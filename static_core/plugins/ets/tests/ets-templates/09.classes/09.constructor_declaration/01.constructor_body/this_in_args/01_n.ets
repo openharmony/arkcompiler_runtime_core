@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause.
+    Call to a superconstructor if a class has an extension clause.
     A compile-time error occurs if: An argument of the call uses this or super.
 expected_out: |-
     Semantic error ESE0235: Using this is not allowed in constructor

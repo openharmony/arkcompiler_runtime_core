@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,30 @@
  */
 
 /*---
-desc: >-
-    Call to a superconstructor if a class has an extension clause.
-    A compile-time error occurs if: An argument of the call uses this or super.
-expected_out: |-
-    Semantic error ESE0235: Using this is not allowed in constructor
+desc: Ensure that all fields are initialized in the specified scenario
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0679: 'this' cannot be referenced before super() call or this() call.
 ---*/
 
 class A {
-    ref: A
-    constructor() {
-        this.ref = this
+    fld: string
+
+    constructor(a: string) {
+        if (a == '1') {
+            throw new Error('1')
+        } else {
+            this.fld = a
+        }
     }
-    constructor(ref: A) {
-        this.ref = ref
-    }
+
 }
 
 class B extends A {
-    ref: A
-    constructor() {
-        super(this.ref)  // CTE, cannot use super or this in arguments
+    constructor(a: string, b: string) {
+        if (this.fld == b) {  // CTE: cannot reference `this` before super() call
+            throw new Error('2')
+        }
+        super(a)
     }
 }

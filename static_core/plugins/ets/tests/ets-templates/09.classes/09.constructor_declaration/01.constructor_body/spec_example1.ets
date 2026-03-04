@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause.
+    Call to a superconstructor if a class has an extension clause.
     The manner new expressions work together with a constructor body execution
     sequence is represented by the example below.
 ---*/

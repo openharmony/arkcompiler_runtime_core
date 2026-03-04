@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,37 +16,42 @@
 /*---
 desc: >-
     Call to a superconstructor if a class has an extension clause.
+    The manner new expressions work together with a constructor body execution
+    sequence is represented by the example below.
 ---*/
 
 let res = ''
 
-class A {
-    x: Object
-    constructor() {
-        this.x = new Object
-        this.assert()
-    }
+function trace(msg: string) {
+    res += msg + ','
+    return res
+}
 
-    assert() {
-        arktest.assertTrue(false, 'this method should not be called')
+class C {
+    C_field = trace("C1")
+    constructor() {
+        trace("C2")
     }
 }
 
-class B extends A {
-    y: Object
+class B extends C {
+    B_field = trace("B1")
     constructor() {
-        super()
-        this.y = new Object
+        // super() is implicitly added here
+        trace ("B2")
     }
+}
 
-    assert() {
-        res = this.y.toString()
+class A extends B {
+    A_field = trace("A1")
+    constructor() {
+        // super() is implicitly added here
+        trace ("A2")
     }
 }
 
 function main() {
-    let b: A | undefined
-    arktest.expectThrow(() => { b = new B })
-    arktest.expectThrow(() => { res = b!.toString() })
-    arktest.assertEQ(res, '')
+    res = ''
+    let a = new A ()
+    arktest.assertEQ(res, 'C1,C2,B1,B2,A1,A2,')
 }

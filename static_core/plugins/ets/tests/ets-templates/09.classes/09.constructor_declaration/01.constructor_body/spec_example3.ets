@@ -16,7 +16,7 @@
 /*---
 desc: >-
     Mandatory call to another same-class constructor that uses the keyword this.
-    Mandatory call to a superconstructor if a class has an extension clause.
+    Call to a superconstructor if a class has an extension clause.
 ---*/
 
 class Base {

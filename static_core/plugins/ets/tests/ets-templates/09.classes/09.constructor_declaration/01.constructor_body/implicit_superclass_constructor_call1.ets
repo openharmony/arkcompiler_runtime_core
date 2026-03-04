@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,41 @@
  */
 
 /*---
-desc: >-
-    Call to a superconstructor if a class has an extension clause.
-    A compile-time error occurs if: An argument of the call uses this or super.
-expected_out: |-
-    Semantic error ESE0235: Using this is not allowed in constructor
-tags: [compile-only, negative]
+desc: Check that superclass constructor implicitly invoked.
+assert: >-
+    If the body has no call to a superconstructor, then the compiler
+    implicitly adds a superconstructor call with no arguments
+    as the very first statement in the body.
 ---*/
 
 class A {
-    ref: A
+    x: string
+
     constructor() {
-        this.ref = this
+        this.x = 'A'
     }
-    constructor(ref: A) {
-        this.ref = ref
+
+    constructor(x: string) {
+        this.x = x
     }
 }
 
 class B extends A {
-    ref: A
     constructor() {
-        super(this.ref)  // CTE, cannot use super or this in arguments
+        // super() added implicitly here
+        this.x += 'B1'
     }
+
+    constructor(x: string) {
+        // super() added implicitly here
+        this.x += 'B2'
+    }
+}
+
+function main(): void {
+    let instance: B = new B()
+    arktest.assertEQ(instance.x, 'AB1')
+
+    instance = new B('Z')
+    arktest.assertEQ(instance.x, 'AB2')
 }

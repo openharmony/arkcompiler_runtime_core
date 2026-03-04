@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause.
+    Call to a superconstructor if a class has an extension clause.
     A compile-time error occurs if: An argument of the call uses this or super.
 expected_out: |-
     Syntax error ESY0061: Unexpected super keyword.

@@ -751,6 +751,14 @@
 
 #33293 Class initialization execution sequence is not correct
 09.classes/09.constructor_declaration/01.constructor_body/spec_example1.ets
+09.classes/09.constructor_declaration/01.constructor_body/spec_example1b.ets
+
+#33500 es2panda aborts when implicit super() calls a superconstructor with rest parameter
+09.classes/09.constructor_declaration/01.constructor_body/implicit_superclass_constructor_call4.ets
+
+#33535 Unexpected field initialization error if some code is added before this() in secondary constructor
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init25.ets
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init26.ets
 
 #28235 Constructor Names not yet work
 09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_same_class1.ets

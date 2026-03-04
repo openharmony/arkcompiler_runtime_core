@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,45 @@
 /*---
 desc: >-
     Call to a superconstructor if a class has an extension clause.
-    A compile-time error occurs if: An argument of the call uses this or super.
-expected_out: |-
-    Semantic error ESE0235: Using this is not allowed in constructor
-tags: [compile-only, negative]
+    The manner new expressions work together with a constructor body execution
+    sequence is represented by the example below.
 ---*/
 
-class A {
-    ref: A
+let res = ''
+
+function trace(msg: string) {
+    res += msg + ','
+    return res
+}
+
+class C {
+    C_field = trace("C1")
     constructor() {
-        this.ref = this
-    }
-    constructor(ref: A) {
-        this.ref = ref
+        trace("C2")
     }
 }
 
-class B extends A {
-    ref: A
+class B extends C {
+    B_field = trace("B1")
+    override C_field = trace("C3")
     constructor() {
-        super(this.ref)  // CTE, cannot use super or this in arguments
+        // super() is implicitly added here
+        trace ("B2")
     }
+}
+
+class A extends B {
+    A_field = trace("A1")
+    override B_field = trace("B3")
+    override C_field = trace("C4")
+    constructor() {
+        // super() is implicitly added here
+        trace ("A2")
+    }
+}
+
+function main() {
+    res = ''
+    let a = new A ()
+    arktest.assertEQ(res, 'C1,C2,B1,C3,B2,A1,B3,C4,A2,')
 }
