@@ -217,6 +217,7 @@ void Region::Destroy()
         allocator->Delete(markBitmap_);
         markBitmap_ = nullptr;
     }
+    RmvFlag(RegionFlag::IS_INVALID);
 }
 
 void RegionBlock::Init(uintptr_t regionsBegin, uintptr_t regionsEnd)
