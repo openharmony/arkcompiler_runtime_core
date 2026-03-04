@@ -63,6 +63,10 @@ void ClassLinker::AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, Cla
 
     GetAotManager()->UpdatePandaFilesSnapshot(file, context, Runtime::GetOptions().IsArkAot());
 
+    if (context != nullptr && !context->IsBootContext()) {
+        GetAotManager()->AddProfiledPandaFile(*file);
+    }
+
     if (context == nullptr || context->IsBootContext()) {
         os::memory::LockHolder lock {bootPandaFilesLock_};
         bootPandaFiles_.push_back(file);
