@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: Ambient Function declarations
-files: ['./function_declarations1.ets']
+desc: Ambient Function declarations - implementation.
+tags: [compile-only, not-a-test]
 ---*/
 
-import { fun, foo, bar, baz } from './function_declarations1.d'
+export function fun(x: int): string { return x.toString()}
 
-function main() {
-   {{c.use|indent}}
+export function foo(x: number, y: string, z: Object[]): double {
+  return (x * y.length * z.length).toDouble();
 }
 
-{% endfor %}
+export function bar<U, V, R>(x: U, y: V): R {
+  return JSON.stringify([x, y]) as R
+}
+
+export function baz(y: string, x?: int): string {
+  return x ? x.toString() : y;
+}
