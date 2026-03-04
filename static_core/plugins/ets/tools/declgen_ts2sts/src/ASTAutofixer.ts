@@ -3495,14 +3495,42 @@ function getParentAbstractMethods(node: ts.ClassDeclaration, checker: ts.TypeChe
   return abstractMethods;
 }
 
-function isSameMethodDeclaration(member1: ts.MethodDeclaration, member2: ts.MethodDeclaration): boolean {
-  if (!compareParameters(member1.parameters, member2.parameters)) {
+function compareParametersTypeByChecker(
+  params1: ts.NodeArray<ts.ParameterDeclaration>,
+  params2: ts.NodeArray<ts.ParameterDeclaration>,
+  checker: ts.TypeChecker
+): boolean {
+  if (params1.length !== params2.length) {
+    return false;
+  }
+  for (let i = 0; i < params1.length; i++) {
+    const paramType1 = params1[i].type;
+    const paramType2 = params2[i].type;
+    const type1 = paramType1 ? checker.getTypeAtLocation(paramType1!) : undefined;
+    const type2 = paramType2 ? checker.getTypeAtLocation(paramType2!) : undefined;
+    if (type1 && type2) {
+      if (checker.typeToString(type1) !== checker.typeToString(type2)) {
+        return false;
+      }
+    } else if (!!type1 !== !!type2) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isSameMethodDeclaration(
+  member1: ts.MethodDeclaration, 
+  member2: ts.MethodDeclaration,
+  checker: ts.TypeChecker
+): boolean {
+  if (!compareParametersTypeByChecker(member1.parameters, member2.parameters, checker)) {
     return false;
   }
   if (member1.type && member2.type) {
-    if (!typesAreEqual(member1.type, member2.type)) {
-      return false;
-    }
+    const type1 = checker.getTypeAtLocation(member1.type);
+    const type2 = checker.getTypeAtLocation(member2.type);
+    return checker.typeToString(type1) === checker.typeToString(type2);
   }
   else if (!!member1.type !== !!member2.type) {
     return false;
@@ -3536,7 +3564,7 @@ function getMissingAbstractMembers(
     }
     if (existingMethods.has(abstractMember.name.text)) {
       const existingMember = existingMethods.get(abstractMember.name.text)!;
-      if (isSameMethodDeclaration(existingMember, abstractMember)) {
+      if (isSameMethodDeclaration(existingMember, abstractMember, checker)) {
         continue;
       }
     }

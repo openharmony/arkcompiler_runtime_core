@@ -16,11 +16,11 @@
 export declare abstract class IBar {
     abstract foo(): void;
     abstract bar(): string;
+    abstract baz(p: Any): Any;
 }
 export declare class Bar extends IBar {
     foo(userId?: string | null): Promise<void>;
     bar(): string;
+    baz(p: Any): Any;
     foo(): void;
 }
-
-  
