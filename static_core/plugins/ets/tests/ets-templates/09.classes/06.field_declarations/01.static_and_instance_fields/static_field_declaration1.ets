@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -33,8 +33,6 @@ class A {
 }
 
 function main(): void {
-    A.x = 42 // reset due to jit mode warmup
-
     // no instances created
     arktest.assertTrue( A.x == 42 )
 
@@ -51,4 +49,6 @@ function main(): void {
     A.x = A.x + 5
 
     arktest.assertTrue( i2.getX() == 48 )
+
+    A.x = 42 // reset due to jit mode warmup
 }
