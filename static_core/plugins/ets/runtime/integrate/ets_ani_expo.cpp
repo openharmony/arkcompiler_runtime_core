@@ -174,4 +174,14 @@ bool ETSAni::DestroyExclusiveWorkerForTaskpoolIfExists()
     method->GetPandaMethod()->Invoke(Coroutine::GetCurrent(), nullptr);
     return true;
 }
+
+PANDA_PUBLIC_API void ETSAni::RegisterETSUncaughtExceptionHandler(ETSUncaughtExceptionCallback callback)
+{
+    Runtime::GetCurrent()->SetUncaughtExceptionCallback(std::move(callback));
+}
+
+PANDA_PUBLIC_API void ETSAni::HandleUncaughtException(ani_error aniError)
+{
+    Runtime::GetCurrent()->HandleUncaughtException(aniError);
+}
 }  // namespace ark::ets
