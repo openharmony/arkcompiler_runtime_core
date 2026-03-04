@@ -19,7 +19,7 @@ desc: >-
     of a member that is inherited or implemented.
     Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE771273: `num` narrows the access modifier of the implemented field."
+expected_out: "Semantic error ESE1600001: Access modifier of field 'num' in class 'D' and in the base class 'C' must be the same."
 ---*/
 
 class C {
