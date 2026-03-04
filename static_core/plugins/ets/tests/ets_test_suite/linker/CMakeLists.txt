@@ -40,7 +40,7 @@ function(add_target_with_dependencies test_suite target additional_dependencies)
 endfunction()
 
 function(add_linker_test test additional_dependencies)
-    set(noValues SKIP_ARM32_COMPILER)
+    set(noValues SKIP_ARM32_COMPILER DISABLE_JIT)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "${noValues}" "" "${multiValueArgs}" ${ARGN})
 
@@ -68,7 +68,9 @@ function(add_linker_test test additional_dependencies)
     endif()
 
     # jit
-    add_target_with_dependencies(ets_test_suite_linker ${target}-ets-jit "${additional_dependencies}")
+    if(NOT ARG_DISABLE_JIT)
+        add_target_with_dependencies(ets_test_suite_linker ${target}-ets-jit "${additional_dependencies}")
+    endif()
 
     if (NOT CMAKE_CROSSCOMPILING)
         # aot
@@ -136,14 +138,14 @@ function(test_runtime_linker_extensions test)
     # For more information please refer to definitions of those methods
     add_linker_test(${test} ${test}-add-deps
         SKIP_ARM32_COMPILER
+        DISABLE_JIT # issue #33456
         RUNTIME_EXTRA_OPTIONS
         "--compiler-inlining-blacklist='${test}.Test::createReferencedLinker,${test}.Test::createUnreferencedLinker'"
         )
 
 endfunction()
 
-# NOTE(dslynko, #32751): Re-enable after fixing flaky failures
-# test_runtime_linker_extensions(runtime_linker_extensions)
+test_runtime_linker_extensions(runtime_linker_extensions)
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context

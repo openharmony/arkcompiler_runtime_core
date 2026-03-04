@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -216,7 +216,7 @@ bool InstBuilder::TryBuildInteropCall(const BytecodeInstruction *bcInst, bool is
 {
     auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
     auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    if (g_options.IsCompilerEnableFastInterop()) {
+    if (method != nullptr && g_options.IsCompilerEnableFastInterop()) {
         auto interopCallKind = GetRuntime()->GetInteropCallKind(method);
         if (interopCallKind != RuntimeInterface::InteropCallKind::UNKNOWN) {
             auto arg1 = GetArgDefinition(bcInst, 1, accRead, isRange);

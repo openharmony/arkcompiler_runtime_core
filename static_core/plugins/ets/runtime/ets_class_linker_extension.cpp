@@ -646,8 +646,7 @@ const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) cons
     if (asyncAnnId.IsValid()) {
         return reinterpret_cast<const void *>(EtsAsyncEntryPoint);
     }
-    auto *coroutine = ets::EtsCoroutine::GetCurrent();
-    bool isVerifyEnabled = coroutine->GetPandaVM()->IsVerifyANI();
+    bool isVerifyEnabled = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM())->IsVerifyANI();
     switch (GetAniMethodType(method)) {
         case AniMethodType::GENERIC: {
             return ani::GetAniEntryPoint(isVerifyEnabled);
