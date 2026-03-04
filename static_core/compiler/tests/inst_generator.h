@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ public:
     {
     }
 
+    virtual ~GraphCreator() = default;
+
     Graph *GenerateGraph(Inst *inst);
 
     void SetRuntimeTargetArch(Arch arch)
@@ -55,7 +57,7 @@ public:
         return &localAllocator_;
     }
 
-private:
+protected:
     Graph *CreateGraph();
 
     Inst *PopulateLoadArrayPair(Graph *graph, BasicBlock *block, Inst *inst, Opcode opc);
@@ -107,7 +109,8 @@ private:
 
     Inst *CreateCheckInstByPackArgs(const PackArgsForCkeckInst &pack);
 
-private:
+    virtual Graph *GenerateGraphImpl(Inst *inst);
+
     // need to create graphs
     ArenaAllocator &allocator_;
     ArenaAllocator &localAllocator_;
@@ -120,6 +123,14 @@ public:
         runtime_.vregsCount_ = regs;
         runtime_.argsCount_ = args;
     }
+};
+
+class GraphCreatorWithGCBarrierEntrypoints : public GraphCreator {
+public:
+    using GraphCreator::GraphCreator;
+
+protected:
+    Graph *GenerateGraphImpl(Inst *inst) override;
 };
 
 class InstGenerator {

@@ -2352,7 +2352,13 @@ void Codegen::CreateReadPairViaBarrier(Inst *inst, MemRef mem, Reg dstReg1, Reg 
 
     if (!GetRuntime()->NeedsPreReadBarrier()) {
         // Fallback to load without barrier
-        GetEncoder()->EncodeLdp(dstReg1, dstReg2, IsTypeSigned(inst->GetType()), mem);
+        if (mem.HasIndex()) {
+            ScopedTmpReg tmp(GetEncoder());
+            GetEncoder()->EncodeAdd(tmp, mem.GetBase(), Shift(mem.GetIndex(), mem.GetScale()));
+            GetEncoder()->EncodeLdp(dstReg1, dstReg2, IsTypeSigned(inst->GetType()), MemRef(tmp, mem.GetDisp()));
+        } else {
+            GetEncoder()->EncodeLdp(dstReg1, dstReg2, IsTypeSigned(inst->GetType()), mem);
+        }
         return;
     }
     ASSERT(GetRuntime()->GetPreReadType() == ark::mem::BarrierType::PRE_CMC_READ_BARRIER);

@@ -32,14 +32,13 @@ public:
             PARAMETER(2U, 2U).u64();  // index
             BASIC_BLOCK(2U, -1L)
             {
-                createLoadArray(INST(3U, Opcode::LoadArray).u64(), 1U, 2U, 0U);
-                INST(4U, Opcode::Return).u64().Inputs(3U);
+                createLoadArray(INST(3U, Opcode::LoadArray).SetNeedBarrier(true).ref(), 1U, 2U, 0U);
+                INST(4U, Opcode::LoadArrayI).u64().Inputs(3U).Imm(0U);
+                INST(5U, Opcode::Return).u64().Inputs(4U);
             }
         }
         SetNumVirtRegs(0);
-        auto *bb = GetGraph()->GetVectorBlocks()[2U];
-        auto *loadArray = bb->GetFirstInst()->CastToLoadArray();
-        return loadArray;
+        return INS(3U).CastToLoadArray();
     }
 
     bool CompileGraph()
@@ -62,12 +61,22 @@ public:
         GetExecModule().SetInstructions(codeEntry, codeExit);
 
         GetExecModule().SetParameter(0U, arg1);
-        auto param1 = GetExecModule().CreateArray(arg2.data(), arg2.size(), GetObjectAllocator());
+        std::array<ObjectPointerType, N> wrapped;
+        std::transform(std::begin(arg2), std::end(arg2), std::begin(wrapped), [this](uint64_t val) {
+            return static_cast<ObjectPointerType>(
+                reinterpret_cast<uintptr_t>(GetExecModule().CreateArray(&val, 1, GetObjectAllocator())));
+        });
+        auto param1 = GetExecModule().CreateArray(wrapped.data(), wrapped.size(), GetObjectAllocator());
         GetExecModule().SetParameter(1U, reinterpret_cast<uint64_t>(param1));
         auto param2 = CutValue<uint64_t>(arg3, DataType::INT64);
         GetExecModule().SetParameter(2U, param2);
         GetExecModule().Execute();
-        return GetExecModule().GetRetValue();
+        auto res = GetExecModule().GetRetValue();
+        GetExecModule().FreeArray(param1);
+        for (auto arr : wrapped) {
+            GetExecModule().FreeArray(reinterpret_cast<void *>(static_cast<uintptr_t>(arr)));
+        }
+        return res;
     }
 };
 
@@ -78,6 +87,7 @@ TEST_F(OptionalInputsTest, OptionalInputs)
             return ir.Inputs(arrInput, idxInput, optInput);
         });
     EXPECT_NE(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
     EXPECT_EQ(loadArray->GetInputsCount(), 3U);
 
     EXPECT_TRUE(CompileGraph());
@@ -92,11 +102,33 @@ TEST_F(OptionalInputsTest, OptionalInputsAdd)
             return ir.Inputs(arrInput, idxInput);
         });
     EXPECT_EQ(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
     EXPECT_EQ(loadArray->GetInputsCount(), 2U);
     auto *entrypoint = *GetGraph()->GetParameters().begin();
     loadArray->SetGCBarrierEntrypoint(entrypoint);
     EXPECT_EQ(loadArray->GetInputsCount(), 3U);
     EXPECT_EQ(loadArray->GetGCBarrierEntrypoint(), entrypoint);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
+
+    EXPECT_TRUE(CompileGraph());
+
+    EXPECT_EQ(ExecGraph<3U>(0U, {1U, 2U, 3U}, 1U), 2U);
+}
+
+TEST_F(OptionalInputsTest, OptionalInputsAddExternal)
+{
+    auto *loadArray = this->CreateGraph(
+        [](auto &ir, unsigned arrInput, unsigned idxInput, [[maybe_unused]] unsigned optInput) -> decltype(auto) {
+            return ir.Inputs(arrInput, idxInput);
+        });
+    EXPECT_EQ(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
+    EXPECT_EQ(loadArray->GetInputsCount(), 2U);
+    auto *entrypoint = *GetGraph()->GetParameters().begin();
+    SetInstGCBarrierEntrypoint(loadArray, entrypoint);
+    EXPECT_EQ(loadArray->GetInputsCount(), 3U);
+    EXPECT_EQ(loadArray->GetGCBarrierEntrypoint(), entrypoint);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
 
     EXPECT_TRUE(CompileGraph());
 
@@ -110,9 +142,30 @@ TEST_F(OptionalInputsTest, OptionalInputsRemove)
             return ir.Inputs(arrInput, idxInput, optInput);
         });
     EXPECT_NE(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
     EXPECT_EQ(loadArray->GetInputsCount(), 3U);
     loadArray->ResetGCBarrierEntrypoint();
     EXPECT_EQ(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
+    EXPECT_EQ(loadArray->GetInputsCount(), 2U);
+
+    EXPECT_TRUE(CompileGraph());
+
+    EXPECT_EQ(ExecGraph<3U>(0U, {1U, 2U, 3U}, 1U), 2U);
+}
+
+TEST_F(OptionalInputsTest, OptionalInputsRemoveExternal)
+{
+    auto *loadArray =
+        this->CreateGraph([](auto &ir, unsigned arrInput, unsigned idxInput, unsigned optInput) -> decltype(auto) {
+            return ir.Inputs(arrInput, idxInput, optInput);
+        });
+    EXPECT_NE(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
+    EXPECT_EQ(loadArray->GetInputsCount(), 3U);
+    ResetInstGCBarrierEntrypoint(loadArray);
+    EXPECT_EQ(loadArray->GetGCBarrierEntrypoint(), nullptr);
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(loadArray), loadArray->GetGCBarrierEntrypoint());
     EXPECT_EQ(loadArray->GetInputsCount(), 2U);
 
     EXPECT_TRUE(CompileGraph());

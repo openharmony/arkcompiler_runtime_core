@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #include "inst_generator.h"
 
 namespace ark::compiler {
-// CC-OFFNXT(huge_method, huge_cyclomatic_complexity, G.FUN.01) big switch-case
-Graph *GraphCreator::GenerateGraph(Inst *inst)
+// CC-OFFNXT(huge_method, huge_cyclomatic_complexity, G.FUN.01, G.FUD.05) big switch-case
+Graph *GraphCreator::GenerateGraphImpl(Inst *inst)
 {
     Graph *graph;
     SetNumVRegsArgs(0U, 0U);
@@ -137,6 +137,12 @@ Graph *GraphCreator::GenerateGraph(Inst *inst)
             graph = nullptr;
             break;
     }
+    return graph;
+}
+
+Graph *GraphCreator::GenerateGraph(Inst *inst)
+{
+    auto *graph = GenerateGraphImpl(inst);
     if (graph != nullptr) {
         auto id = graph->GetCurrentInstructionId();
         inst->SetId(id);
@@ -513,6 +519,50 @@ void GraphCreator::PopulateGraph(Graph *graph, Inst *inst, int32_t n)
     Finalize(graph, block, inst);
 }
 
+namespace {
+void SetGCBarrierFlags(Inst *inst)
+{
+    if (inst->GetOpcode() == Opcode::StoreArray) {
+        inst->CastToStoreArray()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::StoreArrayI) {
+        inst->CastToStoreArrayI()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::StoreStatic) {
+        inst->CastToStoreStatic()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::StoreObject) {
+        inst->CastToStoreObject()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::StoreArrayPair) {
+        inst->CastToStoreArrayPair()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
+        inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::LoadArray) {
+        inst->CastToLoadArray()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::LoadArrayI) {
+        inst->CastToLoadArrayI()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::LoadObject) {
+        inst->CastToLoadObject()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::LoadStatic) {
+        inst->CastToLoadStatic()->SetNeedBarrier(true);
+    }
+    if (inst->GetOpcode() == Opcode::LoadPairPart) {
+        auto *actualInst = inst->GetInput(0).GetInst();
+        if (actualInst->GetOpcode() == Opcode::LoadArrayPair) {
+            inst->GetInput(0).GetInst()->CastToLoadArrayPair()->SetNeedBarrier(true);
+        } else {
+            inst->GetInput(0).GetInst()->CastToLoadArrayPairI()->SetNeedBarrier(true);
+        }
+    }
+}
+}  // namespace
+
 void GraphCreator::Finalize(Graph *graph, BasicBlock *block, Inst *inst)
 {
     auto opc = inst->GetOpcode();
@@ -540,24 +590,7 @@ void GraphCreator::Finalize(Graph *graph, BasicBlock *block, Inst *inst)
         graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     }
     if (inst->GetType() == DataType::REFERENCE) {
-        if (inst->GetOpcode() == Opcode::StoreArray) {
-            inst->CastToStoreArray()->SetNeedBarrier(true);
-        }
-        if (inst->GetOpcode() == Opcode::StoreArrayI) {
-            inst->CastToStoreArrayI()->SetNeedBarrier(true);
-        }
-        if (inst->GetOpcode() == Opcode::StoreStatic) {
-            inst->CastToStoreStatic()->SetNeedBarrier(true);
-        }
-        if (inst->GetOpcode() == Opcode::StoreObject) {
-            inst->CastToStoreObject()->SetNeedBarrier(true);
-        }
-        if (inst->GetOpcode() == Opcode::StoreArrayPair) {
-            inst->CastToStoreArrayPair()->SetNeedBarrier(true);
-        }
-        if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-            inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
-        }
+        SetGCBarrierFlags(inst);
     }
 }
 
@@ -885,6 +918,34 @@ ParameterInst *GraphCreator::CreateParamInst(Graph *graph, DataType::Type type, 
     auto param = graph->CreateInstParameter(slot, type);
     graph->GetStartBlock()->AppendInst(param);
     return param;
+}
+
+Graph *GraphCreatorWithGCBarrierEntrypoints::GenerateGraphImpl(Inst *inst)
+{
+    auto *res = GraphCreator::GenerateGraphImpl(inst);
+    if ((inst_flags::HasFlag(inst->GetOpcode(), inst_flags::WRITE_BARRIER) ||
+         inst_flags::HasFlag(inst->GetOpcode(), inst_flags::READ_BARRIER)) &&
+        inst->GetType() == DataType::REFERENCE) {
+        auto *bb = res->GetStartBlock();
+        auto iter = bb->AllInsts();
+        size_t nParams = 0;
+        for ([[maybe_unused]] const auto &p : res->GetParameters()) {
+            ++iter, ++nParams;
+        }
+
+        auto param = res->CreateInstParameter(nParams, DataType::POINTER);
+        if (*iter == nullptr) {
+            bb->AppendInst(param);
+        } else {
+            bb->InsertBefore(param, *iter);
+        }
+
+        SetNumVRegsArgs(runtime_.GetMethodRegistersCount(res->GetMethod()), nParams + 1);
+        res->SetVRegsCount(res->GetVRegsCount() + 1);
+
+        SetInstGCBarrierEntrypoint(inst, param);
+    }
+    return res;
 }
 
 template <class T>

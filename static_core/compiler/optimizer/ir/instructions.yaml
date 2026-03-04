@@ -333,13 +333,13 @@ instructions:
 
   - opcode: StoreArray
     base: StoreInst
-    signature: [ref-nc-any, int-bc, real-any]
+    signature: [ref-nc-any, int-bc, real-any, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier]
     description: Store value in array.
 
   - opcode: LoadObject
     base: LoadObjectInst
-    signature: [d-real-any, ref-nc-any]
+    signature: [d-real-any, ref-nc-any, ptr-opt]
     flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load value from object's field.
     fields:
@@ -353,7 +353,7 @@ instructions:
 
   - opcode: Load
     base: LoadMemInst
-    signature: [d-real-any, ptr-ref, int]
+    signature: [d-real-any, ptr-ref, int, ptr-opt]
     flags: [native, low_level, load, no_hoist, no_cse, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load value from memory by offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
@@ -366,14 +366,14 @@ instructions:
 
   - opcode: LoadI
     base: LoadMemInstI
-    signature: [d-real-any, ptr-ref]
+    signature: [d-real-any, ptr-ref, ptr-opt]
     flags: [native, low_level, load, no_hoist, no_cse, read_barrier]
     modes: [irtoc]
     description: Load value from memory by immediate offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
   - opcode: Store
     base: StoreMemInst
-    signature: [ptr-ref-any, int, real-any]
+    signature: [ptr-ref-any, int, real-any, ptr-opt]
     flags: [native, low_level, store, no_dce, no_hoist, no_cse, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store value in memory by offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
@@ -386,7 +386,7 @@ instructions:
 
   - opcode: StoreI
     base: StoreMemInstI
-    signature: [ptr-ref, real-any]
+    signature: [ptr-ref, real-any, ptr-opt]
     flags: [native, low_level, store, no_dce, no_hoist, no_cse, write_barrier]
     modes: [irtoc]
     description: Store value in memory by immediate offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
@@ -402,7 +402,7 @@ instructions:
 
   - opcode: LoadResolvedObjectField
     base: LoadResolvedObjectFieldInst
-    signature: [d-real, ref-nc, u32]
+    signature: [d-real, ref-nc, u32, ptr-opt]
     flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load value from resolved object's field.
     fields:
@@ -410,7 +410,7 @@ instructions:
 
   - opcode: StoreObject
     base: StoreObjectInst
-    signature: [ref-nc, real-any]
+    signature: [ref-nc, real-any, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, acc_read, write_barrier]
     description: Store value in object's field.
     fields:
@@ -424,7 +424,7 @@ instructions:
 
   - opcode: StoreResolvedObjectField
     base: StoreResolvedObjectFieldInst
-    signature: [ref-nc, real, u32]
+    signature: [ref-nc, real, u32, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier, barrier]
     description: Store value in resolved object's field.
     fields:
@@ -432,7 +432,7 @@ instructions:
 
   - opcode: LoadStatic
     base: LoadStaticInst
-    signature: [d-real, ref]
+    signature: [d-real, ref, ptr-opt]
     flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load static field from class.
     fields:
@@ -449,7 +449,7 @@ instructions:
 
   - opcode: LoadResolvedObjectFieldStatic
     base: LoadResolvedObjectFieldStaticInst
-    signature: [d-real, ref]
+    signature: [d-real, ref, ptr-opt]
     flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load value from resolved static object's field.
     fields:
@@ -457,7 +457,7 @@ instructions:
 
   - opcode: StoreStatic
     base: StoreStaticInst
-    signature: [ref, real]
+    signature: [ref, real, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, acc_read, write_barrier]
     description: Store value into static field.
     fields:
@@ -474,7 +474,7 @@ instructions:
 
   - opcode: StoreResolvedObjectFieldStatic
     base: StoreResolvedObjectFieldStaticInst
-    signature: [ref, real]
+    signature: [ref, real, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, write_barrier, barrier]
     modes: [jit_aot]
     description: Store value into resolved static field.
@@ -1064,7 +1064,7 @@ instructions:
 
   - opcode: LoadArrayI
     base: LoadInstI
-    signature: [d-real-any, ref-any-nc]
+    signature: [d-real-any, ref-any-nc, ptr-opt]
     flags: [load, no_hoist, no_cse, low_level, acc_read, acc_write, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load value from array.
@@ -1077,21 +1077,21 @@ instructions:
 
   - opcode: StoreArrayI
     base: StoreInstI
-    signature: [ref-nc, real-any]
+    signature: [ref-nc, real-any, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, write_barrier]
     modes: [jit_aot]
     description: Store value in array.
 
   - opcode: LoadArrayPair
     base: LoadArrayPairInst
-    signature: [d-real-any, ref-any-nc, int-bc]
+    signature: [d-real-any, ref-any-nc, int-bc, ptr-opt]
     flags: [load, no_hoist, no_cse, low_level, acc_write, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from array.
 
   - opcode: LoadArrayPairI
     base: LoadArrayPairInstI
-    signature: [d-real-any, ref-any-nc]
+    signature: [d-real-any, ref-any-nc, ptr-opt]
     flags: [load, no_hoist, no_cse, low_level, acc_write, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from array at immediate index.
@@ -1105,28 +1105,28 @@ instructions:
 
   - opcode: LoadObjectPair
     base: LoadObjectPairInst
-    signature: [d-real-any, ref-any-nc]
+    signature: [d-real-any, ref-any-nc, ptr-opt]
     flags: [load, no_hoist, no_cse, low_level, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from object.
 
   - opcode: StoreArrayPair
     base: StoreArrayPairInst
-    signature: [ref-nc, int-bc, real-any, real-any]
+    signature: [ref-nc, int-bc, real-any, real-any, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, require_tmp, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array.
 
   - opcode: StoreArrayPairI
     base: StoreArrayPairInstI
-    signature: [ref-nc, real-any, real-any]
+    signature: [ref-nc, real-any, real-any, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array at immediate index.
 
   - opcode: StoreObjectPair
     base: StoreObjectPairInst
-    signature: [ref-nc, real-any, real-any]
+    signature: [ref-nc, real-any, real-any, ptr-opt]
     flags: [store, no_dce, no_hoist, no_cse, low_level, require_tmp, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to object.
@@ -1397,6 +1397,7 @@ legend:
     ngc: negative check - input should be the NegativeCheck instruction
     save_state: definition of the given input must be SaveState instruction
     dyn: dynamic operands, means that operand can repeat zero or more times
+    opt: optional operands that can be omitted (optional operands must be last in operand list)
 
 verification:
   equal_type_classes: |

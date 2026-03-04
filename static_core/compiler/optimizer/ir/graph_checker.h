@@ -393,25 +393,12 @@ private:
              inst->Dump(&std::cerr)));
     }
 
+    static void CheckGCBarrierEntrypointInputsCount([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
+                                                    [[maybe_unused]] size_t count);
+    static void CheckGCBarrierEntrypointInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
+                                              [[maybe_unused]] bool needBarrier);
     static void CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
-                                       [[maybe_unused]] bool needBarrier = false)
-    {
-        CHECKER_DO_IF_NOT_VISITOR(v,
-                                  DataType::IsTypeNumeric(inst->GetType()) || inst->GetType() == DataType::REFERENCE ||
-                                      inst->GetType() == DataType::ANY,
-                                  (std::cerr << "Memory instruction has wrong type\n", inst->Dump(&std::cerr)));
-        if (inst->IsStore() && (inst->GetInputType(0) != DataType::POINTER) && (inst->GetType() == DataType::ANY)) {
-            CHECKER_DO_IF_NOT_VISITOR(v, needBarrier,
-                                      (std::cerr << "This load/store should have barrier:\n", inst->Dump(&std::cerr)));
-        }
-        auto asGraphChecker = static_cast<GraphChecker *>(v);
-        auto needsPreREB = asGraphChecker->GetGraph()->GetRuntime()->NeedsPreReadBarrier();
-        if (needsPreREB && inst->IsLoad() && (inst->GetInputType(0) != DataType::POINTER) &&
-            (inst->GetType() == DataType::REFERENCE)) {
-            CHECKER_DO_IF_NOT_VISITOR(v, needBarrier,
-                                      (std::cerr << "This load/store should have barrier:\n", inst->Dump(&std::cerr)));
-        }
-    }
+                                       [[maybe_unused]] bool needBarrier);
 
     static void CheckObjectTypeDynamic([[maybe_unused]] GraphVisitor *v, Inst *inst, ObjectType type,
                                        [[maybe_unused]] uint32_t typeId)

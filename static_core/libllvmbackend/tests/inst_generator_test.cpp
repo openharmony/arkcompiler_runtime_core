@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,13 @@
 using ark::compiler::Opcode;
 
 namespace ark::llvmbackend {
-class LLVMCodegenTest : public ark::compiler::GraphTest {};
+template <typename GraphGeneratorT>
+class LLVMCodegenTest : public ark::compiler::GraphTest {
+    GraphGeneratorT CreateGraphGenerator(ArenaAllocator &allocator, ArenaAllocator &localAllocator)
+    {
+        return GraphGeneratorT(allocator, localAllocator);
+    }
+};
 
 class LLVMCodegenStatisticGenerator : public ark::compiler::StatisticGenerator {
 public:
@@ -148,8 +154,10 @@ public:
     }
 };
 
+TYPED_TEST_SUITE_P(LLVMCodegenTest);
+
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-TEST_F(LLVMCodegenTest, AllInstTest)
+TYPED_TEST_P(LLVMCodegenTest, AllInstTest)
 {
     ArenaAllocator instAlloc {SpaceType::SPACE_TYPE_COMPILER};
     ark::compiler::InstGenerator instGen(instAlloc);
@@ -169,5 +177,11 @@ TEST_F(LLVMCodegenTest, AllInstTest)
     statGenAmd64.Generate();
     statGenAmd64.GenerateHTMLPage("LLVMCodegenStatisticAMD64.html");
 }
+
+REGISTER_TYPED_TEST_SUITE_P(LLVMCodegenTest, AllInstTest);
+
+using Types = testing::Types<compiler::GraphCreator, compiler::GraphCreatorWithGCBarrierEntrypoints>;
+// CC-OFFNXT(G.FMT.16-CPP) empty variadic macro, project code style
+INSTANTIATE_TYPED_TEST_SUITE_P(GraphCreatorInstantiation, LLVMCodegenTest, Types, );
 
 }  // namespace ark::llvmbackend
