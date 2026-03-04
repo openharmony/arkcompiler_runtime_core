@@ -75,7 +75,7 @@
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/infer_ternary_0.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/infer_ternary_1.ets
 
-#2236
+#29318
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
 #30760
@@ -98,10 +98,6 @@
 
 #31911
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_n_7.ets
-
-#31042 no CTE for void constrained by undefined
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_n_0.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_n_1.ets
 
 #32423
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_18.ets
@@ -218,8 +214,6 @@
 
 #33086
 07.expressions/06.object_literal/02.object_literal_of_interface_type/interface_literals_negative_0.ets
-#28484 Interface has methods
-07.expressions/06.object_literal/spec_ex6.ets
 
 #25990
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_14.ets
@@ -753,21 +747,6 @@
 
 #16840
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
-
-#26730 implement override/overload
-10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_private_method_n.ets
-10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature_any.ets
-10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature.ets
-10.interfaces/06.interface_inheritance/inheritance_private_method_with_declared_signature2_n.ets
-10.interfaces/06.interface_inheritance/method_inheritance/inherited_abstract_method/inherited_abstract_method_26.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_conflict/conflict_07.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_02.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_11.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_12.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_20.ets
-10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_17.ets
-10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_18.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
 
 #32429
 11.enumerations/enum_cte_n_37.ets
@@ -1552,47 +1531,8 @@
 #31017 override method in superinterface with the same private in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
 
-#26730 implement override/overload
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_25.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_0.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_1.ets
+#26730
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_2.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_3.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_4.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_6.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_7.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_9.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_0.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_4.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_5.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_6.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_neg_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_class_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_neg_0.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_5.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_7.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_9.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_11.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_13.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_intf_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_13.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_17.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_19.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_21.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_23.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_25.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
 
 #33241
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets

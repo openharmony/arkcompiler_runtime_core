@@ -13,7 +13,6 @@ api/@ohos/util/LightWeightMap/LightWeightMapGetKeysValuesSetValueAtTest.ets
 api/@ohos/util/ErrnoToStringTest.ets
 
 ### Issue 31475
-api/@ohos/url/UrlTestXtsCases.ets
 api/@ohos/util/stream/StreamDuplexTestPart2.ets
 api/@ohos/util/stream/StreamWritableTestPart2.ets
 

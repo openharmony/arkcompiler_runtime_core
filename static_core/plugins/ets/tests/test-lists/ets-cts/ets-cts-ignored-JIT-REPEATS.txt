@@ -1,2 +1,0 @@
-#31475 False positive passed tests on runner-2
-09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
