@@ -194,9 +194,6 @@
 #31755
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/explicit_type_conversion_6.ets
 
-#30469
-07.expressions/01.operators/01.operator_precedence/typeof.ets
-
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/05.array_literal/arr_n_2.ets
 

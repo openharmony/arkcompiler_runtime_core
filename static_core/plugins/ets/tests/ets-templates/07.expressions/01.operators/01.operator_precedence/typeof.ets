@@ -102,7 +102,7 @@ function main() {
 
 	// xor
 	str = typeof ~t255
-	arktest.assertEQ(str, "number")
+	arktest.assertEQ(str, "int")
 	str = ""
 
 	str = typeof typeof ~t255
@@ -141,14 +141,14 @@ function main() {
 	arktest.assertEQ(obj as string, "string")
 
 	// relational
-	arktest.assertTrue(typeof num > typeof str)
-	arktest.assertTrue(typeof num >= typeof str)
+	arktest.assertTrue(typeof num < typeof str)
+	arktest.assertTrue(typeof num <= typeof str)
 	arktest.assertFalse(typeof num == typeof str)
-	arktest.assertTrue(typeof typeof num != typeof str)
-	arktest.assertTrue(typeof typeof num > typeof str)
+	arktest.assertTrue(typeof typeof num == typeof str)
+	arktest.assertTrue(typeof typeof num <= typeof str)
 	arktest.assertTrue(typeof typeof num >= typeof str)
 	arktest.assertFalse(typeof typeof num < typeof str)
-	arktest.assertFalse(typeof typeof num <= typeof str)
+	arktest.assertFalse(typeof typeof num > typeof str)
 	arktest.assertFalse(typeof typeof num != typeof typeof str)
 	arktest.assertFalse(typeof typeof num > typeof typeof str)
 	arktest.assertTrue(typeof typeof num >= typeof typeof str)
