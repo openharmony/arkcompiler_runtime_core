@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,6 +18,7 @@ limitations under the License.
 desc: A compile-time error occurs if a non-zero floating-point literal is too large for its type.
 tags: [negative, compile-only]
 params: {{case.lit}}
+expected_out: "Syntax error ESY0249: Invalid number."
 ---*/
 
 let x {{case.type}} = {{case.lit}};

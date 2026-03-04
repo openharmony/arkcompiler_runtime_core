@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Array type with prefix readonly negative.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter"
 ---*/
 
 function main() {

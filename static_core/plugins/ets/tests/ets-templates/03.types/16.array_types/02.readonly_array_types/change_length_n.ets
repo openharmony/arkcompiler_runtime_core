@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  */
 
 {% for c in cases %}
-
 /*---
-desc: Array type [] with prefix readonly
+  desc: Length of a variable of a readonly array type cannot be changed
+  tags: [compile-only, negative]
+  expected_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
 ---*/
 
 function main() {
-    let y: readonly {{c.type}}[] = {{c.value}}
-    arktest.assertTrue(y instanceof ReadonlyArray)
-    arktest.assertEQ(y[0], {{c.expected_value}})
+  let arr: {{c.form}} = [{{c.value}}] 
+  arr.length = arr.length{{c.length_diff}}
 }
+
 {% endfor %}
