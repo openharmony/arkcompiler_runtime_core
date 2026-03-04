@@ -1098,16 +1098,18 @@ public:
         if (IsAbcKit()) {
             SetAbcKitFlags(inst);
         }
-        if constexpr (inst_flags::HasFlag(OPCODE, inst_flags::READ_BARRIER)) {
-            bool needsBarrier = GetRuntime()->NeedsReadBarrier();
-            if (needsBarrier && inst->GetType() == DataType::REFERENCE) {
-                inst->SetNeedBarrier(true);
+        if constexpr (inst_flags::HasFlags(OPCODE, inst_flags::GC_BARRIER | inst_flags::LOAD)) {
+            if (DataType::IsReference(inst->GetType()) && GetRuntime()->NeedsReadBarrier()) {
+                inst->SetNeedReadBarrier(true);
             }
         }
-        if constexpr (inst_flags::HasFlag(OPCODE, inst_flags::WRITE_BARRIER)) {
-            bool needsBarrier = GetRuntime()->NeedsPreWriteBarrier() || GetRuntime()->NeedsPostWriteBarrier();
-            if (needsBarrier && inst->GetType() == DataType::REFERENCE) {
-                inst->SetNeedBarrier(true);
+        if constexpr (inst_flags::HasFlags(OPCODE, inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            auto reference = DataType::IsReference(inst->GetType());
+            if (reference && GetRuntime()->NeedsPreWriteBarrier()) {
+                inst->SetNeedPreWriteBarrier(true);
+            }
+            if (reference && GetRuntime()->NeedsPostWriteBarrier()) {
+                inst->SetNeedPostWriteBarrier(true);
             }
         }
         return inst;

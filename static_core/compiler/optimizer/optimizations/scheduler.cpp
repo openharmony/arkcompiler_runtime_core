@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,7 +108,7 @@ void Scheduler::ProcessInst(Inst *inst, uint32_t *numInst, uint32_t *numBetween,
 {
     uint32_t prio = 0;
     uint32_t instLatency = inst->Latency();
-    bool barrier = inst->IsBarrier();
+    bool barrier = inst->IsCompilerBarrier();
 
     (*numBetween)++;
     old_.insert({inst, (*numInst)++});
@@ -282,7 +282,7 @@ bool Scheduler::ScheduleBasicBlock(BasicBlock *bb)
     uint32_t numInst = 0;
     Inst *first = nullptr;
     for (auto inst = bb->GetFirstInst(); inst != nullptr; inst = inst->GetNext()) {
-        bool barrier = inst->IsBarrier();
+        bool barrier = inst->IsCompilerBarrier();
         numInst++;
         inst->ClearMarkers();
         if (first == nullptr) {

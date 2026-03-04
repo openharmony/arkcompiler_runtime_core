@@ -523,41 +523,41 @@ namespace {
 void SetGCBarrierFlags(Inst *inst)
 {
     if (inst->GetOpcode() == Opcode::StoreArray) {
-        inst->CastToStoreArray()->SetNeedBarrier(true);
+        inst->CastToStoreArray()->SetNeedWriteBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::StoreArrayI) {
-        inst->CastToStoreArrayI()->SetNeedBarrier(true);
+        inst->CastToStoreArrayI()->SetNeedWriteBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::StoreStatic) {
-        inst->CastToStoreStatic()->SetNeedBarrier(true);
+        inst->CastToStoreStatic()->SetNeedWriteBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::StoreObject) {
-        inst->CastToStoreObject()->SetNeedBarrier(true);
+        inst->CastToStoreObject()->SetNeedWriteBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::StoreArrayPair) {
-        inst->CastToStoreArrayPair()->SetNeedBarrier(true);
+        inst->CastToStoreArrayPair()->SetNeedWriteBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-        inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
+        inst->CastToStoreArrayPairI()->SetNeedWriteBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::LoadArray) {
-        inst->CastToLoadArray()->SetNeedBarrier(true);
+        inst->CastToLoadArray()->SetNeedReadBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::LoadArrayI) {
-        inst->CastToLoadArrayI()->SetNeedBarrier(true);
+        inst->CastToLoadArrayI()->SetNeedReadBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::LoadObject) {
-        inst->CastToLoadObject()->SetNeedBarrier(true);
+        inst->CastToLoadObject()->SetNeedReadBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::LoadStatic) {
-        inst->CastToLoadStatic()->SetNeedBarrier(true);
+        inst->CastToLoadStatic()->SetNeedReadBarrier(true);
     }
     if (inst->GetOpcode() == Opcode::LoadPairPart) {
         auto *actualInst = inst->GetInput(0).GetInst();
         if (actualInst->GetOpcode() == Opcode::LoadArrayPair) {
-            inst->GetInput(0).GetInst()->CastToLoadArrayPair()->SetNeedBarrier(true);
+            inst->GetInput(0).GetInst()->CastToLoadArrayPair()->SetNeedReadBarrier(true);
         } else {
-            inst->GetInput(0).GetInst()->CastToLoadArrayPairI()->SetNeedBarrier(true);
+            inst->GetInput(0).GetInst()->CastToLoadArrayPairI()->SetNeedReadBarrier(true);
         }
     }
 }
@@ -923,9 +923,7 @@ ParameterInst *GraphCreator::CreateParamInst(Graph *graph, DataType::Type type, 
 Graph *GraphCreatorWithGCBarrierEntrypoints::GenerateGraphImpl(Inst *inst)
 {
     auto *res = GraphCreator::GenerateGraphImpl(inst);
-    if ((inst_flags::HasFlag(inst->GetOpcode(), inst_flags::WRITE_BARRIER) ||
-         inst_flags::HasFlag(inst->GetOpcode(), inst_flags::READ_BARRIER)) &&
-        inst->GetType() == DataType::REFERENCE) {
+    if (inst_flags::HasFlag(inst->GetOpcode(), inst_flags::GC_BARRIER) && inst->GetType() == DataType::REFERENCE) {
         auto *bb = res->GetStartBlock();
         auto iter = bb->AllInsts();
         size_t nParams = 0;

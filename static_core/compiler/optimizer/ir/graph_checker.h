@@ -190,8 +190,8 @@ private:
     static PANDA_PUBLIC_API void VisitStoreObject([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitStoreObjectDynamic([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitStoreResolvedObjectField([[maybe_unused]] GraphVisitor *v, Inst *inst);
-    static PANDA_PUBLIC_API void VisitFillConstArray([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitStoreResolvedObjectFieldStatic([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitFillConstArray([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadStatic([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);

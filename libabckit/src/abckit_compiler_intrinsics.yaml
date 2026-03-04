@@ -43,7 +43,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ string_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "acc_read", "no_dce", "barrier" ]
+  clear_flags: [ "require_state", "call", "heap_inv", "acc_read", "no_dce", "compiler_barrier" ]
   set_flags: ["load"]
   is_stub: false
   additional_temps: 0
@@ -63,7 +63,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ type_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "acc_read", "no_dce", "barrier" ]
+  clear_flags: [ "require_state", "call", "heap_inv", "acc_read", "no_dce", "compiler_barrier" ]
   set_flags: ["load"]
   is_stub: false
   additional_temps: 0
@@ -83,7 +83,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, type_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "acc_write", "barrier" ]
+  clear_flags: [ "require_state", "call", "heap_inv", "acc_write", "compiler_barrier" ]
   set_flags: ["load", "no_dst"]
   is_stub: false
   additional_temps: 0
@@ -103,7 +103,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, type_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "acc_write", "barrier" ]
+  clear_flags: [ "require_state", "call", "heap_inv", "acc_write", "compiler_barrier" ]
   set_flags: ["load", "no_dst"]
   is_stub: false
   additional_temps: 0
@@ -123,7 +123,7 @@ intrinsics:
   signature:
     ret: i32
     args: [ ref, type_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
   set_flags: []
   is_stub: false
   additional_temps: 0
@@ -163,7 +163,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ i32, type_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "acc_read", "acc_write" ]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "acc_read", "acc_write" ]
   set_flags: [ "alloc", "mem_barrier" ]
   is_stub: false
   additional_temps: 0
@@ -183,7 +183,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ type_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "acc_read", "acc_write" ]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "acc_read", "acc_write" ]
   set_flags: [ "alloc", "mem_barrier" ]
   is_stub: false
   additional_temps: 0
@@ -203,7 +203,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ none, none, method_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "alloc" ]
   is_stub: false
   additional_temps: 0
@@ -223,7 +223,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ none, none, none, none, method_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "alloc" ]
   is_stub: false
   additional_temps: 0
@@ -243,7 +243,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ none, method_id ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "alloc" ]
   is_stub: false
   additional_temps: 0
@@ -263,7 +263,7 @@ intrinsics:
   signature:
     ret: b32
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -283,7 +283,7 @@ intrinsics:
   signature:
     ret: b64
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -303,7 +303,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -323,7 +323,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, b32, field_id ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst", "no_dce" ]
   is_stub: false
   additional_temps: 0
@@ -343,7 +343,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, b64, field_id ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst", "no_dce" ]
   is_stub: false
   additional_temps: 0
@@ -363,7 +363,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, ref, field_id ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst", "no_dce" ]
   is_stub: false
   additional_temps: 0
@@ -383,7 +383,7 @@ intrinsics:
   signature:
     ret: b32
     args: [ field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -403,7 +403,7 @@ intrinsics:
   signature:
     ret: b64
     args: [ field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -423,7 +423,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -443,7 +443,7 @@ intrinsics:
   signature:
     ret: none
     args: [ b32, field_id ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst", "no_dce" ]
   is_stub: false
   additional_temps: 0
@@ -463,7 +463,7 @@ intrinsics:
   signature:
     ret: none
     args: [ b64, field_id ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst", "no_dce" ]
   is_stub: false
   additional_temps: 0
@@ -483,7 +483,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst", "no_dce" ]
   is_stub: false
   additional_temps: 0
@@ -503,7 +503,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, i32, i32 ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst" ]
   is_stub: false
   additional_temps: 0
@@ -523,7 +523,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, i32, i64 ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst" ]
   is_stub: false
   additional_temps: 0
@@ -543,7 +543,7 @@ intrinsics:
   signature:
     ret: none
     args: [ ref, i32, ref ]
-  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_write"]
+  clear_flags: [ "can_throw", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_write"]
   set_flags: [ "store", "no_dst" ]
   is_stub: false
   additional_temps: 0
@@ -563,7 +563,7 @@ intrinsics:
   signature:
     ret: i32
     args: [ i32, ref ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -583,7 +583,7 @@ intrinsics:
   signature:
     ret: i64
     args: [ i32, ref ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -603,7 +603,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ i32, ref ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -664,7 +664,7 @@ intrinsics:
   signature:
     ret: u1
     args: [ ref ]
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
   set_flags: []
   is_stub: false
   additional_temps: 0
@@ -680,11 +680,11 @@ intrinsics:
   compiler_only: true
   private: false
   static: true
-  safepoint_after_call: false 
+  safepoint_after_call: false
   signature:
-    ret: none 
+    ret: none
     args: [ ref ]
-  clear_flags: ["call", "heap_inv", "barrier", "acc_read", "acc_write" ]
+  clear_flags: ["call", "heap_inv", "compiler_barrier", "acc_read", "acc_write" ]
   set_flags: [ "can_throw", "no_dst","no_nullptr" ]
   is_stub: false
   additional_temps: 0
@@ -702,9 +702,9 @@ intrinsics:
   static: true
   safepoint_after_call: false
   signature:
-    ret: i32 
-    args: [ ref ] 
-  clear_flags: [ "require_state", "call", "heap_inv", "barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
+    ret: i32
+    args: [ ref ]
+  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
   set_flags: []
   is_stub: false
   additional_temps: 0
@@ -729,7 +729,7 @@ intrinsics:
     "require_state",
     "call",
     "heap_inv",
-    "barrier",
+    "compiler_barrier",
     "can_throw",
     "no_dce",
     "no_hoist",
@@ -755,7 +755,7 @@ intrinsics:
   signature:
     ret: b32
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -775,7 +775,7 @@ intrinsics:
   signature:
     ret: b64
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0
@@ -795,7 +795,7 @@ intrinsics:
   signature:
     ret: ref
     args: [ ref, field_id ]
-  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "barrier", "acc_read"]
+  clear_flags: [ "can_throw", "no_dce", "require_state", "call", "runtime_call", "heap_inv", "compiler_barrier", "acc_read"]
   set_flags: [ "load" ]
   is_stub: false
   additional_temps: 0

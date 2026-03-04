@@ -72,7 +72,7 @@ def GenerateNumberToStringDecimal(name)
     end
 
     # load cache
-    cache := LoadI(%tr).Imm(eval("Constants::#{suffix}_TO_STRING_CACHE_OFFSET")).SetNeedBarrier(false).ref
+    cache := LoadI(%tr).Imm(eval("Constants::#{suffix}_TO_STRING_CACHE_OFFSET")).SetNeedReadBarrier(false).ref
     If(cache, 0).EQ.Unlikely {
       Goto(:SlowPathNoCache)
     }
@@ -91,7 +91,7 @@ def GenerateNumberToStringDecimal(name)
 
     # get cache element
     elem_offset := AddI(ShlI(hash).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
-    elem := Load(cache, elem_offset).SetNeedBarrier(true).ref
+    elem := Load(cache, elem_offset).SetNeedReadBarrier(true).ref
     IfImm(Compare(elem, 0).EQ.b).Imm(0).NE.Unlikely {
       Goto(:SlowPath)
     }
@@ -103,7 +103,7 @@ def GenerateNumberToStringDecimal(name)
     }
 
     # return string value
-    cachedStr := Cast(LoadI(elem).Imm(eval("Constants::#{suffix}_ELEM_STRING_OFFSET")).SetNeedBarrier(true).ref).ptr
+    cachedStr := Cast(LoadI(elem).Imm(eval("Constants::#{suffix}_ELEM_STRING_OFFSET")).SetNeedReadBarrier(true).ref).ptr
     Return(cachedStr).ptr
 
   Label(:SlowPathStore)

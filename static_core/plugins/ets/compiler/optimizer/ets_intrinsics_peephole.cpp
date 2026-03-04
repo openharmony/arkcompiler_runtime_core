@@ -177,7 +177,7 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
             storeField->SetVolatile(true);
         }
         if (type == DataType::REFERENCE) {
-            storeField->SetNeedBarrier(true);
+            storeField->SetNeedWriteBarrier(true);
         }
         storeField->SetInput(1, intrinsic->GetInput(1).GetInst());
         memObj = storeField;
@@ -190,8 +190,8 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
         if (runtime->IsFieldVolatile(field)) {
             loadField->SetVolatile(true);
         }
-        if (type == DataType::REFERENCE && runtime->NeedsReadBarrier()) {
-            loadField->SetNeedBarrier(true);
+        if (DataType::IsReference(type) && runtime->NeedsReadBarrier()) {
+            loadField->SetNeedReadBarrier(true);
         }
         memObj = loadField;
         intrinsic->ReplaceUsers(loadField);

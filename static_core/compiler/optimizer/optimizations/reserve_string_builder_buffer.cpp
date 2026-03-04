@@ -252,7 +252,7 @@ void StoreStringBuilderConstructorArgument(Graph *graph, Inst *arg, Inst *newObj
     storeArray->SetInput(ARG_IDX_0, newObjectsArray);
     storeArray->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(0));
     storeArray->SetInput(ARG_IDX_2, arg);
-    storeArray->SetNeedBarrier(true);
+    storeArray->SetNeedWriteBarrier(true);
     InsertBeforeWithSaveState(storeArray, ctorCall->GetSaveState());
 }
 

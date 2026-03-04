@@ -110,7 +110,9 @@ class GeneratorIrInline
       else
         Output << "auto* #{var_name} = graph->CreateInst#{inst.name}(DataType::#{inst.get_type_for_cpp}, pc);"
       end
-      Output << "#{var_name}->SetNeedBarrier(true);" if inst.IsStoreArray? && inst.type == :ref
+      if inst.IsStoreArray? && inst.type == :ref
+        Output << "#{var_name}->SetNeedWriteBarrier(true);"
+      end
       generate_inst_inputs(inst)
       if inst.IsCmp? || inst.IsCompare? || inst.IsIf? || inst.IsIfImm? || inst.IsSelect? || inst.IsSelectImm?
         Output << "#{var_name}->SetOperandsType(DataType::#{inst.inputs.first.get_type_for_cpp});"

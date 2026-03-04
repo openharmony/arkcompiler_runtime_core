@@ -110,7 +110,7 @@ instructions:
   - opcode: MulOverflowCheck
     base: FixedInputsInst<3>
     signature: [d-int, int, int, save_state]
-    flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
     description: Mul two values, deoptimize if overflow occurred.
 
@@ -316,13 +316,13 @@ instructions:
   - opcode: InitString
     base: InitStringInst
     signature: [d-ref, ref, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, alloc, require_state, runtime_call, acc_write]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, alloc, require_state, runtime_call, acc_write]
     description: Create and initialize string.
 
   - opcode: LoadArray
     base: LoadInst
     signature: [d-real-any, ref-any-nc, int-bc, ptr-opt]
-    flags: [load, no_hoist, no_cse, acc_read, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, acc_read, acc_write, gc_barrier]
     description: Load value from array.
 
   - opcode: LoadCompressedStringChar
@@ -334,13 +334,13 @@ instructions:
   - opcode: StoreArray
     base: StoreInst
     signature: [ref-nc-any, int-bc, real-any, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, gc_barrier]
     description: Store value in array.
 
   - opcode: LoadObject
     base: LoadObjectInst
     signature: [d-real-any, ref-nc-any, ptr-opt]
-    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, acc_write, gc_barrier]
     description: Load value from object's field.
     fields:
       - field_id: TypeId
@@ -348,13 +348,13 @@ instructions:
   - opcode: LoadObjectDynamic
     base: LoadObjectDynamicInst
     signature: [d-any, ref-any, any, any]
-    flags: [load, no_hoist, no_cse, acc_write, barrier]
+    flags: [load, no_hoist, no_cse, acc_write, compiler_barrier]
     description: Load value from dynamic object's field.
 
   - opcode: Load
     base: LoadMemInst
     signature: [d-real-any, ptr-ref, int, ptr-opt]
-    flags: [native, low_level, load, no_hoist, no_cse, read_barrier]
+    flags: [native, low_level, load, no_hoist, no_cse, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Load value from memory by offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
@@ -367,14 +367,14 @@ instructions:
   - opcode: LoadI
     base: LoadMemInstI
     signature: [d-real-any, ptr-ref, ptr-opt]
-    flags: [native, low_level, load, no_hoist, no_cse, read_barrier]
+    flags: [native, low_level, load, no_hoist, no_cse, gc_barrier]
     modes: [irtoc]
     description: Load value from memory by immediate offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
   - opcode: Store
     base: StoreMemInst
     signature: [ptr-ref-any, int, real-any, ptr-opt]
-    flags: [native, low_level, store, no_dce, no_hoist, no_cse, write_barrier]
+    flags: [native, low_level, store, no_dce, no_hoist, no_cse, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Store value in memory by offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
 
@@ -387,7 +387,7 @@ instructions:
   - opcode: StoreI
     base: StoreMemInstI
     signature: [ptr-ref, real-any, ptr-opt]
-    flags: [native, low_level, store, no_dce, no_hoist, no_cse, write_barrier]
+    flags: [native, low_level, store, no_dce, no_hoist, no_cse, gc_barrier]
     modes: [irtoc]
     description: Store value in memory by immediate offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
 
@@ -403,7 +403,7 @@ instructions:
   - opcode: LoadResolvedObjectField
     base: LoadResolvedObjectFieldInst
     signature: [d-real, ref-nc, u32, ptr-opt]
-    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, acc_write, gc_barrier]
     description: Load value from resolved object's field.
     fields:
       - field_id: TypeId
@@ -411,7 +411,7 @@ instructions:
   - opcode: StoreObject
     base: StoreObjectInst
     signature: [ref-nc, real-any, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, gc_barrier]
     description: Store value in object's field.
     fields:
       - field_id: TypeId
@@ -419,13 +419,13 @@ instructions:
   - opcode: StoreObjectDynamic
     base: StoreObjectDynamicInst
     signature: [d-any, ref-any, any, any, any]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, barrier]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, compiler_barrier]
     description: Store value in dynamic object's field.
 
   - opcode: StoreResolvedObjectField
     base: StoreResolvedObjectFieldInst
     signature: [ref-nc, real, u32, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier, barrier]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, compiler_barrier, gc_barrier]
     description: Store value in resolved object's field.
     fields:
       - field_id: TypeId
@@ -433,7 +433,7 @@ instructions:
   - opcode: LoadStatic
     base: LoadStaticInst
     signature: [d-real, ref, ptr-opt]
-    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, acc_write, gc_barrier]
     description: Load static field from class.
     fields:
       - field_id: TypeId
@@ -450,7 +450,7 @@ instructions:
   - opcode: LoadResolvedObjectFieldStatic
     base: LoadResolvedObjectFieldStaticInst
     signature: [d-real, ref, ptr-opt]
-    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, acc_write, gc_barrier]
     description: Load value from resolved static object's field.
     fields:
       - field_id: TypeId
@@ -458,7 +458,7 @@ instructions:
   - opcode: StoreStatic
     base: StoreStaticInst
     signature: [ref, real, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, gc_barrier]
     description: Store value into static field.
     fields:
       - field_id: TypeId
@@ -466,7 +466,7 @@ instructions:
   - opcode: UnresolvedStoreStatic
     base: UnresolvedStoreStaticInst
     signature: [real, save_state]
-    flags: [store, can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, implicit_runtime_call, require_tmp, write_barrier]
+    flags: [store, can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, implicit_runtime_call, require_tmp, gc_barrier]
     modes: [jit_aot]
     description: Store value into unresolved static field.
     fields:
@@ -475,7 +475,7 @@ instructions:
   - opcode: StoreResolvedObjectFieldStatic
     base: StoreResolvedObjectFieldStaticInst
     signature: [ref, real, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, write_barrier, barrier]
+    flags: [store, no_dce, no_hoist, no_cse, compiler_barrier, gc_barrier]
     modes: [jit_aot]
     description: Store value into resolved static field.
     fields:
@@ -502,7 +502,7 @@ instructions:
   - opcode: LoadConstArray
     base: LoadConstArrayInst
     signature: [d-ref, save_state]
-    flags: [load, can_throw, no_hoist, no_dce, no_cse, require_state, barrier, runtime_call]
+    flags: [load, can_throw, no_hoist, no_dce, no_cse, require_state, compiler_barrier, runtime_call]
     description: Creates a new constant array by id and fills its contents (array elements are literals).
 
   - opcode: LoadConstantPool
@@ -520,7 +520,7 @@ instructions:
   - opcode: FillConstArray
     base: FillConstArrayInst
     signature: [ref, save_state]
-    flags: [store, no_hoist, no_dce, no_cse, no_dst, require_state, barrier, runtime_call, require_tmp]
+    flags: [store, no_hoist, no_dce, no_cse, no_dst, require_state, compiler_barrier, runtime_call, require_tmp]
     description: Fill constant array by contents (array elements are literals).
 
   - opcode: LoadType
@@ -532,14 +532,14 @@ instructions:
   - opcode: UnresolvedLoadType
     base: LoadFromPool
     signature: [d-ref, save_state]
-    flags: [load, can_throw, no_dce, no_hoist, barrier, no_cse, require_state, runtime_call]
+    flags: [load, can_throw, no_dce, no_hoist, compiler_barrier, no_cse, require_state, runtime_call]
     modes: [jit_aot]
     description: Load unresolved type from pool.
 
   - opcode: CheckCast
     base: CheckCastInst
     signature: [ref, ref, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, require_state, runtime_call, acc_read, barrier]
+    flags: [can_throw, no_dce, no_hoist, no_cse, require_state, runtime_call, acc_read, compiler_barrier]
     description: >-
       If an object in the first input can't be cast to the type in the second input ClassCastException is thrown.
       'null' object reference can be cast to every type.
@@ -559,7 +559,7 @@ instructions:
   - opcode: InitClass
     base: ClassInst
     signature: [save_state]
-    flags: [can_throw, no_hoist, barrier, no_dce, require_state, runtime_call]
+    flags: [can_throw, no_hoist, compiler_barrier, no_dce, require_state, runtime_call]
     description: Calls initialization of the class before inlined function
     fields:
       - type_id: TypeId
@@ -567,7 +567,7 @@ instructions:
   - opcode: LoadClass
     base: ClassInst
     signature: [d-ref, save_state]
-    flags: [can_throw, no_hoist, barrier, no_dce, require_state, runtime_call]
+    flags: [can_throw, no_hoist, compiler_barrier, no_dce, require_state, runtime_call]
     description: Loads class
     fields:
       - type_id: TypeId
@@ -575,7 +575,7 @@ instructions:
   - opcode: LoadAndInitClass
     base: ClassInst
     signature: [d-ref, save_state]
-    flags: [can_throw, no_dce, no_hoist, barrier, require_state, runtime_call]
+    flags: [can_throw, no_dce, no_hoist, compiler_barrier, require_state, runtime_call]
     description: Calls initialization of the class before LoadStatic and StoreStatc
     fields:
       - type_id: TypeId
@@ -583,7 +583,7 @@ instructions:
   - opcode: UnresolvedLoadAndInitClass
     base: ClassInst
     signature: [d-ref, save_state]
-    flags: [can_throw, no_dce, no_cse, no_hoist, barrier, require_state, runtime_call]
+    flags: [can_throw, no_dce, no_cse, no_hoist, compiler_barrier, require_state, runtime_call]
     modes: [jit_aot]
     description: Calls initialization of the class that wasn't resolved during compilation before LoadStatic and StoreStatc
     fields:
@@ -630,7 +630,7 @@ instructions:
   - opcode: GetGlobalVarAddress
     base: GlobalVarInst
     signature: [d-ref, any, save_state]
-    flags: [can_throw, no_hoist, barrier, no_dce, require_state, runtime_call]
+    flags: [can_throw, no_hoist, compiler_barrier, no_dce, require_state, runtime_call]
     description: Get global var address
     fields:
       - type_id: TypeId
@@ -701,28 +701,28 @@ instructions:
   - opcode: Deoptimize
     base: DeoptimizeInst
     signature: [save_state]
-    flags: [cf, can_throw, no_dce, no_cse, no_hoist, require_state, barrier, can_deoptimize, terminator]
+    flags: [cf, can_throw, no_dce, no_cse, no_hoist, require_state, compiler_barrier, can_deoptimize, terminator]
     modes: [jit_aot]
     description: Unconditionally switch to interpreter.
 
   - opcode: DeoptimizeIf
     base: DeoptimizeIfInst
     signature: [any-int-bool, save_state]
-    flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, barrier, can_deoptimize]
+    flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, compiler_barrier, can_deoptimize]
     modes: [jit_aot]
     description: Jump to interpreter if value is true.
 
   - opcode: DeoptimizeCompare
     base: DeoptimizeCompareInst
     signature: [any-int-bool-ref-ptr, any-int-bool-ref-ptr, save_state]
-    flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, barrier, can_deoptimize, low_level]
+    flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, compiler_barrier, can_deoptimize, low_level]
     modes: [jit_aot]
     description: Compare and jump to interpreter if the result is true.
 
   - opcode: DeoptimizeCompareImm
     base: DeoptimizeCompareImmInst
     signature: [any-int-bool-ref-ptr, save_state]
-    flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, barrier, can_deoptimize, low_level]
+    flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, compiler_barrier, can_deoptimize, low_level]
     modes: [jit_aot]
     description: Compare and jump to interpreter if the result is true.
 
@@ -739,26 +739,26 @@ instructions:
   - opcode: ReturnVoid
     base: FixedInputsInst<0>
     signature: []
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, terminator]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, terminator]
     description: Return from method.
 
   - opcode: Return
     base: FixedInputsInst<1>
     signature: [real-any]
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, acc_read, terminator]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, acc_read, terminator]
     description: Return value from method.
 
   - opcode: ReturnInlined
     base: ReturnInlinedInst
     signature: [save_state]
-    flags: [no_dce, no_hoist, no_cse, barrier, require_state, acc_read]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, require_state, acc_read]
     modes: [jit_aot]
     description: Return from inlined method.
 
   - opcode: Throw
     base: ThrowInst
     signature: [ref, save_state]
-    flags: [cf, can_throw, no_dce, no_hoist, no_cse, barrier, require_state, terminator]
+    flags: [cf, can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, terminator]
     modes: [jit_aot, bytecode_opt]
     description: Throw an exception. It also might raise NullReferenceException if the exception is null.
 
@@ -768,63 +768,63 @@ instructions:
   - opcode: CallStatic
     base: CallInst
     signature: [d-real-void, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, call, acc_write, acc_read]
+    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, runtime_call, call, acc_write, acc_read]
     description: Calls static method.
 
   - opcode: ResolveStatic
     base: ResolveStaticInst
     signature: [d-ptr, save_state]
-    flags: [can_throw, barrier, require_state, runtime_call]
-    abckit_flags: [can_throw, barrier, runtime_call]
+    flags: [can_throw, compiler_barrier, require_state, runtime_call]
+    abckit_flags: [can_throw, compiler_barrier, runtime_call]
     description: Prepare a method address for CallResolvedStatic. First input is SaveState.
 
   - opcode: CallResolvedStatic
     base: CallInst
     signature: [d-real-void, ptr, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, call, acc_write, acc_read]
+    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, call, acc_write, acc_read]
     description: Calls static method resolved by ResolveStatic. First input is a method address.
 
   - opcode: CallVirtual
     base: CallInst
     signature: [d-real-void, ref-nc, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, call, acc_write, acc_read]
+    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, runtime_call, call, acc_write, acc_read]
     description: Calls virtual method. First input is an object reference.
 
   - opcode: ResolveVirtual
     base: ResolveVirtualInst
     signature: [d-ptr, ref-nc, save_state]
-    flags: [can_throw, barrier, require_state, runtime_call]
-    abckit_flags: [can_throw, barrier, runtime_call]
+    flags: [can_throw, compiler_barrier, require_state, runtime_call]
+    abckit_flags: [can_throw, compiler_barrier, runtime_call]
     description: Prepare a method address for CallResolvedVirtual. First input is an object reference.
 
   - opcode: CallResolvedVirtual
     base: CallInst
     signature: [d-real-void, ptr, ref-nc, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, call, acc_write, acc_read]
+    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, call, acc_write, acc_read]
     description: Calls a vrtual method resolved by ResolveVirtual. First input is a method address.
 
   - opcode: CallDynamic
     base: CallInst
     signature: [d-any-void, any-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, call]
+    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, runtime_call, call]
     description: Calls dynamic method.
 
   - opcode: CallIndirect
     base: CallIndirectInst
     signature: [d-real-void, ptr, real-dyn]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, low_level]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, call, low_level]
     modes: [irtoc]
     description: Low-level call by the address given from the first input.
 
   - opcode: Call
     base: CallInst
     signature: [d-real-void-any, real-dyn]
-    flags: [ can_throw, no_dce, no_hoist, no_cse, barrier, call, low_level ]
+    flags: [ can_throw, no_dce, no_hoist, no_cse, compiler_barrier, call, low_level ]
     description: |
       Low-level call. Target function can be specified by the different ways. Currently, it supports only string name of
       the target function, which will be resolved during linking phase of the host compiler.
@@ -832,29 +832,29 @@ instructions:
   - opcode: MultiArray
     base: CallInst
     signature: [d-ref, ref, int-ngc-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, alloc, barrier, require_state, runtime_call, mem_barrier]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, alloc, barrier, runtime_call, mem_barrier]
+    flags: [can_throw, no_dce, no_hoist, no_cse, alloc, compiler_barrier, require_state, runtime_call, mem_barrier]
+    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, alloc, compiler_barrier, runtime_call, mem_barrier]
     modes: [jit_aot, irtoc]
     description: Creates MultiDimensional Array(a[X][Y][Z]). First input is class. Next inputs - size of arrayes(X, Y, Z).
 
   - opcode: Monitor
     base: MonitorInst
     signature: [ref-nc, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, acc_read]
+    flags: [can_throw, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, acc_read]
     modes: [jit_aot, bytecode_opt]
     description: Enable or disable monitor for the object(If field "Exit" is set, the monitor is disabled)
 
   - opcode: Intrinsic
     base: IntrinsicInst
     signature: [d-real-void-any, real-dyn]
-    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
+    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, call, acc_write, acc_read]
+    abckit_flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, compiler_barrier, runtime_call, call, acc_write, acc_read]
     description: Call runtime intrinsics directly.
 
   - opcode: CallNative
     base: CallInst
     signature: [d-real-void, ptr, real-dyn, save_state]
-    flags: [heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
+    flags: [heap_inv, no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, call]
     modes: [jit_aot]
     description: Call Native API method directly, without bridge. First input is a resolved and checked native pointer.
 
@@ -877,8 +877,8 @@ instructions:
   - opcode: ResolveByName
     base: ResolveVirtualInst
     signature: [d-ptr, ref-nc, save_state]
-    flags: [can_throw, barrier, require_state, runtime_call]
-    abckit_flags: [can_throw, barrier, runtime_call]
+    flags: [can_throw, compiler_barrier, require_state, runtime_call]
+    abckit_flags: [can_throw, compiler_barrier, runtime_call]
     description: Prepare a method address for CallResolvedVirtual by method name. First input is an object reference.
 
     ##############################################################################
@@ -1065,7 +1065,7 @@ instructions:
   - opcode: LoadArrayI
     base: LoadInstI
     signature: [d-real-any, ref-any-nc, ptr-opt]
-    flags: [load, no_hoist, no_cse, low_level, acc_read, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, low_level, acc_read, acc_write, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Load value from array.
 
@@ -1078,21 +1078,21 @@ instructions:
   - opcode: StoreArrayI
     base: StoreInstI
     signature: [ref-nc, real-any, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, gc_barrier]
     modes: [jit_aot]
     description: Store value in array.
 
   - opcode: LoadArrayPair
     base: LoadArrayPairInst
     signature: [d-real-any, ref-any-nc, int-bc, ptr-opt]
-    flags: [load, no_hoist, no_cse, low_level, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, low_level, acc_write, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from array.
 
   - opcode: LoadArrayPairI
     base: LoadArrayPairInstI
     signature: [d-real-any, ref-any-nc, ptr-opt]
-    flags: [load, no_hoist, no_cse, low_level, acc_write, read_barrier]
+    flags: [load, no_hoist, no_cse, low_level, acc_write, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from array at immediate index.
 
@@ -1106,35 +1106,35 @@ instructions:
   - opcode: LoadObjectPair
     base: LoadObjectPairInst
     signature: [d-real-any, ref-any-nc, ptr-opt]
-    flags: [load, no_hoist, no_cse, low_level, read_barrier]
+    flags: [load, no_hoist, no_cse, low_level, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from object.
 
   - opcode: StoreArrayPair
     base: StoreArrayPairInst
     signature: [ref-nc, int-bc, real-any, real-any, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, require_tmp, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, require_tmp, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array.
 
   - opcode: StoreArrayPairI
     base: StoreArrayPairInstI
     signature: [ref-nc, real-any, real-any, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array at immediate index.
 
   - opcode: StoreObjectPair
     base: StoreObjectPairInst
     signature: [ref-nc, real-any, real-any, ptr-opt]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, require_tmp, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, require_tmp, gc_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to object.
 
   - opcode: ReturnI
     base: ReturnInstI
     signature: []
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, low_level, acc_read, terminator]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, low_level, acc_read, terminator]
     modes: [jit_aot, irtoc]
     description: Return value from method.
 
@@ -1164,7 +1164,7 @@ instructions:
   - opcode: SafePoint
     base: SaveStateInst
     signature: [real-dyn]
-    flags: [no_dce, no_hoist, no_cse, barrier, runtime_call]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, runtime_call]
     description: GC safepoint instruction.
     codegen:
       - ld_16  tmp_u16, safepoint_state
@@ -1174,7 +1174,7 @@ instructions:
   - opcode: SaveStateDeoptimize
     base: SaveStateInst
     signature: [d-real-pseudo, real-dyn]
-    flags: [no_dce, no_hoist, no_cse, barrier]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier]
     modes: [jit_aot, bytecode_opt]
     description: >-
       Contains information about virtual registers that must be saved before leaving compiled code. Constructed for all
@@ -1183,7 +1183,7 @@ instructions:
   - opcode: SaveStateOsr
     base: SaveStateInst
     signature: [d-real-pseudo, real-dyn]
-    flags: [no_dce, no_hoist, no_cse, barrier]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier]
     modes: [jit_aot]
     description: >-
       Contains information about virtual registers to fill OSR stackmaps. Constructed for all loop headers in OSR mode.
@@ -1191,7 +1191,7 @@ instructions:
   - opcode: SaveStateSuspend
     base: SaveStateInst
     signature: [d-real-pseudo, real-dyn]
-    flags: [no_dce, no_hoist, no_cse, barrier, heap_inv, can_deoptimize]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, heap_inv, can_deoptimize]
     modes: [jit_aot]
     description: >-
       Do coroutines suspension. Contains information about virtual registers that must be saved before suspension.
@@ -1201,7 +1201,7 @@ instructions:
   - opcode: Dispatch
     base: DispatchInst
     signature: [ref]
-    flags: [no_dce, no_hoist, barrier, terminator]
+    flags: [no_dce, no_hoist, compiler_barrier, terminator]
     modes: [jit_aot]
     description: >-
       Async resume dispatch terminator. Used on the non-null async-context path to continue execution
@@ -1246,48 +1246,48 @@ instructions:
   - opcode: AddOverflow
     base: BinaryOverflowInst
     signature: [d-int, int, int]
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, acc_read]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, acc_read]
     modes: [jit_aot, irtoc]
     description: Add two values and check result to Overflow, in case of overflow and CC is EQ jump to true edge
 
   - opcode: SubOverflow
     base: BinaryOverflowInst
     signature: [d-int, int, int]
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, acc_read]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, acc_read]
     modes: [jit_aot, irtoc]
     description: Sub two values and check result to Overflow, in case of overflow and CC is EQ jump to true edge
 
   - opcode: AddOverflowCheck
     base: FixedInputsInst<3>
     signature: [d-int, int, int, save_state]
-    flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
     description: Add two values, deoptimize if overflow occurred.
 
   - opcode: SubOverflowCheck
     base: FixedInputsInst<3>
     signature: [d-int, int, int, save_state]
-    flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
     description: Sub two values, deoptimize if overflow occurred.
 
   - opcode: NegOverflowAndZeroCheck
     base: FixedInputsInst<2>
     signature: [d-int, int, save_state]
-    flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
     description: Neg value, deoptimize if overflow occurred (get -0 or MIN_INT).
 
   - opcode: If
     base: IfInst
     signature: [real-any, real-any]
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, low_level, acc_read]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, low_level, acc_read]
     description: Performs compare and jump.
 
   - opcode: IfImm
     base: IfImmInst
     signature: [real-any]
-    flags: [cf, no_dce, no_hoist, no_cse, barrier, acc_read]
+    flags: [cf, no_dce, no_hoist, no_cse, compiler_barrier, acc_read]
     description: Performs compare with immediate and jump.
 
   - opcode: NOP
@@ -1299,7 +1299,7 @@ instructions:
   - opcode: Try
     base: TryInst
     signature: []
-    flags: [no_dce, no_hoist, no_cse, barrier]
+    flags: [no_dce, no_hoist, no_cse, compiler_barrier]
     modes: [jit_aot, bytecode_opt]
     description: Pseudo instruction, inserted in the beginning of try-block.
 
@@ -1425,8 +1425,9 @@ flags:
   terminator: Execution will be terminated at the given instruction
   load: Instruction loads from memory
   store: Instruction stores into memory
-  read_barrier: Instruction is load in which read barriers may be involved when the field read is an object
-  write_barrier: Instruction is write in which write barriers may be involved when the field written is an object
+  compiler_barrier: Instruction is a barrier for scheduling
+  gc_barrier: Instruction may require GC Read or Write barrier(-s) (when loading or storing reference(-s))
+  mem_barrier: Memory barrier is required after (or before if it's 'return.void') an instruction
   can_throw: Instruction can throw exception
   call: Call instruction.
   is_check: Instruction has runtime-checks and has `can_throw` flag
@@ -1434,11 +1435,10 @@ flags:
   no_cse: Instruction has unique vn class and CSE can't be applied
   no_dst: Instruction has no destination operand
   no_nullptr: Instruction doesn't produce nullptr
+  no_hoist: Instruction can't be hoisted
   pseudo_dst: Instruction has pseudo destination operand, i.e. it doesn't affect on dataflow
   implicit_runtime_call: Instruction may call runtime before loading source, which can be moved by GC during that call
   low_level: Low level instruction
-  no_hoist: Instruction can't be hoisted
-  barrier: Instruction is a barrier for scheduling
   ref_special: Instruction which can not be moved throught runtime calls
   ifcvt: Instruction can be used in if-conversion
   require_state: Instruction may call runtime, thus, it requires SaveState in the inputs
@@ -1448,7 +1448,6 @@ flags:
   acc_read: Read the accumulator register
   acc_write: Write the accumulator register
   heap_inv: Invalidates heap
-  mem_barrier: we need encode memory barrier after the instruction(for return.void before)
   native: Instruction is used to generate unmanaged (native) code
   can_deoptimize: deoptimization may occur with jump to the interpreter
   catch_input: Instruction is used in some catch block

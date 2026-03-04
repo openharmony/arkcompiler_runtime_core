@@ -17,7 +17,7 @@ Intrinsic.class_eval do
     end
 
     def clear_flags
-        safe_flags = ["no_dce", "no_hoist", "no_cse", "barrier", "require_state", "runtime_call", "heap_inv", "can_throw"]
+        safe_flags = ["no_dce", "no_hoist", "no_cse", "compiler_barrier", "require_state", "runtime_call", "heap_inv", "can_throw"]
         flags = dig(:clear_flags) || []
         raise "Use safe_intrinsic option instead of manually set clear_flags for intrinsic '#{name}'" if !safe_intrinsic? && safe_flags.all?{ |flag| flags.include?(flag) }
         flags += safe_flags if safe_intrinsic?

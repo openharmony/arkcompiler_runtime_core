@@ -1264,7 +1264,7 @@ macro(:handle_ldarr_obj_v8) do |vs|
     move_to_exception
   }
   elem_offset = AddI(ShlI(acc.i32).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).u32
-  load_array := Load(vs, elem_offset).SetNeedBarrier(true).ref
+  load_array := Load(vs, elem_offset).SetNeedReadBarrier(true).ref
   set_acc_object(load_array)
 end
 
@@ -1315,7 +1315,7 @@ macro(:handle_starr_obj_v4_v4) do |vs1, vs2|
     move_to_exception
   }
   elem_offset = AddI(ShlI(vs2).Imm(Constants::REFERENCE_TYPE_SHIFT).u32).Imm(Constants::ARRAY_DATA_OFFSET).u32
-  Store(vs1, elem_offset, acc.ref).SetNeedBarrier(true).ref
+  Store(vs1, elem_offset, acc.ref).SetNeedWriteBarrier(true).ref
 end
 
 macro(:handle_newobj_v8_id16) do |vd, id|
@@ -1399,7 +1399,7 @@ macro(:handle_stobj_obj_v8_id16) do |vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Store(vs, offset, acc.ref).SetNeedBarrier(true).ref
+  Store(vs, offset, acc.ref).SetNeedWriteBarrier(true).ref
 end
 
 macro(:handle_stobj_v_v4_v4_id16) do |v1, v2, id|
@@ -1459,7 +1459,7 @@ macro(:handle_stobj_v_obj_v4_v4_id16) do |v1, v2, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Store(v2.ref, offset, v1.ref).SetNeedBarrier(true).ref
+  Store(v2.ref, offset, v1.ref).SetNeedWriteBarrier(true).ref
 end
 
 macro(:handle_ldobj_v8_id16) do |vs, id|
@@ -1529,7 +1529,7 @@ macro(:handle_ldobj_obj_v8_id16) do |vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  value := Load(vs, offset).SetNeedBarrier(true).ref
+  value := Load(vs, offset).SetNeedReadBarrier(true).ref
   set_acc_object(value).ref
 end
 
@@ -1592,7 +1592,7 @@ macro(:handle_ldobj_v_obj_v4_v4_id16) do |vd, vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  value := Load(vs, offset).SetNeedBarrier(true).ref
+  value := Load(vs, offset).SetNeedReadBarrier(true).ref
   set_object(vd, value).ref
 end
 
@@ -1658,7 +1658,7 @@ macro(:handle_ststatic_obj_id16) do |id|
   class_managed_object := LoadI(bitcast_to_ref(field_class)).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref_uint
   offset_managed_object := Add(offset, Sub(field_class, class_managed_object).ref_uint).u32
 
-  Store(bitcast_to_ref(class_managed_object).ref, offset_managed_object, acc.ref).SetNeedBarrier(true).ref
+  Store(bitcast_to_ref(class_managed_object).ref, offset_managed_object, acc.ref).SetNeedWriteBarrier(true).ref
 end
 
 macro(:handle_ldstatic_id16) do |id|
@@ -1729,7 +1729,7 @@ macro(:handle_ldstatic_obj_id16) do |id|
   class_managed_object := LoadI(bitcast_to_ref(field_class)).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref_uint
   offset_managed_object := Add(offset, Sub(field_class, class_managed_object).ref_uint).u32
 
-  value := Load(bitcast_to_ref(class_managed_object), offset_managed_object).SetNeedBarrier(true).ref
+  value := Load(bitcast_to_ref(class_managed_object), offset_managed_object).SetNeedReadBarrier(true).ref
   set_acc_object(value).ref
 end
 

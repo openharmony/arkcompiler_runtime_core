@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,6 +272,11 @@ inline bool IsTypeSigned(Type type)
 inline bool IsReference(Type type)
 {
     return type == REFERENCE;
+}
+
+inline bool IsAny(Type type)
+{
+    return type == ANY;
 }
 
 // CC-OFFNXT(G.FUD.06) switch-case, ODR

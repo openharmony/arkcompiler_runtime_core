@@ -70,7 +70,11 @@ def GenerateArrayFastCopyToRef(sync_type)
     }
 
     elem := Load(src_data, src_offset).ref
-    Store(dst_data, dst_offset, elem).SetNeedBarrier(sync_type == :Hybrid).ref
+    if sync_type == :Hybrid
+        Store(dst_data, dst_offset, elem).SetNeedWriteBarrier(true).ref
+    else
+        Store(dst_data, dst_offset, elem).SetNeedWriteBarrier(false).ref
+    end
 
     src_offset2 := AddI(src_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u32
     dst_offset2 := AddI(dst_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u32
