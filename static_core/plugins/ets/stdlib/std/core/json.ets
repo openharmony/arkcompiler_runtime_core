@@ -2977,11 +2977,11 @@ class JSONValue {}
 class JSONObject extends JSONValue {
     public keys_: Array<JSONString> = new Array<JSONString>()
     public values: Array<JSONValue> = new Array<JSONValue>()
-    public readonly static START_CHAR = c'{'
-    public readonly static END_CHAR = c'}'
-    public readonly static SEPARATOR = c':'
-    public readonly static DELIMETER = c','
-    public readonly static EMPTY = '{}'
+    public readonly static START_CHAR: char = c'{'
+    public readonly static END_CHAR: char = c'}'
+    public readonly static SEPARATOR: char = c':'
+    public readonly static DELIMETER: char = c','
+    public readonly static EMPTY: string = '{}'
 
     public getFields(): Map<String, JSONValue> {
         const propsCount = this.keys_.length
@@ -3014,9 +3014,9 @@ class JSONObject extends JSONValue {
 
 class JSONArray extends JSONValue {
     public values: Array<JSONValue> = new Array<JSONValue>()
-    public readonly static START_CHAR = c'['
-    public readonly static END_CHAR = c']'
-    public readonly static SEPARATOR = c','
+    public readonly static START_CHAR: char = c'['
+    public readonly static END_CHAR: char = c']'
+    public readonly static SEPARATOR: char = c','
 
     public override toString(): String {
         let res = new StringBuilder([JSONArray.START_CHAR] as FixedArray<char>)
@@ -3042,8 +3042,8 @@ class JSONNumber extends JSONValue {
 
 class JSONString extends JSONValue {
     public value: String = ''
-    public readonly static START_CHAR = c'"'
-    public readonly static END_CHAR = c'"'
+    public readonly static START_CHAR: char = c'"'
+    public readonly static END_CHAR: char = c'"'
 
     public override toString(): String {
         return this.value
@@ -3051,8 +3051,8 @@ class JSONString extends JSONValue {
 }
 
 class JSONTrue extends JSONValue {
-    public readonly static value = 'true'
-    public readonly static START_CHAR = c't'
+    public readonly static value: string = 'true'
+    public readonly static START_CHAR: char = c't'
 
     public override toString(): String {
         return JSONTrue.value
@@ -3060,8 +3060,8 @@ class JSONTrue extends JSONValue {
 }
 
 class JSONFalse extends JSONValue {
-    public readonly static value = 'false'
-    public readonly static START_CHAR = c'f'
+    public readonly static value: string = 'false'
+    public readonly static START_CHAR: char = c'f'
 
     public override toString(): String {
         return JSONFalse.value
@@ -3069,8 +3069,8 @@ class JSONFalse extends JSONValue {
 }
 
 class JSONNull extends JSONValue {
-    public readonly static value = 'null'
-    public readonly static START_CHAR = c'n'
+    public readonly static value: string = 'null'
+    public readonly static START_CHAR: char = c'n'
 
     public override toString(): String {
         return JSONNull.value

@@ -1739,7 +1739,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      * @since 24
      */
-    static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String) {
+    static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String): string {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
         if (position < 0 || position > stringLength) {

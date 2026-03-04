@@ -26,7 +26,7 @@ package std.core;
  * @FaAndStageModel
  * @since 24
  */
-export const KEY_NOT_FOUND = -1;
+export const KEY_NOT_FOUND: int = -1;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)

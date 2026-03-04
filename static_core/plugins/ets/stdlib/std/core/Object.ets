@@ -38,7 +38,7 @@ export type PropertyKey = string
  * @FaAndStageModel
  * @since 24
  */
-export const ARRAY_LENGTH_MEMBER_NAME      = "length"
+export const ARRAY_LENGTH_MEMBER_NAME: string = "length"
 /**
  * Name constant representing function "length" property.
  *
@@ -47,7 +47,7 @@ export const ARRAY_LENGTH_MEMBER_NAME      = "length"
  * @FaAndStageModel
  * @since 24
  */
-export const FUNCTION_LENGTH_MEMBER_NAME   = "length"
+export const FUNCTION_LENGTH_MEMBER_NAME: string = "length"
 /**
  * Name constant representing function "name" property.
  *
@@ -56,7 +56,7 @@ export const FUNCTION_LENGTH_MEMBER_NAME   = "length"
  * @FaAndStageModel
  * @since 24
  */
-export const FUNCTION_NAME_MEMBER_NAME     = "name"
+export const FUNCTION_NAME_MEMBER_NAME: string = "name"
 
 /**
  * Name constant representing object "toString" method.

@@ -309,7 +309,7 @@ export namespace arktest {
     */
     export function expectThrow(
         cb: () => void,
-        test?: (v: Error) => boolean | string) {
+        test?: (v: Error) => boolean | string): void{
         try {
             cb()
         } catch (e) {
@@ -390,7 +390,7 @@ export namespace arktest {
          * @FaAndStageModel
          * @since 24
          */
-        static readonly BLACK = new TermColor(0)
+        static readonly BLACK: TermColor = new TermColor(0)
 
         /**
          * Represents the color red.
@@ -401,7 +401,7 @@ export namespace arktest {
          * @FaAndStageModel
          * @since 24
          */
-        static readonly RED = new TermColor(1)
+        static readonly RED: TermColor = new TermColor(1)
 
         /**
          * Represents the color green.
@@ -412,7 +412,7 @@ export namespace arktest {
          * @FaAndStageModel
          * @since 24
          */
-        static readonly GREEN = new TermColor(2)
+        static readonly GREEN: TermColor = new TermColor(2)
 
         /**
          * The color code.

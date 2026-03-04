@@ -376,7 +376,7 @@ export final class ClassValue extends reflect.Value {
      * @throws error if this value doesn't have field with {@link name}
      * or type of {@link val} doesn't assignable to type of this value
      */
-    public setFieldByName(name: string, val: reflect.Value) {
+    public setFieldByName(name: string, val: reflect.Value): void {
         let f = this.typ.getFieldByName(name)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -473,7 +473,7 @@ export final class ClassValue extends reflect.Value {
      * @throws error if this value doesn't have field with {@link index}'th index
      * or type of {@link val} doesn't assignable to type of this value
      */
-    public setField(i: long, val: reflect.Value) {
+    public setField(i: long, val: reflect.Value): void {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -625,7 +625,7 @@ export final class ArrayValue extends reflect.Value {
      *
      * @throws error if of {@link val} cannot be assign to i'th element of array
      */
-    public setElement(i: long, val: reflect.Value) {
+    public setElement(i: long, val: reflect.Value): void {
         let et = this.typ.getElementType()
         let vt = val.getType()
         if (!et.assignableFrom(vt)) {
