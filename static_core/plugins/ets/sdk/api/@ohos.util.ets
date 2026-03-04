@@ -385,7 +385,7 @@ export namespace util {
             let base64String: string;
             let charArray: Array<string> = new Array<string>();
             for (let i: int = 0; i < src.length; i++) {
-                charArray.push(String.fromCharCode(src[i]));
+                charArray.push(String.fromCharCode(src[i].toInt()));
             }
             base64String = charArray.join("");
             if (options === Type.MIME || options === Type.MIME_URL_SAFE) {

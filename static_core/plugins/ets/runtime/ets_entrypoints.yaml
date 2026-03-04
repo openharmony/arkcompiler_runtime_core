@@ -999,7 +999,7 @@
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # cache
-    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - int32_t                  # int, char code
     - ark::Class*              # string class pointer
 
 - name: CreateStringFromCharCodeSingleNoCacheTlab
@@ -1008,7 +1008,7 @@
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - int32_t                  # int, char code
     - ark::Class*              # string class pointer
 
 - name: CreateStringFromCharCodeSingleNoCacheSlowPath
@@ -1017,7 +1017,7 @@
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - int32_t                  # int, char code
 
 - name: CreateStringFromCharCodeSingleNoCache3Arg
   entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
@@ -1025,7 +1025,7 @@
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - int32_t                  # int, char code
 
 - name: CreateStringFromCharCodeSingleNoCache2Arg
   entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
@@ -1033,7 +1033,7 @@
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - int32_t                  # int, char code
 
 - name: StringRepeat
   entrypoint: StringRepeatTlab

@@ -40,7 +40,7 @@ EtsString *CreateNewStringFromCharCode(EtsObjectArray *charCodes, size_t actualL
         for (size_t i = 0; i < actualLength; ++i) {
             if (!coretypes::String::IsASCIICharacter(
                     // CC-OFFNXT(G.FMT.06-CPP) project code style
-                    EtsString::CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue()))) {
+                    EtsString::CodeToChar(EtsBoxPrimitive<EtsInt>::FromCoreType(codes->Get(i))->GetValue()))) {
                 return false;
             }
         }
@@ -50,7 +50,7 @@ EtsString *CreateNewStringFromCharCode(EtsObjectArray *charCodes, size_t actualL
     auto copyCharsIntoString = [actualLength](EtsObjectArray *codes, auto *dstData) {
         Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, actualLength);
         for (size_t i = 0; i < actualLength; ++i) {
-            to[i] = EtsString::CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue());
+            to[i] = EtsString::CodeToChar(EtsBoxPrimitive<EtsInt>::FromCoreType(codes->Get(i))->GetValue());
         }
     };
 
@@ -114,8 +114,7 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
                 ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError, ss.str());
                 return false;
             }
-            uint16_t codeValue =
-                EtsString::CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(*optElement)->GetValue());
+            uint16_t codeValue = EtsString::CodeToChar(EtsBoxPrimitive<EtsInt>::FromCoreType(*optElement)->GetValue());
             outputChars.emplace_back(codeValue);
             if (isCompressed && !coretypes::String::IsASCIICharacter(codeValue)) {
                 isCompressed = false;

@@ -2383,8 +2383,8 @@ class UnifiedJsonParser {
         
         this.advanceBy(4)
 
-        let codePoint = Double.parseInt(hexStr, 16)
-        return String.fromCharCode(codePoint.toDouble())
+        let codePoint = Double.parseInt(hexStr, 16).toInt()
+        return String.fromCharCode(codePoint)
     }
 
     private parseNumber(): jsonx.JsonElement {
@@ -2970,6 +2970,7 @@ export class JsonParseError extends SyntaxError {
         super(`${msg} at ${start_offset}..${end_offset}`)
     }
 }
+
 
 class JSONValue {}
 

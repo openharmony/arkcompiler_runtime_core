@@ -260,11 +260,11 @@ export namespace uri {
     }
 
     private dealDecodeInput(input: string): string {
-      let index1 = input.indexOf('[');
+      let index1 = input.indexOf('[')
       if (index1 == -1) {
         return decodeURIComponent(input);
       }
-      let index2 = input.indexOf(']', index1);
+      let index2 = input.indexOf(']', index1)
       let split1 = input.substring(0, index1);
       let split2 = input.substring(index1 + 1, index2);
       let split3 = input.substring(index2 + 1);
@@ -535,7 +535,7 @@ export namespace uri {
     let g_rulePathLookup = new Uint8Array(128);
 
     for (let i = 0; i < digitAggregate.length; i++) {
-      const code = digitAggregate.charCodeAt(i).toInt();
+      const code = digitAggregate.charCodeAt(i)
       if (code < 128) {
         g_ruleSchemeLookup[code] = 1;
         g_ruleUrlcLookup[code] = 1;
@@ -547,7 +547,7 @@ export namespace uri {
     }
 
     for (let i = 0; i < alphasAggregate.length; i++) {
-      const code = alphasAggregate.charCodeAt(i).toInt();
+      const code = alphasAggregate.charCodeAt(i)
       if (code < 128) {
         g_ruleSchemeLookup[code] = 1;
         g_ruleUrlcLookup[code] = 1;
@@ -559,7 +559,7 @@ export namespace uri {
     }
 
     for (let i = 0; i < schemeAggregate.length; i++) {
-      const code = schemeAggregate.charCodeAt(i).toInt();
+      const code = schemeAggregate.charCodeAt(i)
       if (code < 128) {
         g_ruleSchemeLookup[code] = 1;
         g_ruleUrlcLookup[code] = 1;
@@ -569,28 +569,28 @@ export namespace uri {
     }
 
     for (let i = 0; i < uricAggregate.length; i++) {
-      const code = uricAggregate.charCodeAt(i).toInt();
+      const code = uricAggregate.charCodeAt(i);
       if (code < 128) {
         g_ruleUrlcLookup[code] = 1;
       }
     }
 
     for (let i = 0; i < pathAggregate.length; i++) {
-      const code = pathAggregate.charCodeAt(i).toInt();
+      const code = pathAggregate.charCodeAt(i);
       if (code < 128) {
         g_rulePathLookup[code] = 1;
       }
     }
 
     for (let i = 0; i < userInfoAggregate.length; i++) {
-      const code = userInfoAggregate.charCodeAt(i).toInt();
+      const code = userInfoAggregate.charCodeAt(i);
       if (code < 128) {
         g_ruleUserInfoLookup[code] = 1;
       }
     }
 
     for (let i = 0; i < portAggregate.length; i++) {
-      const code = portAggregate.charCodeAt(i).toInt();
+      const code = portAggregate.charCodeAt(i);
       if (code < 128) {
         g_rulePortLookup[code] = 1;
       }
@@ -712,7 +712,7 @@ export namespace uri {
       const len = data.length;
 
       for (let i = 0; i < len; i++) {
-        const code = data.charCodeAt(i).toInt();
+        const code = data.charCodeAt(i)
 
         if (code < 128) {
           if (rule[code] === 0) {
@@ -843,9 +843,9 @@ export namespace uri {
       }
       let isLawfulPort = true;
       // find port
-      pos = this.data.lastIndexOf(':');
+      pos = this.data.lastIndexOf(':')
       if (pos != -1) {
-        let pos1 = this.data.lastIndexOf(']');
+        let pos1 = this.data.lastIndexOf(']')
         if (pos1 == -1 || pos > pos1) {
           isLawfulPort = this.analysisPort(pos);
         }
@@ -1023,14 +1023,14 @@ export namespace uri {
     }
 
     isHierarchical(): boolean {
-      let index = this.inputUri.indexOf(':').toInt();
+      let index = this.inputUri.indexOf(':')
       if (index == -1) {
         return true;
       }
       if (this.inputUri.length == index + 1) {
         return false;
       }
-      return this.inputUri.charAt(index.toInt() + 1) == c'/';
+      return this.inputUri.charAt(index + 1) == c'/';
     }
 
     addQueryValue(key: string, value: string) {
@@ -1053,7 +1053,7 @@ export namespace uri {
         result += this.path;
       }
       if (str == "segment") {
-        let lastChar = result.charAt(result.length.toInt() - 1);
+        let lastChar = result.charAt(result.length - 1);
         if (lastChar == c'/') {
           result += param;
         } else {
@@ -1278,9 +1278,9 @@ export namespace uri {
 
       let isLawfulPort = true;
       // Find port
-      const colonPos = this.data.lastIndexOf(':');
+      const colonPos = this.data.lastIndexOf(':')
       if (colonPos !== -1) {
-        const bracketPos = this.data.lastIndexOf(']');
+        const bracketPos = this.data.lastIndexOf(']')
         if (bracketPos === -1 || colonPos > bracketPos) {
           isLawfulPort = this.analysisPort(colonPos);
         }

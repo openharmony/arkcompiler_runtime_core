@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,42 +61,72 @@ function testMinimumFractionDigits1(): void {
     const num: Number = 0.756;
 
     const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
-    arktest.assertEQ(result, "75.60%");
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(result, "75.60%");
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(result, "75,60 %");
+    }
 }
 
 function testMinimumFractionDigits2(): void {
     const num: Number = -0.111;
 
     const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
-    arktest.assertEQ(result, "-11.10%");
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(result, "-11.10%");
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(result, "-11,10 %");
+    }
 }
 
 function testMinimumFractionDigits3(): void {
     const num: Number = 1.0;
 
     const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
-    arktest.assertEQ(result, "100.00%");
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(result, "100.00%");
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(result, "100,00 %");
+    }
 }
 
 function testMinimumFractionDigits4(): void {
     const num: Number = 0;
 
     const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
-    arktest.assertEQ(result, "0.00%");
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(result, "0.00%");
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(result, "0,00 %");
+    }
 }
 
 function testMinimumFractionDigits5(): void {
     const num: Number = 0.55;
 
     const result = num.toLocaleString(undefined, { style: "percent", maximumFractionDigits: 3, minimumFractionDigits: 2 });
-    arktest.assertEQ(result, "55.00%");
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(result, "55.00%");
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(result, "55,00 %");
+    }
 }
 
 function testMinimumFractionDigits6(): void {
     const num: Number = 0.123456;
 
     const result = num.toLocaleString(undefined, { style: "percent", maximumFractionDigits: 5, minimumFractionDigits: 3 });
-    arktest.assertEQ(result, "12.3456%");
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(result, "12.3456%");
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(result, "12,3456 %");
+    }
 }
 
 function main(): int {

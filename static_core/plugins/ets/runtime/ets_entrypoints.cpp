@@ -485,11 +485,11 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
     UNREACHABLE();
 }
 
-extern "C" coretypes::String *CreateStringFromCharCodeSingleNoCacheEntrypoint(uint64_t charCode)
+extern "C" coretypes::String *CreateStringFromCharCodeSingleNoCacheEntrypoint(int32_t charCode)
 {
     // We could use `ark::ets::intrinsics::StdCoreStringFromCharCodeSingle` as the entrypoint, it works, but
     // that function lookups the char code in the cache while we are sure the char code is not cached.
-    return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
+    return EtsString::CreateNewStringFromCharCode(charCode)->GetCoreType();
 }
 
 extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s)

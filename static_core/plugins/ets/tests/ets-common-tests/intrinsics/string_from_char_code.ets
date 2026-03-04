@@ -76,13 +76,13 @@ function incompressibleSingleStringTest() {
 }
 
 function falsePositiveWrongSymbolFlagTest() {
-    arktest.assertEQ(string.fromCharCode(0x1000003B2, 0x1000003B2), 'ββ', "Must be 'ββ'");
-    arktest.assertEQ(string.fromCharCode(0x1000003B2, 0x1000003B2).length, 2, "String length of 'ββ' must be equal to 2");
+    arktest.assertEQ(string.fromCharCode(0x0100003B2, 0x0100003B2), 'ββ', "Must be 'ββ'");
+    arktest.assertEQ(string.fromCharCode(0x0100003B2, 0x0100003B2).length, 2, "String length of 'ββ' must be equal to 2");
 }
 
 function falsePositiveWrongSymbolFlagSingleTest() {
-    arktest.assertEQ(string.fromCharCode(0x1000003B2), 'β', "Must be 'β'");
-    arktest.assertEQ(string.fromCharCode(0x1000003B2).length, 1, "String length of 'β' must be equal to 1");
+    arktest.assertEQ(string.fromCharCode(0x0100003B2), 'β', "Must be 'β'");
+    arktest.assertEQ(string.fromCharCode(0x0100003B2).length, 1, "String length of 'β' must be equal to 1");
 }
 
 function negativeCasesTest() {
@@ -98,10 +98,10 @@ function negativeCasesTest() {
     arktest.assertEQ(string.fromCharCode(-100, -65535).length, 2);
     arktest.assertEQ(string.fromCharCode(-65536, -65536), '\u{0}\u{0}', 'String built from -65536 must be 0');
     arktest.assertEQ(string.fromCharCode(-65536, -65536).length, 2);
-    arktest.assertEQ(string.fromCharCode(0xffff0066, -100), 'fﾜ', "Must be 'fﾜ'");
-    arktest.assertEQ(string.fromCharCode(0xffff0066, -100).length, 2, "String length of 'fﾜ' must be equal to 2");
-    arktest.assertEQ(string.fromCharCode(-100, 0xffff0066), 'ﾜf', "Must be 'ﾜf'");
-    arktest.assertEQ(string.fromCharCode(-100, 0xffff0066).length, 2, "String length of 'ﾜf' must be equal to 2");
+    arktest.assertEQ(string.fromCharCode(0xffff0066.toInt(), -100), 'fﾜ', "Must be 'fﾜ'");
+    arktest.assertEQ(string.fromCharCode(0xffff0066.toInt(), -100).length, 2, "String length of 'fﾜ' must be equal to 2");
+    arktest.assertEQ(string.fromCharCode(-100, 0xffff0066.toInt()), 'ﾜf', "Must be 'ﾜf'");
+    arktest.assertEQ(string.fromCharCode(-100, 0xffff0066.toInt()).length, 2, "String length of 'ﾜf' must be equal to 2");
 }
 
 function negativeSingleCasesTest() {
@@ -113,8 +113,8 @@ function negativeSingleCasesTest() {
     arktest.assertEQ(string.fromCharCode(-65536).length, 1);
     arktest.assertEQ(string.fromCharCode(-1), '\u{ffff}', 'String built from -1 must be 65535');
     arktest.assertEQ(string.fromCharCode(-1).length, 1);
-    arktest.assertEQ(string.fromCharCode(0xffff0066), 'f', "Must be 'f'");
-    arktest.assertEQ(string.fromCharCode(0xffff0066).length, 1, "String length of 'f' must be equal to 1");
+    arktest.assertEQ(string.fromCharCode(0xffff0066.toInt()), 'f', "Must be 'f'");
+    arktest.assertEQ(string.fromCharCode(0xffff0066.toInt()).length, 1, "String length of 'f' must be equal to 1");
 }
 
 function saturationCasesTest() {
@@ -135,41 +135,43 @@ function saturationSingleCasesTest() {
     arktest.assertEQ(string.fromCharCode((4294901862).toInt()).length, 1, "String length of 'f' must be equal to 1");
 }
 
-function overflowCasesTest() {
-    const MAX = 65536
-    arktest.assertEQ(string.fromCharCode(MAX, MAX - 1), '\u{0}\u{ffff}',
-        'String built from char codes [MAX, MAX - 1] must be \u{0}\u{ffff}');
-    arktest.assertEQ(string.fromCharCode(MAX - 1, MAX), '\u{ffff}\u{0}',
-        'String built from char codes [MAX - 1, MAX] must be \u{ffff}\u{0}');
-    arktest.assertEQ(String.fromCharCode(-MAX, -MAX + 1), '\u{0}\u{1}',
-        'String built from char codes [-MAX, -MAX + 1] must be \u{0}\u{1}');
-    arktest.assertEQ(String.fromCharCode(-MAX + 1, -MAX), '\u{1}\u{0}',
-        'String built from char codes [-MAX + 1, -MAX] must be \u{1}\u{0}');
+function overflowCasesTest() { 
+    const MAX = 65536 
+    arktest.assertEQ(string.fromCharCode(MAX, MAX - 1), '\u{0}\u{ffff}', 
+        'String built from char codes [MAX, MAX - 1] must be \u{0}\u{ffff}'); 
+    arktest.assertEQ(string.fromCharCode(MAX - 1, MAX), '\u{ffff}\u{0}', 
+        'String built from char codes [MAX - 1, MAX] must be \u{ffff}\u{0}'); 
+    arktest.assertEQ(String.fromCharCode(-MAX, -MAX + 1), '\u{0}\u{1}', 
+        'String built from char codes [-MAX, -MAX + 1] must be \u{0}\u{1}'); 
+    arktest.assertEQ(String.fromCharCode(-MAX + 1, -MAX), '\u{1}\u{0}', 
+        'String built from char codes [-MAX + 1, -MAX] must be \u{1}\u{0}'); 
 
-    arktest.assertEQ(String.fromCharCode(0, MAX), '\u{0}\u{0}',
-        'String built from char codes [0, MAX] must be \u{0}\u{0}');
-    arktest.assertEQ(String.fromCharCode(-MAX, 0), '\u{0}\u{0}',
-        'String built from char codes [-MAX, 0] must be \u{0}\u{0}');
 
-    arktest.assertEQ(string.fromCharCode(-MAX, -MAX), '\u{0}\u{0}',
-        'String built from char codes [-MAX, -MAX] must be \u{0}\u{0}');
-    arktest.assertEQ(string.fromCharCode(MAX, MAX), '\u{0}\u{0}',
-        'String built from char codes [MAX, MAX] must be \u{0}\u{0}');
+    arktest.assertEQ(String.fromCharCode(0, MAX), '\u{0}\u{0}', 
+        'String built from char codes [0, MAX] must be \u{0}\u{0}'); 
+    arktest.assertEQ(String.fromCharCode(-MAX, 0), '\u{0}\u{0}', 
+        'String built from char codes [-MAX, 0] must be \u{0}\u{0}'); 
+
+
+    arktest.assertEQ(string.fromCharCode(-MAX, -MAX), '\u{0}\u{0}', 
+        'String built from char codes [-MAX, -MAX] must be \u{0}\u{0}'); 
+    arktest.assertEQ(string.fromCharCode(MAX, MAX), '\u{0}\u{0}', 
+        'String built from char codes [MAX, MAX] must be \u{0}\u{0}'); 
 }
 
-function overflowSingleCasesTest() {
-    const MAX = 65536
-    arktest.assertEQ(string.fromCharCode(0), '\u{0}', 'String built from char code 0 must be 0');
-    arktest.assertEQ(string.fromCharCode(MAX), '\u{0}', 'String built from char code MAX must be 0');
-    arktest.assertEQ(string.fromCharCode(MAX - 1), '\u{ffff}',
-        'String built from char code MAX - 1 must be 65535');
-    arktest.assertEQ(string.fromCharCode(-MAX), '\u{0}',
-        'String built from char code -MAX must be 0');
-    arktest.assertEQ(string.fromCharCode(-(MAX - 1)), '\u{1}',
-        'String built from char code -(MAX - 1) must be 1');
-    arktest.assertEQ(string.fromCharCode(-(MAX + 1)), '\u{ffff}',
-        'String built from char code -(MAX + 1) must be \u{ffff}');
-}
+function overflowSingleCasesTest() { 
+    const MAX = 65536 
+    arktest.assertEQ(string.fromCharCode(0), '\u{0}', 'String built from char code 0 must be 0'); 
+    arktest.assertEQ(string.fromCharCode(MAX), '\u{0}', 'String built from char code MAX must be 0'); 
+    arktest.assertEQ(string.fromCharCode(MAX - 1), '\u{ffff}', 
+        'String built from char code MAX - 1 must be 65535'); 
+    arktest.assertEQ(string.fromCharCode(-MAX), '\u{0}', 
+        'String built from char code -MAX must be 0'); 
+    arktest.assertEQ(string.fromCharCode(-(MAX - 1)), '\u{1}', 
+        'String built from char code -(MAX - 1) must be 1'); 
+    arktest.assertEQ(string.fromCharCode(-(MAX + 1)), '\u{ffff}', 
+        'String built from char code -(MAX + 1) must be \u{ffff}'); 
+} 
 
 function stringFromCpsSeqTest() {
     const cpsGolden = '\u{c}\u{7545}\u{ea7e}\u{15fb7}\u{1d4f0}\u{24a29}\u{2bf62}\u{3349b}\u{3a9d4}\u{41f0d}\u{49446}\u{5097f}\u{57eb8}\u{5f3f1}\u{6692a}\u{6de63}\u{7539c}\u{7c8d5}\u{83e0e}\u{8b347}\u{92880}\u{99db9}\u{a12f2}\u{a882b}\u{afd64}\u{b729d}\u{be7d6}\u{c5d0f}\u{cd248}\u{d4781}\u{dbcba}\u{e31f3}\u{ea72c}\u{f1c65}\u{f919e}\u{1006d7}\u{107c10}\u{10f149}';
@@ -200,8 +202,8 @@ function heapVerificationTest() {
     arktest.assertEQ(string.fromCharCode(-100, 0).length, 2);
     arktest.assertEQ(string.fromCharCode(65436, 0), 'ﾜ\u{0}', "Error! Must be 'ﾜ\u{0}'");
     arktest.assertEQ(string.fromCharCode(65436, 0).length, 2);
-    arktest.assertEQ(string.fromCharCode(0xffff0066, -100, 0, 0), 'fﾜ\u{0}\u{0}', "Error! Must be 'fﾜ\u{0}\u{0}'");
-    arktest.assertEQ(string.fromCharCode(0xffff0066, -100, 0, 0).length, 4);
+    arktest.assertEQ(string.fromCharCode((0xffff0066).toInt(), -100, 0, 0), 'fﾜ\u{0}\u{0}', "Error! Must be 'fﾜ\u{0}\u{0}'");
+    arktest.assertEQ(string.fromCharCode((0xffff0066).toInt(), -100, 0, 0).length, 4);
     arktest.assertEQ(string.fromCharCode(65535, 0), '\u{ffff}\u{0}', 'String built from 65535, NaN must be 65535');
     arktest.assertEQ(string.fromCharCode(65535, 0).length, 2);
     arktest.assertEQ(string.fromCharCode(65536, 0), '\u{0}\u{0}', 'String built from 65536, NaN must be 0');
@@ -218,13 +220,12 @@ function stringFromCharVarTest() {
     let alpha: char = 0x3B1.toChar();
     let beta: char = 0x3B2.toChar();
     arktest.assertEQ(string.fromCharCode(alpha.toInt(), beta.toInt()), 'αβ', "Must be 'αβ'");
-    arktest.assertEQ(string.fromCharCode(Char.toDouble(alpha), Char.toDouble(beta)), 'αβ', "Must be 'αβ'");
 }
 
 function stringFromSingleCharVarTest() {
     let beta: char = 0x3B2.toChar();
     arktest.assertEQ(string.fromCharCode(beta.toInt()), 'β', "Must be 'β'");
-    arktest.assertEQ(string.fromCharCode(Char.toDouble(beta)), 'β', "Must be 'β'");
+    arktest.assertEQ(string.fromCharCode(Char.toInt(beta)), 'β', "Must be 'β'");
 }
 
 function stringFromCompositeSymbolTest() {
@@ -245,10 +246,10 @@ function main(): int {
     fromCharCodeTestsuite.addTest('NegativeSingleCases', negativeSingleCasesTest);
     fromCharCodeTestsuite.addTest('SaturationCases', saturationCasesTest);
     fromCharCodeTestsuite.addTest('SaturationSingleCases', saturationSingleCasesTest);
-    fromCharCodeTestsuite.addTest('OverflowCases', overflowCasesTest);
-    fromCharCodeTestsuite.addTest('OverflowSingleCases', overflowSingleCasesTest);
+    fromCharCodeTestsuite.addTest('overflowCasesTest', overflowCasesTest);
+    fromCharCodeTestsuite.addTest('overflowSingleCasesTest', overflowSingleCasesTest);
+    fromCharCodeTestsuite.addTest('heapVerification', heapVerificationTest);
     fromCharCodeTestsuite.addTest('StringFromCpsSeq', stringFromCpsSeqTest);
-    fromCharCodeTestsuite.addTest('HeapVerification', heapVerificationTest);
     fromCharCodeTestsuite.addTest('StringFromCharVar', stringFromCharVarTest);
     fromCharCodeTestsuite.addTest('StringFromSingleCharVar', stringFromSingleCharVarTest);
     fromCharCodeTestsuite.addTest('StringFromCompositeSymbol', stringFromCompositeSymbolTest);

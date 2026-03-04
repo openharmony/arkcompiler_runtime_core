@@ -2002,15 +2002,17 @@ function bugfixConcatLoop0(): String {
 
 function bugfixConcatLoop1(size: int, charset: string): string {
     let res: string = ''
+    const c1: int = 0x43
+    const c2: int = 0xD799
 
     switch (charset) {
         case "ISO-8859-1":
             for (let i = 0; i < size; ++i)
-                res += string.fromCharCode(0x43)
+                res += string.fromCharCode(c1)
         break
         case "UTF-16":
             for (let i = 0; i < size; ++i)
-                res += string.fromCharCode(0xD799)
+                res += string.fromCharCode(c2)
         break
     }
 

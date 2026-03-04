@@ -2600,7 +2600,7 @@ export class Decimal {
     private initializeByString(v: string) {
         let i: int;
         let str: string = v;
-        if ((i = v.charCodeAt(0).toInt()) === 45) {
+        if ((i = v.charCodeAt(0)) === 45) {
             str = v.slice(1);
             this.sign = -1;
         } else {
@@ -2708,7 +2708,7 @@ export class Decimal {
                 `The type of "test(str)" must be Hex/Binary/Octal. Received value is: ${str}`);
         }
 
-        let i = str.search(new RegExp("p", "i")).toInt();
+        let i = str.search(new RegExp("p", "i"));
         let p: double = 0;
         if (i > 0) {
             p = Utils.toNumber(str.slice(i + 1));
@@ -2717,13 +2717,13 @@ export class Decimal {
             str = str.slice(2);
         }
 
-        i = str.indexOf('.').toInt();
+        i = str.indexOf('.');
         let isFloat: boolean = i >= 0;
         let len: int = 0;
         let divisor: Decimal = new Decimal(0);
         if (isFloat) {
             str = str.replace('.', '');
-            len = str.length.toInt();
+            len = str.length;
             i = len - i;
             divisor = this.intPow(new Decimal(base), i, i * 2);
         }

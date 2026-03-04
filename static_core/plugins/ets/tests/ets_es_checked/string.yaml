@@ -95,7 +95,7 @@ sub:
           - paramOf("1".inspect, "wxyz".inspect)
       - method: repeat
         params:
-          - paramOf(1, 3, -1, 0, 0)
+          - paramOf(1, 3, -1, 0)
       - method: slice
         params:
           - paramOf(*inds)

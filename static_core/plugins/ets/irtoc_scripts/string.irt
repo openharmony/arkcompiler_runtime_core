@@ -1075,82 +1075,14 @@ GenerateStringGetBytesTlab(:NativePlus)
 #
 scoped_macro(:load_char_code) do |char_codes, offset|
   _boxed_ptr := get_object_pointer(char_codes, offset)
-  _char_code := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
+  _char_code := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).i32
 end  # load_char_code
 
 ###
-# Tries to convert flag_char_pair, the result of calling the JS_CAST_DOUBLE_TO_CHAR intrinsic, into a Utf16 char (u16).
-# The macro checks whether the conversion was successful: whether an overflow or underflow takes place during the
-# conversion of a denormalized number and if so goes to the slow path.
-#
-scoped_macro(:validate_flag_char_pair) do |flag_char_pair|
-  _convertible1 := Cast(1).b
-  If(AndI(flag_char_pair).Imm(Constants::WRONG_CHAR_FLAG_MASK).u32, 0).NE.Unlikely {
-    _convertible2 := Cast(0).b
-  }
-  _convertible := Phi(_convertible1, _convertible2).b
-end  # validate_flag_char_pair
-
-###
-# Tries to convert a char_code into a Utf16 char (u16).
-# The macro checks whether the conversion was successful: whether an overflow or underflow takes place during the
-# conversion of a denormalized number and if so goes to the slow path.
-#
-scoped_macro(:validate_char_code) do |char_code|
-  _flag_char_pair := Intrinsic(:JS_CAST_DOUBLE_TO_CHAR, char_code).u32
-  _convertible := validate_flag_char_pair(_flag_char_pair)
-end  # validate_char_code
-
-###
-# Checks if starting from codes_data the specified number of codes (codes_count) are convertible: whenever
-# an overflow or underflow takes place during the conversion of a denormalized number we have to go to the
-# slow path.
-#
-scoped_macro(:is_array_of_convertible_char_codes) do |codes_data, codes_count|
-  if Options.jscvt_feature_enabled?
-    _convertible := Cast(1).b
-  else
-    _offset1 := Cast(0).u64
-    _codes_len := ShlI(codes_count).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64
-    _convertible1 := Cast(1).b
-Label(:Loop)
-    _offset := Phi(_offset1, _offset2).u64
-    If(_offset, _codes_len).AE.Unlikely {
-      Goto(:LoopDone)
-    }
-    _convertible2 := validate_char_code(load_char_code(codes_data, _offset).f64)
-    If(_convertible2, 0).EQ.Unlikely.b {
-      Goto(:LoopDone)
-    }
-    _offset2 := AddI(_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u64
-    Goto(:Loop)
-Label(:LoopDone)
-    _convertible := Phi(_convertible1, _convertible2).b
-  end
-end # is_array_of_convertible_char_codes
-
-###
-# Converts a flag_char_pair, the result of calling the JS_CAST_DOUBLE_TO_CHAR intrinsic, into a Utf16 char (u16).
-# Note, a caller of this macro must be sure the conversion will always be successful: neither overflow nor
-# underflow will take place during the conversion of a denormalized number.
-#
-scoped_macro(:get_char_from_flag_char_pair) do |flag_char_pair|
-  if !Options.jscvt_feature_enabled? and defines.DEBUG
-    If(AndI(flag_char_pair).Imm(Constants::WRONG_CHAR_FLAG_MASK).u32, 0).NE.Unlikely {
-      Intrinsic(:UNREACHABLE).Terminator.void
-    }
-  end
-  _char := Cast(flag_char_pair).u16
-end  # get_char_from_flag_char_pair
-
-###
-# Converts a char_code (f64) into a Utf16 char (u16).
-# Note, a caller of this macro must be sure the conversion will always be successful: neither overflow nor
-# underflow will take place during the conversion of a denormalized number.
+# Converts a char_code (i32) into a Utf16 char (u16).
 #
 scoped_macro(:get_char_from_code) do |char_code|
-  _flag_char_pair := Intrinsic(:JS_CAST_DOUBLE_TO_CHAR, char_code).u32
-  _char := get_char_from_flag_char_pair(_flag_char_pair)
+  _char := Cast(char_code).u16 
 end  # get_char_from_code
 
 ###
@@ -1169,7 +1101,7 @@ Label(:Loop)
   If(_offset, _codes_len).AE.Unlikely {
     Goto(:LoopDone)
   }
-  _char := get_char_from_code(load_char_code(codes_data, _offset).f64)
+  _char := get_char_from_code(load_char_code(codes_data, _offset).i32)
   If(SubI(_char).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely {
     _compressible2 := Cast(0).b
     Goto(:LoopDone)
@@ -1182,7 +1114,7 @@ Label(:LoopDone)
 end  # is_array_of_compressible_char_codes
 
 ###
-# Converts char codes (numbers) to chars with type equals either to "u8" or "u16". For type equals to "u8", it is
+# Converts char codes (int) to chars with type equals either to "u8" or "u16". For type equals to "u8", it is
 # assumed that all char codes represent compressible chars.
 #
 ["u8", "u16"].each do |type|
@@ -1195,7 +1127,7 @@ Label(:Loop)
       Goto(:LoopDone)
     }
     _code_offset := ShlI(_i).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64
-    _char := get_char_from_code(load_char_code(src, _code_offset).f64)
+    _char := get_char_from_code(load_char_code(src, _code_offset).i32)
     if compressed_string
       _char_offset := Cast(_i).u64
       Store(dst, _char_offset, _char).u8
@@ -1243,13 +1175,7 @@ function(:CreateStringFromCharCodeTlab,
   codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
   codes_count := LoadI(char_codes).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
-  # Validate if all the char codes are convertible: whenever an overflow or underflow takes place during the
-  # conversion of a denormalized number we have to go to the slow path. The validation must take place before
-  # any attempts to allocate the memory in TLAB.
-  convertible := is_array_of_convertible_char_codes(codes_data, Cast(codes_count).u64)
-  If(convertible, 0).EQ.Unlikely {
-    Goto(:SlowPathEntrypoint)
-  }
+  # according to the specification numbers greater than 0xFFFF are truncated to the last 16 bits and no validity checks are performed
 
   # Allocate a new string
   compressible := is_array_of_compressible_char_codes(codes_data, Cast(codes_count).u64)
@@ -1283,8 +1209,8 @@ Label(:SlowPathEntrypoint)
 
 def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
   nocache = (cache_flag ? "" : "NoCache")
-  param_tuple = (cache_flag ? {cache: 'ref', char_code: 'u64', string_klass: 'ref'}
-                            : {char_code: 'u64', string_klass: 'ref'})
+  param_tuple = (cache_flag ? {cache: 'ref', char_code: 'i32', string_klass: 'ref'}
+                            : {char_code: 'i32', string_klass: 'ref'})
   available_regs = $panda_mask
   function("CreateStringFromCharCodeSingle#{nocache}Tlab".to_sym,
             params: param_tuple,
@@ -1298,19 +1224,8 @@ def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
       next
     end
 
-    char_code_num := Bitcast(char_code).f64
-    flag_char_pair := Intrinsic(:JS_CAST_DOUBLE_TO_CHAR, char_code_num).u32
-    if !Options.jscvt_feature_enabled?
-      # Validate if the char code is convertible: whenever an overflow or underflow takes place during the
-      # conversion of a denormalized number we have to go to the slow path. The validation must take place before
-      # any attempts to allocate the memory in TLAB.
-      convertible := validate_flag_char_pair(flag_char_pair)
-      If(convertible, 0).EQ.Unlikely {
-        Goto(:SlowPathEntrypoint)
-      }
-    end
-
-    char := get_char_from_flag_char_pair(flag_char_pair)
+    char_code_num := Cast(char_code).i32
+    char := Cast(char_code_num).u16 
     # Try to read from the one-byte char cache
     if cache_flag
       IfImm(Compare(char, Constants::ASCII_CHAR_CACHE_SIZE).B.b).Imm(0).NE.b {
@@ -1330,15 +1245,15 @@ def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
     data_size := Phi(data_size1, data_size2).word
 
     new_str := allocate_string_tlab(string_klass, data_size, :FastPath)
-    str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+    str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).i32).ptr
 
     # Copy the char to the new string with the required preprocessing
     # String length field is set according to SetLength() from runtime/include/coretypes/string.h
     If(compressible, 1).EQ.Likely {
-      Store(str_data, Cast(0).u64, char).u8
+      Store(str_data, Cast(0).i32, char).u8
       StoreI(new_str, Cast(4).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
     } Else {
-      Store(str_data, Cast(0).u64, char).u16
+      Store(str_data, Cast(0).i32, char).u16
       StoreI(new_str, OrI(Cast(4).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
     }
 
