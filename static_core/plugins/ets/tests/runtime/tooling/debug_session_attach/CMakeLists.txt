@@ -113,6 +113,9 @@ function(add_debug_session_attach_test ets_file)
             --debugger-attach-allowed=true
             --compiler-enable-jit=false
             "--coroutine-impl=${impl_name}"
+            # ark_aot may inline functions from utils.abc, even though it will be later in --paoc-panda-files.
+            # Make sure they aren't so that their calls can be counted as events
+            "--compiler-inlining-blacklist=utils.fns::sum,utils.fns::mul,utils.fns::sub"
         )
         set(fe_options "")
 

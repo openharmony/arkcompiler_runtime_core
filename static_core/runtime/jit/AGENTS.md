@@ -29,6 +29,8 @@ In the plan, state the matched scenario, documents read, and profile-context con
 
 - Must prove pointer safety for profile/class-context data; avoid UAF, leaks, and null dereference, or cite ownership/lifetime/invariant evidence when no null check exists.
 - Must prove AOT-PGO class context, panda file set, locations, checksums, and profile context match or reject clearly.
+- For `ark_aot --paoc-use-profile`, `--paoc-panda-files` are loaded before profile attachment; do not duplicate them
+  into `--panda-files` only to make profile matching work.
 - Must keep profile diagnostics and aptool visibility strong enough to explain mismatch, rejection, and consumption.
 - Must not use profile save/load evidence as proof of JIT selection, compilation, entrypoint install, or compiled execution.
 

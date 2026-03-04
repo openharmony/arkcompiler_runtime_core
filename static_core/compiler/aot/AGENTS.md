@@ -30,6 +30,8 @@ In the plan, state the matched scenario, documents read, and AOT/LLVM AOT constr
 - Must prove pointer safety and GC visibility at AOT/runtime boundaries; avoid UAF, leaks, and null dereference, or cite ownership/lifetime and `SaveState`/roots/stack-map evidence.
 - Must treat `CodeInfo`, stack maps, inline info, roots masks, bridge frames, and deopt metadata as correctness data.
 - Must prove class context, panda file set, locations, checksums, and profile context match or reject clearly for AOT/AOT-PGO changes.
+- For AOT-PGO profile attachment, `ark_aot` preloads `--paoc-panda-files`; do not mirror those files into
+  `--panda-files` unless an additional runtime-context preload is needed.
 - Must prove LLVM backend participation separately from ARK AOT fallback for LLVM AOT claims.
 
 ## 4. Boundaries

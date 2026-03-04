@@ -73,8 +73,11 @@ private:
     bool RunAotMode(const ark::Span<const char *> &args);
     void StartAotFile(const panda_file::File &pfileRef);
     bool CompileFiles();
-    bool TryLoadPandaFile(const std::string &fileName, PandaVM *vm);
-    std::unique_ptr<const panda_file::File> TryLoadZipPandaFile(const std::string &fileName);
+    std::unique_ptr<const panda_file::File> OpenZipPandaFile(const std::string &fileName);
+    const panda_file::File *DoLoadPandaFile(const std::string &fileName, PandaVM *vm, bool isZipPandaFile);
+    bool TryPreloadPandaFile(const std::string &fileName, PandaVM *vm);
+    bool TryLoadPaocPandaFile(const std::string &fileName, PandaVM *vm);
+    bool LoadPandaFiles();
     bool TryLoadAotProfile();
     bool TryLoadAotFileProfile(ProfilingLoader &profilingLoader, const panda_file::File &pfileRef, size_t pfileIdx);
     bool TryLoadAotMethodProfile(ProfilingLoader &profilingLoader,
@@ -101,10 +104,16 @@ private:
     bool Skip(Method *method);
     static std::string GetFileLocation(const panda_file::File &pfileRef, std::string location);
     static bool CompareBootFiles(std::string filename, std::string paocLocation);
-    bool LoadPandaFiles();
     bool TryCreateGraph(CompilingContext *ctx);
     void BuildClassHashTable(const panda_file::File &pfileRef);
     std::string GetFilePath(std::string fileName);
+
+    std::string FileNameToPaocLocation(const std::string &fileName);
+    std::string PaocLocationToFilePath(const std::string &filePath);
+    void AddPaocLocationMapping(const std::string &fromFileName, const std::string &toFilePath);
+    void AddPreloadedPandaFile(const std::string &fileName, const panda_file::File &pfileRef);
+    void AddPaocPandaFile(const std::string &fileName, const panda_file::File &pfileRef);
+    const panda_file::File *FilePathToPandaFile(const std::string &fileName);
 
     bool IsAotMode()
     {
@@ -175,8 +184,14 @@ private:
     ClassLinker *loader_ {nullptr};
     ArenaAllocator *codeAllocator_ {nullptr};
     std::set<std::string> methodsList_;
+    // Map from filePath to filePath in --paoc-*location
     std::unordered_map<std::string, std::string> locationMapping_;
+    // Map from filePath in --paoc-*location to filePath
+    std::unordered_map<std::string, std::string> locationMappingInv_;
+    // Map from filePath to corresponding preloaded (--boot-panda- and --panda-) files
     std::unordered_map<std::string, const panda_file::File *> preloadedFiles_;
+    // Map from filePath to corresponding --paoc-panda-files
+    std::unordered_map<std::string, const panda_file::File *> paocFiles_;
     size_t compilationIndex_ {0};
     SkipInfo skipInfo_ {false, false};
 

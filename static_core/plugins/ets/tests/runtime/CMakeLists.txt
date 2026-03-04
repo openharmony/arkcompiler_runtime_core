@@ -112,7 +112,7 @@ if (NOT PANDA_TARGET_ARM32 AND NOT PANDA_PRODUCT_BUILD)
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
         SANITIZERS ${PANDA_SANITIZERS_LIST}
         PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
-        DEPS_TARGETS etsstdlib ark_aotdump
+        DEPS_TARGETS etsstdlib ark_aot ark_aotdump
     )
 endif()
 

@@ -44,6 +44,7 @@ parameters:
         - "--compiler-check-final=true"
         - "--compiler-ignore-failures=${parameters.compiler-ignore-failures}"
         - "--compiler-hotness-threshold=${parameters.compiler-hotness-threshold}"
+        - "--compiler-profiling-threshold=0"
         - "--no-async-jit=${parameters.no-async-jit}"
         - ${parameters.ark-args}
     # adds --boot-panda-files option to verifier with all dependent and the current abc files

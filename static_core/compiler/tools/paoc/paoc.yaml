@@ -26,12 +26,12 @@ options:
   - name: paoc-location
     type: std::string
     default: ""
-    description: Location path of the input panda file, that will be written into the AOT file.
+    description: Location path of the input panda file, that will be written into the AOT file. Makes --aot-verify-abs-path option have no effect.
 
   - name: paoc-boot-location
     type: std::string
     default: ""
-    description: Location path of the boot panda files, that will be written into the AOT file.
+    description: Location path of the boot panda files, that will be written into the AOT file. Makes --aot-verify-abs-path option have no effect.
 
   - name: paoc-skip-until
     type: std::string
@@ -103,7 +103,7 @@ options:
   - name: paoc-boot-panda-locations
     type: arg_list_t
     default: []
-    description: Location paths of the each boot panda file, including file names, that will be written into the AOT file.
+    description: Location paths of the each boot panda file, including file names, that will be written into the AOT file. Makes --aot-verify-abs-path option have no effect.
     delimiter: ":"
 
   - name: paoc-zip-panda-file

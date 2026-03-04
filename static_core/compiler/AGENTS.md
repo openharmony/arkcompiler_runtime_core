@@ -41,6 +41,8 @@ In the plan, state the matched scenario, documents read, and constraints found.
 - Must prove GC visibility for object/reference values live across runtime calls, safepoints, deopt, OSR, bridges, or generated fastpaths through `SaveState`, roots, stack maps, or handles.
 - Must treat `CodeInfo`, stack maps, inline info, roots masks, bridge frames, and deopt metadata as correctness data.
 - Must identify workflow proof: JIT selection/compile/install/execution, OSR `SaveStateOsr` live-state reconstruction and deoptimized-frame exclusion, AOT context match, and LLVM backend participation when relevant.
+- For AOT PGO, `ark_aot` loads `--paoc-panda-files` before `--paoc-use-profile` attachment; do not require mirroring
+  those compilation inputs into `--panda-files` unless they are also needed as separate runtime-context files.
 
 ## 4. Boundaries
 

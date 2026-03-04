@@ -40,36 +40,65 @@
 using ark::panda_file::File;
 
 namespace ark::compiler {
+namespace {
+[[maybe_unused]] std::string GetExecPath()
+{
+    return ark::os::file::File::GetExecutablePath().Value();
+}
+
+[[maybe_unused]] std::string GetExecDirectory()
+{
+    auto execPath = GetExecPath();
+    auto pos = execPath.rfind('/');
+    return execPath.substr(0U, pos);
+}
+
+[[maybe_unused]] std::string GetPaocFile()
+{
+    return GetExecDirectory() + "/bin/ark_aot";
+}
+
+[[maybe_unused]] std::string GetAotdumpFile()
+{
+    return GetExecDirectory() + "/bin/ark_aotdump";
+}
+
+[[maybe_unused]] std::string GetPaocDirectory()
+{
+    return GetExecDirectory() + "/bin";
+}
+
+[[maybe_unused]] std::string GetPandaStdlibFile()
+{
+    return GetExecDirectory() + "/pandastdlib/arkstdlib.abc";
+}
+
+const char *ConvertExecArg(std::string &arg)
+{
+    return arg.c_str();
+}
+
+const char *ConvertExecArg(const char *arg)
+{
+    return arg;
+}
+
+template <typename... Args>
+decltype(auto) Exec(Args... args)
+{
+    return os::exec::Exec(ConvertExecArg(args)...);
+}
+
+}  // namespace
+
 class AotTest : public AsmTest {
 public:
-    AotTest()
-    {
-        std::string exePath = GetExecPath();
-        auto pos = exePath.rfind('/');
-        paocPath_ = exePath.substr(0U, pos) + "/../bin/ark_aot";
-        aotdumpPath_ = exePath.substr(0U, pos) + "/../bin/ark_aotdump";
-    }
+    AotTest() = default;
 
     ~AotTest() override = default;
 
     NO_MOVE_SEMANTIC(AotTest);
     NO_COPY_SEMANTIC(AotTest);
-
-    const char *GetPaocFile() const
-    {
-        return paocPath_.c_str();
-    }
-
-    const char *GetAotdumpFile() const
-    {
-        return aotdumpPath_.c_str();
-    }
-
-    std::string GetPaocDirectory() const
-    {
-        auto pos = paocPath_.rfind('/');
-        return paocPath_.substr(0U, pos);
-    }
 
     const char *GetArchAsArgString() const
     {
@@ -91,8 +120,7 @@ public:
     {
         TmpFile tmpfile("aotdump.tmp");
 
-        auto res = os::exec::Exec(GetAotdumpFile(), "--show-code=disasm", "--output-file", tmpfile.GetFileName(),
-                                  aotFilename.c_str());
+        auto res = Exec(GetAotdumpFile(), "--show-code=disasm", "--output-file", tmpfile.GetFileName(), aotFilename);
         ASSERT_TRUE(res) << "aotdump failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "aotdump return error code: " << res.Value();
     }
@@ -131,11 +159,40 @@ public:
 
 private:
     Arch targetArch_ = Arch::AARCH64;
-    std::string paocPath_;
-    std::string aotdumpPath_;
 };
 
+namespace {
+size_t EventCount(const std::string &fname, const std::regex &rgx)
+{
+    std::ifstream infile(fname);
+    size_t found = 0;
+    for (std::string line; std::getline(infile, line);) {
+        found += std::regex_match(line, rgx);
+    }
+    return found;
+}
+
+size_t EventCount(TmpFile &file, const std::regex &rgx)
+{
+    return EventCount(file.GetFileName(), rgx);
+}
+}  // namespace
+
 // NOLINTBEGIN(readability-magic-numbers)
+TEST_F(AotTest, PaocHelp)
+{
+    auto res = Exec(GetPaocFile(), "--help");
+    ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+    ASSERT_EQ(res.Value(), 1U);
+}
+
+TEST_F(AotTest, PaocVersion)
+{
+    auto res = Exec(GetPaocFile(), "--version");
+    ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+    ASSERT_EQ(res.Value(), 1U);
+}
+
 #ifdef PANDA_COMPILER_TARGET_AARCH64
 TEST_F(AotTest, PaocBootPandaFiles)
 {
@@ -163,10 +220,9 @@ TEST_F(AotTest, PaocBootPandaFiles)
 
     // Correct path to arkstdlib.abc
     {
-        auto pandastdlibPath = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), "--paoc-location", LOCATION.c_str(), "--compiler-cross-arch",
-                                  GetArchAsArgString(), "--boot-panda-files", pandastdlibPath.c_str());
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), "--paoc-location", LOCATION, "--compiler-cross-arch",
+                        GetArchAsArgString(), "--boot-panda-files", GetPandaStdlibFile());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "Aot compiler failed with code " << res.Value();
         RunAotdump(aotFname.GetFileName());
@@ -198,10 +254,9 @@ TEST_F(AotTest, PaocLocation)
     }
 
     {
-        auto pandastdlibPath = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), "--paoc-location", LOCATION.c_str(),
-                                  "--compiler-cross-arch=x86_64", "--gc-type=epsilon", "--paoc-use-cha=false");
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), "--paoc-location", LOCATION, "--compiler-cross-arch=x86_64",
+                        "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "Aot compiler failed with code " << res.Value();
     }
@@ -692,41 +747,24 @@ TEST_F(AotTest, PaocSpecifyMethods)
 
     {
         // paoc will try compiling all the methods from the panda-file that matches `--compiler-regex`
-        auto res =
-            os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--compiler-regex", "B::f1",
-                           "--paoc-mode=jit", "--events-output=csv", "--events-file", paocOutputName.GetFileName());
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--compiler-regex", "B::f1",
+                        "--paoc-mode=jit", "--events-output=csv", "--events-file", paocOutputName.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
-        std::ifstream infile(paocOutputName.GetFileName());
-        std::regex rgx("Compilation,B::f1.*,COMPILED");
-        size_t found = 0;
-        for (std::string line; std::getline(infile, line);) {
-            if (line.rfind("Compilation", 0U) == 0U) {
-                ASSERT_TRUE(std::regex_match(line, rgx));
-                found++;
-            }
-        }
-        ASSERT_EQ(found, 1U);
+        ASSERT_EQ(EventCount(paocOutputName, std::regex("Compilation,B::f1.*,COMPILED")), 1);
+        ASSERT_EQ(EventCount(paocOutputName, std::regex("Compilation.*")), 1);
     }
     {
         // Test `--compiler-regex-with-signature`:
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(),
-                                  "--compiler-regex-with-signature", ".*B::f_overloaded\\(\\)", "--paoc-mode=jit",
-                                  "--events-output=csv", "--events-file", paocOutputName.GetFileName());
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(),
+                        "--compiler-regex-with-signature", ".*B::f_overloaded\\(\\)", "--paoc-mode=jit",
+                        "--events-output=csv", "--events-file", paocOutputName.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
-        std::ifstream infile(paocOutputName.GetFileName());
-        std::regex rgx("Compilation,B::f_overloaded.*,COMPILED");
-        size_t found = 0;
-        for (std::string line; std::getline(infile, line);) {
-            if (line.rfind("Compilation", 0U) == 0U) {
-                ASSERT_TRUE(std::regex_match(line, rgx));
-                found++;
-            }
-        }
-        ASSERT_EQ(found, 1U);
+        ASSERT_EQ(EventCount(paocOutputName, std::regex("Compilation,B::f_overloaded.*,COMPILED")), 1);
+        ASSERT_EQ(EventCount(paocOutputName, std::regex("Compilation.*")), 1);
     }
 }
 
@@ -779,8 +817,8 @@ TEST_F(AotTest, PaocMultipleFiles)
     {
         std::stringstream pandaFiles;
         pandaFiles << pandaFname1.GetFileName() << ',' << pandaFname2.GetFileName();
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFiles.str().c_str(), "--paoc-output",
-                                  aotFname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFiles.str(), "--paoc-output", aotFname.GetFileName(),
+                        "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
@@ -821,8 +859,8 @@ TEST_F(AotTest, PaocGcType)
     }
 
     {
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
@@ -896,8 +934,8 @@ TEST_F(AotTest, TryLoadAnFileFromLocationLoadsNormalPath)
             ASSERT_TRUE(gcType == mem::GCType::EPSILON_GC || gcType == mem::GCType::EPSILON_G1_GC)
                 << "Invalid GC type\n";
         }
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), gcTypeName, "--paoc-use-cha=false");
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), gcTypeName, "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
@@ -967,8 +1005,8 @@ TEST_F(AotTest, FileManagerLoadAbc)
             ASSERT_TRUE(gcType == mem::GCType::EPSILON_GC || gcType == mem::GCType::EPSILON_G1_GC)
                 << "Invalid GC type\n";
         }
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), gcTypeName, "--paoc-use-cha=false");
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), gcTypeName, "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
@@ -1090,10 +1128,9 @@ TEST_F(AotTest, PaocClusters)
 
     {
         TmpFile compilerEvents("events.csv");
-        auto res =
-            os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-clusters",
-                           paocClusters.GetFileName(), "--compiler-loop-unroll-factor=7",
-                           "--compiler-enable-events=true", "--compiler-events-path", compilerEvents.GetFileName());
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-clusters",
+                        paocClusters.GetFileName(), "--compiler-loop-unroll-factor=7", "--compiler-enable-events=true",
+                        "--compiler-events-path", compilerEvents.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
@@ -1177,20 +1214,13 @@ TEST_F(AotTest, PandaFiles)
     {
         std::stringstream pandaFiles;
         pandaFiles << pandaFname1.GetFileName() << ',' << pandaFname2.GetFileName();
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname2.GetFileName(), "--panda-files",
-                                  pandaFname1.GetFileName(), "--events-output=csv", "--events-file",
-                                  paocOutputName.GetFileName());
+        auto res =
+            Exec(GetPaocFile(), "--paoc-panda-files", pandaFname2.GetFileName(), "--panda-files",
+                 pandaFname1.GetFileName(), "--events-output=csv", "--events-file", paocOutputName.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
-        std::ifstream infile(paocOutputName.GetFileName());
-        // Inlining attempt proofs that Z::zoo was available to inline
-        std::regex rgx("Inline,.*Z::zoo.*");
-        bool inlineAttempt = false;
-        for (std::string line; std::getline(infile, line);) {
-            inlineAttempt |= std::regex_match(line, rgx);
-        }
-        ASSERT_TRUE(inlineAttempt);
+        ASSERT_GE(EventCount(paocOutputName, std::regex("Inline,.*Z::zoo.*")), 1);
     }
 }
 
@@ -1235,11 +1265,166 @@ TEST_F(AotTest, PandaZipFile)
     }
 
     {
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", filename, "--paoc-zip-panda-file", pandaFilename,
-                                  "--paoc-location", "./");
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", filename, "--paoc-zip-panda-file", pandaFilename,
+                        "--paoc-location", os::GetCurrentWorkingDirectory());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
+}
+
+static void PaocAotPgoEmit(const TmpFile &pandaFname)
+{
+    auto source = R"(
+.record Test1 {}
+.record A1 {}
+.record B1 <extends=A1> {}
+
+.function i32 A1.func(A1 a0) {
+    ldai 1
+    return
+}
+
+.function i32 B1.func(B1 a0) {
+    ldai 2
+    return
+}
+
+.function i32 Test1.__noinline__call_func(A1 a0) {
+    call.virt A1.func, a0
+    return
+}
+
+.function i32 Test1.main() {
+    newobj v0, B1
+    movi v1, 10
+    movi v2, 0
+    movi v3, 0
+loop:
+    lda v1
+    jeq v2, exit
+    call.short Test1.__noinline__call_func, v0
+    add2 v3
+    sta v3
+    inci v2, 1
+    jmp loop
+exit:
+    lda v3
+    return
+}
+    )";
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
+class AotPgoPaocLocationTest : public ::testing::Test {
+public:
+    template <typename CallbackT>
+    bool CreateRuntime(CallbackT optSetter, const std::string &pandaFile, std::optional<std::string> eventsFile)
+    {
+        pandaFile_ = pandaFile;
+
+        RuntimeOptions options;
+        options.SetHeapSizeLimit(50_MB);
+        options.SetGcType("epsilon");
+        options.SetBootPandaFiles({GetPandaStdlibFile()});
+        options.SetLoadRuntimes({"core"});
+        options.SetCompilerEnableJit(false);
+        if (eventsFile.has_value()) {
+            options.SetEventsOutput("csv");
+            options.SetEventsFile(*eventsFile);
+        }
+        optSetter(options);
+        auto pandaFiles = options.GetPandaFiles();
+        pandaFiles.push_back(pandaFile_);
+        options.SetPandaFiles(pandaFiles);
+        Logger::InitializeDummyLogging();
+        return Runtime::Create(options);
+    }
+
+    auto ExecutePandaFile(const std::string &entryPoint, const std::vector<std::string> &args = {})
+    {
+        auto res = Runtime::GetCurrent()->ExecutePandaFile(pandaFile_, entryPoint, args);
+        EXPECT_TRUE(res) << "ark failed with error: " << static_cast<int>(res.Error());
+        return res.ValueOr(-1);
+    }
+
+    void DestroyRuntime()
+    {
+        Runtime::Destroy();
+    }
+
+private:
+    std::string pandaFile_;
+};
+
+TEST_F(AotPgoPaocLocationTest, AotPgoPaocLocation)
+{
+#ifndef PANDA_EVENTS_ENABLED
+    GTEST_SKIP();
+#endif
+
+    // Test basic functionality only in host mode.
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        return;
+    }
+    TmpFile pandaFile("test.pf");
+    TmpFile profileFile("test.prof");
+    TmpFile eventsFile("events-out.csv");
+    TmpFile aotFile("./test.an");
+    // Create directory for --paoc-location ("target" directory)
+    os::CreateDirectories("target");
+    TmpFile targetDir("target");
+    TmpFile targetPandaFname("target/test.pf");
+
+    // Create host panda file
+    PaocAotPgoEmit(pandaFile);
+    // Create "target" panda file
+    PaocAotPgoEmit(targetPandaFname);
+
+    // Collect profile with "target" panda file
+    ASSERT_TRUE(CreateRuntime(
+        [&profileFile](auto &options) {
+            options.SetCompilerProfilingThreshold(0);
+            options.SetProfilerEnabled(true);
+            options.SetProfilesaverEnabled(true);
+            options.SetProfileOutput(profileFile.GetFileName());
+        },
+        targetPandaFname.GetFileName(), eventsFile.GetFileName()));
+    ASSERT_EQ(ExecutePandaFile("Test1::main"), 20U);
+    DestroyRuntime();
+
+    ASSERT_EQ(EventCount(eventsFile, std::regex("InterpProfiling,START,Test1::__noinline__call_func,1")), 1);
+
+    // AOT-compile host panda file, specify "target" --paoc-location
+    {
+        auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFile.GetFileName(),
+                        "--paoc-location=" + os::GetCurrentWorkingDirectory() + "/target",
+                        "--compiler-regex=Test1::__noinline__call_func", "--events-output=csv", "--events-file",
+                        eventsFile.GetFileName(),
+                        std::string("--paoc-use-profile:path=") + profileFile.GetFileName() + ",force",
+                        "--gc-type=epsilon", "--paoc-output", aotFile.GetFileName());
+        ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+        ASSERT_EQ(res.Value(), 0U);
+    }
+
+    // Check that inline caches from profile info are applied
+    ASSERT_EQ(EventCount(eventsFile,
+                         std::regex("Inline,Test1::__noinline__call_func,B1::func,.*VIRTUAL_MONOMORPHIC,SUCCESS")),
+              1);
+
+    // Run "target" panda file with AOT
+    ASSERT_TRUE(CreateRuntime(
+        [&aotFile](auto &options) {
+            options.SetAotFiles({aotFile.GetFileName()});
+            options.SetEnableAn(true);
+        },
+        targetPandaFname.GetFileName(), eventsFile.GetFileName()));
+    ASSERT_EQ(ExecutePandaFile("Test1::main"), 20U);
+    DestroyRuntime();
+
+    ASSERT_EQ(EventCount(eventsFile, std::regex("Deoptimization,.*")), 0);
 }
 
 static void EmitAndLoadPandaFile(ClassLinker *classLinker, const char *source, const TmpFile *pandaFname)
@@ -1327,8 +1512,7 @@ public:
     {
         RuntimeOptions options;
         auto execPath = ark::os::file::File::GetExecutablePath();
-        pandaStdLib_ = ark::os::GetAbsolutePath(execPath.Value() + "/../pandastdlib/arkstdlib.abc");
-        options.SetBootPandaFiles({pandaStdLib_});
+        options.SetBootPandaFiles({GetPandaStdlibFile()});
         options.SetLoadRuntimes({"core"});
         options.SetArkAot(true);
         options.SetHeapSizeLimit(50_MB);  // NOLINT(readability-magic-numbers)
@@ -1340,14 +1524,6 @@ public:
     {
         Runtime::Destroy();
     }
-
-    auto GetStdLibPath()
-    {
-        return pandaStdLib_;
-    }
-
-private:
-    std::string pandaStdLib_;
 };
 
 TEST_F(AotCompilerTest, NoMemoryFilesInAnFile)
@@ -1364,7 +1540,7 @@ TEST_F(AotCompilerTest, NoMemoryFilesInAnFile)
 
     // Fisrt file is stdlib (index 0)
     int index = 0;
-    ASSERT_EQ(aotManager->GetPandaFileSnapshotIndex(GetStdLibPath()), index++);
+    ASSERT_EQ(aotManager->GetPandaFileSnapshotIndex(GetPandaStdlibFile()), index++);
 
     CreateFilesForTestWithInMemoryFile(pandaFname1, pandaFname2);
 
@@ -1537,9 +1713,9 @@ TEST_F(AotTest, PaocCompilationLimitNoLimit)
     PaocCompilationLimitEmit(pandaFname);
 
     // With no time limit (default 0), all methods should be compiled
-    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                              aotFname.GetFileName(), "--paoc-compilation-limit=0", "--events-output=csv",
-                              "--events-file", eventsFile.GetFileName());
+    auto res =
+        Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output", aotFname.GetFileName(),
+             "--paoc-compilation-limit=0", "--events-output=csv", "--events-file", eventsFile.GetFileName());
     ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
     ASSERT_EQ(res.Value(), 0U);
 
@@ -1566,9 +1742,9 @@ TEST_F(AotTest, PaocCompilationLimitWithTimeout)
     PaocCompilationLimitEmit(pandaFname);
 
     // With 1ms time limit, compilation should stop early (or at least succeed without error)
-    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                              aotFname.GetFileName(), "--paoc-compilation-limit=1", "--events-output=csv",
-                              "--events-file", eventsFile.GetFileName(), "--compiler-ignore-failures=false");
+    auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                    aotFname.GetFileName(), "--paoc-compilation-limit=1", "--events-output=csv", "--events-file",
+                    eventsFile.GetFileName(), "--compiler-ignore-failures=false");
     ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
     // Time-limited compilation should return success (0)
     ASSERT_EQ(res.Value(), 0U) << "Time-limited compilation should not return an error";
@@ -1600,9 +1776,9 @@ TEST_F(AotTest, PaocCompilationLimitPartialAotValid)
     PaocCompilationLimitEmit(pandaFname);
 
     // Use enough time limit that allows some but potentially not all methods to compile.
-    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                              aotFname.GetFileName(), "--paoc-compilation-limit=1000", "--events-output=csv",
-                              "--events-file", eventsFile.GetFileName());
+    auto res =
+        Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output", aotFname.GetFileName(),
+             "--paoc-compilation-limit=1000", "--events-output=csv", "--events-file", eventsFile.GetFileName());
     ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
     ASSERT_EQ(res.Value(), 0U);
 
@@ -1626,9 +1802,9 @@ TEST_F(AotTest, PaocCompilationLimitLargeTimeout)
     PaocCompilationLimitEmit(pandaFname);
 
     // With a very large time limit, all methods should compile (same as no limit)
-    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                              aotFname.GetFileName(), "--paoc-compilation-limit=60000", "--events-output=csv",
-                              "--events-file", eventsFile.GetFileName(), "--compiler-ignore-failures=false");
+    auto res = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                    aotFname.GetFileName(), "--paoc-compilation-limit=60000", "--events-output=csv", "--events-file",
+                    eventsFile.GetFileName(), "--compiler-ignore-failures=false");
     ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
     ASSERT_EQ(res.Value(), 0U);
 
@@ -1665,14 +1841,14 @@ TEST_F(AotTest, PaocWriteToAnFd)
     ASSERT_GE(anFd, 0);
 
     // Run paoc with --paoc-an-fd
-    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), "--paoc-an-fd", std::to_string(anFd).c_str());
+    auto execRes = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), "--paoc-an-fd", std::to_string(anFd).c_str());
     close(anFd);
     ASSERT_TRUE(execRes) << "paoc failed with error: " << execRes.Error().ToString();
     ASSERT_EQ(execRes.Value(), 0U) << "paoc returned error code: " << execRes.Value();
 
     // Verify the .an file was written correctly (should be a valid ELF)
-    auto res2 = os::exec::Exec(GetAotdumpFile(), "--show-code=disasm", aotFname.GetFileName());
+    auto res2 = Exec(GetAotdumpFile(), "--show-code=disasm", aotFname.GetFileName());
     ASSERT_TRUE(res2) << "aotdump failed: " << res2.Error().ToString();
     ASSERT_EQ(res2.Value(), 0U) << "aotdump return error: " << res2.Value();
 
@@ -1703,8 +1879,8 @@ TEST_F(AotTest, PaocWriteToInvalidFd)
     int readOnlyFd = open(pandaFname.GetFileName(), O_RDONLY);
     ASSERT_GE(readOnlyFd, 0);
 
-    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                  aotFname.GetFileName(), "--paoc-an-fd", std::to_string(readOnlyFd).c_str());
+    auto execRes = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                        aotFname.GetFileName(), "--paoc-an-fd", std::to_string(readOnlyFd).c_str());
     close(readOnlyFd);
     ASSERT_TRUE(execRes) << "paoc execution failed: " << execRes.Error().ToString();
     // Write to a read-only fd should fail — paoc must return non-zero exit code
@@ -1735,15 +1911,15 @@ TEST_F(AotTest, PaocWriteToAnFdAndPathProduceSameOutput)
     // Compile with fd
     int anFd = open(aotFnameFd.GetFileName(), O_RDWR | O_CREAT | O_TRUNC, 0644);
     ASSERT_GE(anFd, 0);
-    auto execRes1 = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                   aotFnameFd.GetFileName(), "--paoc-an-fd", std::to_string(anFd).c_str());
+    auto execRes1 = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                         aotFnameFd.GetFileName(), "--paoc-an-fd", std::to_string(anFd).c_str());
     close(anFd);
     ASSERT_TRUE(execRes1);
     ASSERT_EQ(execRes1.Value(), 0U);
 
     // Compile with path (default)
-    auto execRes2 = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
-                                   aotFnamePath.GetFileName());
+    auto execRes2 = Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                         aotFnamePath.GetFileName());
     ASSERT_TRUE(execRes2);
     ASSERT_EQ(execRes2.Value(), 0U);
 
@@ -1791,8 +1967,8 @@ TEST_F(AotTest, PaocLoadZipFromHapFd)
 
     std::string hapFdArg = "--paoc-hap-fd=" + std::to_string(hapFd);
     std::string zipPath = std::string(archivename) + "/" + pandaFilename;
-    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", zipPath.c_str(), "--paoc-zip-panda-file",
-                                  pandaFilename, "--paoc-location", "./", hapFdArg.c_str());
+    auto execRes = Exec(GetPaocFile(), "--paoc-panda-files", zipPath.c_str(), "--paoc-zip-panda-file", pandaFilename,
+                        "--paoc-location", os::GetCurrentWorkingDirectory(), hapFdArg.c_str());
     close(hapFd);
     ASSERT_TRUE(execRes) << "paoc failed with error: " << execRes.Error().ToString();
     ASSERT_EQ(execRes.Value(), 0U) << "paoc returned error with hapFd";
@@ -1819,9 +1995,9 @@ TEST_F(AotTest, PaocFullFdPipeline)
     std::string anFdArg = "--paoc-an-fd=" + std::to_string(anFd);
     TmpFile aotFname("./test_full_fd.an");
     std::string zipPath = std::string(archivename) + "/" + pandaFilename;
-    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", zipPath.c_str(), "--paoc-zip-panda-file",
-                                  pandaFilename, "--paoc-location", "./", "--paoc-output", aotFname.GetFileName(),
-                                  hapFdArg.c_str(), anFdArg.c_str());
+    auto execRes = Exec(GetPaocFile(), "--paoc-panda-files", zipPath.c_str(), "--paoc-zip-panda-file", pandaFilename,
+                        "--paoc-location", os::GetCurrentWorkingDirectory(), "--paoc-output", aotFname.GetFileName(),
+                        hapFdArg.c_str(), anFdArg.c_str());
     close(hapFd);
     ASSERT_TRUE(execRes) << "paoc failed with error: " << execRes.Error().ToString();
     ASSERT_EQ(execRes.Value(), 0U) << "paoc returned error in full fd pipeline";
