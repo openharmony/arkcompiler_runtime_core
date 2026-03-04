@@ -533,9 +533,7 @@ if (is_ohos && is_standard_system) {
   ]
   if (runtime_core_enable_ffrt) {
     _libarkruntime_calculated_external_deps += [ "ffrt:libffrt" ]
-    _libarkruntime_calculated_defines += [
-      "PANDA_USE_FFRT",
-    ]
+    _libarkruntime_calculated_defines += [ "PANDA_USE_FFRT" ]
   }
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     _libarkruntime_calculated_defines += [
@@ -569,7 +567,7 @@ ohos_source_set("libarkruntime_set_static") {
   deps = []
   defines = []
 
-  if (enable_irtoc) {
+  if (enable_irtoc && host_os != "mac") {
     # Add modular irtoc targets as dependencies
     deps += [
       "$ark_root/irtoc:irtoc_fastpath",
