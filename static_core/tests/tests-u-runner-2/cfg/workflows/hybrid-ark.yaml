@@ -27,6 +27,9 @@ parameters:
     stdlib: "${parameters.build}/gen/arkcompiler/runtime_core/static_core/plugins/ets/etsstdlib.abc"
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     compiler-enable-jit: "false"
+    # add --boot-panda-files option to ark with all dependent and the current abc files
+    # add --panda-files option to ark with all dependent and the current abc files
+    is-panda: true
 steps:
     ark:
         executable-path: ${parameters.build}/arkcompiler/runtime_core/ark
