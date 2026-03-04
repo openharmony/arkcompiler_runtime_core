@@ -22,6 +22,13 @@ Before coloring, available registers are collected from Architecture and remappe
 ## Build interference graph
 Graph is built by liveness-intervals, algorithm under the hood is the same as in Linear-scan from works of Wimmer ("Linear Scan Register Allocation on SSA Form"). But output is an Interference Graph (IG). Additionally for nodes is collected number or fixed-intervals intersections that tell us that this interval is crossed by call-sites.
 
+### Performance notes
+- The dense interference/affinity matrices are stored as bitsets (`uint64_t` words) to keep O(1) edge checks with lower memory traffic.
+- The IG keeps sparse adjacency lists for hot linear scans in coloring (`MakeBusyBitmap`), while matrix lookups are still used for random checks.
+- Spill weights are cached per `LifeIntervals` during graph construction to avoid recomputing the same cost for repeated visits.
+- Affinity DFS uses prebuilt adjacency lists instead of scanning all affinity candidates on each step.
+- Liveness intersection checks have a fast path for single-range intervals and a two-pointer intersection scan for multi-range cases.
+
 ## Precoloring
 If interval is pre-colored, this value is set as pre-color for node. And input parameters is marked for split if it has intersection with call-site. They will be split later, to let algorithm make a decision about caller/callee register placement.
 Here additionally to the built graph with regular edges that represent interference, it is built affinity edges of the graph. Affinity edges represent move-relation between values. Currently affinity edges are added for inputs of PHI-function and input of Return instructions.
@@ -59,4 +66,3 @@ Current implementation does not support spilling and rematerialisation. So in ca
 
 # TBD
 Meantime information about call-site convention-registers is not passed to allocator. When it is available, it’s worth to add pre-coloring of inputs of arguments, in case the interval of input is not intersected by a call-site. The same thing should be done for return value, meantime there’s no way to get architected return register number.
-

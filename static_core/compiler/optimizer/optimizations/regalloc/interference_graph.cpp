@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,12 +38,20 @@ void InterferenceGraph::Reserve(size_t count)
     nodes_.clear();
     nodes_.reserve(count);
     matrix_.SetCapacity(count);
+    adjacency_.clear();
+    adjacency_.reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        adjacency_.emplace_back(nodes_.get_allocator());
+    }
     biases_.clear();
 }
 
 void InterferenceGraph::AddEdge(unsigned a, unsigned b)
 {
-    matrix_.AddEdge(a, b);
+    if (!matrix_.AddEdge(a, b)) {
+        adjacency_[a].push_back(b);
+        adjacency_[b].push_back(a);
+    }
 }
 
 bool InterferenceGraph::HasEdge(unsigned a, unsigned b) const

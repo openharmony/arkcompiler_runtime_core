@@ -16,6 +16,7 @@
 #ifndef COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
 #define COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
 
+#include <algorithm>
 #include "libarkbase/utils/arena_containers.h"
 #include "optimizer/analysis/liveness_use_table.h"
 #include "optimizer/ir/constants.h"
@@ -417,24 +418,7 @@ public:
     LifeNumber GetFirstIntersectionWith(const LifeIntervals *other, LifeNumber searchFrom = 0) const;
 
     template <bool OTHER_IS_PHYSICAL = false>
-    bool IntersectsWith(const LifeIntervals *other) const
-    {
-        auto intersection = GetFirstIntersectionWith(other);
-        if constexpr (OTHER_IS_PHYSICAL) {
-            ASSERT(other->IsPhysical());
-            // Interval can intersect the physical one at the beginning of its live range only if that physical
-            // interval's range was created for it. Try to find next intersection
-            //
-            // interval [--------------------------]
-            // physical [-]       [-]           [-]
-            //           ^         ^
-            //          skip      intersection
-            if (intersection == GetBegin()) {
-                intersection = GetFirstIntersectionWith(other, intersection + 1U);
-            }
-        }
-        return intersection != INVALID_LIFE_NUMBER;
-    }
+    bool IntersectsWith(const LifeIntervals *other) const;
 
     bool IsSplitSibling() const
     {

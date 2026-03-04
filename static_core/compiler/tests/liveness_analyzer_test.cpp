@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,6 +227,28 @@ TEST_F(LivenessAnalyzerTest, LifeIntervals)
 
     lifeInter.AppendGroupRange({10U, 95U});
     EXPECT_EQ(lifeInter.GetRanges(), LIVE_RANGES_VECTOR({10U, 100U}));
+}
+
+TEST_F(LivenessAnalyzerTest, IntervalIntersections)
+{
+    LifeIntervals first(GetAllocator(), nullptr);
+    first.AppendRange(10U, 15U);
+    first.AppendRange(0U, 5U);
+
+    LifeIntervals second(GetAllocator(), nullptr);
+    second.AppendRange(14U, 18U);
+    second.AppendRange(5U, 10U);
+
+    EXPECT_EQ(first.GetFirstIntersectionWith(&second, 0U), 14U);
+    EXPECT_TRUE(first.IntersectsWith(&second));
+
+    LifeIntervals physical(GetAllocator(), nullptr);
+    physical.AppendRange(10U, 11U);
+    physical.SetPhysicalReg(0U, DataType::Type::INT64);
+
+    LifeIntervals target(GetAllocator(), nullptr);
+    target.AppendRange(10U, 20U);
+    EXPECT_FALSE(target.IntersectsWith<true>(&physical));
 }
 
 /*

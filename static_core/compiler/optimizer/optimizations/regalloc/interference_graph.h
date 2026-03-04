@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,41 +141,46 @@ public:
     explicit GraphMatrix(ArenaAllocator *alloc) : matrix_(alloc->Adapter()), amatrix_(alloc->Adapter()) {}
     void SetCapacity(unsigned capacity)
     {
-        capacity_ = RoundUp(capacity, sizeof(uintptr_t));
+        capacity_ = capacity;
+        // One bit per matrix element keeps O(1) edge checks with lower memory footprint.
+        size_t totalBits = static_cast<size_t>(capacity_) * capacity_;
+        size_t words = RoundUp(totalBits, wordBits) / wordBits;
         matrix_.clear();
-        matrix_.resize(capacity_ * capacity_);
+        matrix_.resize(words);
         amatrix_.clear();
-        amatrix_.resize(capacity_ * capacity_);
+        amatrix_.resize(words);
     }
 
     bool AddEdge(unsigned a, unsigned b)
     {
-        auto it = matrix_.begin() + a * capacity_ + b;
-        bool oldVal = (*it != 0U);
-        *it = 1U;
-        auto it1 = matrix_.begin() + b * capacity_ + a;
-        *it1 = 1U;
+        auto [word, mask] = GetMask(a, b);
+        bool oldVal = (matrix_[word] & mask) != 0U;
+        matrix_[word] |= mask;
+        auto [word1, mask1] = GetMask(b, a);
+        matrix_[word1] |= mask1;
         return oldVal;
     }
 
     bool AddAffinityEdge(unsigned a, unsigned b)
     {
-        auto it = amatrix_.begin() + a * capacity_ + b;
-        bool oldVal = (*it != 0U);
-        *it = 1U;
-        auto it1 = amatrix_.begin() + b * capacity_ + a;
-        *it1 = 1U;
+        auto [word, mask] = GetMask(a, b);
+        bool oldVal = (amatrix_[word] & mask) != 0U;
+        amatrix_[word] |= mask;
+        auto [word1, mask1] = GetMask(b, a);
+        amatrix_[word1] |= mask1;
         return oldVal;
     }
 
     bool HasEdge(unsigned a, unsigned b) const
     {
-        return matrix_[a * capacity_ + b] != 0U;
+        auto [word, mask] = GetMask(a, b);
+        return (matrix_[word] & mask) != 0U;
     }
 
     bool HasAffinityEdge(unsigned a, unsigned b) const
     {
-        return amatrix_[a * capacity_ + b] != 0U;
+        auto [word, mask] = GetMask(a, b);
+        return (amatrix_[word] & mask) != 0U;
     }
 
     unsigned GetCapacity() const noexcept
@@ -184,8 +189,18 @@ public:
     }
 
 private:
-    ArenaVector<uint8_t> matrix_;
-    ArenaVector<uint8_t> amatrix_;
+    static constexpr size_t wordBits = sizeof(uint64_t) * CHAR_BIT;
+
+    std::pair<size_t, uint64_t> GetMask(unsigned a, unsigned b) const
+    {
+        size_t idx = static_cast<size_t>(a) * capacity_ + b;
+        size_t word = idx / wordBits;
+        uint64_t mask = 1ULL << (idx % wordBits);
+        return {word, mask};
+    }
+
+    ArenaVector<uint64_t> matrix_;
+    ArenaVector<uint64_t> amatrix_;
     unsigned capacity_ = 0;
 };
 
@@ -195,7 +210,10 @@ using NodeVector = ArenaVector<ColorNode>;
 // one is for random checks (here is a matrix) and lists on adjacency for sequental access. It's worth to add!
 class InterferenceGraph {
 public:
-    explicit InterferenceGraph(ArenaAllocator *alloc) : nodes_(alloc->Adapter()), matrix_(alloc), useSpillWeight_() {}
+    explicit InterferenceGraph(ArenaAllocator *alloc)
+        : nodes_(alloc->Adapter()), matrix_(alloc), adjacency_(alloc->Adapter()), useSpillWeight_()
+    {
+    }
     ColorNode *AllocNode();
 
     NodeVector &GetNodes() noexcept
@@ -362,14 +380,14 @@ private:
         nbrColors->reset();
         nbrBiasColors->reset();
         // Collect neighbors colors
-        for (unsigned nbrId = 0; nbrId < size_; nbrId++) {
+        for (auto nbrId : adjacency_[id]) {
             auto &nbrNode = GetNode(nbrId);
 
             // Collect neighbour color
-            if (nbrNode.GetColor() != GetInvalidReg() && HasEdge(id, nbrId)) {
+            if (nbrNode.GetColor() != GetInvalidReg()) {
                 ASSERT(nbrNode.GetColor() < nbrColors->size());
                 nbrColors->set(nbrNode.GetColor());
-            } else if (nbrId != id && nbrNode.HasBias() && HasEdge(id, nbrId)) {
+            } else if (nbrNode.HasBias()) {
                 // Collect biased neighbour color
                 ASSERT(nbrNode.GetBias() < GetBiasCount());
                 if (biases_[nbrNode.GetBias()].color != GetInvalidReg()) {
@@ -403,6 +421,8 @@ private:
 
     NodeVector nodes_;
     GraphMatrix matrix_;
+    // Sparse neighbour lists are used in hot linear scans during coloring.
+    ArenaVector<ArenaVector<unsigned>> adjacency_;
     static const size_t DEFAULT_BIAS_SIZE = 16;
     SmallVector<Bias, DEFAULT_BIAS_SIZE> biases_;
     uint8_t useSpillWeight_ : 1;

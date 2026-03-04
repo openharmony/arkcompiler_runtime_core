@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ protected:
 
 namespace {
 constexpr unsigned DEFAULT_CAPACITY1 = 10U;
+constexpr unsigned MATRIX_BOUNDARY_CAPACITY = 65U;
 unsigned g_testEdgeS1[2U][2U] = {{0U, 1U}, {7U, 4U}};  // NOLINT(modernize-avoid-c-arrays)
 auto g_isInSet = [](unsigned a, unsigned b) {
     for (size_t i = 0; i < 2U; i++) {  // NOLINT(modernize-loop-convert)
@@ -69,6 +70,20 @@ TEST_F(RegAllocInterferenceTest, BasicAfinity)
         }
     }
     EXPECT_GE(matrix.GetCapacity(), DEFAULT_CAPACITY1);
+}
+
+TEST_F(RegAllocInterferenceTest, MatrixBoundary)
+{
+    GraphMatrix matrix(GetLocalAllocator());
+    matrix.SetCapacity(MATRIX_BOUNDARY_CAPACITY);
+    EXPECT_FALSE(matrix.AddEdge(0U, MATRIX_BOUNDARY_CAPACITY - 1U));
+    EXPECT_TRUE(matrix.AddEdge(0U, MATRIX_BOUNDARY_CAPACITY - 1U));
+    EXPECT_FALSE(matrix.AddAffinityEdge(MATRIX_BOUNDARY_CAPACITY - 1U, MATRIX_BOUNDARY_CAPACITY - 1U));
+    EXPECT_TRUE(matrix.HasEdge(0U, MATRIX_BOUNDARY_CAPACITY - 1U));
+    EXPECT_TRUE(matrix.HasEdge(MATRIX_BOUNDARY_CAPACITY - 1U, 0U));
+    EXPECT_TRUE(matrix.HasAffinityEdge(MATRIX_BOUNDARY_CAPACITY - 1U, MATRIX_BOUNDARY_CAPACITY - 1U));
+    EXPECT_FALSE(matrix.HasEdge(1U, MATRIX_BOUNDARY_CAPACITY - 1U));
+    EXPECT_EQ(matrix.GetCapacity(), MATRIX_BOUNDARY_CAPACITY);
 }
 
 TEST_F(RegAllocInterferenceTest, BasicGraph)
