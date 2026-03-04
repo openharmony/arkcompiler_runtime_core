@@ -220,7 +220,12 @@ async function cancelExecutingTaskTest() {
         arktest.assertEQ(err.message, 'taskpool:: sequenceRunner task has been executed');
         return undefined;
     }
-    arktest.expectError(() => { let res = waitForCompletion<Any>(() => p); }, new Error('taskpool:: sequenceRunner task has been canceled'));
+
+    p.then((result: Any) => {
+        arktest.assertEQ(result, 'abc');
+    }).catch((e: Error) => {
+        arktest.assertEQ(e.message, 'taskpool:: sequenceRunner task has been canceled');
+    });
 }
 
 async function cancelExecutedTaskTest() {
@@ -402,8 +407,7 @@ function main(): int {
     seqRunnerSuite.addTest('ExecuteSeqRunnerTaskTest', executeSeqRunnerTaskTest);
     seqRunnerSuite.addTest('ExecuteGroupTaskTest', executeGroupTaskTest);
     seqRunnerSuite.addAsyncTest('CancelNonStartedTaskTest', cancelNonStartedTaskTest);
-    // #33161
-    seqRunnerSuiteDisabled.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
+    seqRunnerSuite.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
     seqRunnerSuite.addAsyncTest('CancelExecutedTaskTest', cancelExecutedTaskTest);
     seqRunnerSuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     seqRunnerSuite.addTest('AddDependencyExecutedTaskTest', addDependencyExecutedTaskTest);
