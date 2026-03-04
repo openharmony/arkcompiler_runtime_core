@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <cstdint>
 
 using TextDecoder = ark::ets::sdk::util::TextDecoder;
+const ani_size kInitialLocalScopeSize = 16;
 
 namespace OHOS {
 class TextDecoderEngine : public FuzzTestEngine {
@@ -37,7 +38,9 @@ public:
     {
         std::string encodingStr = "GBK";
         TextDecoder decoder(encodingStr, iflag);
+        env_->CreateLocalScope(kInitialLocalScopeSize);
         decoder.DecodeToString(env_, source, offset, length, iflag);
+        env_->DestroyLocalScope();
     }
 
 private:

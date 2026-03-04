@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ protected:
 
     std::string BuildOptionString()
     {
-        const char *stdlibPath = "/system/etc/etsstdlib.abc";
+        const char *stdlibPath = "/system/etc/etsstdlib.abc:/system/framework/base_sdk.abc";
         std::string bootFileString("--ext:boot-panda-files=");
         bootFileString += stdlibPath;
 
