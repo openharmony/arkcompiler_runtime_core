@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,6 +165,7 @@ public:
     AliasType CheckInstAlias(Inst *mem1, Inst *mem2) const;
     AliasType CheckRefAlias(Inst *ref1, Inst *ref2) const;
     void Dump(std::ostream *out) const;
+    static std::string_view AliasTypeToStr(AliasType t);
 
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override;
 

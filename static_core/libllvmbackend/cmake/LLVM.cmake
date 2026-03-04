@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -58,7 +58,7 @@ if (PANDA_BUILD_LLVM_BINARIES)
         SOURCE_DIR ${LLVM_SOURCES_DIR}
     )
 
-    set(LLVM_CMAKE_COMMON_VARIABLES -G${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    set(LLVM_CMAKE_COMMON_VARIABLES -G${CMAKE_GENERATOR}
         -DPACKAGE_VERSION=${REQUIRED_LLVM_VERSION}
         -DLLVM_ENABLE_FFI=OFF
         -DLLVM_ENABLE_TERMINFO=OFF
@@ -71,6 +71,11 @@ if (PANDA_BUILD_LLVM_BINARIES)
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     )
+    if(CMAKE_BUILD_TYPE STREQUAL FastVerify)
+        list(APPEND LLVM_CMAKE_COMMON_VARIABLES -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_ENABLE_ASSERTIONS=ON)
+    else()
+        list(APPEND LLVM_CMAKE_COMMON_VARIABLES -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+    endif()
     set(COMMON_LLVM_COMPONENTS "cmake-exports;llvm-headers;LLVM")
     set(LLVM_COMMON_BUILD_PREFIX "${PANDA_BUILD_LLVM_BINARIES_PATH_ROOT}/BUILD")
     set(LLVM_COMMON_INSTALL_PREFIX "${PANDA_BUILD_LLVM_BINARIES_PATH_ROOT}/INSTALL")
