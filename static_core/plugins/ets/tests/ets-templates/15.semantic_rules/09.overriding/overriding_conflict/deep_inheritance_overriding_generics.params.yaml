@@ -34,7 +34,6 @@ cases:
       function f<W extends A2>(p: W): void {
         new C1<W>().foo(p)
       }
-    expected_error: "Unknown expected error"
 
   - hierarchy: |-
       |   I1     
@@ -60,7 +59,6 @@ cases:
       function f<W extends A2>(p: W): void {
         new C2<W>().foo(p)
       }
-    expected_error: "Unknown expected error"
 
   - hierarchy: |-
      |  I1 I2     
@@ -85,7 +83,6 @@ cases:
       function f<W>(p: W): void {
         new C2<W>().foo(p)
       }
-    expected_error: "Unknown expected error"
 
   - hierarchy: |-
      |  I1 I2 I3   
@@ -113,4 +110,3 @@ cases:
       function f<W>(p: W): void {
         new C2<W>().foo(p)
       }
-    expected_error: "Unknown expected error"
