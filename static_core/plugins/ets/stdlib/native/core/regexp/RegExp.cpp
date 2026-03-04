@@ -298,12 +298,6 @@ static void SetGroupsField(ani_env *env, ani_class regexpResultClass, ani_object
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(regexpExecArray, groupsField, static_cast<ani_ref>(groupsStr)));
 }
 
-static ani_object Compile([[maybe_unused]] ani_env **env, [[maybe_unused]] ani_object obj)
-{
-    // NOTE(kparshukov): remove #20259
-    return obj;
-}
-
 static ani_object DoExec(ani_env *env, ani_object regexp, ani_class resultClass, ani_object resultObject,
                          ExecData execData)
 {
@@ -400,7 +394,6 @@ static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani
 void RegisterRegExpNativeMethods(ani_env *env)
 {
     const auto regExpImpls = std::array {
-        ani_native_function {"compile", ":C{std.core.RegExp}", reinterpret_cast<void *>(Compile)},
         ani_native_function {"execImpl",
                              "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpExecArray}",
                              reinterpret_cast<void *>(Exec)},
