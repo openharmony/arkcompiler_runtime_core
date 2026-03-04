@@ -1,0 +1,143 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# It's temporary file for ark_static_standalone_build type.
+# Will be removed after the related legacy jobs removing.
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+
+pcre2_lib_dir = "//third_party/pcre2/pcre2"
+pcre2_arkts_dir = "//third_party/pcre2/pcre2_ArkTS"
+
+copy("pcre2_copy_config_h") {
+  sources = [ "$pcre2_lib_dir/src/config.h.generic" ]
+  outputs = [ "$target_gen_dir/pcre2/internal/config.h" ]
+}
+
+copy("pcre2_copy_pcre2_h") {
+  sources = [ "$pcre2_lib_dir/src/pcre2.h.generic" ]
+  outputs = [ "$target_gen_dir/pcre2/common/pcre2.h" ]
+}
+
+copy("pcre2_copy_chartables_c") {
+  sources = [ "$pcre2_lib_dir/src/pcre2_chartables.c.dist" ]
+  outputs = [ "$target_gen_dir/pcre2/internal/pcre2_chartables.c" ]
+}
+
+ohos_static_library("libpcre2_16") {
+  output_name = "libpcre2_16"
+  deps = [
+    ":pcre2_copy_config_h",
+    ":pcre2_copy_pcre2_h",
+    ":pcre2_copy_chartables_c",
+  ]
+  sources = [
+    "$pcre2_lib_dir/src/pcre2_auto_possess.c",
+    "$pcre2_lib_dir/src/pcre2_compile.c",
+    "$pcre2_lib_dir/src/pcre2_compile_class.c",
+    "$pcre2_lib_dir/src/pcre2_config.c",
+    "$pcre2_lib_dir/src/pcre2_context.c",
+    "$pcre2_lib_dir/src/pcre2_convert.c",
+    "$pcre2_lib_dir/src/pcre2_dfa_match.c",
+    "$pcre2_lib_dir/src/pcre2_error.c",
+    "$pcre2_lib_dir/src/pcre2_extuni.c",
+    "$pcre2_lib_dir/src/pcre2_find_bracket.c",
+    "$pcre2_lib_dir/src/pcre2_jit_compile.c",
+    "$pcre2_lib_dir/src/pcre2_maketables.c",
+    "$pcre2_lib_dir/src/pcre2_match.c",
+    "$pcre2_lib_dir/src/pcre2_match_data.c",
+    "$pcre2_arkts_dir/pcre2_newline_static.c",
+    "$pcre2_lib_dir/src/pcre2_ord2utf.c",
+    "$pcre2_lib_dir/src/pcre2_pattern_info.c",
+    "$pcre2_lib_dir/src/pcre2_script_run.c",
+    "$pcre2_lib_dir/src/pcre2_serialize.c",
+    "$pcre2_lib_dir/src/pcre2_string_utils.c",
+    "$pcre2_lib_dir/src/pcre2_study.c",
+    "$pcre2_lib_dir/src/pcre2_substitute.c",
+    "$pcre2_lib_dir/src/pcre2_substring.c",
+    "$pcre2_lib_dir/src/pcre2_tables.c",
+    "$pcre2_lib_dir/src/pcre2_ucd.c",
+    "$pcre2_lib_dir/src/pcre2_valid_utf.c",
+    "$pcre2_lib_dir/src/pcre2_xclass.c",
+  ]
+  include_dirs = [
+    "$pcre2_lib_dir/src",
+    "$target_gen_dir/pcre2/common",
+    "$target_gen_dir/pcre2/internal",
+  ]
+  sources += [ "$target_gen_dir/pcre2/internal/pcre2_chartables.c" ]
+  cflags = [
+    "-D_GNU_SOURCE",
+    "-DHAVE_CONFIG_H",
+    "-DSUPPORT_PCRE2_16=1",
+    "-DSUPPORT_UNICODE=1",
+    "-DPCRE2_CODE_UNIT_WIDTH=16",
+    "-w",
+  ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
+}
+
+ohos_static_library("libpcre2_8") {
+  output_name = "libpcre2_8"
+  deps = [
+    ":pcre2_copy_config_h",
+    ":pcre2_copy_pcre2_h",
+    ":pcre2_copy_chartables_c",
+  ]
+  sources = [
+    "$pcre2_lib_dir/src/pcre2_auto_possess.c",
+    "$pcre2_lib_dir/src/pcre2_chkdint.c",
+    "$pcre2_lib_dir/src/pcre2_compile.c",
+    "$pcre2_lib_dir/src/pcre2_compile_class.c",
+    "$pcre2_lib_dir/src/pcre2_config.c",
+    "$pcre2_lib_dir/src/pcre2_context.c",
+    "$pcre2_lib_dir/src/pcre2_convert.c",
+    "$pcre2_lib_dir/src/pcre2_dfa_match.c",
+    "$pcre2_lib_dir/src/pcre2_error.c",
+    "$pcre2_lib_dir/src/pcre2_extuni.c",
+    "$pcre2_lib_dir/src/pcre2_find_bracket.c",
+    "$pcre2_lib_dir/src/pcre2_jit_compile.c",
+    "$pcre2_lib_dir/src/pcre2_maketables.c",
+    "$pcre2_lib_dir/src/pcre2_match.c",
+    "$pcre2_lib_dir/src/pcre2_match_data.c",
+    "$pcre2_arkts_dir/pcre2_newline_static.c",
+    "$pcre2_lib_dir/src/pcre2_ord2utf.c",
+    "$pcre2_lib_dir/src/pcre2_pattern_info.c",
+    "$pcre2_lib_dir/src/pcre2_script_run.c",
+    "$pcre2_lib_dir/src/pcre2_serialize.c",
+    "$pcre2_lib_dir/src/pcre2_string_utils.c",
+    "$pcre2_lib_dir/src/pcre2_study.c",
+    "$pcre2_lib_dir/src/pcre2_substitute.c",
+    "$pcre2_lib_dir/src/pcre2_substring.c",
+    "$pcre2_lib_dir/src/pcre2_tables.c",
+    "$pcre2_lib_dir/src/pcre2_ucd.c",
+    "$pcre2_lib_dir/src/pcre2_valid_utf.c",
+    "$pcre2_lib_dir/src/pcre2_xclass.c",
+  ]
+  include_dirs = [
+    "$pcre2_lib_dir/src",
+    "$target_gen_dir/pcre2/common",
+    "$target_gen_dir/pcre2/internal",
+  ]
+  sources += [ "$target_gen_dir/pcre2/internal/pcre2_chartables.c" ]
+  cflags = [
+    "-D_GNU_SOURCE",
+    "-DHAVE_CONFIG_H",
+    "-DSUPPORT_PCRE2_8=1",
+    "-DSUPPORT_UNICODE=1",
+    "-DPCRE2_CODE_UNIT_WIDTH=8",
+    "-w",
+  ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
+}

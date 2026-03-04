@@ -367,3 +367,31 @@ unittests_list = [
   "tests/runtime/types:ets_internal_objects_mock_tests",
   "tests/runtime/types:ets_internal_objects_tests",
 ]
+
+# pcre2 dependencies for different build modes
+if (!(ark_standalone_build || ark_static_standalone_build)) {
+  # Ohos build: use external_deps (cross-part dependency)
+  runtime_external_deps = [
+    "pcre2:libpcre2_static_8",
+    "pcre2:libpcre2_static_16",
+  ]
+} else if (ark_standalone_build) {
+  # ark_standalone build: use deps (third_party dependency)
+  arkruntime_deps += [
+    "//third_party/pcre2:libpcre2_static_8",
+    "//third_party/pcre2:libpcre2_static_16",
+  ]
+} else if (ark_static_standalone_build) {
+  # ark_static_standalone build: use deps (local plugin build)
+  _pcre2_gen_dir = get_label_info("pcre2:libpcre2_16", "target_gen_dir")
+
+  runtime_include_dirs = [
+    "$_pcre2_gen_dir/pcre2/common",
+    "$_pcre2_gen_dir/pcre2/internal",
+  ]
+
+  arkruntime_deps += [
+    "$ark_root/plugins/ets/pcre2:libpcre2_16",
+    "$ark_root/plugins/ets/pcre2:libpcre2_8",
+  ]
+}
