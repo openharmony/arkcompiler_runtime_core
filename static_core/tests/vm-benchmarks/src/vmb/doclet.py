@@ -352,6 +352,8 @@ class TemplateVars:  # pylint: disable=invalid-name
     wt: int = 1
     fi: int = 0
     gc: int = -1
+    cl: int = 0
+    ct: float = 1.0
     tags: Any = None
     bugs: Any = None
     imports: Any = None
@@ -456,6 +458,10 @@ class TemplateVars:  # pylint: disable=invalid-name
                 self.wt = ovr.warmup_time
             if ovr.fast_iters is not None:
                 self.fi = ovr.fast_iters
+            if ovr.coroutines_threshold is not None:
+                self.ct = ovr.coroutines_threshold
+            if ovr.coroutines_limit is not None:
+                self.cl = ovr.coroutines_limit
             if ovr.sys_gc_pause is not None:
                 self.gc = ovr.sys_gc_pause
             if ovr.compiler_inlining == 'false':
