@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,50 +18,8 @@ desc: enum for export
 tags: [not-a-test, compile-only]
 ---*/
 
-export enum ImpColorsInt {
-  Red = 1,
-  Green,
-  Blue = 4
-}
-
-export enum ImpColorsStr {
+export enum ExpColorsStr: string {
   Red = "One",
   Green = "Two",
   Blue = "Three"
-}
-
-export enum ExpColorsLong: long {
-  Red = 0x7FFF_FFFF_1,
-  Green,
-  Blue = 0x7FFF_FFFF_4
-}
-
-export enum ExpColorsInt: int {
-  Red = 1,
-  Green,
-  Blue = 4
-}
-
-export enum ExpColorsShort: short {
-  Red = 1,
-  Green,
-  Blue = 4
-}
-
-export enum ExpColorsByte: byte {
-  Red = 1,
-  Green,
-  Blue = 4
-}
-
-export enum ExpColorsDouble: double {
-  Red = 1.0,
-  Green = 2.5,
-  Blue = 5.0
-}
-
-export enum ExpColorsFloat: float {
-  Red = 1.0f,
-  Green = 2.5f,
-  Blue = 5.0f
 }
