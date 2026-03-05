@@ -137,7 +137,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        } else {
 %            Class const *cachedClass = nullptr;
 %            auto resolveAndLink = [&](const char *descr) {
-%                ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%                ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %                cachedClass = classLinker_->GetClass(utf::CStringAsMutf8(descr), false, classLinkerCtx_, &errorHandler);
 %            };
 %            // descriptors for primitive types get from libarkfile/templates/type
@@ -176,7 +176,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                    resolveAndLink("[D");
 %                    break;
 %                case panda_file::LiteralTag::ARRAY_STRING: {
-%                    ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%                    ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %                    cachedClass = classLinker_->GetClass(langContext_.GetStringArrayClassDescriptor(), false, classLinkerCtx_, &errorHandler);
 %                    break;
 %                }
@@ -193,7 +193,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    }),
 %    "MethodId_" => %({
 %        auto methodId = method_->GetClass()->ResolveMethodIndex(id.AsIndex());
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        const auto *pf = method_->GetPandaFile();
 %        Method *calledMethod = pf->GetPandaCache()->GetMethodFromCache(methodId);
 %        // Special case for array constructors, which are fake methods that other
@@ -225,7 +225,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        }
 %    }),
 %    "StaticFieldID_" => %({
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
 %        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, true, &errorHandler);
 %        if (cachedField != nullptr) {
@@ -238,7 +238,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        }
 %    }),
 %    "FieldId_" => %({
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
 %        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, false, &errorHandler);
 %        if (cachedField != nullptr) {
@@ -252,7 +252,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    }),
 %    "TypeId_" => %({
 %        auto classIdx = method_->GetClass()->ResolveClassIndex(id.AsIndex());
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        auto *cachedClass = classLinker_->GetClass(*method_, classIdx, &errorHandler);
 %        if (cachedClass != nullptr) {
 %            auto classType = Type {cachedClass};
@@ -263,7 +263,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        }
 %    }),
 %    "StringId_" => %({
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        auto cachedStringClass = classLinker_->GetClass(langContext_.GetStringClassDescriptor(), false, classLinkerCtx_, &errorHandler);
 %        if (cachedStringClass != nullptr) {
 %            auto cachedStringType = Type {cachedStringClass};
@@ -273,7 +273,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        }
 %    }),
 %    "ClassId_" => %({
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        // We are in lda.type bytecode handler. acc type is going to be java.lang.Class
 %        auto cachedClassClass = classLinker_->GetClass(langContext_.GetClassClassDescriptor(), false, classLinkerCtx_, &errorHandler);
 %        if (cachedClassClass != nullptr) {
@@ -284,7 +284,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        }
 %    }),
 %    "NullValue_" => %(
-%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
 %        auto cachedUniqueObjectClass = classLinker_->GetClass(langContext_.GetUniqueObjectClassDescriptor(), false, classLinkerCtx_, &errorHandler);
 %        if (cachedUniqueObjectClass != nullptr) {
 %            auto cachedClassType = Type {cachedUniqueObjectClass};

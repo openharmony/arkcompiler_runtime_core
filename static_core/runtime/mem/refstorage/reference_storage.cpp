@@ -17,7 +17,6 @@
 
 #include "libarkbase/mem/mem.h"
 #include "libarkbase/utils/dfx.h"
-#include "runtime/include/thread.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/gc_root.h"

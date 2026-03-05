@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "runtime/compiler_thread_pool_worker.h"
 #include "runtime/compiler_queue_simple.h"
 #include "runtime/compiler_queue_aged_counter_priority.h"
+#include "runtime/include/mutator.h"
 #include "compiler/inplace_task_runner.h"
 
 namespace ark {
@@ -77,8 +78,8 @@ void CompilerProcessor::InPlaceCompileMethod(CompilerTask &&ctx)
     compilerCtx.SetVM(ctx.GetVM());
 
     // Set current thread to have access to vm during compilation
-    Thread compilerThread(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER);
-    ScopedCurrentThread sct(&compilerThread);
+    Mutator compilerThread(ctx.GetVM(), Mutator::MutatorType::COMPILER);
+    ScopedCurrentMutator sct(&compilerThread);
 
     if (compilerCtx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
         compiler_->CompileMethodLocked<compiler::INPLACE_MODE>(std::move(taskRunner));

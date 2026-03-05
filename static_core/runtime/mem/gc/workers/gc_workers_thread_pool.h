@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_GC_WORKERS_THREAD_POOL_H
 #define PANDA_RUNTIME_MEM_GC_GC_WORKERS_THREAD_POOL_H
 
-#include "runtime/include/thread.h"
+#include "runtime/include/mutator.h"
 #include "runtime/thread_pool.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
@@ -98,7 +98,7 @@ private:
 
 class GCWorkersCreationInterface : public WorkerCreationInterface {
 public:
-    explicit GCWorkersCreationInterface(PandaVM *vm) : gcThread_(vm, Thread::ThreadType::THREAD_TYPE_GC)
+    explicit GCWorkersCreationInterface(PandaVM *vm) : gcThread_(vm, Mutator::MutatorType::GC)
     {
         ASSERT(vm != nullptr);
     }
@@ -110,18 +110,18 @@ public:
     void AttachWorker(bool helperThread) override
     {
         if (!helperThread) {
-            Thread::SetCurrent(&gcThread_);
+            Mutator::SetCurrent(&gcThread_);
         }
     }
     void DetachWorker(bool helperThread) override
     {
         if (!helperThread) {
-            Thread::SetCurrent(nullptr);
+            Mutator::SetCurrent(nullptr);
         }
     }
 
 private:
-    Thread gcThread_;
+    Mutator gcThread_;
 };
 
 /// @brief GC workers task pool based on internal thread pool

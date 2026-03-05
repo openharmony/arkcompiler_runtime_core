@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,13 +28,13 @@
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/method.h"
+#include "runtime/include/mutator.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/tlab.h"
 #include "runtime/compiler_thread_pool_worker.h"
 #include "runtime/compiler_task_manager_worker.h"
-#include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
 #include "libarkbase/generated/source_language.h"
@@ -210,14 +210,14 @@ public:
         if (!static_cast<const Method *>(method)->HasCompiledCode()) {
             return false;
         }
-        CompilerInterface *compiler = Thread::GetCurrent()->GetVM()->GetCompiler();
+        CompilerInterface *compiler = Mutator::GetCurrent()->GetVM()->GetCompiler();
         ASSERT(compiler->GetOsrCode(static_cast<const Method *>(method)) == nullptr);
         compiler->SetOsrCode(static_cast<const Method *>(method), ep);
         return true;
     }
     void *GetOsrCode(MethodPtr method) override
     {
-        return Thread::GetCurrent()->GetVM()->GetCompiler()->GetOsrCode(static_cast<const Method *>(method));
+        return Mutator::GetCurrent()->GetVM()->GetCompiler()->GetOsrCode(static_cast<const Method *>(method));
     }
     bool HasCompiledCode(MethodPtr method) override
     {
@@ -643,13 +643,13 @@ public:
 
     void SetCurrentThread(ThreadPtr thread) const override
     {
-        ASSERT(thread != Thread::GetCurrent());
-        Thread::SetCurrent(static_cast<ark::Thread *>(thread));
+        ASSERT(thread != Mutator::GetCurrent());
+        Mutator::SetCurrent(static_cast<Mutator *>(thread));
     }
 
     ThreadPtr GetCurrentThread() const override
     {
-        return Thread::GetCurrent();
+        return Mutator::GetCurrent();
     }
 
     bool CanUseStringFlatCheck() const override;

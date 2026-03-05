@@ -70,7 +70,7 @@ void GetInfoForInteropCallArgsConversion(
 
 compiler::RuntimeInterface::IntrinsicId GetInteropRefReturnValueConvertIntrinsic(Method *method) const
 {
-    auto vm = reinterpret_cast<PandaEtsVM *>(Thread::GetCurrent()->GetVM());
+    auto *vm = reinterpret_cast<PandaEtsVM *>(Mutator::GetCurrent()->GetVM());
     auto klass = GetClass(method, GetMethodReturnTypeId(method));
     // start fastpath
     if (klass == PlatformTypes(vm)->interopJSValue->GetRuntimeClass()) {

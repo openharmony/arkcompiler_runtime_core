@@ -20,7 +20,6 @@
 #include "runtime/tooling/backtrace/backtrace.h"
 #include "runtime/tooling/backtrace/symbol_extractor.h"
 #include "runtime/include/managed_thread.h"
-#include "runtime/include/thread.h"
 #include "libarkbase/utils/logger.h"
 
 static std::optional<ark::tooling::MethodInfo> ReadMethodInfo(ark::panda_file::MethodDataAccessor &mda)

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "runtime/compiler.h"
 #include "runtime/compiler_task_manager_worker.h"
+#include "runtime/include/mutator.h"
 #include "compiler/background_task_runner.h"
 #include "compiler/compiler_task_runner.h"
 
@@ -58,10 +59,9 @@ void CompilerTaskManagerWorker::AddTask(CompilerTask &&task)
 
 void CompilerTaskManagerWorker::BackgroundCompileMethod(CompilerTask &&ctx)
 {
-    auto threadDeleter = [this](Thread *thread) { internalAllocator_->Delete(thread); };
+    auto threadDeleter = [this](Mutator *thread) { internalAllocator_->Delete(thread); };
     compiler::BackgroundCompilerContext::CompilerThread compilerThread(
-        internalAllocator_->New<Thread>(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER),
-        std::move(threadDeleter));
+        internalAllocator_->New<Mutator>(ctx.GetVM(), Mutator::MutatorType::COMPILER), std::move(threadDeleter));
 
     auto taskDeleter = [this](CompilerTask *task) { internalAllocator_->Delete(task); };
     compiler::BackgroundCompilerContext::CompilerTask compilerTask(

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "include/runtime.h"
+#include "runtime/include/runtime.h"
 #include "runtime/mem/internal_allocator-inl.h"
-#include "runtime/include/thread.h"
 
 namespace ark::mem {
 
@@ -303,7 +302,7 @@ typename InternalAllocator<CONFIG>::LocalSmallObjectAllocator *InternalAllocator
         auto localAllocator =
             allocator->New<LocalSmallObjectAllocator>(allocator->GetMemStats(), SpaceType::SPACE_TYPE_INTERNAL);
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Set up local internal allocator at addr " << localAllocator
-                                      << " for the thread " << ark::Thread::GetCurrent();
+                                      << " for the mutator " << ark::Mutator::GetCurrent();
         return localAllocator;
     }
     return nullptr;

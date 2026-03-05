@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ class EtsHandle : public VMHandle<T> {
 public:
     inline explicit EtsHandle() : VMHandle<T>() {}
     explicit EtsHandle(EtsCoroutine *coroutine, T *etsObj)
-        : VMHandle<T>(ManagedThread::CastFromThread(coroutine), GetObjectHeader(etsObj))
+        : VMHandle<T>(ManagedThread::CastFromMutator(coroutine), GetObjectHeader(etsObj))
     {
     }
 

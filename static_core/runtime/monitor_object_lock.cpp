@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "runtime/monitor_object_lock.h"
 
 #include "libarkbase/os/thread.h"
-#include "runtime/include/thread.h"
 #include "runtime/handle_scope-inl.h"
 
 namespace ark {
@@ -30,14 +29,14 @@ ObjectLock::ObjectLock(ObjectHeader *obj)
 
 bool ObjectLock::Wait(bool ignoreInterruption)
 {
-    Monitor::State state = Monitor::Wait(objHandler_.GetPtr(), ThreadStatus::IS_WAITING, 0, 0, ignoreInterruption);
+    Monitor::State state = Monitor::Wait(objHandler_.GetPtr(), MutatorStatus::IS_WAITING, 0, 0, ignoreInterruption);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
     return state != Monitor::State::INTERRUPTED;
 }
 
 bool ObjectLock::TimedWait(uint64_t timeout)
 {
-    Monitor::State state = Monitor::Wait(objHandler_.GetPtr(), ThreadStatus::IS_TIMED_WAITING, timeout, 0);
+    Monitor::State state = Monitor::Wait(objHandler_.GetPtr(), MutatorStatus::IS_TIMED_WAITING, timeout, 0);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
     return state != Monitor::State::INTERRUPTED;
 }

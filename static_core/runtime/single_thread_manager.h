@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ public:
     void SuspendAllThreads() override
     {
         ManagedThread *mainThread = GetMainThread();
-        if (Thread::GetCurrent() != mainThread) {
+        if (Mutator::GetCurrent() != mainThread) {
             mainThread->SuspendImpl(true);
         }
     }
@@ -40,7 +40,7 @@ public:
     void ResumeAllThreads() override
     {
         ManagedThread *mainThread = GetMainThread();
-        if (Thread::GetCurrent() != mainThread) {
+        if (Mutator::GetCurrent() != mainThread) {
             mainThread->ResumeImpl(true);
         }
     }
@@ -48,8 +48,8 @@ public:
     bool IsRunningThreadExist() override
     {
         ManagedThread *mainThread = GetMainThread();
-        if (Thread::GetCurrent() != mainThread) {
-            if (mainThread->GetStatus() == ThreadStatus::RUNNING) {
+        if (Mutator::GetCurrent() != mainThread) {
+            if (mainThread->GetStatus() == MutatorStatus::RUNNING) {
                 return true;
             }
         }

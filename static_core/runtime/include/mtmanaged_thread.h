@@ -15,9 +15,158 @@
 #ifndef PANDA_RUNTIME_MTMANAGED_THREAD_H
 #define PANDA_RUNTIME_MTMANAGED_THREAD_H
 
-#include "managed_thread.h"
+#include "runtime/include/mutator.h"
+#include "runtime/include/managed_thread.h"
 
 namespace ark {
+
+class LockedObjectInfo {
+public:
+    LockedObjectInfo(ObjectHeader *obj, void *fp) : object_(obj), stack_(fp) {}
+    inline ObjectHeader *GetObject() const
+    {
+        return object_;
+    }
+
+    inline void SetObject(ObjectHeader *objNew)
+    {
+        object_ = objNew;
+    }
+
+    ALWAYS_INLINE void UpdateObject(const ReferenceUpdater &updater)
+    {
+        [[maybe_unused]] ObjectStatus status = updater(&object_);
+        ASSERT(status == ObjectStatus::ALIVE_OBJECT);
+    }
+
+    inline void *GetStack() const
+    {
+        return stack_;
+    }
+
+    inline void SetStack(void *stackNew)
+    {
+        stack_ = stackNew;
+    }
+
+    static constexpr uint32_t GetMonitorOffset()
+    {
+        return MEMBER_OFFSET(LockedObjectInfo, object_);
+    }
+
+    static constexpr uint32_t GetStackOffset()
+    {
+        return MEMBER_OFFSET(LockedObjectInfo, stack_);
+    }
+
+private:
+    ObjectHeader *object_;
+    void *stack_;
+};
+
+template <typename Adapter = mem::AllocatorAdapter<LockedObjectInfo>>
+class LockedObjectList {
+    static constexpr uint32_t DEFAULT_CAPACITY = 16;
+
+public:
+    LockedObjectList() : capacity_(DEFAULT_CAPACITY), allocator_(Adapter())
+    {
+        storage_ = allocator_.allocate(DEFAULT_CAPACITY);
+    }
+
+    ~LockedObjectList()
+    {
+        allocator_.deallocate(storage_, capacity_);
+    }
+
+    NO_COPY_SEMANTIC(LockedObjectList);
+    NO_MOVE_SEMANTIC(LockedObjectList);
+
+    void PushBack(LockedObjectInfo data)
+    {
+        ExtendIfNeeded();
+        storage_[size_++] = data;
+    }
+
+    template <typename... Args>
+    LockedObjectInfo &EmplaceBack(Args &&...args)
+    {
+        ExtendIfNeeded();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto *rawMem = &storage_[size_];
+        auto *datum = new (rawMem) LockedObjectInfo(std::forward<Args>(args)...);
+        size_++;
+        return *datum;
+    }
+
+    LockedObjectInfo &Back()
+    {
+        ASSERT(size_ > 0);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return storage_[size_ - 1];
+    }
+
+    bool Empty() const
+    {
+        return size_ == 0;
+    }
+
+    void PopBack()
+    {
+        ASSERT(size_ > 0);
+        --size_;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        (&storage_[size_])->~LockedObjectInfo();
+    }
+
+    Span<LockedObjectInfo> Data()
+    {
+        return Span<LockedObjectInfo>(storage_, size_);
+    }
+
+    static constexpr uint32_t GetCapacityOffset()
+    {
+        return MEMBER_OFFSET(LockedObjectList, capacity_);
+    }
+
+    static constexpr uint32_t GetSizeOffset()
+    {
+        return MEMBER_OFFSET(LockedObjectList, size_);
+    }
+
+    static constexpr uint32_t GetDataOffset()
+    {
+        return MEMBER_OFFSET(LockedObjectList, storage_);
+    }
+
+private:
+    void ExtendIfNeeded()
+    {
+        ASSERT(size_ <= capacity_);
+        if (size_ < capacity_) {
+            return;
+        }
+        uint32_t newCapacity = capacity_ * 3U / 2U;  // expand by 1.5
+        LockedObjectInfo *newStorage = allocator_.allocate(newCapacity);
+        ASSERT(newStorage != nullptr);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::copy(storage_, storage_ + size_, newStorage);
+        allocator_.deallocate(storage_, capacity_);
+        storage_ = newStorage;
+        capacity_ = newCapacity;
+    }
+
+    template <typename T, size_t ALIGNMENT = sizeof(T)>
+    using Aligned __attribute__((aligned(ALIGNMENT))) = T;
+    // Use uint32_t instead of size_t to guarantee the same size
+    // on all platforms and simplify compiler stubs accessing this fields.
+    // uint32_t is large enough to fit locked objects list's size.
+    Aligned<uint32_t> capacity_;
+    Aligned<uint32_t> size_ {0};
+    Aligned<LockedObjectInfo *> storage_;
+    Adapter allocator_;
+};
+
 class MTManagedThread : public ManagedThread {
 public:
     PANDA_PUBLIC_API static MTManagedThread *Create(
@@ -41,12 +190,12 @@ public:
     void VisitGCRoots(const GCRootVisitor &cb) override;
     void UpdateAndSweep(const ReferenceUpdater &updater) override;
 
-    ThreadStatus GetWaitingMonitorOldStatus()
+    MutatorStatus GetWaitingMonitorOldStatus()
     {
         return monitorOldStatus_;
     }
 
-    void SetWaitingMonitorOldStatus(ThreadStatus status)
+    void SetWaitingMonitorOldStatus(MutatorStatus status)
     {
         monitorOldStatus_ = status;
     }
@@ -134,17 +283,18 @@ public:
         isInterrupted_ = false;
     }
 
-    static bool ThreadIsMTManagedThread(Thread *thread)
+    static bool MutatorIsMTManagedThread(Mutator *mutator)
     {
-        ASSERT(thread != nullptr);
-        return thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_MT_MANAGED;
+        ASSERT(mutator != nullptr);
+        return (mutator->GetMutatorType() == MutatorType::MANAGED) &&
+               (static_cast<ManagedThread *>(mutator)->GetManagedThreadType() ==
+                ManagedThread::ThreadType::THREAD_TYPE_MT_MANAGED);
     }
 
-    static MTManagedThread *CastFromThread(Thread *thread)
+    static MTManagedThread *CastFromMutator(Mutator *mutator)
     {
-        ASSERT(thread != nullptr);
-        ASSERT(ThreadIsMTManagedThread(thread));
-        return static_cast<MTManagedThread *>(thread);
+        ASSERT(MutatorIsMTManagedThread(mutator));
+        return static_cast<MTManagedThread *>(mutator);
     }
 
     /**
@@ -155,7 +305,7 @@ public:
      */
     static MTManagedThread *GetCurrentRaw()
     {
-        return CastFromThread(Thread::GetCurrent());
+        return CastFromMutator(Mutator::GetCurrent());
     }
 
     /**
@@ -164,18 +314,18 @@ public:
      */
     static PANDA_PUBLIC_API MTManagedThread *GetCurrent()
     {
-        Thread *thread = Thread::GetCurrent();
-        ASSERT(thread != nullptr);
-        if (ThreadIsMTManagedThread(thread)) {
-            return CastFromThread(thread);
+        Mutator *mutator = Mutator::GetCurrent();
+        ASSERT(mutator != nullptr);
+        if (MutatorIsMTManagedThread(mutator)) {
+            return CastFromMutator(mutator);
         }
         // no guarantee that we will return nullptr here in the future
         return nullptr;
     }
 
-    void WaitWithLockHeld(ThreadStatus waitStatus) REQUIRES(condLock_)
+    void WaitWithLockHeld(MutatorStatus waitStatus) REQUIRES(condLock_)
     {
-        ASSERT(waitStatus == ThreadStatus::IS_WAITING);
+        ASSERT(waitStatus == MutatorStatus::IS_WAITING);
         auto oldStatus = GetStatus();
         UpdateStatus(waitStatus);
         WaitWithLockHeldInternal();
@@ -189,7 +339,7 @@ public:
     {
         static constexpr uint32_t YIELD_ITERS = 500;
         uint32_t loopIter = 0;
-        while (thread->GetStatus() == ThreadStatus::RUNNING) {
+        while (thread->GetStatus() == MutatorStatus::RUNNING) {
             if (!thread->IsSuspended()) {
                 LOG(WARNING, RUNTIME) << "No request for suspension, do not wait thread " << thread->GetId();
                 break;
@@ -207,12 +357,12 @@ public:
         }
     }
 
-    bool TimedWaitWithLockHeld(ThreadStatus waitStatus, uint64_t timeout, uint64_t nanos, bool isAbsolute = false)
+    bool TimedWaitWithLockHeld(MutatorStatus waitStatus, uint64_t timeout, uint64_t nanos, bool isAbsolute = false)
         REQUIRES(condLock_)
     {
-        ASSERT(waitStatus == ThreadStatus::IS_TIMED_WAITING || waitStatus == ThreadStatus::IS_SLEEPING ||
-               waitStatus == ThreadStatus::IS_BLOCKED || waitStatus == ThreadStatus::IS_SUSPENDED ||
-               waitStatus == ThreadStatus::IS_COMPILER_WAITING || waitStatus == ThreadStatus::IS_WAITING_INFLATION);
+        ASSERT(waitStatus == MutatorStatus::IS_TIMED_WAITING || waitStatus == MutatorStatus::IS_SLEEPING ||
+               waitStatus == MutatorStatus::IS_BLOCKED || waitStatus == MutatorStatus::IS_SUSPENDED ||
+               waitStatus == MutatorStatus::IS_COMPILER_WAITING || waitStatus == MutatorStatus::IS_WAITING_INFLATION);
         auto oldStatus = GetStatus();
         UpdateStatus(waitStatus);
         bool res = TimedWaitWithLockHeldInternal(timeout, nanos, isAbsolute);
@@ -223,11 +373,11 @@ public:
         return res;
     }
 
-    bool TimedWait(ThreadStatus waitStatus, uint64_t timeout, uint64_t nanos = 0, bool isAbsolute = false)
+    bool TimedWait(MutatorStatus waitStatus, uint64_t timeout, uint64_t nanos = 0, bool isAbsolute = false)
     {
-        ASSERT(waitStatus == ThreadStatus::IS_TIMED_WAITING || waitStatus == ThreadStatus::IS_SLEEPING ||
-               waitStatus == ThreadStatus::IS_BLOCKED || waitStatus == ThreadStatus::IS_SUSPENDED ||
-               waitStatus == ThreadStatus::IS_COMPILER_WAITING || waitStatus == ThreadStatus::IS_WAITING_INFLATION);
+        ASSERT(waitStatus == MutatorStatus::IS_TIMED_WAITING || waitStatus == MutatorStatus::IS_SLEEPING ||
+               waitStatus == MutatorStatus::IS_BLOCKED || waitStatus == MutatorStatus::IS_SUSPENDED ||
+               waitStatus == MutatorStatus::IS_COMPILER_WAITING || waitStatus == MutatorStatus::IS_WAITING_INFLATION);
         auto oldStatus = GetStatus();
         bool res = false;
         {
@@ -255,7 +405,7 @@ public:
          * All monitors should be released by the thread before completing its execution by stepping into the
          * termination loop.
          * */
-        if (GetStatus() == ThreadStatus::NATIVE) {
+        if (GetStatus() == MutatorStatus::NATIVE) {
             // There is a chance, that the runtime will be destroyed at this time.
             // Thus we should not release monitors for NATIVE status
         } else {
@@ -264,7 +414,7 @@ public:
              * @description This point is right after the thread has released all his monitors and right before it steps
              * into the termination loop.
              * */
-            UpdateStatus(ThreadStatus::IS_TERMINATED_LOOP);
+            UpdateStatus(MutatorStatus::IS_TERMINATED_LOOP);
             /* @sync 3
              * @description This point is right after the thread has released all his monitors and changed status to
              * IS_TERMINATED_LOOP
@@ -349,6 +499,7 @@ protected:
     }
 
 private:
+    Thread *vmThread_ {nullptr};
     MTManagedThread *next_ {nullptr};
 
     LockedObjectList<> localObjectsLocked_;
@@ -366,7 +517,7 @@ private:
     // Count of monitors owned by this thread
     std::atomic_int32_t monitorCount_ {0};
     // Used for dumping stack info
-    ThreadStatus monitorOldStatus_ {ThreadStatus::FINISHED};
+    MutatorStatus monitorOldStatus_ {MutatorStatus::FINISHED};
     ObjectHeader *enterMonitorObject_ {nullptr};
 
     // Monitor, in which this thread is entering. It is required only to detect deadlocks with daemon threads.

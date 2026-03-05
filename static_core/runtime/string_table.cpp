@@ -15,6 +15,7 @@
 
 #include "runtime/string_table.h"
 
+#include "runtime/include/mutator.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/include/coretypes/string.h"
@@ -152,7 +153,7 @@ void StringTable::Table::PreBarrierOnGet(coretypes::String *str)
     // Need pre barrier if string exists in string table, because this string can be got from the
     // string table (like phoenix) and write to a field during concurrent phase and GC does not see it on Remark
     ASSERT_MANAGED_CODE();
-    auto *preWrb = Thread::GetCurrent()->GetPreWrbEntrypoint();
+    auto *preWrb = ManagedThread::GetCurrent()->GetPreWrbEntrypoint();
     if (preWrb != nullptr) {
         reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(str);
     }
@@ -168,8 +169,8 @@ coretypes::String *StringTable::Table::GetOrInternString(const uint8_t *mutf8Dat
     }
 
     // Even if this string is not inserted, it should get removed during GC
-    result =
-        coretypes::String::CreateFromMUtf8(mutf8Data, utf16Length, canBeCompressed, ctx, Thread::GetCurrent()->GetVM());
+    result = coretypes::String::CreateFromMUtf8(mutf8Data, utf16Length, canBeCompressed, ctx,
+                                                Mutator::GetCurrent()->GetVM());
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -188,7 +189,7 @@ coretypes::String *StringTable::Table::GetOrInternString(const uint16_t *utf16Da
     }
 
     // Even if this string is not inserted, it should get removed during GC
-    result = coretypes::String::CreateFromUtf16(utf16Data, utf16Length, ctx, Thread::GetCurrent()->GetVM());
+    result = coretypes::String::CreateFromUtf16(utf16Data, utf16Length, ctx, Mutator::GetCurrent()->GetVM());
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -264,7 +265,7 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const uint8_t *
     }
 
     result = coretypes::String::CreateFromMUtf8(mutf8Data, utf16Length, canBeCompressed, ctx,
-                                                Thread::GetCurrent()->GetVM(), false);
+                                                Mutator::GetCurrent()->GetVM(), false);
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -280,7 +281,7 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const uint16_t 
         return result;
     }
 
-    result = coretypes::String::CreateFromUtf16(utf16Data, utf16Length, ctx, Thread::GetCurrent()->GetVM(), false);
+    result = coretypes::String::CreateFromUtf16(utf16Data, utf16Length, ctx, Mutator::GetCurrent()->GetVM(), false);
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -308,7 +309,7 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const panda_fil
         return result;
     }
     result = coretypes::String::CreateFromMUtf8(data.data, data.utf16Length, data.isAscii, ctx,
-                                                Thread::GetCurrent()->GetVM(), false);
+                                                Mutator::GetCurrent()->GetVM(), false);
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }

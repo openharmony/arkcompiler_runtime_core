@@ -21,11 +21,13 @@
 #include "libarkbase/os/stacktrace.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/locks.h"
+#include "runtime/include/mutator.h"
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/stack_walker.h"
+#include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/safepoint_timer.h"
 #include "runtime/interpreter/runtime_interface.h"
@@ -36,6 +38,7 @@
 #include <sys/time.h>
 
 namespace ark {
+
 using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 
@@ -43,11 +46,11 @@ mem::TLAB *ManagedThread::zeroTlab_ = nullptr;
 static const int MIN_PRIORITY = os::thread::LOWEST_PRIORITY;
 static constexpr int MICROSEC_CONVERSION = 1000000;
 
-static mem::InternalAllocatorPtr GetInternalAllocator(Thread *thread)
+static mem::InternalAllocatorPtr GetInternalAllocator(const Mutator *mutator)
 {
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have HeapManager, so we get internal allocator from
     // runtime
-    mem::HeapManager *heapManager = thread->GetVM()->GetHeapManager();
+    mem::HeapManager *heapManager = mutator->GetVM()->GetHeapManager();
     if (heapManager != nullptr) {
         return heapManager->GetInternalAllocator();
     }
@@ -62,37 +65,25 @@ ManagedThread::ThreadId ManagedThread::GetInternalId()
 
 Thread::~Thread()
 {
-    FreeAllocatedMemory();
-}
-
-void Thread::FreeInternalMemory()
-{
-    FreeAllocatedMemory();
-}
-
-void Thread::FreeAllocatedMemory()
-{
-#ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
+#if defined(PANDA_USE_CUSTOM_SIGNAL_STACK)
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     ASSERT(allocator != nullptr);
     allocator->Free(signalStack_.ss_sp);
-#endif
+#endif  // PANDA_USE_CUSTOM_SIGNAL_STACK
 }
 
-Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorLock()), vm_(vm), threadType_(threadType)
+Thread::Thread(PandaVM *vm) : vm_(vm)
 {
-    InitializeThreadFlag();
-    InitThreadRandomState();
-#ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
+#if defined(PANDA_USE_CUSTOM_SIGNAL_STACK)
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     signalStack_.ss_sp = allocator->Alloc(SIGSTKSZ * 8U);
     signalStack_.ss_size = SIGSTKSZ * 8U;
     signalStack_.ss_flags = 0;
     sigaltstack(&signalStack_, nullptr);
-#endif
+#endif  // PANDA_USE_CUSTOM_SIGNAL_STACK
 }
 
-void Thread::InitThreadRandomState()
+void ManagedThread::InitThreadRandomState()
 {
     struct timeval tv = {0, 0};
     gettimeofday(&tv, nullptr);
@@ -102,11 +93,11 @@ void Thread::InitThreadRandomState()
 /* static */
 void ManagedThread::Initialize()
 {
-    ASSERT(!Thread::GetCurrent());
+    ASSERT(!Mutator::GetCurrent());
     ASSERT(!zeroTlab_);
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     zeroTlab_ = allocator->New<mem::TLAB>(nullptr, 0U);
-    InitializeInitThreadFlag();
+    InitializeInitMutatorFlag();
 }
 
 /* static */
@@ -136,8 +127,8 @@ ManagedThread *ManagedThread::Create(Runtime *runtime, PandaVM *vm, ark::panda_f
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     // Create thread structure using new, we rely on this structure to be accessible in child threads after
     // runtime is destroyed
-    return new ManagedThread(os::thread::GetCurrentThreadId(), allocator, vm, Thread::ThreadType::THREAD_TYPE_MANAGED,
-                             threadLang);
+    return new ManagedThread(os::thread::GetCurrentThreadId(), allocator, vm,
+                             ManagedThread::ThreadType::THREAD_TYPE_MANAGED, threadLang);
 }
 
 /* static - creation of the initial MT Managed thread */
@@ -182,24 +173,26 @@ void ManagedThread::InitCardTableData(mem::GCBarrierSet *barrier)
 }
 
 ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
-                             Thread::ThreadType threadType, ark::panda_file::SourceLang threadLang)
-    : Thread(pandaVm, threadType),
+                             ManagedThread::ThreadType threadType, ark::panda_file::SourceLang threadLang)
+    : Mutator(pandaVm, MutatorType::MANAGED),
       id_(id),
       threadLang_(threadLang),
       ptThreadInfo_(allocator->New<tooling::PtThreadInfo>()),
-      threadFrameStates_(allocator->Adapter())
+      threadFrameStates_(allocator->Adapter()),
+      mThreadType_(threadType)
 {
+    InitThreadRandomState();
     ASSERT(zeroTlab_ != nullptr);
     tlab_ = zeroTlab_;
     entrypointsTable_ = Runtime::GetCurrent()->GetEntrypointsTable();
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
     mem::GC *gc = pandaVm->GetGC();
     if (gc != nullptr) {
-        barrierSet_ = gc->GetBarrierSet();
-        InitCardTableData(barrierSet_);
-        preBarrierType_ = barrierSet_->GetPreType();
-        postBarrierType_ = barrierSet_->GetPostType();
-        if (barrierSet_->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
+        auto *barrierSet = gc->GetBarrierSet();
+        InitCardTableData(barrierSet);
+        preBarrierType_ = barrierSet->GetPreType();
+        postBarrierType_ = barrierSet->GetPostType();
+        if (barrierSet->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
             preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
             // need to initialize in constructor because we have barriers between constructor and InitBuffers in
             // InitializedClasses
@@ -417,7 +410,7 @@ void ManagedThread::NativeCodeBegin()
     threadFrameStates_.push(NATIVE_CODE);
 #endif
     SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), true));
-    UpdateStatus(ThreadStatus::NATIVE);
+    UpdateStatus(MutatorStatus::NATIVE);
     isManagedScope_ = false;
 }
 
@@ -426,7 +419,7 @@ void ManagedThread::NativeCodeEnd()
     // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
     // If this was last frame, it should have been called from Destroy() and it should UpdateStatus to FINISHED
     // after this method
-    UpdateStatus(ThreadStatus::RUNNING);
+    UpdateStatus(MutatorStatus::RUNNING);
     SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), false));
     isManagedScope_ = true;
 #if defined(VERBOSE_THREAD_STATE_LOG)
@@ -442,13 +435,13 @@ bool ManagedThread::IsInNativeCode() const
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     return threadFrameStates_.top() == NATIVE_CODE;
 #endif
-    return GetStatus() == ThreadStatus::NATIVE;
+    return GetStatus() == MutatorStatus::NATIVE;
 }
 
 void ManagedThread::ManagedCodeBegin()
 {
     // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
-    UpdateStatus(ThreadStatus::RUNNING);
+    UpdateStatus(MutatorStatus::RUNNING);
     SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), false));
     isManagedScope_ = true;
 #if defined(VERBOSE_THREAD_STATE_LOG)
@@ -467,7 +460,7 @@ void ManagedThread::ManagedCodeEnd()
 #endif
     SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), true));
     // Should be NATIVE_CODE
-    UpdateStatus(ThreadStatus::NATIVE);
+    UpdateStatus(MutatorStatus::NATIVE);
     isManagedScope_ = false;
 }
 
@@ -477,7 +470,7 @@ bool ManagedThread::IsManagedCode() const
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     return threadFrameStates_.top() == MANAGED_CODE;
 #endif
-    return GetStatus() == ThreadStatus::RUNNING;
+    return GetStatus() == MutatorStatus::RUNNING;
 }
 
 // Since we don't allow two consecutive NativeCode frames, there is no managed code on stack if
@@ -503,34 +496,34 @@ bool ManagedThread::HasClearStack() const
     return threadFrameStates_.empty();
 }
 
-PandaString ManagedThread::ThreadStatusAsString(enum ThreadStatus status)
+PandaString ManagedThread::ThreadStatusAsString(enum MutatorStatus status)
 {
     switch (status) {
-        case ThreadStatus::CREATED:
+        case MutatorStatus::CREATED:
             return "New";
-        case ThreadStatus::RUNNING:
+        case MutatorStatus::RUNNING:
             return "Runnable";
-        case ThreadStatus::IS_BLOCKED:
+        case MutatorStatus::IS_BLOCKED:
             return "Blocked";
-        case ThreadStatus::IS_WAITING:
+        case MutatorStatus::IS_WAITING:
             return "Waiting";
-        case ThreadStatus::IS_TIMED_WAITING:
+        case MutatorStatus::IS_TIMED_WAITING:
             return "Timed_waiting";
-        case ThreadStatus::IS_SUSPENDED:
+        case MutatorStatus::IS_SUSPENDED:
             return "Suspended";
-        case ThreadStatus::IS_COMPILER_WAITING:
+        case MutatorStatus::IS_COMPILER_WAITING:
             return "Compiler_waiting";
-        case ThreadStatus::IS_WAITING_INFLATION:
+        case MutatorStatus::IS_WAITING_INFLATION:
             return "Waiting_inflation";
-        case ThreadStatus::IS_SLEEPING:
+        case MutatorStatus::IS_SLEEPING:
             return "Sleeping";
-        case ThreadStatus::IS_TERMINATED_LOOP:
+        case MutatorStatus::IS_TERMINATED_LOOP:
             return "Terminated_loop";
-        case ThreadStatus::TERMINATING:
+        case MutatorStatus::TERMINATING:
             return "Terminating";
-        case ThreadStatus::NATIVE:
+        case MutatorStatus::NATIVE:
             return "Native";
-        case ThreadStatus::FINISHED:
+        case MutatorStatus::FINISHED:
             return "Terminated";
         default:
             return "unknown";
@@ -567,7 +560,7 @@ PandaString ManagedThread::LogThreadStack(ThreadState newState) const
 
 MTManagedThread::MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
                                  ark::panda_file::SourceLang threadLang)
-    : ManagedThread(id, allocator, pandaVm, Thread::ThreadType::THREAD_TYPE_MT_MANAGED, threadLang),
+    : ManagedThread(id, allocator, pandaVm, ManagedThread::ThreadType::THREAD_TYPE_MT_MANAGED, threadLang),
       enteringMonitor_(nullptr)
 {
     ASSERT(pandaVm != nullptr);
@@ -589,6 +582,7 @@ MTManagedThread::~MTManagedThread()
     ASSERT(internalId_ != 0);
     auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
     threadManager->RemoveInternalThreadId(internalId_);
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(vmThread_);
 }
 
 void ManagedThread::PushLocalObject(ObjectHeader **objectHeader)
@@ -661,6 +655,10 @@ void MTManagedThread::ProcessCreatedThread()
     ManagedThread::SetCurrent(this);
     // Runtime takes ownership of the thread
     trace::ScopedTrace scopedTrace2("ThreadManager::RegisterThread");
+    // MTManagedThread represents class for one managed mutator per OS thread (unlike ManagedThread).
+    // A thread instance should be created in OS thread associated with MTManagedThread, so
+    // the related Thread instance is created here. The instance will be deleted in the destructor
+    vmThread_ = Runtime::GetCurrent()->GetInternalAllocator()->New<Thread>(GetVM());
     auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
     threadManager->RegisterThread(this);
     NativeCodeBegin();
@@ -675,7 +673,7 @@ bool MTManagedThread::Sleep(uint64_t ms)
     ASSERT(thread != nullptr);
     bool isInterrupted = thread->IsInterrupted();
     if (!isInterrupted) {
-        thread->TimedWait(ThreadStatus::IS_SLEEPING, ms, 0);
+        thread->TimedWait(MutatorStatus::IS_SLEEPING, ms, 0);
         isInterrupted = thread->IsInterrupted();
     }
     return isInterrupted;
@@ -773,10 +771,10 @@ void ManagedThread::VisitGCRoots(const GCRootVisitor &cb)
 void MTManagedThread::Destroy()
 {
     ASSERT(this == ManagedThread::GetCurrent());
-    ASSERT(GetStatus() != ThreadStatus::FINISHED);
+    ASSERT(GetStatus() != MutatorStatus::FINISHED);
 
-    UpdateStatus(ThreadStatus::TERMINATING);  // Set this status to prevent runtime for destroying itself while this
-                                              // NATTIVE thread
+    UpdateStatus(MutatorStatus::TERMINATING);  // Set this status to prevent runtime for destroying itself while this
+                                               // NATTIVE thread
     // is trying to acquire runtime.
     ReleaseMonitors();
     if (!IsDaemon()) {
@@ -837,6 +835,8 @@ void MTManagedThread::FreeInternalMemory()
 {
     localObjectsLocked_.~LockedObjectList<>();
     ptReferenceStorage_.reset();
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(vmThread_);
+    vmThread_ = nullptr;
 
     ManagedThread::FreeInternalMemory();
 }
@@ -889,7 +889,6 @@ void ManagedThread::FreeInternalMemory()
     objectHeaderHandleScopes_.~PandaVector<HandleScope<ObjectHeader *> *>();
 
     FreePreBuffer();
-    Thread::FreeInternalMemory();
 }
 
 void ManagedThread::PrintSuspensionStackIfNeeded()
@@ -937,7 +936,7 @@ void ManagedThread::CleanUp()
     objectHeaderHandleStorage_->FreeHandles(0);
     objectHeaderHandleScopes_.clear();
 
-    CleanUpThreadStatus();
+    CleanUpMutatorStatus();
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 

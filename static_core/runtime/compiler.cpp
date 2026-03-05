@@ -25,8 +25,8 @@
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/field.h"
+#include "runtime/include/mutator.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/mem/heap_manager.h"
@@ -643,13 +643,13 @@ RuntimeInterface::IdType PandaRuntimeInterface::GetLiteralArrayClassIdWithinFile
 bool PandaRuntimeInterface::CanUseTlabForClass(ClassPtr klass) const
 {
     auto cls = ClassCast(klass);
-    return !Thread::GetCurrent()->GetVM()->GetHeapManager()->IsObjectFinalized(cls) && !cls->IsVariableSize() &&
+    return !Mutator::GetCurrent()->GetVM()->GetHeapManager()->IsObjectFinalized(cls) && !cls->IsVariableSize() &&
            cls->IsInstantiable();
 }
 
 size_t PandaRuntimeInterface::GetTLABMaxSize() const
 {
-    return Thread::GetCurrent()->GetVM()->GetHeapManager()->GetTLABMaxAllocSize();
+    return Mutator::GetCurrent()->GetVM()->GetHeapManager()->GetTLABMaxAllocSize();
 }
 
 bool PandaRuntimeInterface::CanScalarReplaceObject(ClassPtr klass) const
@@ -845,23 +845,23 @@ RuntimeInterface::FieldId PandaRuntimeInterface::GetFieldId(FieldPtr field) cons
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPreReadType() const
 {
-    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreReadType();
+    return Mutator::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreReadType();
 }
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPreType() const
 {
-    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreType();
+    return Mutator::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreType();
 }
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPostType() const
 {
-    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPostType();
+    return Mutator::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPostType();
 }
 
 ark::mem::BarrierOperand PandaRuntimeInterface::GetBarrierOperand(ark::mem::BarrierPosition barrierPosition,
                                                                   std::string_view operandName) const
 {
-    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetBarrierOperand(barrierPosition, operandName);
+    return Mutator::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetBarrierOperand(barrierPosition, operandName);
 }
 
 uint32_t PandaRuntimeInterface::GetFunctionTargetOffset([[maybe_unused]] Arch arch) const
@@ -896,16 +896,16 @@ bool PandaRuntimeInterface::HasSafepointDuringCall() const
 
 RuntimeInterface::ThreadPtr PandaRuntimeInterface::CreateCompilerThread()
 {
-    ASSERT(Thread::GetCurrent() != nullptr);
+    ASSERT(Mutator::GetCurrent() != nullptr);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    return allocator->New<Thread>(PandaVM::GetCurrent(), Thread::ThreadType::THREAD_TYPE_COMPILER);
+    return allocator->New<Mutator>(PandaVM::GetCurrent(), Mutator::MutatorType::COMPILER);
 }
 
 void PandaRuntimeInterface::DestroyCompilerThread(ThreadPtr thread)
 {
     ASSERT(thread != nullptr);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    allocator->Delete(static_cast<Thread *>(thread));
+    allocator->Delete(static_cast<Mutator *>(thread));
 }
 
 InlineCachesWrapper::CallKind InlineCachesWrapper::GetClasses(PandaRuntimeInterface::MethodPtr m, uintptr_t pc,
@@ -982,7 +982,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
     }
     if (noAsyncJit_) {
         // Change thread status to release mutator lock, in case JIT thread needs to invalidate compiled code
-        ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_COMPILER_WAITING);
+        ScopedChangeMutatorStatus s(ManagedThread::GetCurrent(), MutatorStatus::IS_COMPILER_WAITING);
 
         auto status = method->GetCompilationStatus();
         for (; (status == Method::WAITING) || (status == Method::COMPILATION);
@@ -996,7 +996,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
             // Issue: #20680
             if (thread != nullptr) {
                 static constexpr uint64_t SLEEP_MS = 10;
-                thread->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
+                thread->TimedWait(MutatorStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
             }
         }
     }
@@ -1163,7 +1163,7 @@ uint8_t CompileMethodImpl(coretypes::String *fullMethodName, ClassLinkerContext 
         auto thread = MTManagedThread::GetCurrent();
         if (thread != nullptr) {
             static constexpr uint64_t SLEEP_MS = 10;
-            thread->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
+            thread->TimedWait(MutatorStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
         }
     }
     static constexpr uint8_t COMPILATION_FAILED = 5;

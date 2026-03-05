@@ -310,8 +310,8 @@ bool PandaEtsVM::Initialize()
     classLinker_->GetEtsClassLinkerExtension()->InitializeBuiltinClasses();
 
     if (Runtime::GetOptions().ShouldLoadBootPandaFiles()) {
-        ASSERT(Thread::GetCurrent() != nullptr);
-        ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
+        ASSERT(ManagedThread::GetCurrent() != nullptr);
+        ASSERT(GetThreadManager()->GetMainThread() == ManagedThread::GetCurrent());
         auto *coro = EtsCoroutine::GetCurrent();
 
         ASSERT(coro != nullptr);

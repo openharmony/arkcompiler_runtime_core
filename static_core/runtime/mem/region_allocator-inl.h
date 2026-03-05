@@ -18,7 +18,6 @@
 #include "libarkbase/mem/mem.h"
 #include "libarkbase/utils/logger.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/mem/region_allocator.h"
 #include "runtime/mem/region_space-inl.h"

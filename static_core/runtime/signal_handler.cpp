@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "include/stack_walker.h"
 #include "tooling/pt_thread_info.h"
 #include "tooling/sampler/sampling_profiler.h"
+#include "runtime/include/mutator.h"
 #include "runtime/runtime_helpers.h"
 
 #ifdef PANDA_TARGET_AMD64
@@ -174,8 +175,8 @@ void SignalManager::DeleteHandlersArray()
 
 bool InAllocatedCodeRange(uintptr_t pc)
 {
-    Thread *thread = Thread::GetCurrent();
-    if (thread == nullptr) {
+    Mutator *mutator = Mutator::GetCurrent();
+    if (mutator == nullptr) {
         // Current thread is not attatched to any of the VMs
         return false;
     }
@@ -184,7 +185,7 @@ bool InAllocatedCodeRange(uintptr_t pc)
         return true;
     }
 
-    auto heapManager = thread->GetVM()->GetHeapManager();
+    auto heapManager = mutator->GetVM()->GetHeapManager();
     if (heapManager == nullptr) {
         return false;
     }
@@ -437,13 +438,13 @@ bool CrashFallbackDumpHandler::Action(int sig, [[maybe_unused]] siginfo_t *sigin
 
     auto thread = ManagedThread::GetCurrent();
     if (thread == nullptr) {
-        auto vmThread = Thread::GetCurrent();
+        auto vmThread = Mutator::GetCurrent();
         if (vmThread == nullptr) {
             LOG(ERROR, RUNTIME) << "SIGSEGV in unknown thread";
             return false;
         }
         LOG(ERROR, RUNTIME) << "SIGSEGV in runtime thread: threadType="
-                            << helpers::ToUnderlying(vmThread->GetThreadType());
+                            << helpers::ToUnderlying(vmThread->GetMutatorType());
         PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::RUNTIME, false).GetStream());
         return false;
     }

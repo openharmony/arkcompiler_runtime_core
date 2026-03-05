@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,11 +106,11 @@ void Monitor::InflateThinLock(MTManagedThread *thread, [[maybe_unused]] const VM
     auto threadManager = reinterpret_cast<MTThreadManager *>(thread->GetVM()->GetThreadManager());
     os::thread::ThreadId ownerThreadId = mark.GetThreadId();
     {
-        ScopedChangeThreadStatus ets(thread, ThreadStatus::IS_WAITING_INFLATION);
+        ScopedChangeMutatorStatus ets(thread, MutatorStatus::IS_WAITING_INFLATION);
         owner = threadManager->SuspendAndWaitThreadByInternalThreadId(ownerThreadId);
     }
     thread->SetEnterMonitorObject(nullptr);
-    thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+    thread->SetWaitingMonitorOldStatus(MutatorStatus::FINISHED);
     // Thread could have finished by the time we tried stopping it
     if (owner != nullptr) {
         // NB! Inflate can do nothing if monitor is already unlocked or acquired by other thread.
@@ -127,10 +127,10 @@ void Monitor::InflateThinLock(MTManagedThread *thread, [[maybe_unused]] const VM
     // to heavy monitor
     {
         static constexpr uint64_t SLEEP_MS = 10;
-        thread->TimedWait(ThreadStatus::IS_WAITING_INFLATION, SLEEP_MS, 0);
+        thread->TimedWait(MutatorStatus::IS_WAITING_INFLATION, SLEEP_MS, 0);
     }
     thread->SetEnterMonitorObject(nullptr);
-    thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+    thread->SetWaitingMonitorOldStatus(MutatorStatus::FINISHED);
 #endif
 }
 
@@ -176,7 +176,7 @@ std::optional<Monitor::State> Monitor::HandleLightLockedState(MarkWord &mark, MT
             // Retried acquiring light lock for too long, do inflation
 
             thread->SetEnterMonitorObject(objHandle.GetPtr());
-            thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_WAITING_INFLATION);
+            thread->SetWaitingMonitorOldStatus(MutatorStatus::IS_WAITING_INFLATION);
             Monitor::InflateThinLock(thread, objHandle);
 #if defined(PANDA_USE_FUTEX)
             lightlockRetryCount = 0;
@@ -366,7 +366,7 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
     }
 }
 
-static inline bool DoWaitInternal(MTManagedThread *thread, ThreadStatus status, uint64_t timeout, uint64_t nanos)
+static inline bool DoWaitInternal(MTManagedThread *thread, MutatorStatus status, uint64_t timeout, uint64_t nanos)
     REQUIRES(*(thread->GetWaitingMutex()))
 {
     bool isTimeout = false;
@@ -380,7 +380,7 @@ static inline bool DoWaitInternal(MTManagedThread *thread, ThreadStatus status, 
 }
 
 Monitor::State Monitor::WaitWithHeavyLockedState(MTManagedThread *thread, VMHandle<ObjectHeader> &objHandle,
-                                                 MarkWord &mark, ThreadStatus status, uint64_t timeout, uint64_t nanos,
+                                                 MarkWord &mark, MutatorStatus status, uint64_t timeout, uint64_t nanos,
                                                  bool ignoreInterruption)
 {
     State resultState = State::OK;
@@ -446,7 +446,7 @@ Monitor::State Monitor::WaitWithHeavyLockedState(MTManagedThread *thread, VMHand
     }
 
     thread->SetWaitingMonitor(nullptr);
-    thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+    thread->SetWaitingMonitorOldStatus(MutatorStatus::FINISHED);
     Runtime::GetCurrent()->GetNotificationManager()->MonitorWaitedEvent(objHandle.GetPtr(), isTimeout);
 
     return resultState;
@@ -454,7 +454,7 @@ Monitor::State Monitor::WaitWithHeavyLockedState(MTManagedThread *thread, VMHand
 
 /** Zero timeout is used as infinite wait (see docs)
  */
-Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t timeout, uint64_t nanos,
+Monitor::State Monitor::Wait(ObjectHeader *obj, MutatorStatus status, uint64_t timeout, uint64_t nanos,
                              bool ignoreInterruption)
 {
     ASSERT(obj != nullptr);
@@ -603,9 +603,9 @@ void Monitor::Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj
     // Atomic with relaxed order reason: memory access in monitor
     waitersCounter_.fetch_add(1, std::memory_order_relaxed);
     thread->SetEnterMonitorObject(objHandle.GetPtr());
-    thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_BLOCKED);
+    thread->SetWaitingMonitorOldStatus(MutatorStatus::IS_BLOCKED);
     {
-        ScopedChangeThreadStatus ets(thread, ThreadStatus::IS_BLOCKED);
+        ScopedChangeMutatorStatus ets(thread, MutatorStatus::IS_BLOCKED);
         // Save current monitor, on which the given thread is blocked.
         // It can be used to detect potential deadlock with daemon threds.
         thread->SetEnteringMonitor(this);
@@ -620,7 +620,7 @@ void Monitor::Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj
         this->recursiveCounter_++;
     }
     thread->SetEnterMonitorObject(nullptr);
-    thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+    thread->SetWaitingMonitorOldStatus(MutatorStatus::FINISHED);
     // Atomic with relaxed order reason: memory access in monitor
     waitersCounter_.fetch_sub(1, std::memory_order_relaxed);
     // Even thout these 2 warnings are valid, We suppress them. Reason is to have consistent logging
@@ -677,7 +677,7 @@ void Monitor::InitWithOwner(MTManagedThread *thread, ObjectHeader *obj)
     ASSERT(this->GetOwner() == nullptr);
 
 #ifdef PANDA_USE_FUTEX
-    ASSERT(thread == MTManagedThread::GetCurrent() || thread->GetStatus() != ThreadStatus::RUNNING);
+    ASSERT(thread == MTManagedThread::GetCurrent() || thread->GetStatus() != MutatorStatus::RUNNING);
     lock_.LockForOther(thread->GetId());
 #else
     ASSERT(thread == MTManagedThread::GetCurrent());
@@ -705,7 +705,7 @@ void Monitor::ReleaseOnFailedInflate(MTManagedThread *thread)
     [[maybe_unused]] bool success = this->SetOwner(thread, nullptr);
     ASSERT(success);
 #ifdef PANDA_USE_FUTEX
-    ASSERT(thread == MTManagedThread::GetCurrent() || thread->GetStatus() != ThreadStatus::RUNNING);
+    ASSERT(thread == MTManagedThread::GetCurrent() || thread->GetStatus() != MutatorStatus::RUNNING);
     lock_.UnlockForOther(thread->GetId());
 #else
     ASSERT(thread == MTManagedThread::GetCurrent());

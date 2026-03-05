@@ -27,10 +27,10 @@ namespace ark {
 /* static */
 mem::GCBarrierSet *ObjectAccessor::GetBarrierSet()
 {
-    // The getter for non-managed threads (JIT, GC)
-    const auto *thread = Thread::GetCurrent();
-    ASSERT(thread != nullptr);
-    return thread->GetVM()->GetGC()->GetBarrierSet();
+    // The getter for non-managed mutators (JIT, GC)
+    const auto *mutator = Mutator::GetCurrent();
+    ASSERT(mutator != nullptr);
+    return mutator->GetBarrierSet();
 }
 
 /* static */

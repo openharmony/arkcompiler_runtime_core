@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,8 @@ public:
         if (managedThread_ == nullptr) {
             return PT_THREAD_NONE_ID;
         }
-        if (Coroutine::ThreadIsCoroutine(managedThread_)) {
-            return Coroutine::CastFromThread(managedThread_)->GetCoroutineId();
+        if (Coroutine::MutatorIsCoroutine(managedThread_)) {
+            return Coroutine::CastFromMutator(managedThread_)->GetCoroutineId();
         }
         return managedThread_->GetId();
     }

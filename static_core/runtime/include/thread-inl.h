@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "runtime/handle_base.h"
 #include "runtime/global_handle_storage-inl.h"
 #include "runtime/handle_storage-inl.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
 
 namespace ark {

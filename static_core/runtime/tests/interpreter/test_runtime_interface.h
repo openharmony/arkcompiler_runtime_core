@@ -396,7 +396,7 @@ public:
     static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
     {
         uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
-        auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
+        auto allocator = Mutator::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
         void *mem = allocator->Allocate(ark::Frame::GetAllocSize(ark::Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz),
                                         GetLogAlignment(8), ManagedThread::GetCurrent());
         return new (Frame::FromExt(mem, extSz)) ark::Frame(mem, method, prev, nregs);
@@ -406,7 +406,7 @@ public:
                                                    Method *method, Frame *prev)
     {
         uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
-        auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
+        auto allocator = Mutator::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
         void *mem =
             allocator->Allocate(ark::Frame::GetAllocSize(size, extSz), GetLogAlignment(8), ManagedThread::GetCurrent());
         if (UNLIKELY(mem == nullptr)) {

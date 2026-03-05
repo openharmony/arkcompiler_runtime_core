@@ -26,7 +26,6 @@
 #include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 

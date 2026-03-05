@@ -20,7 +20,6 @@
 #include "ets_vm.h"
 #include "gtest/gtest.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 #include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 
 #include <array>

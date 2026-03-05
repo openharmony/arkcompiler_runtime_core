@@ -44,7 +44,7 @@ Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, Co
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                      ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
                      std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)
-    : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
+    : ManagedThread(id, allocator, vm, ManagedThread::ThreadType::THREAD_TYPE_COROUTINE, threadLang),
       name_(std::move(name)),
       context_(context),
       manager_(static_cast<CoroutineManager *>(GetVM()->GetThreadManager())),

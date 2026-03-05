@@ -221,8 +221,8 @@ ani_env *GetAniEnv()
 
 #define NAPI_TO_ANI_SCOPE                                       \
     do {                                                        \
-        auto *t = Thread::GetCurrent();                         \
-        if (t == nullptr) {                                     \
+        auto *m = Mutator::GetCurrent();                        \
+        if (m == nullptr) {                                     \
             STValueThrowJSError(env, "Thread is not attached"); \
             /* CC-OFFNXT(G.PRE.05) function gen */              \
             return nullptr;                                     \

@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "libarkbase/mem/mem.h"
-#include "runtime/include/thread.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
@@ -73,7 +72,7 @@ public:
 
 TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
 {
-    mem::MemStatsType *memStats = Thread::GetCurrent()->GetVM()->GetMemStats();
+    mem::MemStatsType *memStats = Mutator::GetCurrent()->GetVM()->GetMemStats();
 
     ani_class testClass;
     ASSERT_EQ(env_->FindClass("RegisterNativeAllocationTest.NativeAllocationTest", &testClass), ANI_OK);

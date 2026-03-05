@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ void EtsPlugin::DestroyManagedThread(ManagedThread *thr) const
     auto rt = Runtime::GetCurrent();
     auto vm = rt->GetPandaVM();
     auto coroman = static_cast<CoroutineManager *>(vm->GetThreadManager());
-    coroman->DestroyEntrypointlessCoroutine(Coroutine::CastFromThread(thr));
+    coroman->DestroyEntrypointlessCoroutine(Coroutine::CastFromMutator(thr));
 }
 
 void EtsPlugin::TypeSystemSetup(TypeSystem *types) const

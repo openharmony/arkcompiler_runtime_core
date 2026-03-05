@@ -1834,7 +1834,7 @@ public:
             return {};
         }
 
-        ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
+        ScopedChangeMutatorStatus st {ManagedThread::GetCurrent(), MutatorStatus::RUNNING};
         Job::ErrorHandler handler;
         auto typeCls = field->ResolveTypeClass(&handler);
         if (typeCls == nullptr) {

@@ -46,7 +46,7 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
       langCtx_ {ark::plugins::GetLanguageContextBase(lang)},
       bootLinkerCtx_ {service->GetClassLinker()->GetExtension(LanguageContext {langCtx_})->GetBootContext()}
 {
-    ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+    ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
     auto compute = [&](uint8_t const *descr) -> Type {
         return descr != nullptr ? BootDescriptorToType(descr) : Type {};
     };
@@ -116,7 +116,7 @@ Type TypeSystem::NormalizedTypeOf(Type type)
 
 MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
 {
-    ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+    ScopedChangeMutatorStatus st(ManagedThread::GetCurrent(), MutatorStatus::RUNNING);
     auto &&methodId = method->GetUniqId();
     auto it = signatureOfMethod_.find(methodId);
     if (it != signatureOfMethod_.end()) {

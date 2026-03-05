@@ -18,6 +18,7 @@
 
 #include "include/external_callback_poster.h"
 #include "runtime/include/runtime.h"
+#include "runtime/include/thread.h"
 #include "runtime/coroutines/local_storage.h"
 #include "runtime/coroutines/coroutine_worker_domain.h"
 
@@ -38,7 +39,7 @@ enum class CoroutinePriority {
 };
 
 /// Represents a coroutine worker, which can host multiple coroutines and schedule them.
-class CoroutineWorker {
+class CoroutineWorker : public Thread {
 public:
     enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, FLATTENED_STRING_CACHE, LAST_ID };
     using LocalStorage = StaticLocalStorage<DataIdx>;
@@ -50,13 +51,13 @@ public:
     NO_MOVE_SEMANTIC(CoroutineWorker);
 
     CoroutineWorker(Runtime *runtime, PandaVM *vm, PandaString name, Id id, bool isMainWorker)
-        : runtime_(runtime), vm_(vm), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
+        : Thread(vm), runtime_(runtime), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
     {
 #if defined(ARK_USE_COMMON_RUNTIME)
         mutator_ = common::Mutator::CreateAndRegisterNewMutator(nullptr);
 #endif  // ARK_USE_COMMON_RUNTIME
     }
-    virtual ~CoroutineWorker()
+    ~CoroutineWorker() override
     {
         DestroyCallbackPoster();
     }
@@ -64,11 +65,6 @@ public:
     Runtime *GetRuntime()
     {
         return runtime_;
-    }
-
-    PandaVM *GetPandaVM() const
-    {
-        return vm_;
     }
 
     Id GetId() const
@@ -148,7 +144,6 @@ private:
     virtual void CacheLocalObjectsInCoroutines() {}
 
     Runtime *runtime_ = nullptr;
-    PandaVM *vm_ = nullptr;
     PandaString name_;
     Id id_ = INVALID_ID;
     bool isMainWorker_ = false;

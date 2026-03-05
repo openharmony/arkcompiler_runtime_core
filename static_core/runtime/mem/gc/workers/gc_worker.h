@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,12 @@
 #define PANDA_RUNTIME_MEM_GC_WORKERS_GC_WORKER_H
 
 #include "libarkbase/taskmanager/task.h"
+#include "runtime/include/mutator.h"
 #include "runtime/mem/gc/gc_queue.h"
 
 namespace ark {
 // Forward declaration for GCWorker
-class Thread;
+class Mutator;
 }  // namespace ark
 
 namespace ark::mem {
@@ -38,7 +39,7 @@ public:
     /**
      * @brief Create local gc tasks queue and structure for gc panda thread.
      * Don't start gc worker
-     * @see ark::Thread
+     * @see ark::Mutator
      * @see CreateAndStartWorker
      * @see FinalizeAndDestroyWorker
      *
@@ -79,7 +80,7 @@ private:
 
     GC *gc_ {nullptr};
     GCQueueInterface *gcTaskQueue_ {nullptr};
-    Thread *gcThread_ {nullptr};
+    Mutator *gcMutator_ {nullptr};
     uint32_t collectNumberMod_ {1U};
     /* Internal thread specific variables */
     std::thread *gcInternalThread_ {nullptr};

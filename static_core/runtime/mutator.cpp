@@ -13,97 +13,128 @@
  * limitations under the License.
  */
 
-#include "runtime/include/runtime.h"
-#include "runtime/include/thread_proxy.h"
+#include "runtime/include/mutator.h"
+#include "runtime/include/panda_vm.h"
 #include "runtime/interpreter/runtime_interface.h"
-
-#include "libarkbase/macros.h"
 
 namespace ark {
 
-CONSTEXPR_IN_RELEASE ThreadFlag GetInitialThreadFlag()
+Mutator::Mutator(PandaVM *vm, MutatorType type) : vm_(vm), type_(type)
+{
+    ASSERT(vm_ != nullptr);
+    mutatorLock_ = vm_->GetMutatorLock();
+    // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
+    auto *gc = vm_->GetGC();
+    if (gc != nullptr) {
+        barrierSet_ = gc->GetBarrierSet();
+    }
+    ASSERT(type_ != MutatorType::NONE);
+    InitializeMutatorFlag();
+}
+
+CONSTEXPR_IN_RELEASE MutatorFlag GetInitialMutatorFlag()
 {
 #ifndef NDEBUG
-    ThreadFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
+    MutatorFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
     return initialFlag;
 #else
     return NO_FLAGS;
 #endif
 }
 
-ThreadFlag ThreadProxyStatic::initialThreadFlag_ = NO_FLAGS;
+MutatorFlag Mutator::initialMutatorFlag_ = NO_FLAGS;
 
 /* static */
-void ThreadProxyStatic::InitializeInitThreadFlag()
+void Mutator::InitializeInitMutatorFlag()
 {
-    initialThreadFlag_ = GetInitialThreadFlag();
+    initialMutatorFlag_ = GetInitialMutatorFlag();
 }
 
-bool ThreadProxyStatic::TestAllFlags() const
+bool Mutator::TestAllFlags() const
 {
-    return (fts_.asStruct.flags) != initialThreadFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+#if !defined(ARK_USE_COMMON_RUNTIME)
+    return (fms_.asStruct.flags) != initialMutatorFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+#else
+    return GetMutator()->HasSuspendRequest();
+#endif
 }
 
-void ThreadProxyStatic::SetFlag(ThreadFlag flag)
+void Mutator::SetFlag(MutatorFlag flag)
 {
     // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asAtomic.flags.fetch_or(flag, std::memory_order_seq_cst);
+    fms_.asAtomic.flags.fetch_or(flag, std::memory_order_seq_cst);
 }
 
-void ThreadProxyStatic::ClearFlag(ThreadFlag flag)
+void Mutator::ClearFlag(MutatorFlag flag)
 {
     // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asAtomic.flags.fetch_and(UINT16_MAX ^ flag, std::memory_order_seq_cst);
+    fms_.asAtomic.flags.fetch_and(UINT16_MAX ^ flag, std::memory_order_seq_cst);
 }
 
-uint32_t ThreadProxyStatic::ReadFlagsAndThreadStatusUnsafe()
+uint32_t Mutator::ReadFlagsAndMutatorStatusUnsafe()
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    return fts_.asInt;
+    return fms_.asInt;
 }
 
-enum ThreadStatus ThreadProxyStatic::GetStatus() const
+enum MutatorStatus Mutator::GetStatus() const
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     // Atomic with acquire order reason: data race with flags with dependecies on reads after
     // the load which should become visible
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    return static_cast<enum ThreadStatus>(fts_.asAtomic.status.load(std::memory_order_acquire));
+    return static_cast<enum MutatorStatus>(fms_.asAtomic.status.load(std::memory_order_acquire));
+#else
+    if (GetMutator()->IsInRunningState()) {
+        return MutatorStatus::RUNNING;
+    }
+    return MutatorStatus::NATIVE;
+#endif
 }
 
-uint32_t ThreadProxyStatic::ReadFlagsUnsafe() const
+uint32_t Mutator::ReadFlagsUnsafe() const
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    return fts_.asStruct.flags;
+    return fms_.asStruct.flags;
 }
 
-void ThreadProxyStatic::InitializeThreadFlag()
+void Mutator::InitializeMutatorFlag()
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asInt = initialThreadFlag_;
+    fms_.asInt = initialMutatorFlag_;
+#endif
 }
 
-void ThreadProxyStatic::CleanUpThreadStatus()
+void Mutator::CleanUpMutatorStatus()
 {
-    InitializeThreadFlag();
-    StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(ThreadStatus::CREATED);
+#if !defined(ARK_USE_COMMON_RUNTIME)
+    InitializeMutatorFlag();
+    StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(MutatorStatus::CREATED);
+#endif
 }
 
-void ThreadProxyStatic::UpdateStatus(enum ThreadStatus status)
+#if defined(ARK_USE_COMMON_RUNTIME)
+NO_THREAD_SAFETY_ANALYSIS void Mutator::UpdateStatus(enum MutatorStatus status)
+#else
+void Mutator::UpdateStatus(enum MutatorStatus status)
+#endif
 {
-    ThreadStatus oldStatus = GetStatus();
-    if (oldStatus == ThreadStatus::RUNNING && status != ThreadStatus::RUNNING) {
+    MutatorStatus oldStatus = GetStatus();
+#if !defined(ARK_USE_COMMON_RUNTIME)
+    if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
         TransitionFromRunningToSuspended(status);
-    } else if (oldStatus != ThreadStatus::RUNNING && status == ThreadStatus::RUNNING) {
+    } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
         // NB! This thread is treated as suspended so when we transition from suspended state to
         // running we need to check suspension flag and counter so SafepointPoll has to be done before
         // acquiring mutator_lock.
         // StoreStatus acquires lock here
-        StoreStatus<CHECK_SAFEPOINT, READLOCK>(ThreadStatus::RUNNING);
-    } else if (oldStatus == ThreadStatus::NATIVE && status != ThreadStatus::IS_TERMINATED_LOOP &&
+        StoreStatus<CHECK_SAFEPOINT, READLOCK>(MutatorStatus::RUNNING);
+    } else if (oldStatus == MutatorStatus::NATIVE && status != MutatorStatus::IS_TERMINATED_LOOP &&
                IsRuntimeTerminated()) {
         // If a daemon thread with NATIVE status was deregistered, it should not access any managed object,
         // i.e. change its status from NATIVE, because such object may already be deleted by the runtime.
@@ -115,31 +146,46 @@ void ThreadProxyStatic::UpdateStatus(enum ThreadStatus status)
         // NB! Status is not a simple bit, without atomics it can produce faulty GetStatus.
         StoreStatus(status);
     }
+#else
+    if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
+        GetMutator()->TransferToNativeIfInRunning();
+        GetMutatorLock()->Unlock();
+    } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
+        GetMutator()->TransferToRunningIfInNative();
+        GetMutatorLock()->ReadLock();
+    }
+#endif
 }
 
-void ThreadProxyStatic::TransitionFromRunningToSuspended(enum ThreadStatus status)
+void Mutator::TransitionFromRunningToSuspended(enum MutatorStatus status)
 {
     // Do Unlock after StoreStatus, because the thread requesting a suspension should see an updated status
     StoreStatus(status);
     GetMutatorLock()->Unlock();
 }
 
-void ThreadProxyStatic::SuspendCheck()
+void Mutator::SuspendCheck()
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     // We should use internal suspension to avoid missing call of IncSuspend
     SuspendImpl(true);
     GetMutatorLock()->Unlock();
     GetMutatorLock()->ReadLock();
     ResumeImpl(true);
+
+#else
+    UNREACHABLE();
+#endif
 }
 
-void ThreadProxyStatic::SuspendImpl(bool internalSuspend)
+void Mutator::SuspendImpl(bool internalSuspend)
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     os::memory::LockHolder lock(suspendLock_);
-    LOG(DEBUG, RUNTIME) << "Suspending thread " << GetId();
+    LOG(DEBUG, RUNTIME) << "Suspending thread " << os::thread::GetCurrentThreadId();
     if (!internalSuspend) {
         if (IsUserSuspended()) {
-            LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already suspended";
+            LOG(DEBUG, RUNTIME) << "thread " << os::thread::GetCurrentThreadId() << " is already suspended";
             return;
         }
         userCodeSuspendCount_++;
@@ -148,15 +194,19 @@ void ThreadProxyStatic::SuspendImpl(bool internalSuspend)
     if (oldCount == 0) {
         SetFlag(SUSPEND_REQUEST);
     }
+#else
+    UNREACHABLE();
+#endif
 }
 
-void ThreadProxyStatic::ResumeImpl(bool internalResume)
+void Mutator::ResumeImpl(bool internalResume)
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     os::memory::LockHolder lock(suspendLock_);
-    LOG(DEBUG, RUNTIME) << "Resuming thread " << GetId();
+    LOG(DEBUG, RUNTIME) << "Resuming thread " << os::thread::GetCurrentThreadId();
     if (!internalResume) {
         if (!IsUserSuspended()) {
-            LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already resumed";
+            LOG(DEBUG, RUNTIME) << "thread " << os::thread::GetCurrentThreadId() << " is already resumed";
             return;
         }
         ASSERT(userCodeSuspendCount_ != 0);
@@ -169,29 +219,42 @@ void ThreadProxyStatic::ResumeImpl(bool internalResume)
         }
     }
     // Help for UnregisterExitedThread
-    TSAN_ANNOTATE_HAPPENS_BEFORE(&fts_);
+    TSAN_ANNOTATE_HAPPENS_BEFORE(&fms_);
     suspendVar_.Signal();
+#else
+    UNREACHABLE();
+#endif
 }
 
-void ThreadProxyStatic::SafepointPoll()
+void Mutator::SafepointPoll()
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     if (this->TestAllFlags()) {
         trace::ScopedTrace scopedTrace("RunSafepoint");
         ark::interpreter::RuntimeInterface::Safepoint();
     }
+#else
+    GetMutator()->CheckSafepointIfSuspended();
+#endif
 }
 
-bool ThreadProxyStatic::IsUserSuspended() const
+bool Mutator::IsUserSuspended() const
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     return userCodeSuspendCount_ > 0;
+#else
+    UNREACHABLE();
+    return false;
+#endif
 }
 
-void ThreadProxyStatic::WaitSuspension()
+void Mutator::WaitSuspension()
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
     constexpr int TIMEOUT = 100;
     auto oldStatus = GetStatus();
     PrintSuspensionStackIfNeeded();
-    UpdateStatus(ThreadStatus::IS_SUSPENDED);
+    UpdateStatus(MutatorStatus::IS_SUSPENDED);
     {
         /* @sync 1
          * @description Right after the thread updates its status to IS_SUSPENDED and right before beginning to wait
@@ -210,110 +273,34 @@ void ThreadProxyStatic::WaitSuspension()
         ASSERT(!IsSuspended());
     }
     UpdateStatus(oldStatus);
+#else
+    GetMutator()->WaitSuspension();
+#endif
 }
 
-void ThreadProxyStatic::MakeTSANHappyForThreadState()
+void Mutator::MakeTSANHappyForThreadState()
 {
-    TSAN_ANNOTATE_HAPPENS_AFTER(&fts_);
+#if !defined(ARK_USE_COMMON_RUNTIME)
+    TSAN_ANNOTATE_HAPPENS_AFTER(&fms_);
+#else
+    UNREACHABLE();
+#endif
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
+static thread_local common::Mutator *g_SharedExternalMutator = nullptr;
 
-using namespace common;
-
-static thread_local Mutator *g_SharedExternalMutator = nullptr;
-
-enum ThreadStatus ThreadProxyHybrid::GetStatus() const
-{
-    if (GetMutator()->IsInRunningState()) {
-        return ThreadStatus::RUNNING;
-    }
-    return ThreadStatus::NATIVE;
-}
-
-void ThreadProxyHybrid::UpdateStatus([[maybe_unused]] enum ThreadStatus status)
-{
-    ThreadStatus oldStatus = GetStatus();
-    if (oldStatus == ThreadStatus::RUNNING && status != ThreadStatus::RUNNING) {
-        GetMutator()->TransferToNativeIfInRunning();
-        GetMutatorLock()->Unlock();
-    } else if (oldStatus != ThreadStatus::RUNNING && status == ThreadStatus::RUNNING) {
-        GetMutator()->TransferToRunningIfInNative();
-        GetMutatorLock()->ReadLock();
-    }
-}
-
-bool ThreadProxyHybrid::TestAllFlags() const
-{
-    return GetMutator()->HasSuspendRequest();
-}
-
-bool ThreadProxyHybrid::IsSuspended() const
-{
-    return GetMutator()->HasSuspendRequest();
-}
-
-void ThreadProxyHybrid::SafepointPoll()
-{
-    GetMutator()->CheckSafepointIfSuspended();
-}
-
-void ThreadProxyHybrid::WaitSuspension()
-{
-    GetMutator()->WaitSuspension();
-}
-
-void ThreadProxyHybrid::InitializeThreadFlag() {}
-
-void ThreadProxyHybrid::CleanUpThreadStatus() {}
-
-bool ThreadProxyHybrid::IsRuntimeTerminated() const
-{
-    return false;
-}
-
-void ThreadProxyHybrid::SetRuntimeTerminated()
-{
-    UNREACHABLE();
-}
-
-void ThreadProxyHybrid::SuspendCheck()
-{
-    UNREACHABLE();
-}
-
-void ThreadProxyHybrid::SuspendImpl([[maybe_unused]] bool internalSuspend)
-{
-    UNREACHABLE();
-}
-
-void ThreadProxyHybrid::ResumeImpl([[maybe_unused]] bool internalResume)
-{
-    UNREACHABLE();
-}
-
-bool ThreadProxyHybrid::IsUserSuspended()
-{
-    UNREACHABLE();
-    return false;
-}
-
-void ThreadProxyHybrid::MakeTSANHappyForThreadState()
-{
-    UNREACHABLE();
-}
-
-void ThreadProxyHybrid::BindMutator()
+void Mutator::BindMutator()
 {
     GetMutator()->BindMutator();
 }
 
-void ThreadProxyHybrid::UnbindMutator()
+void Mutator::UnbindMutator()
 {
     GetMutator()->UnbindMutator();
 }
 
-bool ThreadProxyHybrid::CreateExternalMutatorIfNeeded(bool useSharedMutator, Mutator *m)
+bool Mutator::CreateExternalMutatorIfNeeded(bool useSharedMutator, common::Mutator *m)
 {
     if (m != nullptr) {
         mutator_ = m;
@@ -330,25 +317,25 @@ bool ThreadProxyHybrid::CreateExternalMutatorIfNeeded(bool useSharedMutator, Mut
         }
         // NOTE(panferovi): replace Mutator::GerCurrent by new interface
         // that obtain Mutator from JS, when it is implemented
-        mutator_ =
-            Mutator::GetCurrent() != nullptr ? Mutator::GetCurrent() : Mutator::CreateAndRegisterNewMutator(nullptr);
+        mutator_ = common::Mutator::GetCurrent() != nullptr ? common::Mutator::GetCurrent()
+                                                            : common::Mutator::CreateAndRegisterNewMutator(nullptr);
         ASSERT(mutator_ != nullptr);
         SetSharedExternalMutator(mutator_);
         return true;
     }
 
-    mutator_ = Mutator::CreateAndRegisterNewMutator(nullptr);
+    mutator_ = common::Mutator::CreateAndRegisterNewMutator(nullptr);
     return true;
 }
 
 /* static */
-void ThreadProxyHybrid::SetSharedExternalMutator(Mutator *externalMutator)
+void Mutator::SetSharedExternalMutator(common::Mutator *externalMutator)
 {
     g_SharedExternalMutator = externalMutator;
 }
 
 /* static */
-Mutator *ThreadProxyHybrid::GetSharedExternalMutator()
+common::Mutator *Mutator::GetSharedExternalMutator()
 {
     return g_SharedExternalMutator;
 }

@@ -31,7 +31,7 @@ public:
         auto opts = CreateDefaultOptions(gcType);  // NOLINT(performance-unnecessary-value-param)
         [[maybe_unused]] bool res = Runtime::Create(opts);
         ASSERT(res);
-        thread_ = Thread::GetCurrent();
+        thread_ = ManagedThread::GetCurrent();
         ASSERT(thread_ != nullptr);
     }
 
@@ -163,7 +163,7 @@ public:
     const size_t EXPECTED_FAIL_COUNT_ZERO = 0;
     const size_t EXPECTED_FAIL_COUNT_ONE = 1;
 
-    Thread *thread_;
+    ManagedThread *thread_;
     // NOLINTEND(misc-non-private-member-variables-in-classes, readability-identifier-naming)
 };
 
@@ -223,7 +223,7 @@ TEST_F(HeapVerifierTestStw, IsValidHeapObjectAddress)
     EXPECT_FALSE(verifier.IsValidObjectAddress(nullptr));
     EXPECT_FALSE(verifier.IsHeapAddress(&verifier));
 
-    auto objAllocator = Thread::GetCurrent()->GetVM()->GetGC()->GetObjectAllocator();
+    auto objAllocator = ManagedThread::GetCurrent()->GetVM()->GetGC()->GetObjectAllocator();
     auto fnVerify = [&verifier, &objAllocator](const std::string &str) {
         coretypes::LineString *strObj = coretypes::LineString::CreateFromMUtf8(
             reinterpret_cast<const uint8_t *>(&str[0]), str.length(),

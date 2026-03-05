@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "libarkfile/bytecode_instruction.h"
 #include "pt_scoped_managed_code.h"
 #include "pt_thread_info.h"
+#include "runtime/include/mutator.h"
 #include "runtime/handle_scope-inl.h"
 
 namespace ark::tooling {
@@ -205,9 +206,9 @@ Expected<ark::Frame *, Error> GetPandaFrameByPtThread(PtThread thread, uint32_t 
     ManagedThread *managedThread = thread.GetManagedThread();
     ASSERT(managedThread != nullptr);
 
-    if (MTManagedThread::ThreadIsMTManagedThread(managedThread)) {
+    if (MTManagedThread::MutatorIsMTManagedThread(managedThread)) {
         // Check if thread is suspended
-        MTManagedThread *mtManagedThread = MTManagedThread::CastFromThread(managedThread);
+        MTManagedThread *mtManagedThread = MTManagedThread::CastFromMutator(managedThread);
         if (MTManagedThread::GetCurrent() != mtManagedThread && !mtManagedThread->IsUserSuspended()) {
             return Unexpected(Error(Error::Type::THREAD_NOT_SUSPENDED,
                                     std::string("Thread " + std::to_string(thread.GetId()) + " is not suspended")));
@@ -412,11 +413,11 @@ std::optional<Error> Debugger::SuspendThread(PtThread thread) const
     ManagedThread *managedThread = thread.GetManagedThread();
     ASSERT(managedThread != nullptr);
 
-    if (!MTManagedThread::ThreadIsMTManagedThread(managedThread)) {
+    if (!MTManagedThread::MutatorIsMTManagedThread(managedThread)) {
         return Error(Error::Type::THREAD_NOT_FOUND,
                      std::string("Thread ") + std::to_string(thread.GetId()) + " is not MT Thread");
     }
-    MTManagedThread *mtManagedThread = MTManagedThread::CastFromThread(managedThread);
+    MTManagedThread *mtManagedThread = MTManagedThread::CastFromMutator(managedThread);
     mtManagedThread->Suspend();
 
     return {};
@@ -427,11 +428,11 @@ std::optional<Error> Debugger::ResumeThread(PtThread thread) const
     ManagedThread *managedThread = thread.GetManagedThread();
     ASSERT(managedThread != nullptr);
 
-    if (!MTManagedThread::ThreadIsMTManagedThread(managedThread)) {
+    if (!MTManagedThread::MutatorIsMTManagedThread(managedThread)) {
         return Error(Error::Type::THREAD_NOT_FOUND,
                      std::string("Thread ") + std::to_string(thread.GetId()) + " is not MT Thread");
     }
-    MTManagedThread *mtManagedThread = MTManagedThread::CastFromThread(managedThread);
+    MTManagedThread *mtManagedThread = MTManagedThread::CastFromMutator(managedThread);
     mtManagedThread->Resume();
 
     return {};
@@ -610,22 +611,22 @@ void Debugger::MethodExit(ManagedThread *managedThread, Method *method)
 
 void Debugger::ClassLoad(Class *klass)
 {
-    auto *thread = Thread::GetCurrent();
-    if (!vmStarted_ || thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_COMPILER) {
+    auto *mutator = Mutator::GetCurrent();
+    if (!vmStarted_ || mutator->GetMutatorType() == Mutator::MutatorType::COMPILER) {
         return;
     }
 
-    hooks_.ClassLoad(PtThread(ManagedThread::CastFromThread(thread)), klass);
+    hooks_.ClassLoad(PtThread(ManagedThread::CastFromMutator(mutator)), klass);
 }
 
 void Debugger::ClassPrepare(Class *klass)
 {
-    auto *thread = Thread::GetCurrent();
-    if (!vmStarted_ || thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_COMPILER) {
+    auto *mutator = Mutator::GetCurrent();
+    if (!vmStarted_ || mutator->GetMutatorType() == Mutator::MutatorType::COMPILER) {
         return;
     }
 
-    hooks_.ClassPrepare(PtThread(ManagedThread::CastFromThread(thread)), klass);
+    hooks_.ClassPrepare(PtThread(ManagedThread::CastFromMutator(mutator)), klass);
 }
 
 void Debugger::MonitorWait(ObjectHeader *object, int64_t timeout)

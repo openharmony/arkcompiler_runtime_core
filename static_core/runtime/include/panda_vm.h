@@ -22,6 +22,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/method.h"
+#include "runtime/include/mutator.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/gc_phase.h"
 
@@ -58,8 +59,8 @@ public:
 
     static PandaVM *GetCurrent()
     {
-        ASSERT(Thread::GetCurrent() != nullptr);
-        return Thread::GetCurrent()->GetVM();
+        ASSERT(Mutator::GetCurrent() != nullptr);
+        return Mutator::GetCurrent()->GetVM();
     }
 
     virtual coretypes::String *ResolveString([[maybe_unused]] const panda_file::File &pf,

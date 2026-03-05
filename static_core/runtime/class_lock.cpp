@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,13 @@ ClassLock::ClassLock(const ObjectHeader *obj)
     auto *clsLinkerCtx = cls_->GetLoadContext();
     clsMtx_ = clsLinkerCtx->GetClassMutexHandler(cls_);
 
-    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_BLOCKED);
+    ScopedChangeMutatorStatus s(ManagedThread::GetCurrent(), MutatorStatus::IS_BLOCKED);
     clsMtx_->Lock();
 }
 
 bool ClassLock::Wait([[maybe_unused]] bool ignoreInterruption)
 {
-    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_WAITING);
+    ScopedChangeMutatorStatus s(ManagedThread::GetCurrent(), MutatorStatus::IS_WAITING);
     clsMtx_->Wait();
     return true;
 }

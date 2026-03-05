@@ -143,8 +143,8 @@ void ANIVerifier::Abort(const std::string_view message)
     ss << message << "\n";
 
     EtsCoroutine *coro = nullptr;
-    Thread *thread = Thread::GetCurrent();
-    if (thread != nullptr) {
+    Mutator *mutator = Mutator::GetCurrent();
+    if (mutator != nullptr) {
         coro = EtsCoroutine::GetCurrent();
     }
     if (coro != nullptr) {

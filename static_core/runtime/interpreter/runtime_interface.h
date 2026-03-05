@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -314,7 +314,7 @@ public:
         SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
 #ifndef NDEBUG
         // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
-        if (Runtime::GetOptions().IsRunGcEverySafepoint() && Thread::GetCurrent()->GetMutatorLock()->HasLock()) {
+        if (Runtime::GetOptions().IsRunGcEverySafepoint() && Mutator::GetCurrent()->GetMutatorLock()->HasLock()) {
             auto *vm = ManagedThread::GetCurrent()->GetVM();
             vm->GetGCTrigger()->TriggerGcIfNeeded(vm->GetGC());
         }

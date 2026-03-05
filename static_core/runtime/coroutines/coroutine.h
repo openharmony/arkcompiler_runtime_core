@@ -156,32 +156,31 @@ public:
 
     bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) override;
 
-    static bool ThreadIsCoroutine(Thread *thread)
+    static bool MutatorIsCoroutine(Mutator *mutator)
     {
-        ASSERT(thread != nullptr);
-        // NOTE(konstanting, #IAD5MH): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
-        // remove the runtime/scheduler directory contents
-        return thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_TASK;
+        ASSERT(mutator != nullptr);
+        return (mutator->GetMutatorType() == MutatorType::MANAGED) &&
+               (static_cast<ManagedThread *>(mutator)->GetManagedThreadType() ==
+                ManagedThread::ThreadType::THREAD_TYPE_COROUTINE);
     }
 
-    static Coroutine *CastFromThread(Thread *thread)
+    static Coroutine *CastFromMutator(Mutator *mutator)
     {
-        ASSERT(thread != nullptr);
-        ASSERT(ThreadIsCoroutine(thread));
-        return static_cast<Coroutine *>(thread);
+        ASSERT(MutatorIsCoroutine(mutator));
+        return static_cast<Coroutine *>(mutator);
     }
 
     static Coroutine *GetCurrent()
     {
-        Thread *thread = Thread::GetCurrent();
-        ASSERT(thread != nullptr);
-        if (ThreadIsCoroutine(thread)) {
-            return CastFromThread(thread);
+        auto *mutator = Mutator::GetCurrent();
+        ASSERT(mutator != nullptr);
+        if (MutatorIsCoroutine(mutator)) {
+            return CastFromMutator(mutator);
         }
         return nullptr;
     }
 
-    /// Get coroutine status. It is independent from ThreadStatus.
+    /// Get coroutine status. It is independent from MutatorStatus.
     Status GetCoroutineStatus() const;
     /// Get coroutine name.
     PandaString GetName() const;

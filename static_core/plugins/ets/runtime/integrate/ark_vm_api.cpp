@@ -28,8 +28,8 @@ extern "C" arkvm_status ARKVM_RegisterExternalScheduler(arkvm_external_scheduler
         return ARKVM_INVALID_ARGS;
     }
 
-    auto *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
+    auto *mutator = ark::Mutator::GetCurrent();
+    if (mutator == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
     auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
@@ -49,8 +49,8 @@ extern "C" arkvm_status ARKVM_RunScheduler(arkvm_schedule_mode mode)
         return ARKVM_INVALID_ARGS;
     }
 
-    auto *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
+    auto *mutator = ark::Mutator::GetCurrent();
+    if (mutator == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
     auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mtmanaged_thread.h"
-#include "runtime/include/thread_status.h"
+#include "runtime/include/mutator_status.h"
 #include "runtime/include/locks.h"
 
 namespace ark {
@@ -284,7 +284,7 @@ private:
 
     MTManagedThread *GetThreadByInternalThreadIdWithLockHeld(uint32_t threadId) REQUIRES(threadLock_);
 
-    bool CanDeregister(enum ThreadStatus status)
+    bool CanDeregister(enum MutatorStatus status)
     {
         // Deregister thread only for IS_TERMINATED_LOOP.
         // In all other statuses we should wait:
@@ -294,7 +294,7 @@ private:
         // * FINISHED threads should be deleted itself;
         // * NATIVE threads are either go to FINISHED status or considered a part of a deadlock;
         // * other statuses - should eventually go to IS_TERMINATED_LOOP or FINISHED status.
-        return status == ThreadStatus::IS_TERMINATED_LOOP;
+        return status == MutatorStatus::IS_TERMINATED_LOOP;
     }
 
     mutable os::memory::Mutex threadLock_;

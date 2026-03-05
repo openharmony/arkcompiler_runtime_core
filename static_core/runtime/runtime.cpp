@@ -55,7 +55,6 @@
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/safepoint_timer.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/tooling/debug_inf.h"
 #include "runtime/handle_scope.h"

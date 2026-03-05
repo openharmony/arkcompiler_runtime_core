@@ -15,7 +15,11 @@
 #ifndef PANDA_RUNTIME_MANAGED_THREAD_H
 #define PANDA_RUNTIME_MANAGED_THREAD_H
 
-#include "thread.h"
+#include <cstdint>
+
+#include "runtime/include/mutator.h"
+#include "runtime/include/object_header.h"
+#include "runtime/include/thread.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_MANAGED_CODE() ASSERT(::ark::ManagedThread::GetCurrent()->IsManagedCode())
@@ -24,11 +28,33 @@
 
 namespace ark {
 class MTThreadManager;
+
+namespace test {
+class ThreadTest;
+}  // namespace test
+namespace tooling {
+class PtThreadInfo;
+}  // namespace tooling
+template <class TYPE>
+class HandleStorage;
+template <class TYPE>
+class GlobalHandleStorage;
+template <class TYPE>
+class HandleScope;
+
+struct CustomTLSData {
+    CustomTLSData() = default;
+    virtual ~CustomTLSData() = default;
+
+    NO_COPY_SEMANTIC(CustomTLSData);
+    NO_MOVE_SEMANTIC(CustomTLSData);
+};
+
 /**
- * @brief Class represents managed thread
+ * @brief Class represents managed mutator
  *
- * When the thread is created it registers itself in the runtime, so
- * runtime knows about all managed threads at any given time.
+ * When the mutator is created it registers itself in the runtime, so
+ * runtime knows about all managed mutators at any given time.
  *
  * This class should be used to store thread specitic information that
  * is necessary to execute managed code:
@@ -39,11 +65,21 @@ class MTThreadManager;
  *
  *  Now it's used by interpreter to store current frame only.
  */
-class ManagedThread : public Thread {
+// NOTE(ipetrov): ManagedThread is not a thread in OS meaning. The class represents a managed execution context that can
+// be shared between several OS threads. Maybe rename to more suitable name: ManagedMutator or VmExecutionContext
+class ManagedThread : public Mutator {
 public:
+    // NOTE(ipetrov): Do we need ManagedThread types?
+    enum class ThreadType {
+        THREAD_TYPE_NONE,
+        THREAD_TYPE_MANAGED,
+        THREAD_TYPE_MT_MANAGED,
+        THREAD_TYPE_COROUTINE,
+    };
     enum ThreadState : uint8_t { NATIVE_CODE = 0, MANAGED_CODE = 1 };
 
     using NativeHandleType = os::thread::NativeHandleType;
+    using ThreadId = uint32_t;
     static constexpr ThreadId NON_INITIALIZED_THREAD_ID = 0;
     static constexpr ThreadId MAX_INTERNAL_THREAD_ID = MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT;
     static constexpr size_t STACK_MAX_SIZE_OVERFLOW_CHECK = 256_MB;
@@ -58,6 +94,11 @@ public:
 #else
     static constexpr size_t STACK_OVERFLOW_PROTECTED_SIZE = 4_KB;
 #endif
+
+    ALWAYS_INLINE ThreadType GetManagedThreadType() const
+    {
+        return mThreadType_;
+    }
 
     void SetLanguageContext([[maybe_unused]] const LanguageContext &ctx)
     {
@@ -125,31 +166,27 @@ public:
         return iframeStackSize_;
     }
 
-    static bool ThreadIsManagedThread(const Thread *thread)
+    static bool MutatorIsManagedThread(const Mutator *mutator)
     {
-        ASSERT(thread != nullptr);
-        Thread::ThreadType threadType = thread->GetThreadType();
-        return threadType == Thread::ThreadType::THREAD_TYPE_MANAGED ||
-               threadType == Thread::ThreadType::THREAD_TYPE_MT_MANAGED ||
-               threadType == Thread::ThreadType::THREAD_TYPE_TASK;
+        ASSERT(mutator != nullptr);
+        return mutator->GetMutatorType() == MutatorType::MANAGED;
     }
 
-    static ManagedThread *CastFromThread(Thread *thread)
+    static ManagedThread *CastFromMutator(Mutator *mutator)
     {
-        ASSERT(thread != nullptr);
-        ASSERT(ThreadIsManagedThread(thread));
-        return static_cast<ManagedThread *>(thread);
+        ASSERT(MutatorIsManagedThread(mutator));
+        return static_cast<ManagedThread *>(mutator);
     }
 
     /**
      * @brief GetCurrentRaw Unsafe method to get current ManagedThread.
-     * It can be used in hotspots to get the best performance.
+     * It can be used to get the best performance.
      * We can only use this method in places where the ManagedThread exists.
      * @return pointer to ManagedThread
      */
     static ManagedThread *GetCurrentRaw()
     {
-        return CastFromThread(Thread::GetCurrent());
+        return CastFromMutator(Mutator::GetCurrent());
     }
 
     /**
@@ -158,10 +195,9 @@ public:
      */
     PANDA_PUBLIC_API static ManagedThread *GetCurrent()
     {
-        Thread *thread = Thread::GetCurrent();
-        ASSERT(thread != nullptr);
-        if (ThreadIsManagedThread(thread)) {
-            return CastFromThread(thread);
+        Mutator *mutator = Mutator::GetCurrent();
+        if (MutatorIsManagedThread(mutator)) {
+            return CastFromMutator(mutator);
         }
         return nullptr;
     }
@@ -170,7 +206,7 @@ public:
 
     static void Shutdown();
 
-    static PandaString ThreadStatusAsString(enum ThreadStatus status);
+    static PandaString ThreadStatusAsString(enum MutatorStatus status);
 
     ark::mem::StackFrameAllocator *GetStackFrameAllocator() const
     {
@@ -223,7 +259,8 @@ public:
                                  ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     ~ManagedThread() override;
 
-    explicit ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Thread::ThreadType threadType,
+    explicit ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
+                           ManagedThread::ThreadType threadType,
                            ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
 
     // Here methods which are just proxy or cache for runtime interface
@@ -302,7 +339,7 @@ public:
     }
     static constexpr uint32_t GetFlagOffset()
     {
-        return ThreadProxy::GetFlagOffset();
+        return Mutator::GetFlagOffset();
     }
 
     static constexpr uint32_t GetNativeStackBeginOffset()
@@ -369,10 +406,6 @@ public:
     static constexpr uint32_t GetTlsPostWrbTwoObjectsOffset()
     {
         return MEMBER_OFFSET(ManagedThread, postWrbTwoObjects_);
-    }
-    static constexpr uint32_t GetTlsPreWrbEntrypointOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, preWrbEntrypoint_);
     }
     static constexpr uint32_t GetTlsStringClassPointerOffset()
     {
@@ -565,7 +598,7 @@ public:
 
     PANDA_PUBLIC_API void PrintSuspensionStackIfNeeded() override;
 
-    ThreadId GetId() const override
+    virtual ThreadId GetId() const
     {
         // Atomic with relaxed order reason: data race with id_ with no synchronization or ordering constraints imposed
         // on other reads or writes
@@ -574,7 +607,7 @@ public:
 
     ThreadId GetInternalId();
 
-    void FreeInternalMemory() override;
+    virtual void FreeInternalMemory();
     void DestroyInternalResources();
 
     /// Clears the pre/post barrier buffers (and other resources) without deallocation.
@@ -582,11 +615,6 @@ public:
 
     /// Collect TLAB metrics for memstats
     void CollectTLABMetrics();
-
-    ALWAYS_INLINE mem::GCBarrierSet *GetBarrierSet() const
-    {
-        return barrierSet_;
-    }
 
     void InitForStackOverflowCheck(size_t nativeStackReservedSize, size_t nativeStackProtectedSize);
     virtual void DisableStackOverflowCheck();
@@ -680,6 +708,11 @@ public:
     [[nodiscard]] bool HasManagedCodeOnStack() const;
     [[nodiscard]] bool HasClearStack() const;
 
+    uint64_t *GetThreadRandomState()
+    {
+        return &threadRandomState_;
+    }
+
 protected:
     void ProtectNativeStack();
 
@@ -739,6 +772,7 @@ protected:
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
+    void InitThreadRandomState();
     void FreePreBuffer();
     void InitCardTableData(mem::GCBarrierSet *barrier);
     PandaString LogThreadStack(ThreadState newState) const;
@@ -797,7 +831,6 @@ private:
     ObjectHeader *flattenedStringCache_ {nullptr};
 
     mem::TLAB *tlab_ {nullptr};
-    mem::GCBarrierSet *barrierSet_ {nullptr};
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
     // Keep these here to speed up interpreter
     mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
@@ -853,6 +886,8 @@ private:
     HandleStorage<ObjectHeader *> *objectHeaderHandleStorage_ {nullptr};
 
     PandaStack<ThreadState> threadFrameStates_;
+    ThreadType mThreadType_ {ThreadType::THREAD_TYPE_NONE};
+    uint64_t threadRandomState_ {0};
 
 #if !defined(NDEBUG)
     uintptr_t runtimeCallEnabled_ {1};

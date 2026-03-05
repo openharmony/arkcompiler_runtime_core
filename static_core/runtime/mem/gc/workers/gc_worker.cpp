@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include "libarkbase/taskmanager/task_scheduler.h"
-#include "runtime/include/thread.h"
+#include "runtime/include/mutator.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_worker.h"
 
@@ -26,8 +26,8 @@ GCWorker::GCWorker(GC *gc) : gc_(gc)
     ASSERT(gcTaskQueue_ != nullptr);
     auto *vm = gc_->GetPandaVm();
     ASSERT(vm != nullptr);
-    gcThread_ = internalAllocator->New<Thread>(vm, Thread::ThreadType::THREAD_TYPE_GC);
-    ASSERT(gcThread_ != nullptr);
+    gcMutator_ = internalAllocator->New<Mutator>(vm, Mutator::MutatorType::GC);
+    ASSERT(gcMutator_ != nullptr);
     if (gc_->GetSettings()->UseTaskManagerForGC()) {
         gcRunner_ = [this]() { this->GCTaskRunner(); };
     }
@@ -36,15 +36,15 @@ GCWorker::GCWorker(GC *gc) : gc_(gc)
 GCWorker::~GCWorker()
 {
     auto internalAllocator = gc_->GetInternalAllocator();
-    internalAllocator->Delete(gcThread_);
+    internalAllocator->Delete(gcMutator_);
     internalAllocator->Delete(gcTaskQueue_);
 }
 
 /* static */
 void GCWorker::GCThreadLoop(GCWorker *gcWorker)
 {
-    // We need to set VM to current_thread, since GC can call ObjectAccessor::GetBarrierSet() methods
-    ScopedCurrentThread gcCurrentThreadScope(gcWorker->gcThread_);
+    // We need to set VM to current mutator, since GC can call ObjectAccessor::GetBarrierSet() methods
+    ScopedCurrentMutator gcCurrentMutatorScope(gcWorker->gcMutator_);
 
     while (true) {
         // Get gc task from local gc tasks queue
@@ -109,8 +109,9 @@ void GCWorker::GCTaskRunner()
         // According task for TaskManager will be created after RunGC if needed
         return;
     }
-    // Task manager does not know anything about panda threads, so set gc thread as current thread during task running
-    ScopedCurrentThread gcCurrentThreadScope(gcThread_);
+    // Task manager does not know anything about panda threads, so set gc mutator fo the current thread during task
+    // running
+    ScopedCurrentMutator gcCurrentMutatorScope(gcMutator_);
     auto gcTask = GetTask();
     // If GC was not started then task should not be run, so delay the task execution
     if (!gc_->IsGCRunning()) {

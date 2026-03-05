@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ Coroutine::Status ThreadedCoroutineContext::GetStatus() const
 void ThreadedCoroutineContext::SetStatus(Coroutine::Status newStatus)
 {
 #ifndef NDEBUG
-    PandaString setter = (Thread::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
+    PandaString setter = (Mutator::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
     LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << newStatus << " by " << setter;
 #endif
     status_ = newStatus;
@@ -69,9 +69,9 @@ void ThreadedCoroutineContext::Destroy()
         UNREACHABLE();
     }
     ASSERT(co == Coroutine::GetCurrent());
-    ASSERT(co->GetStatus() != ThreadStatus::FINISHED);
+    ASSERT(co->GetStatus() != MutatorStatus::FINISHED);
 
-    co->UpdateStatus(ThreadStatus::TERMINATING);
+    co->UpdateStatus(MutatorStatus::TERMINATING);
 
     auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
     if (threadManager->TerminateCoroutine(co)) {

@@ -16,10 +16,10 @@
 #include "compiler/code_info/code_info.h"
 #include "runtime/include/stack_walker-inl.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
 #include "libarkbase/mem/mem.h"
 #include "libarkfile/bytecode_instruction.h"
+#include "runtime/include/mutator.h"
 #include "runtime/interpreter/runtime_interface.h"
 
 #include <iomanip>
@@ -146,7 +146,7 @@ StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, 
         // so we read entry from special backup field in the frame.
         codeEntry = cframe.GetDeoptCodeEntry();
     } else if (cframe.IsOsr()) {
-        codeEntry = Thread::GetCurrent()->GetVM()->GetCompiler()->GetOsrCode(cframe.GetMethod());
+        codeEntry = Mutator::GetCurrent()->GetVM()->GetCompiler()->GetOsrCode(cframe.GetMethod());
     } else {
         codeEntry = cframe.GetMethod()->GetCompiledEntryPoint();
     }
@@ -576,7 +576,7 @@ Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
             }
         }
         EnvData envData {vregList, GetCFrame(), codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data())};
-        Thread::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
+        Mutator::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
     } else {
         auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
         ASSERT((frameNumVregs + 1) >= vregList.size());

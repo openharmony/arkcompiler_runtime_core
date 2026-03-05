@@ -307,15 +307,15 @@ static SampleInfo::ThreadStatus GetThreadStatus(ManagedThread *mthread)
     ASSERT(mthread != nullptr);
 
     auto threadStatus = mthread->GetStatus();
-    if (threadStatus == ThreadStatus::RUNNING) {
+    if (threadStatus == MutatorStatus::RUNNING) {
         return SampleInfo::ThreadStatus::RUNNING;
     }
 
     bool isCoroutineRunning = false;
-    if (Coroutine::ThreadIsCoroutine(mthread)) {
-        isCoroutineRunning = Coroutine::CastFromThread(mthread)->GetCoroutineStatus() == Coroutine::Status::RUNNING;
+    if (Coroutine::MutatorIsCoroutine(mthread)) {
+        isCoroutineRunning = Coroutine::CastFromMutator(mthread)->GetCoroutineStatus() == Coroutine::Status::RUNNING;
     }
-    if (threadStatus == ThreadStatus::NATIVE && isCoroutineRunning) {
+    if (threadStatus == MutatorStatus::NATIVE && isCoroutineRunning) {
         return SampleInfo::ThreadStatus::RUNNING;
     }
 

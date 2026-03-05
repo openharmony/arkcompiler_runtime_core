@@ -2452,11 +2452,13 @@ void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::Buffers
             allocator->Delete(localBuffer);
         }
     }
+    GC::OnThreadTerminate(thread, keepBuffers);
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::OnThreadCreate(ManagedThread *thread)
 {
+    GC::OnThreadCreate(thread);
     // Any access to other threads' data (including MAIN's) might cause a race here
     // so don't do this please.
     thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(currentPreWrbEntrypoint_));

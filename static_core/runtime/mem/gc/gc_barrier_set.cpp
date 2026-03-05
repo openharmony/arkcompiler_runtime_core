@@ -86,13 +86,13 @@ BarrierOperand GCBarrierSet::GetPostBarrierOperand(std::string_view name)
 bool GCG1BarrierSet::IsPreBarrierEnabled()
 {
     // No data race because G1GC sets this flag on pause
-    return Thread::GetCurrent()->GetPreWrbEntrypoint() != nullptr;
+    return Mutator::GetCurrent()->GetPreWrbEntrypoint() != nullptr;
 }
 
 void GCG1BarrierSet::PreBarrier(void *preValAddr)
 {
     LOG_IF(preValAddr != nullptr, DEBUG, GC) << "GC PreBarrier: with pre-value " << preValAddr;
-    ASSERT(Thread::GetCurrent()->GetPreWrbEntrypoint() != nullptr);
+    ASSERT(Mutator::GetCurrent()->GetPreWrbEntrypoint() != nullptr);
 
     PreSATBBarrier(reinterpret_cast<ObjectHeader *>(preValAddr));
 }
