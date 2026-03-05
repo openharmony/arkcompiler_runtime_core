@@ -15,10 +15,12 @@
 export declare abstract class IBar {
     abstract foo(): void;
     abstract bar(): string;
+    abstract baz(p: any): any;
 }
 
 export declare class Bar extends IBar {
     foo(userId?: string|null): Promise<void>;
     bar(): string;
+    baz(p: any): any;
 }
   

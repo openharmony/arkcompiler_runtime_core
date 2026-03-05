@@ -15,6 +15,7 @@
 export abstract class IBar {
     abstract foo(): void;
     abstract bar(): string;
+    abstract baz(p: any): any;
 }
 
 export class Bar extends IBar {
@@ -23,6 +24,9 @@ export class Bar extends IBar {
     }
     bar(): string {
         return "bar";
+    }
+    baz(p: any): any {
+        return Promise.resolve("baz");
     }
 }
   
