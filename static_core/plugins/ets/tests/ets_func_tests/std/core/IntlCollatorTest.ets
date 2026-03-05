@@ -14,9 +14,10 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Intl.Collator");
+    const suite = new arktest.ArkTestsuite('Intl.Collator');
 
-    suite.addTest("Intl.Collator.compare", testCollatorCompare);
+    suite.addTest('Intl.Collator.compare', testCollatorCompare);
+    suite.addTest('Array.sort call Intl.Collator.compare', testArraySortCompare);
     return suite.run();
 }
 
@@ -63,3 +64,9 @@ function testCollatorCompare(): void {
     arktest.assertEQ(punctuationCollator.compare('a-b', 'ab'), 0, "ignorePunctuation: 'a-b' should equal 'ab'");
 }
 
+function testArraySortCompare(): void {
+    let arr = ['a', 'c', 'b'];
+    let col = new Intl.Collator('de', {sensitivity: 'base'});
+    arr.sort(col.compare);
+    arktest.assertEQ(arr.join(), 'a,b,c');
+}
