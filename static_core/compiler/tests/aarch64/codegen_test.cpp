@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,8 @@ public:
     virtual void Visit##A([[maybe_unused]] const vixl::aarch64::Instruction *instr) {}
     VISITOR_LIST(DECLARE)
 #undef DECLARE
+    virtual void VisitCryptoSM3([[maybe_unused]] const vixl::aarch64::Instruction *instr) {}
+    virtual void VisitCryptoSM4([[maybe_unused]] const vixl::aarch64::Instruction *instr) {}
 
     void Visit(vixl::aarch64::Metadata *metadata, const vixl::aarch64::Instruction *instr) final
     {
