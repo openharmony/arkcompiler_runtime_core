@@ -14,6 +14,6 @@
  */
 
 {% from '16.concurrency/03.asynchronous_execution/predefined_types.jinja' import numeric_types_cases, boolean_types_cases, symbol_types_cases, no_value_types_cases, resizable_array_types_cases, generic_array_types_cases %}
-{% from '16.concurrency/03.asynchronous_execution/await_compile_errors_predefined0.base.jinja' import generate_complete_test %}
+{% from '16.concurrency/03.asynchronous_execution/await_non_promise_predefined0.base.jinja' import generate_complete_test %}
 
 {{ generate_complete_test(boolean_types_cases + numeric_types_cases + no_value_types_cases + symbol_types_cases + resizable_array_types_cases + generic_array_types_cases) }}
