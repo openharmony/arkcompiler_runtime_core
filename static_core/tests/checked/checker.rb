@@ -250,7 +250,7 @@ class Checker
   def initialize(options, name, line_no: 0)
     @name = name
     @code = Code.new('', options.source, line_no)
-    @cwd = "#{Dir.getwd}/#{name.gsub(/[ -:()<>]/, '_')}"
+    @cwd = "#{Dir.getwd}/#{name.gsub(/[ -\/:<>]/, '_')}"
     @options = options
     @args = ''
     @ir_files = []
