@@ -130,7 +130,7 @@ export namespace Intl {
         * @return -1 if y "more" than x
         * @return 0 if x equal y
         */
-        public compare(x: string, y: string): number {
+        public compare(x: string, y: string): int {
             if (x == y) {
                 return 0
             }
@@ -302,7 +302,7 @@ export namespace Intl {
         * @param data string array contains collation, lang, x, y
         * @return icu-collator 2 strings compare result: 1 (x "more" than y), -1 (y "more" than x) or 0 (equals)
         */
-        private native compareByCollation(collation : string, lang: string, str1: string, str2: string, caseFirst: string) : double
+        private native compareByCollation(collation : string, lang: string, str1: string, str2: string, caseFirst: string) : int
 
         private static readonly SensitivityValues : ReadonlyArray<string> = Array.of<string>("base",  "accent", "case", "variant")
         private static readonly UsageValues : ReadonlyArray<string> = Array.of<string>("sort", "search")
