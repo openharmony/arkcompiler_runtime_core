@@ -12,40 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_relative 'common.irt'
 include_relative '../../../irtoc/scripts/common.irt'
 include_relative '../../../irtoc/scripts/string_helpers.irt'
 include_relative '../../../irtoc/scripts/array_helpers.irt'
-
-module Constants
-  ARRAY_BUFFER_CLASS_SIZE = "cross_values::GetArrayBufferClassSize(GetArch())"
-  ARRAY_BUFFER_BYTE_LENGTH_OFFSET =  "cross_values::GetArrayBufferByteLengthOffset(GetArch())"
-  ARRAY_BUFFER_DATA_OFFSET = "cross_values::GetArrayBufferDataOffset(GetArch())"
-
-  TYPED_UNSIGNED_ARRAY_BYTES_PER_ELEMENT_OFFSET = "cross_values::GetTypedUnsignedArrayBytesPerElementOffset(GetArch())"
-  TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(GetArch())"
-  TYPED_UNSIGNED_ARRAY_BYTE_LENGTH_OFFSET = "cross_values::GetTypedUnsignedArrayByteLengthOffset(GetArch())"
-  TYPED_UNSIGNED_ARRAY_LENGTH_INT_OFFSET = "cross_values::GetTypedUnsignedArrayLengthIntOffset(GetArch())"
-  TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET = "cross_values::GetTypedUnsignedArrayLengthOffset(GetArch())"
-  TYPED_UNSIGNED_ARRAY_CLASS_SIZE = "cross_values::GetTypedUnsignedArrayClassSize(GetArch())"
-  TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedUnsignedArrayBufferOffset(GetArch())"
-  TYPED_UNSIGNED_ARRAY_CLASS_SIZE_WITH_ALIGNMENT = "cross_values::GetTypedUnsignedArrayClassSize(GetArch()) + TLAB_ALIGNMENT - 1"
-
-  TYPED_ARRAY_BYTES_PER_ELEMENT_OFFSET = "cross_values::GetTypedArrayBytesPerElementOffset(GetArch())"
-  TYPED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedArrayByteOffsetOffset(GetArch())"
-  TYPED_ARRAY_BYTE_LENGTH_OFFSET = "cross_values::GetTypedArrayByteLengthOffset(GetArch())"
-  TYPED_ARRAY_LENGTH_INT_OFFSET = "cross_values::GetTypedArrayLengthIntOffset(GetArch())"
-  TYPED_ARRAY_LENGTH_OFFSET = "cross_values::GetTypedArrayLengthOffset(GetArch())"
-  TYPED_ARRAY_CLASS_SIZE = "cross_values::GetTypedArrayClassSize(GetArch())"
-  TYPED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedArrayBufferOffset(GetArch())"
-  TYPED_ARRAY_CLASS_SIZE_WITH_ALIGNMENT = "cross_values::GetTypedArrayClassSize(GetArch()) + TLAB_ALIGNMENT - 1"
-
-  ETS_BIG_INT_BYTES_OFFSET = "cross_values::GetEtsBigIntBytesOffset(GetArch())"
-  ETS_BIG_INT_SIGN_OFFSET = "cross_values::GetEtsBigIntSignOffset(GetArch())"
-  ETS_BIG_INT_TO_LONG_SHIFT = "static_cast<uint64_t>(32U)"
-  ETS_BIG_INT_TO_LONG_MASK = "((uint64_t{1U} << uint64_t{32U}) - uint64_t{1U})"
-  LOG2_BYTES_PER_I32 = "2"
-end
 
 def GenerateTypedArrayFillInternal(name, prefix, type, outType, scale, cgmode)
     signed = (['i8', 'i16', 'i32', 'i64', 'f32', 'f64'].include?(outType) ? true : false)
@@ -61,19 +30,19 @@ def GenerateTypedArrayFillInternal(name, prefix, type, outType, scale, cgmode)
             next
         end
         if signed
-          buffer := LoadI(arr).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BUFFER_OFFSET).ref
         else
-          buffer := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
         end
-        bufferData := LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref
+        bufferData := LoadI(buffer).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref
         If(bufferData, 0).EQ.Unlikely {
           Goto(:SlowPathEntrypoint)
         }
         if signed
-          byteOffsetF64 := LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
+          byteOffsetF64 := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
           byteOffset := Cast(byteOffsetF64).i32
         else
-          byteOffset := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).i32
+          byteOffset := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).i32
         end
         arrayDataOffset := AddI(byteOffset).Imm(Constants::ARRAY_DATA_OFFSET).i32
         offset0 := Add(arrayDataOffset, ShlI(startPos).Imm(scale).i32).i32
@@ -203,8 +172,8 @@ scoped_macro(:validate_big_int) do |data, offset|
 end # validate_big_int
 
 scoped_macro(:get_long_from_big_int) do |object|
-  _bytes := get_object_pointer_imm(object, Constants::ETS_BIG_INT_BYTES_OFFSET)
-  _sign := Cast(LoadI(object).Imm(Constants::ETS_BIG_INT_SIGN_OFFSET).i32).i64
+  _bytes := get_object_pointer_imm(object, EtsConstants::ETS_BIG_INT_BYTES_OFFSET)
+  _sign := Cast(LoadI(object).Imm(EtsConstants::ETS_BIG_INT_SIGN_OFFSET).i32).i64
   _bytes_data := AddI(_bytes).Imm(Constants::ARRAY_DATA_OFFSET).ptr
   _bytes_length := LoadI(_bytes).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
   _length1 := Cast(_bytes_length).u32
@@ -221,9 +190,9 @@ Label(:Loop)
   If(_i, _length).AE.Unlikely {
     Goto(:LoopDone)
   }
-  _int := Cast(Load(_bytes_data, ShlI(Cast(_i).u64).Imm(Constants::LOG2_BYTES_PER_I32).u64).u32).u64
-  _masked := AndI(_int).Imm(Constants::ETS_BIG_INT_TO_LONG_MASK).u64
-  _shift := Mul(Cast(_i).u64, Constants::ETS_BIG_INT_TO_LONG_SHIFT).u64
+  _int := Cast(Load(_bytes_data, ShlI(Cast(_i).u64).Imm(EtsConstants::LOG2_BYTES_PER_I32).u64).u32).u64
+  _masked := AndI(_int).Imm(EtsConstants::ETS_BIG_INT_TO_LONG_MASK).u64
+  _shift := Mul(Cast(_i).u64, EtsConstants::ETS_BIG_INT_TO_LONG_SHIFT).u64
   _comp := Cast(Shl(_masked, _shift).u64).i64
   _res2 := Add(_res, _comp).i64
   _i2 := AddI(_i).Imm(1).u32
@@ -267,14 +236,14 @@ def GenerateTypedArraySetValuesFromArray(name, etype, stype, elm_size, mode)
     }
 
     # source.length > this.length (Out of range)
-    dest_length := LoadI(dest).Imm(eval("Constants::#{prefix}_LENGTH_INT_OFFSET")).u32
+    dest_length := LoadI(dest).Imm(eval("EtsConstants::#{prefix}_LENGTH_INT_OFFSET")).u32
     If(source_length, dest_length).GT.Unlikely {
       Goto(:SlowPathEntrypoint)
     }
 
     # load TypedArray params, ArrayBuffer and Array
-    buffer := LoadI(dest).Imm(eval("Constants::#{prefix}_BUFFER_OFFSET")).ref
-    packet := LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref
+    buffer := LoadI(dest).Imm(eval("EtsConstants::#{prefix}_BUFFER_OFFSET")).ref
+    packet := LoadI(buffer).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref
     If(packet, 0).EQ.Unlikely {
       Goto(:SlowPathEntrypoint)
     }
@@ -353,21 +322,21 @@ def GenerateArrayCopyWithin(name, uname, type, scale)
         end
 
         if signed
-          buffer := LoadI(arr).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BUFFER_OFFSET).ref
         else
-          buffer := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
         end
 
-        bufferData := Cast(LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref).ptr
+        bufferData := Cast(LoadI(buffer).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref).ptr
         If(bufferData, 0).EQ.Unlikely {
           Goto(:SlowPathEntrypoint)
         }
 
         if signed
-          byteOffsetF64 := LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
+          byteOffsetF64 := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
           byteOffset := Cast(byteOffsetF64).u32
         else
-          byteOffset := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).u32
+          byteOffset := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).u32
         end
 
         arrayDataOffset := AddI(byteOffset).Imm(Constants::ARRAY_DATA_OFFSET).u32
