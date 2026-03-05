@@ -91,7 +91,7 @@ public:
         auto path = PandaString(pf.GetFullFileName());
         {
             os::memory::LockHolder mapLock {profilePathMapLock_};
-            if (!profiledPandaFilesMap_.empty() && profiledPandaFilesMap_.find(path) == profiledPandaFilesMap_.end()) {
+            if (profiledPandaFilesMap_.empty() || profiledPandaFilesMap_.find(path) == profiledPandaFilesMap_.end()) {
                 return;
             }
         }
