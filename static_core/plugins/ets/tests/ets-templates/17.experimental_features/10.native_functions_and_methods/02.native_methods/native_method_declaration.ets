@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,13 @@
 
 /*---
 desc: Native method declaration.
-assert: A method that is native is implemented in platform-dependent code, typically written in another programming language such as C.
 tags: [compile-only]
 ---*/
 
 abstract class A {
-  native run(): void;
+    native run(): void;
+}
+
+class B extends A {
+    native run(): void;
 }

@@ -40,7 +40,7 @@
 07.expressions/35.lambda_expression/01.lambda_signature/positive_4.ets
 13.modules_and_namespaces/04.import_directives/02.default_import_binding/import_defaultExport_selectiveBindings.ets
 13.modules_and_namespaces/04.import_directives/05.import_path/bad/import_path_bad_n_8.ets
-17.experimental_features/10.native_functions_and_methods/01.native_functions/nat4.ets
+17.experimental_features/10.native_functions_and_methods/01.native_functions/negative/nat4_n.ets
 17.experimental_features/11.classes_experimental/02.final_methods/final_declaration_with_modifiers_negative_1.ets
 #FailKind.ABORT_FAIL - 68 tests:
 03.types/18.function_types/incorrect_function_name_45.ets
@@ -140,7 +140,7 @@
 13.modules_and_namespaces/10.program_entry_point/main_n_22.ets
 13.modules_and_namespaces/10.program_entry_point/main_n_23.ets
 15.semantic_rules/10.overloading/main_overload_neg.ets
-17.experimental_features/10.native_functions_and_methods/01.native_functions/nat8.ets
+17.experimental_features/10.native_functions_and_methods/01.native_functions/negative/nat3_n.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/bad_package_declarations/bad_package_declarations_0.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/bad_package_declarations/bad_package_declarations_1.ets
 #FailKind.TSC_FAIL - 1469 tests:
@@ -1991,9 +1991,9 @@
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/two_interfaces_6.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/two_interfaces_8.ets
 17.experimental_features/10.native_functions_and_methods/01.native_functions/nat3.ets
-17.experimental_features/10.native_functions_and_methods/02.native_methods/native_method_declaration_with_keywords_0.ets
-17.experimental_features/10.native_functions_and_methods/02.native_methods/native_method_declaration_with_keywords_3.ets
-17.experimental_features/10.native_functions_and_methods/02.native_methods/native_method_declaration_with_keywords_4.ets
+17.experimental_features/10.native_functions_and_methods/02.native_methods/native_method_declaration_with_keywords_n_0.ets
+17.experimental_features/10.native_functions_and_methods/02.native_methods/native_method_declaration_with_keywords_n_3.ets
+17.experimental_features/10.native_functions_and_methods/02.native_methods/native_method_declaration_with_keywords_n_4.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_1.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_12.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_3.ets

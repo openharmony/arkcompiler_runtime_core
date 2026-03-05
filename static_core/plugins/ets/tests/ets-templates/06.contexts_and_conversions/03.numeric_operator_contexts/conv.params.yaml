@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,37 +23,37 @@ cases:
 
   # enumerations
   - defs: |-
-      enum IntEnum {One = 1, Two, Three}
+      enum IntEnum1 {One = 1, Two, Three}
     op: '+'
-    type1: IntEnum
-    v1: IntEnum.One
-    type2: IntEnum
-    v2: IntEnum.Two
+    type1: IntEnum1
+    v1: IntEnum1.One
+    type2: IntEnum1
+    v2: IntEnum1.Two
     res: 3
 
   - defs: |-
-      enum IntEnum {One = 1, Two, Three}
+      enum IntEnum2 {One = 1, Two, Three}
     op: '*'
-    type1: IntEnum
-    v1: IntEnum.One
-    type2: IntEnum
-    v2: IntEnum.Three
+    type1: IntEnum2
+    v1: IntEnum2.One
+    type2: IntEnum2
+    v2: IntEnum2.Three
     res: 3
       
   - defs: |-
-      enum IntEnum {One = 1, Two, Three}
+      enum IntEnum3 {One = 1, Two, Three}
     op: '/'
-    type1: IntEnum
-    v1: IntEnum.Two
-    type2: IntEnum
-    v2: IntEnum.One
+    type1: IntEnum3
+    v1: IntEnum3.Two
+    type2: IntEnum3
+    v2: IntEnum3.One
     res: 2
 
   - defs: |-
-      enum IntEnum {One, Two, Three}
+      enum IntEnum4 {One, Two, Three}
     op: '>'
-    type1: IntEnum
-    v1: IntEnum.Two
-    type2: IntEnum
-    v2: IntEnum.One
+    type1: IntEnum4
+    v1: IntEnum4.Two
+    type2: IntEnum4
+    v2: IntEnum4.One
     res: "true"

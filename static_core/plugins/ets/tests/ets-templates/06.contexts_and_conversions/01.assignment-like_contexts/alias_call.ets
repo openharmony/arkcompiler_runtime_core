@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,36 +13,53 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: Invocation contexts allow using aliases.
-params: Aliases '{{c.ref_type}}' to '{{c.type}}'
+desc: >-
+    Invocation contexts allow using aliases.
 ---*/
 
 class A {
-  {%- for v in c['values'] %}
-  public fld_{{loop.index}}: {{c.type}};
-  {%- endfor %}
+{% for c in cases %}
+{% set outer_loop_index = loop.index %}
+    {%- for v in c['values'] %}
+    public fld_{{outer_loop_index}}{{loop.index}}: {{c.type}};
+    {%- endfor %}
 
   public constructor({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}) {
     {%- for v in c['values'] %}
-    this.fld_{{loop.index}} = p{{loop.index}};
+    this.fld_{{outer_loop_index}}{{loop.index}} = p{{loop.index}};
     {%- endfor %}
   }
 
   public foo({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}): void {
     {%- for v in c['values'] %}
-    arktest.assertEQ(this.fld_{{loop.index}}, p{{loop.index}})
+    arktest.assertEQ(this.fld_{{outer_loop_index}}{{loop.index}}, p{{loop.index}})
     {%- endfor %}
   }
+
+  {% endfor %}
 }
 
-function main(): void {
-  {%- for v in c['values'] %}
-  let v{{loop.index}}: {{c.ref_type}} = {{v|safe}};
-  {%- endfor %}
 
-  let c: A = new A({% for v in c['values'] %}v{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
-  c.foo({% for v in c['values'] %}v{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Alias_call_context");
+
+    {% for c in cases %}
+    {% set outer_loop_index = loop.index %}
+
+        testSuite.addTest("alias_call{{outer_loop_index}}", () => {
+
+            {%- for v in c['values'] %}
+            let v{{outer_loop_index}}{{loop.index}}: {{c.ref_type}} = {{v|safe}};
+            {%- endfor %}
+
+            let c{{outer_loop_index}}: A = new A({% for v in c['values'] %}v{{outer_loop_index}}{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
+            c{{outer_loop_index}}.foo({% for v in c['values'] %}v{{outer_loop_index}}{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
+
+        }); 
+    {%- endfor %} 
+
+    return testSuite.run();
 }
-{% endfor %}

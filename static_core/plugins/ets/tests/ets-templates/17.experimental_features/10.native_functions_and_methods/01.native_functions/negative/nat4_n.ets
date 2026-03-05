@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,7 @@
 /*---
 desc: A compile-time error occurs if a native function doesn't have return type.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0018: Native and Declare methods should have explicit return type."
 ---*/
 
 native function foo(); // native without parameters
-
-function main() {
-
-    foo();
-    
-}

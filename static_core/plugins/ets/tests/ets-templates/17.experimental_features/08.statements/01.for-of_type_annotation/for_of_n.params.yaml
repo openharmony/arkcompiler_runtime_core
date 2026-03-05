@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,69 +12,70 @@
 # limitations under the License.
 ---
 cases:
-    - tags: 'compile-only, negative'
-      use: |-
+#0
+    - use: |-
           for (const v: int of [1,2,3,4]) {
               res += v
               v = 0   // shouldn't be allowed for const
               res += v
           }
           arktest.assertEQ(res, "10203040")
-
-    - tags: 'compile-only, negative'  
-      use: |-
+      expected_out: "Semantic error ESE4001: Cannot assign to a constant variable v"
+#1
+    - use: |-
           for (let v: int of []) res += v  // shouldn't be allowed
           arktest.assertEQ(res, "")
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Semantic error ESE0076: 'For-of' statement source expression is not of iterable type."
+#2
+    - use: |-
           for (const ch: char of "ABCD") {
               res += ch
               ch = ' '   // shouldn't be allowed for const
               res += ch
           }
           arktest.assertEQ(res, "A B C D ")
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Semantic error ESE0069: Source element type 'String' is not assignable to the loop iterator type 'Char'."
+#3
+    - use: |-
           // wrong expr type
           for (const ch: char of 123) res += ch
           arktest.assertEQ(res, "123")
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Semantic error ESE0076: 'For-of' statement source expression is not of iterable type."
+#4
+    - use: |-
           let obj: Object = new Object()
           // wrong expr type
           for (const v: Object of obj) res += v
           arktest.assertEQ(res, "")
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: " Semantic error ESE0258: Object type doesn't have proper iterator method."
+#5
+    - use: |-
           let arr: Error[] = [new Error(), new Error()]
           // wrong var type
           for (const v: Number of arr) res += v
           arktest.assertEQ(res, "")
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Semantic error ESE0069: Source element type 'Error' is not assignable to the loop iterator type 'Double'."
+#6
+    - use: |-
           let arr: int[] = new int[0]
           // missing right parenthesis
           for (let v: int of arr res += v
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Syntax error ESY0230: Expected ')', got 'identification literal'."
+#7
+    - use: |-
           let arr: int[] = new int[0]
           // missing left parenthesis
           for let v: int of arr) res += v
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Syntax error ESY0230: Expected '(', got 'let'."
+#8
+    - use: |-
           let arr: int[] = new int[0]
           // missing both parentheses
           for let v: int of arr res += v
-
-    - tags: 'compile-only, negative'
-      use: |-
+      expected_out: "Syntax error ESY0230: Expected '(', got 'let'."
+#9
+    - use: |-
           let arr: int[] = new int[0]
           // missing semicolon separating type
           for (let v int of arr) res += v
+      expected_out: "Syntax error ESY0105: Variable must be initialized or it's type must be declared."

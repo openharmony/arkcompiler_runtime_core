@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,10 @@
  */
 
 /*---
-desc: If the return type is omitted in a native function (see Native Functions), then a compile-time error occurs.
-tags: [compile-only, negative]
+desc: A compile-time error occurs if a native constructor has a body.
+tags: [compile-only]
 ---*/
 
-native function foo(a: Number) {
-    return a;
+class NativeConstructorClass {
+    native constructor();
 }

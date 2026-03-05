@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,10 @@
  * limitations under the License.
  */
 
-{% for mod in modifiers %}
-
 /*---
-desc: Native method declaration with '{{mod}}' keyword.
-assert: It is compile-time error if a method declaration that contains the keyword native also contains any one of the keywords abstract, open, override, native, or synchronized.
+desc: A compile-time error occurs if a native function has a body.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
 ---*/
 
-class A {
-  {{mod}} native run(): void;
-}
-
-{% endfor %}
+native function foo(): void {}

@@ -13,17 +13,27 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
+
 /*---
-desc: Assignment contexts followed by a widening primitive conversion.
-params: from '{{case.src_type}}' to '{{case.dst_type}}'
+desc: >-
+    Assignment contexts followed by a widening primitive conversion.
 ---*/
 
-function main(): void {
-  {% for v in case['values'] %}
-  let src_{{loop.index}}: {{case.src_type}} = new {{case.src_type}}({{v|safe}});
-  let dst_{{loop.index}}: {{case.dst_type}} = src_{{loop.index}};
-  arktest.assertEQ(dst_{{loop.index}}, (src_{{loop.index}}.to{{case.dst_type}}()))
-  {% endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Alias_assignment_ToCast_context");
+
+    {% for case in cases %}
+        testSuite.addTest("alias_{{loop.index}}", () => {
+            {% for v in case['values'] %}
+                let src_{{loop.index}}: {{case.src_type}} = new {{case.src_type}}({{v|safe}});
+                let dst_{{loop.index}}: {{case.dst_type}} = src_{{loop.index}};
+                arktest.assertEQ(dst_{{loop.index}}, (src_{{loop.index}}.to{{case.dst_type}}()))
+            {%- endfor %}
+        }); 
+    {% endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}
+

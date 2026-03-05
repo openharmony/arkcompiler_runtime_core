@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,18 @@
 
 /*---
 desc: A compile-time error occurs if a native function has a body.
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
-native function foo(a: int): int {
-    return a;
-}
+native function foo(a: Object, b?: string, ): int|float; // native with optional parameter
+export native function foo2(b: string, a: int = 1): int; // native with default parameter and export directive
+native function foo3(func: (i: int) => int): string // native with lambda parameter
 
-function main(): void {
-    foo(0);
+function main() {
+
+    let v = foo(new Object());
+    let z: int = foo2('');
+    const myLambda = (i: int) => 1
+    foo3(myLambda)
+
 }
