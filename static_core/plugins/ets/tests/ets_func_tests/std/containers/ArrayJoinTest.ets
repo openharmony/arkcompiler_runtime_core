@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 
  function main(): void {
-    let x = new Array<number>(4);
+    let x = Array.create<number | undefined>(4, undefined);
     x[0] = 0;
     x[3] = 3;
     arktest.assertEQ(x.join(), "0,,,3", 'x.join() === "0,,,3". Actual:' + (x.join()));
 
-    let z = new Array<undefined>(4)
+    let z = Array.create<undefined>(4, undefined)
     arktest.assertEQ(z.join(), ",,,", 'z.join() === ",,,". Actual:' + (z.join()));
 
     let y = new Array<null>(null,null,null);

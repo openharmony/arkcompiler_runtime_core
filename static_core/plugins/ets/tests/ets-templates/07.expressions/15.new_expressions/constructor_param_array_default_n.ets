@@ -30,7 +30,7 @@ class C<T> extends Array<T> {
 }
 
 function main(): void {
-  let arr = new Array<C<Object>>(5)
+  let arr = new Array<C<Object>>()
 }
 
 {% endfor %}

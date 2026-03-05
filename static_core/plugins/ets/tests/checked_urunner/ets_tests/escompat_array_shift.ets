@@ -43,14 +43,8 @@ function checkArray(arr: int[], expected: int[]) {
 
 function test(): void {
     let size = 16;
-    let arr = new Array<int>(size);
-    let expArr = new Array<int>(size - 1);
-    for (let i = 0; i < size; ++i) {
-        arr[i] = i;
-    }
-    for (let i = 0; i < size - 1; ++i) {
-        expArr[i] = i + 1;
-    }
+    let arr = new Array<int>(size, (index: int) => index);
+    let expArr = new Array<int>(size - 1, (index: int) => index + 1);
     arr.shift();
     arktest.assertEQ(arr.length, size - 1);
     checkArray(arr, expArr);

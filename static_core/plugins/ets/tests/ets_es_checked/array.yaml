@@ -267,9 +267,3 @@ sub:
           - expr: Array<number>().length
             ret_type: int
             expected: 0
-          - expr: Array<number>(5).length
-            ret_type: int
-            expected: 5
-          - expr: Array<number>(0).length
-            ret_type: int
-            expected: 0

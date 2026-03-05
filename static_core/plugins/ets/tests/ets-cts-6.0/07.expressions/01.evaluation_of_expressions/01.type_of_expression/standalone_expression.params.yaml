@@ -25,7 +25,7 @@ cases:
   - {type: 'string', val: '(42).toString()'}
   - {type: 'bigint', val: '100n'}
   - {type: 'number', val: 'NaN'}
-  - {type: 'object', val: 'Array<number>(3)'}
+  - {type: 'object', val: 'Array.create<number>(3, 0)'}
   - {type: 'boolean', val: '[1] instanceof number[]'}
   - {type: 'string', val:  '(typeof x == "string") ? x:""'}
   - {type: 'boolean', val: 'true && false'}

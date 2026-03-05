@@ -30,7 +30,7 @@ class C {
 }
 
 function main(): void {
-  let arr = new Array<C>(5)
+  let arr = new Array<C>()
 }
 
 {% endfor %}

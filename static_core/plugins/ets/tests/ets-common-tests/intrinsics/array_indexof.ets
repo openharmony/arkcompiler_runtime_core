@@ -188,7 +188,8 @@ function testArrayOfBoolean() {
 
 
 function testArrayOfMixedTypes() {
-    let a: Array<number | string | object | undefined | null | boolean> = new Array<number | string | object | undefined | null | boolean>(123457);
+    let a: (number | string | object | undefined | null | boolean)[] =
+        Array.create<number | string | object | undefined | null | boolean>(123457, undefined);
     let _false = false;
     let b: object = new Object();
     let one = 1;

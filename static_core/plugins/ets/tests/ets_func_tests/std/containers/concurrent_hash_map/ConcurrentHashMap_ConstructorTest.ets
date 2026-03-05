@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,10 +30,10 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_002", () =>
     {
-        let array = Array<[Number, string]>(10);
+        let array: ([Number, string])[] = [];
         for (let i = 0; i < 10; i++) {
             let arrKV: [Number, string] = [arrKeys[i], arrValues[i]]
-            array[i] = arrKV;
+            array.push(arrKV);
         }
         let arrayLike = array as ArrayLike<[Number, string]>;
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(arrayLike);
@@ -44,10 +44,10 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_003", () =>
     {
-        let arr: Array<[Number, string]> = new Array<[Number, string]>(10);
+        let arr: ([Number, string])[] = [];
         for (let i: int = 0; i < 10 ; i++) {
             let arrKV: [Number, string] = [arrKeys[i], arrValues[i]]
-            arr[i] = arrKV;
+            arr.push(arrKV);
         }
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(arr);
         arktest.assertEQ(concurrentHashMap.size, 10);

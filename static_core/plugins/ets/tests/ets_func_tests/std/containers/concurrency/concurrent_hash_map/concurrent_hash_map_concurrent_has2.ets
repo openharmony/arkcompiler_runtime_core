@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,9 @@ function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
-	let res: Array<T> = new Array<T> (arr.length);
+	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res[i] = arr[i].Await();
+		res.push(arr[i].Await());
 	return res;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@ import { launch } from "std/concurrency"
 
 const elementsNum: int = 100;
 
-let testArrayInt: Array<int> = new Array<int>(elementsNum);
-let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
-let testArrayStr: Array<String> = new Array<String>(elementsNum);
+let testArrayInt: int[] = Array.create<int>(elementsNum, 0);
+let testArrayObj: Object[] = Array.create<Object>(elementsNum, {});
+let testArrayStr: String[] = Array.create<String>(elementsNum, '');
 let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 let queueObj: containers.ArrayBlockingQueue<Object> = new containers.ArrayBlockingQueue<Object>(200);
 let queueStr: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
@@ -29,7 +29,7 @@ function main(): int {
 
     ArrayBlockingQueueTestsuite.addTest("SimpleQueuePushPopFrontBackSizeEmptyTest", () =>
     {
-        let arr: Array<int> = new Array<int>(elementsNum);
+        let arr: int[] = Array.create<int>(elementsNum, 0);
         for (let i: int = 0; i < arr.length; ++i) {
             let el = (random() * 10000).toInt();
             arr[i] = el;
@@ -110,7 +110,7 @@ function pusherStr() {
 }
 
 function popperInt(): Array<int> {
-    let arr = new Array<int>(elementsNum);
+    let arr = Array.create<int>(elementsNum, 0);
     for (let i = 0; i < elementsNum; i++) {
         arr[i] = queueInt.pop();
     }
@@ -118,7 +118,7 @@ function popperInt(): Array<int> {
 }
 
 function popperObj(): Array<Object> {
-    let arr = new Array<Object>(elementsNum);
+    let arr = Array.create<Object>(elementsNum, {});
     for (let i = 0; i < elementsNum; i++) {
         arr[i] = queueObj.pop();
     }
@@ -126,7 +126,7 @@ function popperObj(): Array<Object> {
 }
 
 function popperStr(): Array<String> {
-    let arr = new Array<String>(elementsNum);
+    let arr = Array.create<String>(elementsNum, '');
     for (let i = 0; i < elementsNum; i++) {
         arr[i] = queueStr.pop();
     }

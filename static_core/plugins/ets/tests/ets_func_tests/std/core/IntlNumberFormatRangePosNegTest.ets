@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,10 +51,7 @@ const IR: int = 10;
 
 function positiveNumbersAsStrings(): Array<string> {
     // Codes for numberValues[1]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
+    let expected = Array.create<string>(languageCodes.length, '');
     expected[EN] = String.fromCharCode(49, 44, 50, 51, 52, 46, 53);
     expected[FR] = String.fromCharCode(49, 8239, 50, 51, 52, 44, 53);
     expected[ES] = String.fromCharCode(49, 46, 50, 51, 52, 44, 53);
@@ -71,10 +68,7 @@ function positiveNumbersAsStrings(): Array<string> {
 
 function negativeNumbersAsStrings(): Array<string> {
     // Codes for  numberValues[0]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
+    let expected = Array.create<string>(languageCodes.length, '');
     expected[EN] = String.fromCharCode(45, 49, 44, 50, 51, 52, 46, 53);
     expected[FR] = String.fromCharCode(45, 49, 8239, 50, 51, 52, 44, 53);
     expected[ES] = String.fromCharCode(45, 49, 46, 50, 51, 52, 44, 53);
@@ -91,10 +85,7 @@ function negativeNumbersAsStrings(): Array<string> {
 
 function negativeInfsAsStrings(): Array<string> {
     // Codes for numberValues[2]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
+    let expected = Array.create<string>(languageCodes.length, '');
     expected[EN] = String.fromCharCode(45, 8734);
     expected[FR] = expected[EN];
     expected[ES] = expected[EN];
@@ -110,10 +101,7 @@ function negativeInfsAsStrings(): Array<string> {
 }
 
 function separatorsBetweenNegAndPosAsStrings(): Array<string> {
-    let separators = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < separators.length; ++i) {
-        separators[i] = new string("");
-    }
+    let separators = Array.create<string>(languageCodes.length, '');
     separators[EN] = String.fromCharCode(32, 8211, 32);
     separators[FR] = separators[EN];
     separators[ES] = String.fromCharCode(32, 45, 32);
@@ -129,10 +117,7 @@ function separatorsBetweenNegAndPosAsStrings(): Array<string> {
 }
 
 function separatorsBetweenPosAndNegAsStrings(): Array<string> {
-    let separators = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < separators.length; ++i) {
-        separators[i] = new string("");
-    }
+    let separators = Array.create<string>(languageCodes.length, '');
     separators[EN] = String.fromCharCode(8211);
     separators[FR] = separators[EN];
     separators[ES] = String.fromCharCode(45);
@@ -149,10 +134,7 @@ function separatorsBetweenPosAndNegAsStrings(): Array<string> {
 
 function positiveBigIntsAsStrings(): Array<string> {
     // Codes for bigIntValues[1]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
+    let expected = Array.create<string>(languageCodes.length, '');
     expected[EN] = String.fromCharCode(49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
     expected[FR] = String.fromCharCode(49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
     expected[ES] = String.fromCharCode(49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
@@ -169,10 +151,7 @@ function positiveBigIntsAsStrings(): Array<string> {
 
 function negativeBigIntsAsStrings(): Array<string> {
     // Codes for bigIntValues[0]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
+    let expected = Array.create<string>(languageCodes.length, '');
     expected[EN] = String.fromCharCode(45, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
     expected[FR] = String.fromCharCode(45, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
     expected[ES] = String.fromCharCode(45, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
@@ -210,15 +189,9 @@ function CheckFormatRangeUnion(locale: string, funcName: string, start: number |
     }
 
     if (expected != str) {
-        let arr = new Array<Number>(str.length);
-        for (let ii = 0; ii < str.length; ++ii) {
-            arr[ii] = str.codePointAt(ii)!;
-        }
+        let arr = new Array<Number>(str.length, (index: int) => str.codePointAt(index)!);
         console.log(funcName + ". Got: \"" + str + "\" Codes: " + arr.join(","));
-        arr = new Array<Number>(expected.length);
-        for (let ii = 0; ii < expected.length; ++ii) {
-            arr[ii] = expected.codePointAt(ii)!;
-        }
+        arr = new Array<Number>(expected.length, (index: int) => expected.codePointAt(index)!);
         console.log(funcName + ". Exp: Codes: " + arr.join(","));
         console.log(funcName + ". Detected on " + locale);
         return fail;

@@ -37,9 +37,9 @@ class C<T> extends Array<T> {
 }
 
 function main(): void {
-  let arr = new Array<C<Object>>(5)
+  let arr = new Array<C<Object>>()
   let t: foo = (i: undefined|Object) => { return i }
-  arr[0] = new C<Object>(t)
-  arktest.assertEQ(arr.length, 5)
+  arr.push(new C<Object>(t))
+  arktest.assertEQ(arr.length, 1)
   arktest.assertEQ(arr.at(0).i, undefined)
 }

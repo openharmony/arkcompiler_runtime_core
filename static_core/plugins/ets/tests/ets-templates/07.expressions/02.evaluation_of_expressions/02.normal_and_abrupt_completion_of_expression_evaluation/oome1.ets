@@ -26,13 +26,13 @@ const ARRAY_SIZE = 1_000_000;
 
 function main() {
   try {
-    let v: Array<Object> = new Array<Object>(ARRAY_SIZE);
+    let v: Object[] = Array.create<Object>(ARRAY_SIZE, {});
 
     for (let i: int = 0; i < ARRAY_SIZE; i++) {
-        let w = new Array<Object>(ARRAY_SIZE);
+        let w = Array.create<Object>(ARRAY_SIZE, {});
 
         for (let j: int = 0; j < ARRAY_SIZE; j++) {
-          w[j] = new Array<number>(100).fill(ARRAY_SIZE);
+          w[j] = Array.create<number>(100, ARRAY_SIZE);
         }
 
         v[i] = w;

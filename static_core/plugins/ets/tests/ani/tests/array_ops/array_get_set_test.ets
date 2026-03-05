@@ -20,11 +20,11 @@ export class ArrayWithCounters<T> extends Array<T> {
     private realLength: int = 0
 
     public constructor(arr: Array<T>) {
-        super(arr.length)
+        super()
         this.realLength = arr.length
         this.length_ = this.realLength
         for (let i = 0; i < arr.length; i++) {
-            super.$_set(i, arr[i])
+            super.push(arr[i])
         }
         this.length_ = 0
     }

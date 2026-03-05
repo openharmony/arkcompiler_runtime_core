@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,7 +167,7 @@ function testGetHashCode21() {
 
 function testLong(): void {
   let vals = new Array<Long>(-10012345111, -298765, -12, -1, 0, 1, 16, 100, 12345, 9876543111)
-  let hashCoderArr = new Array<Long>(vals.length);
+  let hashCoderArr = Array.create<Long>(vals.length, 0);
   
   for (let i = 0; i < vals.length; i++) {
     hashCoderArr[i] = Runtime.getHashCodeByValue(vals[i]);

@@ -54,7 +54,7 @@ function testOutOfMemory(): void {
     let buf: Any[] = []
     try {
         while (true) {
-            buf.push(new Array<byte>(1000))
+            buf.push(new FixedArray<byte>(1000))
         }
     } catch (e) {
     }

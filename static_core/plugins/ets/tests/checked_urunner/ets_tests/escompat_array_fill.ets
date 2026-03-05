@@ -52,8 +52,7 @@ function checkArray(arr: int[], start: int, end: int, expected: int) {
 
 function fillBigArray() {
     // if have memory leak, will cause oom, then test failed
-    let array2: number[] = new Array<number>(1024 * 768);
-    array2.fill(1);
+    let array2: number[] = Array.create<number>(1024 * 768, 1);
 }
 
 function testArrayFill() {
@@ -78,17 +77,17 @@ function testArrayFill() {
     arktest.assertEQ(array1.fill(15, 0, 1)[1], 14);
     arktest.assertEQ(array1.fill(16, 1, 2)[1], 16);
 
-    let arrNull = new Array<null>(3);
+    let arrNull = new Array<null>(3, (index) => null);
     arrNull.fill(null, 0, 3);
     for (let i = 0; i < 3; i++) {
         arktest.assertEQ(arrNull[i], null);
     }
-    let arrUndef = new Array<undefined>(5);
+    let arrUndef = new Array<undefined>(5, (index) => undefined);
     arrUndef.fill(undefined, 0, 5)
     for (let i = 0; i < 5; i++) {
         arktest.assertEQ(arrUndef[i], undefined);
     }
-    let arrUnion = new Array<TestClass | undefined>(5);
+    let arrUnion = new Array<TestClass | undefined>(5, (index) => undefined);
     arrUnion.fill(undefined, 0, 5)
     arrUnion.fill(new TestClass(2), 3, 5)
     for (let i = 0; i < 5; i++) {
@@ -100,7 +99,7 @@ function testArrayFill() {
         let tmpObj = arrUnion[i] as TestClass
         arktest.assertEQ(tmpObj.get(), 2);
     }
-    let arrObj = new Array<TestClass>(50000);
+    let arrObj = new Array<TestClass>(50000, (index) => new TestClass(0));
     arrObj.fill(new TestClass(3), 0, 50000);
     for (let i = 0; i < 50000; i++) {
         arktest.assertEQ(arrObj[i].get(), 3);
@@ -113,8 +112,13 @@ function testArrayFill() {
 
 class MyArray<T> extends Array<T> {
     counter: int;
-    public constructor(len: number) {
-        super(len.toInt());
+    public constructor() {
+        super();
+        this.counter = 0;
+    }
+
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        super(arrayLen, initializer);
         this.counter = 0;
     }
 
@@ -130,7 +134,7 @@ class MyArray<T> extends Array<T> {
 }
 
 function testArrayCallVirtualFill() {
-    let array2: MyArray<int> = new MyArray<int>(arraySize);
+    let array2: MyArray<int> = new MyArray<int>(arraySize, (index) => 0);
     array2.fill(99, 0, arraySize);
     checkArray(array2, 0, arraySize, 99);
     arktest.assertEQ(array2.getCounter(), 1);

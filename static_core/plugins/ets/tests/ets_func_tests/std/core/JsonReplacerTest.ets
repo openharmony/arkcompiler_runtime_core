@@ -58,12 +58,12 @@ class C {
 }
 
 class O<T> implements JsonReplacer {
-    private buffer: Array<T>
+    private buffer: Array<T | undefined>
     private capacity: int = 20
 
     constructor(capacity: int) {
         this.capacity = capacity;
-        this.buffer = new Array<T>(this.capacity)
+        this.buffer = Array.create<T | undefined>(this.capacity, undefined)
         this.buffer.length = 0
     }
 

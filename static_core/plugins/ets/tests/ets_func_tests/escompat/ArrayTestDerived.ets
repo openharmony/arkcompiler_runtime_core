@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@ const DERIVED_ACCESS_OFFSET = 1000;
 
 class Derived extends Array<Number> {
     public constructor(arrayLen: number) {
-        super(arrayLen.toInt());
+        super(arrayLen.toInt(), (index) => 0);
     }
 
     public override $_get(index: int): Number {
@@ -46,10 +46,7 @@ function main(): int {
     arktest.assertEQ(__noinline__getOutside(a), DERIVED_ACCESS_OFFSET);
     arktest.assertEQ(__noinline__atOutside(a), DERIVED_ACCESS_OFFSET);
 
-    let b = new Array<Number>(10);
-    for (let i = 0; i < 10; i++) {
-        b[i] = i.toDouble();
-    }
+    let b = new Array<Number>(10, (index: int) => index.toDouble());
     arktest.assertEQ(__noinline__getOutside(b), 0);
     arktest.assertEQ(__noinline__atOutside(b), 0);
     return 0;

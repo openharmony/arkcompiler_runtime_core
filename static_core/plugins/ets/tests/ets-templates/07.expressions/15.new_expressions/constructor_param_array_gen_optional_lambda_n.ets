@@ -38,7 +38,7 @@ class A<T> extends Array<T> {
 
 class C<T> {
   foo() {
-    let arr = new Array<T>(5)
+    let arr = new Array<T>()
   }
 }
 

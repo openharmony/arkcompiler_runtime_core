@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,9 +143,7 @@ function testToArray() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let test1 = lightWeightSet.toArray()
-    let test2 = new Array<string>(2)
-    test2[0] = "aa"
-    test2[1] = "bb"
+    let test2: string[] = ['aa', 'bb']
     arktest.assertEQ(test1[0], test2[0], "The lightWeightSet fail at 1st judgement");
     arktest.assertEQ(test1[1], test2[1], "The lightWeightSet fail at 2nd judgement");
 }

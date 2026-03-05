@@ -62,13 +62,6 @@
 //! INST       /CallVirtual.*std\.core\.Array::\$_set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError,.*,COMPILED/
-//! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError"
-//! PASS_AFTER "IrBuilder"
-//! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*std\.core\.Array::\$_get/
-//! PASS_AFTER "Inline"
-//! INST_NOT   /Intrinsic.EscompatArrayGet/
 
 //# std.core.Array get/set operations (with errors):
 //! CHECKER    AOT IR Builder: Case #2
@@ -80,13 +73,6 @@
 //! INST       /CallVirtual.*std\.core\.Array::\$_set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError"
-//! PASS_AFTER "IrBuilder"
-//! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*std\.core\.Array::\$_get/
-//! PASS_AFTER "Inline"
-//! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! RUN        entry: "escompat_array_get_set.ETSGLOBAL::test2"
 
 function arraySet(arr: int[]): void {
     arr[1] = 2;
@@ -115,28 +101,14 @@ function __noinline__testRangeError(arr: int[], index: int): int {
     return NO_ERROR_THROWN;
 }
 
-function __noinline__testClassCastError(arr: int[], index: int): int {
-    const MAGIC_NUMBER = 1234567890;
-    let dest = MAGIC_NUMBER;
-    try {
-        dest = arr[index];
-    } catch (e) {
-        if (e instanceof ClassCastError) {
-            return (dest == MAGIC_NUMBER) ? CORRECT_ERROR_THROWN : WRONG_EXPRESSION_RESULT;
-        }
-        return WRONG_ERROR_THROWN;
-    }
-    return NO_ERROR_THROWN;
-}
-
 function test1(): void {
-    const arr = new Array<int>(16);
+    const arr = new Array<int>(16, (index) => 0);
     arraySet(arr);
     arktest.assertEQ(arrayGet(arr), 20);
 }
 
 function test2(): void {
-    const arr = new Array<int>(16);
+    const arr = new Array<int>(16, (index) => 0);
     arraySet(arr);
 
     // Error case #1: index < 0
@@ -144,14 +116,15 @@ function test2(): void {
 
     // Error case #2: index >= length
     arktest.assertEQ(__noinline__testRangeError(arr, 16), CORRECT_ERROR_THROWN);
-
-    // Error case #3: undefined -> Int cast error
-    arktest.assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_ERROR_THROWN);
 }
 
 class ExtArray<T> extends Array<T> {
-    public constructor(n: int) {
-        super(n)
+    public constructor() {
+        super()
+    }
+
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        super(arrayLen, initializer)
     }
 }
 
@@ -175,7 +148,7 @@ class ExtArray<T> extends Array<T> {
 //! INST_NOT      /BoundsCheck/
 //! INST_NOT      /Call.*get_unsafe/
 function testGetUnsafe() {
-    let a = new ExtArray<int>(1)
+    let a = new ExtArray<int>(1, (index) => 0)
     a[0] = 10
     arktest.assertEQ(10, a.pop())
 }
@@ -200,7 +173,7 @@ function testGetUnsafe() {
 //! INST_NOT      /BoundsCheck/
 //! INST_NOT      /Call.*set_unsafe/
 function testSetUnsafe() {
-    let a = new ExtArray<int>(1)
+    let a = new ExtArray<int>(1, (index) => 0)
     let b = a.with(0, 10)
     arktest.assertEQ(10, b[0])
 }

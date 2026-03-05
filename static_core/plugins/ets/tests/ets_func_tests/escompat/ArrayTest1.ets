@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@ function runTestPhase(): int {
     failures += check((): int => { return createDefault() }, 'Create default empty Array');
     failures += check((): int => { return createWithGivenZeroSize() }, 'Create Array with given zero size');
     failures += check((): int => { return createWithGivenSize() }, 'Create Array with given size');
-    failures += check((): int => { return createWithNegativeInitialCapacity() }, 'Create Array with negative capacity');
     failures += check((): int => { return isArrayRawArrayNumber() }, 'isArrayRawArrayNumber');
     failures += check((): int => { return isArrayArrayNumber() }, 'isArrayArrayNumber');
     failures += check((): int => { return isArrayNullUndefined() }, 'isArrayNullUndefined');
@@ -85,20 +84,8 @@ function createDefault(): int {
     })
 }
 
-function createWithNegativeInitialCapacity(): int {
-    try {
-        new Array<Number>(-1);
-    } catch (e) {
-        if (e instanceof NegativeArraySizeError) {
-            return success;
-        }
-        throw new Error(`Expects NegativeArraySizeError to be thrown, but actual error: '${e}'`);
-    }
-    throw new Error("Expects NegativeArraySizeError to be thrown, but no error in actual.");
-}
-
 function createWithGivenZeroSize(): int {
-    return check(() => new Array<Number>(0), (arr: Array<Number>) => {
+    return check(() => new Array<Number>(), (arr: Array<Number>) => {
         arktest.assertEQ(arr.length, 0);
         return success;
     })
@@ -106,7 +93,7 @@ function createWithGivenZeroSize(): int {
 
 function createWithGivenSize(): int {
     const ARRAY_SIZE = 10;
-    return check(() => new Array<Number>(ARRAY_SIZE), (arr: Array<Number>) => {
+    return check(() => Array.create<Number>(ARRAY_SIZE, 0), (arr: Array<Number>) => {
         arktest.assertEQ(arr.length, ARRAY_SIZE);
         return success;
     })
@@ -154,7 +141,7 @@ function pushECMA(): int {
 }
 
 function setNull(): int {
-    return check(() => new Array<string | null>(3), (arr: Array<string | null>) => {
+    return check(() => Array.create<string | null>(3, null), (arr: Array<string | null>) => {
         arr[1] = "abc"
         arr[2] = null;
         arktest.assertEQ(arr[2], null);
@@ -165,7 +152,7 @@ function setNull(): int {
 class A {}
 
 function setCustomClass() : int {
-    return check(() => new Array<A>(1), (arr: Array<A>) => {
+    return check(() => new Array<A>(new A()), (arr: Array<A>) => {
         arr[0] = new A()
         return success
     })

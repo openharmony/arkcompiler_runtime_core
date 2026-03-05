@@ -32,6 +32,6 @@ class C {
 }
 
 function main(): void {
-  let arr = new Array<C>(5)
-  arktest.assertEQ(arr.length, 5)
+  let arr = new Array<C>()
+  arktest.assertEQ(arr.length, 0)
 }
