@@ -153,6 +153,9 @@ def copy(source_path: Path, dest_path: Path, remove_if_exist: bool = True) -> No
         else:
             shutil.rmtree(dest_path)
     if source_path.is_file():
+        dest_file_folder = dest_path.parent
+        if not dest_file_folder.exists():
+            dest_file_folder.mkdir(parents=True, exist_ok=True)
         shutil.copy(source_path, dest_path)
     else:
         shutil.copytree(source_path, dest_path,

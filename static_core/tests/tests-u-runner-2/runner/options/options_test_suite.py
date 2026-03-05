@@ -111,7 +111,8 @@ class TestSuiteOptions(IOptions):
             f'--{TestSuiteOptions.__FILTER}', '-f', action='store',
             default=TestSuiteOptions.__DEFAULT_FILTER,
             dest=f"{dest}{TestSuiteOptions.__FILTER}",
-            help=f'test filter wildcard. By default \'{TestSuiteOptions.__DEFAULT_FILTER}\'')
+            help="Glob pattern to select tests relative to test root."
+                  "If the pattern matches directories, tests inside them are included recursively. ")
         repeats_group = parser.add_mutually_exclusive_group(required=False)
         repeats_group.add_argument(
             f'--{TestSuiteOptions.__REPEATS}', action='store',
