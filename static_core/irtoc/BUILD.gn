@@ -44,24 +44,6 @@ if (enable_irtoc) {
     }
   }
 
-  irtoc_fastpath_scripts = [
-    "scripts/common.irt",
-    "scripts/string_helpers.irt",
-    "scripts/allocation.irt",
-    "scripts/resolvers.irt",
-    "scripts/monitors.irt",
-    "scripts/check_cast.irt",
-    "scripts/gc.irt",
-    "scripts/strings.irt",
-    "scripts/string_builder.irt",
-    "scripts/memcopy.irt",
-    "scripts/arrays.irt",
-  ]
-
-  irtoc_interpreter_scripts = [ "scripts/interpreter.irt" ]
-
-  irtoc_tests_scripts = [ "scripts/tests.irt" ]
-
   generated_file("irtoc_plugins_file") {
     outputs = [ irtoc_plugins_file ]
     inputs = plugin_irtoc_plugins
@@ -127,17 +109,29 @@ if (enable_irtoc) {
 
   if (host_os != "mac") {
     irtoc_modular_compile("irtoc_fastpath") {
-      scripts = irtoc_fastpath_scripts
+      scripts = [
+        "scripts/common.irt",
+        "scripts/string_helpers.irt",
+        "scripts/allocation.irt",
+        "scripts/resolvers.irt",
+        "scripts/monitors.irt",
+        "scripts/check_cast.irt",
+        "scripts/gc.irt",
+        "scripts/strings.irt",
+        "scripts/string_builder.irt",
+        "scripts/memcopy.irt",
+        "scripts/arrays.irt",
+      ]
       # NOTE(sukhikhalexander): implement validation issue #33412
     }
 
     irtoc_modular_compile("irtoc_interpreter") {
-      scripts = irtoc_interpreter_scripts
+      scripts = [ "scripts/interpreter.irt" ]
       use_llvm_inline = true
     }
 
     irtoc_modular_compile("irtoc_tests") {
-      scripts = irtoc_tests_scripts
+      scripts = [ "scripts/tests.irt" ]
     }
 
     irtoc_modular_compile("irtoc_ets_fastpath") {
