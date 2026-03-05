@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,22 @@ class G {
 
 class CheckWrongSignature {
     static method(a: String): boolean {
+        return true;
+    }
+}
+
+class Parent {
+    static parentStaticMethod(): boolean {
+        return true;
+    }
+}
+class Child extends Parent {
+    static childStaticMethod(): boolean {
+        return true;
+    }
+}
+final class Grandchild extends Child {
+    static grandchildStaticMethod(): boolean {
         return true;
     }
 }

@@ -1288,5 +1288,140 @@ TEST_F(ClassFindMethodTest, check_hierarchy_static)
     ASSERT_NE(overridedMethodInParent, overridedMethodInChild);
 }
 
+TEST_F(ClassFindMethodTest, check_initialization0)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":", &method), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":", &method), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":", &method), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
+TEST_F(ClassFindMethodTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -453,41 +453,6 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_c
     ASSERT_EQ(valueA, ANI_FALSE);
 }
 
-TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization_boolean)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.G", &cls), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
-    ani_boolean value {};
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "publicMethodx", "zz:z", &value, ANI_TRUE, ANI_FALSE),
-              ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "publicMethod", "zz:z", &value, ANI_TRUE, ANI_FALSE),
-              ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
-}
-
-TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization_boolean_a)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.G", &cls), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
-    ani_boolean value {};
-    ani_value args[2U];
-    args[0U].z = ANI_TRUE;
-    args[1U].z = ANI_FALSE;
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "publicMethodx", "zz:z", &value, args), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "publicMethod", "zz:z", &value, args), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
-}
-
 TEST_F(ClassCallStaticMethodByNameBooleanTest, check_wrong_signature)
 {
     ani_class cls {};
@@ -516,6 +481,291 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, check_wrong_signature)
 
     TestFuncVCorrectSignature(cls, &value, str);
     TestFuncVWrongSignature(cls, &value, str);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization0)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "parentStaticMethod", ":z", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization0_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "parentStaticMethod", ":z", &boolValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "childStaticMethod", ":z", &boolValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization1_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "childStaticMethod", ":z", &boolValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "grandchildStaticMethod", ":z", &boolValue),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization2_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "grandchildStaticMethod", ":z", &boolValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "parentStaticMethod", ":z", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization3_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "parentStaticMethod", ":z", &boolValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "childStaticMethod", ":z", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization4_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "childStaticMethod", ":z", &boolValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "grandchildStaticMethod", ":z", &boolValue),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization5_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "grandchildStaticMethod", ":z", &boolValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "parentStaticMethod", ":z", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization6_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "parentStaticMethod", ":z", &boolValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "childStaticMethod", ":z", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization7_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "childStaticMethod", ":z", &boolValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "grandchildStaticMethod", ":z", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization8_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
+    ani_value args;
+    ani_boolean boolValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "grandchildStaticMethod", ":z", &boolValue, &args),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ class A {
         A.count += a0;
         A.count += a1;
     }
-    
+
     static getCount(): int {
         return A.count;
     }
@@ -68,7 +68,7 @@ class A {
         A.count += a0;
         A.count += a1;
     }
-    
+
     static getCount(): int {
         return A.count;
     }
@@ -80,7 +80,7 @@ class B extends A{
         B.count += a1;
         B.count -= a0;
     }
-    
+
     static getCount(): int {
         return B.count;
     }
@@ -95,7 +95,7 @@ class A {
         A.count += a0;
         A.count += a1;
     }
-    
+
     static getCount(): int {
         return A.count;
     }
@@ -171,4 +171,14 @@ class G {
 class CheckWrongSignature {
     static method(a: String): void {
     }
+}
+
+class Parent {
+    static parentStaticMethod(): void {}
+}
+class Child extends Parent {
+    static childStaticMethod(): void {}
+}
+final class Grandchild extends Child {
+    static grandchildStaticMethod(): void {}
 }
