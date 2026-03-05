@@ -170,19 +170,11 @@ export namespace xml {
          * @param {string} encoding - The encoding format of the data. Only 'utf-8' is supported.
          * @throws {BusinessError} Throws an error if the encoding is not 'utf-8'.
          */
-        constructor(encoding: string) {
-            if (encoding !== 'utf-8') {
+        constructor(encoding?: string) {
+            if (encoding != undefined && encoding !== 'utf-8') {
                 throw createBusinessError(EncodingErrorCodeId, 'Parameter error.Just support utf-8');
             }
 
-            this.buffer = new ArrayBuffer(MaxXmlLength);
-            this.increaseStackLength();
-        }
-
-        /**
-         * Constructs an instance of the class with the specified buffer.
-         */
-        constructor() {
             this.buffer = new ArrayBuffer(MaxXmlLength);
             this.increaseStackLength();
         }
@@ -598,21 +590,11 @@ export namespace xml {
          * @param {string} encoding - The encoding format of the data. Only 'utf-8' is supported.
          * @throws {BusinessError} Throws an error if the encoding is not 'utf-8'.
          */
-        constructor(buffer: ArrayBuffer | DataView, encoding: string) {
-            if (encoding !== 'utf-8') {
+        constructor(buffer: ArrayBuffer | DataView, encoding?: string) {
+            if (encoding != undefined && encoding !== 'utf-8') {
                 throw createBusinessError(TypeErrorCodeId, 'Parameter error.Just support utf-8');
             }
 
-            this.buffer = buffer;
-            this.increaseStackLength();
-        }
-
-        /**
-         * Constructs an instance of the class with the specified buffer.
-         *
-         * @param {ArrayBuffer | DataView} buffer - The buffer containing the data to be processed.
-         */
-        constructor(buffer: ArrayBuffer | DataView) {
             this.buffer = buffer;
             this.increaseStackLength();
         }
