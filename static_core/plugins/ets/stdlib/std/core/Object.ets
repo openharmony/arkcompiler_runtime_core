@@ -30,60 +30,9 @@ package std.core;
  */
 export type PropertyKey = string
 
-/**
- * Name constant representing array "length" property.
- *
- * @constant
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export const ARRAY_LENGTH_MEMBER_NAME: string = "length"
-/**
- * Name constant representing function "length" property.
- *
- * @constant
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export const FUNCTION_LENGTH_MEMBER_NAME: string = "length"
-/**
- * Name constant representing function "name" property.
- *
- * @constant
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export const FUNCTION_NAME_MEMBER_NAME: string = "name"
-
-/**
- * Name constant representing object "toString" method.
- *
- * @constant
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export const OBJECT_TO_STRING_MEMBER_NAME: string          = "toString"
-/**
- * Name constant representing object "toLocaleString" method.
- *
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export const OBJECT_TO_LOCALE_STRING_MEMBER_NAME: string   = "toLocaleString"
-/**
- * Name constant representing object "hasOwnProperty" method.
- *
- * @constant
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export const OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME: string   = "hasOwnProperty"
+const ARRAY_LENGTH_MEMBER_NAME      = "length"
+const FUNCTION_LENGTH_MEMBER_NAME   = "length"
+const FUNCTION_NAME_MEMBER_NAME     = "name"
 
 type EntryType = [PropertyKey, Any]
 type NullishEntryType = EntryType | null | undefined
