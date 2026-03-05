@@ -56,7 +56,7 @@ export declare class C1 {
     constructor();
 }
 export declare class C2 {
-    public foo2(...nums: st.Array<number>): void;
+    public foo2(...nums: Array<number>): void;
     constructor();
 }
 export declare class C3 {
@@ -76,7 +76,7 @@ export declare class C6 {
     constructor();
 }
 export declare class C7 {
-    public static foo7(...nums: st.Array<number>): void;
+    public static foo7(...nums: Array<number>): void;
     constructor();
 }
 export declare class C8 {
@@ -132,7 +132,7 @@ export declare class ReadOnlyClass {
     public foo2(nums: readonly [number , string]): void;
     public foo3(nums: readonly number[]): void;
     public static foo4(nums: readonly number[]): void;
-    public foo5(...nums: readonly number[]): void;
+    public foo5(...nums: number[]): void;
     public constructor(nums: readonly [number , string]);
 }
 export declare class Dog {
