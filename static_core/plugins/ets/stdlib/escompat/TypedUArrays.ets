@@ -1505,8 +1505,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         let resBuf = new ArrayBuffer(this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT)
         let res = new Uint8ClampedArray(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn(this.getUnsafe(i).toDouble(), i, this)
-            res.setUnsafeClamp(i, round(fnRes).toInt())
+            res.set(i, fn(this.getUnsafe(i).toDouble(), i, this))
         }
         return res
     }
@@ -3226,8 +3225,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint8Array.BYTES_PER_ELEMENT)
         let res = new Uint8Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn(this.getUnsafe(i).toDouble(), i, this)
-            res.setUnsafeClamp(i, fnRes.toInt())
+            res.set(i, fn(this.getUnsafe(i).toDouble(), i, this))
         }
         return res
     }
@@ -4928,8 +4926,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint16Array.BYTES_PER_ELEMENT)
         let res = new Uint16Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn(this.getUnsafe(i).toDouble(), i, this)
-            res.setUnsafeClamp(i, fnRes.toInt())
+            res.set(i, fn(this.getUnsafe(i).toDouble(), i, this))
         }
         return res
     }
@@ -6670,8 +6667,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint32Array.BYTES_PER_ELEMENT)
         let res = new Uint32Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn(this.getUnsafe(i).toDouble(), i, this)
-            res.setUnsafeClamp(i, fnRes.toLong())
+            res.set(i, fn(this.getUnsafe(i).toDouble(), i, this))
         }
         return res
     }
@@ -8430,8 +8426,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         let resBuf = new ArrayBuffer(this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT)
         let res = new BigUint64Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn(new BigInt(this.getUnsafe(i)), i, this)
-            res.setUnsafeClamp(i, fnRes.getULong())
+            res.set(i, fn(new BigInt(this.getUnsafe(i)), i, this))
         }
         return res
     }
