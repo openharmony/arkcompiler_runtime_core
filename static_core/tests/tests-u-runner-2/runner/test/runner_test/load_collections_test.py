@@ -176,17 +176,17 @@ class CollectionsTest(TestCase):
     def test_load_collection_with_filter(self) -> None:
         """
         test-suite test_suite_col_several contains 2 collections
-        expected result: loaded test1.ets
+        expected result: loaded test1.ets, test2.ets
         """
         with patch.object(TestSuite, 'list_roots', new_callable=PropertyMock) as mock_list_roots:
             mock_list_roots.return_value = [
                 RootDir(CollectionsTest.data_folder, None, MagicMock())
             ]
-        config = CollectionsTest.get_config()
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = ["tests_folder/test1.ets", "tests_folder/test2.ets"]
-        try:
-            self.assertEqual(actual_tests, expected_tests)
-        finally:
-            test_utils.clear_after_test()
+            config = CollectionsTest.get_config()
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = ["tests_folder/test1.ets", "tests_folder/test2.ets"]
+            try:
+                self.assertEqual(actual_tests, expected_tests)
+            finally:
+                test_utils.clear_after_test()
