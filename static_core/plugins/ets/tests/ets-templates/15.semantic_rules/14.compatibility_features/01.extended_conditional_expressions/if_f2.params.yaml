@@ -48,16 +48,10 @@ cases:
     - { val: '42 - 21 - 21', type: 'number' }
     - { val: '42 * (21 - 11 - 10)', type: 'number' }
 
-    - decl: |-
-        let empty: string = ''
-      type: string
-      val: '`${empty}`'
-
-    - decl: |-
-        enum Color { Red, Green, Blue }
-      type: int
-      val: Color.Red.valueOf()
-
+    - { val: '`${empty}`', type: string }
+      
+    - { val: Color.Red.valueOf(), type: int }
+      
     - { val: 'new Byte()', type: 'Byte' }
     - { val: 'new Short()', type: 'Short' }
     - { val: 'new Int()', type: 'Int' }

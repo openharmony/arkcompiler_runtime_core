@@ -1,4 +1,3 @@
-{%- for c in cases %}
 /*
  * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,20 +18,37 @@ desc: >-
     ArkTS provides extended semantics for conditional-and and conditional-or expressions for better alignment.
 ---*/
 
-{{c.decl}}
+class A {}
+class B {}
+type UT = A | B | null
+
+let empty: string = ''
+
+interface I {}
+type NI = I | null
+
+enum Color { Red, Green, Blue }
 
 let retcode: int
 
-function main(): void {
-    let v: {{c.type}} = {{c.val}}
-    retcode = 0
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Extended_Conditional_expressions_while_false_cycle");
 
-    while (v) {  // falsy
-        if (retcode == 0) {
-            retcode = 1
-            break
-        }
-    }
-    arktest.assertEQ(retcode, 0)
+    {% for c in cases %}
+        testSuite.addTest("Conditional_expression_while_false_cycle{{loop.index}}", () => {
+ 	        let v: {{c.type}} = {{c.val}}
+            retcode = 0
+
+            while (v) {  // falsy
+                if (retcode == 0) {
+                    retcode = 1
+                    break
+                }
+            }
+            arktest.assertEQ(retcode, 0)
+ 	    }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}

@@ -52,28 +52,13 @@ cases:
     - { val: '42 * (21 - 11 - 10)', type: 'number' }
     - { val: "c'\u0000'", type: 'char' }
 
-    - decl: |-
-        class A {}
-        class B {}
-        type UT = A | B | null
-      type: UT
-      val: 'null'
+    - { val: 'null', type: UT }
 
-    - decl: |-
-        let empty: string = ''
-      type: string
-      val: '`${empty}`'
+    - { val: '`${empty}`', type: 'string' }
 
-    - decl: |-
-        interface I {}
-        type NI = I | null
-      type: NI
-      val: 'null'
+    - { val: 'null', type: NI }
 
-    - decl: |-
-        enum Color { Red, Green, Blue }
-      type: Color
-      val: Color.Red
+    - { val: Color.Red, type: Color }
 
     - { val: 'new Byte()', type: 'Byte' }
     - { val: 'new Short()', type: 'Short' }

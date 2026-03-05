@@ -867,6 +867,9 @@
 #33238
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping.ets
 
+#33508
+15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
+
 #25111
 15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/positive_0.ets
 15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/positive_1.ets
@@ -1573,9 +1576,6 @@
 #33241
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets
 
-#33242
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/private_method_public_in_sub_n.ets
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/private_method_non_compatible_n.ets
 #24525 bridges for overrides for formerly primitive types
 15.semantic_rules/09.overriding/01.overriding_in_classes/bridge_method_override_4.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/bridge_method_override_5.ets

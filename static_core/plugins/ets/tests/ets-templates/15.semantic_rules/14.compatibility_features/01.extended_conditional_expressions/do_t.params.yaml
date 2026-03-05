@@ -93,29 +93,12 @@ cases:
     - { val: '[1, 2, 3]', type: 'int[]' }
     - { val: '[false]', type: 'boolean[]' }
 
-    - val: '(p: number): number => { return p+p }'
-      type: '((p: number) => number)'
+    - { val: '(p: number): number => { return p+p }', type: '((p: number) => number)' }
+      
+    - { val: new A(), type: UT }
 
-    - decl: |-
-        class A {}
-        class B {}
-        type UT = A | B | null
-      type: UT
-      val: new A()
-
-    - decl: |-
-        type TT = [number, string]
-      type: TT
-      val: '[1, ""]'
-
-    - decl: |-
-        interface I {}
-        class A implements I {}
-        type NI = I | null
-      type: NI
-      val: new A()
-
-    - decl: |-
-        enum Color { Red, Green, Blue }
-      type: Color
-      val: Color.Green
+    - { val: '[1, ""]', type: TT }
+      
+    - { val: new AB(), type: NI }
+      
+    - { val: Color.Green, type: Color } 
