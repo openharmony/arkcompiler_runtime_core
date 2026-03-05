@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 /*---
 desc: A compile-time error occurs if a native constructor has a body. A semicolon, or an empty body (i.e., no body at all) indicates the absence of implementation.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0084: Native constructor declaration cannot have a body."
 ---*/
 
 class NativeConstructorClass {

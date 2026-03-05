@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,9 @@
  */
 
 /*---
-desc: A compile-time error occurs if a native constructor has a body.
-tags: [compile-only]
+desc: A compile-time error occurs for a native function with ambient declaration
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0143: Unresolved reference declare"
 ---*/
 
-class NativeConstructorClass {
-    native constructor();
-}
+declare native function foo(x: number): void// CTE: native with declare

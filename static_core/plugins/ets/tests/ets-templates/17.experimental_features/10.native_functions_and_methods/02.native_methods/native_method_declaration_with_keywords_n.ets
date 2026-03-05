@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
+{% for m in modifiers %}
+
 /*---
-desc: A compile-time error occurs if a native function has a rethrows clause
+desc: Native method declaration with '{{m.mod}}' keyword.
 tags: [compile-only, negative]
+expected_out: "{{m.expected_out}}"
 ---*/
 
-native function foo(func: () => Object throws): Object rethrows; // CTE: native with rethrows
+class A {
+  {{m.mod}} native run(): void;
+}
+
+{% endfor %}

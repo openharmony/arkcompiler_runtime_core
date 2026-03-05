@@ -1916,6 +1916,9 @@
 #31022
 17.experimental_features/06.iterable_types/it_18.ets
 
+#33437
+17.experimental_features/08.statements/01.for-of_type_annotation/for_of_29.ets
+
 #29101
 17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/negative/cm_access_modifier_n_0.ets
 17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/negative/cm_access_modifier_n_1.ets

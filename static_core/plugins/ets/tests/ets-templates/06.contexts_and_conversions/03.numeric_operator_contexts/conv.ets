@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,26 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: Numeric contexts apply to the operands of an arithmetic operator.
-params: {{c.type1}}, {{c.type2}}
-tags: [{{c.tags}}]
 ---*/
 
+{% for c in cases %}
 {{c.defs}}
-
-function main(): void {
-  let v1: {{c.type1}} = {{c.v1|safe}};
-  let v2: {{c.type2}} = {{c.v2|safe}}
-  arktest.assertEQ(v1 {{c.op}} v2, {{c.res}})
-}
 {% endfor %}
+
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Numeric contexts");
+
+    {% for c in cases %}
+        testSuite.addTest("Numeric context{{loop.index}}", () => {
+            let v1: {{c.type1}} = {{c.v1|safe}};
+            let v2: {{c.type2}} = {{c.v2|safe}}
+            arktest.assertEQ(v1 {{c.op}} v2, {{c.res}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
+}

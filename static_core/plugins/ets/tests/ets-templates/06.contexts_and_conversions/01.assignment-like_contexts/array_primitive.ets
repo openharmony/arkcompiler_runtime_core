@@ -13,16 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: Assignment contexts of a primitive types
-params: Assignment from {{c.src_type}} to {{c.dst_type}}
-tags: [compile-only]
 ---*/
 
-function main() {
-  let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new FixedArray<{{c.src_type}}>(1);
-  let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new FixedArray<{{c.dst_type}}>(1);
-  dst_{{loop.index}} = src_{{loop.index}};
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("FixedArray_primitive_context");
+
+    {% for c in cases %}
+        testSuite.addTest("FixedArray_primitive{{loop.index}}", () => {
+            let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new FixedArray<{{c.src_type}}>(1);
+            let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new FixedArray<{{c.dst_type}}>(1);
+            dst_{{loop.index}} = src_{{loop.index}};
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,19 @@
  */
 
 /*---
-desc: If the return type is omitted in a native function (see Native Functions), then a compile-time error occurs.
-tags: [compile-only, negative]
+desc: Overriding native method
 ---*/
 
-native function foo() {
-    return new Boolean();
+abstract class A {
+    native run(): string
+}
+
+class B extends A {
+    override run(): string {
+        return '123'
+    }
+}
+
+function main() {
+    arktest.assertEQ(new B().run(), '123')
 }

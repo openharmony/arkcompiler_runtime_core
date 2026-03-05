@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,9 @@
  */
 
 /*---
-desc: A compile-time error occurs if a native function has a throws clause.
+desc: A compile-time error occurs if a native function has a body.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0112: Unexpected token, expected an identifier."
 ---*/
 
-native function foo(a: Object): int throws; // CTE on throws
-
-function main() {
-
-    let v: int = foo(new Object());
-    
-}
+async native function foo<T extends Object>(): Promise<T>; // async can't coexist with native

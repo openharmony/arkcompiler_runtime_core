@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +15,25 @@
 
 {% for c in cases %}
 /*---
-desc: Invocation contexts followed by a widening primitive conversion.
-params: from '{{c.ref_type}}' to '{{c.type}}'
+desc: >-
+    Invocation contexts followed by a widening primitive conversion.
+    from '{{c.src_type}}' to '{{c.dst_type}}'
 tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
 class A {
   {%- for v in c['values'] %}
-  public fld_{{loop.index}}: {{c.type}};
+  public fld_{{loop.index}}: {{c.dst_type}};
   {%- endfor %}
 
-  public constructor({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}) {
+  public constructor({% for v in c['values'] %}p{{loop.index}}: {{c.dst_type}}{{ ", " if not loop.last }}{% endfor %}) {
     {%- for v in c['values'] %}
     this.fld_{{loop.index}} = p{{loop.index}};
     {%- endfor %}
   }
 
-  public foo({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}): void {
+  public foo({% for v in c['values'] %}p{{loop.index}}: {{c.dst_type}}{{ ", " if not loop.last }}{% endfor %}): void {
     {%- for v in c['values'] %}
     arktest.assertEQ(this.fld_{{loop.index}}, p{{loop.index}})
     {%- endfor %}
@@ -40,7 +42,7 @@ class A {
 
 function main(): void {
   {%- for v in c['values'] %}
-  let v{{loop.index}}: {{c.ref_type}} = {{v|safe}};
+  let v{{loop.index}}: {{c.src_type}} = {{v|safe}};
   {%- endfor %}
 
   let c: A = new A({% for v in c['values'] %}v{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
