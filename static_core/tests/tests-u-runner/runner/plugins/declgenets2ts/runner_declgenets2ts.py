@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,35 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-import subprocess
-import os
 import logging
+import multiprocessing
+import os
+import subprocess
+from collections import namedtuple
+from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Set
+from typing import Any, Callable, cast, Generator, List, Set
 
+import pytz
 import yaml
+from tqdm import tqdm
 
-from runner.logger import Log
-from runner.options.config import Config
-from runner.plugins.ets.ets_test_suite import (
-    EtsTestSuite,
-    CtsEtsTestSuite,
-    FuncEtsTestSuite,
-    RuntimeEtsTestSuite
-)
-from runner.plugins.ets.ets_test_dir import EtsTestDir
-from runner.plugins.declgenets2ts.test_declgenets2ts import DeclgenEts2tsStage, TestDeclgenETS2TS
-from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites
-from runner.runner_base import get_test_id
-from runner.runner_file_based import RunnerFileBased
 from runner.enum_types.test_directory import TestDirectory
+from runner.logger import Log
+from runner.options.cli_args_wrapper import CliArgsWrapper
+from runner.options.config import Config
+from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites
+from runner.plugins.declgenets2ts.test_declgenets2ts import TestDeclgenETS2TS
+from runner.plugins.ets.ets_test_dir import EtsTestDir
+from runner.plugins.ets.ets_test_suite import (CtsEtsTestSuite, EtsTestSuite, FuncEtsTestSuite, RuntimeEtsTestSuite)
+from runner.plugins.ets.preparation_step import CopyStep, JitStep
 from runner.plugins.work_dir import WorkDir
-from runner.plugins.ets.preparation_step import JitStep, \
-    CopyStep
+from runner.runner_base import get_test_id, worker_cli_wrapper_args, init_worker
+from runner.runner_file_based import RunnerFileBased
+from runner.test_base import Test
 
 _LOGGER = logging.getLogger(
     "runner.plugins.declgenets2ts.runner_declgenets2ts")
+
+DeclgenEtsConfig = namedtuple('DeclgenEtsConfig', ['declgen_ets_name', 'ignored_ets_prefix'])
 
 
 class DeclgenSdkEtsTestSuite(EtsTestSuite):
@@ -63,21 +65,54 @@ class DeclgenSdkEtsTestSuite(EtsTestSuite):
                 test_gen_path=self.test_root,
                 config=self.config,
                 num_repeats=self._jit.num_repeats
-        ))
+            ))
+
+
+class InvalidConfiguration(Exception):
+    pass
+
+
+def run_declgen_test(test: TestDeclgenETS2TS) -> TestDeclgenETS2TS:
+    start = datetime.now(pytz.UTC)
+    Log.all(_LOGGER, f"Start to execute declgen_ets2ts: {test.test_id}")
+    CliArgsWrapper.args = worker_cli_wrapper_args
+    test.passed, test.report, test.fail_kind = test.run_declgen_ets2ts(test.test_dets, test.test_ets)
+    finish = datetime.now(pytz.UTC)
+    test.time = (finish - start).total_seconds()
+    if not test.passed:
+        # If a test is failed, it won't go to the next stages,
+        # so we define status, output log and generate report here
+        Test.output_status_and_log(test)
+        Test.create_report(test)
+    return test
+
+
+def run_tsc_test(test: TestDeclgenETS2TS) -> TestDeclgenETS2TS:
+    start = datetime.now(pytz.UTC)
+    Log.all(_LOGGER, f"Start to execute tsc: {test.test_id}")
+    CliArgsWrapper.args = worker_cli_wrapper_args
+    test.passed, test.report, test.fail_kind = test.run_tsc(test.test_dets)
+    finish = datetime.now(pytz.UTC)
+    if test.time is None:
+        test.time = 0
+    test.time = test.time + (finish - start).total_seconds()
+    # as tsc is the last stage, we define here status, output log and generate report
+    Test.output_status_and_log(test)
+    Test.create_report(test)
+    return test
 
 
 class RunnerDeclgenETS2TS(RunnerFileBased):
     def __init__(self, config: Config):
         config.verifier.enable = False
-        self.__declgen_ets_name = self.get_declgen_ets_name(config.test_suites)
-
-        super().__init__(config, self.__declgen_ets_name)
+        self.ets_config = self.get_declgen_ets_name(config.test_suites)
+        super().__init__(config, self.ets_config.declgen_ets_name)
 
         self.declgen_ets2ts_executor = os.path.join(
             self.build_dir, "bin", "declgen_ets2ts")
 
-        test_suite_class = self.get_declgen_ets_class(self.__declgen_ets_name)
-        if self.__declgen_ets_name == DeclgenEtsSuites.RUNTIME.value:
+        test_suite_class = self.get_declgen_ets_class(self.ets_config.declgen_ets_name)
+        if self.ets_config.declgen_ets_name == DeclgenEtsSuites.RUNTIME.value:
             self.default_list_root = self._get_frontend_test_lists()
         self.declgen_list_root = os.path.join(self.default_list_root, "declgenets2ts")
         test_suite = test_suite_class(
@@ -89,38 +124,22 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         Log.short(_LOGGER, f"TEST_ROOT set to {self.test_root}")
         Log.short(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
-        self.collect_ignored_excluded_tests()
-
+        self.collect_ignored_excluded_lists()
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
         self.add_directories([TestDirectory(self.test_root, "ets", [])])
 
-    @property
-    def default_work_dir_root(self) -> Path:
-        return Path("/tmp/declgenets2ts") / self.__declgen_ets_name
+    @staticmethod
+    def get_declgen_ets_class(ets_suite_name: str) -> Any:
+        name_to_class = {
+            DeclgenEtsSuites.CTS.value: CtsEtsTestSuite,
+            DeclgenEtsSuites.FUNC.value: FuncEtsTestSuite,
+            DeclgenEtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
+            DeclgenEtsSuites.DECLGENSDK.value: DeclgenSdkEtsTestSuite,
+        }
+        return name_to_class.get(ets_suite_name)
 
-    def collect_ignored_excluded_tests(self) -> None:
-        self.collect_excluded_test_lists(test_name=self.__declgen_ets_name)
-        self.collect_ignored_test_lists(test_name=self.__declgen_ets_name)
-
-        if self.__declgen_ets_name == "declgen-ets2ts-cts":
-            self.ignored_cts_ets_prefix = "ets-cts"
-        elif self.__declgen_ets_name == "declgen-ets2ts-func-tests":
-            self.ignored_cts_ets_prefix = "ets-func-tests"
-        elif self.__declgen_ets_name == "declgen-ets2ts-runtime":
-            self.ignored_cts_ets_prefix = "ets-runtime"
-        else:
-            return
-
-        self.list_root = os.path.join(self.default_list_root, self.ignored_cts_ets_prefix)
-        self.collect_excluded_test_lists(test_name=self.ignored_cts_ets_prefix)
-        self.excluded_lists.extend(self.collect_test_lists("ignored", None, self.ignored_cts_ets_prefix))
-
-    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenETS2TS:
-        test = TestDeclgenETS2TS(self.test_env, test_file, flags, get_test_id(
-            test_file, self.test_root), self.build_dir, self.__declgen_ets_name)
-        test.ignored = is_ignored
-        return test
-
-    def run_command(self, command: list, cwd: str, description: str, timeout: int = 60 * 10) -> None:
+    @staticmethod
+    def run_command(command: list, cwd: str, description: str, timeout: int = 60 * 10) -> None:
         Log.short(_LOGGER, f"Running command: {' '.join(command)}")
         Log.short(_LOGGER, description)
         with subprocess.Popen(
@@ -143,7 +162,8 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
                 Log.exception_and_raise(
                     _LOGGER, f"Exception{' '.join(command)} failed with {ex}")
 
-    def read_package_info(self, package_json_path: str) -> str:
+    @staticmethod
+    def read_package_info(package_json_path: str) -> str:
         try:
             with open(package_json_path, "r", encoding="utf-8") as file:
                 package_data = yaml.safe_load(file)
@@ -159,41 +179,76 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         except Exception as ex:  # pylint: disable=broad-except
             Log.exception_and_raise(_LOGGER, f"Error reading YAML file: {ex}")
 
-    def get_declgen_ets_name(self, test_suites: Set[str]) -> str:
-        name = ""
-        if "declgen_ets2ts_cts" in test_suites:
-            name = DeclgenEtsSuites.CTS.value
-        elif "declgen_ets2ts_func_tests" in test_suites:
-            name = DeclgenEtsSuites.FUNC.value
-        elif "declgen_ets2ts_runtime" in test_suites:
-            name = DeclgenEtsSuites.RUNTIME.value
-        elif "declgen_ets2ts_sdk" in test_suites:
-            name = DeclgenEtsSuites.DECLGENSDK.value
-        else:
-            Log.exception_and_raise(
-                _LOGGER, f"Unsupported test suite: {self.config.test_suites}")
-        return name
+    @staticmethod
+    def filter_not_run(tests: List[TestDeclgenETS2TS]) -> Generator[TestDeclgenETS2TS, Any, None]:
+        Log.short(_LOGGER, "Exclude compile-only-negative tests")
+        for test in tests:
+            if test.is_compile_only_negative:
+                test.passed = True
+                test.fail_kind = None
+                test.report = None
+                test.excluded = True
+                Test.output_status_and_log(test)
+                yield test
+        yield from []
 
-    def get_declgen_ets_class(self, ets_suite_name: str) -> Any:
-        name_to_class = {
-            DeclgenEtsSuites.CTS.value: CtsEtsTestSuite,
-            DeclgenEtsSuites.FUNC.value: FuncEtsTestSuite,
-            DeclgenEtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
-            DeclgenEtsSuites.DECLGENSDK.value: DeclgenSdkEtsTestSuite,
-        }
-        return name_to_class.get(ets_suite_name)
+    @property
+    def default_work_dir_root(self) -> Path:
+        return Path("/tmp/declgenets2ts") / str(self.ets_config.declgen_ets_name)
+
+    def collect_ignored_excluded_lists(self) -> None:
+        Log.all(_LOGGER, f"Collecting test lists and tests for names"
+                         f" {self.ets_config.declgen_ets_name} and {self.ets_config.ignored_ets_prefix}")
+        self.collect_excluded_test_lists(test_name=self.ets_config.declgen_ets_name)
+        self.collect_ignored_test_lists(test_name=self.ets_config.declgen_ets_name)
+
+        self.list_root = os.path.join(self.default_list_root, self.ets_config.ignored_ets_prefix)
+        self.collect_excluded_test_lists(test_name=self.ets_config.ignored_ets_prefix)
+        self.collect_ignored_test_lists(test_name=self.ets_config.ignored_ets_prefix)
+
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenETS2TS:
+        test = TestDeclgenETS2TS(self.test_env, test_file, flags, get_test_id(
+            test_file, self.test_root), self.build_dir, self.ets_config.declgen_ets_name)
+        test.ignored = is_ignored
+        return test
+
+    def get_declgen_ets_name(self, test_suites: Set[str]) -> DeclgenEtsConfig:
+        if "declgen_ets2ts_cts" in test_suites:
+            return DeclgenEtsConfig(DeclgenEtsSuites.CTS.value, "ets-cts")
+        if "declgen_ets2ts_func_tests" in test_suites:
+            return DeclgenEtsConfig(DeclgenEtsSuites.FUNC.value, "ets-func-tests")
+        if "declgen_ets2ts_runtime" in test_suites:
+            return DeclgenEtsConfig(DeclgenEtsSuites.RUNTIME.value, "ets-runtime")
+        if "declgen_ets2ts_sdk" in test_suites:
+            return DeclgenEtsConfig(DeclgenEtsSuites.DECLGENSDK.value, "ets-sdk")
+        message = f"Unsupported test suite: {self.config.test_suites}"
+        Log.exception_and_raise(_LOGGER, message, InvalidConfiguration)
+
+    def run_stage(self, stage_name: str, tests: List[TestDeclgenETS2TS],
+                  run_test: Callable[[TestDeclgenETS2TS], TestDeclgenETS2TS]) -> List[
+        TestDeclgenETS2TS]:
+        Log.default(_LOGGER, f"Start stage '{stage_name}' running for every test")
+        with multiprocessing.Pool(processes=self.config.general.processes,
+                                  initializer=init_worker, initargs=(CliArgsWrapper.args,)) as pool:
+            results = pool.imap_unordered(run_test, tests, chunksize=self.config.general.chunksize)
+            if self.config.general.show_progress:
+                results = tqdm(results, total=len(tests))
+            stage_results: List[TestDeclgenETS2TS] = list(results)
+            pool.close()
+            pool.join()
+            return stage_results
 
     def run(self) -> None:
-        super().run()
-        TestDeclgenETS2TS.results.extend(self.results)
-        TestDeclgenETS2TS.state = DeclgenEts2tsStage.TSC
-        self.tests.clear()
-        for result in self.results:
-            if result.passed:
-                self.tests.add(result)
-        super().run()
-        path_to_result = {result.path: result for result in self.results}
-        for i, result in enumerate(TestDeclgenETS2TS.results):
-            if result.path in path_to_result:
-                TestDeclgenETS2TS.results[i] = path_to_result[result.path]
-        self.results = TestDeclgenETS2TS.results
+        """
+        Fully override `run` from base class `Runner` -
+        here, first, all tests goes through the first stage, declgen_ets2ts,
+        then all tests goes through the second stage, tsc.
+        """
+        all_tests = [cast(TestDeclgenETS2TS, test) for test in self.tests]
+        not_run = list(self.filter_not_run(all_tests))
+        declgen_to_run = [test for test in all_tests if not test.is_compile_only_negative]
+        declgen_result = self.run_stage("declgen_ets2ts", declgen_to_run, run_declgen_test)
+        declgen_failed = [result for result in declgen_result if not result.passed]
+        tsc_to_run = [result for result in declgen_result if result.passed and result.is_valid_test]
+        tsc_result = self.run_stage("tsc", tsc_to_run, run_tsc_test)
+        self.results = tsc_result + declgen_failed + not_run
