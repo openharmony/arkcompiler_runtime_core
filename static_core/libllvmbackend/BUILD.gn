@@ -340,6 +340,7 @@ if (is_llvmbackend) {
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
       "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
       "$ark_root/runtime:plugins_entrypoints_gen_h",
+      "$ark_root/compiler:arktscompiler_header_deps",
     ]
 
     external_deps = [ sdk_libc_secshared_dep ]
