@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported interface.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_interface.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_interface.ets
 ---*/
 
-import I from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_interface"
+import I from "../../06.exported_declarations/default_exported_declarations/default_export_interface"
 
 class C implements I {}
 

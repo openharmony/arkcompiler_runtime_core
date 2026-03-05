@@ -16,11 +16,11 @@
 /*---
 desc: Edit imported default const variable is prohibited.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_const.ets
 tags: [compile-only, negative]
 ---*/
 
-import c_var from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const"
+import c_var from "../../06.exported_declarations/default_exported_declarations/default_export_const"
 
 function main(): void {
     c_var = 3;

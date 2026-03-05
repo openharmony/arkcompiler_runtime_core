@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import abstract class type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_abstract_class.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_abstract_class.ets
 ---*/
 
-import type {AC} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_abstract_class"
+import type {AC} from "../../06.exported_declarations/type_exported_declarations/export_type_abstract_class"
 
 class C extends AC {};
 

@@ -41,24 +41,24 @@
 18.annotations/04.ambient_annotations/ambient_annotations_n/import_ambient_annotation_n_2.ets
 
 # TODO(dkofanov): package ETSGLOBAL clash:
-13.modules_and_namespaces/06.export_directives/01.selective_export_directive/pkg01_test.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/pkg01_test.ets
+13.modules_and_namespaces/07.export_directives/01.selective_export_directive/pkg01_test.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/pkg01_test.ets
 
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_0.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_1.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_10.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_11.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_12.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_13.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_14.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_2.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_3.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_4.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_5.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_6.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_7.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_8.ets
-13.modules_and_namespaces/06.export_directives/02.single_export_directive/single_export_9.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_0.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_1.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_10.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_11.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_12.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_13.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_14.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_2.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_3.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_4.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_5.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_6.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_7.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_8.ets
+13.modules_and_namespaces/07.export_directives/02.single_export_directive/single_export_9.ets
 
 # TODO(dkofanov): Stdlib variable redeclaration:
 15.semantic_rules/02.subtyping/subtyping_among_primitive_types/primitive_types_cast_3.ets

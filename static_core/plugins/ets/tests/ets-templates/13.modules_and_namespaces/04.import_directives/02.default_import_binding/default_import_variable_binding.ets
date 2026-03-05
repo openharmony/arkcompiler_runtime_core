@@ -16,10 +16,10 @@
 /*---
 desc: Import a default exported variable.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_variable.ets
 ---*/
 
-import {default as i_test_var} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
+import {default as i_test_var} from "../../06.exported_declarations/default_exported_declarations/default_export_variable"
 
 let firstiter: boolean = true
 

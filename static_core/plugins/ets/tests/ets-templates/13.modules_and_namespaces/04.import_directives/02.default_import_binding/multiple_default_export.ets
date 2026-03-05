@@ -16,12 +16,12 @@
 /*---
 desc: Import multiple default entities from different modules.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_function.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_class.ets
 ---*/
 
-import TestFunc from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
-import DefaultExportedClass from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
+import TestFunc from "../../06.exported_declarations/default_exported_declarations/default_export_function"
+import DefaultExportedClass from "../../06.exported_declarations/default_exported_declarations/default_export_class"
 
 function main() {
     let c: DefaultExportedClass = new DefaultExportedClass();

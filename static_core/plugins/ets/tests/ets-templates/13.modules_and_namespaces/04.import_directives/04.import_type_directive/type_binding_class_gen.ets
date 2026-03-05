@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import generic class type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_gen.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_class_gen.ets
 ---*/
 
-import type {C} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_gen"
+import type {C} from "../../06.exported_declarations/type_exported_declarations/export_type_class_gen"
 
 function main(): void {
     let c = new C<number>(7);

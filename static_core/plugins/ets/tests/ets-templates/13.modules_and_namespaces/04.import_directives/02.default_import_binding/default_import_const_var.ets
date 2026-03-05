@@ -16,10 +16,10 @@
 /*---
 desc: Import default const variable.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_const.ets
 ---*/
 
-import c_var from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const"
+import c_var from "../../06.exported_declarations/default_exported_declarations/default_export_const"
 
 function main(): void {
     arktest.assertEQ(c_var, 2);

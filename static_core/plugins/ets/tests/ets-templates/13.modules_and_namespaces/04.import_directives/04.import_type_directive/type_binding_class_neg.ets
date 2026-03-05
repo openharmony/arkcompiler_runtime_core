@@ -16,8 +16,8 @@ limitations under the License.
 /*---
 desc: Import non-existing type from the module.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_class.ets
 tags: [compile-only, negative]
 ---*/
 
-import type {A} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
+import type {A} from "../../06.exported_declarations/type_exported_declarations/export_type_class"

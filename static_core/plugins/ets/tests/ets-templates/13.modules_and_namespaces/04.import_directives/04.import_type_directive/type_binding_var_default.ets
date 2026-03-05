@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import default primitive type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_default_type.ets
+- ../../06.exported_declarations/type_exported_declarations/export_default_type.ets
 ---*/
 
-import T_INT from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_default_type"
+import T_INT from "../../06.exported_declarations/type_exported_declarations/export_default_type"
 
 function main(): void {
     let i: T_INT = 4;

@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import interface type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_interface.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_interface.ets
 ---*/
 
-import type {I} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_interface"
+import type {I} from "../../06.exported_declarations/type_exported_declarations/export_type_interface"
 
 class C implements I {};
 

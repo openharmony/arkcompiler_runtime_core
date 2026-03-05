@@ -17,7 +17,7 @@
 desc: No export key word present.
 tags: [compile-only, negative]
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/nothing_exported.ets
+- ../../06.exported_declarations/default_exported_declarations/nothing_exported.ets
 ---*/
 
-import A from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/nothing_exported"
+import A from "../../06.exported_declarations/default_exported_declarations/nothing_exported"

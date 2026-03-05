@@ -17,11 +17,11 @@
 desc: Chaining import (default -> selective -> all) Default import
   export-import same class
 files:
-- ../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
+- ../06.exported_declarations/default_exported_declarations/default_export_class.ets
 name: chaining_import_0
 ---*/
 
-import {default as DefaultExportedClass0} from "../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
+import {default as DefaultExportedClass0} from "../06.exported_declarations/default_exported_declarations/default_export_class"
 
 export DefaultExportedClass0
 

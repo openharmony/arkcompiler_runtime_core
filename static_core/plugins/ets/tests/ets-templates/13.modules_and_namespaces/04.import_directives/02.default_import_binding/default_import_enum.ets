@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported enum.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_enum.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_enum.ets
 ---*/
 
-import DefaultExportedEnum from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_enum"
+import DefaultExportedEnum from "../../06.exported_declarations/default_exported_declarations/default_export_enum"
 
 function main(): void {
     arktest.assertEQ(DefaultExportedEnum.Blue.toString(), "1"); // enum method valueOf is not implemented yet

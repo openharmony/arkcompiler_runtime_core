@@ -18,10 +18,10 @@ desc: |-
     Module imports default entity A from another module, then exports own default entity B.
     Only one default export is allowed in a module.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_variable.ets
 ---*/
 
-import test_var from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
+import test_var from "../../06.exported_declarations/default_exported_declarations/default_export_variable"
 
 export default let i: string = test_var;
 

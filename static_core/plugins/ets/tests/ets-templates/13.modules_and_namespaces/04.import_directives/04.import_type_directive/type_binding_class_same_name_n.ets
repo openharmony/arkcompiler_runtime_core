@@ -16,11 +16,11 @@ limitations under the License.
 /*---
 desc: Import class type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_class_same_name.ets
 tags: [negative, compile-only]
 ---*/
 
-import type {A} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name"
+import type {A} from "../../06.exported_declarations/type_exported_declarations/export_type_class_same_name"
 
 function main(): void {
     let c = new A();

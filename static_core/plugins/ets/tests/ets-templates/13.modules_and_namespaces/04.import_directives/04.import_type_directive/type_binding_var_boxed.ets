@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import boxed type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_var_boxed.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_var_boxed.ets
 ---*/
 
-import type {T_BOXED} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_var_boxed"
+import type {T_BOXED} from "../../06.exported_declarations/type_exported_declarations/export_type_var_boxed"
 
 function main(): void {
     let i: T_BOXED = new Boolean(true);

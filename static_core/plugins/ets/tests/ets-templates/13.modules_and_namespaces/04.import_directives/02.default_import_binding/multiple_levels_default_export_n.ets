@@ -17,10 +17,10 @@
 desc: Import entity from module A, imported from module B.
 tags: [compile-only, negative]
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_type_2_level.ets
 ---*/
 
-import VAR_i from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level"
+import VAR_i from "../../06.exported_declarations/default_exported_declarations/default_export_type_2_level"
 
 function main() {
     let c: VAR_i = 3;

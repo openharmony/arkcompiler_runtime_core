@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import enum type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_enum.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_enum.ets
 ---*/
 
-import type {COUNTER} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_enum"
+import type {COUNTER} from "../../06.exported_declarations/type_exported_declarations/export_type_enum"
 
 function main(): void {
     let enm = COUNTER.three;

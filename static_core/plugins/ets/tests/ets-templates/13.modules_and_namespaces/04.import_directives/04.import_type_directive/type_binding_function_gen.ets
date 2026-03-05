@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import generic function type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_func_gen.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_func_gen.ets
 ---*/
 
-import type {foo} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_func_gen"
+import type {foo} from "../../06.exported_declarations/type_exported_declarations/export_type_func_gen"
 
 function main(): void {
     let bar: foo<string> = (a: string): string => { return a }

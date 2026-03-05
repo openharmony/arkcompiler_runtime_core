@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import tuple type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_var_tpl.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_var_tpl.ets
 ---*/
 
-import type {TPL} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_var_tpl"
+import type {TPL} from "../../06.exported_declarations/type_exported_declarations/export_type_var_tpl"
 
 function main(): void {
     let tpl: TPL = [ 1, "str"]

@@ -16,10 +16,10 @@
 /*---
 desc: Import default generic class.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_generic_class.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_generic_class.ets
 ---*/
 
-import GENC from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_generic_class"
+import GENC from "../../06.exported_declarations/default_exported_declarations/default_export_generic_class"
 
 function main(): void {
     let a = new GENC<Number>();
