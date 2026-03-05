@@ -115,7 +115,7 @@ static_core/plugins/ets/isa/                             @mbolshov @xucheng46 @g
 static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon ^asidorov @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/                         @vpukhov @slynkodenis
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis
+static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis @liyiming13
 static_core/plugins/ets/runtime/ets_class_linker_context.cpp                  @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_class_linker_context.h                    @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_class_linker_extension.cpp                @vpukhov @slynkodenis @shilei123
@@ -136,7 +136,7 @@ static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof @xucheng46 ^gitee
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 ^templinkonstantin
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^templinkonstantin ^chernykhsergey
-static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis
+static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis @liyiming13
 static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao @slynkodenis @groshevmaksim ^seeuiceland
 static_core/runtime/include/mem/                         ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
 static_core/runtime/include/tooling/                     @slynkodenis ^kurnevichstanislav
