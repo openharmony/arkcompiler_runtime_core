@@ -7404,6 +7404,18 @@ public:
     }
 };
 
+class DispatchInst : public FixedInputsInst1 {
+public:
+    using Base = FixedInputsInst1;
+    using Base::Base;
+
+    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    {
+        ASSERT(Base::ValidateInputsCount(index));
+        return DataType::REFERENCE;
+    }
+};
+
 bool IsVolatileMemInst(const Inst *inst);
 
 // Check if instruction is pseudo-user for mutli-output instruction
