@@ -1769,13 +1769,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         let resBuf = new ArrayBuffer(this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT)
         let res = new {{element['name']}}Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
-
-            {%- if element.get('name') == 'Uint8Clamped' %}
-            res.setUnsafeClamp(i, round(fnRes).toInt())
-            {%- else %}
-            res.setUnsafeClamp(i, {{castFromEl % 'fnRes'}})
-            {%- endif %}
+            res.set(i, fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this))
         }
         return res
     }

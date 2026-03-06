@@ -1904,7 +1904,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         let resBuf = new ArrayBuffer(this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT)
         let res = new {{N}}Array(resBuf, 0, (resBuf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this){{castFromEl}})
+            res.set(i, fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this))
         }
         return res
     }

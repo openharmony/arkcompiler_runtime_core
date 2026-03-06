@@ -1573,7 +1573,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Int8Array.BYTES_PER_ELEMENT)
         let res = new Int8Array(resBuf, 0, (resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toByte())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this))
         }
         return res
     }
@@ -3321,7 +3321,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Int16Array.BYTES_PER_ELEMENT)
         let res = new Int16Array(resBuf, 0, (resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toShort())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this))
         }
         return res
     }
@@ -5037,7 +5037,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Int32Array.BYTES_PER_ELEMENT)
         let res = new Int32Array(resBuf, 0, (resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toInt())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this))
         }
         return res
     }
@@ -6791,7 +6791,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         let resBuf = new ArrayBuffer(this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT)
         let res = new BigInt64Array(resBuf, 0, (resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(new BigInt(this.getUnsafe(i)), i, this).getLong())
+            res.set(i, fn(new BigInt(this.getUnsafe(i)), i, this))
         }
         return res
     }
@@ -8526,7 +8526,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Float32Array.BYTES_PER_ELEMENT)
         let res = new Float32Array(resBuf, 0, (resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toFloat())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this))
         }
         return res
     }
@@ -10122,7 +10122,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let resBuf = new ArrayBuffer(this.lengthInt * Float64Array.BYTES_PER_ELEMENT)
         let res = new Float64Array(resBuf, 0, (resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toDouble())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this))
         }
         return res
     }
