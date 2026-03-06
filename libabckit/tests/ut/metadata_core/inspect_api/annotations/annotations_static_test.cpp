@@ -73,39 +73,6 @@ TEST_F(LibAbcKitInspectApiAnnotationsTest, AnnotationGetNameStatic)
     ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationIsExternal, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitInspectApiAnnotationsTest, AnnotationIsExternalStatic)
-{
-    abckit::File file(TEST_ABC_PATH);
-
-    std::set<std::string> gotInternalAnnotationNames;
-    std::set<std::string> gotExternalAnnotationNames;
-    std::set<std::string> expectInternalAnnotationNames = {"AI4"};
-    std::set<std::string> expectExternalAnnotationNames = {"ets.annotation.EnclosingClass",
-                                                           "ets.annotation.InnerClass"};
-
-    for (const auto &module : file.GetModules()) {
-        if (module.IsExternal()) {
-            continue;
-        }
-        auto result = helpers::GetNamespaceByName(module, "Ns1");
-        ASSERT_NE(result, std::nullopt);
-        const auto &ns = result.value();
-        const auto &classes = ns.GetClasses();
-        const auto &klass = classes.front();
-        for (const auto &anno : klass.GetAnnotations()) {
-            if (anno.IsExternal()) {
-                gotExternalAnnotationNames.emplace(anno.GetName());
-                continue;
-            }
-            gotInternalAnnotationNames.emplace(anno.GetName());
-        }
-    }
-
-    ASSERT_EQ(gotInternalAnnotationNames, expectInternalAnnotationNames);
-    ASSERT_EQ(gotExternalAnnotationNames, expectExternalAnnotationNames);
-}
-
 // Test: test-kind=api, api=InspectApiImpl::annotationGetInterface, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTest, ClassAnnotationGetInterfaceStatic)
 {

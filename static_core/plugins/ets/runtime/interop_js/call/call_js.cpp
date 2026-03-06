@@ -628,17 +628,16 @@ static std::optional<uint32_t> GetQnameCount(Class *klass)
 {
     auto pf = klass->GetPandaFile();
     panda_file::ClassDataAccessor cda(*pf, klass->GetFileId());
-    auto qnameCount =
-        cda.EnumerateAnnotation("Lets/annotation/DynamicCall;", [pf](panda_file::AnnotationDataAccessor &ada) {
-            for (uint32_t i = 0; i < ada.GetCount(); i++) {
-                auto adae = ada.GetElement(i);
-                auto *elemName = pf->GetStringData(adae.GetNameId()).data;
-                if (utf::IsEqual(utf::CStringAsMutf8("value"), elemName)) {
-                    return adae.GetArrayValue().GetCount();
-                }
+    auto qnameCount = cda.EnumerateAnnotation("###33445-deprecated", [pf](panda_file::AnnotationDataAccessor &ada) {
+        for (uint32_t i = 0; i < ada.GetCount(); i++) {
+            auto adae = ada.GetElement(i);
+            auto *elemName = pf->GetStringData(adae.GetNameId()).data;
+            if (utf::IsEqual(utf::CStringAsMutf8("value"), elemName)) {
+                return adae.GetArrayValue().GetCount();
             }
-            UNREACHABLE();
-        });
+        }
+        UNREACHABLE();
+    });
     return qnameCount;
 }
 

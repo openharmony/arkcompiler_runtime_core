@@ -26,7 +26,7 @@ namespace ark::ets {
 /*static*/
 panda_file::File::EntityId EtsAnnotation::FindAsyncAnnotation(const Method *method)
 {
-    return FindAnnotation(method, utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_etsCoroutineAsync));
+    return FindAnnotation(method, utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_arkruntimeAnnotationAsync));
 }
 
 /*static*/

@@ -48,11 +48,14 @@
     TP("Lstd/core/TupleN;", coreTupleN)                                                                               \
     TP("Lstd/core/BaseEnum;", coreBaseEnum)                                                                           \
     /* Builtin language annotations */                                                                                \
+    AN("Larkruntime/annotation/InternalAPI;", arkruntimeAnnotationInternalAPI)                                        \
+    AN("Larkruntime/annotation/Module;", arkruntimeAnnotationModule)                                                  \
+    AN("Larkruntime/annotation/FunctionReference;", arkruntimeAnnotationFunctionReference)                            \
+    AN("Larkruntime/annotation/Async;", arkruntimeAnnotationAsync)                                                    \
     AN("Lstd/annotations/InterfaceObjectLiteral;", annotationsInterfaceObjectLiteral)                                 \
     AN("Lstd/annotations/functions/OptionalParametersAnnotation;", annotationsFunctionsOptionalParametersAnnotation)  \
-    AN("Lets/annotation/Module;", etsAnnotationModule)                                                                \
-    AN("Lets/annotation/FunctionalReference;", etsAnnotationFunctionalReference)                                      \
-    AN("Lets/coroutine/Async;", etsCoroutineAsync)                                                                    \
+    AN("Lstd/core/NamedFunctionObject;", coreNamedFunctionObject)                                                     \
+    AN("Lstd/core/AsyncFunctionObject;", coreAsyncFunctionObject)                                                     \
     /* ANI */                                                                                                         \
     AN("Lstd/annotations/ani/unsafe/Quick;", annotationsAniUnsafeQuick)                                               \
     AN("Lstd/annotations/ani/unsafe/Direct;", annotationsAniUnsafeDirect)                                             \

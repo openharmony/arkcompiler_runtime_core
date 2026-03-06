@@ -42,7 +42,7 @@ using namespace ark;
 
 namespace {
 constexpr std::string_view ETS_ANNOTATION_CLASS = "ets.annotation.class";
-constexpr std::string_view ETS_ANNOTATION_MODULE = "ets.annotation.Module";
+constexpr std::string_view ETS_ANNOTATION_MODULE = "arkruntime.annotation.Module";
 constexpr std::string_view ETS_EXTENDS = "ets.extends";
 constexpr std::string_view ETS_IMPLEMENTS = "ets.implements";
 constexpr std::string_view ENUM_BASE = "std.core.BaseEnum";

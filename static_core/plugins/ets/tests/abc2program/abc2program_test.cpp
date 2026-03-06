@@ -495,7 +495,7 @@ TEST_F(Abc2ProgramMetadataTest, Record4)
     };
     const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
         {"ets.annotation.element.value", {""}},
-        {"ets.annotation.class", {"ets.annotation.Module"}},
+        {"ets.annotation.class", {"arkruntime.annotation.Module"}},
         {"ets.annotation.type", {"class"}},
         {"ets.annotation.element.type", {"array"}},
         {"ets.annotation.element.name", {"exported"}},

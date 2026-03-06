@@ -34,7 +34,7 @@ static bool UpdateLambdaAnnotationsForSignatureChange(ark::pandasm::Program *pro
                                                       const std::string &newMangleName)
 {
     constexpr const char *LAMBDA_RECORD_KEY = "%%lambda-";
-    constexpr const char *FUNCTIONAL_REFERENCE_ANNO = "ets.annotation.FunctionalReference";
+    constexpr const char *FUNCTIONAL_REFERENCE_ANNO = "arkruntime.annotation.FunctionReference";
     constexpr const char *ELEMENT_NAME = "value";
 
     if (oldMangleName == newMangleName) {

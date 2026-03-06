@@ -18,7 +18,7 @@
 .record ColorModifier <ets.extends=ModifierWithKey, access.record=public> {
 }
 
-.record ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public, ets.annotation.type=class, ets.annotation.class=ets.annotation.Module, ets.annotation.id=id_271695, ets.annotation.element.name=exported, ets.annotation.element.type=string, ets.annotation.element.value=""> {
+.record ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public, ets.annotation.type=class, ets.annotation.class=arkruntime.annotation.Module, ets.annotation.id=id_271695, ets.annotation.element.name=exported, ets.annotation.element.type=string, ets.annotation.element.value=""> {
 }
 
 .record ModifierWithKey <ets.extends=std.core.Object, access.record=public> {
