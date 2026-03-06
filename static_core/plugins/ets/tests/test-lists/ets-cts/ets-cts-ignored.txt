@@ -1827,9 +1827,6 @@
 #31017 override method in superinterface with the same private in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
 
-#26730
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_2.ets
-
 #33241
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets
 
