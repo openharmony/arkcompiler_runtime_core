@@ -22,6 +22,7 @@
 
 namespace ark {
 
+// NOLINTNEXTLINE(readability-redundant-string-init)
 constexpr std::string_view ARK_VERSION_GIT_HASH = "${ARK_VERSION_GIT_HASH}";
 constexpr std::string_view ARK_VERSION_DATE = "${ARK_VERSION_DATE}";
 
