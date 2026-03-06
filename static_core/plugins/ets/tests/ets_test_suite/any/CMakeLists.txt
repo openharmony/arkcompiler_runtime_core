@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,6 @@ add_custom_target(ets_test_suite_any)
 add_ets_test(ets_test_suite_any
     FILE relaxed_any.ets
     TEST_NAME ets_test_suite_any
-    MODE "INT"
+    MODE "INT" "JIT" "AOT"
     COMPILER_EXTRA_OPTIONS "--permit-relaxed-any=true"
 )

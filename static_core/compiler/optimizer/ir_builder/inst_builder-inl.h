@@ -1660,10 +1660,8 @@ void InstBuilder::BuildStringGetIntrinsic(const BytecodeInstruction *bcInst, boo
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
-void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                         [[maybe_unused]] DataType::Type type)
+void InstBuilder::BuildLoadFromAnyByName(const BytecodeInstruction *bcInst)
 {
-    ASSERT(IS_ACC_WRITE);
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto stringId = bcInst->GetId(0).AsIndex();
 
@@ -1673,7 +1671,7 @@ void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruct
 
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2U);
     static constexpr auto ACC_READ = false;
-    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, ACC_READ));
+    intrinsic->AppendInput(GetArgDefinition(bcInst, IS_ACC_WRITE ? 0 : 1, ACC_READ));
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->AppendInput(graph_->FindOrCreateConstant(stringId));
     intrinsic->AddInputType(DataType::INT32);
@@ -1684,15 +1682,17 @@ void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruct
 
     AddInstruction(saveState, intrinsic);
     UpdateDefinitionAcc(intrinsic);
+    if (IS_ACC_WRITE) {
+        UpdateDefinitionAcc(intrinsic);
+    } else {
+        UpdateDefinition(bcInst->GetVReg(0), intrinsic);
+    }
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <bool IS_ACC_WRITE>
-void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                          [[maybe_unused]] DataType::Type type)
+template <bool IS_ACC_READ>
+void InstBuilder::BuildStoreFromAnyByName(const BytecodeInstruction *bcInst)
 {
-    static_assert(!IS_ACC_WRITE);
-
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto stringId = bcInst->GetId(0).AsIndex();
 
@@ -1702,11 +1702,11 @@ void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruc
 
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2U);
     static constexpr bool ACC_READ = false;
-    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, ACC_READ));
+    intrinsic->AppendInput(GetArgDefinition(bcInst, IS_ACC_READ ? 0 : 1, ACC_READ));
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->AppendInput(graph_->FindOrCreateConstant(stringId));
     intrinsic->AddInputType(DataType::INT32);
-    intrinsic->AppendInput(GetDefinitionAcc());
+    intrinsic->AppendInput(IS_ACC_READ ? GetDefinitionAcc() : GetArgDefinition(bcInst, 0, ACC_READ));
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
@@ -1717,57 +1717,224 @@ void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruc
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                        [[maybe_unused]] DataType::Type type)
+void InstBuilder::BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst)
 {
-    // NOTE(zavedeevdenis) Support
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
-    failed_ = true;
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+
+    const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYIDX;
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3U);
+
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(GetDefinitionAcc());
+    intrinsic->AddInputType(DataType::FLOAT64);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
+    UpdateDefinitionAcc(intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                         [[maybe_unused]] DataType::Type type)
+void InstBuilder::BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst)
 {
-    // NOTE(zavedeevdenis) Support
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
-    failed_ = true;
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+
+    const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYIDX;
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 4U);
+
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 1, false));
+    intrinsic->AddInputType(DataType::FLOAT64);
+    intrinsic->AppendInput(GetDefinitionAcc());
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                        [[maybe_unused]] DataType::Type type)
+void InstBuilder::BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst)
 {
-    // NOTE(zavedeevdenis) Support
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
-    failed_ = true;
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+
+    const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYVAL;
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3U);
+
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 1, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
+    UpdateDefinitionAcc(intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                         [[maybe_unused]] DataType::Type type)
+void InstBuilder::BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst)
 {
-    // NOTE(zavedeevdenis) Support
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
-    failed_ = true;
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+
+    const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYVAL;
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::VOID, bcAddr, intrinsicId);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 4U);
+
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 1, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(GetDefinitionAcc());
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
+}
+
+template <bool IS_THIS>
+void InstBuilder::BuildAnyCallHelper(const BytecodeInstruction *bcInst, RuntimeInterface::IntrinsicId intrinsicId,
+                                     uint64_t argc)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+
+    // Technically `any.call.range v0, v2, 1` would be a legal usage
+    auto isRange = argc > 1;
+    ASSERT(!isRange || intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_RANGE ||
+           intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE ||
+           intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_RANGE);
+
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    static constexpr auto SAVE_STATE_PLUS_FIRST_ARG = 2;
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), argc + SAVE_STATE_PLUS_FIRST_ARG +
+                                                                  static_cast<uint64_t>(IS_THIS) +
+                                                                  static_cast<uint64_t>(isRange));
+    // This VReg has different meanings between call opcodes, but its underlying usage is the same
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    if constexpr (IS_THIS) {
+        // StringId, also `any.*.this` opcodes require method to resolve string
+        intrinsic->AppendInput(graph_->FindOrCreateConstant(bcInst->GetId(0).AsIndex()));
+        intrinsic->AddInputType(DataType::INT32);
+        intrinsic->SetMethodFirstInput();
+        intrinsic->SetMethod(GetMethod());
+    }
+    if (isRange) {
+        // argc
+        intrinsic->AppendInput(graph_->FindOrCreateConstant(argc));
+        intrinsic->AddInputType(DataType::INT32);
+    }
+    if (argc > 0) {
+        // Actual call parameters. This handles both cases when there's only one arg or a range
+        auto reg = bcInst->GetVReg(1);
+        for (uint64_t i = 0; i < argc; reg++, i++) {
+            intrinsic->AppendInput(GetDefinition(reg));
+            intrinsic->AddInputType(DataType::REFERENCE);
+        }
+    }
+    // Savestate
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
+    UpdateDefinitionAcc(intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <bool IS_ACC_WRITE>
-void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcInst)
+void InstBuilder::BuildAnyCall0(const BytecodeInstruction *bcInst)
 {
-    // NOTE(zavedeevdenis) Support
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
-    failed_ = true;
+    static constexpr auto IS_THIS = false;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL0, 0U);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildIsInstanceAny([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                     [[maybe_unused]] DataType::Type type)
+void InstBuilder::BuildAnyCallRange(const BytecodeInstruction *bcInst)
 {
-    // NOTE(zavedeevdenis) Support
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
-    failed_ = true;
+    static constexpr auto IS_THIS = false;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_RANGE,
+                                bcInst->GetImm64(0));
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallShort(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = false;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_SHORT, 1U);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallThis0(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = true;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS0, 0U);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallThisRange(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = true;
+    int64_t argc = bcInst->GetImm64(0);
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE, argc);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallThisShort(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = true;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_SHORT, 1U);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallNew0(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = false;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW0, 0);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallNewRange(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = false;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_RANGE,
+                                bcInst->GetImm64(0));
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildAnyCallNewShort(const BytecodeInstruction *bcInst)
+{
+    static constexpr auto IS_THIS = false;
+    BuildAnyCallHelper<IS_THIS>(bcInst, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_SHORT, 1);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildIsInstanceAny(const BytecodeInstruction *bcInst)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::BOOL, bcAddr,
+                                                 RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_ISINSTANCE);
+
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3U);
+    intrinsic->AppendInput(GetDefinitionAcc());  // object to check (lhs)
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));  // constructor (rhs)
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
+    UpdateDefinitionAcc(intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)

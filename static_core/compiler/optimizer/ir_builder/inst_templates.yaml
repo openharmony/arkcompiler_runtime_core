@@ -310,21 +310,28 @@ templates:
     % name = inst.opcode.split('_')[1]
     % case name
     % when "ldbyname"
-      BuildLoadFromAnyByName< <%= inst.acc_write? %> >(instruction, <%= get_type(inst.dtype) %>);
+      BuildLoadFromAnyByName< <%= inst.acc_write? %> >(instruction);
     % when "stbyname"
-      BuildStoreFromAnyByName< <%= inst.acc_write? %> >(instruction, <%= get_type(inst.type(0)) %>);
+      BuildStoreFromAnyByName< <%= inst.acc_read? %> >(instruction);
     % when "ldbyidx"
-      BuildLoadFromAnyByIdx(instruction, <%= get_type(inst.dtype) %>);
+      BuildLoadFromAnyByIdx(instruction);
     % when "stbyidx"
-      BuildStoreFromAnyByIdx(instruction, <%= get_type(inst.type(0)) %>);
+      BuildStoreFromAnyByIdx(instruction);
     % when "ldbyval"
-      BuildLoadFromAnyByVal(instruction, <%= get_type(inst.dtype) %>);
+      BuildLoadFromAnyByVal(instruction);
     % when "stbyval"
-      BuildStoreFromAnyByVal(instruction, <%= get_type(inst.type(0)) %>);
+      BuildStoreFromAnyByVal(instruction);
     % when "isinstance"
-      BuildIsInstanceAny(instruction, <%= get_type(inst.dtype) %>);
+      BuildIsInstanceAny(instruction);
     % when "call"
-      BuildAnyCall< <%= inst.acc_write? %> >(instruction);
+    %   type = inst.opcode.split('_')[2]
+    %   if type == "new" || type == "this"
+    %     args = inst.opcode.split('_')[3]
+    %   else
+    %     args = type
+    %     type = ""
+    %   end
+    BuildAnyCall<%= type.capitalize %><%= args.capitalize %>(instruction);
     % else
       UNREACHABLE();
     % end

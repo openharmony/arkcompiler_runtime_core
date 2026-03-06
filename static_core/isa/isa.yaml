@@ -3080,14 +3080,14 @@ groups:
     exceptions:
       - x_null
     pseudo: |
-      if v1 == null then
+      if v2 == null then
         throw NullPointerException
       end
-      field = resolve_field_by_name(v1, string_id)
+      field = resolve_field_by_name(v2, string_id)
       if op == any.stbyname.v and size(field) < 32 then
-        v1.set(field, truncate(field, v2))
+        v2.set(field, truncate(field, v1))
       else
-        v1.set(field, v2)
+        v2.set(field, v1)
       end
     instructions:
       - sig: any.stbyname.v v1:in:ref, v2:in:ref, string_id

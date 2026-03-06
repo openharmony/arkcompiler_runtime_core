@@ -206,7 +206,7 @@ bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* i
     switch(inst->GetOpcode()) {
 % runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/,
 %                  /^monitor/,
-%                  /^any.ldbyname/, /^any.stbyname/,
+%                  /^any.ldbyname/, /^any.stbyname/, /^any.ldbyidx/, /^any.stbyidx/, /^any.ldbyval/, /^any.stbyval/, /^any.call/, /^any.call.new/,
 %                  /^ets.typeof/, /^ets.call.name/, /^ets.nullcheck/, /^ets.equals/, /^ets.strictequals/
 %                 ]
 % Panda::instructions.each do |inst|

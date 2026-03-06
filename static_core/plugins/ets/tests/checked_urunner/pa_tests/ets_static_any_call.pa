@@ -1,0 +1,202 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#! CHECKER      Static Any Call INT
+#! RUN          options: "--compiler-enable-jit=false", entry: "_GLOBAL::main"
+
+#! CHECKER      Static Any Call JIT
+#! RUN          force_jit: true, options: "--compiler-regex='.*testCall.*'", entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::testCall0"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCall0/
+#! METHOD       "_GLOBAL::testCallRange"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallRange/
+#! METHOD       "_GLOBAL::testCallShort"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallShort/
+
+#! CHECKER      Static Any Call AOT
+#! RUN_PAOC     options: "--compiler-regex='.*testCall.*'"
+#! METHOD       "_GLOBAL::testCall0"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCall0/
+#! METHOD       "_GLOBAL::testCallRange"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallRange/
+#! METHOD       "_GLOBAL::testCallShort"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallShort/
+#! RUN          entry: "_GLOBAL::main"
+
+.language eTS
+
+.record std.core.Int <external>
+
+.record std.core.Object <external>
+
+.record std.core.Function <external>
+
+.record TestCall <final, ets.implements=std.core.Function, access.record=public> {
+}
+
+.function i32 testFunction(i32 a0, i32 a1) {
+    lda a0
+    sta v1
+    mul v1, a0
+    return
+}
+
+.function void TestCall._ctor_(TestCall a0) <ctor, access.function=public> {
+    return.void
+}
+
+.function std.core.Object TestCall.unsafeCall(TestCall a0, std.core.Object[] a1) <varargs, access.function=public> {
+    lenarr a1
+    movi v0, 0x2
+    jge v0, jump_2
+    jnez jump_1
+    call.short TestCall.invoke0:(TestCall), a0
+    return.obj
+jump_1:
+    ldai 0x0
+    ldarr.obj a1
+    sta.obj v0
+    call.short TestCall.invoke1:(TestCall,std.core.Object), a0, v0
+    return.obj
+jump_2:
+    ldai 0x0
+    ldarr.obj a1
+    sta.obj v0
+    ldai 0x1
+    ldarr.obj a1
+    sta.obj v1
+    call TestCall.invoke2:(TestCall,std.core.Object,std.core.Object), a0, v0, v1
+    return.obj
+}
+
+.function std.core.Object TestCall.invoke0(TestCall a0) <access.function=public> {
+    ldai 7
+    sta v0
+    ldai 6
+    sta v1
+    mul v0, v1
+    sta v2
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
+    return.obj
+}
+
+.function std.core.Object TestCall.invoke1(TestCall a0, std.core.Object a1) <access.function=public> {
+    ldai 7
+    sta v0
+    lda.obj a1
+	checkcast std.core.Int
+	call.short std.core.Int.toInt:(std.core.Int), a1
+    sta v1
+    mul v0, v1
+    sta v2
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
+    return.obj
+}
+
+.function std.core.Object TestCall.invoke2(TestCall a0, std.core.Object a1, std.core.Object a2) <access.function=public> {
+    lda.obj a1
+	checkcast std.core.Int
+	call.short std.core.Int.toInt:(std.core.Int), a1
+    sta v0
+    lda.obj a2
+	checkcast std.core.Int
+	call.short std.core.Int.toInt:(std.core.Int), a2
+    sta v1
+    mul v0, v1
+    sta v2
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
+    return.obj
+}
+
+.function i32 testCall0() {
+    initobj.short TestCall._ctor_:(TestCall)
+    sta.obj v0
+    any.call.0 v0
+    sta.obj v2
+    ldai 42
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 testCallRange() {
+    initobj.short TestCall._ctor_:(TestCall)
+    sta.obj v0
+    ldai 10
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ldai -3
+    sta v2
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
+    sta.obj v2
+    any.call.range v0, v1, 2
+    sta.obj v2
+    ldai -30
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 testCallShort() {
+    initobj.short TestCall._ctor_:(TestCall)
+    sta.obj v0
+    ldai 6
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    any.call.short v0, v1
+    sta.obj v2
+    ldai 42
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 main() <static, access.function=public> {
+    call.short testCall0
+    jeqz exit_0
+    call.short testCallRange
+    jeqz exit_range
+    call.short testCallShort
+    jeqz exit_short
+    ldai 0
+    return
+exit_0:
+    ldai -1
+    return
+exit_range:
+    ldai -2
+    return
+exit_short:
+    ldai -3
+    return
+}
+
+.function void std.core.Int._ctor_(std.core.Int a0, i32 a1) <ctor, external, access.function=public>
+
+.function i32 std.core.Int.toInt(std.core.Int a0) <external, access.function=public>
+
+.function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
