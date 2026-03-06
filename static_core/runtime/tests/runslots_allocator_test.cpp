@@ -24,10 +24,10 @@
 
 namespace ark::mem {
 
-using NonObjectAllocator = RunSlotsAllocator<EmptyAllocConfigWithCrossingMap>;
 using RunSlotsType = RunSlots<>;
 
-class RunSlotsAllocatorTest : public AllocatorTest<NonObjectAllocator> {
+template <typename AllocConfigT>
+class RunSlotsAllocatorTest : public AllocatorTest<RunSlotsAllocator<AllocConfigT>> {
 public:
     NO_COPY_SEMANTIC(RunSlotsAllocatorTest);
     NO_MOVE_SEMANTIC(RunSlotsAllocatorTest);
@@ -47,11 +47,12 @@ public:
     }
 
 protected:
-    static constexpr size_t DEFAULT_POOL_SIZE_FOR_ALLOC = NonObjectAllocator::GetMinPoolSize();
+    using Allocator = RunSlotsAllocator<AllocConfigT>;
+    static constexpr size_t DEFAULT_POOL_SIZE_FOR_ALLOC = Allocator::GetMinPoolSize();
     static constexpr size_t DEFAULT_POOL_ALIGNMENT_FOR_ALLOC = RUNSLOTS_ALIGNMENT_IN_BYTES;
     static constexpr Alignment RUNSLOTS_LOG_MAX_ALIGN = LOG_ALIGN_8;
 
-    void AddMemoryPoolToAllocator(NonObjectAllocator &alloc) override
+    void AddMemoryPoolToAllocator(Allocator &alloc) override
     {
         os::memory::LockHolder lock(poolLock_);
         void *mem = ark::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC);
@@ -62,7 +63,7 @@ protected:
         }
     }
 
-    void AddMemoryPoolToAllocatorProtected(NonObjectAllocator &alloc) override
+    void AddMemoryPoolToAllocatorProtected(Allocator &alloc) override
     {
         os::memory::LockHolder lock(poolLock_);
         void *mem = ark::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC + PANDA_PAGE_SIZE);
@@ -73,16 +74,6 @@ protected:
         if (!alloc.AddMemoryPool(mem, DEFAULT_POOL_SIZE_FOR_ALLOC)) {
             ASSERT_TRUE(0 && "Can't add mem pool to allocator");
         }
-    }
-
-    void ReleasePages(NonObjectAllocator &alloc)
-    {
-        alloc.ReleaseEmptyRunSlotsPagesUnsafe();
-    }
-
-    bool AllocatedByThisAllocator(NonObjectAllocator &allocator, void *mem) override
-    {
-        return allocator.AllocatedByRunSlotsAllocator(mem);
     }
 
     void TestRunSlots(size_t slotsSize)
@@ -100,13 +91,27 @@ protected:
         LOG(DEBUG, ALLOC) << "Iteration = " << i;
     }
 
+    void ReleasePages(Allocator &alloc)
+    {
+        alloc.ReleaseEmptyRunSlotsPagesUnsafe();
+    }
+
+    bool AllocatedByThisAllocator(Allocator &allocator, void *mem) override
+    {
+        return allocator.AllocatedByRunSlotsAllocator(mem);
+    }
+
 private:
     std::vector<std::pair<void *, size_t>> allocatedMemMmap_;
     // Mutex, which allows only one thread to add pool to the pool vector
     os::memory::Mutex poolLock_;
 };
 
-TEST_F(RunSlotsAllocatorTest, SimpleRunSlotsTest)
+class RunSlotsNonobjectAllocatorTest : public RunSlotsAllocatorTest<EmptyAllocConfigWithCrossingMap> {};
+
+class RunSlotsObjectAllocatorTest : public RunSlotsAllocatorTest<ObjectAllocConfigWithCrossingMap> {};
+
+TEST_F(RunSlotsNonobjectAllocatorTest, SimpleRunSlotsTest)
 {
     for (size_t i = RunSlotsType::ConvertToPowerOfTwoUnsafe(RunSlotsType::MinSlotSize());
          i <= RunSlotsType::ConvertToPowerOfTwoUnsafe(RunSlotsType::MaxSlotSize()); i++) {
@@ -114,11 +119,11 @@ TEST_F(RunSlotsAllocatorTest, SimpleRunSlotsTest)
     }
 }
 
-TEST_F(RunSlotsAllocatorTest, SimpleAllocateDifferentObjSizeTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, SimpleAllocateDifferentObjSizeTest)
 {
     LOG(DEBUG, ALLOC) << "SimpleAllocateDifferentObjSizeTest";
     mem::MemStatsType memStats;
-    NonObjectAllocator allocator(&memStats);
+    Allocator allocator(&memStats);
     AddMemoryPoolToAllocator(allocator);
     // NOLINTNEXTLINE(readability-magic-numbers)
     for (size_t i = 23UL; i < 300UL; i++) {
@@ -128,12 +133,12 @@ TEST_F(RunSlotsAllocatorTest, SimpleAllocateDifferentObjSizeTest)
     }
 }
 
-TEST_F(RunSlotsAllocatorTest, TestReleaseRunSlotsPagesTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, TestReleaseRunSlotsPagesTest)
 {
     static constexpr size_t ALLOC_SIZE = RunSlotsType::ConvertToPowerOfTwoUnsafe(RunSlotsType::MinSlotSize());
     LOG(DEBUG, ALLOC) << "TestRunSlotsReusageTestTest";
     mem::MemStatsType memStats;
-    NonObjectAllocator allocator(&memStats);
+    Allocator allocator(&memStats);
     AddMemoryPoolToAllocator(allocator);
     std::vector<void *> elements;
     // Fill the whole pool
@@ -170,20 +175,20 @@ TEST_F(RunSlotsAllocatorTest, TestReleaseRunSlotsPagesTest)
     }
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateAllPossibleSizesFreeTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateAllPossibleSizesFreeTest)
 {
     for (size_t i = 1; i <= RunSlotsType::MaxSlotSize(); i++) {
         AllocateAndFree(i, RUNSLOTS_SIZE / i);
     }
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateWriteFreeTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateWriteFreeTest)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
     AllocateAndFree(sizeof(uint64_t), 512UL);
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateRandomFreeTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateRandomFreeTest)
 {
     static constexpr size_t ALLOC_SIZE = sizeof(uint64_t);
     static constexpr size_t ELEMENTS_COUNT = 512;
@@ -191,37 +196,37 @@ TEST_F(RunSlotsAllocatorTest, AllocateRandomFreeTest)
     AllocateFreeDifferentSizesTest<ALLOC_SIZE / 2UL, 2UL * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
 }
 
-TEST_F(RunSlotsAllocatorTest, CheckReuseOfRunSlotsTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, CheckReuseOfRunSlotsTest)
 {
     AllocateReuseTest(RUNSLOTS_ALIGNMENT_MASK);
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateTooBigObjTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateTooBigObjTest)
 {
     AllocateTooBigObjectTest<RunSlotsType::MaxSlotSize()>();
 }
 
-TEST_F(RunSlotsAllocatorTest, AlignmentAllocTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AlignmentAllocTest)
 {
     AlignedAllocFreeTest<1, RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>();
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateTooMuchTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateTooMuchTest)
 {
     static constexpr size_t ALLOC_SIZE = sizeof(uint64_t);
     AllocateTooMuchTest(ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC / ALLOC_SIZE);
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateVectorTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateVectorTest)
 {
     AllocateVectorTest();
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocateReuse2)
 {
     // It's regression test
     auto *memStats = new mem::MemStatsType();
-    NonObjectAllocator allocator(memStats);
+    Allocator allocator(memStats);
     static constexpr size_t SIZE1 = 60;
     static constexpr size_t SIZE2 = 204;
     constexpr char CHAR1 = 'a';
@@ -272,44 +277,44 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
     delete memStats;
 }
 
-TEST_F(RunSlotsAllocatorTest, ObjectIteratorTest)
+TEST_F(RunSlotsObjectAllocatorTest, ObjectIteratorTest)
 {
-    ObjectIteratorTest<1, RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>();
+    ObjectIteratorTest<sizeof(ObjectHeader), RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>();
 }
 
-TEST_F(RunSlotsAllocatorTest, ObjectCollectionTest)
+TEST_F(RunSlotsObjectAllocatorTest, ObjectCollectionTest)
 {
-    ObjectCollectionTest<1, RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>();
+    ObjectCollectionTest<sizeof(ObjectHeader), RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>();
 }
 
-TEST_F(RunSlotsAllocatorTest, ObjectIteratorInRangeTest)
+TEST_F(RunSlotsObjectAllocatorTest, ObjectIteratorInRangeTest)
 {
-    ObjectIteratorInRangeTest<1, RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>(
+    ObjectIteratorInRangeTest<sizeof(ObjectHeader), RunSlotsType::MaxSlotSize(), LOG_ALIGN_MIN, RUNSLOTS_LOG_MAX_ALIGN>(
         CrossingMapSingleton::GetCrossingMapGranularity());
 }
 
-TEST_F(RunSlotsAllocatorTest, AsanTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AsanTest)
 {
     AsanTest();
 }
 
-TEST_F(RunSlotsAllocatorTest, VisitAndRemoveFreePoolsTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, VisitAndRemoveFreePoolsTest)
 {
     static constexpr size_t POOLS_COUNT = 5;
     VisitAndRemoveFreePools<POOLS_COUNT>(RunSlotsType::MaxSlotSize());
 }
 
-TEST_F(RunSlotsAllocatorTest, AllocatedByRunSlotsAllocatorTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, AllocatedByRunSlotsNonobjectAllocatorTest)
 {
     AllocatedByThisAllocatorTest();
 }
 
-TEST_F(RunSlotsAllocatorTest, RunSlotsReusingTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, RunSlotsReusingTest)
 {
     static constexpr size_t SMALL_OBJ_SIZE = sizeof(uint32_t);
     static constexpr size_t BIG_OBJ_SIZE = 128;
     auto *memStats = new mem::MemStatsType();
-    NonObjectAllocator allocator(memStats);
+    Allocator allocator(memStats);
     AddMemoryPoolToAllocatorProtected(allocator);
     // Alloc one big object. this must cause runslots init with it size
     void *mem = allocator.Alloc(BIG_OBJ_SIZE);
@@ -334,7 +339,7 @@ TEST_F(RunSlotsAllocatorTest, RunSlotsReusingTest)
     delete memStats;
 }
 
-TEST_F(RunSlotsAllocatorTest, MTAllocFreeTest)
+TEST_F(RunSlotsNonobjectAllocatorTest, MTAllocFreeTest)
 {
     static constexpr size_t MIN_ELEMENTS_COUNT = 1500;
     static constexpr size_t MAX_ELEMENTS_COUNT = 3000;
@@ -350,7 +355,7 @@ TEST_F(RunSlotsAllocatorTest, MTAllocFreeTest)
     }
 }
 
-TEST_F(RunSlotsAllocatorTest, MTAllocIterateTest)
+TEST_F(RunSlotsObjectAllocatorTest, MTAllocIterateTest)
 {
     static constexpr size_t MIN_ELEMENTS_COUNT = 1500;
     static constexpr size_t MAX_ELEMENTS_COUNT = 3000;
@@ -362,17 +367,12 @@ TEST_F(RunSlotsAllocatorTest, MTAllocIterateTest)
 #endif
     static constexpr size_t MT_TEST_RUN_COUNT = 5;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
-        MtAllocIterateTest<1, RunSlotsType::MaxSlotSize(), THREADS_COUNT>(
+        MtAllocIterateTest<sizeof(ObjectHeader), RunSlotsType::MaxSlotSize(), THREADS_COUNT>(
             MIN_ELEMENTS_COUNT, MAX_ELEMENTS_COUNT, CrossingMapSingleton::GetCrossingMapGranularity());
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33026)
-TEST_F(RunSlotsAllocatorTest, DISABLED_MTAllocCollectTest)
-#else
-TEST_F(RunSlotsAllocatorTest, MTAllocCollectTest)
-#endif
+TEST_F(RunSlotsObjectAllocatorTest, MTAllocCollectTest)
 {
     static constexpr size_t MIN_ELEMENTS_COUNT = 1500;
     static constexpr size_t MAX_ELEMENTS_COUNT = 3000;
@@ -384,7 +384,8 @@ TEST_F(RunSlotsAllocatorTest, MTAllocCollectTest)
 #endif
     static constexpr size_t MT_TEST_RUN_COUNT = 5;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
-        MtAllocCollectTest<1, RunSlotsType::MaxSlotSize(), THREADS_COUNT>(MIN_ELEMENTS_COUNT, MAX_ELEMENTS_COUNT);
+        MtAllocCollectTest<sizeof(ObjectHeader), RunSlotsType::MaxSlotSize(), THREADS_COUNT>(MIN_ELEMENTS_COUNT,
+                                                                                             MAX_ELEMENTS_COUNT);
     }
 }
 
