@@ -27,6 +27,7 @@ from runner.options.options import IOptions
 from runner.options.options_step import RawStepData, Step, StepKind
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.utils import indent as utils_indent
+from runner.utils import to_bool
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -36,6 +37,8 @@ WORKFLOW_KIND = "workflow-kind"
 PARAMETERS = "parameters"
 STEPS = "steps"
 FROM = "from"
+IS_PANDA = "is-panda"
+DEFAULT_IS_PANDA = False
 
 
 class WorkflowOptions(IOptions):
@@ -88,6 +91,10 @@ class WorkflowOptions(IOptions):
     @cached_property
     def steps(self) -> list[Step]:
         return self.__steps
+
+    @cached_property
+    def is_panda(self) -> bool:
+        return to_bool(self.__parameters.get(IS_PANDA, DEFAULT_IS_PANDA))
 
     @cached_property
     def parameters(self) -> dict[str, Any]:  # type: ignore[explicit-any]

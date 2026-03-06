@@ -35,6 +35,7 @@ from runner.utils import check_int, convert_underscore, extract_parameter_name
 _LOGGER = Log.get_logger(__file__)
 
 
+# pylint: disable=too-many-public-methods
 class TestSuiteOptions(IOptions):
     __DATA = "data"
     __TEST_SUITE = "test-suite"
@@ -60,6 +61,8 @@ class TestSuiteOptions(IOptions):
     __WORK_DIR = "work-dir"
     __USE_METADATA = "use-metadata"
     __DEFAULT_USE_METADATA = True
+    __VALIDATOR_CLASS = "validator"
+    __DEFAULT_VALIDATOR_CLASS = None
 
     def __init__(self, args: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(None)
@@ -103,6 +106,12 @@ class TestSuiteOptions(IOptions):
             raise InvalidConfiguration("work-dir is not specified")
         return str(self.__parameters[self.__WORK_DIR])
 
+    @property
+    def validator_class(self) -> str | None:
+        if (validator := self.__parameters.get(self.__VALIDATOR_CLASS, self.__DEFAULT_VALIDATOR_CLASS)) is not None:
+            return cast(str, validator)
+        return None
+
     @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         dest = f"{dest}." if dest else ""
@@ -112,7 +121,7 @@ class TestSuiteOptions(IOptions):
             default=TestSuiteOptions.__DEFAULT_FILTER,
             dest=f"{dest}{TestSuiteOptions.__FILTER}",
             help="Glob pattern to select tests relative to test root."
-                  "If the pattern matches directories, tests inside them are included recursively. ")
+                 "If the pattern matches directories, tests inside them are included recursively. ")
         repeats_group = parser.add_mutually_exclusive_group(required=False)
         repeats_group.add_argument(
             f'--{TestSuiteOptions.__REPEATS}', action='store',
