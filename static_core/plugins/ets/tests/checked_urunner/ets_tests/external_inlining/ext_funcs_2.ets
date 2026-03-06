@@ -38,7 +38,7 @@ export function getArrElement(arr: int[], idx: int): int {
 }
 
 export function makeArray(n: int): int[] {
-    let arr = new int[n];
+    let arr = new int[n](0);
     return arr;
 }
 

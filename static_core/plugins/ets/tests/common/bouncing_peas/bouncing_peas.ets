@@ -246,7 +246,7 @@ class Scene {
     constructor(ballsQuantity: int, ballRadius: float) {
         this.drawer = new Drawer();
 
-        this.balls = new Ball[ballsQuantity];
+        this.balls = new Ball[ballsQuantity](new Ball());
         let offset: float = 0;
         for (let i = 0; i < ballsQuantity; i++) {
             offset += ballRadius * 3;

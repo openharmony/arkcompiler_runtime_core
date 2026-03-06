@@ -141,7 +141,7 @@ const valueCount = 500;
 const iterCount = valueCount * 3;
 
 function doTest<T>(values: T[], workers: int) {
-    let jobs = new (Job<String> | undefined)[workers];
+    let jobs = new (Job<String> | undefined)[workers](undefined);
     for (let i = 0; i < workers; i++) {
         let state = (i.toLong() * 1234567) | 42;
         // check only in one worker to make others faster
@@ -162,7 +162,7 @@ function doTest<T>(values: T[], workers: int) {
 
 function testDoubles() {
     // console.println('testDoubles')
-    let values = new Double[valueCount];
+    let values = new Double[valueCount](0);
     for (let i = 0; i < valueCount; i++) {
         let exp = (Math.random() * 2 - 1) * (310).toInt()
         values[i] = Math.random() * Math.pow(10, exp);
@@ -172,7 +172,7 @@ function testDoubles() {
 
 function testDoublesBitcast() {
     // console.println('testDoublesBitcast');
-    let values = new Double[valueCount];
+    let values = new Double[valueCount](0);
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {
         state = xorshift(state);
@@ -183,7 +183,7 @@ function testDoublesBitcast() {
 
 function testFloats() {
     // console.println('testFloats');
-    let values = new Float[valueCount];
+    let values = new Float[valueCount](0);
     for (let i = 0; i < valueCount; i++) {
         let exp = (Math.random() * 2 - 1) * (39).toInt()
         values[i] = (Math.random() * Math.pow(10, exp)).toFloat();
@@ -193,7 +193,7 @@ function testFloats() {
 
 function testFloatsBitcast() {
     // console.println('testFloatsBitcast');
-    let values = new Float[valueCount];
+    let values = new Float[valueCount](0);
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {
         state = xorshift(state);
@@ -204,7 +204,7 @@ function testFloatsBitcast() {
 
 function testLongs() {
     // console.println('testLongs');
-    let values = new Long[valueCount];
+    let values = new Long[valueCount](0);
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {
         state = xorshift(state);

@@ -61,10 +61,10 @@ cases:
           let a = { name: "John" }  // CTE expected
 
     - decl: |-
-          let arr = new (Object|undefined)[1];  // inferred array of Error|undefined
+          let arr = new (Object|undefined)[1](undefined);  // inferred array of Error|undefined
       tags: 'negative'
       use: |-
-          arktest.assertEQ(arr[0], new Object[1])
+          arktest.assertEQ(arr[0], new Object[1](new Object()))
 
     - decl: const myC = "1"
       tags: 'compile-only, negative'

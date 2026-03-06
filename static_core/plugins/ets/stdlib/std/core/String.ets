@@ -853,7 +853,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     private split(separator: Char, limit: Int): String[] {
         if (limit == 0) {
-            return new String[0];
+            return new String[0]("");
         }
         let strLen = this.getLength();
         if (strLen == 0) {
@@ -863,7 +863,7 @@ export final class String extends Object implements Comparable<String>, Iterable
             limit = Int.MAX_VALUE;
         }
 
-        let out: String[] = new String[0];
+        let out: String[] = new String[0]("");
         let from: int = 0;
         while (true) {
             let index: int = this.indexOf(separator, from);
@@ -881,20 +881,20 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     private splitImpl(separator: String, limit: Int): String[] {
         if (limit == 0) {
-            return new String[0];
+            return new String[0]("");
         }
         let strLen = this.getLength();
         let sepLen: int = separator.getLength();
         if (strLen == 0) {
             if (sepLen == 0) {
-                return new String[0];
+                return new String[0]("");
             }
             return [(this)];
         }
         if (limit < 0) {
             limit = Int.MAX_VALUE;
         }
-        let out: String[] = new String[0];
+        let out: String[] = new String[0]("");
         if (sepLen == 0) {
             // The string is split by UTF-16 code units and this destroys surrogate pairs (if any).
             if (strLen > limit) {
@@ -1864,7 +1864,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         let preceding = this.substring(0, position)
         let following = this.substring(position + searchLength)
-        let replacement = String.getSubstitution(searchValue, this, position, new String[0], undefined, replaceValue)
+        let replacement = String.getSubstitution(searchValue, this, position, new String[0](""), undefined, replaceValue)
         return preceding + replacement + following
     }
 
@@ -1983,7 +1983,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
-            let replacement = String.getSubstitution(searchValue, this, p, new String[0], undefined, replaceValue)
+            let replacement = String.getSubstitution(searchValue, this, p, new String[0](""), undefined, replaceValue)
             result = result + preserved + replacement
             endOfLastMatch = p + searchLength
         }

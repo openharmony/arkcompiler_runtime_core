@@ -50,8 +50,8 @@ cases:
 
   # Fields and methods
   - def: |-
-      var2: number[] = new number[1]
-      foo: number[] = new number[2]
+      var2: number[] = new number[1](0)
+      foo: number[] = new number[2](0)
       var1() {}
       bar() { return true }
     check: 

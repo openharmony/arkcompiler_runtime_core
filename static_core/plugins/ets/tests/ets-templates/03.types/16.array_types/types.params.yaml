@@ -37,7 +37,7 @@ cases:
     - decl: |-
         type A = Object|undefined
       type: A[]
-      vals: 'new A[2]'
+      vals: 'new A[2](undefined)'
       val: 'new Boolean(true)'
       assert: 'arr[0] instanceof Boolean && (arr[0] as Boolean)'
 

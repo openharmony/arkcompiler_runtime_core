@@ -24,7 +24,7 @@ const b: {{c.type2}} = {{c.value2}}
 const size: int = (a {{c.sign}} b){{c.conversion}}
 
 function main() {
-    const data = new int[size]
+    const data = new int[size](0)
     arktest.assertEQ(data.length, {{c.expected}})
 }
 

@@ -171,7 +171,7 @@ cases:
 
     - use: |-
           // new expression in expression
-          let r = [...(new number[256])]
+          let r = [...(new number[256](0))]
           arktest.assertEQ(r.length, 256)
           arktest.assertEQ(r[0], 0)
           arktest.assertEQ(r[255], 0)

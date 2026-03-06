@@ -75,7 +75,7 @@ cases:
       class A {}
       class B {}
     stype: B[]
-    sval: new B[1]
+    sval: new B[1](new B())
     dtype: as A[]
     expected: "Semantic error ESE0326: Cannot cast type 'Array<B>' to 'Array<A>'"
 #20
@@ -158,7 +158,7 @@ cases:
   - defs: |-
       class A {}
     stype: Object
-    sval: new A[1]
+    sval: new A[1](new A())
     dtype: as A[][]
     expected: "Semantic error ESE0326: Cannot cast type 'Array<A>' to 'Array<Array<A>>'"
 #28

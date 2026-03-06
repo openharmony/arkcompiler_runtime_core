@@ -22,7 +22,7 @@ desc:
 const testValue: {{c.type}} = {{c.value}}
 
 function main() {
-    const data = new int[~testValue {{c.conversion}}]
+    const data = new int[~testValue {{c.conversion}}](0)
     arktest.assertEQ(data.length, {{c.expected}})
 }
 

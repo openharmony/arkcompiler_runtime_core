@@ -141,7 +141,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(100)]
+          let v: A[] = new A[foo(100)](new A())
           arktest.assertEQ(res, "100")
           arktest.assertEQ(cntr, 100)
           arktest.assertTrue(v[99] instanceof A)
@@ -182,7 +182,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
@@ -207,7 +207,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
@@ -231,7 +231,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
@@ -254,7 +254,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
@@ -278,11 +278,11 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -303,7 +303,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
@@ -328,7 +328,7 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
@@ -352,32 +352,32 @@ cases:
       use: |-
           cntr = 0
           res = ""
-          let v: A[] = new A[foo(42)]
+          let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
           arktest.assertEQ(cntr, 42)
           arktest.assertTrue(v[41] instanceof A)
           arktest.assertEQ(v[41].fld, 41)
 
     - use: |-
-          let v: int[] = new int[33]  // initialized with 0
+          let v: int[] = new int[33](0)  // initialized with 0
           for (let i = 0; i < 33; i++) {
               arktest.assertEQ(v[i], 0)
           }
 
     - use: |-
-          let v: number[] = new number[33]  // initialized with 0.0
+          let v: number[] = new number[33](0)  // initialized with 0.0
           for (let i = 0; i < 33; i++) {
               arktest.assertEQ(v[i], 0.0)
           }
 
     - use: |-
-          let v: char[] = new char[33]  // initialized with c'\u0000'
+          let v: char[] = new char[33]((0).toChar())  // initialized with c'\u0000'
           for (let i = 0; i < 33; i++) {
               arktest.assertEQ(v[i], c'\u0000')
           }
 
     - use: |-
-          let v: boolean[] = new boolean[33]  // initialized with false
+          let v: boolean[] = new boolean[33](false)  // initialized with false
           for (let i = 0; i < 33; i++) {
               arktest.assertEQ(v[i], false)
           }
@@ -385,7 +385,7 @@ cases:
     - defs: |-
           type EN = Error|undefined
       use: |-
-          let v: EN[] = new EN[33]  // initialized with undefined
+          let v: EN[] = new EN[33](undefined)  // initialized with undefined
           for (let i = 0; i < 33; i++) {
               arktest.assertEQ(v[i], undefined)
           }
@@ -393,7 +393,7 @@ cases:
     - defs: |-
           type EU = Error|undefined
       use: |-
-          let v: EU[] = new EU[33]  // initialized with undefined
+          let v: EU[] = new EU[33](undefined)  // initialized with undefined
           for (let i = 0; i < 33; i++) {
               arktest.assertEQ(v[i], undefined)
           }

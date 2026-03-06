@@ -14,65 +14,65 @@
 ---
 cases:
   - use: |-
-      let v: number[] = new number[new Boolean(true)] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[new Boolean(true)](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number[false] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[false](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number[new Object()] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[new Object()](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number[new Error()] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[new Error()](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number[null] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[null](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number[undefined] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[undefined](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number["abc"] // CTE: dimension is not assignable to int type
+      let v: number[] = new number["abc"](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - use: |-
-      let v: number[] = new number[c'a'] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[c'a'](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: int|short = 42 as short
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: BigInt = new BigInt(1n)
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: bigint = 1n
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: Long = new Long(1 as long)
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: long = 1
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
@@ -138,13 +138,13 @@ cases:
   - decl: |-
       let size: Number = new Number(1.0)
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: number = 1.0
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
@@ -162,13 +162,13 @@ cases:
   - decl: |-
       let size: Float = new Float(1.0f)
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       let size: float = 1.0f
     use: |-
-      let v: number[] = new number[size] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
@@ -187,33 +187,33 @@ cases:
       // enum constants of string type
       enum Color { Red = 'r', Green = 'g', Blue = 'b' }
     use: |-
-      let v: number[] = new number[Color.Green] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[Color.Green](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       // enum constants of long type
       enum Color { Red = 9223372036854775807, Green = 2, Blue = 3 }
     use: |-
-      let v: number[] = new number[Color.Green] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[Color.Green](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       // enum constants of long type
       enum Color: long { Red = 1, Green = 2, Blue = 3 }
     use: |-
-      let v: number[] = new number[Color.Green] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[Color.Green](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       // enum constants of float type
       enum Color: float { Red = 1.0f, Green = 2.0f, Blue = 3.0f }
     use: |-
-      let v: number[] = new number[Color.Green] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[Color.Green](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
       // enum constants of double type
       enum Color: double { Red = 1.0, Green = 2.0, Blue = 3.0 }
     use: |-
-      let v: number[] = new number[Color.Green] // CTE: dimension is not assignable to int type
+      let v: number[] = new number[Color.Green](0) // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"

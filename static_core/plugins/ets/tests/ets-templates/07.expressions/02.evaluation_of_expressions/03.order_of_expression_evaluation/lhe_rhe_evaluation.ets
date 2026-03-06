@@ -21,7 +21,7 @@ desc: >-
 
 function main() {
 
-    let a = new int[2];
+    let a = new int[2](0);
     let x: int = 1;
     let y: int = 1;
     let exceptions: int = 0;

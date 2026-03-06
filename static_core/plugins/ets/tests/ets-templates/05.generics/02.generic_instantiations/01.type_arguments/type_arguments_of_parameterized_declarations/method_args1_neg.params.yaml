@@ -70,8 +70,8 @@ cases:
   # type argument is array of classes, interfaces, enums
   #6
   - use: |-
-      let v = new I[0]
-      if (a.meth<X[]>(v, new X[0]) !== v) {  // I[] is not X[]
+      let v = new I[0](new I())
+      if (a.meth<X[]>(v, new X[0](new X())) !== v) {  // I[] is not X[]
           return 1
       }
     stdout: |-
@@ -87,8 +87,8 @@ cases:
       "Semantic error ESE0318: Type 'FixedArray<Color>' cannot be assigned to type 'Array<Object>|null'"
   #8
   - use: |-
-      let v = new X[0]
-      arktest.assertEQ(a.meth<X[]>(v, new Y<X>[0]), v)
+      let v = new X[0](new X())
+      arktest.assertEQ(a.meth<X[]>(v, new Y<X>[0](new Y<X>())), v)
     stdout: |-
       "Semantic error ESE0127: No matching call signature for meth(Array<X>, Array<Y<X>>)"
 
@@ -115,7 +115,7 @@ cases:
       "Semantic error ESE0127: No matching call signature for meth(X, X)"
   #11
   - use: |-
-      let v = new X[0]
+      let v = new X[0](new X())
       if (a.meth<B|null>(v, v) !== v) {  // B|null is out of bound
           return 1
       }
@@ -126,7 +126,7 @@ cases:
       "Semantic error ESE0228: Type argument 'Array<X>|null' should be a subtype of 'Array<Object>' constraint"
   #12
   - use: |-
-      let v = new X[0]
+      let v = new X[0](new X())
       arktest.assertEQ(a.meth<B>(v, new Y<X>[0]), v)
     decl: |-
       type B = X[]|null
@@ -136,7 +136,7 @@ cases:
   # create array with interfaces
   #13
   - use: |-
-      let v: I[] = new I[0] // cannot use array creation expression with interfaces
+      let v: I[] = new I[0](new I()) // cannot use array creation expression with interfaces
       if (a.meth<I[]>(v, v) !== v) {
           return 1;
       }
@@ -144,7 +144,7 @@ cases:
       "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
   #14
   - use: |-
-      let v: I[]|null = new I[0] // cannot use array creation expression with interfaces
+      let v: I[]|null = new I[0](new I()) // cannot use array creation expression with interfaces
       if (a.meth<I[]>(v, v) !== v) {  // I[]|null is not I[]
           return 1
       }

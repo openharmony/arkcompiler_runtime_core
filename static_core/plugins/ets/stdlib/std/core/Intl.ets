@@ -87,7 +87,7 @@ export namespace Intl {
                 return []
             }
 
-            const langTags = new string[locales.length]
+            const langTags = new string[locales.length]("")
             for (let i = 0; i < locales.length; i++) {
                 const locale = locales[i] as string | Intl.Locale
                 langTags[i] = locale instanceof string ? locale : locale.toString()
@@ -1384,8 +1384,7 @@ export class DateTimeFormat {
                     arr.push(item)
                 }
             }
-
-            const result = new string[arr.length]
+            const result = new string[arr.length]("")
             for (let i = 0; i < arr.length; i++) {
                 result[i] = arr[i]
             }
@@ -3025,7 +3024,7 @@ export class DateTimeFormat {
         */
         public segment(doc: string): Segments {
             let result = this.segmentWith(doc, this._granularity)
-            let segments = new SegmentDataImpl[result.length];
+            let segments = new SegmentDataImpl[result.length](new SegmentDataImpl());
 
             for (let i = 0; i < result.length; ++i) {
                 segments[i] = Segmenter.tryToSegmentData(result[i], this._granularity, doc);

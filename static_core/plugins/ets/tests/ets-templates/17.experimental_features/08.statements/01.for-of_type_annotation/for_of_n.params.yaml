@@ -57,25 +57,25 @@ cases:
       expected_out: "Semantic error ESE0069: Source element type 'Error' is not assignable to the loop iterator type 'Double'."
 #6
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing right parenthesis
           for (let v: int of arr res += v
       expected_out: "Syntax error ESY0230: Expected ')', got 'identification literal'."
 #7
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing left parenthesis
           for let v: int of arr) res += v
       expected_out: "Syntax error ESY0230: Expected '(', got 'let'."
 #8
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing both parentheses
           for let v: int of arr res += v
       expected_out: "Syntax error ESY0230: Expected '(', got 'let'."
 #9
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing semicolon separating type
           for (let v int of arr) res += v
       expected_out: "Syntax error ESY0105: Variable must be initialized or it's type must be declared."

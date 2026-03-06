@@ -23,7 +23,7 @@ const cond: boolean = {{c.expression}}
 const size: int = cond ? {{c.if_true}} : {{c.if_false}}
 
 function main() {
-    const data = new int[size]
+    const data = new int[size](0)
     arktest.assertEQ(data.length, {{c.expected}})
 }
 

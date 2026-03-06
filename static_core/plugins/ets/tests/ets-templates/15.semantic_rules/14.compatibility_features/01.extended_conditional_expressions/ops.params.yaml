@@ -49,7 +49,7 @@ cases:
     - { val: 'new Boolean(!true)', type: 'Boolean', truthy: false }
 
     - { val: '[]', type: 'number[]', truthy: true }
-    - { val: 'new string[0]', type: 'string[]', truthy: true }
+    - { val: 'new string[0]("")', type: 'string[]', truthy: true }
 
     - { val: 'new Object()', type: 'Object', truthy: true }
     - { val: '{} as Object', type: 'Object|null', truthy: true }

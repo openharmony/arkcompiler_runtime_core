@@ -55,17 +55,17 @@ cases:
           arktest.assertEQ(res, "")
 
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing right parenthesis
           for (let v of arr res += v
 
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing left parenthesis
           for let v of arr) res += v
 
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           // missing both parentheses
           for let v of arr res += v
 

@@ -69,7 +69,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
-            const copy = new Any[this.buffer.length * 2 + cap];
+            const copy = new Any[this.buffer.length * 2 + cap](undefined);
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i];
             }
@@ -78,7 +78,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
     }
 
     public constructor() {
-        this.buffer = new Any[4]
+        this.buffer = new Any[4](undefined)
         this.actualLength = 0
     }
 }

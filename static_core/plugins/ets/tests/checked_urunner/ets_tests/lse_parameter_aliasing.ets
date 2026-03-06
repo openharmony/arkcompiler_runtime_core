@@ -34,7 +34,7 @@
 
 function test(a: FixedArray<String[]>, b: FixedArray<String[]>): String {
     let x = a[0]
-    b[0] = new String[2]
+    b[0] = new String[2]("")
     let y = a[0]
     x[0] = 'a'
     return y[0]
@@ -43,19 +43,19 @@ function test(a: FixedArray<String[]>, b: FixedArray<String[]>): String {
 function main(): void {
     {
         let c: FixedArray<String[]> = new FixedArray<String[]>(2)
-        c[0] = new String[2]
-        c[1] = new String[2]
+        c[0] = new String[2]("")
+        c[1] = new String[2]("")
         let d: FixedArray<String[]> = new FixedArray<String[]>(2)
-        d[0] = new String[2]
-        d[1] = new String[2]
+        d[0] = new String[2]("")
+        d[1] = new String[2]("")
         c[0][0] = 'b'
         arktest.assertEQ(test(c, d), 'a')
         arktest.assertEQ(c[0][0], 'a')
     }
     {
         let c: FixedArray<String[]> = new FixedArray<String[]>(2)
-        c[0] = new String[2]
-        c[1] = new String[2]
+        c[0] = new String[2]("")
+        c[1] = new String[2]("")
         c[0][0] = 'b'
         arktest.assertEQ(test(c, c), '')
         arktest.assertEQ(c[0][0], '')

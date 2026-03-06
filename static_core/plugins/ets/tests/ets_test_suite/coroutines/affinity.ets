@@ -46,7 +46,7 @@ function checker(id_main: int): Int {
 
 function check_sync_id_nonmain(number_of_coros: int): int {
     let id_current: int = CoroutineExtras.getWorkerId();
-    let promises: (Job<Int> | undefined)[] = new (Job<Int> | undefined)[number_of_coros];
+    let promises: (Job<Int> | undefined)[] = new (Job<Int> | undefined)[number_of_coros](undefined);
 
     for (let i = 0; i < number_of_coros; ++i) {
         promises[i] = launch<Int>() {

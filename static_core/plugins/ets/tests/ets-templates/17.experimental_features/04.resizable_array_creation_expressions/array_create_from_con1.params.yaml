@@ -14,13 +14,13 @@
 cases:
   - desc: Create empty Array
     logic: |-
-      let a = new number[0]
+      let a = new number[0](0)
       arktest.assertEQ(a.length, 0)
 
   - desc: Create Array with length < 0
     decl: |-
       function f(len: int): void {
-        let a = new number[len]
+        let a = new number[len](0)
       }
     logic: |-
       let expectedError = (e: Error): boolean => {
@@ -31,7 +31,7 @@ cases:
 
   - desc: Create Array with type Object
     logic: |-
-      let a = new Object[30]
+      let a = new Object[30](new Object())
       arktest.assertEQ(a.length, 30)
       for (let i = 0; i < 30; i++) {
         arktest.assertTrue(a[i] instanceof Object)
@@ -40,13 +40,13 @@ cases:
   - desc: Create Array with undefined default values
     sub_cases_logic:
       - |-
-        let a = new (Object|undefined)[30]
+        let a = new (Object|undefined)[30](undefined)
         arktest.assertEQ(a.length, 30)
         for (let i = 0; i < 30; i++) {
           arktest.assertEQ(a[i], undefined)
         }
       - |-
-        let a = new Any[30]
+        let a = new Any[30](undefined)
         arktest.assertEQ(a.length, 30)
         for (let i = 0; i < 30; i++) {
           arktest.assertEQ(a[i], undefined)
@@ -66,7 +66,7 @@ cases:
       - {check_type: "char", check_value: "c'\\u0000'"}
       - {check_type: "boolean", check_value: "false"}
     logic: |-
-      let a = new [check_type][30]
+      let a = new [check_type][30]([check_value])
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof [check_type])
       for (let i = 0; i < 30; i++) {
@@ -109,7 +109,7 @@ cases:
         }
       }
     logic: |-
-      let a = new C[30]
+      let a = new C[30](new C())
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof C)
       for (let i = 0; i < 30; i++) {
@@ -130,7 +130,7 @@ cases:
         }
       }
     logic: |-
-      let a = new C[30]
+      let a = new C[30](new C())
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof C)
       for (let i = 0; i < 30; i++) {
@@ -151,7 +151,7 @@ cases:
         }
       }
     logic: |-
-      let a = new C[30]
+      let a = new C[30](new C())
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof C)
       for (let i = 0; i < 30; i++) {

@@ -32,7 +32,7 @@ statements:
             x = i;
           }
   - block: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           for (let v: int of arr)
             x = v;
   - block: |-

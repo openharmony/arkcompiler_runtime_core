@@ -15,21 +15,21 @@ cases:
 #0
     - decl: |-
           // empty array
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
       use: |-
           for (let v: int of arr) res += v
           arktest.assertEQ(res, "")
 #1
     - decl: |-
           // empty nullable array
-          let arr: int[]|null = new int[0]
+          let arr: int[]|null = new int[0](0)
       use: |-
           for (let v: int of arr!) res += v
           arktest.assertEQ(res, "")
 #2
     - decl: |-
           // empty nullable array
-          let arr: int[]|undefined = new int[0]
+          let arr: int[]|undefined = new int[0](0)
       use: |-
           for (const v: int of arr!) res += v
           arktest.assertEQ(res, "")

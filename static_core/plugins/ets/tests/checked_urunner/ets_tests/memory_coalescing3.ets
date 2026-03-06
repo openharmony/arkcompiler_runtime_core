@@ -62,9 +62,9 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: double[] = new double[n];
-        let v1: double[] = new double[n];
-        let v2: double[] = new double[n];
+        let u: double[] = new double[n](0);
+        let v1: double[] = new double[n](0);
+        let v2: double[] = new double[n](0);
         let vv: double = 0;
         let a: A = new A();
         for (i = 0; i < n; i++) {

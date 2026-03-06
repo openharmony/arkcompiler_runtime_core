@@ -191,7 +191,7 @@ cases:
           override foo(i: Object[]): void {
               res = 2;
           }
-      call: new Derived().foo(new Object[2]);
+      call: new Derived().foo(new Object[2](new Object()));
       result: 2
 
     # override-compatible argument (covariance)
@@ -210,12 +210,12 @@ cases:
     - base: |-
           foo(): Object[] {
               res = 1;
-              return new Object[2];
+              return new Object[2](new Object());
           }
       derived: |-
           override foo(): Object[] {
               res = 2;
-              return new Object[2];
+              return new Object[2](new Object());
           }
       call: new Derived().foo();
       result: 2

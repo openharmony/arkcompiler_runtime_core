@@ -62,7 +62,7 @@ cases:
   # type argument is array of classes, interfaces, enums
   #5
   - use: |-
-      let v = new X[0]
+      let v = new X[0](new X())
       if (a.meth <X> (new X(), v) !== v) {  // X[] is not X
           return 1;
       }
@@ -71,7 +71,7 @@ cases:
       "Semantic error ESE0228: Type argument 'X' should be a subtype of 'Array<Object>' constraint"
   #6
   - use: |-
-      let v: I[] = new I[0]
+      let v: I[] = new I[0](new I())
       if (a.meth <Y[]> (new X(), v) !== v) {  // Y[] is not I[]
           return 1;
       }
@@ -110,7 +110,7 @@ cases:
       "Semantic error ESE0127: No matching call signature for meth(Array<I>, Array<I>)"
   #10
   - use: |-
-      let v = new X[0]
+      let v = new X[0](new X())
       if (a.meth <B> (new X(), v) !== v) {  // X[] is not X[][]
           return 1;
       }
@@ -122,7 +122,7 @@ cases:
   # create array with interfaces
   #11
   - use: |-
-      let v: I[] = new I[0] // cannot use array creation expression with interfaces
+      let v: I[] = new I[0](new I()) // cannot use array creation expression with interfaces
       if (a.meth <I[]> (new X(), v) !== v) {
           return 1;
       }

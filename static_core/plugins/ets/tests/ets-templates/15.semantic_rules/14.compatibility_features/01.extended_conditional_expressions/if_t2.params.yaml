@@ -81,11 +81,11 @@ cases:
     - { val: '42 * (21 - 10 - 10)', type: 'number' }
 
     - { val: '[]', type: 'byte[]' }
-    - { val: 'new short[0]', type: 'short[]' }
-    - { val: 'new int[0]', type: 'int[]' }
+    - { val: 'new short[0]((0).toShort())', type: 'short[]' }
+    - { val: 'new int[0](0)', type: 'int[]' }
     - { val: '[]', type: 'long[]' }
     - { val: 'new float[0][0]', type: 'float[][]' }
-    - { val: 'new double[0]', type: 'double[]' }
+    - { val: 'new double[0](0)', type: 'double[]' }
 
     - { val: 'new Object()', type: 'Object' }
     - { val: 'new Error()', type: 'Error' }

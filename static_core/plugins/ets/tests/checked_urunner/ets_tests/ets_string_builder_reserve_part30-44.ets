@@ -349,7 +349,7 @@ function storeReserve43() : string {
     return sb.toString();
 }
 
-let sbArray = new StringBuilder[1]
+let sbArray = new StringBuilder[1](new StringBuilder())
 function storeReserve44() : string {
     let sb = new StringBuilder()                // not applied, due to object being stored
     sb.append(0)

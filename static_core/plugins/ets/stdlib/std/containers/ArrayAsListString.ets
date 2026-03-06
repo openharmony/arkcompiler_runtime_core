@@ -75,7 +75,7 @@ export namespace containers {
         * @returns a shallow-copy of the underlying array
         */
         public toArray(): String[] {
-            let data = new String[this.curSize];
+            let data = new String[this.curSize]("");
             for (let i = 0; i < this.curSize; ++i) {
                 data[i] = this.data[i];
             }

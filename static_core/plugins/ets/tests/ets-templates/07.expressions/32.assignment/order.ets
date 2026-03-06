@@ -31,14 +31,14 @@ function main(): void {
 
 	// without braces
 	result = ""
-	let x: int[] = new int[3]
+	let x: int[] = new int[3](0)
 	let t: int = x[getIdx(0)] = x[getIdx(1)] = x[getIdx(2)] = 3
 	arktest.assertEQ(result, "012")
 	arktest.assertEQ(t, 3)
 
 	// with braces
 	result = ""
-	let y: int[] = new int[3]
+	let y: int[] = new int[3](0)
 	let q: int = (y[getIdx(0)] = (y[getIdx(1)] = (y[getIdx(2)] = 3)))
 	arktest.assertEQ(result, "012")
 	arktest.assertEQ(q, 3)

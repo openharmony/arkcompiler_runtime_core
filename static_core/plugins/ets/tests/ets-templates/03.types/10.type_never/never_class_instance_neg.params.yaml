@@ -50,7 +50,7 @@ types:
           "Syntax error ESY0318: Class cannot be used as object."    
     #7
     - use: |-
-          let x: never[] = new never[10]
+          let x: never[] = new never[10](never)
       stdout: |-
           "Semantic error ESE0051: Cannot use array creation expression with non-constructable element type which is non-assignable from undefined."
     #8

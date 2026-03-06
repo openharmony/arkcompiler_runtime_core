@@ -14,7 +14,7 @@
 ---
 cases:
     - decl: |-
-          let arr: int[] = new int[4]
+          let arr: int[] = new int[4](0)
           function foo(cnt: int): int  {
               return arr[cnt]
           }

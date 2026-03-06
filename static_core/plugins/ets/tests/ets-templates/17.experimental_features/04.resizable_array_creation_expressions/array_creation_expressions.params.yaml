@@ -13,13 +13,13 @@
 
 --- # List of valid array creation expressions
 array_creation:
-  - "A[1]"
-  - "int[1]"
-  - "byte[1]"
-  - "short[1]"
-  - "long[1]"
-  - "float[1]"
-  - "double[1]"
+  - "A[1](new A)"
+  - "int[1](0)"
+  - "byte[1](0)"
+  - "short[1](0)"
+  - "long[1](0)"
+  - "float[1](0)"
+  - "double[1](0)"
 
   - "A[1][1]"
   - "int[1][1]"

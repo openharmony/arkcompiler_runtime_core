@@ -181,7 +181,7 @@ cases:
           - |-
               let v: UT = new Object()
           - |-
-              let v: UT = new Char[2]
+              let v: UT = new Char[2]((0).toChar())
 
     - decl: |-
           type U1 = number[] | string[]

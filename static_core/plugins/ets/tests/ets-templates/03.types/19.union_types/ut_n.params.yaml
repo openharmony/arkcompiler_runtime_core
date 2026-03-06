@@ -52,7 +52,7 @@ cases:
     - decl: |-
           type UT1 = string | boolean
       use: |-
-          let v: UT1[] = new UT1[2]  // CTE: must be nullable union type in arrays
+          let v: UT1[] = new UT1[2](false)  // CTE: must be nullable union type in arrays
       stdout: |-
         " Semantic error ESE0051: Cannot use array creation expression with non-constructable element type which is non-assignable from undefined."
 
@@ -177,7 +177,7 @@ cases:
           class C {}
           type UT = B | C[]
       use: |-
-          let v: UT = new B[0]  // CTE: wrong type
+          let v: UT = new B[0](new B())  // CTE: wrong type
       stdout: |-
         "Semantic error ESE0318: Type 'Array<B>' cannot be assigned to type 'B|Array<C>'"
 

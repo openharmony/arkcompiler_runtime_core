@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,7 +189,7 @@ function main(): int {
     let vec = new Vec2(1200, 800);
 
     let countSB: int = 512;
-    let arrSBody = new SBody[countSB];
+    let arrSBody = new SBody[countSB](new SBody);
     let step: int = 13;
     for (let i=0; i < countSB; ++i) {
         arrSBody[i] = new SBody;

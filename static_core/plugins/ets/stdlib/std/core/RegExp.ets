@@ -947,7 +947,7 @@ export class RegExp extends Object {
         if (limit == undefined) {
             lim = (1 << 32) -1
         } else if (limit == 0) {
-            return new String[0]
+            return new String[0]("")
         } else {
             lim = limit!.toLong()
         }
@@ -955,7 +955,7 @@ export class RegExp extends Object {
         if (size == 0) {
             let z = splitter.exec(str)
             if (z != null) {
-                return new String[0]
+                return new String[0]("")
             }
             return [str]
         }

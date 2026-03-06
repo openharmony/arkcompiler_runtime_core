@@ -678,8 +678,8 @@ export namespace stream {
                     this.writeCallbacks.push(callback);
                 });
                 this.writaCallbackMove = false;
-                let strChunks: string[] = new (string)[this.buffer.length];
-                let arrayChunks: Uint8Array[] = new (Uint8Array)[this.buffer.length];
+                let strChunks: string[] = new (string)[this.buffer.length]("");
+                let arrayChunks: Uint8Array[] = new (Uint8Array)[this.buffer.length](new Uint8Array());
                 let isString: boolean = false;
                 let index: int = 0;
                 this.buffer.forEach((value: WritableBuffer) => {

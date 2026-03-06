@@ -50,8 +50,8 @@ cases:
 
   # type argument is array of classes, interfaces, enums
   - use: |-
-      let v = new Object[0]
-      if (foo <X[]> (v, new X[0]) !== v) {  // Object is not X
+      let v = new Object[0](new Object())
+      if (foo <X[]> (v, new X[0](new X())) !== v) {  // Object is not X
           return 1;
       }
     bound: ' extends Object[]'
@@ -59,7 +59,7 @@ cases:
       "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Object>' constraint"
 
   - use: |-
-      let v: X[] = new X[0]
+      let v: X[] = new X[0](new X())
       if (foo <J[]> (v, v) !== v) {  // J[] is not I[]
           return 1;
       }
@@ -76,8 +76,8 @@ cases:
       "Semantic error ESE0127: No matching call signature for foo(Array<Color>, Array<Color>)"
 
   - use: |-
-      let v = new X[0]
-      arktest.assertEQ(foo <X[]> (v, new Y<X>[0]), v)
+      let v = new X[0](new X())
+      arktest.assertEQ(foo <X[]> (v, new Y<X>[0](new Y<X>())), v)
     stdout: |-
       "Semantic error ESE0127: No matching call signature for foo(Array<X>, Array<Y<X>>)"
 
@@ -104,8 +104,8 @@ cases:
       "Semantic error ESE0228: Type argument 'X|null' should be a subtype of 'I' constraint"
 
   - use: |-
-      let v = new X[0]
-      if (foo <B>(v, new Y<X>[0]) !== v) {  // X[] is superclass to Y<X>[]
+      let v = new X[0](new X())
+      if (foo <B>(v, new Y<X>[0](new Y<X>())) !== v) {  // X[] is superclass to Y<X>[]
           return 1;
       }
     decl: |-
@@ -114,8 +114,8 @@ cases:
       "Semantic error ESE0127: No matching call signature for foo(Array<X>, Array<Y<X>>)"
 
   - use: |-
-      let v = new X[0]
-      arktest.assertEQ(foo <B>(v, new Y<X>[0]), v)
+      let v = new X[0](new X())
+      arktest.assertEQ(foo <B>(v, new Y<X>[0](new Y<X>())), v)
     decl: |-
       type B = X[]|null
     stdout: |-
@@ -123,7 +123,7 @@ cases:
 
   # use interface to create array
   - use: |-
-      let v: X[] = new X[0] // cannnot use array creation expression with interfaces
+      let v: X[] = new X[0](new X()) // cannnot use array creation expression with interfaces
       if (foo <I[]> (v, v) !== v) {
           return 1;
       }

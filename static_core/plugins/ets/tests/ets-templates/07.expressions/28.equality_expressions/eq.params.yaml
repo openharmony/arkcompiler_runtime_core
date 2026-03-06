@@ -34,7 +34,7 @@ cases:
     - { a: '[Color.Red]', b: '[Color.Green]' }
 
     - { a: 'new Object()', b: 'new Object()' }
-    - { a: 'new Object[1]', b: 'new Object[1]' }
+    - { a: 'new Object[1](new Object())', b: 'new Object[1](new Object())' }
 
     - { a: new A(), b: new B() }
     - { a: '[new A()]', b: '[new B()]' }

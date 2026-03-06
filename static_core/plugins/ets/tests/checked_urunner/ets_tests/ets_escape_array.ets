@@ -75,7 +75,7 @@ function test2(flag: boolean): number {
 
 // Escape isn't apply, because array is used in catch block
 function test3(): number {
-    let arr = new number[1];
+    let arr = new number[1](0);
     try {
         arr[0] = 1;
         arr[1] = 2;

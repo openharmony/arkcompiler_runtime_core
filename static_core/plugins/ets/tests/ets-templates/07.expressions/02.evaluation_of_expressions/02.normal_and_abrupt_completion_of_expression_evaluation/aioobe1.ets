@@ -21,7 +21,7 @@ desc: If the value of an array index expression is negative,
 
 function main() {
 
-  let v = new int[100];
+  let v = new int[100](0);
   let a = 1;
   let b = 1;
 

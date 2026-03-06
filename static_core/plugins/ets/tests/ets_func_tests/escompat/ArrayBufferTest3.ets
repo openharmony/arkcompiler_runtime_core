@@ -109,7 +109,7 @@ function testManagedAccessors(): void {
     const REDUCED_LENGTH = 5
     const FULL_LENGTH = REDUCED_LENGTH * 2
     let a = new ArrayBuffer(FULL_LENGTH, FULL_LENGTH)
-    const expectedBytes = new byte[a.getByteLength()]
+    const expectedBytes = new byte[a.getByteLength()](0)
     for (let i = 0; i < a.getByteLength(); i++) {
         expectedBytes[i] = i .toByte()
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,7 +155,7 @@ function square_override(): boolean {
 }
 
 function array_of_squares(): boolean {
-    let a: Square[] = new Square[32];
+    let a: Square[] = new Square[32](new Square());
     let ok: boolean = true;
     for (let i = 0; i < a.length; i++) {
         a[i] = new Square(new Point(2.0*i, 2.0*i), 3);

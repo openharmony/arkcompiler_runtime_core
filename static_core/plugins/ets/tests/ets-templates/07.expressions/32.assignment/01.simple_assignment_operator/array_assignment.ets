@@ -41,7 +41,7 @@ tags: [no-warmup]
 ---*/
 
 let result: string = ""
-let arr: string[] = new string[3]
+let arr: string[] = new string[3]("")
 
 function getArray(): string[] {
     result = result + "getArray "

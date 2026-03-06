@@ -84,7 +84,7 @@ cases:
           class A implements J {}
       use: |-
           let a: A = new A()
-          arktest.assertEQ( a.m(new Error(), new Object[1]), 1 )
+          arktest.assertEQ( a.m(new Error(), new Object[1](new Object())), 1 )
           arktest.assertEQ( a.m(new Error(), new Long(), new Error()), 2 )
           arktest.assertEQ( a.m(new Error(), new Error()), 3 )
           arktest.assertEQ( a.m(new Error(), new Object(), new Object(), new Object()), 4 )

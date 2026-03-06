@@ -14,7 +14,7 @@
 ---
 cases:
 #0-1
-  - { stype: 'Object[]', src: 'new Object[1]', dtype: Object }
+  - { stype: 'Object[]', src: 'new Object[1](new Object())', dtype: Object }
   - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: Object }
 #2-3
   - { stype: '() => void', src: '() => { return; }', dtype: Object }
@@ -28,13 +28,13 @@ cases:
   - { stype: 'Float', src: 'new Float()', dtype: Object }
   - { stype: 'Double', src: 'new Double()', dtype: Object }
 #11-17
-  - { stype: 'Byte[]', src: 'new Byte[1]', dtype: Object }
-  - { stype: 'Short[]', src: 'new Short[1]', dtype: Object }
-  - { stype: 'Char[]', src: 'new Char[1]', dtype: Object }
-  - { stype: 'Int[]', src: 'new Int[1]', dtype: Object }
-  - { stype: 'Long[]', src: 'new Long[1]', dtype: Object }
-  - { stype: 'Float[]', src: 'new Float[1]', dtype: Object }
-  - { stype: 'Double[]', src: 'new Double[1]', dtype: Object }
+  - { stype: 'Byte[]', src: 'new Byte[1](0)', dtype: Object }
+  - { stype: 'Short[]', src: 'new Short[1](0)', dtype: Object }
+  - { stype: 'Char[]', src: 'new Char[1]((0).toChar())', dtype: Object }
+  - { stype: 'Int[]', src: 'new Int[1](0)', dtype: Object }
+  - { stype: 'Long[]', src: 'new Long[1](0)', dtype: Object }
+  - { stype: 'Float[]', src: 'new Float[1](0)', dtype: Object }
+  - { stype: 'Double[]', src: 'new Double[1](0)', dtype: Object }
 #18-23
   - { stype: 'Byte', src: 'new Byte()', dtype: Integral }
   - { stype: 'Short', src: 'new Short()', dtype: Integral }

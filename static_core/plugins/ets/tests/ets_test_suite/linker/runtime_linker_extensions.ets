@@ -139,7 +139,7 @@ class Test {
     static testCustomAbcRuntimeLinker() {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Test.getAdditionalFilesList().slice(1);
-        const abcFiles = new string[reducedAbcFiles.length];
+        const abcFiles = new string[reducedAbcFiles.length]("");
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linkers
         const placeholderClass = Class.of(new A());
@@ -159,7 +159,7 @@ class Test {
     static testClassInitializationFail() {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Test.getAdditionalFilesList().slice(1);
-        const abcFiles = new string[reducedAbcFiles.length];
+        const abcFiles = new string[reducedAbcFiles.length]("");
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new AbcRuntimeLinker(undefined, abcFiles);
@@ -249,7 +249,7 @@ class Test {
         const allAbcFiles = Test.getAdditionalFilesList();
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = allAbcFiles.slice(1);
-        const abcFiles = new string[reducedAbcFiles.length];
+        const abcFiles = new string[reducedAbcFiles.length]("");
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new AbcRuntimeLinker(undefined, abcFiles);
@@ -260,7 +260,7 @@ class Test {
         const allAbcFiles = Test.getAdditionalFilesList();
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = allAbcFiles.slice(1);
-        const abcFiles = new string[reducedAbcFiles.length];
+        const abcFiles = new string[reducedAbcFiles.length]("");
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new MemoryRuntimeLinker(undefined, Test.loadRawFiles(abcFiles));

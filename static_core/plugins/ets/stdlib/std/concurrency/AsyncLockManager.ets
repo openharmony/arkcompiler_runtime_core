@@ -80,7 +80,7 @@ class AsyncLockManager {
     */
     public queryAll(): AsyncLockState[] {
         ConcurrencyHelpers.mutexLock(this.mutex);
-        let result = new AsyncLockState[Double.toInt(this.locks.size)];  // Statement "as int" to be removed after fixing issue 19773.
+        let result = new AsyncLockState[Double.toInt(this.locks.size)](new AsyncLockState());  // Statement "as int" to be removed after fixing issue 19773.
         let idx = 0;
         this.locks.forEach((val: WeakRef<AsyncLock>, key: String): void => {
             let l = val.deref();
@@ -145,7 +145,7 @@ export class AsyncLockState {
     }
 
     private toArray(set: Set<AsyncLockInfo>) : AsyncLockInfo[] {
-        let array = new AsyncLockInfo[Double.toInt(set.size)]; // Statement "as int" to be removed after fixing issue 19773.
+        let array = new AsyncLockInfo[Double.toInt(set.size)](new AsyncLockInfo()); // Statement "as int" to be removed after fixing issue 19773.
         let idx = 0;
         set.forEach((val: AsyncLockInfo): void => {
             array[idx++] = val;
