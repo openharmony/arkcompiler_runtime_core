@@ -250,7 +250,7 @@ extern "C" void EtsEscompatArrayFillImpl(ObjectHeader *bufferHeader, int32_t len
 }
 
 template <typename T>
-static void MemAtomicSwap(void *aAddr, void *bAddr)
+static void MemAtomicSwap(T *aAddr, T *bAddr)
 {
     auto a = reinterpret_cast<std::atomic<T> *>(aAddr);
     auto b = reinterpret_cast<std::atomic<T> *>(bAddr);
@@ -270,20 +270,12 @@ static void MemAtomicSwap(void *aAddr, void *bAddr)
 }
 
 template <typename T>
-static void MemAtomicSwapReadBarrier(mem::GCBarrierSet *barrierSet, const void *memStart, void *aAddr, void *bAddr)
+static void MemAtomicSwapReadBarrier(mem::GCBarrierSet *barrierSet, T *aAddr, T *bAddr)
 {
     auto *a1 = reinterpret_cast<std::atomic<T> *>(aAddr);
     auto *a2 = reinterpret_cast<std::atomic<T> *>(bAddr);
-    auto *b1 = reinterpret_cast<const std::atomic<T> *>(barrierSet->PreReadBarrier(
-        memStart, reinterpret_cast<uint8_t *>(aAddr) - reinterpret_cast<const uint8_t *>(memStart)));
-    auto *b2 = reinterpret_cast<const std::atomic<T> *>(barrierSet->PreReadBarrier(
-        memStart, reinterpret_cast<const uint8_t *>(bAddr) - reinterpret_cast<const uint8_t *>(memStart)));
-    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
-    // of the memory ordering at a higher logical level
-    auto v1 = b1->load(std::memory_order_relaxed);
-    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
-    // of the memory ordering at a higher logical level
-    auto v2 = b2->load(std::memory_order_relaxed);
+    auto v1 = reinterpret_cast<T>(barrierSet->ReadBarrier(reinterpret_cast<void **>(aAddr)));
+    auto v2 = reinterpret_cast<T>(barrierSet->ReadBarrier(reinterpret_cast<void **>(bAddr)));
     // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
     // of the memory ordering at a higher logical level
     a2->store(v1, std::memory_order_relaxed);
@@ -293,14 +285,14 @@ static void MemAtomicSwapReadBarrier(mem::GCBarrierSet *barrierSet, const void *
 }
 
 template <typename T>
-static auto GetSwap([[maybe_unused]] void *arrAddr, [[maybe_unused]] mem::GCBarrierSet *readBarrierSet)
+static auto GetSwap([[maybe_unused]] mem::GCBarrierSet *readBarrierSet)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
+    bool useReadBarrier = readBarrierSet->IsReadBarrierEnabled();
 
-    return [usePreReadBarrier, readBarrierSet, arrAddr](T *aPtr, T *bPtr) {
-        if (usePreReadBarrier) {
-            MemAtomicSwapReadBarrier<T>(readBarrierSet, arrAddr, aPtr, bPtr);
+    return [useReadBarrier, readBarrierSet](T *aPtr, T *bPtr) {
+        if (useReadBarrier) {
+            MemAtomicSwapReadBarrier<T>(readBarrierSet, aPtr, bPtr);
         } else {
             MemAtomicSwap<T>(aPtr, bPtr);
         }
@@ -319,7 +311,7 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsObjectArray> &buffer,
 {
     auto *arr = buffer->GetData<T>();
     auto *barrierSet = thread->GetBarrierSet();
-    auto swap = GetSwap<T>(arr, barrierSet);
+    auto swap = GetSwap<T>(barrierSet);
     bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
 
     auto swapWithBarriers = [&swap, &usePreBarrier, barrierSet](T *aPtr, T *bPtr) {

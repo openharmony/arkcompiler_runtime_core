@@ -127,37 +127,35 @@ extern "C" void StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_
 }
 
 template <typename T>
-static void MemAtomicCopy(const void *srcAddr, void *dstAddr)
+static void MemAtomicCopy(const T *srcAddr, T *dstAddr)
 {
-    auto src = reinterpret_cast<const std::atomic<T> *>(srcAddr);
-    auto dst = reinterpret_cast<std::atomic<T> *>(dstAddr);
+    auto *src = reinterpret_cast<const std::atomic<T> *>(srcAddr);
+    auto *dst = reinterpret_cast<std::atomic<T> *>(dstAddr);
     // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
     // of the memory ordering at a higher logical level
     dst->store(src->load(std::memory_order_relaxed), std::memory_order_relaxed);
 }
 
 template <typename T>
-static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, const void *srcStart, const void *srcAddr,
-                                     void *dstAddr)
+static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, T *srcAddr, T *dstAddr)
 {
     auto *dst = reinterpret_cast<std::atomic<T> *>(dstAddr);
-    auto *src = reinterpret_cast<const std::atomic<T> *>(barrierSet->PreReadBarrier(
-        srcStart, reinterpret_cast<const uint8_t *>(srcAddr) - reinterpret_cast<const uint8_t *>(srcStart)));
+    auto *src = barrierSet->ReadBarrier(reinterpret_cast<void **>(srcAddr));
     // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
     // of the memory ordering at a higher logical level
-    dst->store(src->load(std::memory_order_relaxed), std::memory_order_relaxed);
+    dst->store(reinterpret_cast<T>(src), std::memory_order_relaxed);
 }
 
 template <typename T>
-static auto GetCopy([[maybe_unused]] const void *srcAddr)
+static auto GetCopy()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     auto *readBarrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
-    bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
+    bool useReadBarrier = readBarrierSet->IsReadBarrierEnabled();
 
-    return [usePreReadBarrier, readBarrierSet, srcAddr](T *srcPtr, T *dstPtr) {
-        if (usePreReadBarrier) {
-            MemAtomicCopyReadBarrier<T>(readBarrierSet, srcAddr, srcPtr, dstPtr);
+    return [useReadBarrier, readBarrierSet](T *srcPtr, T *dstPtr) {
+        if (useReadBarrier) {
+            MemAtomicCopyReadBarrier<T>(readBarrierSet, srcPtr, dstPtr);
         } else {
             MemAtomicCopy<T>(srcPtr, dstPtr);
         }
@@ -243,7 +241,7 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
     auto *src = srcArray.GetStartPtr();
     auto *dst = dstArray.GetStartPtr();
     bool backwards = reinterpret_cast<uintptr_t>(src) < reinterpret_cast<uintptr_t>(dst);
-    auto copy = GetCopy<T>(src);
+    auto copy = GetCopy<T>();
 
     if constexpr (NEED_PRE_WRITE_BARRIER) {
         auto *barrierSet = thread->GetBarrierSet();

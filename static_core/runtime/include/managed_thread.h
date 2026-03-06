@@ -275,6 +275,16 @@ public:
         return postBarrierType_;
     }
 
+    void *GetReadBarrierEntrypoint() const
+    {
+        return readBarrierEntrypoint_;
+    }
+
+    void SetReadBarrierEntrypoint(void *entry)
+    {
+        readBarrierEntrypoint_ = entry;
+    }
+
     // Methods to access thread local storage
     InterpreterCache *GetInterpreterCache()
     {
@@ -406,6 +416,10 @@ public:
     static constexpr uint32_t GetTlsPostWrbTwoObjectsOffset()
     {
         return MEMBER_OFFSET(ManagedThread, postWrbTwoObjects_);
+    }
+    static constexpr uint32_t GetTlsReadBarrierEntrypointOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, readBarrierEntrypoint_);
     }
     static constexpr uint32_t GetTlsStringClassPointerOffset()
     {
@@ -835,6 +849,7 @@ private:
     // Keep these here to speed up interpreter
     mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
     mem::BarrierType postBarrierType_ {mem::BarrierType::POST_WRB_NONE};
+    void *readBarrierEntrypoint_ {nullptr};
     // Thread local storages to avoid locks in heap manager
     mem::StackFrameAllocator *stackFrameAllocator_;
     mem::InternalAllocator<>::LocalSmallObjectAllocator *internalLocalAllocator_;

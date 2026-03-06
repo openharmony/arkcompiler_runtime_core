@@ -163,6 +163,7 @@ constexpr bool IsEmptyBarrier(BarrierType barrierType)
 }
 
 using ObjRefProcessFunc = void (*)(void *);
+using ObjFieldProcessFunc = void *(*)(void **);
 using ObjTwoRefProcessFunc = void (*)(const void *, const void *);
 
 enum class BarrierOperandType {
@@ -173,10 +174,11 @@ enum class BarrierOperandType {
     FUNC_WITH_OBJ_REF_ADDRESS,        // contains address of function with this sig: void foo(void* );
     UINT8_LITERAL,                    // contains uint8_t value
     FUNC_WITH_TWO_OBJ_REF_ADDRESSES,  // contains address of function with this sig: void foo(void* , void* );
+    FUNC_WITH_OBJ_FIELD_ADDRESS       // contains address of function with this sig: void *foo(void **)
 };
 
 using BarrierOperandValue = std::variant<void *, bool *, std::atomic<ObjRefProcessFunc> *, uint8_t *, ObjRefProcessFunc,
-                                         uint8_t, ObjTwoRefProcessFunc>;
+                                         uint8_t, ObjTwoRefProcessFunc, ObjFieldProcessFunc>;
 
 class BarrierOperand {
 public:

@@ -87,6 +87,7 @@ arkbytecodeopt_deps =
 arkruntime_deps = [
   "$ark_root/assembler:libarktsassembler_static",
   "$ark_root/libarkfile:libarktsfile_static",
+  "$_plugin_dir:etsstdlib",
 ]
 
 arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h(${default_toolchain})" ]
