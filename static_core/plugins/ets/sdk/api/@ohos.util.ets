@@ -692,6 +692,10 @@ export namespace util {
         readonly CONVERTER_FLAGS_IGNORE_BOM = 0x4;
         private nativeDecoder_: long;
 
+        constructor() {
+            this(undefined, undefined);
+        }
+
         constructor(encoding?: string, options?: TextDecoderOptions) {
             let flags = 0;
             if (encoding) {
