@@ -199,6 +199,7 @@ static bool WaitInitialization(ObjectLockT *lock, ClassLinker *classLinker, Mana
 template <MTModeT MODE>
 bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread *thread, Class *klass)
 {
+    ASSERT_MANAGED_CODE();
     if (klass->IsInitialized()) {
         return true;
     }

@@ -2332,7 +2332,7 @@ void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bo
 void Codegen::CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
 {
     ASSERT(inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::ANY);
-    if (!GetRuntime()->NeedsPreReadBarrier()) {
+    if (!GetRuntime()->NeedsReadBarrier()) {
         // Fallback to load without barrier
         auto type = inst->GetType();
         if (isVolatile) {
@@ -2342,7 +2342,7 @@ void Codegen::CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVo
         }
         return;
     }
-    ASSERT(GetRuntime()->GetPreReadType() == ark::mem::BarrierType::PRE_CMC_READ_BARRIER);
+    ASSERT(GetRuntime()->GetReadType() == ark::mem::BarrierType::CMC_READ_BARRIER);
     SCOPED_DISASM_STR(this, "Load via CMC-GC read barrier.");
     CreateCmcReadViaBarrierCall(inst, mem, dstReg, isVolatile, preserved);
 }
@@ -2352,7 +2352,7 @@ void Codegen::CreateReadPairViaBarrier(Inst *inst, MemRef mem, Reg dstReg1, Reg 
     ASSERT(dstReg1.IsValid() && dstReg2.IsValid());
     ASSERT(dstReg1.GetId() != dstReg2.GetId());
 
-    if (!GetRuntime()->NeedsPreReadBarrier()) {
+    if (!GetRuntime()->NeedsReadBarrier()) {
         // Fallback to load without barrier
         if (mem.HasIndex()) {
             ScopedTmpReg tmp(GetEncoder());
@@ -2363,7 +2363,7 @@ void Codegen::CreateReadPairViaBarrier(Inst *inst, MemRef mem, Reg dstReg1, Reg 
         }
         return;
     }
-    ASSERT(GetRuntime()->GetPreReadType() == ark::mem::BarrierType::PRE_CMC_READ_BARRIER);
+    ASSERT(GetRuntime()->GetReadType() == ark::mem::BarrierType::CMC_READ_BARRIER);
     SCOPED_DISASM_STR(this, "Load pair via CMC-GC read barrier.");
 
     auto callBarrier1st = [this, inst, mem, dstReg1, preserved]() {

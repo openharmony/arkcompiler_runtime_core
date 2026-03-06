@@ -201,7 +201,7 @@ extern "C" void *ReadBarrierFuncEntrypoint(void **fieldPtr)
 }
 
 GCCMCBarrierSet::GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
-    : GCBarrierSet(allocator, BarrierType::PRE_CMC_READ_BARRIER, BarrierType::PRE_WRB_NONE,
+    : GCBarrierSet(allocator, BarrierType::CMC_READ_BARRIER, BarrierType::PRE_WRB_NONE,
                    BarrierType::POST_CMC_WRITE_BARRIER)
 {
     readBarrierFunc_ = &ReadBarrierFuncEntrypoint;
@@ -263,7 +263,7 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
             return field.GetTargetObject();
         }
     }
-    auto field = *reinterpret_cast<common_vm::RefField<false> *>(*refAddr);
+    auto field = reinterpret_cast<common_vm::RefField<false> &>(*refAddr);
     return field.GetTargetObject();
 }
 
