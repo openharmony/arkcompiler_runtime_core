@@ -262,7 +262,7 @@ if (ark_use_common_runtime) {
   ]
 }
 
-if (is_ohos && is_standard_system) {
+if (is_ohos && is_standard_system && !ark_standalone_build) {
   srcs_runtime += [ "runtime/platform/ohos/logger.cpp" ]
 }
 
