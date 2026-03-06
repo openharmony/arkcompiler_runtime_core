@@ -318,3 +318,21 @@ cases:
           arktest.assertEQ(r.length, 2)
           arktest.assertEQ(r[0], '1')
           arktest.assertEQ(r[1], 2)
+
+    - use: |-
+        let source = [1, 2, 3, 4]
+        let target: short[] = [...source]
+      expected_out: |-
+        Semantic error ESE0227: Array element at index 0 with type ''Int'' is not compatible with the target array element type ''Short''
+
+    - use: |-
+        let source = [1.0f, 2.0f, 3.0f, 4.0f]
+        let target: int[] = [...source]
+      expected_out: |-
+        Semantic error ESE0227: Array element at index 0 with type ''Float'' is not compatible with the target array element type ''Int''
+
+    - use: |-
+        let source = [1.0, 2.0, 3.0, 4.0]
+        let target: float[] = [...source]
+      expected_out: |-
+        Semantic error ESE0227: Array element at index 0 with type ''Double'' is not compatible with the target array element type ''Float''

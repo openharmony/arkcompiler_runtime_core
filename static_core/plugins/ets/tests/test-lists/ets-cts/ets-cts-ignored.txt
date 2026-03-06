@@ -257,6 +257,13 @@
 07.expressions/07.spread_expression/spex_readonly_array_source.ets
 07.expressions/07.spread_expression/spex_readonly_n_1.ets
 
+#33309
+07.expressions/07.spread_expression/spex_58.ets
+07.expressions/07.spread_expression/spex_59.ets
+07.expressions/07.spread_expression/spex_60.ets
+07.expressions/07.spread_expression/spex_61.ets
+07.expressions/07.spread_expression/spex_62.ets
+
 #32640
 07.expressions/09.this_expression/this_in_field_initializer_n.ets
 
@@ -503,6 +510,14 @@
 #29971
 08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
 08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
+
+#33390
+08.statements/13.switch_statements/switch_with_expression_neg_0.ets
+08.statements/13.switch_statements/switch_with_expression_neg_1.ets
+08.statements/13.switch_statements/switch_with_expression_neg_2.ets
+08.statements/13.switch_statements/switch_with_expression_neg_3.ets
+08.statements/13.switch_statements/switch_with_expression_neg_4.ets
+08.statements/13.switch_statements/switch_with_expression_neg_5.ets
 
 #33182
 09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets

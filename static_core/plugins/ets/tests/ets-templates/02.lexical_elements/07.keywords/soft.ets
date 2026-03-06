@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -63,6 +63,34 @@ function main(): void{
     let cd = new D()
     arktest.assertEQ(cd.test("test"), "test")
     arktest.assertEQ(cd.{{kwd}}, 1)
+
+    arktest.assertEQ(11, forCall())
+    arktest.assertEQ(12, forOfCall())
+    arktest.assertTrue(localDef())
+}
+
+function forCall() {
+    for(let {{kwd}}: number; ;) {
+        let l = {{kwd}}
+        return 11;
+    }
+    return 12;
+}
+
+function forOfCall() {
+    let x: string = 'The quick brown fox jumps over the lazy dog'
+    let letter = ''
+
+    for(let {{kwd}} of x) {
+        letter = {{kwd}}
+        break;
+    }
+    return letter == 'T' ? 12 : 0
+}
+
+function localDef() {
+    let {{kwd}}: boolean = true;
+    return {{kwd}} ? true : false
 }
 
 {% endfor %}

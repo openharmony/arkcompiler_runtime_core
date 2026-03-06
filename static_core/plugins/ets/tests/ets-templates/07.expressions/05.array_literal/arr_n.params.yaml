@@ -15,9 +15,11 @@
 cases:
     - use: |-
           let a: (number|undefined)[] = [ 1, 2, 3,  , 4, ]  // missing elements not allowed in sts
+      out: "Syntax error ESY167720: Omitted elements are not supported in arrays."
 
     - use: |-
           let a: undefined[] = [,]  // missing elements not allowed in sts
+      out: "Syntax error ESY167720: Omitted elements are not supported in arrays."
 
     - decl: |-
           function foo(a: int[]|Object[]) {
@@ -36,3 +38,13 @@ cases:
           }
       use: |-
           foo([[]])  // type cannot be determined
+
+    - use: |-
+        let src = [1, 2, 3]
+        let a = [, ...src]
+      out: "Syntax error ESY167720: Omitted elements are not supported in arrays."
+
+    - use: |-
+        let src = [1, 2, 3]
+        let a = [...src,, ]
+      out: "Syntax error ESY167720: Omitted elements are not supported in arrays."

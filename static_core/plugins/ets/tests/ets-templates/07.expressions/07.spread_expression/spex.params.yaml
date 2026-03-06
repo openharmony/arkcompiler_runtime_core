@@ -614,3 +614,33 @@ cases:
           arktest.assertEQ(r.length, 2)
           arktest.assertEQ(r[0], '1')
           arktest.assertEQ(r[1], 2)
+
+    - use: |-
+        let source = [1, 2, 3, 4]
+        let target: number[] = [...source]
+        arktest.assertEQ(4, target.length)
+        arktest.assertEQ(2.0, target[1])
+
+    - use: |-
+        let source = [1, 2, 3, 4]
+        let target: float[] = [...source]
+        arktest.assertEQ(4, target.length)
+        arktest.assertEQ(2.0f, target[1])
+
+    - use: |-
+        let source = [1, 2, 3, 4]
+        let target: double[] = [...source]
+        arktest.assertEQ(4, target.length)
+        arktest.assertEQ(2.0, target[1])
+
+    - use: |-
+        let source = [1, 2, 3, 4]
+        let target: long[] = [...source]
+        arktest.assertEQ(4, target.length)
+        arktest.assertEQ(2, target[1])
+
+    - use: |-
+        let source = [1.0f, 2.0f, 3.0f, 4.0f]
+        let target: double[] = [...source]
+        arktest.assertEQ(4, target.length)
+        arktest.assertEQ(2.0, target[1])
