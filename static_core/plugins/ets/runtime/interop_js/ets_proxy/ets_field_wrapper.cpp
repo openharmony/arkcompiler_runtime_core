@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ namespace ark::ets::interop::js::ets_proxy {
 
 template <bool IS_STATIC>
 static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCoroutine *coro, InteropCtx *ctx,
-                                         napi_env env, napi_value jsThis)
+                                         napi_value jsThis)
 {
     if constexpr (IS_STATIC) {
         EtsClass *etsClass = fieldWrapper->GetOwner()->GetEtsClass();
@@ -42,16 +42,12 @@ static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCorou
         return etsClass->AsObject();
     }
 
-    if (UNLIKELY(IsNullOrUndefined<true>(env, jsThis))) {
-        ctx->ThrowJSTypeError(env, "ets this in set accessor cannot be null or undefined");
-        return nullptr;
-    }
-
     EtsObject *etsThis = fieldWrapper->GetOwner()->UnwrapEtsProxy(ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
         if (coro->HasPendingException()) {
             ctx->ForwardEtsException(coro);
         }
+        ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
     return etsThis;
@@ -75,7 +71,7 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
-    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
+    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
@@ -110,7 +106,7 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
-    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
+    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
