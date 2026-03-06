@@ -9713,6 +9713,15 @@ intrinsics:
         - std.core.Object
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
 
+  - name: DebuggerAPIGetCallerABCPath
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getCallerABCPath
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::DebuggerAPIGetCallerABCPath
 ##############################
 #      std.core.reflect      #
 ##############################

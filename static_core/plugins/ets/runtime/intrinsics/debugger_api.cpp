@@ -199,4 +199,27 @@ void DebuggerAPISetLocalObject(EtsLong regNumber, EtsObject *value)
     DebuggerAPISetLocal<ObjectHeader *>(coroutine, regNumber, objHandle.GetPtr()->GetCoreType());
 }
 
+EtsString *DebuggerAPIGetCallerABCPath()
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    std::string abcPath;
+    auto stack = StackWalker::Create(coroutine);
+    stack.NextFrame();
+    if (!stack.HasFrame()) {
+        LOG(ERROR, DEBUGGER) << "caller stack has no frame.";
+        return EtsString::CreateNewEmptyString();
+    }
+    auto *method = stack.GetMethod();
+    if (LIKELY(method != nullptr)) {
+        if (method->GetPandaFile() == nullptr) {
+            LOG(ERROR, DEBUGGER) << "caller has no abcfile.";
+            return EtsString::CreateNewEmptyString();
+        }
+        abcPath = method->GetPandaFile()->GetFullFileName();
+        return EtsString::CreateFromMUtf8(abcPath.c_str());
+    }
+    LOG(ERROR, DEBUGGER) << "caller stack has no method.";
+    return EtsString::CreateNewEmptyString();
+}
+
 }  // namespace ark::ets::intrinsics
