@@ -43,6 +43,7 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertTrue(actual.passed)
+        self.assertEqual("", actual.description)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_absent_expected(self, mock_test: MagicMock) -> None:
@@ -55,6 +56,7 @@ class ParserValidatorTest(TestCase):
         actual_output = ""
         actual_error = ""
         actual_return_code = 0
+        expected_description = f"Expected file {mock_test.path.parent}/test2-expected.txt not found"
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
             _=step_name,
@@ -62,7 +64,8 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertFalse(actual.passed)
-        self.assertEqual(actual.kind, ValidatorFailKind.NONE)
+        self.assertEqual(expected_description, actual.description)
+        self.assertEqual(ValidatorFailKind.OTHER, actual.kind)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_with_output(self, mock_test: MagicMock) -> None:
@@ -82,7 +85,54 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertTrue(actual.passed)
+        self.assertEqual("", actual.description)
         self.assertEqual(actual.kind, ValidatorFailKind.NONE)
+
+    @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
+    def test_passed_with_output_extra_lines(self, mock_test: MagicMock) -> None:
+        """
+        Input: there is an output, expected file contains matching content, return code = 0
+        Actual content has extra leading and finishing empty lines -
+        they should be stripped and do not affect the result
+        Expected: test passed
+        """
+        mock_test.path = self.data_folder / "test3.ets"
+        step_name = "step"
+        actual_output = "\nhello\nworld\n"
+        actual_error = ""
+        actual_return_code = 0
+        actual = ParserValidator.es2panda_result_validator(
+            test=mock_test,
+            _=step_name,
+            actual_output=actual_output,
+            _2=actual_error,
+            return_code=actual_return_code)
+        self.assertTrue(actual.passed)
+        self.assertEqual("", actual.description)
+        self.assertEqual(ValidatorFailKind.NONE, actual.kind)
+
+    @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
+    def test_passed_with_extra_lines_in_expected(self, mock_test: MagicMock) -> None:
+        """
+        Input: there is an output, expected file contains matching content, return code = 0
+        Expected content has extra leading and finishing empty lines -
+        they should be stripped and do not affect the result
+        Expected: test passed
+        """
+        mock_test.path = self.data_folder / "test4.ets"
+        step_name = "step"
+        actual_output = "hello\nworld"
+        actual_error = ""
+        actual_return_code = 0
+        actual = ParserValidator.es2panda_result_validator(
+            test=mock_test,
+            _=step_name,
+            actual_output=actual_output,
+            _2=actual_error,
+            return_code=actual_return_code)
+        self.assertTrue(actual.passed)
+        self.assertEqual("", actual.description)
+        self.assertEqual(ValidatorFailKind.NONE, actual.kind)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_failed_not_matched_output(self, mock_test: MagicMock) -> None:
@@ -95,6 +145,7 @@ class ParserValidatorTest(TestCase):
         actual_output = "hello\nword"
         actual_error = ""
         actual_return_code = 0
+        expected_description = f"Actual output '{actual_output}' does not match to expected one 'hello\nworld'"
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
             _=step_name,
@@ -102,7 +153,8 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertFalse(actual.passed)
-        self.assertEqual(actual.kind, ValidatorFailKind.COMPARE_OUTPUT)
+        self.assertEqual(expected_description, actual.description)
+        self.assertEqual(ValidatorFailKind.COMPARE_OUTPUT, actual.kind)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_with_output_rt1(self, mock_test: MagicMock) -> None:
@@ -122,6 +174,7 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertTrue(actual.passed)
+        self.assertEqual("", actual.description)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_with_output_rt2(self, mock_test: MagicMock) -> None:
@@ -134,6 +187,7 @@ class ParserValidatorTest(TestCase):
         actual_output = "hello\nworld"
         actual_error = ""
         actual_return_code = 2
+        expected_description = f"Actual return code {actual_return_code} does not match to expected values [0, 1]"
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
             _=step_name,
@@ -141,6 +195,8 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertFalse(actual.passed)
+        self.assertEqual(expected_description, actual.description)
+        self.assertEqual(ValidatorFailKind.COMPARE_OUTPUT, actual.kind)
 
     def test_normalize_build_system_path_unix(self) -> None:
         """

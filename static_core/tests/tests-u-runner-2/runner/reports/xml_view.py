@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,23 +43,30 @@ class XmlView:
 
     @staticmethod
     def __get_failed_test_case(test_result: Test) -> list[str]:
-        if not isinstance(test_result, TestStandardFlow) or not test_result.report or test_result.fail_kind is None:
+        if (not isinstance(test_result, TestStandardFlow) or not test_result.step_reports or
+                test_result.fail_kind is None):
             return ['<failure>There are no data about the failure</failure>']
+
+        failed_steps = [r for r in test_result.step_reports if r.status != "PASSED"]
+        failed_output = "\n".join([r.cmd_output for r in failed_steps])
+        failed_error = "\n".join([r.cmd_error for r in failed_steps])
+        failed_return_code = failed_steps[-1].cmd_return_code
 
         result = []
         status = f"STATUS: {test_result.fail_kind}: "
-        if test_result.report.output:
-            status += str(re.sub(r'\[.*]', '', test_result.report.output.splitlines()[0]))
-        elif test_result.report.error:
-            status += str(re.sub(r'\[.*]', '', test_result.report.error.splitlines()[0]))
+        if failed_output:
+            status += str(re.sub(r'\[.*]', '', failed_output.splitlines()[0]))
+        elif failed_error:
+            status += str(re.sub(r'\[.*]', '', failed_error.splitlines()[0]))
 
         result.append('<failure>')
         result.append('<![CDATA[')
         result.append(f"error kind = {test_result.fail_kind}")
-        result.append(f"To reproduce:{test_result.reproduce}\n")
-        result.append(f"OUT: {test_result.report.output}")
-        result.append(f"ERR: {test_result.report.error}")
-        result.append(f"return_code = {test_result.report.return_code}")
+        steps_to_reproduce = "\n".join(str(test_result.step_reports))
+        result.append(f"To reproduce:{steps_to_reproduce}\n")
+        result.append(f"OUT: {failed_output}")
+        result.append(f"ERR: {failed_error}")
+        result.append(f"return_code = {failed_return_code}")
         result.append(status)
         result.append(']]>')
         result.append('</failure>')

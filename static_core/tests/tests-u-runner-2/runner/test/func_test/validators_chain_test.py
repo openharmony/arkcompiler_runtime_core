@@ -55,7 +55,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_compile_only_rt_fail(self, mock_popen: MagicMock) -> None:
         """
         test-file: test1_compile_only.ets
@@ -77,7 +77,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_compile_only_rt_stderr_fail(self, mock_popen: MagicMock) -> None:
         """
         test-file: test1_compile_only.ets
@@ -99,7 +99,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_compile_only_rt_stderr_pass(self, mock_popen: MagicMock) -> None:
         """
         test-file: test2_compile_only.ets
@@ -121,10 +121,10 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     @patch.object(BaseValidator, "check_return_code", wraps=BaseValidator.check_return_code)
-    @patch.object(BaseValidator, "check_stderr", wraps=BaseValidator.check_return_code)
-    @patch.object(BaseValidator, "check_output", wraps=BaseValidator.check_return_code)
+    @patch.object(BaseValidator, "check_stderr", wraps=BaseValidator.check_stderr)
+    @patch.object(BaseValidator, "check_output", wraps=BaseValidator.check_output)
     def test_compile_only_rt_stdout_pass(self, mock_check_stdout: MagicMock,
                                          mock_check_stderr: MagicMock,
                                          mock_check_rt: MagicMock,
@@ -152,7 +152,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_pass(self, mock_popen: MagicMock) -> None:
         """
         test-file: test4_runtime.ets, stdout for compile step
@@ -176,7 +176,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_rt_fail(self, mock_popen: MagicMock) -> None:
         """
         test-file: test4_runtime.ets
@@ -208,7 +208,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_stdout_fail(self, mock_popen: MagicMock) -> None:
         """
         test-file: test5_runtime.ets, stdout in aot step
@@ -240,7 +240,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_stdout_last_step_fail(self, mock_popen: MagicMock) -> None:
         """
         test-file: test5_runtime.ets, stdout in runtime step (last step)
@@ -273,10 +273,10 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     @patch.object(BaseValidator, "check_return_code", wraps=BaseValidator.check_return_code)
-    @patch.object(BaseValidator, "check_stderr", wraps=BaseValidator.check_return_code)
-    @patch.object(BaseValidator, "check_output", wraps=BaseValidator.check_return_code)
+    @patch.object(BaseValidator, "check_stderr", wraps=BaseValidator.check_stderr)
+    @patch.object(BaseValidator, "check_output", wraps=BaseValidator.check_output)
     def test_runtime_fail_on_compile(self, mock_check_stdout: MagicMock,
                                      mock_check_stderr: MagicMock,
                                      mock_check_rc: MagicMock,
@@ -314,7 +314,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_stdout_pass(self, mock_popen: MagicMock) -> None:
         """
         test-file: test5_runtime.ets, stdout in aot step
@@ -347,7 +347,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_no_stdout_fail(self, mock_popen: MagicMock) -> None:
         """
         test-file: test5_runtime.ets, no stdout, but expected comparison with stdout

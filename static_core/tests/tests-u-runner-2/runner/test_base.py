@@ -38,8 +38,8 @@ from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
 from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
+from runner.types.step_report import StepReport
 from runner.types.test_env import TestEnv
-from runner.types.test_report import TestReport
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -67,8 +67,6 @@ class Test:
         # Expected output. Used in the Parser and CTS test suites
         self.expected: str = ""
         self.expected_err: str = ""
-        # Contains fields output, error, and return_code of the last executed step
-        self.report: TestReport | None = None
         # Test result: True if all steps passed, False is any step fails
         self.passed: bool | None = None
         # If the test is mentioned in any ignored_list
@@ -80,8 +78,8 @@ class Test:
         # Test can detect itself as excluded additionally to excluded_tests
         # In such case the test will be counted as `excluded by other reasons`
         self.excluded = False
-        # Collect all executable commands
-        self.reproduce = ""
+        # Collect reports for every executed step
+        self.step_reports: list[StepReport] = []
         # Time to execute in seconds
         self.time: float | None = None
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
@@ -91,6 +89,9 @@ class Test:
         self.path_to_expected_err = Path(f"{self.path}.expected.err")
         self.run_lock = Lock()
         self.is_completed = False
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.test_id}"
 
     @property
     def has_expected(self) -> bool:
@@ -107,7 +108,7 @@ class Test:
         for key, val in params.items():
             if isinstance(val, bool):
                 prs.add_argument(f'--{key}',
-                                               dest=f"{key}", action='store_true')
+                                 dest=f"{key}", action='store_true')
             elif isinstance(val, list):
                 prs.add_argument(f'--{key}', dest=f"{key}", action='append')
             else:
@@ -119,7 +120,6 @@ class Test:
         start = datetime.now(pytz.UTC)
         _LOGGER.all(f"\033[1mStarted:\033[0m \033[1;33m{self.test_id}\033[0m. Launch #{repeat}")
         self.repeat = repeat
-        self.reproduce = ''
 
         with self.run_lock:
             result = self.do_run()
@@ -130,16 +130,18 @@ class Test:
         if result.passed is None:
             return result
 
+        message = (f"{self.get_command_line()}"
+                   f"\n{'Provide following environment variables'}: {LocalEnv.get().list()}")
+        result.add_step_report(StepReport("Steps to reproduce", extra=message))
+
         if self.is_output_status():
             _LOGGER.default(
                 f"\033[1mFinished:\033[0m \033[1;33m{self.test_id}\033[0m. Launch #{repeat}"
                 f"- {round(self.time, 2)} sec - {self.status_as_cstring()}")
-        self.reproduce += f"\nTo reproduce with URunner run:\n{self.get_command_line()}"
-        self.reproduce += f"\nProvide following environment variables: {LocalEnv.get().list()}"
+
         if self.is_output_log() and not self.excluded:
-            _LOGGER.default(f"{self.test_id}: steps: {self.reproduce}")
-            if not self.report:
-                _LOGGER.default(f"{self.test_id}: no information about test running neither output nor error")
+            steps_to_reproduce = "\n\n".join([str(r) for r in self.step_reports])
+            _LOGGER.default(f"{self.test_id}: steps: {steps_to_reproduce}")
 
         report_generator = ReportGenerator(self.test_id, self.test_env, repeat)
         self.reports = report_generator.generate_reports(result)
@@ -177,6 +179,10 @@ class Test:
         ]
 
         return '\n'.join(reproduce_message)
+
+    def add_step_report(self, report: StepReport) -> None:
+        if report not in self.step_reports:
+            self.step_reports.append(report)
 
     def get_short_cli(self) -> str:
         reproduce_message = [f'{Path(__file__).parent.parent}/runner.sh',
@@ -218,7 +224,7 @@ class Test:
 
         return ' '.join(reproduce_message)
 
-    def get_entity_params(self,                         # type: ignore[explicit-any]
+    def get_entity_params(self,  # type: ignore[explicit-any]
                           entity: Literal["workflow", "test-suite"]) -> dict[str, Any]:
         match entity:
             case "workflow":
@@ -319,7 +325,6 @@ class Test:
         return True
 
     def get_test_names(self) -> tuple[str, str]:
-
         # if --test-file is set to test, e.g. ani_test_any_call/AnyTestClass.ani_test_valid
         test_id_re = re.compile(r'^[A-Z][A-Za-z0-9_]*\.[A-Za-z][A-Za-z0-9_]+$')
         if test_id_re.match(PurePosixPath(self.test_id).name):

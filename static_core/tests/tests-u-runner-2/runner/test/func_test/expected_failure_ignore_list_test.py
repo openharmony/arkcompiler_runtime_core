@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -70,12 +70,12 @@ class FailuresFromIgnoreTest(TestCase):
             config = self.get_config()
             runner = RunnerStandardFlow(config)
             actual_tests = list(runner.tests)
-
-            self.assertEqual({(t.test_id, t.ignored, t.last_failure) for t in actual_tests},
-                                {(e.test_id, e.ignored, e.last_failure) for e in expected_tests})
-
-            work_dir = Path(os.environ["WORK_DIR"])
-            shutil.rmtree(work_dir, ignore_errors=True)
+            try:
+                self.assertEqual({(t.test_id, t.ignored, t.last_failure) for t in actual_tests},
+                                 {(e.test_id, e.ignored, e.last_failure) for e in expected_tests})
+            finally:
+                work_dir = Path(os.environ["WORK_DIR"])
+                shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -93,7 +93,7 @@ class FailuresFromIgnoreTest(TestCase):
             test_output_test3 = "test failed failure failed blabala3 hbs[dsfds.ets]fail error"
             err_output = ""
             expected_result = {("test1.ets", True), ("test2.ets", True), ("test3.ets", True), ("test4.ets", True),
-                            ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
+                               ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
             expected_stat = {"passed": 0, "ignored": 3, "failed": 3, "excluded": 0}
 
             config = self.get_config()
@@ -105,7 +105,7 @@ class FailuresFromIgnoreTest(TestCase):
                 test.reports[ReportFormat.LOG] = "failure"
                 if test.test_id == "test3.ets":
                     _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output_test3,
-                                                                                err_output, 0)
+                                                        err_output, 0)
                 else:
                     _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output,
                                                         err_output, 0)
@@ -113,14 +113,14 @@ class FailuresFromIgnoreTest(TestCase):
             runner.results = actual_tests
             failed = runner.summarize()
             actual_stat = {"passed": runner.passed, "ignored": runner.ignored,
-                        "failed": runner.failed, "excluded": runner.excluded}
-
-            self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
-            self.assertEqual(failed, 3)
-            test_utils.compare_dicts(self, expected_stat, actual_stat)
-
-            work_dir = Path(os.environ["WORK_DIR"])
-            shutil.rmtree(work_dir, ignore_errors=True)
+                           "failed": runner.failed, "excluded": runner.excluded}
+            try:
+                self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
+                self.assertEqual(failed, 3)
+                test_utils.compare_dicts(self, expected_stat, actual_stat)
+            finally:
+                work_dir = Path(os.environ["WORK_DIR"])
+                shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -137,7 +137,7 @@ class FailuresFromIgnoreTest(TestCase):
             test_output = "test unexpected failure"
             err_output = ""
             expected_result = {("test1.ets", False), ("test2.ets", True), ("test3.ets", False), ("test4.ets", True),
-                            ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
+                               ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
             expected_stat = {"passed": 0, "ignored": 1, "failed": 5, "excluded": 0}
             config = self.get_config()
             runner = RunnerStandardFlow(config)
@@ -147,11 +147,11 @@ class FailuresFromIgnoreTest(TestCase):
                 test.passed = False
                 test.reports[ReportFormat.LOG] = "failure"
                 _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output,
-                                                                                err_output, 0)
+                                                    err_output, 0)
             runner.results = actual_tests
             failed = runner.summarize()
             actual_stat = {"passed": runner.passed, "ignored": runner.ignored,
-                        "failed": runner.failed, "excluded": runner.excluded}
+                           "failed": runner.failed, "excluded": runner.excluded}
 
             self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
             self.assertEqual(failed, 5)

@@ -43,55 +43,54 @@ class BaseValidator(IValidator):
 
     @staticmethod
     def check_return_code(test: "TestStandardFlow", step_value: str, output: str,
-                            error_output: str, return_code: int) -> ValidationResult:
+                          error_output: str, return_code: int) -> ValidationResult:
         if test.ignored and test.last_failure:
             test.last_failure_check_passed = BaseValidator._check_last_failure_for_ignored_test(test.last_failure,
                                                                                                 output, error_output)
 
-        step_passed = BaseValidator._step_passed(test, return_code, step_value)
+        step_passed, message = BaseValidator._step_passed(test, return_code, step_value)
         if step_passed:
-            return ValidationResult(True, ValidatorFailKind.NONE, "")
-        return ValidationResult(False, ValidatorFailKind.STEP_FAILED, "")
+            return ValidationResult(True, ValidatorFailKind.NONE, message)
+        return ValidationResult(False, ValidatorFailKind.STEP_FAILED, message)
 
     @staticmethod
     def check_stderr(test: "TestStandardFlow", step_value: str, _1: str,
-                            error_output: str, _2: int) -> ValidationResult:
+                     error_output: str, _2: int) -> ValidationResult:
         error_output = error_output.strip()
         if not error_output:
             return ValidationResult(True, ValidatorFailKind.NONE, "")
 
         _LOGGER.all(f"Step validator {step_value}: get error output '{error_output}'")
         if test.has_expected_err:
-            comparison_res = test.compare_with_stderr(error_output)
+            comparison_res, message = test.compare_with_stderr(error_output)
             if comparison_res:
-                return ValidationResult(comparison_res, ValidatorFailKind.NONE, "")
+                return ValidationResult(comparison_res, ValidatorFailKind.NONE, message)
             return ValidationResult(comparison_res, ValidatorFailKind.COMPARE_OUTPUT,
-                                    "Comparison with .expected or .expected.err file has failed")
+                                    f"Comparison with .expected or .expected.err file has failed: {message}")
 
         return ValidationResult(False, ValidatorFailKind.STDERR_NOT_EMPTY, "stderr is not empty")
 
     @staticmethod
     def check_output(test: "TestStandardFlow", step_value: str, output: str,
-                            _1: str, _2: int) -> ValidationResult:
-        comparison_res = test.compare_with_stdout(output)
+                     _1: str, _2: int) -> ValidationResult:
+        comparison_res, message = test.compare_with_stdout(output)
         if step_value == StepKind.COMPILER.value:
             fail_kind = ValidatorFailKind.NONE if comparison_res else ValidatorFailKind.COMPARE_OUTPUT
-            return ValidationResult(comparison_res, fail_kind, "")
+            return ValidationResult(comparison_res, fail_kind, message)
 
         if comparison_res:
-            return ValidationResult(comparison_res, ValidatorFailKind.NONE, f"{step_value} validation passed",
-                                    stop_runtime_validation=True)
+            return ValidationResult(comparison_res, ValidatorFailKind.NONE, message, stop_runtime_validation=True)
 
         test.runtime_steps.pop(0)
         if test.runtime_steps and not output:
             # if there are more runtime steps - comparison may happen there
-            return ValidationResult(True, ValidatorFailKind.NONE, "")
+            return ValidationResult(True, ValidatorFailKind.NONE, message)
 
         # if there are no more runtime steps or
         # current runtime step had expected file to compare output with and the comparison failed
         # - return the comparison_res
         return ValidationResult(comparison_res, ValidatorFailKind.COMPARE_OUTPUT,
-                                 "Comparison with .expected or .expected.err file has failed")
+                                f"Comparison with .expected or .expected.err file has failed: {message}")
 
     @staticmethod
     def gtest_result_validator(json_file: str, test_result: CompletedProcess) -> ValidationResult:
@@ -121,18 +120,20 @@ class BaseValidator(IValidator):
         return ValidationResult(False, ValidatorFailKind.STEP_FAILED, "")
 
     @staticmethod
-    def _step_passed(test: "TestStandardFlow", return_code: int, step: str) -> bool:
-        if step == StepKind.COMPILER.value:
-            if test.is_negative_compile:
-                return return_code == 1
-            return return_code == 0
-
-        if step == StepKind.RUNTIME.value:
-            if test.is_negative_runtime:
-                return return_code in [1, 255]
-            return return_code == 0
-
-        return return_code == 0
+    def _step_passed(test: "TestStandardFlow", return_code: int, step: str) -> tuple[bool, str]:
+        expected_return_code = 0
+        message = ""
+        if step == StepKind.RUNTIME.value and test.is_negative_runtime:
+            passed = return_code in [1, 255]
+            if not passed:
+                message = f"Return code {return_code} does not match to expected [1, 255]"
+            return passed, message
+        if step == StepKind.COMPILER.value and test.is_negative_compile:
+            expected_return_code = 1
+        passed = return_code == expected_return_code
+        if not passed:
+            message = f"Return code {return_code} does not match to expected one {expected_return_code}"
+        return passed, message
 
     @staticmethod
     def _check_last_failure_for_ignored_test(failure: str, output: str, error_output: str) -> bool:

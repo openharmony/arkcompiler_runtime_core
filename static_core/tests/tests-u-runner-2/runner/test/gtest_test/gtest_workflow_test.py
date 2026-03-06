@@ -57,7 +57,7 @@ class GTestFlowTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.run")
+    @patch("runner.suites.one_step_runner.subprocess.run")
     def test_gtest_runner_all_tests_in_class(self, mock_run: MagicMock) -> None:
         config = self.config_test()
         stdout = ("AnyCallTest.\n AnyCall_Valid\n AnyCall_NonFunctionObject\n AnyCall_WithClosure\n "
