@@ -40,7 +40,7 @@ cases:
               }
               return
           }
-      expected: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
+      expected: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
 #3
     - tags: compile-only
       use: |-
@@ -51,7 +51,7 @@ cases:
                   throw new Error()
               }
           }
-      expected: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 #4
     - tags: compile-only
       use: |-
@@ -84,7 +84,7 @@ cases:
           function main(): void {
               return res == '' ? 0 : 1 // CTE, wrong return type
           }
-      expected: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
+      expected: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
 #7
     - tags: compile-only
       use: |-
@@ -93,7 +93,7 @@ cases:
           function main(): void {
               return res == '' ? Color.Red : Color.Green // CTE, wrong return type
           }
-      expected: "Semantic error ESE0091: Type 'Color' is not compatible with the enclosing method's return type 'void'"
+      expected: "Semantic error ESE0091: Type 'Color' is not compatible with the enclosing method's return type 'undefined'"
 #8
     - use: |-
           function main() {

@@ -18,7 +18,7 @@
 desc: >-
     Class declarations with default constructors declared implicitly.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0139: Signature constructor(): void is not visible here."
+expected_out: "Semantic error ESE0139: Signature constructor(): undefined is not visible here."
 ---*/
 
 class A {

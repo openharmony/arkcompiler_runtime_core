@@ -37,7 +37,7 @@ function_decls:
       call: |-
         return
 
-    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
+    - expected_out: '"Semantic error ESE0318: Type ''undefined'' cannot be assigned to type ''Double''"'
       decl: |-
         let i = 1
         function foo(): void {
@@ -45,21 +45,6 @@ function_decls:
         }
       call: |-
         let x: number = foo();  // CTE, cannot assign void to number
-
-    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
-      decl: |-
-        let i = 1
-        function foo(): void {
-            i += 1
-        }
-      call: |-
-        let x = foo();  // CTE, Cannot use type 'void' as value
-
-    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
-      decl: |-
-        let f = (): void => {}
-      call: |-
-        let x = f();  // CTE, Cannot use type 'void' as value
 
     - expected_out: '"Semantic error ESE0104: Not all code paths return a value."'
       decl: |-
@@ -77,7 +62,7 @@ function_decls:
       call: |-
         return
 
-    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
+    - expected_out: '"Semantic error ESE0318: Type ''undefined'' cannot be assigned to type ''Double''"'
       decl: |-
         let i = 1
         let foo = (): void => {  // infer void

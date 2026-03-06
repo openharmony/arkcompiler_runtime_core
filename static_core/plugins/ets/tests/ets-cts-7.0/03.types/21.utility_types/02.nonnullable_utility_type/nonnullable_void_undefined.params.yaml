@@ -20,7 +20,7 @@ cases:
   - type: |-
       void
     expect: |-
-      TODO
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'never'
   - type: |-
       null|undefined
     expect: |-
@@ -28,4 +28,4 @@ cases:
   - type: |-
       null|void
     expect: |-
-      TODO
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'never'

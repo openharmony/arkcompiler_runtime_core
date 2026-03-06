@@ -31,8 +31,7 @@ cases:
       }
     use: |-
       new Derived<A, B>();
-    expected_out: "Semantic error ESE0141: Class member foo with type Int in Derived<T,S> cannot override foo with type void field from class Base<T,S> because the overriding return type is not compatible with the other return type."
-
+    expected_out: "Semantic error ESE0141: Class member foo with type Int in Derived<T,S> cannot override foo with type undefined field from class Base<T,S> because the overriding return type is not compatible with the other return type."
   - doc: |-
       CTE as return type A contravariant to B.
     decl: |-

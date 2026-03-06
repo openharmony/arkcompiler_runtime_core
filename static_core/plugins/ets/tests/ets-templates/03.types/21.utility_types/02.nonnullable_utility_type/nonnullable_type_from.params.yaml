@@ -15,25 +15,25 @@
 cases:
   # Type.from with NonNullable
   - decl: |-
-      let type_of_int: Type = Type.from<NonNullable<int|null|undefined>>()
+      let type_of_int: Class = Class.from<NonNullable<int|null|undefined>>()
     type: |-
       type_of_int
     check: |-
       Int
   - decl: |-
-      let type_of_string: Type = Type.from<NonNullable<string|null|undefined>>()
+      let type_of_string: Class = Class.from<NonNullable<string|null|undefined>>()
     type: |-
       type_of_string
     check: |-
       String
   - decl: |-
-      let type_of_number: Type = Type.from<NonNullable<number>>()
+      let type_of_number: Class = Class.from<NonNullable<number>>()
     type: |-
       type_of_number
     check: |-
       Double
   - decl: |-
-      let type_of_object: Type = Type.from<NonNullable<Object>>()
+      let type_of_object: Class = Class.from<NonNullable<Object>>()
     type: |-
       type_of_object
     check: |-
@@ -41,7 +41,7 @@ cases:
   - decl: |-
       class A {}
       type B = A|null|undefined
-      let type_of_class: Type = Type.from<NonNullable<B>>()
+      let type_of_class: Class = Class.from<NonNullable<B>>()
     type: |-
       type_of_class
     check: |-
@@ -49,7 +49,7 @@ cases:
   - decl: |-
       interface I {}
       type B = I|null|undefined
-      let type_of_interface: Type = Type.from<NonNullable<B>>()
+      let type_of_interface: Class = Class.from<NonNullable<B>>()
     type: |-
       type_of_interface
     check: |-
@@ -57,26 +57,26 @@ cases:
   # Spec example verbatim (5.3.2)
   - decl: |-
       type X = Object|null|undefined
-      let type_of_y: Type = Type.from<NonNullable<X>>()
+      let type_of_y: Class = Class.from<NonNullable<X>>()
     type: |-
       type_of_y
     check: |-
       Object
   # NonNullable with primitive types
   - decl: |-
-      let type_of_bool: Type = Type.from<NonNullable<boolean|null>>()
+      let type_of_bool: Class = Class.from<NonNullable<boolean|null>>()
     type: |-
       type_of_bool
     check: |-
       Boolean
   - decl: |-
-      let type_of_byte: Type = Type.from<NonNullable<byte|undefined>>()
+      let type_of_byte: Class = Class.from<NonNullable<byte|undefined>>()
     type: |-
       type_of_byte
     check: |-
       Byte
   - decl: |-
-      let type_of_char: Type = Type.from<NonNullable<char|null|undefined>>()
+      let type_of_char: Class = Class.from<NonNullable<char|null|undefined>>()
     type: |-
       type_of_char
     check: |-

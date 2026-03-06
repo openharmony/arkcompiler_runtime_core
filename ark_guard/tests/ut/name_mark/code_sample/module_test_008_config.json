@@ -35,7 +35,7 @@
         "-keep package module_test_008 {\n    fooEx12():{Ustd.core.Null, std.core.String};\n    }",
         "-keep package module_test_008 {\n    fooEx13():std.core.String;\n    }",
         "-keep package module_test_008 {\n    fooEx14():{Ustd.core.Array, std.core.String};\n    }",
-        "-keep package module_test_008 {\n    fooEx15():Y;\n    }",
+        "-keep package module_test_008 {\n    fooEx15():void;\n    }",
         "-keep package module_test_008 {\n    fooEx16():std.core.Int;\n    }"
       ]
     }

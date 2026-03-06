@@ -386,7 +386,7 @@ cases:
       try {
           let obj: C = {
               a: (() => { sequence += '1'; return 1 })(),
-              b: (() => { sequence += '2'; throw new Error('test') })(),
+              b: (() => { sequence += '2'; if (sequence !== '') { throw new Error('test') } return 2 })(),
               c: (() => { sequence += '3'; return 3 })()
           }
       } catch (e) {

@@ -19,11 +19,6 @@ cases:
     statements:
       - "let hack: undefined = helper(() => 1)"
 
-  - description: "Variable holding empty function cannot assign result to undefined"
-    statements:
-      - "let x = () => {}"
-      - "let test3: undefined = x()"
-
   - description: "Void in conditional types should follow consumption rules"
     declarations:
       - "type Test<T> = T extends void ? never : T"

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,11 +32,7 @@ bool DebugContext::InWhitelist(WhitelistKind kind, uint64_t id) const
 
 void DebugContext::InsertIntoWhitelist(const PandaString &name, bool isClassName, Method::UniqId id)
 {
-    auto kindsToAdd = isClassName
-                          ? std::initializer_list<WhitelistKind> {WhitelistKind::CLASS}
-                          : std::initializer_list<WhitelistKind> {WhitelistKind::METHOD, WhitelistKind::METHOD_CALL};
-
-    for (auto kind : kindsToAdd) {
+    auto addToWhitelist = [&](WhitelistKind kind) {
         auto k = static_cast<size_t>(kind);
         auto &ids = whitelist.id[k];
         auto &names = config->whitelistNames[k];
@@ -45,7 +41,15 @@ void DebugContext::InsertIntoWhitelist(const PandaString &name, bool isClassName
             LOG(DEBUG, VERIFIER) << "Method with " << (isClassName ? "class " : "") << "name " << name << ", id 0x"
                                  << std::hex << id << " was added to whitelist";
         }
+    };
+
+    if (isClassName) {
+        addToWhitelist(WhitelistKind::CLASS);
+        return;
     }
+
+    addToWhitelist(WhitelistKind::METHOD);
+    addToWhitelist(WhitelistKind::METHOD_CALL);
 }
 
 }  // namespace ark::verifier::debug
