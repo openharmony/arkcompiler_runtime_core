@@ -654,7 +654,7 @@ export namespace jsonx {
          * @param {string} key - The key to look up
          * @returns {int} The integer value
          * @throws {JsonTypeError} If the value is not an integer or if this element is not an object
-         * @throws {RangeError} If the key is not found
+         * @throws {RangeError} the number is out of the range of int
          */
         asInteger(): int {
             if (this.jsonType != JsonType.JsonNumber) {
@@ -663,6 +663,9 @@ export namespace jsonx {
             if (this.maybeDoubleValue != undefined) {
                 throw new JsonTypeError("Expected integer, but element contains a double value.")
             }
+            if (this.maybeLongValue == undefined) {
+		        throw new JsonTypeError("Expected integer, but element stores different value type.")
+	        }
             if (this.maybeLongValue! > Int.MAX_VALUE || this.maybeLongValue! < Int.MIN_VALUE) {
                 throw new RangeError(`'${this.maybeLongValue!}' is not a int`)
             }
