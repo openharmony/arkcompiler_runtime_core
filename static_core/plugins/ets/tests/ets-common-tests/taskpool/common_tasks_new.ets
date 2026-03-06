@@ -202,6 +202,57 @@ async function multipleFailCallbackExceptionTest(){
     arktest.assertEQ(callbacksCalled, 2);
 }
 
+function dependencyStressAsyncSleep(time: number): Promise<void> {
+    return new Promise<void>((resolve) => {
+        setTimeout(() => {
+            resolve(undefined);
+        }, time.toInt());
+    });
+}
+
+async function pendingDependencyShouldNotBlockReadyTask(): Promise<void> {
+    const rounds: int = 10;
+    for (let round: int = 0; round < rounds; round++) {
+        let blocker: taskpool.Task = new taskpool.Task(async () => {
+            await dependencyStressAsyncSleep(200.0);
+            return 0 as int;
+        });
+        let blockedTasks: taskpool.Task[] = [];
+        let blockedPromises: Promise<Any>[] = [];
+
+        for (let i: int = 0; i < 60; i++) {
+            let blockedTask: taskpool.Task = new taskpool.Task((): int => i);
+            blockedTask.addDependency(blocker);
+            blockedTasks.push(blockedTask);
+            blockedPromises.push(
+                taskpool.execute(blockedTask, taskpool.Priority.HIGH).then((res: Any) => res).catch((err: Error) => err)
+            );
+        }
+
+        await dependencyStressAsyncSleep(20.0);
+
+        let readyTask: taskpool.Task = new taskpool.Task((): int => 1);
+        let readyTaskSettled = await Promise.race<boolean>([
+            taskpool.execute(readyTask, taskpool.Priority.HIGH).then((_res: Any) => true).catch((_err: Error) => false),
+            dependencyStressAsyncSleep(300.0).then(() => false)
+        ]);
+
+        let blockerExecuted = await taskpool.execute(blocker, taskpool.Priority.HIGH)
+            .then((_res: Any) => true)
+            .catch((_err: Error) => false);
+        arktest.assertEQ(blockerExecuted, true);
+        await Promise.allSettled(blockedPromises);
+        blockedTasks.forEach((task: taskpool.Task) => {
+            try {
+                taskpool.cancel(task);
+            } catch (_e) {
+            }
+        });
+
+        arktest.assertEQ(readyTaskSettled, true, 'ready task must not be starved by blocked dependency tasks');
+    }
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     commonTaskSuite.addAsyncTest('cancelInSuccessCallback', cancelInSuccessCallback);
@@ -210,6 +261,7 @@ function main(): int {
     commonTaskSuite.addAsyncTest('onExecutionFailedtestmultAsyncfun', onExecutionFailedtestmultAsyncfun);
     commonTaskSuite.addAsyncTest('onFailCallbackExceptionTest', onFailCallbackExceptionTest);
     commonTaskSuite.addAsyncTest('multipleFailCallbackExceptionTest', multipleFailCallbackExceptionTest);
+    commonTaskSuite.addAsyncTest('pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);
 
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();

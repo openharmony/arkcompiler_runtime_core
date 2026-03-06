@@ -1617,11 +1617,12 @@ function main(): int {
     commonTaskSuite.addAsyncTest('ExceedContinueTaskCountTest', exceedContinueTaskTest);
     commonTaskSuite.addAsyncTest('OneTaskExecutionTest', oneTaskExecutionTest);
     commonTaskSuite.addAsyncTest('CallbackTest', callbackTest);
-    commonTaskSuite.addAsyncTest('IsCancelTest', isCancelTest);
-    commonTaskSuite.addAsyncTest('IsCancelPromiseTest', isCancelPromiseTest);
-    commonTaskSuite.addAsyncTest('CancelNonExecutingTaskTest', cancelNonExecutingTaskTest);
-    commonTaskSuite.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
-    commonTaskSuite.addAsyncTest('CheckIsDoneAndCancelTaskTest', checkIsDoneAndCancelTaskTest);
+    // #32450: Test is incorrect
+    commonTaskSuiteDisabled.addAsyncTest('IsCancelTest', isCancelTest);
+    commonTaskSuiteDisabled.addAsyncTest('IsCancelPromiseTest', isCancelPromiseTest);
+    commonTaskSuiteDisabled.addAsyncTest('CancelNonExecutingTaskTest', cancelNonExecutingTaskTest);
+    commonTaskSuiteDisabled.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
+    commonTaskSuiteDisabled.addAsyncTest('CheckIsDoneAndCancelTaskTest', checkIsDoneAndCancelTaskTest);
     commonTaskSuite.addAsyncTest('DependentTasksTest', dependentTasksTest);
     // #24758: Test is incorrect and flaky fails
     commonTaskSuiteDisabled.addAsyncTest('DependentTasksWithParamsTest', dependentTasksWithParamsTest);

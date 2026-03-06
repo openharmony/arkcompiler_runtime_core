@@ -624,22 +624,26 @@ export namespace taskpool {
         notifyDependencies(): void {
             for (const dependentTask: Task of this.dependentTasks) {
                 let internalDepTask = InternalTask.of(dependentTask);
+                let shouldActivatePendingTask = false;
                 ConcurrencyHelpers.lockGuard(internalDepTask.taskMutex, () => {
-                    internalDepTask.taskDependenciesCount--;
+                    if (internalDepTask.taskDependenciesCount > 0) {
+                        internalDepTask.taskDependenciesCount--;
+                    }
+                    shouldActivatePendingTask = (internalDepTask.taskDependenciesCount == 0);
                     ConcurrencyHelpers.condVarNotifyOne(internalDepTask.condVar, internalDepTask.taskMutex);
                 });
-
+                if (shouldActivatePendingTask) {
+                    if (!tryActivatePendingDependencyTask(dependentTask)) {
+                        ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+                            ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
+                        });
+                    }
+                }
             }
             ConcurrencyHelpers.mutexLock(this.taskMutex);
             this.isRunning = false;
             ConcurrencyHelpers.condVarNotifyOne(this.condVar, this.taskMutex);
             ConcurrencyHelpers.mutexUnlock(this.taskMutex);
-            // Notify waiting workers using condition variable
-            for (let i = 0; i < this.dependentTasks.size; i++ ) {
-                ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
-                    ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
-                });
-            }
         }
 
         getDuration(): int {
@@ -648,6 +652,7 @@ export namespace taskpool {
 
         execute(currentWorker : GlobalQueueWorker | undefined = undefined): Any {
             initWorkerPoolSync();
+            removePendingDependencyTask(this.task);
             this.waitForDependencies();
             if (this.state.compareAndSwap(State.WAITING, State.RUNNING) == State.CANCELED) {
                 this.notifyDependencies();
@@ -2233,6 +2238,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
             if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.CANCELED) == curState) {
+                cleanupCanceledPendingDependencyTask(task);
                 return;
             }
         }
@@ -2430,6 +2436,62 @@ export namespace taskpool {
 
     function isCanceled(task: Task): boolean {
         return InternalTask.of(task).state.load() == InternalState.CANCELED.valueOf();
+    }
+
+    function getTaskCanceledError(internalTask: InternalTask): Error {
+        if (internalTask.groupId != 0) {
+            return new Error(TASKPOOL_ERROR_GROUP_CANCELED, "taskpool:: taskGroup has been canceled");
+        }
+        if (internalTask.seqId.load() != 0) {
+            return new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled");
+        }
+        if (internalTask.asyncId.load() != 0) {
+            return new Error(TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED, "taskpool:: asyncRunner task has been canceled");
+        }
+        return new Error(TASKPOOL_ERROR_TASK_CANCELED, "taskpool:: task has been canceled");
+    }
+
+    function finishCanceledPendingDependencyTask(task: Task): void {
+        waitingTasksNum.fetchSub(1);
+        ConcurrencyHelpers.lockGuard(mutex, () => {
+            const count = allTasks.get(task) ?? 0;
+            if (count <= 1) {
+                allTasks.delete(task);
+            } else {
+                allTasks.set(task, count - 1);
+            }
+        });
+
+        let internalTask = InternalTask.of(task);
+        let cancelError = getTaskCanceledError(internalTask);
+        ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+            internalTask.currentDeferred?.rejectPromise(cancelError);
+            internalTask.currentDeferred = undefined;
+            while (internalTask.pendingDeferreds.length > 0) {
+                let deferred = internalTask.pendingDeferreds.shift();
+                deferred?.rejectPromise(cancelError);
+            }
+        });
+    }
+
+    function takePendingDependencyTaskPriority(task: Task): Priority | undefined {
+        let priority: Priority | undefined = undefined;
+        ConcurrencyHelpers.lockGuard(pendingDependencyTasksMutex, () => {
+            priority = pendingDependencyTasks.get(task);
+            if (priority != undefined) {
+                pendingDependencyTasks.delete(task);
+            }
+        });
+        return priority;
+    }
+
+    function cleanupCanceledPendingDependencyTask(task: Task): boolean {
+        let priority = takePendingDependencyTaskPriority(task);
+        if (priority == undefined) {
+            return false;
+        }
+        finishCanceledPendingDependencyTask(task);
+        return true;
     }
 
     function tryCancelDependentTasks(task: Task): void {
@@ -2790,6 +2852,53 @@ export namespace taskpool {
      * @param priority The priority queue to get task from
      * @returns Task if found and executable, undefined otherwise
      */
+    function moveToPendingDependencyQueue(task: Task, priority: Priority): boolean {
+        let moved = false;
+        let internalTask = InternalTask.of(task);
+        ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+            if (internalTask.taskDependenciesCount == 0) {
+                return;
+            }
+            ConcurrencyHelpers.lockGuard(pendingDependencyTasksMutex, () => {
+                pendingDependencyTasks.set(task, priority);
+            });
+            moved = true;
+        });
+        return moved;
+    }
+
+    function removePendingDependencyTask(task: Task): void {
+        ConcurrencyHelpers.lockGuard(pendingDependencyTasksMutex, () => {
+            pendingDependencyTasks.delete(task);
+        });
+    }
+
+    function tryActivatePendingDependencyTask(task: Task): boolean {
+        let isReady = false;
+        let internalTask = InternalTask.of(task);
+        ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+            isReady = (internalTask.taskDependenciesCount == 0);
+        });
+        if (!isReady) {
+            return false;
+        }
+
+        let priority = takePendingDependencyTaskPriority(task);
+        if (priority == undefined) {
+            return false;
+        }
+        if (internalTask.state.load() == InternalState.CANCELED.valueOf()) {
+            finishCanceledPendingDependencyTask(task);
+            return false;
+        }
+
+        globalTaskQueue.get(priority!)?.push(task);
+        ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+            ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
+        });
+        return true;
+    }
+
     function getGlobalTaskImplNonBlocking(priority: Priority): Task | undefined {
         let queue = globalTaskQueue.get(priority);
         if (queue == undefined || queue.size == 0) {
@@ -2804,8 +2913,9 @@ export namespace taskpool {
         if (InternalTask.of(task!).taskDependenciesCount == 0) {
             return task;
         } else {
-            // Put back dependent task at the end of queue
-            queue.push(task);
+            if (!moveToPendingDependencyQueue(task, priority)) {
+                return task;
+            }
         }
         return undefined;
     }
@@ -2961,6 +3071,7 @@ export namespace taskpool {
     let isGlobalTaskQueuesInitialized: AtomicFlag = new AtomicFlag(false);
     let taskQueues: Map<Priority, Array<Task>>;
     let globalTaskQueue: Map<Priority, containers.LinkedBlockingQueue<Task>>;
+    let pendingDependencyTasks: Map<Task, Priority> = new Map<Task, Priority>();
 
     let highTaskQueue: Array<Task>;
     let mediumTaskQueue: Array<Task>;
@@ -2973,6 +3084,7 @@ export namespace taskpool {
     const globalTaskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
     const globalTaskCondVar: Object = ConcurrencyHelpers.condVarCreate();
     const globalTaskCounterMutex: Object = ConcurrencyHelpers.mutexCreate();
+    const pendingDependencyTasksMutex: Object = ConcurrencyHelpers.mutexCreate();
     let globalHighTaskExecuteCount: AtomicInt = new AtomicInt(0);
     let globalMediumTaskExecuteCount: AtomicInt = new AtomicInt(0);
 
