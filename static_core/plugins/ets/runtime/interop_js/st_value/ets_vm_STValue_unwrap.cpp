@@ -284,6 +284,7 @@ napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] nap
         return nullptr;
     }
     napi_value jsThis {};
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -299,6 +300,7 @@ napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] nap
         s.AddLocalRef(etsArg, &argRef);
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ani_value parseArg[1];
     parseArg[0].r = argRef;
     ani_class jsonClass {};
@@ -311,7 +313,7 @@ napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] nap
     ani_class stringClass;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.String", &stringClass));
 
-    ani_string aniString = static_cast<ani_string>(jsonRes);
+    auto aniString = static_cast<ani_string>(jsonRes);
 
     ani_size size {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->String_GetUTF8Size(aniString, &size));
@@ -320,8 +322,8 @@ napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] nap
     ANI_CHECK_ERROR_RETURN(env, aniEnv->String_GetUTF8(aniString, stdString.data(), stdString.size(), &size));
     stdString.resize(size);
 
-    napi_value js_string {};
-    NAPI_CHECK_FATAL(napi_create_string_utf8(env, stdString.data(), stdString.size(), &js_string));
-    return js_string;
+    napi_value jsString {};
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, stdString.data(), stdString.size(), &jsString));
+    return jsString;
 }
 }  // namespace ark::ets::interop::js

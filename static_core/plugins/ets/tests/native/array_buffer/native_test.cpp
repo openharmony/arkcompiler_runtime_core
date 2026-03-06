@@ -107,8 +107,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalEmpty)
     ASSERT_EQ(resultData, data);
     ASSERT_EQ(resultLength, 0);
 
-    ani_boolean bufferIsExpected =
-        CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, 0);
+    auto bufferIsExpected = CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, 0);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 }
 
@@ -135,8 +134,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
     ASSERT_EQ(resultData[1], TWO_HUNDRED_THIRTY_FOUR);
     ASSERT_EQ(resultData[TWO], THREE_HUNDRED_FOURTY_FIVE);
 
-    ani_boolean bufferIsExpected =
-        CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
+    auto bufferIsExpected = CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 }
 
@@ -161,7 +159,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
     ASSERT_EQ(resultstatus2, ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
 
-    ani_boolean isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
+    auto isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
     ASSERT_EQ(isDetached, ANI_FALSE);
 }
 
@@ -176,8 +174,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
     ASSERT_NE(arrayBuffer, nullptr);
     CheckUnhandledError();
 
-    ani_boolean bufferIsExpected =
-        CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
+    auto bufferIsExpected = CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 
     ani_boolean result = ANI_FALSE;
@@ -192,7 +189,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
     ASSERT_EQ(resultstatus2, ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 
-    ani_boolean isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
+    auto isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
     ASSERT_EQ(isDetached, ANI_TRUE);
 
     auto resultstatus3 = DetachArrayBuffer(env_, arrayBuffer);

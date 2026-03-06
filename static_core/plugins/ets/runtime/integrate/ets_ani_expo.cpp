@@ -43,11 +43,11 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
         if (option.rfind(AOT_FILES_OPTION_PREFIX, 0) == 0) {
             std::string aotFilesRawInput = option.substr(AOT_FILES_OPTION_PREFIX.size());
             size_t start = 0;
-            size_t end = aotFilesRawInput.find(":");
+            size_t end = aotFilesRawInput.find(':');
             while (end != std::string::npos) {
                 appAnFiles.push_back(aotFilesRawInput.substr(start, end - start));
                 start = end + 1;
-                end = aotFilesRawInput.find(":", start);
+                end = aotFilesRawInput.find(':', start);
             }
             appAnFiles.push_back(aotFilesRawInput.substr(start));
         } else if (option == ENABLE_AN_OPTION) {

@@ -33,7 +33,7 @@ inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDes
     ThrowEtsException(coroutine, classDescriptor.data(), msg.data());
 }
 
-void ThrowEtsException(EtsCoroutine *coroutine, EtsClass *exceptionClass, const char *msg);
+void ThrowEtsException(EtsCoroutine *coroutine, EtsClass *cls, const char *msg);
 
 inline void ThrowEtsException(EtsCoroutine *coroutine, EtsClass *exceptionClass, std::string_view msg)
 {

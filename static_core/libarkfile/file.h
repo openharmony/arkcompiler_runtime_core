@@ -210,10 +210,12 @@ public:
 
         auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
         // for newer versions, the first byte is a flag of whether metadata was recorded
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto isMetadataRecorded = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
         ark::Span<const uint8_t> exportedTableSpan;
 
         if (isMetadataRecorded) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             auto metadataSize = reinterpret_cast<const uint32_t *>(
                 exportedIdxData.SubSpan(METADATA_FLAG_SIZE, sizeof(uint32_t)).data())[0];
             exportedTableSpan =
@@ -238,12 +240,14 @@ public:
 
         auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
         // for newer versions, the first byte is a flag of whether metadata was recorded
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto isMetadataRecorded = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
         if (!isMetadataRecorded) {  // if not recorded, the remaining data is export table so there is no metadata
             return Span<const uint8_t>();
         }
 
         auto metadataSize =
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             reinterpret_cast<const uint32_t *>(exportedIdxData.SubSpan(METADATA_FLAG_SIZE, sizeof(uint32_t)).data())[0];
         return exportedIdxData.SubSpan(header->numExportTable - metadataSize);
     }

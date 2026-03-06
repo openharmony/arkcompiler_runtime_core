@@ -79,6 +79,7 @@ extern "C" arkvm_status ARKVM_RegisterProfilePaths(const arkvm_profile_path_info
     ark::PandaVector<ark::compiler::AotManager::ProfilePathEntry> entries;
     entries.reserve(infoCount);
     for (size_t idx = 0; idx < infoCount; ++idx) {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         const auto &info = infos[idx];
         if (info.abcPath == nullptr || info.abcPath[0] == '\0') {
             hasInvalidArgs = true;
@@ -95,14 +96,17 @@ extern "C" arkvm_status ARKVM_RegisterProfilePaths(const arkvm_profile_path_info
         }
         ark::compiler::ProfilePathInfo pathInfo {ark::PandaString(info.curProfilePath), std::move(baselinePath)};
         entries.emplace_back(ark::PandaString(info.abcPath), std::move(pathInfo));
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     if (hasInvalidArgs) {
-        size_t invalidCount = infoCount - entries.size();
+        [[maybe_unused]] size_t invalidCount = infoCount - entries.size();
         LOG(DEBUG, RUNTIME) << "ARKVM_RegisterProfilePaths: valid entries count: " << entries.size()
                             << ", invalid entries count: " << invalidCount;
     }
+
     aotManager->RegisterProfilePaths(std::move(entries));
     if (hasInvalidArgs) {
+        // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
         return entries.empty() ? ARKVM_INVALID_ARGS : ARKVM_PARTIAL_SUCCESS;
     }
     return ARKVM_OK;

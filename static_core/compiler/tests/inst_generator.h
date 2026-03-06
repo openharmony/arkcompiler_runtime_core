@@ -29,6 +29,8 @@ public:
     }
 
     virtual ~GraphCreator() = default;
+    NO_COPY_SEMANTIC(GraphCreator);
+    NO_MOVE_SEMANTIC(GraphCreator);
 
     Graph *GenerateGraph(Inst *inst);
 
@@ -112,10 +114,12 @@ protected:
     virtual Graph *GenerateGraphImpl(Inst *inst);
 
     // need to create graphs
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     ArenaAllocator &allocator_;
     ArenaAllocator &localAllocator_;
     RuntimeInterfaceMock runtime_;
     Arch arch_ {Arch::AARCH64};
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 public:
     void SetNumVRegsArgs(size_t regs, size_t args)

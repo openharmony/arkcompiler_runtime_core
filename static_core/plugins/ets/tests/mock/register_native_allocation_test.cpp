@@ -55,18 +55,18 @@ public:
         // clang-format on
         ani_options optionsPtr = {optionsVector.size(), optionsVector.data()};
 
-        ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm_), ANI_OK) << "Cannot create ETS VM";
-        ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env_), ANI_OK) << "Cannot get ani env";
+        ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm), ANI_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(vm->GetEnv(ANI_VERSION_1, &env), ANI_OK) << "Cannot get ani env";
     }
 
     void TearDown() override
     {
-        ASSERT_EQ(vm_->DestroyVM(), ANI_OK) << "Cannot destroy ETS VM";
+        ASSERT_EQ(vm->DestroyVM(), ANI_OK) << "Cannot destroy ETS VM";
     }
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    ani_env *env_ {nullptr};
-    ani_vm *vm_ {nullptr};
+    ani_env *env {nullptr};
+    ani_vm *vm {nullptr};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
@@ -75,29 +75,29 @@ TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
     mem::MemStatsType *memStats = Mutator::GetCurrent()->GetVM()->GetMemStats();
 
     ani_class testClass;
-    ASSERT_EQ(env_->FindClass("RegisterNativeAllocationTest.NativeAllocationTest", &testClass), ANI_OK);
+    ASSERT_EQ(env->FindClass("RegisterNativeAllocationTest.NativeAllocationTest", &testClass), ANI_OK);
 
     ani_static_method allocMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(testClass, "allocate_object", ":i", &allocMethod), ANI_OK);
+    ASSERT_EQ(env->Class_FindStaticMethod(testClass, "allocate_object", ":i", &allocMethod), ANI_OK);
     ani_int value1 = -1;
-    ASSERT_EQ(env_->Class_CallStaticMethod_Int(testClass, allocMethod, &value1), ANI_OK);
+    ASSERT_EQ(env->Class_CallStaticMethod_Int(testClass, allocMethod, &value1), ANI_OK);
     ASSERT_EQ(value1, 0);
 
     size_t heapFreedBeforeMethod;
     {
-        ark::ets::ani::ScopedManagedCodeFix s(env_);
+        ark::ets::ani::ScopedManagedCodeFix s(env);
         heapFreedBeforeMethod = memStats->GetFreedHeap();
     }
 
     ani_static_method mainMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(testClass, "main_method", ":i", &mainMethod), ANI_OK);
+    ASSERT_EQ(env->Class_FindStaticMethod(testClass, "main_method", ":i", &mainMethod), ANI_OK);
     ani_int value2 = -1;
-    ASSERT_EQ(env_->Class_CallStaticMethod_Int(testClass, mainMethod, &value2), ANI_OK);
+    ASSERT_EQ(env->Class_CallStaticMethod_Int(testClass, mainMethod, &value2), ANI_OK);
     ASSERT_EQ(value2, 0);
 
     size_t heapFreedAfterMethod;
     {
-        ark::ets::ani::ScopedManagedCodeFix s(env_);
+        ark::ets::ani::ScopedManagedCodeFix s(env);
         heapFreedAfterMethod = memStats->GetFreedHeap();
     }
 

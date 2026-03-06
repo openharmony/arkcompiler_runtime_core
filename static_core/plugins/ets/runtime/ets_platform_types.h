@@ -97,6 +97,7 @@ private:
 ALWAYS_INLINE inline EtsPlatformTypes const *PlatformTypes(EtsCoroutine *coro)
 {
     ASSERT(coro != nullptr);
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
     return coro->GetLocalStorage().Get<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR, EtsPlatformTypes *>();
 }
 

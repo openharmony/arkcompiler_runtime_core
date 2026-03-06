@@ -22,6 +22,7 @@
 namespace ark::ets::test {
 
 // CC-OFFNXT(G.PRE.02-CPP): code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_MIRROR_FIELD_INFO_TEST(type)                                          \
     TEST_F(EtsAtomicPrimitiveMembers, MemoryLayoutOf##type)                          \
     {                                                                                \

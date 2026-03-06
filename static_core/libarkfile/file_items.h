@@ -1682,7 +1682,7 @@ class ArrayValueItem;
 
 class MetadataItem : public BaseItem {
 public:
-    MetadataItem(std::vector<uint8_t> metadata) : metadata_(metadata) {}
+    explicit MetadataItem(std::vector<uint8_t> metadata) : metadata_(std::move(metadata)) {}
 
     ~MetadataItem() override = default;
 
