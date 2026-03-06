@@ -25,10 +25,6 @@
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_2.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_3.ets
 
-#33271
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_1.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_3.ets
-
 #31615 RTE for partial class field assignment
 03.types/21.utility_types/03.partial_utility_type/partial_inherit3.ets
 
@@ -58,14 +54,6 @@
 
 #30760
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
-
-#33488 CTE on plain form of return
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_3.ets
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_8.ets
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_12.ets
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_1.ets
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_5.ets
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_8.ets
 
 #26666 (cts #47 - bad array element type)
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3.ets
@@ -307,11 +295,6 @@
 #29971
 08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
 08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
-
-#33488
-08.statements/12.return_statements/return_5.ets
-08.statements/12.return_statements/return_6.ets
-08.statements/12.return_statements/return_7.ets
 
 #33998 no CTE override superclass field by accessor
 09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/override_superclass_field_with_accessor_n_0.ets

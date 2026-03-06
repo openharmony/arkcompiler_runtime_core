@@ -13,16 +13,6 @@
 
 ---
 cases:
-  - description: "Void in tuple types should be forbidden for consumption"
-    statements:
-      - "let t: [void, number] = [undefined, 1]"
-
   - description: "Void in function parameters should be forbidden"
     statements:
       - "function test(param: void): void {}"
-
-  - description: "Void as property type should be forbidden"
-    declarations:
-      - "class Test { prop: void }"
-    statements:
-      - "let obj = new Test()"

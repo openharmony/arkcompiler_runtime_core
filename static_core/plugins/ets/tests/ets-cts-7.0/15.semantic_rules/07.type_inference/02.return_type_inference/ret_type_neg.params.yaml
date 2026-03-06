@@ -24,19 +24,6 @@ function_decls:
 
     - decl: |-
         let i = 1
-        function foo() {  // infer void
-            i += 1
-        }
-      call: |-
-        let x = foo();  // CTE, Cannot use type 'void' as value
-
-    - decl: |-
-        let f = () => {}
-      call: |-
-        let x = f();  // CTE, Cannot use type 'void' as value
-
-    - decl: |-
-        let i = 1
         let foo() => {  // infer void
             i += 1
         }

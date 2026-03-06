@@ -13,12 +13,6 @@
 
 ---
 cases:
-  - description: "Generic function with void type parameter - consumption should be CTE"
-    declarations:
-      - "function foo<T>(): T { return 0 as T }"
-    statements:
-      - "let v = foo<void>()"
-
   - description: "Generic function with void parameter calling number-returning function should be CTE"
     declarations:
       - "function foo<T>(f: () => T): T { return f() }"

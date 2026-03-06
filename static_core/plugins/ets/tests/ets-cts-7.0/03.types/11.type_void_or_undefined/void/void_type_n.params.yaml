@@ -13,13 +13,6 @@
 
 cases:
   - |
-    let x: void
-  - |
-    function foo(): void {}
-    let y = foo()
-  - |
     function foo(): void {
-      return void 
+      return void
     }
-  - |
-    type aType = void | number

@@ -43,11 +43,6 @@ cases:
           let ft: ((p: string) => string)|null = bar
       use: |-
           ft("A") // CTE: not callable expression - smart typing for global variable doesnt't work
-#4
-    - decl: |-
-          function foo() {}
-      use: |-
-          let e = foo() // CTE: void cannot be used as type annotation
 #5
     - decl: |-
           function bar(callee: () => void): void {}

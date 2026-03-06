@@ -20,7 +20,7 @@ cases:
       derived: |-
         override foo(i: [Object, Base]): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: [Object, Base]): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: [Object, Base]): undefined in Derived not overriding any method"
     # override-incompatible argument type
 #1
     - base: |-
@@ -28,7 +28,7 @@ cases:
       derived: |-
           override foo(i: [Object, Base]): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: [Object, Base]): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: [Object, Base]): undefined in Derived not overriding any method"
 
     # override-incompatible argument type
 #2
@@ -37,7 +37,7 @@ cases:
       derived: |-
           override foo(i: [Object, Object]): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: [Object, Object]): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: [Object, Object]): undefined in Derived not overriding any method"
 
     # override-incompatible return type
 #3
@@ -85,7 +85,7 @@ cases:
       derived: |-
           override foo(i: Base): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: Base): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: Base): undefined in Derived not overriding any method"
 
     # override-incompatible return value (contravariance)
 #7
@@ -111,7 +111,7 @@ cases:
               i(new Object());
           }
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: ((p1: Object) => Base)): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: ((p1: Object) => Base)): undefined in Derived not overriding any method"
 
     # override-incompatible return type (covariance)
 #9
@@ -124,7 +124,7 @@ cases:
               i(new Object());
           }
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: ((p1: Object) => Base)): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: ((p1: Object) => Base)): undefined in Derived not overriding any method"
 
     # override-incompatible argument (contravariance)
 #10
@@ -133,7 +133,7 @@ cases:
       derived: |-
           override foo(i: Base[]): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: Array<Base>): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: Array<Base>): undefined in Derived not overriding any method"
 
     # override-incompatible argument (contravariance)
 #11
@@ -142,7 +142,7 @@ cases:
       derived: |-
           override foo(i: Base[]): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: Array<Base>): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: Array<Base>): undefined in Derived not overriding any method"
 
     # override-incompatible argument (covariance)
 #12
@@ -151,7 +151,7 @@ cases:
       derived: |-
           override foo(i: Object[]): void {}
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: Array<Object>): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: Array<Object>): undefined in Derived not overriding any method"
 
     # override-incompatible return type (contravariance)
 #13

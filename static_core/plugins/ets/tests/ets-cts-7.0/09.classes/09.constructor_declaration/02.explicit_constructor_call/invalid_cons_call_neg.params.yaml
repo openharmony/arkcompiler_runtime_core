@@ -14,7 +14,7 @@
 ---
 cases:
     - expected_out: |-
-          Semantic error ESE0139: Signature constructor(v: Int): void is not visible here.
+          Semantic error ESE0139: Signature constructor(v: Int): undefined is not visible here.
       decl: |-
           class A {
               constructor() {}

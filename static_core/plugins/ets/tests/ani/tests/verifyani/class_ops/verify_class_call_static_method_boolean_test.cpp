@@ -108,7 +108,7 @@ public:
 
         ani_boolean result;
         if constexpr (std::is_same_v<TestType, ClassCallStaticMethodBooleanATest>) {
-            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
+            ani_value args[2U] = {};  // NOLINT(modernize-avoid-c-arrays)
             ASSERT_EQ(env->c_api->Class_CallStaticMethod_Boolean_A(env, cls, method, &result, args), ANI_OK);
         } else {
             ASSERT_EQ(env->c_api->Class_CallStaticMethod_Boolean(env, cls, method, &result), ANI_OK);

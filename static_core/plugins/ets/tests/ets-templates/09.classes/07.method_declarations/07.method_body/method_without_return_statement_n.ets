@@ -19,7 +19,7 @@ desc: >-
     If a method is declared to have a return type, then a compile-time error occurs
     if the body of the method can complete normally.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 ---*/
 
 class A {

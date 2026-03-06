@@ -18,7 +18,7 @@ desc: The method with the same name has the same type and number of parameters, 
 tags: [compile-only, negative]
 expected_out: >-
     Semantic error ESE0190: ChildClass is not abstract
-    and does not override abstract method update(data: I1): void in Parent1
+    and does not override abstract method update(data: I1): undefined in Parent1
 ---*/
 
 interface I1 {

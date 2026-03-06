@@ -20,7 +20,7 @@ desc: >-
     - Any non-abstract subclass of A (see Abstract Classes) does not provide
     an implementation for m.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0190: B is not abstract and does not override abstract method run(): void in A"
+expected_out: "Semantic error ESE0190: B is not abstract and does not override abstract method run(): undefined in A"
 ---*/
 
 abstract class A {

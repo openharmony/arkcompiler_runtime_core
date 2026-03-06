@@ -364,8 +364,7 @@ extern "C" void EtsEscompatArrayReverse(ObjectHeader *bufferHeader, int32_t leng
 }
 
 struct ElementComputeResult {
-    explicit ElementComputeResult(EtsExecutionContext *executionCtx)
-        : executionCtx(executionCtx), ptypes(PlatformTypes(executionCtx)) {};
+    explicit ElementComputeResult(EtsExecutionContext *exCtx) : executionCtx(exCtx), ptypes(PlatformTypes(exCtx)) {};
     NO_COPY_SEMANTIC(ElementComputeResult);
     DEFAULT_MOVE_SEMANTIC(ElementComputeResult);
     ~ElementComputeResult() = default;

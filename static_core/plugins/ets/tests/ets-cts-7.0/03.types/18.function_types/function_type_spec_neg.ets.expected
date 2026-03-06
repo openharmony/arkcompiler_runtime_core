@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Semantic error ESE0318: Type '((p1: Double) => void)' cannot be assigned to type '((p1: Double|undefined, p2: String|undefined) => void)'
+Semantic error ESE0318: Type '((p1: Double) => undefined)' cannot be assigned to type '((p1: Double|undefined, p2: String|undefined) => undefined)'

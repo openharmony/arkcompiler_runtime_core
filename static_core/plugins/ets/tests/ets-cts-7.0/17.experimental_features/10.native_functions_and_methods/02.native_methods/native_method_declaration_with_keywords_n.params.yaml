@@ -16,7 +16,7 @@ modifiers:
   - mod: "abstract"
     expected_out: "Semantic error ESE0047: Invalid method modifier(s): an abstract method can't have private, override, static, final or native modifier."
   - mod: "override"
-    expected_out: "Semantic error ESE0136: Method run(): void in A not overriding any method"
+    expected_out: "Semantic error ESE0136: Method run(): undefined in A not overriding any method"
   - mod: "native"
     expected_out: "Syntax error ESY0115: Duplicated modifier is not allowed."
   - mod: "open"

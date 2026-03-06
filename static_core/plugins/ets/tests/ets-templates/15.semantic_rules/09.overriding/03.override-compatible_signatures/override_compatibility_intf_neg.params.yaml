@@ -25,7 +25,7 @@ cases:
       doc: Class/Interface type
       params: override-incompatible parameter
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: IDerived): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: IDerived): undefined in Derived not overriding any method"
 
     # INTERFACE, METHOD RETURN TYPE
     - base: |-
