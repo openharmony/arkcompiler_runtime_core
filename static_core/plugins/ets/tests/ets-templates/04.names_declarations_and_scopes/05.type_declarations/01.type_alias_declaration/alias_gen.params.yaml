@@ -382,3 +382,27 @@ cases:
         let y: object = x;
         let xr: TRR<string> = {'k1': 'String 1', 'k2': x, 'k3': y, 'k4': undefined, 'k5': {'l2': 'String 2'}}
         let ok = false
+
+    # recursive type aliases with Promise
+    - defs: |-
+        type EnvFunction<T> = () => T
+        type SimpleType = string | Promise<SimpleType>
+      use: |-
+        let simple: SimpleType = 'hello'
+        let env: EnvFunction<SimpleType> = (): SimpleType => simple
+        let result = env()
+        let ok = result instanceof string && (result as string) == 'hello'
+
+    - defs: |-
+        type RecPromise = Promise<RecPromise> | RecPromise[]
+      use: |-
+        let arr: RecPromise = new Array<RecPromise>()
+        let p: RecPromise = new Promise<RecPromise>((resolve: (value: RecPromise) => void) => { resolve(arr) })
+        let ok = p instanceof Promise && arr instanceof Array
+
+    - defs: |-
+        type EffectResult = (() => EffectResult) | Promise<EffectResult>
+      use: |-
+        let inner: EffectResult = new Promise<EffectResult>((resolve: (value: EffectResult) => void) => {})
+        let fn: EffectResult = (): EffectResult => { return inner }
+        let ok = fn instanceof Function

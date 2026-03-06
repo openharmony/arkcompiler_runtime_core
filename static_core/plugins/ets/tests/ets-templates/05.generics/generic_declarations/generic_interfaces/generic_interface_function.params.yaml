@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -147,4 +147,34 @@ cases:
     logic: |-
       let stringValue = new FunctionValue();
       arktest.assertEQ(stringValue.getFunctionValue()(12), 2);
+
+  - desc: Generic interface with rest parameter function type field, reassigned lambda, Object type
+    decl: |-
+      interface RestParamI<T> {
+        foo: (...a: T[]) => T[];
+      }
+
+      class RestParamImpl<T> implements RestParamI<T> {
+        foo!: (...a: T[]) => T[];
+      }
+    logic: |-
+      let obj: RestParamImpl<Object> = new RestParamImpl<Object>();
+      obj.foo = (...x: Object[]): Object[] => { return x };
+      let result: Object[] = obj.foo();
+      arktest.assertEQ(result.length as int, 0);
+
+  - desc: Generic interface with rest parameter function type field, reassigned lambda, Int type with args
+    decl: |-
+      interface RestParamI<T> {
+        foo: (...a: T[]) => T[];
+      }
+
+      class RestParamImpl<T> implements RestParamI<T> {
+        foo!: (...a: T[]) => T[];
+      }
+    logic: |-
+      let obj: RestParamImpl<Int> = new RestParamImpl<Int>();
+      obj.foo = (...x: Int[]): Int[] => { return x };
+      arktest.assertEQ(obj.foo().length as int, 0);
+      arktest.assertEQ(obj.foo(0, 1, 2).length as int, 3);
 
