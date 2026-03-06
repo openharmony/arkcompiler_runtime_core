@@ -43,6 +43,16 @@ function main(): int {
     suite.addTest('Stringify DataView', testStringifyDataView);
     suite.addTest('Stringify ArrayBuffer', testStringifyArrayBuffer);
 
+    // RegExp tests
+    suite.addTest('Stringify RegExp', testStringifyRegExp);
+
+    // Circular reference tests
+    suite.addTest("Stringify array circular reference to self", testStringifyArrayCircularSelf);
+    suite.addTest("Stringify array circular reference to each other", testStringifyArrayCircularEachOther);
+    suite.addTest("Stringify object circular reference to self", testStringifyObjectCircularSelf);
+    suite.addTest("Stringify object circular reference to each other", testStringifyObjectCircularEachOther);
+    suite.addTest("Stringify deeply nested circular reference", testStringifyDeeplyNestedCircular);
+
     return suite.run()
 }
 
@@ -472,4 +482,47 @@ function testStringifyDataView(): void {
 function testStringifyArrayBuffer(): void {
     const buffer = new ArrayBuffer(8);
     arktest.assertEQ(JSON.stringify(buffer), '{}');
+}
+
+function testStringifyRegExp(): void {
+    const regexp = new RegExp('([0-9])([a-z])', 'g');
+    arktest.assertEQ(JSON.stringify(regexp), '{}');
+}
+
+function testStringifyArrayCircularSelf(): void {
+    const arr: Object[] = Array.create<Object>(1, new Object())
+    arr[0] = arr
+    arktest.expectThrow(() => { JSON.stringify(arr) }, (e: Error) => e instanceof TypeError)
+}
+
+function testStringifyArrayCircularEachOther(): void {
+    const arr1: Object[] = Array.create<Object>(1, new Object())
+    const arr2: Object[] = Array.create<Object>(1, new Object())
+    arr1[0] = arr2
+    arr2[0] = arr1
+    arktest.expectThrow(() => { JSON.stringify(arr1) }, (e: Error) => e instanceof TypeError)
+}
+
+function testStringifyObjectCircularSelf(): void {
+    const obj: Record<string, Object> = new Record<string, Object>()
+    obj["self"] = obj
+    arktest.expectThrow(() => { JSON.stringify(obj) }, (e: Error) => e instanceof TypeError)
+}
+
+function testStringifyObjectCircularEachOther(): void {
+    const obj1: Record<string, Object> = new Record<string, Object>()
+    const obj2: Record<string, Object> = new Record<string, Object>()
+    obj1["ref"] = obj2
+    obj2["ref"] = obj1
+    arktest.expectThrow(() => { JSON.stringify(obj1) }, (e: Error) => e instanceof TypeError)
+}
+
+function testStringifyDeeplyNestedCircular(): void {
+    const level1: Record<string, Object> = new Record<string, Object>()
+    const level2: Record<string, Object> = new Record<string, Object>()
+    const level3: Record<string, Object> = new Record<string, Object>()
+    level1["child"] = level2
+    level2["nested"] = level3
+    level3["circular"] = level2
+    arktest.expectThrow(() => { JSON.stringify(level1) }, (e: Error) => e instanceof TypeError)
 }

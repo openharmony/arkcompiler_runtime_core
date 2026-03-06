@@ -229,6 +229,7 @@
     AN("Lstd/core/JSONRename;", coreJSONRename)                                                                       \
     /* RegExp */                                                                                                      \
     TP("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                         \
+    TP("Lstd/core/RegExp;", coreRegExp)                                                                               \
     /* Date */                                                                                                        \
     TP("Lstd/core/Date;", coreDate)                                                                                   \
     /* Do not add anything below this line. */
