@@ -19,13 +19,10 @@
 
 using namespace testing::ext;
 
-/**
- * @tc.name: object_literal_get_full_name_test_001
- * @tc.desc: test ObjectLiteralGetFullName function with simple name
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(NameUtilTest, object_literal_get_full_name_test_001, TestSize.Level1)
+class NameUtilTest : public ::testing::Test {};
+
+// Test: test-kind=api, api=NameUtil::ObjectLiteralGetFullName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(NameUtilTest, object_literal_get_full_name_test_001)
 {
     // Test the logic directly instead of using mock objects
     // This test simulates what ObjectLiteralGetFullName does internally
@@ -45,13 +42,8 @@ HWTEST(NameUtilTest, object_literal_get_full_name_test_001, TestSize.Level1)
     EXPECT_EQ(result, expected);
 }
 
-/**
- * @tc.name: object_literal_get_full_name_test_002
- * @tc.desc: test ObjectLiteralGetFullName function with dots in name
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(NameUtilTest, object_literal_get_full_name_test_002, TestSize.Level1)
+// Test: test-kind=api, api=NameUtil::ObjectLiteralGetFullName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(NameUtilTest, object_literal_get_full_name_test_002)
 {
     // Test the logic directly instead of using mock objects
     const std::string moduleName = "test.module";
@@ -70,13 +62,8 @@ HWTEST(NameUtilTest, object_literal_get_full_name_test_002, TestSize.Level1)
     EXPECT_EQ(result, expected);
 }
 
-/**
- * @tc.name: object_literal_get_full_name_test_003
- * @tc.desc: test ObjectLiteralGetFullName function with empty string
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(NameUtilTest, object_literal_get_full_name_test_003, TestSize.Level1)
+// Test: test-kind=api, api=NameUtil::ObjectLiteralGetFullName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(NameUtilTest, object_literal_get_full_name_test_003)
 {
     // Test the logic directly instead of using mock objects
     const std::string moduleName = "test.module";
@@ -95,13 +82,8 @@ HWTEST(NameUtilTest, object_literal_get_full_name_test_003, TestSize.Level1)
     EXPECT_EQ(result, expected);
 }
 
-/**
- * @tc.name: object_literal_get_full_name_test_004
- * @tc.desc: test ObjectLiteralGetFullName function with complex name
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(NameUtilTest, object_literal_get_full_name_test_004, TestSize.Level1)
+// Test: test-kind=api, api=NameUtil::ObjectLiteralGetFullName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(NameUtilTest, object_literal_get_full_name_test_004)
 {
     // Test the logic directly instead of using mock objects
     const std::string moduleName = "com.example.app";

@@ -17,7 +17,9 @@
 #define LIBABCKIT_SRC_ADAPTER_STATIC_MODIFY_NAME_HELPER_H
 
 #include <string>
+#include <utility>
 #include <variant>
+#include <vector>
 
 #include "libabckit/src/metadata_inspect_impl.h"
 
@@ -38,6 +40,13 @@ public:
             field,
         const std::string &newName);
     static bool InterfaceFieldRefreshName(AbckitCoreInterfaceField *ifaceField, const std::string &newName = "");
+
+    /**
+     * Apply all pending function renames to program annotations in one pass (async, lambda,
+     * FunctionOverload, Module.exported). Call from WriteAbcStatic after collecting renames.
+     */
+    static bool ApplyBatchFunctionRenameAnnotations(
+        ark::pandasm::Program *prog, const std::vector<std::pair<std::string, std::string>> &renamePairs);
 
 private:
     static bool ModuleRefreshNamespaces(AbckitCoreModule *m);

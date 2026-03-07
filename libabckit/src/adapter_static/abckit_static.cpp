@@ -23,6 +23,7 @@
 #include "libabckit/src/adapter_static/helpers_static.h"
 #include "libabckit/src/statuses_impl.h"
 #include "libabckit/src/adapter_static/inst_modifier.h"
+#include "libabckit/src/adapter_static/modify_name_helper.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 #include "libabckit/src/logger.h"
 #include "src/adapter_static/metadata_modify_static.h"
@@ -1679,6 +1680,15 @@ void WriteAbcStatic(AbckitFile *file, const char *path, size_t len)
     }
 
     auto program = file->GetStaticProgram();
+    if (!file->pendingFunctionRenames.empty()) {
+        if (!libabckit::ModifyNameHelper::ApplyBatchFunctionRenameAnnotations(program, file->pendingFunctionRenames)) {
+            LIBABCKIT_LOG(ERROR) << "Failed to apply batch function rename annotations\n";
+            statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+            return;
+        }
+        file->pendingFunctionRenames.clear();
+    }
+
     program->strings.clear();
     for (const auto &[_, function] : program->functionStaticTable) {
         const auto &funcStringSet = function.CollectStringsFromFunctionInsns();

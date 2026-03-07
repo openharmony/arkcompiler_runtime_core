@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 #include "libabckit/src/logger.h"
@@ -60,18 +61,7 @@ static bool UpdateAnnotationElementValueString(ark::pandasm::RecordMetadata *met
                                                const std::string &elementName, const std::string &newValue);
 static bool UpdateAnnotationElementValueRecord(ark::pandasm::RecordMetadata *metadata, const std::string &annoName,
                                                const std::string &elementName, const std::string &recordName);
-static bool FunctionRefreshLambdaAnnotationElements(AbckitCoreFunction *function, const std::string &oldFunctionKeyName,
-                                                    const std::string &newFunctionKeyName);
-static bool FunctionRefreshAsyncAnnotationElements(AbckitCoreFunction *function, const std::string &oldFunctionKeyName,
-                                                   const std::string &newFunctionKeyName);
-static bool FunctionRefreshFunctionOverloadAnnotationElements(AbckitCoreFunction *function,
-                                                              const std::string &oldFunctionKeyName,
-                                                              const std::string &newFunctionKeyName);
-
 static std::string ExtractSimpleFunctionName(const std::string &keyName);
-static bool ProcessAsyncAnnotationsInFunctionTable(std::map<std::string, ark::pandasm::Function> &functionTable,
-                                                   const std::string &oldFunctionKeyName,
-                                                   const std::string &newFunctionKeyName, bool isStatic);
 
 std::string AddGetSetPrefix(const std::string &input, const std::string &name)
 {
@@ -151,63 +141,6 @@ static std::string ExtractSimpleFunctionName(const std::string &keyName)
         return nameWithModule;
     }
     return nameWithModule.substr(lastDotPos + 1);
-}
-
-// Process async annotations in function table. Single pass: for each function with metadata,
-// EnumerateAnnotations once and update if Async value matches oldName. No sort, no index (index was measured slower).
-static bool ProcessAsyncAnnotationsInFunctionTable(std::map<std::string, ark::pandasm::Function> &functionTable,
-                                                   const std::string &oldFunctionKeyName,
-                                                   const std::string &newFunctionKeyName, bool isStatic)
-{
-    constexpr std::string_view ASYNC_ANNOTATION = "arkruntime.annotation.Async";
-    constexpr std::string_view ELEMENT_NAME = "value";
-
-    for (auto &[functionKeyName, func] : functionTable) {
-        if (func.metadata == nullptr) {
-            continue;
-        }
-        const std::string &currentFunctionKeyName = functionKeyName;
-        ark::pandasm::Function &currentFunc = func;
-
-        func.metadata->EnumerateAnnotations([&](ark::pandasm::AnnotationData &anno) {
-            if (std::string_view(anno.GetName()) != ASYNC_ANNOTATION) {
-                return;
-            }
-
-            for (const auto &elem : anno.GetElements()) {
-                if (std::string_view(elem.GetName()) != ELEMENT_NAME) {
-                    continue;
-                }
-                auto *value = elem.GetValue();
-                if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::METHOD) {
-                    continue;
-                }
-                auto *scalarValue = value->GetAsScalar();
-                if (scalarValue == nullptr) {
-                    continue;
-                }
-                std::string methodValue = scalarValue->GetValue<std::string>();
-                if (methodValue != oldFunctionKeyName) {
-                    continue;
-                }
-
-                LIBABCKIT_LOG(DEBUG) << "Found async function " << currentFunctionKeyName
-                                     << " with Async annotation pointing to old function: " << oldFunctionKeyName
-                                     << std::endl;
-
-                if (!UpdateAnnotationElementValueMethod(currentFunc.metadata.get(), std::string(ASYNC_ANNOTATION),
-                                                        std::string(ELEMENT_NAME), newFunctionKeyName, isStatic)) {
-                    LIBABCKIT_LOG(ERROR) << "Failed to update Async annotation element in " << currentFunctionKeyName
-                                         << std::endl;
-                    return;
-                }
-
-                LIBABCKIT_LOG(DEBUG) << "Updated Async annotation in " << currentFunctionKeyName << " from "
-                                     << oldFunctionKeyName << " to " << newFunctionKeyName << std::endl;
-            }
-        });
-    }
-    return true;
 }
 
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter)
@@ -312,11 +245,10 @@ static bool UpdateAnnotationElementValueMethod(ark::pandasm::ItemMetadata *metad
     return UpdateAnnotationElementValue(metadata, annoName, elementName, std::move(newVal));
 }
 
-// Update method array values in FunctionOverload annotation element
-static bool UpdateFunctionOverloadArrayValues(ark::pandasm::ArrayValue *arrayValue,
-                                              const std::string &oldFunctionKeyName,
-                                              const std::string &newFunctionKeyName,
-                                              std::vector<ark::pandasm::ScalarValue> &newValues)
+// Batch: replace any method in array that is in oldToNew map
+static bool UpdateFunctionOverloadArrayValuesWithMap(
+    ark::pandasm::ArrayValue *arrayValue, const std::unordered_map<std::string_view, std::string_view> &oldToNew,
+    std::vector<ark::pandasm::ScalarValue> &newValues)
 {
     bool elementFound = false;
     auto &values = arrayValue->GetValues();
@@ -336,9 +268,10 @@ static bool UpdateFunctionOverloadArrayValues(ark::pandasm::ArrayValue *arrayVal
         std::string methodName = scalarValue->GetValue<std::string>();
         bool isStatic = scalarValue->IsStatic();
 
-        if (methodName == oldFunctionKeyName) {
-            newValues.push_back(
-                ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::METHOD>(newFunctionKeyName, isStatic));
+        auto it = oldToNew.find(std::string_view(methodName));
+        if (it != oldToNew.end()) {
+            newValues.push_back(ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::METHOD>(
+                std::string(it->second), isStatic));
             elementFound = true;
         } else {
             newValues.push_back(val);
@@ -348,197 +281,245 @@ static bool UpdateFunctionOverloadArrayValues(ark::pandasm::ArrayValue *arrayVal
     return elementFound;
 }
 
-static bool FunctionRefreshFunctionOverloadAnnotationElements(AbckitCoreFunction *function,
-                                                              const std::string &oldFunctionKeyName,
-                                                              const std::string &newFunctionKeyName)
+// Helper function to process Async annotation elements
+static void ProcessAsyncAnnotationElement(const ark::pandasm::AnnotationElement &elem, const std::string &currentKey,
+                                          ark::pandasm::Function &currentFunc,
+                                          const std::unordered_map<std::string_view, std::string_view> &oldToNew,
+                                          bool isStatic, bool &hasUpdates)
 {
-    LIBABCKIT_LOG_FUNC;
+    constexpr std::string_view ASYNC_ANNOTATION = "arkruntime.annotation.Async";
+    constexpr std::string_view ELEMENT_NAME = "value";
 
-    if (oldFunctionKeyName == newFunctionKeyName) {
-        return true;
+    if (std::string_view(elem.GetName()) != ELEMENT_NAME) {
+        return;
     }
 
-    auto *prog = function->owningModule->file->GetStaticProgram();
-    constexpr const char *FUNCTION_OVERLOAD_ANNOTATION = "ets.annotation.FunctionOverload";
+    auto *value = elem.GetValue();
+    if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::METHOD) {
+        return;
+    }
 
-    for (auto &[recordNameRef, record] : prog->recordTable) {
-        if (record.metadata == nullptr) {
+    auto *scalarValue = value->GetAsScalar();
+    if (scalarValue == nullptr) {
+        return;
+    }
+
+    std::string methodValue = scalarValue->GetValue<std::string>();
+    auto it = oldToNew.find(std::string_view(methodValue));
+    if (it == oldToNew.end()) {
+        return;
+    }
+
+    if (!UpdateAnnotationElementValueMethod(currentFunc.metadata.get(), std::string(ASYNC_ANNOTATION),
+                                            std::string(ELEMENT_NAME), std::string(it->second), isStatic)) {
+        LIBABCKIT_LOG(ERROR) << "Failed to update Async annotation element in " << currentKey << std::endl;
+    } else {
+        hasUpdates = true;
+    }
+}
+
+// Batch: update Async annotation elements in function table using oldToNew map
+static bool ProcessAsyncAnnotationsInFunctionTableBatch(
+    std::map<std::string, ark::pandasm::Function> &functionTable,
+    const std::unordered_map<std::string_view, std::string_view> &oldToNew, bool isStatic, bool &hasUpdates)
+{
+    constexpr std::string_view ASYNC_ANNOTATION = "arkruntime.annotation.Async";
+
+    for (auto &[functionKeyName, func] : functionTable) {
+        if (func.metadata == nullptr) {
             continue;
         }
 
-        const std::string &recordName = recordNameRef;
+        const std::string &currentKey = functionKeyName;
+        ark::pandasm::Function &currentFunc = func;
 
-        record.metadata->EnumerateAnnotations([&](ark::pandasm::AnnotationData &anno) {
-            if (anno.GetName() != FUNCTION_OVERLOAD_ANNOTATION) {
+        currentFunc.metadata->EnumerateAnnotations([&](ark::pandasm::AnnotationData &anno) {
+            if (std::string_view(anno.GetName()) != ASYNC_ANNOTATION) {
                 return;
             }
 
-            anno.EnumerateAnnotationElements([&](ark::pandasm::AnnotationElement &element) {
-                auto *value = element.GetValue();
-                if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::ARRAY) {
-                    return;
-                }
-
-                auto *arrayValue = static_cast<ark::pandasm::ArrayValue *>(value);
-                if (arrayValue->GetComponentType() != ark::pandasm::Value::Type::METHOD) {
-                    return;
-                }
-                std::vector<ark::pandasm::ScalarValue> newValues;
-                bool elementFound =
-                    UpdateFunctionOverloadArrayValues(arrayValue, oldFunctionKeyName, newFunctionKeyName, newValues);
-                if (elementFound) {
-                    std::string elementName = element.GetName();
-                    anno.DeleteAnnotationElementByName(elementName);
-                    auto newArrayValue = std::make_unique<ark::pandasm::ArrayValue>(ark::pandasm::Value::Type::METHOD,
-                                                                                    std::move(newValues));
-                    ark::pandasm::AnnotationElement newElement(elementName, std::move(newArrayValue));
-                    anno.AddElement(std::move(newElement));
-                    LIBABCKIT_LOG(DEBUG) << "Updated FunctionOverload method in record " << recordName << ": "
-                                         << oldFunctionKeyName << " -> " << newFunctionKeyName << std::endl;
-                }
-            });
+            for (const auto &elem : anno.GetElements()) {
+                ProcessAsyncAnnotationElement(elem, currentKey, currentFunc, oldToNew, isStatic, hasUpdates);
+            }
         });
     }
-
     return true;
 }
 
-// Check if FunctionalReference annotation needs update
-static bool CheckFunctionalReferenceNeedsUpdate(ark::pandasm::AnnotationData &anno, const std::string &elementName,
-                                                const std::string &oldFunctionKeyName)
+static bool ProcessLambdaRecordFunctionalReference(
+    ark::pandasm::RecordMetadata *recordMeta, const std::unordered_map<std::string_view, std::string_view> &oldToNew,
+    bool &hasUpdates)
 {
-    if (anno.GetName() != "arkruntime.annotation.FunctionReference") {
-        return false;
-    }
-    for (const auto &elem : anno.GetElements()) {
-        if (elem.GetName() == elementName) {
-            auto *value = elem.GetValue();
-            if (value != nullptr && value->GetType() == ark::pandasm::Value::Type::METHOD) {
-                auto *scalarValue = value->GetAsScalar();
-                if (scalarValue != nullptr) {
-                    std::string methodValue = scalarValue->GetValue<std::string>();
-                    if (methodValue == oldFunctionKeyName) {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    return false;
-}
-
-// Check if NamedFunctionObject annotation needs update
-static bool CheckNamedFunctionObjectNeedsUpdate(ark::pandasm::AnnotationData &anno, const std::string &nameElement,
-                                                const std::string &oldSimpleName)
-{
-    if (anno.GetName() != "std.core.NamedFunctionObject") {
-        return false;
-    }
-    for (const auto &elem : anno.GetElements()) {
-        if (elem.GetName() == nameElement) {
-            auto *value = elem.GetValue();
-            if (value != nullptr && value->GetType() == ark::pandasm::Value::Type::STRING) {
-                auto *scalarValue = value->GetAsScalar();
-                if (scalarValue != nullptr) {
-                    std::string nameValue = scalarValue->GetValue<std::string>();
-                    if (nameValue == oldSimpleName) {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    return false;
-}
-
-static bool FunctionRefreshLambdaAnnotationElements(AbckitCoreFunction *function, const std::string &oldFunctionKeyName,
-                                                    const std::string &newFunctionKeyName)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    if (oldFunctionKeyName == newFunctionKeyName) {
-        return true;
-    }
-
-    auto *prog = function->owningModule->file->GetStaticProgram();
-    const std::string LAMBDA_RECORD_KEY = "%%lambda-";
     // CC-OFFNXT(G.NAM.03-CPP) project code style
-    const std::string FUNCTIONAL_REFERENCE_ANNO = "arkruntime.annotation.FunctionReference";
-    const std::string NAMED_FUNCTION_OBJECT_ANNO = "std.core.NamedFunctionObject";
-    const std::string ELEMENT_NAME = "value";
-    const std::string NAME_ELEMENT = "name";
+    constexpr std::string_view FUNCTIONAL_REFERENCE_ANNO = "arkruntime.annotation.FunctionReference";
+    constexpr std::string_view ELEMENT_NAME = "value";
 
-    std::string oldSimpleName = ExtractSimpleFunctionName(oldFunctionKeyName);
-    std::string newSimpleName = ExtractSimpleFunctionName(newFunctionKeyName);
-    bool nameChanged = !oldSimpleName.empty() && oldSimpleName != newSimpleName;
-
-    for (const auto &[recordNameRef, record] : prog->recordTable) {
-        std::string recordName = recordNameRef;
-
-        if (recordName.find(LAMBDA_RECORD_KEY) == std::string::npos || record.metadata == nullptr) {
+    for (const auto &elem : recordMeta->GetAnnotations()) {
+        if (elem.GetName() != FUNCTIONAL_REFERENCE_ANNO) {
             continue;
         }
-
-        bool needsUpdateFuncRef = false;
-        bool needsUpdateNamedFunc = false;
-
-        record.metadata->EnumerateAnnotations([&](ark::pandasm::AnnotationData &anno) {
-            if (CheckFunctionalReferenceNeedsUpdate(anno, ELEMENT_NAME, oldFunctionKeyName)) {
-                needsUpdateFuncRef = true;
-                LIBABCKIT_LOG(DEBUG) << "Found lambda record " << recordName
-                                     << " with FunctionalReference to old function: " << oldFunctionKeyName
-                                     << std::endl;
-            } else if (nameChanged && CheckNamedFunctionObjectNeedsUpdate(anno, NAME_ELEMENT, oldSimpleName)) {
-                needsUpdateNamedFunc = true;
-                LIBABCKIT_LOG(DEBUG) << "Found lambda record " << recordName
-                                     << " with NamedFunctionObject name: " << oldSimpleName << std::endl;
+        for (const auto &e : elem.GetElements()) {
+            if (e.GetName() != ELEMENT_NAME) {
+                continue;
             }
-        });
-
-        if (needsUpdateFuncRef) {
-            LIBABCKIT_LOG(DEBUG) << "Updating FunctionalReference in " << recordName << " from " << oldFunctionKeyName
-                                 << " to " << newFunctionKeyName << std::endl;
-            if (!UpdateAnnotationElementValueMethod(record.metadata.get(), FUNCTIONAL_REFERENCE_ANNO, ELEMENT_NAME,
-                                                    newFunctionKeyName, true)) {
-                LIBABCKIT_LOG(ERROR) << "Failed to update FunctionalReference annotation element in " << recordName
-                                     << std::endl;
-                return false;
+            auto *value = e.GetValue();
+            if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::METHOD) {
+                continue;
             }
-        }
-
-        if (needsUpdateNamedFunc) {
-            LIBABCKIT_LOG(DEBUG) << "Updating NamedFunctionObject in " << recordName << " from " << oldSimpleName
-                                 << " to " << newSimpleName << std::endl;
-            if (!UpdateAnnotationElementValueString(record.metadata.get(), NAMED_FUNCTION_OBJECT_ANNO, NAME_ELEMENT,
-                                                    newSimpleName)) {
-                LIBABCKIT_LOG(ERROR) << "Failed to update NamedFunctionObject annotation element in " << recordName
-                                     << std::endl;
-                return false;
+            auto *scalarValue = value->GetAsScalar();
+            if (scalarValue == nullptr) {
+                continue;
             }
+            std::string methodValue = scalarValue->GetValue<std::string>();
+            auto it = oldToNew.find(std::string_view(methodValue));
+            if (it == oldToNew.end()) {
+                continue;
+            }
+            if (UpdateAnnotationElementValueMethod(recordMeta, std::string(FUNCTIONAL_REFERENCE_ANNO),
+                                                   std::string(ELEMENT_NAME), std::string(it->second), true)) {
+                hasUpdates = true;
+            }
+            break;
         }
     }
-
     return true;
 }
 
-static bool FunctionRefreshAsyncAnnotationElements(AbckitCoreFunction *function, const std::string &oldFunctionKeyName,
-                                                   const std::string &newFunctionKeyName)
+static bool ProcessLambdaRecordNamedFunctionObject(ark::pandasm::RecordMetadata *recordMeta,
+                                                   const std::unordered_map<std::string, std::string> &simpleOldToNew,
+                                                   bool &hasUpdates)
 {
-    LIBABCKIT_LOG_FUNC;
+    constexpr std::string_view NAMED_FUNCTION_OBJECT_ANNO = "std.core.NamedFunctionObject";
+    constexpr std::string_view NAME_ELEMENT = "name";
 
-    if (oldFunctionKeyName == newFunctionKeyName) {
-        return true;
+    for (const auto &elem : recordMeta->GetAnnotations()) {
+        if (elem.GetName() != NAMED_FUNCTION_OBJECT_ANNO) {
+            continue;
+        }
+        for (const auto &e : elem.GetElements()) {
+            if (e.GetName() != NAME_ELEMENT) {
+                continue;
+            }
+            auto *value = e.GetValue();
+            if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::STRING) {
+                continue;
+            }
+            auto *scalarValue = value->GetAsScalar();
+            if (scalarValue == nullptr) {
+                continue;
+            }
+            std::string nameValue = scalarValue->GetValue<std::string>();
+            auto it = simpleOldToNew.find(nameValue);
+            if (it == simpleOldToNew.end()) {
+                continue;
+            }
+            if (UpdateAnnotationElementValueString(recordMeta, std::string(NAMED_FUNCTION_OBJECT_ANNO),
+                                                   std::string(NAME_ELEMENT), it->second)) {
+                hasUpdates = true;
+            }
+            break;
+        }
     }
+    return true;
+}
 
-    auto *prog = function->owningModule->file->GetStaticProgram();
+static bool ProcessFunctionOverloadAnnotation(ark::pandasm::AnnotationData &anno,
+                                              const std::unordered_map<std::string_view, std::string_view> &oldToNew,
+                                              std::vector<ark::pandasm::ScalarValue> &scratch, bool &hasUpdates)
+{
+    bool elementFound = false;
+    anno.EnumerateAnnotationElements([&](ark::pandasm::AnnotationElement &element) {
+        auto *value = element.GetValue();
+        if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::ARRAY) {
+            return;
+        }
+        auto *arrayValue = static_cast<ark::pandasm::ArrayValue *>(value);
+        if (arrayValue->GetComponentType() != ark::pandasm::Value::Type::METHOD) {
+            return;
+        }
+        scratch.clear();
+        scratch.reserve(arrayValue->GetValues().size());
+        if (UpdateFunctionOverloadArrayValuesWithMap(arrayValue, oldToNew, scratch)) {
+            anno.DeleteAnnotationElementByName(element.GetName());
+            auto newArrayValue =
+                std::make_unique<ark::pandasm::ArrayValue>(ark::pandasm::Value::Type::METHOD, std::move(scratch));
+            ark::pandasm::AnnotationElement newElement(element.GetName(), std::move(newArrayValue));
+            anno.AddElement(std::move(newElement));
+            scratch.clear();
+            hasUpdates = true;
+            elementFound = true;
+        }
+    });
+    return elementFound;
+}
 
-    bool success = true;
-    success &=
-        ProcessAsyncAnnotationsInFunctionTable(prog->functionStaticTable, oldFunctionKeyName, newFunctionKeyName, true);
-    success &= ProcessAsyncAnnotationsInFunctionTable(prog->functionInstanceTable, oldFunctionKeyName,
-                                                      newFunctionKeyName, false);
+static bool ProcessModuleAnnotation(ark::pandasm::AnnotationData &anno,
+                                    const std::unordered_map<std::string_view, std::string_view> &oldToNew,
+                                    std::vector<ark::pandasm::ScalarValue> &scratch, bool &hasUpdates)
+{
+    bool elementFound = false;
+    anno.EnumerateAnnotationElements([&](ark::pandasm::AnnotationElement &element) {
+        if (element.GetName() != "exported") {
+            return;
+        }
+        auto *value = element.GetValue();
+        if (value == nullptr || value->GetType() != ark::pandasm::Value::Type::ARRAY) {
+            return;
+        }
+        auto *arrayValue = static_cast<ark::pandasm::ArrayValue *>(value);
+        if (arrayValue->GetComponentType() != ark::pandasm::Value::Type::METHOD) {
+            return;
+        }
+        scratch.clear();
+        scratch.reserve(arrayValue->GetValues().size());
+        if (UpdateFunctionOverloadArrayValuesWithMap(arrayValue, oldToNew, scratch)) {
+            anno.DeleteAnnotationElementByName(element.GetName());
+            auto newArrayValue =
+                std::make_unique<ark::pandasm::ArrayValue>(ark::pandasm::Value::Type::METHOD, std::move(scratch));
+            ark::pandasm::AnnotationElement newElement(element.GetName(), std::move(newArrayValue));
+            anno.AddElement(std::move(newElement));
+            scratch.clear();
+            hasUpdates = true;
+            elementFound = true;
+        }
+    });
+    return elementFound;
+}
 
-    return success;
+static bool ApplyBatchFunctionRecordAnnotations(ark::pandasm::Program *prog,
+                                                const std::unordered_map<std::string_view, std::string_view> &oldToNew,
+                                                const std::unordered_map<std::string, std::string> &simpleOldToNew,
+                                                bool &hasUpdates)
+{
+    constexpr std::string_view LAMBDA_RECORD_KEY = "%%lambda-";
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr const char *FUNCTION_OVERLOAD_ANNOTATION = "arkruntime.annotation.FunctionReference";
+    constexpr const char *MODULE_ANNOTATION = "arkruntime.annotation.Module";
+
+    static thread_local std::vector<ark::pandasm::ScalarValue> s_recordScalarScratch;
+
+    for (const auto &[recordNameRef, record] : prog->recordTable) {
+        if (record.metadata == nullptr) {
+            continue;
+        }
+        const std::string_view recordKey(recordNameRef);
+        const bool isLambdaRecord = (recordKey.find(LAMBDA_RECORD_KEY) != std::string::npos);
+        ark::pandasm::RecordMetadata *recordMeta = record.metadata.get();
+
+        recordMeta->EnumerateAnnotations([&](ark::pandasm::AnnotationData &anno) {
+            if (isLambdaRecord) {
+                ProcessLambdaRecordFunctionalReference(recordMeta, oldToNew, hasUpdates);
+                ProcessLambdaRecordNamedFunctionObject(recordMeta, simpleOldToNew, hasUpdates);
+            }
+            if (anno.GetName() == FUNCTION_OVERLOAD_ANNOTATION) {
+                ProcessFunctionOverloadAnnotation(anno, oldToNew, s_recordScalarScratch, hasUpdates);
+            }
+            if (anno.GetName() == MODULE_ANNOTATION) {
+                ProcessModuleAnnotation(anno, oldToNew, s_recordScalarScratch, hasUpdates);
+            }
+        });
+    }
+    return true;
 }
 
 static bool UpdateAnnotationElementValueString(ark::pandasm::RecordMetadata *metadata, const std::string &annoName,
@@ -973,6 +954,51 @@ bool libabckit::ModifyNameHelper::NamespaceRefreshName(AbckitCoreNamespace *ns, 
     return true;
 }
 
+bool libabckit::ModifyNameHelper::ApplyBatchFunctionRenameAnnotations(
+    ark::pandasm::Program *prog, const std::vector<std::pair<std::string, std::string>> &renamePairs)
+{
+    if (renamePairs.empty()) {
+        return true;
+    }
+    std::unordered_map<std::string_view, std::string_view> oldToNew;
+    std::unordered_map<std::string, std::string> simpleOldToNew;
+    for (const auto &p : renamePairs) {
+        if (p.first == p.second) {
+            continue;
+        }
+        oldToNew.emplace(p.first, p.second);
+        std::string oldSimple = ExtractSimpleFunctionName(p.first);
+        std::string newSimple = ExtractSimpleFunctionName(p.second);
+        if (!oldSimple.empty() && oldSimple != newSimple) {
+            simpleOldToNew.emplace(oldSimple, newSimple);
+        }
+    }
+    if (oldToNew.empty()) {
+        return true;
+    }
+
+    for (int innerIter = 0; innerIter < 10; ++innerIter) {  //  10 is maxInnerIterations
+        bool hasUpdates = false;
+
+        if (!ProcessAsyncAnnotationsInFunctionTableBatch(prog->functionStaticTable, oldToNew, true, hasUpdates)) {
+            return false;
+        }
+        if (!ProcessAsyncAnnotationsInFunctionTableBatch(prog->functionInstanceTable, oldToNew, false, hasUpdates)) {
+            return false;
+        }
+        if (!ApplyBatchFunctionRecordAnnotations(prog, oldToNew, simpleOldToNew, hasUpdates)) {
+            return false;
+        }
+
+        if (!hasUpdates) {
+            LIBABCKIT_LOG(DEBUG) << "ApplyBatchFunctionRenameAnnotations converged at iteration " << (innerIter + 1)
+                                 << std::endl;
+            break;
+        }
+    }
+    return true;
+}
+
 void libabckit::ModifyNameHelper::GenerateNewFunctionNames(AbckitCoreFunction *function, const std::string &newName,
                                                            const std::string &oldFunctionKeyName,
                                                            std::string &newFunctionKeyName,
@@ -1026,20 +1052,8 @@ bool libabckit::ModifyNameHelper::FunctionRefreshName(AbckitCoreFunction *functi
     }
     funcImpl->name = newFunctionName;
 
-    if (!FunctionRefreshAsyncAnnotationElements(function, oldFunctionKeyName, newFunctionKeyName)) {
-        LIBABCKIT_LOG(ERROR) << "Failed to refresh async annotation elements" << std::endl;
-        return false;
-    }
-
-    if (!FunctionRefreshLambdaAnnotationElements(function, oldFunctionKeyName, newFunctionKeyName)) {
-        LIBABCKIT_LOG(ERROR) << "Failed to refresh lambda annotation elements" << std::endl;
-        return false;
-    }
-
-    if (!FunctionRefreshFunctionOverloadAnnotationElements(function, oldFunctionKeyName, newFunctionKeyName)) {
-        LIBABCKIT_LOG(ERROR) << "Failed to refresh FunctionOverload annotation elements" << std::endl;
-        return false;
-    }
+    AbckitFile *file = function->owningModule->file;
+    file->pendingFunctionRenames.emplace_back(oldFunctionKeyName, newFunctionKeyName);
 
     return true;
 }
