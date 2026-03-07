@@ -157,7 +157,7 @@ cases:
                 is_subtype_of_inter_type: "false",
                 check_value_1: "123",
                 check_value_1_is_subtype_of_inter_type: "false",
-                check_value_2: "45.6",
+                check_value_2: "45.6f",
                 check_value_2_is_subtype_of_inter_type: "false" }
             - { check_type_T:  "boolean",
                 is_subtype_of_inter_type: "false",
