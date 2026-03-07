@@ -574,6 +574,9 @@ private:
     size_t copiedObjectsYoung_ {0};
     size_t copiedObjectsOld_ {0};
     bool singlePassCompactionEnabled_ {false};
+    size_t origionSize_ {0};
+    size_t sensitiveSize_ {0};
+    static constexpr size_t ADJUST_SPACE_RATE = 32;
 
     template <class, bool>
     friend class RefCacheBuilder;

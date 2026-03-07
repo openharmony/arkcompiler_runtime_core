@@ -2793,6 +2793,10 @@ void G1GC<LanguageConfig>::PostponeGCStart()
 {
     regionGarbageRateThreshold_ = 0;
     this->SetFastGCFlag(true);
+    if (sensitiveSize_ == 0) {
+        sensitiveSize_ = Runtime::GetOptions().GetHeapSizeLimit() / ADJUST_SPACE_RATE;
+    }
+    origionSize_ = GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(sensitiveSize_);
     GC::PostponeGCStart();
 }
 
@@ -2802,6 +2806,8 @@ void G1GC<LanguageConfig>::PostponeGCEnd()
     ASSERT(!this->IsPostponeEnabled() || (regionGarbageRateThreshold_ == 0 && this->GetFastGCFlag()));
     regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
     this->SetFastGCFlag(false);
+    GenerationalGC<LanguageConfig>::RestoreTenuredGC();
+    GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(origionSize_);
     GC::PostponeGCEnd();
 }
 
