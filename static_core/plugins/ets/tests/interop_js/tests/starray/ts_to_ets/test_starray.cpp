@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { etsVm, getTestModule } = require('../scenarios.test.abc');
 
-const etsMod = getTestModule('scenarios_test');
-const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeConflictEts = etsMod.getFunction('functionArgTypeConflictMap');
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
+namespace ark::ets::interop::js::testing {
+
+class TsToEtsSTArrayTest : public EtsInteropTest {};
+
+TEST_F(TsToEtsSTArrayTest, testReturnArray)
 {
-	let result = functionArgTypeConflictEts();
-	ASSERT_TRUE(!(result instanceof Map));
-	ASSERT_EQ(result.get('foo'), 'bar');
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReturnArray"));
 }
+
+TEST_F(TsToEtsSTArrayTest, testConsumeArray)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testConsumeArray"));
+}
+}  // namespace ark::ets::interop::js::testing

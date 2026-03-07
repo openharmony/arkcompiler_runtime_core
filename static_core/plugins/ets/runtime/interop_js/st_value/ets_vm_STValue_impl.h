@@ -93,6 +93,12 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info);
 napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info info);
 napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info info);
 napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info);
+napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info);
+napi_value STValueNewSTSetImpl(napi_env env, napi_callback_info info);
+napi_value STValueNewSTMapImpl(napi_env env, napi_callback_info info);
+napi_value STValueIsSTArrayImpl(napi_env env, napi_callback_info info);
+napi_value STValueIsSTSetImpl(napi_env env, napi_callback_info info);
+napi_value STValueIsSTMapImpl(napi_env env, napi_callback_info info);
 
 }  // namespace ark::ets::interop::js
 

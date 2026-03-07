@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,13 @@ const genericSubsetByRefStaticCallFromSts = getFunction('genericSubsetByRefStati
 function checkSubsetByRefStatic() {
     const res = SubsetByRefStatic.get(jsArrInt);
 
-    ASSERT_TRUE(checkArray(res) && res[0] === jsArrInt[0]);
+    ASSERT_TRUE(!checkArray(res) && res[0] === jsArrInt[0]);
 }
 
 function checkGenericSubsetByRefStaticCallFromSts() {
     const res = genericSubsetByRefStaticCallFromSts(jsArrInt);
 
-    ASSERT_TRUE(checkArray(res) && res[0] === jsArrInt[0]);
+    ASSERT_TRUE(!checkArray(res) && res[0] === jsArrInt[0]);
 }
 
 checkSubsetByRefStatic();

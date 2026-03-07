@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,8 @@ export let tsObject = {
 export function changeObject() {
     tsObject.value = tsString + tsString;
 }
-export let arr = [tsNumber];
+export let arr = globalThis.gtest.etsVm.STValue.newSTArray();
+arr.push(tsNumber);
 export function changeArray() {
     arr.push(tsNumber);
 }

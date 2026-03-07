@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,10 @@ const etsConcatArray2 = etsVm.getClass('Lescompat_interface/ETSGLOBAL;').etsConc
 const arrayConcat = etsVm.getClass('Lescompat_interface/ETSGLOBAL;').arrayConcat;
 const error = new Error();
 
-const tsConcatArray1 = [1, 2, 3, 4];
-const tsConcatArray2 = [5, 6, 7, 8];
+const tsConcatArray1 = etsVm.STValue.newSTArray();
+tsConcatArray1.push(1, 2, 3, 4);
+const tsConcatArray2 = etsVm.STValue.newSTArray();
+tsConcatArray2.push(5, 6, 7, 8);
 
 function testEsCompatIfaceInEts(): void {
   // Invoke method with escompat interface as parameter in ets, but take TS object as argument

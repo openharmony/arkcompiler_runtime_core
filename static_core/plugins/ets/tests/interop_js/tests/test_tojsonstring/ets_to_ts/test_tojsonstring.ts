@@ -60,8 +60,16 @@ function testSimpleClass(): void {
 function testClassWithArray(): void {
     let obj = new ClassWithArray();
     obj.id = 1;
-    obj.items = [10, 20, 30];
-    obj.tags = ['tag1', 'tag2', 'tag3'];
+    let arrItems = STValue.newSTArray();
+    arrItems.push(10);
+    arrItems.push(20);
+    arrItems.push(30);
+    obj.items = arrItems;
+    let arrTags = STValue.newSTArray();
+    arrTags.push('tag1');
+    arrTags.push('tag2');
+    arrTags.push('tag3');
+    obj.tags = arrTags;
 
     let jsonResult = STValue.toJSON(obj);
     let expected = serializeClassWithArray(obj);
@@ -139,7 +147,11 @@ function testComplexNestedObject(): void {
     task3.status = 'Pending';
     task3.hours = 60;
 
-    project.tasks = [task1, task2, task3];
+    let tasks = STValue.newSTArray();
+    tasks.push(task1);
+    tasks.push(task2);
+    tasks.push(task3);
+    project.tasks = tasks;
 
     let jsonResult = STValue.toJSON(project);
     let expected = serializeProject(project);
