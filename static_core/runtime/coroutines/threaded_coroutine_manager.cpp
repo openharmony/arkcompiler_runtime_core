@@ -524,4 +524,33 @@ void ThreadedCoroutineManager::ProcessTimerEvents()
     }
 }
 
+void ThreadedCoroutineManager::InitializeManagedStructures()
+{
+    ASSERT_NATIVE_CODE();
+    auto *currCoro = Coroutine::GetCurrent();
+    ASSERT(currCoro == GetMainThread());
+
+    ScopedManagedCodeThread msc(currCoro);
+    PandaVector<PandaVector<CoroutineWorker::LocalObjectData>> eachWorkerLocalObjects {};
+
+    os::memory::LockHolder l {workersLock_};
+
+    auto numWorkers = workers_.size();
+    workersLock_.Unlock();
+
+    eachWorkerLocalObjects.reserve(numWorkers);
+    for (size_t i = 0; i < numWorkers; i++) {
+        eachWorkerLocalObjects.push_back(CoroutineWorker::CreateWorkerLocalObjects());
+    }
+    workersLock_.Lock();
+    ASSERT(numWorkers == workers_.size());
+
+    int i = 0;
+    for (auto *w : workers_) {
+        w->InitWorkerLocalObjects(std::move(eachWorkerLocalObjects[i++]));
+        w->CacheLocalObjectsInCoroutines();
+    }
+    currCoro->UpdateCachedObjects();
+}
+
 }  // namespace ark

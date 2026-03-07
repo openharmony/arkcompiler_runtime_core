@@ -151,7 +151,6 @@ public:
     }
 
     // event handlers
-    void OnHostWorkerChanged() override;
     void OnContextSwitchedTo() override;
     void OnChildCoroutineCreated(Coroutine *child) override;
 

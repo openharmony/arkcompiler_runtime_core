@@ -45,6 +45,12 @@ public:
     using LocalStorage = StaticLocalStorage<DataIdx>;
     using Id = int32_t;
 
+    struct LocalObjectData {
+        CoroutineWorker::DataIdx type;
+        mem::Reference *objectRef;
+        LocalStorage::Finalizer finalizer;
+    };
+
     static constexpr Id INVALID_ID = -1;
 
     NO_COPY_SEMANTIC(CoroutineWorker);
@@ -116,10 +122,27 @@ public:
 
     void TriggerSchedulerExternally(Coroutine *requester, int64_t delayMs = 0);
 
+    /// @brief Update worker local object in coroutines
+    virtual void CacheLocalObjectsInCoroutines() {};
+
+    /**
+     * Initialize worker local objects
+     * @param objectRefs created objects
+     */
+    void InitWorkerLocalObjects(PandaVector<LocalObjectData> &&objectRefs);
+
     /// should be called once the VM is ready to create managed objects in the managed heap
     void InitializeManagedStructures();
 
-    /// should be called from CoroutineManager after worker creation from the coroutine assigned to the worker
+    static PandaVector<LocalObjectData> CreateWorkerLocalObjects();
+
+    /// @brief should be called by CoroutineManager just before the worker become visible for others
+    void OnBeforeWorkerStartup();
+
+    /**
+     * @brief Must be called by CoroutineManager after the worker is created,
+     *        from the coroutine assigned to that worker.
+     */
     void OnWorkerStartup();
 
     /**
@@ -140,9 +163,6 @@ public:
 #endif  // ARK_USE_COMMON_RUNTIME
 
 private:
-    void CreateWorkerLocalObjects();
-    virtual void CacheLocalObjectsInCoroutines() {}
-
     Runtime *runtime_ = nullptr;
     PandaString name_;
     Id id_ = INVALID_ID;

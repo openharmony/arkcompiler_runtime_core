@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,7 @@ public:
      */
     virtual void InitializeScheduler(Runtime *runtime, PandaVM *vm) = 0;
     /// should be called once the VM is ready to create managed objects in the managed heap
-    void InitializeManagedStructures();
+    virtual void InitializeManagedStructures() = 0;
     /// Should be called after all execution is finished. Destroys the main coroutine.
     virtual void Finalize() = 0;
     /// Add coroutine to registry (used for enumeration and tracking) and perform all the required actions

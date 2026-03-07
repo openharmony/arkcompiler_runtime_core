@@ -140,6 +140,9 @@ public:
     CoroutineWorkerGroup::Id GenerateWorkerGroupId(CoroutineWorkerDomain domain,
                                                    const PandaVector<CoroutineWorker::Id> &hint) override;
 
+    /// should be called once the VM is ready to create managed objects in the managed heap
+    void InitializeManagedStructures() override;
+
 protected:
     static constexpr CoroutineWorker::Id MAIN_WORKER_ID = 0U;
     // maximum worker id is bound by the number of bits in the affinity mask
@@ -197,6 +200,8 @@ private:
     StackfulCoroutineWorker *CreateWorker(Runtime *runtime, PandaVM *vm,
                                           StackfulCoroutineWorker::ScheduleLoopType wType, PandaString workerName,
                                           bool isMainWorker = false);
+    // we have to preallocate objects before worker initialization in order to avoid deadlock caused by GC triggering
+    PandaVector<CoroutineWorker::LocalObjectData> CreateWorkerLocalObjects();
 
     /* coroutine registry management */
     void AddToRegistry(Coroutine *co) REQUIRES(coroListLock_);

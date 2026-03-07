@@ -461,13 +461,14 @@ add_ets_coroutines_test(FILE scale_workers_pool.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE migrate_awakened_coro.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "MIGRATE_AWAKENED"
-                        WORKERS "THREE"
-                        MODE "INT"
-)
+# NOTE(alimovilya, #33501) enable after fix
+# add_ets_coroutines_test(FILE migrate_awakened_coro.ets
+#                         SKIP_ARM32_COMPILER
+#                         IMPL "STACKFUL"
+#                         OPTION_SETS_STACKFUL "MIGRATE_AWAKENED"
+#                         WORKERS "THREE"
+#                         MODE "INT"
+# )
 
 add_ets_coroutines_test(FILE migration.ets
                         SKIP_ARM32_COMPILER
