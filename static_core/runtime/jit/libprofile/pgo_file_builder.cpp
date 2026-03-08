@@ -20,14 +20,17 @@
 #include "libarkbase/utils/expected.h"
 #include "libarkbase/utils/logger.h"
 
-#include <iostream>
+#include <atomic>
+#include <cerrno>
+#include <cstdio>
 #include <iomanip>
-
-#if !defined(PANDA_TARGET_WINDOWS)
-#include "libarkbase/os/file_lock.h"
-#endif
+#include <iostream>
 
 namespace ark::pgo {
+
+// Monotonic counter to generate unique tmp filenames, avoiding races when
+// multiple threads (e.g. background profile saver and shutdown save) call Save() concurrently.
+static std::atomic<uint32_t> g_saveCounter {0};
 // NOLINTNEXTLINE(readability-magic-numbers)
 static_assert(sizeof(PgoHeader) == 24, "PgoHeader is 24 bytes");
 // NOLINTNEXTLINE(readability-magic-numbers)
@@ -376,28 +379,25 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
 
 uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr)
 {
-#if !defined(PANDA_TARGET_WINDOWS)
-    os::file_lock::ScopedFileLock lock(fileName.c_str(), LOCK_EX);
-    if (!lock.IsLocked()) {
-        LOG(ERROR, RUNTIME) << "Failed to acquire exclusive lock on " << fileName;
-        return 0;
-    }
-#endif
+    // Atomic with relaxed order reason: counter only needs uniqueness, not synchronization with other data
+    auto counter = PandaString(std::to_string(g_saveCounter.fetch_add(1, std::memory_order_relaxed)));
+    auto tmpFileName = fileName + "." + counter + ".tmp";
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-    std::ofstream fd(fileName.data(), std::ios::binary | std::ios::out);
+    std::ofstream fd(tmpFileName.data(), std::ios::binary | std::ios::out);
     if (!fd.is_open()) {
+        LOG(ERROR, RUNTIME) << "Failed to open temp file for writing: " << tmpFileName;
         return 0;
     }
     uint32_t writtenBytes = 0;
 
     auto savedProf = GetSavedTypes(profObject->GetAllMethods());
     auto headerBytes = WriteFileHeader(fd, MAGIC, VERSION, PROFILE_TYPE, savedProf, classCtxStr);
-    CheckAndAddBytes(fd, fileName, headerBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, headerBytes, writtenBytes);
 
     auto pandaFilesBytes = WritePandaFilesSection(fd, profObject->GetPandaFileMapReverse());
-    CheckAndAddBytes(fd, fileName, pandaFilesBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, pandaFilesBytes, writtenBytes);
 
     uint32_t offset = writtenBytes;
     auto sectionNum = GetSectionNumbers(profObject->GetAllMethods());
@@ -406,11 +406,20 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
     fd.seekp(sectionInfosSize, std::ios::cur);
 
     auto methodsBytes = WriteAllMethodsSections(fd, profObject->GetAllMethods());
-    CheckAndAddBytes(fd, fileName, methodsBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, methodsBytes, writtenBytes);
 
     fd.seekp(offset, std::ios::beg);
     auto sectionInfoBytes = WriteSectionInfosSection(fd, sectionInfos_);
-    CheckAndAddBytes(fd, fileName, sectionInfoBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, sectionInfoBytes, writtenBytes);
+
+    fd.close();
+
+    // Atomic rename: readers always see either the old complete file or the new complete file
+    if (rename(tmpFileName.c_str(), fileName.c_str()) != 0) {
+        LOG(ERROR, RUNTIME) << "Failed to rename " << tmpFileName << " to " << fileName << ", errno=" << errno;
+        remove(tmpFileName.c_str());
+        return 0;
+    }
 
     return writtenBytes;
 }
@@ -648,13 +657,6 @@ Expected<AotProfilingData, PandaString> AotPgoFile::Load(const PandaString &file
 {
     using namespace std::string_literals;
     AotProfilingData data;
-
-#if !defined(PANDA_TARGET_WINDOWS)
-    os::file_lock::ScopedFileLock lock(fileName.c_str(), LOCK_SH);
-    if (!lock.IsLocked()) {
-        return UnexpectedS("Failed to acquire shared lock on file");
-    }
-#endif
 
     std::ifstream inputFile(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
     if (!inputFile.is_open()) {
