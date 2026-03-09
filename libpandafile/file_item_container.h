@@ -111,7 +111,7 @@ public:
 
     void ReLayout();
     void ComputeLayoutForReferencedItems();
-    uint32_t ComputelayoutForRest();
+    uint32_t ComputeLayoutForRest();
     uint32_t ComputeLayout();
     size_t GetFileSize();
     bool Write(Writer *writer);

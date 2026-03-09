@@ -609,6 +609,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
     }
 
     for (const auto &[id, l] : program.literalarray_table) {
+        ASSERT(items->GetLiteralArrayItemMap()->find(id) != items->GetLiteralArrayItemMap()->end());
         auto *literal_array_item = items->GetLiteralArrayItemMap()->find(id)->second;
         std::vector<panda_file::LiteralItem> literal_array;
         for (auto &literal : l.literals_) {
@@ -1525,7 +1526,7 @@ std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program,
         return nullptr;
     }
 
-    size_t size = items.ComputelayoutForRest();
+    size_t size = items.ComputeLayoutForRest();
     auto *buffer = new std::byte[size];
     auto writer = MemoryBufferWriter(reinterpret_cast<uint8_t *>(buffer), size);
     items.DeduplicateItems();
