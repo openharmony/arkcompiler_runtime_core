@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,14 +43,16 @@ class A {
         if (a == '1') {
             throw new Error('1')
         }
-        // 2. Mandatory call to a superconstructor (N/A, no superclass)
-        // 3. Mandatory execution of field initializers (if any) in the order they appear in
-        // a class body implicitly added by the compiler.
-        // 4. Optional arbitrary code that avoids usage of non-initialized fields.
+        // 2. Call to a superconstructor (N/A, no superclass)
+        // 3. Implicit addition by the compiler: field initializers (if any)
+        // are to be executed in the order they appear in a class body.
+        // 4. Code that either does not use this or accesses fields through this
+        // so the fields that are not explicitly initialized in the body of body
+        // of primary constructor or during the step 3 are not read.
         if (a == '2') {
             throw new Error('2')
         }
-        // 5. Optional code that ensures all object fields to be initialized.
+        // 5. Arbitrary code after all the fields are initialized as defined in item 4.
         arktest.assertEQ(this.f00, null)
         arktest.assertEQ(this.f01, 1)
         arktest.assertEQ(this.f02, 2)
@@ -74,18 +76,17 @@ class A {
         arktest.assertEQ(this.f13[1], '1')
         arktest.assertEQ(this.f13[2], '2')
         arktest.assertEQ(this.f14(2.0), '2')
-        // 6. Optional arbitrary code.
         if (a == '3') {
             throw new Error('3')
         }
     }
 
     constructor(a: string, b: int) { // secondary
-        // 1. Optional arbitrary code that uses neither this nor super.
+        // 1. Optional arbitrary code that does not use this or super.
         if (a == '4') {
             throw new Error('4')
         }
-        // 2. Call to another same-class constructor that uses the keyword this
+        // 2. Mandatory call to another same-class constructor that uses the keyword this.
         this(a)
         // 3. Optional arbitrary code.
         if (a == '5') {

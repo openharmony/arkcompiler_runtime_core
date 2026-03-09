@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,28 @@
  */
 
 /*---
-desc: >-
-    Call to a superconstructor if a class has an extension clause.
-    A compile-time error occurs if: An argument of the call uses this or super.
+desc: Check that superclass constructor implicitly invoked.
+assert: >-
+    If the body has no call to a superconstructor, then the compiler
+    implicitly adds a superconstructor call with no arguments
+    as the very first statement in the body.
+    If the superconstructor requires a non-empty list of arguments,
+    then a compile-time error occurs.
 expected_out: |-
-    Semantic error ESE0235: Using this is not allowed in constructor
+    Semantic error ESE0192: Must call super constructor
 tags: [compile-only, negative]
 ---*/
 
 class A {
-    ref: A
-    constructor() {
-        this.ref = this
-    }
-    constructor(ref: A) {
-        this.ref = ref
+    x: string
+
+    constructor(x: string) {
+        this.x = x
     }
 }
 
 class B extends A {
-    ref: A
-    constructor() {
-        super(this.ref)  // CTE, cannot use super or this in arguments
+    constructor(x: string) {  // CTE: no-args superconstructor not found
+        this.x = 'B'
     }
 }

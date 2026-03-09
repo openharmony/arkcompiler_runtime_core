@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,40 +22,65 @@ function foo(p: number): string {
 }
 
 class A {
-    f00: null = null
-    f01: byte = 1
-    f02: short = 2
-    f03: int = 3
-    f04: long = 4
-    f05: float = 1.5f
-    f06: double = 2.5
-    f07: boolean = true
-    f08: string = foo(3.14)
-    f09: bigint = 111111111111111111111111n
-    f10: Array<Object> = [new Object, 'b', 333n]
-    f11: FixedArray<int> = [42, 43, 44]
-    f12: [string, boolean|int] = ['12', 12]
-    f13: Record<int, string> = { 1: '1', 2: '2' }
-    f14: (p: number) => string = foo
-}
+    f00: null
+    f01: byte
+    f02: short
+    f03: int
+    f04: long
+    f05: float
+    f06: double
+    f07: boolean
+    f08: string
+    f09: bigint
+    f10: Array<Object>
+    f11: FixedArray<int>
+    f12: [string, boolean|int]
+    f13: Record<int, string>
+    f14: (p: number) => string
 
-class B extends A {
-    constructor(a: string) { // primary
+    constructor(a: string) {
         // 1. Optional arbitrary code that uses neither this nor super.
         if (a == '1') {
             throw new Error('1')
         }
-        // 2. Call to a superconstructor
-        // (calling default implicit super constructor)
+        // 2. Call to a superconstructor (N/A, no superclass)
         // 3. Implicit addition by the compiler: field initializers (if any)
         // are to be executed in the order they appear in a class body.
         // 4. Code that either does not use this or accesses fields through this
         // so the fields that are not explicitly initialized in the body of body
         // of primary constructor or during the step 3 are not read.
+        this.f00 = null
+        this.f01 = 1
+        this.f02 = 2
+        this.f03 = 3
+        this.f04 = 4
+        this.f05 = 1.5f
+        this.f06 = 2.5
+        this.f07 = true
+        this.f08 = foo(3.14)
+        this.f09 = 111111111111111111111111n
+        this.f10 = [new Object, 'b', 333n]
+        this.f11 = [42, 43, 44]
+        this.f12 = ['12', 12]
+        this.f13 = { 1: '1', 2: '2' }
+        this.f14 = foo
+
+        // 5. Arbitrary code after all the fields are initialized as defined in item 4.
         if (a == '2') {
             throw new Error('2')
         }
-        // 5. Arbitrary code after all the fields are initialized as defined in item 4.
+    }
+}
+
+class B extends A {
+    constructor(a: string) {
+        // 1. Optional arbitrary code that does not use this or super.
+        if (a == '3') {
+            throw new Error('3')
+        }
+        // 2. Call to a superconstructor
+        super(a)
+        // 3. Optional arbitrary code.
         arktest.assertEQ(this.f00, null)
         arktest.assertEQ(this.f01, 1)
         arktest.assertEQ(this.f02, 2)
@@ -79,37 +104,20 @@ class B extends A {
         arktest.assertEQ(this.f13[1], '1')
         arktest.assertEQ(this.f13[2], '2')
         arktest.assertEQ(this.f14(2.0), '2')
-        if (a == '3') {
-            throw new Error('3')
-        }
-    }
-
-    constructor(a: string, b: int) { // secondary
-        // 1. Optional arbitrary code that does not use this or super.
         if (a == '4') {
             throw new Error('4')
-        }
-        // 2. Mandatory call to another same-class constructor that uses the keyword this.
-        this(a)
-        // 3. Optional arbitrary code.
-        if (a == '5') {
-            throw new Error('5')
         }
     }
 }
 
 function main() {
-    // call primary constructor
+    let a: A = new A('x')
+    arktest.expectError(() => { a = new A('1') }, '1')
+    arktest.expectError(() => { a = new A('2') }, '2')
+
     let b: B = new B('x')
     arktest.expectError(() => { b = new B('1') }, '1')
     arktest.expectError(() => { b = new B('2') }, '2')
     arktest.expectError(() => { b = new B('3') }, '3')
-
-    // call secondary constructor
-    b = new B('x', 1)
-    arktest.expectError(() => { b = new B('1', 1) }, '1')
-    arktest.expectError(() => { b = new B('2', 1) }, '2')
-    arktest.expectError(() => { b = new B('3', 1) }, '3')
-    arktest.expectError(() => { b = new B('4', 1) }, '4')
-    arktest.expectError(() => { b = new B('5', 1) }, '5')
+    arktest.expectError(() => { b = new B('4') }, '4')
 }

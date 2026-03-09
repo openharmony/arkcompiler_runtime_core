@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause.
+    Call to a superconstructor if a class has an extension clause.
 ---*/
 
 let res = ''

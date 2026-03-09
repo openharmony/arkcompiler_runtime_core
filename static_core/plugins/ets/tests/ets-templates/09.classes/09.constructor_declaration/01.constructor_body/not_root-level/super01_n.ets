@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause.
+    Call to a superconstructor if a class has an extension clause.
     A compile-time error occurs if: The call is not a root-level statement within a constructor.
 expected_out: |-
     Semantic error ESE2077: 'super' call must be a root-level statement in constructor
