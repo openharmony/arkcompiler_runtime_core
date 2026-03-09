@@ -13,26 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    Wrong type for implementation of the interface property
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: "Expected CTE output is unknown"
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+interface I {
+  num: number
+  methI(): string {
+    return "methI"
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class A implements I {
+  num = 2
 }
 
 function main(): void {
 }
-
-{% endfor %}

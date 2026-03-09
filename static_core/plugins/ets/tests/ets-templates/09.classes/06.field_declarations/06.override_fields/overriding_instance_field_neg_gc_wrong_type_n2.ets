@@ -17,19 +17,33 @@ limitations under the License.
 
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    The term same-type in case of generic classes means that the type
+    of a field in a derived class must be the same as in the base
+    class instantiated with a parameter of the same type as the type
+    of the field in the derived class.
 tags: [compile-only, negative]
 expected_out: "{{c.expected_out}}"
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+class A<T> {}
+
+class B<U> extends A<U> {}
+
+class C<U> extends A<U> {}
+
+class Base<T> {
+  f: {{c.base_type}}
+  constructor() {
+    this.f = new {{c.base_type}}()
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class D<T> extends Base<T> {
+  f: {{c.override_type}}
+  constructor() {
+    super()
+    this.f = new {{c.override_type}}()
+  }
 }
 
 function main(): void {

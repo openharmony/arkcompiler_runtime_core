@@ -17,7 +17,9 @@ limitations under the License.
 
 /*---
 desc: >-
-    A property can be implemented as a field in different combinations
+    Providing implementation for the interface property
+    in the form of a field with overriding implementation
+    class field with override keyword
 ---*/
 
 interface I {

@@ -13,24 +13,28 @@
 
 cases:
   - {check_type: "Any", base_value: "null",
-      override_value: "undefined", new_value: "\"abc\""}
-  - {check_type: "Object|undefined", base_value: "5",
-      override_value: "undefined", new_value: "7"}
+      override_value: "7", new_value: "\"abc\""}
+  - {check_type: "Object", base_value: "5",
+      override_value: "\"abc\"", new_value: "7"}
   - {check_type: "number", base_value: "3",
-      override_value: "0.0", new_value: "13"}
+      override_value: "6.7", new_value: "13"}
   - {check_type: "double", base_value: "3.4",
-      override_value: "0.0", new_value: "15"}
+      override_value: "5.0", new_value: "15"}
   - {check_type: "float", base_value: "6.7f",
-      override_value: "0.0f", new_value: "9.8f"}
+      override_value: "7.3f", new_value: "9.8f"}
   - {check_type: "long", base_value: "9223372036854775807",
-      override_value: "0", new_value: "9223372036854775000"}
+      override_value: "78945", new_value: "9223372036854775000"}
   - {check_type: "int", base_value: "123",
-      override_value: "0", new_value: "321321"}
+      override_value: "321", new_value: "321321"}
   - {check_type: "short", base_value: "325",
-      override_value: "0", new_value: "536"}
+      override_value: "253", new_value: "536"}
   - {check_type: "byte", base_value: "127",
-      override_value: "0", new_value: "15"}
+      override_value: "78", new_value: "15"}
+  - {check_type: "string", base_value: "\"abc\"",
+      override_value: "\"defg\"", new_value: "\"hijk\""}
+  - {check_type: "bigint", base_value: "12345678901234567890n",
+      override_value: "5556423623465n", new_value: "123123n"}
   - {check_type: "char", base_value: "c'\\u2028'",
-      override_value: "c'\\u0000'", new_value: "c'x'"}
-  - {check_type: "boolean", base_value: "true",
-      override_value: "false", new_value: "true"}
+      override_value: "c'z'", new_value: "c'x'"}
+  - {check_type: "boolean", base_value: "false",
+      override_value: "true", new_value: "false"}

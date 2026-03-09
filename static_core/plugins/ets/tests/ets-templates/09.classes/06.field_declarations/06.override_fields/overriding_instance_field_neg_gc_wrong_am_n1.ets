@@ -13,26 +13,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    An overriding member can keep or extend an access modifier
+    of a member that is inherited or implemented.
+    Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: "Semantic error ESE1600001: Access modifier of field 'f' in class 'D' and in the base class 'Base' must be the same."
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+class Base<T> {
+  f: T
+  constructor(v: T) {
+    this.f = v
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class D<T> extends Base<T> {
+  protected f: T
+  constructor(v: T) {
+    super(v)
+    this.f = v
+  }
 }
 
 function main(): void {
 }
-
-{% endfor %}

@@ -17,12 +17,15 @@ limitations under the License.
 
 /*---
 desc: >-
-    When extending a class, an instance field declared in a superclass
-    can be overridden by a same-name, same-type field.
-    The new declaration adds no new field to the class type but allows
-    changing field initialization.
-params: simple overriding, default value
+    An overridden field must be initialized explicitly, either by using
+    an initializer or in a constructor. Otherwise, compile-time error occurs.
+    Implicit initialization is not used, even though the type of the field
+    has a default value.
+tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
+
+{{c.cv_decl_data}}
 
 class Base {
   field: {{c.check_type}} = {{c.base_value}}
@@ -32,22 +35,7 @@ class A extends Base {
   field: {{c.check_type}}
 }
 
-function get_field(a: Base): {{c.check_type}} {
-  return a.field
-}
-
-function set_field(a: Base, value: {{c.check_type}}) {
-  a.field = value
-}
-
 function main(): void {
-  let a: A = new A()
-  arktest.assertTrue(a.field instanceof {{c.check_type}})
-  arktest.assertEQ(a.field, {{c.override_value}})
-  arktest.assertEQ(get_field(a), {{c.override_value}})
-  set_field(a, {{c.new_value}})
-  arktest.assertEQ(a.field, {{c.new_value}})
-  arktest.assertEQ(get_field(a), {{c.new_value}})
 }
 
 {% endfor %}

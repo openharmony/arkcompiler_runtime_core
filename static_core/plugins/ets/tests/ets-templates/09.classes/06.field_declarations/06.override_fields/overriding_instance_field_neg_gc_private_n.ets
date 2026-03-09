@@ -13,26 +13,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    A compile-time error occurs if an attempt is made
+    to override private member
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: "Semantic error ESE1365480: The 'override' modifier is invalid here because the property 'f' is private in class 'Base'."
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+class Base<T> {
+  private f: T
+  constructor(v: T) {
+    this.f = v
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class D<T> extends Base<T> {
+  override f: T
+  constructor(v: T) {
+    super(v)
+    this.f = v
+  }
 }
 
 function main(): void {
 }
-
-{% endfor %}

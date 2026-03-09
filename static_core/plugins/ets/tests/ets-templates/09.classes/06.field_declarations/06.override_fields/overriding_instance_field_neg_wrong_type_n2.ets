@@ -20,7 +20,7 @@ desc: >-
     The type of the overriding field is to be the same as that of the
     overridden field. Otherwise, a compile-time error occurs
 tags: [compile-only, negative]
-expected_out: {{c.expected_out}}
+expected_out: "{{c.expected_out}}"
 ---*/
 
 class Animal {}

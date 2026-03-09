@@ -17,19 +17,30 @@ limitations under the License.
 
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    Different not covariant subtype values
 tags: [compile-only, negative]
 expected_out: "{{c.expected_out}}"
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+class A<T> {}
+
+class B<U> extends A<U> {}
+
+class C<U> extends A<U> {}
+
+class Base<T> {
+  f: B<T>
+  constructor() {
+    this.f = new B<T>()
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class D<T> extends Base<T> {
+  f: B<T>
+  constructor() {
+    super()
+    this.f = new {{c.check_value_type}}()
+  }
 }
 
 function main(): void {

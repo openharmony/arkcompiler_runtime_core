@@ -15,20 +15,25 @@ limitations under the License.
 
 /*---
 desc: >-
-    Compile-time error, conflict in overriding
+    A compile-time error occurs if a field is not declared as readonly
+    in a superclass, while an overriding field is marked as readonly
 tags: [compile-only, negative]
 expected_out: "Expected CTE output is unknown"
 ---*/
 
-interface I {
-  num: number
-  methI(): string {
-    return "methI"
+class Base<T> {
+  f: T
+  constructor(v: T) {
+    this.f = v
   }
 }
 
-class A implements I {
-  num = 2
+class D<T> extends Base<T> {
+  readonly f: T
+  constructor(v: T) {
+    super(v)
+    this.f = v
+  }
 }
 
 function main(): void {
