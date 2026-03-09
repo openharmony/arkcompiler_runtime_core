@@ -389,7 +389,15 @@ public:
         : ManagedCodeAccessor(env), alreadyInManaged_(ManagedThread::IsManagedScope())
     {
         ASSERT(env == EtsCoroutine::GetCurrent()->GetPandaAniEnv());
-        ASSERT(alreadyInManaged_ ? !StackWalker::Create(GetCoroutine()).GetMethod()->IsCriticalNative() : true);
+
+#ifndef NDEBUG
+        if (alreadyInManaged_) {
+            auto stack = StackWalker::Create(GetCoroutine());
+            if (stack.HasFrame()) {
+                ASSERT(!stack.GetMethod()->IsCriticalNative());
+            }
+        }
+#endif  // NDEBUG
 
         if (alreadyInManaged_ && IsAccessFromManagedAllowed()) {
             return;
@@ -423,12 +431,13 @@ private:
     {
 #ifndef NDEBUG
         auto stack = StackWalker::Create(GetCoroutine());
-        auto method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
-        ASSERT(method != nullptr);
-        return method->IsFastNative();
-#else
-        return true;
+        if (stack.HasFrame()) {
+            auto method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
+            ASSERT(method != nullptr);
+            return method->IsFastNative();
+        }
 #endif  // NDEBUG
+        return true;
     }
 
     PandaUniquePtr<ExceptionData> exceptionData_;

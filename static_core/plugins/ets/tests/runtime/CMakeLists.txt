@@ -12,6 +12,7 @@
 # limitations under the License.
 
 add_custom_target(ets_tests_runtime_gtests)
+add_dependencies(ets_tests is_assignable_from_union_test_gtests)
 
 panda_ets_add_gtest(
     NO_CORES
