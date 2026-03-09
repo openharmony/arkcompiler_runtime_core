@@ -15,7 +15,10 @@
 
 #include <cstring>
 #include <gtest/gtest.h>
+#include <memory>
 #include <string>
+#include <string_view>
+#include <unordered_map>
 
 #include "adapter_static/modify_name_helper.h"
 #include "helpers/helpers.h"
@@ -23,9 +26,15 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"
+#include "static_core/assembler/assembly-function.h"
+#include "static_core/assembler/assembly-record.h"
+#include "static_core/assembler/assembly-emitter.h"
+#include "libarkfile/include/source_lang_enum.h"
 
 using namespace testing::ext;
 using namespace libabckit;
+
+class ModifyNameHelperTest : public ::testing::Test {};
 
 namespace libabckit::test {
 namespace {
@@ -71,88 +80,6 @@ bool GetSetMatchAndReplace(const std::string &oldFunctionKeyName, const std::str
         return true;
     }
     return false;
-}
-
-/**
- * @tc.name: async_replace_fast_test_001
- * @tc.desc: test AsyncReplaceFast function with async prefix
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ModifyNameHelperTest, async_replace_fast_test_001, TestSize.Level1)
-{
-    const std::string oldFunctionKeyName = "%%async-oldName:param1:param2:returnType";
-    const std::string newName = "newName";
-    const std::string expected = "%%async-newName:param1:param2:returnType";
-    const std::string result = AsyncReplaceFast(oldFunctionKeyName, newName);
-    EXPECT_EQ(result, expected);
-}
-
-/**
- * @tc.name: async_replace_fast_test_002
- * @tc.desc: test AsyncReplaceFast function without async prefix
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ModifyNameHelperTest, async_replace_fast_test_002, TestSize.Level1)
-{
-    const std::string oldFunctionKeyName = "oldName:param1:param2:returnType";
-    const std::string newName = "newName";
-    const std::string expected = "oldName:param1:param2:returnType";
-    const std::string result = AsyncReplaceFast(oldFunctionKeyName, newName);
-    EXPECT_EQ(result, expected);
-}
-
-/**
- * @tc.name: get_set_match_and_replace_test_001
- * @tc.desc: test GetSetMatchAndReplace function with getter prefix
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ModifyNameHelperTest, get_set_match_and_replace_test_001, TestSize.Level1)
-{
-    std::string outNewFunctionKeyName;
-    const std::string oldFunctionKeyName = "%%get-fieldName:param1:returnType";
-    const std::string fieldName = "fieldName";
-    const std::string newName = "newFieldName";
-    const std::string expected = "%%get-newFieldName:param1:returnType";
-    const bool result = GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, outNewFunctionKeyName);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(outNewFunctionKeyName, expected);
-}
-
-/**
- * @tc.name: get_set_match_and_replace_test_002
- * @tc.desc: test GetSetMatchAndReplace function with setter prefix
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ModifyNameHelperTest, get_set_match_and_replace_test_002, TestSize.Level1)
-{
-    std::string outNewFunctionKeyName;
-    const std::string oldFunctionKeyName = "%%set-fieldName:param1:returnType";
-    const std::string fieldName = "fieldName";
-    const std::string newName = "newFieldName";
-    const std::string expected = "%%set-newFieldName:param1:returnType";
-    const bool result = GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, outNewFunctionKeyName);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(outNewFunctionKeyName, expected);
-}
-
-/**
- * @tc.name: get_set_match_and_replace_test_003
- * @tc.desc: test GetSetMatchAndReplace function without get/set prefix
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ModifyNameHelperTest, get_set_match_and_replace_test_003, TestSize.Level1)
-{
-    std::string outNewFunctionKeyName;
-    const std::string oldFunctionKeyName = "fieldName:param1:returnType";
-    const std::string fieldName = "fieldName";
-    const std::string newName = "newFieldName";
-    const bool result = GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, outNewFunctionKeyName);
-    EXPECT_FALSE(result);
 }
 
 static bool CheckFunctionInTables(const std::string &functionKeyName, const ark::pandasm::Program &prog)
@@ -206,14 +133,111 @@ static void CheckAsyncAnnotationsInTable(const ark::pandasm::Program::FunctionTa
     }
 }
 
-/**
- * @tc.name: function_refresh_name_test_001
- * @tc.desc: test FunctionRefreshName calls
- * ProcessAsyncAnnotationsInFunctionTable to update async annotations
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ModifyNameHelperTest, function_refresh_name_test_001, TestSize.Level1)
+static std::unique_ptr<ark::pandasm::FunctionMetadata> CreateFunctionMetadata()
+{
+    return std::make_unique<ark::pandasm::FunctionMetadata>();
+}
+
+static std::unique_ptr<ark::pandasm::RecordMetadata> CreateRecordMetadata()
+{
+    return std::make_unique<ark::pandasm::RecordMetadata>();
+}
+
+static void AddAsyncAnnotationToFunction(ark::pandasm::Function &func, const std::string &methodName)
+{
+    if (func.metadata == nullptr) {
+        func.metadata = CreateFunctionMetadata();
+    }
+    auto methodValue = ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::METHOD>(methodName, false);
+    std::vector<ark::pandasm::ScalarValue> values;
+    values.push_back(std::move(methodValue));
+    auto arrayValue = std::make_unique<ark::pandasm::ArrayValue>(ark::pandasm::Value::Type::METHOD, std::move(values));
+    auto element = ark::pandasm::AnnotationElement("value", std::move(arrayValue));
+    std::vector<ark::pandasm::AnnotationElement> elements;
+    elements.push_back(std::move(element));
+    auto annotation = ark::pandasm::AnnotationData("ets.coroutine.Async", std::move(elements));
+    std::vector<ark::pandasm::AnnotationData> annotations;
+    annotations.push_back(std::move(annotation));
+    func.metadata->AddAnnotations(annotations);
+}
+
+static void AddFunctionalReferenceAnnotationToRecord(ark::pandasm::Record &record, const std::string &methodName)
+{
+    if (record.metadata == nullptr) {
+        record.metadata = CreateRecordMetadata();
+    }
+    auto methodValue = ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::METHOD>(methodName, false);
+    std::vector<ark::pandasm::ScalarValue> values;
+    values.push_back(std::move(methodValue));
+    auto arrayValue = std::make_unique<ark::pandasm::ArrayValue>(ark::pandasm::Value::Type::METHOD, std::move(values));
+    auto element = ark::pandasm::AnnotationElement("value", std::move(arrayValue));
+    std::vector<ark::pandasm::AnnotationElement> elements;
+    elements.push_back(std::move(element));
+    auto annotation = ark::pandasm::AnnotationData("ets.annotation.FunctionalReference", std::move(elements));
+    std::vector<ark::pandasm::AnnotationData> annotations;
+    annotations.push_back(std::move(annotation));
+    record.metadata->AddAnnotations(annotations);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::AsyncReplaceFast, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(ModifyNameHelperTest, async_replace_fast_test_001)
+{
+    const std::string oldFunctionKeyName = "%%async-oldName:param1:param2:returnType";
+    const std::string newName = "newName";
+    const std::string expected = "%%async-newName:param1:param2:returnType";
+    const std::string result = AsyncReplaceFast(oldFunctionKeyName, newName);
+    EXPECT_EQ(result, expected);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::AsyncReplaceFast, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(ModifyNameHelperTest, async_replace_fast_test_002)
+{
+    const std::string oldFunctionKeyName = "oldName:param1:param2:returnType";
+    const std::string newName = "newName";
+    const std::string expected = "oldName:param1:param2:returnType";
+    const std::string result = AsyncReplaceFast(oldFunctionKeyName, newName);
+    EXPECT_EQ(result, expected);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::GetSetMatchAndReplace, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(ModifyNameHelperTest, get_set_match_and_replace_test_001)
+{
+    std::string outNewFunctionKeyName;
+    const std::string oldFunctionKeyName = "%%get-fieldName:param1:returnType";
+    const std::string fieldName = "fieldName";
+    const std::string newName = "newFieldName";
+    const std::string expected = "%%get-newFieldName:param1:returnType";
+    const bool result = GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, outNewFunctionKeyName);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(outNewFunctionKeyName, expected);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::GetSetMatchAndReplace, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(ModifyNameHelperTest, get_set_match_and_replace_test_002)
+{
+    std::string outNewFunctionKeyName;
+    const std::string oldFunctionKeyName = "%%set-fieldName:param1:returnType";
+    const std::string fieldName = "fieldName";
+    const std::string newName = "newFieldName";
+    const std::string expected = "%%set-newFieldName:param1:returnType";
+    const bool result = GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, outNewFunctionKeyName);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(outNewFunctionKeyName, expected);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::GetSetMatchAndReplace, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(ModifyNameHelperTest, get_set_match_and_replace_test_003)
+{
+    std::string outNewFunctionKeyName;
+    const std::string oldFunctionKeyName = "fieldName:param1:returnType";
+    const std::string fieldName = "fieldName";
+    const std::string newName = "newFieldName";
+    const bool result = GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, outNewFunctionKeyName);
+    EXPECT_FALSE(result);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::FunctionRefreshName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(ModifyNameHelperTest, function_refresh_name_test_001)
 {
     constexpr auto TEST_ABC = ABCKIT_ABC_DIR "ut/metadata_core/modify_api/functions/functions_static.abc";
 
@@ -258,4 +282,65 @@ HWTEST(ModifyNameHelperTest, function_refresh_name_test_001, TestSize.Level1)
     }
 }
 
+// Test: test-kind=api, api=ModifyNameHelper::ApplyBatchFunctionRenameAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(ModifyNameHelperTest, apply_batch_function_rename_annotations_test_001)
+{
+    ark::pandasm::Program prog;
+    std::vector<std::pair<std::string, std::string>> renamePairs;
+    const bool result = libabckit::ModifyNameHelper::ApplyBatchFunctionRenameAnnotations(&prog, renamePairs);
+    EXPECT_TRUE(result);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::ApplyBatchFunctionRenameAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(ModifyNameHelperTest, apply_batch_function_rename_annotations_test_002)
+{
+    ark::pandasm::Program prog;
+    constexpr auto LANG = ark::panda_file::SourceLang::ETS;
+
+    auto func = ark::pandasm::Function("testFunc", LANG);
+    func.returnType = ark::pandasm::Type::FromName("void");
+    func.regsNum = 1;
+    AddAsyncAnnotationToFunction(func, "oldMethod");
+    prog.functionInstanceTable.emplace("testFunc:", std::move(func));
+
+    std::vector<std::pair<std::string, std::string>> renamePairs = {{"oldMethod:", "newMethod:"}};
+    const bool result = libabckit::ModifyNameHelper::ApplyBatchFunctionRenameAnnotations(&prog, renamePairs);
+    EXPECT_TRUE(result);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::ApplyBatchFunctionRenameAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(ModifyNameHelperTest, apply_batch_function_rename_annotations_test_003)
+{
+    ark::pandasm::Program prog;
+    constexpr auto LANG = ark::panda_file::SourceLang::ETS;
+
+    auto record = ark::pandasm::Record("%%lambda-1", LANG);
+    AddFunctionalReferenceAnnotationToRecord(record, "oldLambdaMethod");
+    prog.recordTable.emplace(record.name, std::move(record));
+
+    std::vector<std::pair<std::string, std::string>> renamePairs = {{"oldLambdaMethod:", "newLambdaMethod:"}};
+    const bool result = libabckit::ModifyNameHelper::ApplyBatchFunctionRenameAnnotations(&prog, renamePairs);
+    EXPECT_TRUE(result);
+}
+
+// Test: test-kind=api, api=ModifyNameHelper::ApplyBatchFunctionRenameAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(ModifyNameHelperTest, apply_batch_function_rename_annotations_test_004)
+{
+    ark::pandasm::Program prog;
+    constexpr auto LANG = ark::panda_file::SourceLang::ETS;
+
+    auto func = ark::pandasm::Function("testFunc", LANG);
+    func.returnType = ark::pandasm::Type::FromName("void");
+    func.regsNum = 1;
+    AddAsyncAnnotationToFunction(func, "oldMethod");
+    prog.functionInstanceTable.emplace("testFunc:", std::move(func));
+
+    std::vector<std::pair<std::string, std::string>> renamePairs = {{"differentMethod:", "newMethod:"}};
+    const bool result = libabckit::ModifyNameHelper::ApplyBatchFunctionRenameAnnotations(&prog, renamePairs);
+    EXPECT_TRUE(result);
+}
 }  // namespace libabckit::test

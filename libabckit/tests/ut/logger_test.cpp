@@ -19,13 +19,10 @@
 
 using namespace testing::ext;
 
-/**
- * @tc.name: null_buffer_xsputn_test_001
- * @tc.desc: test NullBuffer::xsputn method with positive size
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(LoggerTest, null_buffer_xsputn_test_001, TestSize.Level1)
+class LoggerTest : public ::testing::Test {};
+
+// Test: test-kind=api, api=Logger::NullBuffer::xsputn, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LoggerTest, null_buffer_xsputn_test_001)
 {
     libabckit::NullBuffer nullBuffer;
     const char *testString = "Test string";
@@ -34,13 +31,8 @@ HWTEST(LoggerTest, null_buffer_xsputn_test_001, TestSize.Level1)
     EXPECT_EQ(result, size);
 }
 
-/**
- * @tc.name: null_buffer_xsputn_test_002
- * @tc.desc: test NullBuffer::xsputn method with zero size
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(LoggerTest, null_buffer_xsputn_test_002, TestSize.Level1)
+// Test: test-kind=api, api=Logger::NullBuffer::xsputn, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LoggerTest, null_buffer_xsputn_test_002)
 {
     libabckit::NullBuffer nullBuffer;
     const char *testString = "Test string";
@@ -49,13 +41,8 @@ HWTEST(LoggerTest, null_buffer_xsputn_test_002, TestSize.Level1)
     EXPECT_EQ(result, size);
 }
 
-/**
- * @tc.name: null_buffer_xsputn_test_003
- * @tc.desc: test NullBuffer::xsputn method with large size
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(LoggerTest, null_buffer_xsputn_test_003, TestSize.Level1)
+// Test: test-kind=api, api=Logger::NullBuffer::xsputn, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LoggerTest, null_buffer_xsputn_test_003)
 {
     libabckit::NullBuffer nullBuffer;
     const char *testString = "Test string";
@@ -64,13 +51,8 @@ HWTEST(LoggerTest, null_buffer_xsputn_test_003, TestSize.Level1)
     EXPECT_EQ(result, size);
 }
 
-/**
- * @tc.name: null_buffer_xsputn_test_004
- * @tc.desc: test NullBuffer::xsputn method with null pointer
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(LoggerTest, null_buffer_xsputn_test_004, TestSize.Level1)
+// Test: test-kind=api, api=Logger::NullBuffer::xsputn, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LoggerTest, null_buffer_xsputn_test_004)
 {
     libabckit::NullBuffer nullBuffer;
     const char *testString = nullptr;

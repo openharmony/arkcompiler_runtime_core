@@ -1027,6 +1027,12 @@ struct AbckitFile {
      * Whether need refresh insts
      */
     bool needRefreshInsts = false;
+
+    /**
+     * Pending (oldKey, newKey) function renames; applied in batch in WriteAbcStatic to reduce
+     * per-function annotation refresh calls (async, lambda, FunctionOverload).
+     */
+    std::vector<std::pair<std::string, std::string>> pendingFunctionRenames;
 };
 
 struct AbckitDynamicImportDescriptorPayload {
