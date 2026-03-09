@@ -679,7 +679,7 @@ HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)
 
     method_item->SetDebugInfo(debug_info_item);
 
-    container.ComputelayoutForRest();
+    container.ComputeLayoutForRest();
     MemoryWriter mem_writer;
     container.InvalidateComputeLayout();
 

@@ -473,7 +473,7 @@ void ItemContainer::ComputeLayoutForReferencedItems()
     }
 }
 
-uint32_t ItemContainer::ComputelayoutForRest()
+uint32_t ItemContainer::ComputeLayoutForRest()
 {
     uint32_t original_offset = 0;
     for (auto iter = items_end_; iter != items_.end(); iter++) {
@@ -509,7 +509,7 @@ uint32_t ItemContainer::ComputeLayout()
 {
     cur_offset_ = 0;
     ComputeLayoutForReferencedItems();
-    return ComputelayoutForRest();
+    return ComputeLayoutForRest();
 }
 
 void ItemContainer::RebuildLineNumberProgramIndex()
@@ -667,7 +667,7 @@ size_t ItemContainer::GetFileSize()
 
     if (IsComputeLayoutForReferencedItemsFinished()) {
         panda::Timer::ScopeTimer timer(panda::EVENT_COMPUTE_LAYOUT_FOR_REST);
-        return ComputelayoutForRest();
+        return ComputeLayoutForRest();
     }
 
     panda::Timer::ScopeTimer timer(panda::EVENT_COMPUTE_LAYOUT);
