@@ -30,6 +30,14 @@
 #include "seeds_dumper.h"
 #include "util/assert_util.h"
 
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
 bool ark::guard::Obfuscator::Execute(abckit_wrapper::FileView &fileView)
 {
     // member link
@@ -57,6 +65,17 @@ bool ark::guard::Obfuscator::Execute(abckit_wrapper::FileView &fileView)
     NameCacheKeeper keeper(fileView);
     keeper.Process(parser.GetNameCache());
     LOG_I << "name cache keep success";
+
+    // name mark: declaration name cache read and set
+    if ((!config_.GetApplyNameCacheDecl().empty()) && fs::exists(config_.GetApplyNameCacheDecl())) {
+        NameCacheParser declParser(config_.GetApplyNameCacheDecl());
+        declParser.Parse();
+        LOG_I << "declaration name cache parse success";
+
+        NameCacheKeeper declKeeper(fileView);
+        declKeeper.Process(declParser.GetNameCache());
+        LOG_I << "declaration name cache keep success";
+    }
 
     // obfuscate preparation
     NameMappingManager memberNameMapping;

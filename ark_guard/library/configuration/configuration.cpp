@@ -55,6 +55,7 @@ bool ark::guard::Configuration::IsValid() const
     LOG_I << "disableObfuscation:" << obfuscationRules.disableObfuscation;
     LOG_I << "printNameCache:" << obfuscationRules.printNameCache;
     LOG_I << "applyNameCache:" << obfuscationRules.applyNameCache;
+    LOG_I << "applyNameCacheDecl:" << obfuscationRules.applyNameCacheDecl;
     LOG_I << "removeLog:" << obfuscationRules.removeLog;
     LOG_I << "printSeeds enable:" << obfuscationRules.printSeedsOption.enable;
     LOG_I << "printSeeds filePath:" << obfuscationRules.printSeedsOption.filePath;
@@ -94,6 +95,11 @@ const std::string &ark::guard::Configuration::GetPrintNameCache() const
 const std::string &ark::guard::Configuration::GetApplyNameCache() const
 {
     return obfuscationRules.applyNameCache;
+}
+
+const std::string &ark::guard::Configuration::GetApplyNameCacheDecl() const
+{
+    return obfuscationRules.applyNameCacheDecl;
 }
 
 bool ark::guard::Configuration::DisableObfuscation() const
