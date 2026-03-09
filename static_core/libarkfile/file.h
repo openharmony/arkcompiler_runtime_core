@@ -228,6 +228,19 @@ public:
                     exportedTableSpan.size() / sizeof(uint32_t));
     }
 
+    bool IsMetadataUsed() const
+    {
+        const Header *header = GetHeader();
+        if (header->version < METADATA_SINCE_VERSION) {
+            return false;
+        }
+
+        Span file(GetBase(), header->fileSize);
+        auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
+    }
+
     Span<const uint8_t> GetMetadata() const
     {
         const Header *header = GetHeader();
