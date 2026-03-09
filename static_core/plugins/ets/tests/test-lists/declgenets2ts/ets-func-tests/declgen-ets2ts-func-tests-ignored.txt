@@ -75,7 +75,6 @@ spec/16.Support_for_GUI_Programming/struct-type/test-class-extends-struct.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_1.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0012.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
-std/concurrency/AsyncLockTest.ets
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 std/containers/concurrency/blocking_queue/blocking_queue_push_and_pop.ets
 std/containers/concurrency/blocking_queue/blocking_queue_add_and_poll.ets

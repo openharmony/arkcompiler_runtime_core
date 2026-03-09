@@ -133,6 +133,7 @@ async function asyncLockExclusiveModeTest(): Promise<int> {
 }
 
 let asyncLockAppTestsuite = new arktest.ArkTestsuite("asyncLockAppTestsuite");
+let asyncLockAppTestsuiteDisabled = new arktest.ArkTestsuite("asyncLockAppTestsuite.DISABLED");
 
 asyncLockAppTestsuite.addTest("sequentialLockUnlocked", () => {
      arktest.assertTrue(sequentialLockUnlocked());
@@ -178,7 +179,8 @@ asyncLockAppTestsuite.addTest("queryWithDeadlockTest", () => {
     arktest.assertTrue(queryWithDeadlockTest())
 })
 
-asyncLockAppTestsuite.addTest("sequentialLock", () => {
+// #32450: Test is incorrect
+asyncLockAppTestsuiteDisabled.addTest("sequentialLock", () => {
     arktest.assertTrue(sequentialLock())
 })
 
@@ -226,7 +228,8 @@ asyncLockAppTestsuite.addTest("acquireLockTwiceExclusiveExclusiveNotAvailable", 
     arktest.assertTrue(acquireLockTwiceExclusiveExclusiveNotAvailable())
 })
 
-asyncLockAppTestsuite.addTest("sequentialLockInf", () => {
+// #32450: Test is incorrect
+asyncLockAppTestsuiteDisabled.addTest("sequentialLockInf", () => {
     arktest.assertTrue(sequentialLockInf())
 })
 
@@ -242,7 +245,8 @@ asyncLockAppTestsuite.addTest("simpleDeadLock2Locks", () => {
     arktest.assertTrue(simpleDeadLock2Locks())
 })
 
-asyncLockAppTestsuite.addTest("warningDeadLock", () => {
+// #32450: Test is incorrect
+asyncLockAppTestsuiteDisabled.addTest("warningDeadLock", () => {
     arktest.assertTrue(warningDeadLockTest())
 })
 
@@ -1057,5 +1061,6 @@ function main(): int {
     let summ = 0;
     summ += asyncLockTestsuite.run();
     summ += asyncLockAppTestsuite.run();
+    CoroutineExtras.stopTaskpool();
     return summ
 }

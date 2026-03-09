@@ -23,6 +23,16 @@ export enum AsyncLockMode {
     EXCLUSIVE = 2,
 }
 
+class PendingLockRequest {
+    constructor(asyncLockInfo: AsyncLockInfo) {
+        this.asyncLockInfo = asyncLockInfo;
+        this.event = ConcurrencyHelpers.eventCreate();
+    }
+
+    public asyncLockInfo: AsyncLockInfo;
+    public event: Object;
+}
+
 export class AsyncLock {
 
     /**
@@ -90,13 +100,17 @@ export class AsyncLock {
     public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: AsyncLockMode, options: AsyncLockOptions<U>): Promise<T> {
         let callerCID = CoroutineExtras.getCoroutineId();
         let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
-        let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options, asyncLockInfo); }
-        if (this.canAcquireLock(mode, callerCID, asyncLockInfo)) {
-            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, options,  asyncLockInfo); }
-        } else {
+        let wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, options, asyncLockInfo); }
+        let pendingRequest: PendingLockRequest | null = null;
+        if (!this.canAcquireLock(mode, callerCID, asyncLockInfo)) {
             ConcurrencyHelpers.mutexLock(this.mutex);
-            this.pendingQueue.push(asyncLockInfo);
+            pendingRequest = new PendingLockRequest(asyncLockInfo);
+            this.pending.add(asyncLockInfo);
+            this.pendingQueue.push(pendingRequest);
             ConcurrencyHelpers.mutexUnlock(this.mutex);
+            wrapped = (l: AsyncLock) => {
+                return l.wrapper<T, U>(callback, callerCID, mode, options, asyncLockInfo, pendingRequest!);
+            }
         }
         return AsyncLock.launchPromise(wrapped, this);
     }
@@ -104,17 +118,21 @@ export class AsyncLock {
     private canAcquireLock<T>(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
         try {
-            // FIFO fairness: if there are queued waiters, newcomers cannot bypass them.
-            if (this.pendingQueue.length > 0) {
-                return false;
-            }
-            if (this.counter == 0 && this.mode == AsyncLockMode.UNLOCKED) {
+            if (this.holderCID == 0 && this.mode == AsyncLockMode.UNLOCKED) {
+                this.trimPendingQueueHeadUnsafe();
+                if (this.pendingQueueHead != this.pendingQueue.length) {
+                    return false;
+                }
                 this.counter = 1;
                 this.held.add(asyncLockInfo);
+                this.holderCID = callerCID;
                 this.mode = mode;
                 return true;
             }
             if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
+                if (this.hasPendingExclusiveRequestUnsafe()) {
+                    return false;
+                }
                 this.counter++;
                 this.held.add(asyncLockInfo);
                 this.mode = mode;
@@ -128,12 +146,12 @@ export class AsyncLock {
 
     private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
         try {
-            return  Promise.resolve<T>(callback()).finally(() => {
+            return Promise.resolve<T>(callback()).finally(() => {
+                this.unlock(asyncLockInfo);
                 if (options.signal != null && options.signal!.aborted == true) {
                     this.fireCondEvent();
                     throw new Error('AsyncLock:: Operation aborted by signal');
                 }
-                this.unlock(asyncLockInfo);
             });
         } catch(e) {
             this.unlock(asyncLockInfo);
@@ -161,73 +179,69 @@ export class AsyncLock {
         return p;
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<Awaited<T>> {
-
-        this.lock<U>(callerCID, mode,  asyncLockInfo, options);
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode,
+        options: AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo, pendingRequest: PendingLockRequest) : Promise<Awaited<T>> {
+        this.lock<U>(callerCID, mode, asyncLockInfo, pendingRequest, options);
         return this.syncwrapper<T, U>(callback, options,  asyncLockInfo);
     }
 
-    private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
-        let isDone = false;
-        let timeout = options.timeout;
-        let isTimeoutExec: boolean = false;
+    private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, pendingRequest: PendingLockRequest,
+        options: AsyncLockOptions<U>): void {
+        let isDone: AtomicFlag = new AtomicFlag(false);
+        let isTimeoutExec: AtomicFlag = new AtomicFlag(false);
+        let timeoutArmed: AtomicFlag = new AtomicFlag(options.timeout > 0);
 
-        if (timeout) {
+        if (timeoutArmed.get()) {
            setTimeout(() => {
+              if (!timeoutArmed.get() || isDone.get()) {
+                  return;
+              }
               this.queryAllDeadlocks();
-              this.fireCondEvent();
-              isTimeoutExec = true;
-           }, timeout);
+              isTimeoutExec.set(true);
+              ConcurrencyHelpers.eventFire(pendingRequest.event);
+           }, options.timeout);
         }
 
-        while (isDone == false) {
+        try {
+            while (isDone.get() == false) {
 
-             if (options.signal != null && options.signal!.aborted == true) {
-                 ConcurrencyHelpers.lockGuard(this.mutex, () => { this.removeFromPendingQueue(asyncLockInfo); });
-                 this.fireCondEvent();
-                 throw new Error('AsyncLock:: Operation aborted by signal');
-            }
-            if(isTimeoutExec == true) {
-                ConcurrencyHelpers.lockGuard(this.mutex, () => { this.removeFromPendingQueue(asyncLockInfo); });
-                throw new Error('AsyncLock:: ' + this.deadLockPrinter.toString('Operation timed out'));
-            }
-
-            if(options.isAvailable) {
-                ConcurrencyHelpers.lockGuard(this.mutex, () => { this.removeFromPendingQueue(asyncLockInfo); });
-                throw new Error('AsyncLock:: Lock is not available');
-            }
-
-            ConcurrencyHelpers.mutexLock(this.mutex);
-            if (this.counter == 0) {
-                if ((mode == AsyncLockMode.EXCLUSIVE && this.pendingQueue[0] == asyncLockInfo) ||
-                    (mode == AsyncLockMode.SHARED && !this.hasPendingExclusiveBefore(asyncLockInfo))) {
-                    this.mode = mode;
-                    this.counter++;
-                    this.removeFromPendingQueue(asyncLockInfo);
-                    this.held.add(asyncLockInfo);
-                    isDone = true;
+                 if (options.signal != null && options.signal!.aborted == true) {
+                     this.removePendingRequest(asyncLockInfo);
+                     this.fireCondEvent();
+                     throw new Error('AsyncLock:: Operation aborted by signal');
                 }
-            } else {
-                if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED &&
-                    !this.hasPendingExclusiveBefore(asyncLockInfo)) {
-                    this.counter++;
-                    this.removeFromPendingQueue(asyncLockInfo);
-                    this.held.add(asyncLockInfo);
-                    isDone = true;
+                if (isTimeoutExec.get() == true) {
+                    this.removePendingRequest(asyncLockInfo);
+                    this.fireCondEvent();
+                    throw new Error('AsyncLock:: ' + this.deadLockPrinter.toString('Operation timed out'));
+                }
+
+                if (options.isAvailable) {
+                    this.removePendingRequest(asyncLockInfo);
+                    this.fireCondEvent();
+                    throw new Error('AsyncLock:: Lock is not available');
+                }
+
+                ConcurrencyHelpers.mutexLock(this.mutex);
+                if (this.tryAcquirePendingRequest(callerCID, mode, asyncLockInfo)) {
+                    isDone.set(true);
+                    this.dispatchPendingUnsafe();
+                }
+                ConcurrencyHelpers.mutexUnlock(this.mutex);
+
+                if (isDone.get() == false) {
+                    ConcurrencyHelpers.eventWait(pendingRequest.event);
                 }
             }
-
-            if (isDone == false) {
-                ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
-            }
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
+        } finally {
+            timeoutArmed.set(false);
         }
     }
 
     private fireCondEvent()
     {
         ConcurrencyHelpers.mutexLock(this.mutex);
-        ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
+        this.dispatchPendingUnsafe();
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
@@ -236,33 +250,124 @@ export class AsyncLock {
         this.held.delete(asyncLockInfo);
         this.counter--;
         if (this.counter == 0) {
+            this.holderCID = 0;
             this.mode = AsyncLockMode.UNLOCKED;
-            ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
         }
+        this.dispatchPendingUnsafe();
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
-    private hasPendingExclusiveBefore(asyncLockInfo: AsyncLockInfo): boolean {
-        for (let i = 0; i < this.pendingQueue.length; ++i) {
-            let info = this.pendingQueue[i];
-            if (info == asyncLockInfo) {
-                return false;
-            }
-            if (info.mode == AsyncLockMode.EXCLUSIVE) {
-                return true;
-            }
+    private dispatchPendingUnsafe(): void {
+        this.trimPendingQueueHeadUnsafe();
+        if (this.pendingQueueHead == this.pendingQueue.length) {
+            return;
         }
-        // Not found in queue, treat as blocked to avoid bypassing FIFO.
+        if (this.holderCID != 0 && this.mode != AsyncLockMode.SHARED) {
+            return;
+        }
+
+        let headInfo = this.pendingQueue[this.pendingQueueHead].asyncLockInfo;
+        if (headInfo.mode == AsyncLockMode.EXCLUSIVE) {
+            if (this.holderCID == 0) {
+                ConcurrencyHelpers.eventFire(this.pendingQueue[this.pendingQueueHead].event);
+            }
+            return;
+        }
+
+        for (let i = this.pendingQueueHead; i < this.pendingQueue.length; ++i) {
+            let req = this.pendingQueue[i];
+            if (!this.pending.has(req.asyncLockInfo)) {
+                continue;
+            }
+            if (req.asyncLockInfo.mode != AsyncLockMode.SHARED) {
+                break;
+            }
+            ConcurrencyHelpers.eventFire(req.event);
+        }
+    }
+
+    private tryAcquirePendingRequest(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo): boolean {
+        if (!this.isPendingRequestEligibleUnsafe(mode, asyncLockInfo)) {
+            return false;
+        }
+
+        if (this.holderCID == 0) {
+            this.holderCID = callerCID;
+            this.mode = mode;
+            this.counter = 1;
+        } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
+            this.counter++;
+        } else {
+            return false;
+        }
+
+        this.removePendingRequestUnsafe(asyncLockInfo);
+        this.held.add(asyncLockInfo);
         return true;
     }
 
-    private removeFromPendingQueue(asyncLockInfo: AsyncLockInfo): void {
-        for (let i = 0; i < this.pendingQueue.length; ++i) {
-            if (this.pendingQueue[i] == asyncLockInfo) {
-                this.pendingQueue.splice(i, 1);
-                return;
+    private isPendingRequestEligibleUnsafe(mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo): boolean {
+        this.trimPendingQueueHeadUnsafe();
+        if (!this.pending.has(asyncLockInfo)) {
+            return false;
+        }
+
+        for (let i = this.pendingQueueHead; i < this.pendingQueue.length; ++i) {
+            let waitingLockInfo = this.pendingQueue[i].asyncLockInfo;
+            if (!this.pending.has(waitingLockInfo)) {
+                continue;
+            }
+            if (waitingLockInfo == asyncLockInfo) {
+                return true;
+            }
+            if (mode == AsyncLockMode.EXCLUSIVE || waitingLockInfo.mode == AsyncLockMode.EXCLUSIVE) {
+                return false;
             }
         }
+        return false;
+    }
+
+    private removePendingRequest(asyncLockInfo: AsyncLockInfo): void {
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        this.removePendingRequestUnsafe(asyncLockInfo);
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+    }
+
+    private removePendingRequestUnsafe(asyncLockInfo: AsyncLockInfo): void {
+        if (!this.pending.delete(asyncLockInfo)) {
+            return;
+        }
+        this.trimPendingQueueHeadUnsafe();
+    }
+
+    private trimPendingQueueHeadUnsafe(): void {
+        while (this.pendingQueueHead < this.pendingQueue.length &&
+            !this.pending.has(this.pendingQueue[this.pendingQueueHead].asyncLockInfo)) {
+            this.pendingQueueHead++;
+        }
+        if (this.pendingQueueHead > AsyncLock.PENDING_QUEUE_COMPACT_THRESHOLD &&
+            this.pendingQueueHead * 2 >= this.pendingQueue.length) {
+            let compactedQueue = new Array<PendingLockRequest>();
+            for (let i = this.pendingQueueHead; i < this.pendingQueue.length; ++i) {
+                let req = this.pendingQueue[i];
+                if (this.pending.has(req.asyncLockInfo)) {
+                    compactedQueue.push(req);
+                }
+            }
+            this.pendingQueue = compactedQueue;
+            this.pendingQueueHead = 0;
+        }
+    }
+
+    private hasPendingExclusiveRequestUnsafe(): boolean {
+        this.trimPendingQueueHeadUnsafe();
+        for (let i = this.pendingQueueHead; i < this.pendingQueue.length; ++i) {
+            let lockInfo = this.pendingQueue[i].asyncLockInfo;
+            if (this.pending.has(lockInfo) && lockInfo.mode == AsyncLockMode.EXCLUSIVE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -295,11 +400,7 @@ export class AsyncLock {
      */
     public query(): AsyncLockState {
         ConcurrencyHelpers.mutexLock(this.mutex);
-        let pendingSet = new Set<AsyncLockInfo>();
-        for (let i = 0; i < this.pendingQueue.length; ++i) {
-            pendingSet.add(this.pendingQueue[i]);
-        }
-        let state = new AsyncLockState(this.held, pendingSet);
+        let state = new AsyncLockState(this.held, this.pending);
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return state;
     }
@@ -307,12 +408,11 @@ export class AsyncLock {
     private queryDeadlock(deadLockPrinter : DeadLockInfo) {
         ConcurrencyHelpers.mutexLock(this.mutex);
         this.held.forEach((v : AsyncLockInfo) => {
-            for (let i = 0; i < this.pendingQueue.length; ++i) {
-                let p = this.pendingQueue[i];
+            this.pending.forEach((p : AsyncLockInfo) => {
                 if (v.contextId != p.contextId) {
                     deadLockPrinter.add(v, p);
                 }
-            }
+            })
         });
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
@@ -330,12 +430,15 @@ export class AsyncLock {
 
     public readonly name: string;
     private static LastAnonymousId: int = 0;
+    private static readonly PENDING_QUEUE_COMPACT_THRESHOLD: int = 64;
+    private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
-    private pendingQueue: Array<AsyncLockInfo> = new Array<AsyncLockInfo>();
-    private condVar: Object = ConcurrencyHelpers.condVarCreate();
+    private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
+    private pendingQueue: Array<PendingLockRequest> = new Array<PendingLockRequest>();
+    private pendingQueueHead: int = 0;
     private deadLockPrinter: DeadLockInfo = new DeadLockInfo();
 }
 
@@ -383,4 +486,3 @@ final class AsyncLockHelper extends AsyncLock {
         super(name);
     }
 }
-
