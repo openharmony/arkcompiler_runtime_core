@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,8 @@ declare const b6 = false;
 declare const b5 = false;
 declare let b4: boolean;
 declare let b8: boolean;
-declare const b9 = "";
+//33781
+//declare const b9 = "";
 declare const b10 = 0;
 declare let b12: string;
 declare let b13: number;

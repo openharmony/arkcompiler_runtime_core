@@ -508,10 +508,6 @@ syntax:
   id: 124
   message: "Unexpected token, expected 'private' or identifier."
 
-- name: INITIALIZERS_IN_AMBIENT_CONTEXTS
-  id: 125
-  message: "Initializers are not allowed in ambient contexts."
-
 - name: VAR_DEC_EXPECTED
   id: 126
   message: "Variable declaration expected."

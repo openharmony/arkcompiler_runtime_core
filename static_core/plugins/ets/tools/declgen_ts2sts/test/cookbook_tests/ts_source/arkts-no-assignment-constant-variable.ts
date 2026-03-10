@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-let b = false; 
+let b = false;
 let b45 = true;
 let b1 = true;
-const b2 = false; 
+const b2 = false;
 let b451 = 1;
 
 const b3 = b1 || b2;
@@ -25,7 +25,8 @@ const b5 = !b1 && b2;
 let b4 = b1 || b2;
 let b8 = !b1 && b2;
 
-const b9 = '';
+//33781
+//const b9 = '';
 const b10 = 0;
 
 let b12 = '';
