@@ -38,7 +38,7 @@ cases:
       == c'p'
     expected: 112
     expect: |-
-      Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.
+      Semantic error ESE0346: Wrong type of operands for binary expression
   - type: |-
       char
     value: |-
