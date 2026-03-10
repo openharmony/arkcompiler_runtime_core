@@ -46,3 +46,5 @@ cases:
   - { use: "2000000", use_type: ": int | long" }
   # value fits within float
   - { use: "1.0", use_type: ": float | double" }
+  - { use: "3.14", use_type: ": float" }
+  - { use: "3.4e39", use_type: ": float" }

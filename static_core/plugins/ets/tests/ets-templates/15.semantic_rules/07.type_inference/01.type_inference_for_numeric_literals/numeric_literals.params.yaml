@@ -15,6 +15,7 @@ cases:
   # literal
   - { use: "1.0f", use_type: ": float", expected_type: float }
   - { use: "1.0", use_type: ": double", expected_type: double }
+  - { use: "11", use_type: ": double", expected_type: double }
   - { use: "16", use_type: ": int", expected_type: int }
   - { use: "127", use_type: ": int", expected_type: int }
   - { use: "128", use_type: ": int", expected_type: int }

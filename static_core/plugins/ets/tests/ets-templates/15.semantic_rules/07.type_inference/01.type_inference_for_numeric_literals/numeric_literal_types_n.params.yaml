@@ -18,7 +18,6 @@ cases:
   - { use: "32768", value: '127', use_type: ": int | short", expected_out: "Semantic error ESE101680: Ambiguous value 127, fits into multiple types" }
   - { use: "9223372036854775807", value: '127', use_type: ": int | long", expected_out: "Semantic error ESE101680: Ambiguous value 127, fits into multiple types" }
   - { use: "9223372036854775807", value: '127', use_type: ": short | long", expected_out: "Semantic error ESE101680: Ambiguous value 127, fits into multiple types" }
-  - { use: "3.4e39", value: '1.0', use_type: ": float | double", expected_out: "Semantic error ESE101680: Ambiguous value 1.0, fits into multiple types" }
   - { use: "3.4e39", value: '3.4e38f', use_type: ": float | double", expected_out: "Semantic error ESE101680: Ambiguous value 3.4e+38f, fits into multiple types" }
   - { use: "3.4e39", value: '1', use_type: ": float | double", expected_out: "Semantic error ESE0255: Ambiguous union type operation" }
   - { use: "127", value: '(1).toShort()', use_type: ": byte", expected_out: "Semantic error ESE0318: Type 'Short' cannot be assigned to type 'Byte'" }
@@ -26,5 +25,4 @@ cases:
   - { use: "2147483647", value: '(9223372036854775807).toLong()', use_type: ": int", expected_out: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Int'" }
   - { use: "1", value: '1.0', use_type: ": long", expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Long'" }
   - { use: "127", value: '128', use_type: ": byte", expected_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Byte'" }
-  - { use: "3.14", value: '3.4e39', use_type: ": float", expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Float'" }
-  - { use: "123f", value: '3.4e39', use_type: ": float", expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Float'" }
+  - { use: "123f", value: '3.14', use_type: ": float", expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Float'" }
