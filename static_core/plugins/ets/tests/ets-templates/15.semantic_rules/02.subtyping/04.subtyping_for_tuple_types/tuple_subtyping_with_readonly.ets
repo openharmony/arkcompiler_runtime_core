@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-/*---
+ /*---
 desc: >-
-    A compile-time error occurs if a method is private in superinterface
-    but public in subinterface.
-tags: [compile-only, negative]
-expected_out: "Syntax error ESY0224: Identifier expected, got 'public'."
+    Tuple type T (P1, ..., Pn) is a subtype of type S (P1, ..., Pm),
+    where n >= m, i.e., a tuple type is a subtype of a tuple type with
+    fewer identical constituent types.
+    Check with readonly directive
 ---*/
 
-interface Base {
-    private foo() {}
-}
-
-interface Derived extends Base {
-    public foo(): void {}
+function main(): void {
+    const a: readonly [string, boolean] = ["hello", true]
+    let b: [string] = a
+    arktest.assertEQ(b[0], "hello")
 }

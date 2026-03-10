@@ -51,29 +51,14 @@ cases:
     - { val: '42 - 21 - 21', type: 'number' }
     - { val: '42 * (21 - 11 - 10)', type: 'number' }
 
-    - decl: |-
-        class A {}
-        class B {}
-        type UT = A | B | null
-      type: UT
-      val: 'null'
+    - {val: 'null', type: UT}
+      
+    - {val: '`${empty}`', type: string}
 
-    - decl: |-
-        let empty: string = ''
-      type: string
-      val: '`${empty}`'
-
-    - decl: |-
-        interface I {}
-        type NI = I | null
-      type: NI
-      val: 'null'
-
-    - decl: |-
-        enum Color { Red, Green, Blue }
-      type: Color
-      val: Color.Red
-
+    - {val: 'null', type: NI}
+      
+    - {val: Color.Red, type: Color}
+      
     - { val: 'new Byte()', type: 'Byte' }
     - { val: 'new Short()', type: 'Short' }
     - { val: 'new Int()', type: 'Int' }

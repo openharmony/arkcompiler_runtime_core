@@ -15,10 +15,9 @@
 
 /*---
 desc: >-
-    A compile-time error occurs if a method with non-compatible signature
-    has the same name as a private method in superinterface.
+    A compile-time error occurs if subinterface tries to access private method 
 tags: [compile-only, negative]
-expected_out: non-compatible signature
+expected_out: "Semantic error ESE0139: Signature foo(): void is not visible here."
 ---*/
 
 interface Base {
@@ -28,7 +27,10 @@ interface Base {
 }
 
 interface Derived extends Base {
-    method_1()
-    method_2(p: string)
-    foo(p: number): void
+    method_1() //overriding
+    method_2(p: string) { // overloading
+        this.foo(1.0) // OK
+        this.foo() // CTE expected, Base.foo() is not accessible here at all
+    }
+    foo(p: number): void // it is just a new method declaration
 }

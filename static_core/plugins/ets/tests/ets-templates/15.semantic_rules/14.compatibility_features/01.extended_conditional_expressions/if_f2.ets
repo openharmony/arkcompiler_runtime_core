@@ -1,4 +1,3 @@
-{%- for c in cases %}
 /*
  * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +18,24 @@ desc: >-
     ArkTS provides extended semantics for conditional-and and conditional-or expressions for better alignment.
 ---*/
 
-{{c.decl}}
+let empty: string = ''
 
-function main(): void {
-    let v: {{c.type}} = {{c.val}}
-    let res: int = 0
-    if (v) {  // falsy
-        res = 1
-    }
-    arktest.assertEQ(res, 0)
+enum Color { Red, Green, Blue }
+
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Extended_Conditional_expressions_falsy_if_values");
+
+    {% for c in cases %}
+        testSuite.addTest("Conditional_expression_falsy_if_values{{loop.index}}", () => {
+ 	        let v: {{c.type}} = {{c.val}}
+            let res: int = 0
+            if (v) {  // falsy
+                res = 1
+            }
+            arktest.assertEQ(res, 0)
+ 	    }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}

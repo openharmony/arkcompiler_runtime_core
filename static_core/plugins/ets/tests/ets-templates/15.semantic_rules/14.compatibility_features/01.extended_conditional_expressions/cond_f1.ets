@@ -1,4 +1,4 @@
-{%- for c in cases %}
+
 /*
  * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,16 @@ desc: >-
     ArkTS provides extended semantics for conditional-and and conditional-or expressions for better alignment.
 ---*/
 
-function main(): void {
-    let res: int = ({{c}}) ? 1 : 0  // falsy
-    arktest.assertEQ(res, 0)
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Extended_Conditional_expressions_falsy_literals");
+
+    {% for c in cases %}
+        testSuite.addTest("Conditional_expression_falsyliterals_and_exp{{loop.index}}", () => {
+ 	        let res: int = ({{c}}) ? 1 : 0  // falsy
+            arktest.assertEQ(res, 0)
+ 	    }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}

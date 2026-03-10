@@ -43,5 +43,11 @@ function main(): int {
         arktest.assertEQ(t1[0], "hello")
     })
 
+    suite.addTest("assign tuple with const modifier", () => {
+        const a: [string, boolean] = ["hello", true]
+        let b: [string] = a
+        arktest.assertEQ(b[0], "hello")
+    })
+
     return suite.run()
 }
