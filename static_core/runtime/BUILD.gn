@@ -405,7 +405,7 @@ if (defined(enable_perf_counters)) {
   _libarkruntime_calculated_sources += [ "tooling/perf_counter.cpp" ]
 }
 
-if (is_mob) {
+if (is_mob && !is_android) {
   _libarkruntime_calculated_sources += [
     "$ark_root/platforms/mobile/runtime/mutator.cpp",
     "$ark_root/platforms/mobile/runtime/verify_app_install.cpp",

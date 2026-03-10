@@ -172,6 +172,7 @@ config("ark_common_config") {
   defines = [ "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1" ]
   if (enable_codegen) {
     defines += [ "PANDA_COMPILER_ENABLE" ]
+    defines += [ "PANDA_WITH_CODEGEN" ]
   }
   if (is_emulator) {
     defines += [ "PANDA_TARGET_EMULATOR" ]
@@ -254,6 +255,11 @@ config("ark_common_config") {
       "PANDA_TARGET_MOBILE",
       "PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS",
     ]
+    if (is_android) {
+      defines += [
+        "PANDA_TARGET_ANDROID",
+      ]
+    }
   } else if (is_ohos) {
     defines += [
       # TODO: use PANDA_TARGET_OHOS instead of PANDA_TARGET_UNIX
