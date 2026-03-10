@@ -52,7 +52,7 @@ cases:
   - desc: How to get Boolean via reflection.
     logic: |-
       let type_of_Bool: Type = Type.from<Boolean>();
-      arktest.assertEQ(type_of_Bool.toString(), "std.core.Boolean");
+      arktest.assertEQ(type_of_Bool.toString(), "boolean");
   - desc: How to get Date via reflection.
     logic: |-
       let type_of_date: Type = Type.from<Date>();
@@ -68,7 +68,7 @@ cases:
   - desc: How to get Int via reflection.
     logic: |-
       let type_of_int: Type = Type.from<int>();
-      arktest.assertEQ(type_of_int.toString(), "std.core.Int");
+      arktest.assertEQ(type_of_int.toString(), "int");
   - desc: How to get SomeInterface via reflection.
     logic: |-
       let type_of_SomeInterface: Type = Type.from<SomeInterface>();
@@ -85,7 +85,7 @@ cases:
   - desc: How to get number via reflection.
     logic: |-
       let type_of_number: Type = Type.from<number>();
-      arktest.assertEQ(type_of_number.toString(), "std.core.Double");
+      arktest.assertEQ(type_of_number.toString(), "double");
   - desc: How to get object via reflection.
     logic: |-
       let type_of_object: Type = Type.from<object>();
@@ -154,11 +154,11 @@ cases:
   - desc: How to get short via reflection.
     logic: |-
       let type_of_short: Type = Type.from<short>();
-      arktest.assertEQ(type_of_short.toString(), "std.core.Short");
+      arktest.assertEQ(type_of_short.toString(), "short");
   - desc: How to get byte via reflection.
     logic: |-
       let type_of_byte: Type = Type.from<byte>();
-      arktest.assertEQ(type_of_byte.toString(), "std.core.Byte");
+      arktest.assertEQ(type_of_byte.toString(), "byte");
   - desc: How to get enum via reflection.
     logic: |-
       let type_of_enum: Type = Type.from<Color>();
