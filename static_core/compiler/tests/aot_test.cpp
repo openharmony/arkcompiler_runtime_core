@@ -1138,6 +1138,57 @@ TEST_F(AotCompilerTest, NoMemoryFilesInAnFile)
         ASSERT_FALSE(filename.empty()) << "Empty filename found in final context string";
     }
 }
+// Test: When --load-in-boot=false (default, e.g. appspawn), boot files should NOT be split into app context.
+// This verifies the fix for the issue where appspawn (with --load-in-boot=false and --panda-files empty)
+// incorrectly moved the last boot ABC into appClassContext_.
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
+class BootContextSplitTest : public ::testing::TestWithParam<bool> {
+public:
+    BootContextSplitTest()
+    {
+        RuntimeOptions options;
+        auto execPath = ark::os::file::File::GetExecutablePath();
+        pandaStdLib_ = ark::os::GetAbsolutePath(execPath.Value() + "/../pandastdlib/arkstdlib.abc");
+        options.SetBootPandaFiles({pandaStdLib_});
+        options.SetLoadRuntimes({"core"});
+        options.SetArkAot(true);
+        options.SetHeapSizeLimit(50_MB);  // NOLINT(readability-magic-numbers)
+        options.SetGcType("epsilon");
+        // --panda-files is empty (not set), simulating appspawn or standalone with --load-in-boot
+        options.SetLoadInBoot(GetParam());
+        Runtime::Create(options);
+    }
+
+    ~BootContextSplitTest() override
+    {
+        Runtime::Destroy();
+    }
+
+private:
+    std::string pandaStdLib_;
+};
+
+// When --load-in-boot=false (appspawn scenario): all boot files stay in boot context, app context is empty.
+// When --load-in-boot=true (standalone scenario): the last boot file is split into app context.
+TEST_P(BootContextSplitTest, BootContextNotSplitWithoutLoadInBoot)
+{
+    auto *aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+    auto bootCtx = aotManager->GetBootClassContext();
+    auto appCtx = aotManager->GetAppClassContext();
+
+    if (GetParam()) {
+        // --load-in-boot=true: last boot file should be moved to app context.
+        // With only one boot file (arkstdlib.abc), boot context becomes empty after the split.
+        ASSERT_FALSE(appCtx.empty()) << "With --load-in-boot=true, app context should contain the last boot file";
+    } else {
+        // --load-in-boot=false: no splitting, app context should be empty
+        ASSERT_TRUE(appCtx.empty()) << "With --load-in-boot=false, app context should be empty, but got: " << appCtx;
+        ASSERT_FALSE(bootCtx.empty()) << "All boot files should remain in boot context";
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(LoadInBootGuard, BootContextSplitTest, ::testing::Values(false, true));
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler
