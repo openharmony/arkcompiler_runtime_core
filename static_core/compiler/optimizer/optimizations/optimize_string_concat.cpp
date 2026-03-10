@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,13 +47,13 @@ bool OptimizeStringConcat::RunImpl()
 {
     bool isApplied = false;
 
-    if (GetStringBuilderClassId(GetGraph()) == 0) {
-        COMPILER_LOG(WARNING, OPTIMIZE_STRING_CONCAT) << "StringBuilder class not found";
+    if (GetGraph()->IsAotMode()) {
+        // NOTE(mivanov): Creating StringBuilder.ctor calls in AOT mode not yet supported
         return isApplied;
     }
 
-    if (GetGraph()->IsAotMode()) {
-        // NOTE(mivanov): Creating StringBuilder.ctor calls in AOT mode not yet supported
+    if (GetStringBuilderClassId(GetGraph()) == 0) {
+        COMPILER_LOG(WARNING, OPTIMIZE_STRING_CONCAT) << "StringBuilder class not found";
         return isApplied;
     }
 

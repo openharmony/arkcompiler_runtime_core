@@ -37,6 +37,7 @@ public:
           semi_(graph->GetLocalAllocator()->Adapter()),
           vertices_(graph->GetLocalAllocator()->Adapter()),
           map_(graph->GetLocalAllocator()->Adapter()),
+          isInliningComplete_(graph->IsInliningComplete()),
           lightMode_(lightMode)
     {
     }
@@ -77,9 +78,9 @@ private:
     bool TryToRemoveNonLiveInst(Inst *inst, BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBlocks, Marker liveMrk);
 
     void SetLiveRec(Inst *inst, Marker mrk, Marker liveMrk);
-    void LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk);
+    void LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk, Marker processedMrk);
     bool SimpleDce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks);
-    void Marking(Marker deadMrk, Marker mrk, Marker liveMrk);
+    void Marking(Marker deadMrk, Marker mrk, Marker liveMrk, Marker processedMrk);
     void TryMarkInstIsDead(Inst *inst, Marker deadMrk, Marker mrk, Marker liveMrk);
 
     bool Removal(ArenaSet<BasicBlock *> *newEmptyBlocks);
@@ -110,6 +111,7 @@ private:
     // number of the inst according to the order it is reached during the DFS
     int32_t dfsNum_ {DEFAULT_DFS_VAL};
 
+    bool isInliningComplete_;
     bool lightMode_ {true};
 
     inline uint32_t GetInstId(Inst *inst) const

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1860,6 +1860,7 @@ TEST_F(CleanupTest, RemoveCallReturnInlined)
         }
     }
 
+    GetGraph()->SetInliningComplete();
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
 
     auto graph = CreateEmptyGraph();
@@ -1901,8 +1902,10 @@ TEST_F(CleanupTest, RemoveNestedCallInlined)
             INST(8U, Opcode::ReturnInlined).Inputs(2U);
             INST(9U, Opcode::Return).u64().Inputs(12U);
         }
+        INS(6U).CastToSaveState()->SetInliningDepth(1U);
     }
 
+    GetGraph()->SetInliningComplete();
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
 
     auto graph = CreateEmptyGraph();
@@ -1922,6 +1925,7 @@ TEST_F(CleanupTest, RemoveNestedCallInlined)
             INST(8U, Opcode::ReturnInlined).Inputs(2U);
             INST(9U, Opcode::Return).u64().Inputs(12U);
         }
+        INS(6U).CastToSaveState()->SetInliningDepth(1U);
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -1955,6 +1959,7 @@ SRC_GRAPH(InlinedCallsWithCommonSaveState, Graph *graph)
             INST(8U, Opcode::ReturnInlined).Inputs(2U);
             INST(9U, Opcode::Return).u64().Inputs(12U);
         }
+        INS(6U).CastToSaveState()->SetInliningDepth(1U);
     }
 }
 
@@ -1985,6 +1990,7 @@ OUT_GRAPH(InlinedCallsWithCommonSaveState, Graph *graph)
             INST(8U, Opcode::ReturnInlined).Inputs(2U);
             INST(9U, Opcode::Return).u64().Inputs(12U);
         }
+        INS(6U).CastToSaveState()->SetInliningDepth(1U);
     }
 }
 
@@ -1992,6 +1998,7 @@ TEST_F(CleanupTest, InlinedCallsWithCommonSaveState)
 {
     src_graph::InlinedCallsWithCommonSaveState::CREATE(GetGraph());
 
+    GetGraph()->SetInliningComplete();
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
 
     auto graph = CreateEmptyGraph();

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,6 @@ namespace ark::compiler {
 
 bool Cleanup::CanBeMerged(BasicBlock *bb)
 {
-    // TryCatchResolving with profile data needs separate CatchBegin with CatchPhis blocks
-    if (!GetGraph()->IsBytecodeOptimizer() &&
-        (!GetGraph()->IsAotMode() || GetGraph()->GetAotData()->HasProfileData()) && bb->IsCatchBegin()) {
-        return false;
-    }
     return bb->GetSuccsBlocks().size() == 1 && bb->GetSuccessor(0)->GetPredsBlocks().size() == 1 &&
            !bb->GetSuccessor(0)->IsPseudoControlFlowBlock() && bb->IsTry() == bb->GetSuccessor(0)->IsTry();
 }
@@ -86,11 +81,18 @@ bool Cleanup::RunImpl()
      * turns into this:
      *              [1']
      */
+
+    bool mightNeedTryCatchResolving = (!GetGraph()->IsBytecodeOptimizer() &&
+                                       (!GetGraph()->IsAotMode() || GetGraph()->GetAotData()->HasProfileData()));
     for (auto bb : GetGraph()->GetVectorBlocks()) {
         if (bb == nullptr || bb->IsPseudoControlFlowBlock()) {
             continue;
         }
 
+        // TryCatchResolving with profile data needs separate CatchBegin with CatchPhis blocks
+        if (mightNeedTryCatchResolving && bb->IsCatchBegin()) {
+            continue;
+        }
         while (CanBeMerged(bb)) {
             ASSERT(!bb->GetSuccessor(0)->HasPhi());
             COMPILER_LOG(DEBUG, CLEANUP) << "Merged block " << bb->GetSuccessor(0)->GetId() << " into " << bb->GetId();
@@ -200,6 +202,7 @@ bool Cleanup::CheckSpecialTriangle(BasicBlock *bb)
 
 void Cleanup::RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBlocks)
 {
+    bool anyPhiRemoved = false;
     for (auto phi : bb->PhiInstsSafe()) {
         if (!phi->GetUsers().Empty()) {
             continue;
@@ -207,13 +210,11 @@ void Cleanup::RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBloc
         bb->RemoveInst(phi);
         COMPILER_LOG(DEBUG, CLEANUP) << "Dead Phi removed " << phi->GetId();
         GetGraph()->GetEventWriter().EventCleanup(phi->GetId(), phi->GetPc());
+        anyPhiRemoved = true;
+    }
 
-        for (auto pred : bb->GetPredsBlocks()) {
-            if (pred->IsEmpty() && !SkipBasicBlock(pred)) {
-                COMPILER_LOG(DEBUG, CLEANUP) << "Would re-check empty block " << pred->GetId();
-                newEmptyBlocks->insert(pred);
-            }
-        }
+    if (anyPhiRemoved) {
+        RemovalPhi(bb, newEmptyBlocks);
     }
 }
 
@@ -271,7 +272,7 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker deadMrk, ArenaSet<BasicBlock *> *
 
 void Cleanup::MarkInlinedCaller(Marker liveMrk, Inst *saveState)
 {
-    if (!saveState->IsSaveState()) {
+    if (!saveState->IsSaveState() || !isInliningComplete_) {
         return;
     }
     auto caller = static_cast<SaveStateInst *>(saveState)->GetCallerInst();
@@ -327,11 +328,12 @@ void Cleanup::MarkLiveRec(Marker liveMrk, Inst *inst)
 template <bool LIGHT_MODE>
 void Cleanup::MarkOneLiveInst(Marker deadMrk, Marker liveMrk, Inst *inst)
 {
-    if constexpr (LIGHT_MODE) {
+    if (LIGHT_MODE || !isInliningComplete_) {
         if (inst->IsNotRemovable() && !inst->IsMarked(deadMrk)) {
             MarkLiveRec<true>(liveMrk, inst);
         }
     } else {
+        // only after Inlining is completed
         if (inst->GetOpcode() == Opcode::ReturnInlined) {
             // SaveState input of ReturnInlined will be marked as live through CallInlined if needed
             inst->SetMarker(liveMrk);
@@ -363,7 +365,7 @@ bool Cleanup::TryToRemoveNonLiveInst(Inst *inst, BasicBlock *bb, ArenaSet<BasicB
             return modified;
         }
     }
-    if (!LIGHT_MODE && inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
+    if (!LIGHT_MODE && isInliningComplete_ && inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
         auto callerSs = inst->GetSaveState();
         for (auto &user : callerSs->GetUsers()) {
             auto userInst = user.GetInst();
@@ -381,12 +383,7 @@ bool Cleanup::TryToRemoveNonLiveInst(Inst *inst, BasicBlock *bb, ArenaSet<BasicB
     modified = true;
 
     if (isPhi) {
-        for (auto pred : bb->GetPredsBlocks()) {
-            if (pred->IsEmpty() && !SkipBasicBlock(pred)) {
-                COMPILER_LOG(DEBUG, CLEANUP) << "Would re-check empty block " << pred->GetId();
-                newEmptyBlocks->insert(pred);
-            }
-        }
+        RemovalPhi(bb, newEmptyBlocks);
     } else if (bb->IsEmpty() && !SkipBasicBlock(bb)) {
         COMPILER_LOG(DEBUG, CLEANUP) << "No more non-Phi instructions in block " << bb->GetId();
         newEmptyBlocks->insert(bb);
@@ -423,7 +420,7 @@ void Cleanup::SetLiveRec(Inst *inst, Marker mrk, Marker liveMrk)
     }
 }
 
-void Cleanup::LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk)
+void Cleanup::LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk, Marker processedMrk)
 {
     ASSERT(!inst->IsMarked(mrk));
     ASSERT(!inst->IsMarked(deadMrk));
@@ -448,7 +445,8 @@ void Cleanup::LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker d
         if (user->IsMarked(deadMrk)) {
             continue;
         }
-        LiveUserSearchRec(user, mrk, liveMrk, deadMrk);
+        user->SetMarker(processedMrk);
+        LiveUserSearchRec(user, mrk, liveMrk, deadMrk, processedMrk);
         if (user->IsMarked(liveMrk)) {
             ASSERT(!inst->IsMarked(mrk) && inst->IsMarked(liveMrk));
             return;
@@ -479,17 +477,18 @@ void Cleanup::TryMarkInstIsDead(Inst *inst, Marker deadMrk, Marker mrk, [[maybe_
     dead_.push_back(inst);
 }
 
-void Cleanup::Marking(Marker deadMrk, Marker mrk, Marker liveMrk)
+void Cleanup::Marking(Marker deadMrk, Marker mrk, Marker liveMrk, Marker processedMrk)
 {
     size_t i = 0;
     while (i < dead_.size()) {
         auto inst = dead_.at(i);
         for (auto inputItem : inst->GetInputs()) {
             auto input = inputItem.GetInst();
-            if (input->IsMarked(deadMrk) || input->IsMarked(mrk)) {
+            if (input->IsMarked(deadMrk) || input->IsMarked(mrk) || input->IsMarked(processedMrk)) {
                 continue;
             }
-            LiveUserSearchRec(input, mrk, liveMrk, deadMrk);
+            input->SetMarker(processedMrk);
+            LiveUserSearchRec(input, mrk, liveMrk, deadMrk, processedMrk);
             for (auto temp : temp_) {
                 TryMarkInstIsDead(temp, deadMrk, mrk, liveMrk);
             }
@@ -542,9 +541,11 @@ bool Cleanup::SimpleDce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks)
     auto mrk = markerHolder.GetMarker();
     auto liveMarkerHolder = MarkerHolder(GetGraph());
     auto liveMrk = liveMarkerHolder.GetMarker();
+    auto processedMarkerHolder = MarkerHolder(GetGraph());
+    auto processedMrk = processedMarkerHolder.GetMarker();
 
     // Step 1. Marking
-    Marking(deadMrk, mrk, liveMrk);
+    Marking(deadMrk, mrk, liveMrk, processedMrk);
 
     // Step 2. Removal
     return Removal(newEmptyBlocks);
