@@ -110,6 +110,18 @@ function testSpecialStringRecord(): void {
   ASSERT_TRUE(special === 'a@b#c$');
 }
 
+function testRecordGetUnsupportedKey(): void {
+  let symbolKey = Symbol('test');
+  let symbolValue = myRecord[symbolKey];
+  ASSERT_TRUE(symbolValue === undefined);
+
+  let stringValue = myRecord.day;
+  ASSERT_TRUE(stringValue === 'one');
+
+  let numberValue = myRecord[1];
+  ASSERT_TRUE(numberValue === undefined);
+}
+
 testGetRecordValue();
 testChangeRecordValue();
 testNewRecordValueFromDynamic();
@@ -119,3 +131,4 @@ testLargeNumberRecord();
 testSequentialAccess();
 testModifyRecord();
 testSpecialStringRecord();
+testRecordGetUnsupportedKey();
