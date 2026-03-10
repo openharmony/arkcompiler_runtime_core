@@ -114,6 +114,12 @@
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_20.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_self_dependency_n_6.ets
 
+#33548
+05.generics/01.type_parameters/04.wildcard_type/wildcard_type_n_4.ets
+
+#33549
+05.generics/01.type_parameters/04.wildcard_type/wildcard_type_n_8.ets
+
 #26666 (cts #47 - bad array element type)
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined1.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined1u.ets
