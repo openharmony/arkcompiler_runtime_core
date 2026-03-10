@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ class ConditionVariable;
 
 class CAPABILITY("mutex") Mutex {
 public:
-    PANDA_PUBLIC_API explicit Mutex(bool is_init = true);
+    PANDA_PUBLIC_API explicit Mutex(bool isInit = true);
 
     PANDA_PUBLIC_API ~Mutex();
 
@@ -78,12 +78,12 @@ public:
     // NOTE(mwx851039): Extract common part as an interface.
     static bool DoNotCheckOnTerminationLoop()
     {
-        return no_check_for_deadlock_;
+        return noCheckForDeadlock_;
     }
 
     static void IgnoreChecksOnTerminationLoop()
     {
-        no_check_for_deadlock_ = true;
+        noCheckForDeadlock_ = true;
     }
 
 protected:
@@ -95,7 +95,7 @@ private:
     // This field is set to false in case of deadlock with daemon threads (only daemon threads
     // are not finished and they have state IS_BLOCKED). In this case we should terminate
     // those threads ignoring failures on lock structures destructors.
-    PANDA_PUBLIC_API static std::atomic_bool no_check_for_deadlock_;
+    PANDA_PUBLIC_API static std::atomic_bool noCheckForDeadlock_;
 
     NO_COPY_SEMANTIC(Mutex);
     NO_MOVE_SEMANTIC(Mutex);
@@ -149,7 +149,7 @@ public:
 
     PANDA_PUBLIC_API void Wait(Mutex *mutex);
 
-    PANDA_PUBLIC_API bool TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns = 0, bool is_absolute = false);
+    PANDA_PUBLIC_API bool TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns = 0, bool isAbsolute = false);
 
 private:
     pthread_cond_t cond_;
