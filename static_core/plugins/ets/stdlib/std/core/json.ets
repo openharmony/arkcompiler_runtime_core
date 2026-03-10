@@ -23,14 +23,6 @@ export interface JsonReplacer {
     jsonReplacer(): Record<String, Any>
 }
 
-// NOTE (chengzhihao): $Partial is not generated for exported interfaces.issue #26111
-// now use this class to throw the error.
-export class JsonReplacerTemp implements JsonReplacer {
-    jsonReplacer(): Record<String, Any> {
-        throw new Error('frontend bug');
-    }
-}
-
 export @interface JSONRename {
     newName: string
 }
@@ -1860,7 +1852,7 @@ class EscapeStringBuilder {
     private static escapeTable: FixedArray<string> = EscapeStringBuilder.createEscapeTable()
     private static controlCharsRange: int = 32
     private static delCode: int = 127
-    
+
     private static createEscapeTable(): FixedArray<string> {
         const asciiRange: int = 128
         const table: FixedArray<string> = new FixedArray<string>(asciiRange)
@@ -1893,7 +1885,7 @@ class EscapeStringBuilder {
                     }
                     break
             }
-        }        
+        }
         return table
     }
 
@@ -2233,7 +2225,7 @@ class UnifiedJsonParser {
             case c'5': case c'6': case c'7': case c'8': case c'9':
                 return this.parseNumber()
             default:
-                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
         }
     }
@@ -2334,7 +2326,7 @@ class UnifiedJsonParser {
 
     private parseEscape(): string {
         if (this.index >= this.length) {
-            throw new JsonParseError(`Incomplete escape sequence at ${this.getPositionDesc()}`, 
+            throw new JsonParseError(`Incomplete escape sequence at ${this.getPositionDesc()}`,
                 this.index, this.index)
         }
 
@@ -2367,20 +2359,20 @@ class UnifiedJsonParser {
 
     private parseUnicodeEscape(): string {
         if (this.index + 4 > this.length) {
-            throw new JsonParseError(`Incomplete Unicode escape sequence at ${this.getPositionDesc()}`, 
+            throw new JsonParseError(`Incomplete Unicode escape sequence at ${this.getPositionDesc()}`,
                 this.index, this.index)
         }
 
         let hexStr = this.source.substring(this.index, this.index + 4)
-        
+
         for (let i = 0; i < 4; i++) {
             let c = hexStr.charAt(i)
             if (!((c >= c'0' && c <= c'9') || (c >= c'a' && c <= c'f') || (c >= c'A' && c <= c'F'))) {
-                throw new JsonParseError(`Invalid hexadecimal digit '${c}' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Invalid hexadecimal digit '${c}' at ${this.getPositionDesc()}`,
                     this.index + i, this.index + i + 1)
             }
         }
-        
+
         this.advanceBy(4)
 
         let codePoint = Double.parseInt(hexStr, 16).toInt()
@@ -2479,7 +2471,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c']') {
-                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -2506,7 +2498,7 @@ class UnifiedJsonParser {
 
             this.skipWhitespace()
             if (this.ch != c':') {
-                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
             this.advance()
@@ -2527,7 +2519,7 @@ class UnifiedJsonParser {
                 this.advance()
                 return result
             } else {
-                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -2550,7 +2542,7 @@ class UnifiedJsonParser {
         let result = this.parseValueToJSON()
         this.skipWhitespace()
         if (this.index < this.length) {
-            throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`, 
+            throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                 this.index, this.index)
         }
         return result
@@ -2587,7 +2579,7 @@ class UnifiedJsonParser {
             case c'5': case c'6': case c'7': case c'8': case c'9':
                 return this.parseNumberToJSON()
             default:
-                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
         }
     }
@@ -2710,7 +2702,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c']') {
-                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -2732,7 +2724,7 @@ class UnifiedJsonParser {
 
             this.skipWhitespace()
             if (this.ch != c':') {
-                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
             this.advance()
@@ -2749,7 +2741,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c'}') {
-                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`, 
+                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
