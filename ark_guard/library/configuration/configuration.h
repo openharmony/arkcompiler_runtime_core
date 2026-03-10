@@ -81,6 +81,8 @@ struct ObfuscationRules {
     std::string printNameCache;
     /* Reuse the specified name to cache the file filename */
     std::string applyNameCache;
+    /* Reuse the specified name cache file for declaration files (nameCache.json from es2panda declgen) */
+    std::string applyNameCacheDecl;
     /* The default value is false, indicating that the call to the log statement is not deleted */
     bool removeLog = false;
     /* Obfuscation options '-printseeds' */
@@ -133,6 +135,12 @@ public:
      * @return apply name cache path
      */
     [[nodiscard]] const std::string &GetApplyNameCache() const;
+
+    /**
+     * @brief Get apply name cache decl path
+     * @return apply name cache decl path
+     */
+    [[nodiscard]] const std::string &GetApplyNameCacheDecl() const;
 
     /**
      * @brief Is disable obfuscation

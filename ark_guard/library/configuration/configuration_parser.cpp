@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ constexpr std::string_view OBFUSCATION_RULES = "obfuscationRules";
 constexpr std::string_view DISABLE_OBFUSCATION = "disableObfuscation";
 constexpr std::string_view PRINT_NAME_CACHE = "printNameCache";
 constexpr std::string_view APPLY_NAME_CACHE = "applyNameCache";
+constexpr std::string_view APPLY_NAME_CACHE_DECL = "applyNameCacheDecl";
 constexpr std::string_view REMOVE_LOG = "removeLog";
 
 constexpr std::string_view PRINT_SEEDS_OPTION = "printSeedsOption";
@@ -99,6 +100,7 @@ void ark::guard::ConfigurationParser::ParseConfigurationFile(const std::string &
     configuration.obfuscationRules.disableObfuscation = JsonUtil::GetBoolValue(obfRulesObject, DISABLE_OBFUSCATION);
     configuration.obfuscationRules.printNameCache = JsonUtil::GetStringValue(obfRulesObject, PRINT_NAME_CACHE);
     configuration.obfuscationRules.applyNameCache = JsonUtil::GetStringValue(obfRulesObject, APPLY_NAME_CACHE);
+    configuration.obfuscationRules.applyNameCacheDecl = JsonUtil::GetStringValue(obfRulesObject, APPLY_NAME_CACHE_DECL);
     configuration.obfuscationRules.removeLog = JsonUtil::GetBoolValue(obfRulesObject, REMOVE_LOG);
 
     ParsePrintSeedsOption(obfRulesObject, configuration);
