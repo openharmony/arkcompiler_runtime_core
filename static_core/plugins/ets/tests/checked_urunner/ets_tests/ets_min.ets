@@ -83,64 +83,148 @@
 
 
 function testI32() : int {
-    if (min(Int.MAX_VALUE as int, 0 as int) != 0 as int) return 1;
-    if (min(Int.MIN_VALUE as int, 0 as int) != Int.MIN_VALUE as int) return 2;
-    if (min(0 as int, -2 as int) != -2 as int) return 3;
-    if (min(0 as int, 3 as int) != 0 as int) return 4;
-    if (min(-2 as int, -4 as int) != -4 as int) return 5;
-    if (min(1 as int, 4 as int) != 1 as int) return 6;
+    if (min(Int.MAX_VALUE as int, 0 as int) != 0 as int) {
+        return 1;
+    }
+    if (min(Int.MIN_VALUE as int, 0 as int) != Int.MIN_VALUE as int) {
+        return 2;
+    }
+    if (min(0 as int, -2 as int) != -2 as int) {
+        return 3;
+    }
+    if (min(0 as int, 3 as int) != 0 as int) {
+        return 4;
+    }
+    if (min(-2 as int, -4 as int) != -4 as int) {
+        return 5;
+    }
+    if (min(1 as int, 4 as int) != 1 as int) {
+        return 6;
+    }
 
     return 0;
 }
 
 function testI64() : int {
-    if (min(Long.MAX_VALUE, 0) != 0) return 11;
-    if (min(Long.MIN_VALUE, 0) != Long.MIN_VALUE) return 12;
-    if (min(0 as int, -2) != -2) return 13;
-    if (min(0 as int, 3) != 0) return 14;
-    if (min(-2 as int, -4) != -4) return 15;
-    if (min(1 as int, 4) != 1) return 16;
+    if (min(Long.MAX_VALUE, 0) != 0) {
+        return 11;
+    }
+    if (min(Long.MIN_VALUE, 0) != Long.MIN_VALUE) {
+        return 12;
+    }
+    if (min(0 as int, -2) != -2) {
+        return 13;
+    }
+    if (min(0 as int, 3) != 0) {
+        return 14;
+    }
+    if (min(-2 as int, -4) != -4) {
+        return 15;
+    }
+    if (min(1 as int, 4) != 1) {
+        return 16;
+    }
 
     return 0;
 }
 
 function testF32() : int {
-    if (min(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 21;
-    if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 22;
-    if (min(0.0f, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 23;
-    if (min(0.0f, Float.MIN_VALUE) != 0.0f) return 24;
-    if (min(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MIN_VALUE) return 25;
-    if (min(0.0f, 2.0f) != 0.0f) return 26;
-    if (min(0.0f, -4.0f) != -4.0f) return 27;
-    if (min((1.e-10).toFloat(), (2.e+12).toFloat()) != (1.e-10).toFloat()) return 28;
-    if (!Float.isNaN(min(Float.NaN, Float.NaN))) return 29;
-    if (!Float.isNaN(min(Float.MAX_VALUE, Float.NaN))) return 30;
+    if (min(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+        return 21;
+    }
+    if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+        return 22;
+    }
+    if (min(0.0f, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+        return 23;
+    }
+    if (min(0.0f, Float.MIN_VALUE) != 0.0f) {
+        return 24;
+    }
+    if (min(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MIN_VALUE) {
+        return 25;
+    }
+    if (min(0.0f, 2.0f) != 0.0f) {
+        return 26;
+    }
+    if (min(0.0f, -4.0f) != -4.0f) {
+        return 27;
+    }
+    if (min((1.e-10).toFloat(), (2.e+12).toFloat()) != (1.e-10).toFloat()) {
+        return 28;
+    }
+    if (!Float.isNaN(min(Float.NaN, Float.NaN))) {
+        return 29;
+    }
+    if (!Float.isNaN(min(Float.MAX_VALUE, Float.NaN))) {
+        return 30;
+    }
 
     return 0;
 }
 
 function testF64() : int {
-    if (min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 31;
-    if (min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 32;
-    if (min(0, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 33;
-    if (min(0, Double.MIN_VALUE) != 0) return 34;
-    if (min(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MIN_VALUE) return 35;
-    if (min(0 as double, 2) != 0) return 36;
-    if (min(0 as double, -4) != -4) return 37;
-    if (min(1.e-100, 2.e+200) != 1.e-100) return 38;
-    if (!Double.isNaN(min(Double.NaN, Double.NaN))) return 39;
-    if (!Double.isNaN(min(Double.MAX_VALUE, Double.NaN))) return 40;
+    if (min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 31;
+    }
+    if (min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 32;
+    }
+    if (min(0, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 33;
+    }
+    if (min(0, Double.MIN_VALUE) != 0) {
+        return 34;
+    }
+    if (min(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 35;
+    }
+    if (min(0 as double, 2) != 0) {
+        return 36;
+    }
+    if (min(0 as double, -4) != -4) {
+        return 37;
+    }
+    if (min(1.e-100, 2.e+200) != 1.e-100) {
+        return 38;
+    }
+    if (!Double.isNaN(min(Double.NaN, Double.NaN))) {
+        return 39;
+    }
+    if (!Double.isNaN(min(Double.MAX_VALUE, Double.NaN))) {
+        return 40;
+    }
 
-    if (Math.min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 41;
-    if (Math.min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 42;
-    if (Math.min(0 as int, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 43;
-    if (Math.min(0 as int, Double.MIN_VALUE) != 0) return 44;
-    if (Math.min(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MIN_VALUE) return 45;
-    if (Math.min(0 as double, 2) != 0) return 46;
-    if (Math.min(0 as double, -4) != -4) return 47;
-    if (Math.min(1.e-100, 2.e+200) != 1.e-100) return 48;
-    if (!Double.isNaN(Math.min(Double.NaN, Double.NaN))) return 49;
-    if (!Double.isNaN(Math.min(Double.MAX_VALUE, Double.NaN))) return 50;
+    if (Math.min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 41;
+    }
+    if (Math.min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 42;
+    }
+    if (Math.min(0 as int, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 43;
+    }
+    if (Math.min(0 as int, Double.MIN_VALUE) != 0) {
+        return 44;
+    }
+    if (Math.min(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 45;
+    }
+    if (Math.min(0 as double, 2) != 0) {
+        return 46;
+    }
+    if (Math.min(0 as double, -4) != -4) {
+        return 47;
+    }
+    if (Math.min(1.e-100, 2.e+200) != 1.e-100) {
+        return 48;
+    }
+    if (!Double.isNaN(Math.min(Double.NaN, Double.NaN))) {
+        return 49;
+    }
+    if (!Double.isNaN(Math.min(Double.MAX_VALUE, Double.NaN))) {
+        return 50;
+    }
 
     return 0;
 }

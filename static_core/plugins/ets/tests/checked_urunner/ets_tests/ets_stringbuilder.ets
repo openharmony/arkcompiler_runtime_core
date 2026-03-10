@@ -628,4 +628,4 @@ function encodePercentEncoding(str: string) {
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events \
 //!                         --compiler-events-path=./events_compiler.csv",
-//!              entry: "ets_stringbuilder.ETSGLOBAL::main"
+//!               entry: "ets_stringbuilder.ETSGLOBAL::main"

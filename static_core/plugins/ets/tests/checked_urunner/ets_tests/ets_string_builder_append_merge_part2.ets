@@ -108,7 +108,9 @@
 
 function f0If1Else12Append4(cond: boolean): string {
     let sb = new StringBuilder();
-    if (sb != null) sb.toString();
+    if (sb != null) {
+        sb.toString();
+    }
 
     if (cond) {
         sb.append('0');
@@ -123,7 +125,9 @@ function f0If1Else12Append4(cond: boolean): string {
 
 function f1If1Else11Append4(cond: boolean): string {
     let sb = new StringBuilder();
-    if (sb != null) sb.toString();
+    if (sb != null) {
+        sb.toString();
+    }
 
     sb.append('0');
     if (cond) {
@@ -138,7 +142,9 @@ function f1If1Else11Append4(cond: boolean): string {
 
 function f2If1Else10Append4(cond: boolean): string {
     let sb = new StringBuilder();
-    if (sb != null) sb.toString();
+    if (sb != null) {
+        sb.toString();
+    }
 
     sb.append('0');
     sb.append('1');
@@ -153,7 +159,9 @@ function f2If1Else10Append4(cond: boolean): string {
 
 function f1If2Else10Append4(cond: boolean): string {
     let sb = new StringBuilder();
-    if (sb != null) sb.toString();
+    if (sb != null) {
+        sb.toString();
+    }
 
     sb.append('0');
     if (cond) {
@@ -168,7 +176,9 @@ function f1If2Else10Append4(cond: boolean): string {
 
 function f0If2Else20Append4(cond: boolean): string {
     let sb = new StringBuilder();
-    if (sb != null) sb.toString();
+    if (sb != null) {
+        sb.toString();
+    }
 
     if (cond) {
         sb.append('0');

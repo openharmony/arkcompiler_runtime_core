@@ -32,7 +32,8 @@ function main(): void {
 }
 
 //! CHECKER      Test charAt intrinsic with tree string
-//! RUN          force_jit: true, options: "--use-all-strings=true --compiler-regex=charAt.*", entry: "charAt.ETSGLOBAL::testTreeStringCharAt"
+//! RUN          force_jit: true, options: "--use-all-strings=true --compiler-regex=charAt.*",
+//!              entry: "charAt.ETSGLOBAL::testTreeStringCharAt"
 //! METHOD       "charAt.ETSGLOBAL::testTreeStringCharAt"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Call.*std.core.String::charAt"
@@ -52,7 +53,8 @@ function createTreeString(s1: string, s2: string): string {
 }
 
 //! CHECKER      Test charAt intrinsic with sliced string
-//! RUN          force_jit: true, options: "--use-all-strings=true --compiler-regex=charAt.*", entry: "charAt.ETSGLOBAL::testSlicedStringCharAt"
+//! RUN          force_jit: true, options: "--use-all-strings=true --compiler-regex=charAt.*",
+//!              entry: "charAt.ETSGLOBAL::testSlicedStringCharAt"
 //! METHOD       "charAt.ETSGLOBAL::testSlicedStringCharAt"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Call.*std.core.String::charAt"

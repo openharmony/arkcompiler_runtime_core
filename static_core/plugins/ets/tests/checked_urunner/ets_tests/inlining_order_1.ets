@@ -39,10 +39,10 @@
 //!              options: "--log-level=debug --log-components=compiler --compiler-log=inlining"
 
 function cold(): int {
- return 30; 
+    return 30; 
 }
 function hot(i:int):int {
- return -i; 
+    return -i; 
 }
 
 function testLoops(): void {

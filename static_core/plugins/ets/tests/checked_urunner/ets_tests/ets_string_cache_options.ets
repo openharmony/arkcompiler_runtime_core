@@ -64,8 +64,8 @@
 
 //! CHECKER       INTERP-CPP, check ets cache not used with option
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=cpp \
-//!                         --compiler-enable-events --use-string-caches=false --compiler-events-path=./events_compiler.csv \
+//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=cpp --compiler-enable-events \
+//!                         --use-string-caches=false --compiler-events-path=./events_compiler.csv \
 //!                         --compiler-enable-jit=false",
 //!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!

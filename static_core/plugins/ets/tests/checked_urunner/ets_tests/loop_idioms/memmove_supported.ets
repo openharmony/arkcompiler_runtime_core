@@ -15,82 +15,82 @@
 
 //! CHECKER       Test memmove
 //! RUN           force_jit: true,
-//!               options: "--compiler-regex='.*memmove_supported.TestSupported::test_patternMatch_offsets.*'",
+//!               options: "--compiler-regex='.*memmove_supported.TestSupported::testPatternMatchOffsets.*'",
 //!               entry: "memmove_supported.ETSGLOBAL::main"
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets1"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets1"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets2"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets2"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets3"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets3"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets4"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets4"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_sameNegOffset"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsetsSameNegOffset"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_negOffsets"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsetsNegOffsets"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_negOffsets_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsetsNegOffsetsRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_sameNegOffset_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsetsSameNegOffsetRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets4_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets4Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets3_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets3Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets2_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets2Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets1_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets1Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 
 //! CHECKER       AOT Test memmove for references
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*memmove_supported.TestSupported::test_patternMatch_offsets.*'"
+//! RUN_PAOC      options: "--compiler-regex='.*memmove_supported.TestSupported::testPatternMatchOffsets.*'"
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_negOffsets_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsetsNegOffsetsRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_sameNegOffset_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsetsSameNegOffsetRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets4_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets4Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets3_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets3Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets2_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets2Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets1_ref"
+//! METHOD        "memmove_supported.TestSupported::testPatternMatchOffsets1Ref"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 
@@ -105,7 +105,7 @@ function check(arr1: Object, arr2: Object): int {
 let GLOBAL_OFFS: int = 1;
 
 class TestSupported {
-    static test_patternMatch_offsets1(): int {
+    static testPatternMatchOffsets1(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -115,7 +115,7 @@ class TestSupported {
         return check(dst, [1, 2, 6, 7, 8]);
     }
 
-    static test_patternMatch_offsets1_ref(): int {
+    static testPatternMatchOffsets1Ref(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         let offs = dst.length - src.length;
@@ -125,7 +125,7 @@ class TestSupported {
         return check(dst, ['1', '2', '6', '7', '8']);
     }
 
-    static test_patternMatch_offsets2(): int {
+    static testPatternMatchOffsets2(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -135,7 +135,7 @@ class TestSupported {
         return check(dst, [1, 2, 6, 7, 8]);
     }
 
-    static test_patternMatch_offsets2_ref(): int {
+    static testPatternMatchOffsets2Ref(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         let offs = dst.length - src.length;
@@ -145,7 +145,7 @@ class TestSupported {
         return check(dst, ['1', '2', '6', '7', '8']);
     }
 
-    static test_patternMatch_offsets3(): int {
+    static testPatternMatchOffsets3(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -155,7 +155,7 @@ class TestSupported {
         return check(dst, [1, 2, 6, 7, 8]);
     }
 
-    static test_patternMatch_offsets3_ref(): int {
+    static testPatternMatchOffsets3Ref(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         let offs = dst.length - src.length;
@@ -165,7 +165,7 @@ class TestSupported {
         return check(dst, ['1', '2', '6', '7', '8']);
     }
 
-    static test_patternMatch_offsets4(): int {
+    static testPatternMatchOffsets4(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -175,7 +175,7 @@ class TestSupported {
         return check(dst, [1, 2, 6, 7, 8]);
     }
 
-    static test_patternMatch_offsets4_ref(): int {
+    static testPatternMatchOffsets4Ref(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         let offs = dst.length - src.length;
@@ -185,7 +185,7 @@ class TestSupported {
         return check(dst, ['1', '2', '6', '7', '8']);
     }
 
-    static test_patternMatch_offsets_sameNegOffset(): int {
+    static testPatternMatchOffsetsSameNegOffset(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         for (let i: int = 1; i < src.length; i++) {
@@ -194,7 +194,7 @@ class TestSupported {
         return check(dst, [6, 7, 3, 4, 5]);
     }
 
-    static test_patternMatch_offsets_sameNegOffset_ref(): int {
+    static testPatternMatchOffsetsSameNegOffsetRef(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = 1; i < src.length; i++) {
@@ -203,7 +203,7 @@ class TestSupported {
         return check(dst, ['6', '7', '3', '4', '5']);
     }
 
-    static test_patternMatch_offsets_negOffsets(): int {
+    static testPatternMatchOffsetsNegOffsets(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         for (let i: int = 2; i < src.length + 1; i++) {
@@ -212,7 +212,7 @@ class TestSupported {
         return check(dst, [1, 6, 7, 4, 5]);
     }
 
-    static test_patternMatch_offsets_negOffsets_ref(): int {
+    static testPatternMatchOffsetsNegOffsetsRef(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = 2; i < src.length + 1; i++) {
@@ -224,18 +224,18 @@ class TestSupported {
 
 function main(): int {
     let res: int = 0;
-    res += TestSupported.test_patternMatch_offsets1();
-    res += TestSupported.test_patternMatch_offsets1_ref();
-    res += TestSupported.test_patternMatch_offsets2();
-    res += TestSupported.test_patternMatch_offsets2_ref();
-    res += TestSupported.test_patternMatch_offsets3();
-    res += TestSupported.test_patternMatch_offsets3_ref();
-    res += TestSupported.test_patternMatch_offsets4();
-    res += TestSupported.test_patternMatch_offsets4_ref();
-    res += TestSupported.test_patternMatch_offsets_sameNegOffset();
-    res += TestSupported.test_patternMatch_offsets_sameNegOffset_ref();
-    res += TestSupported.test_patternMatch_offsets_negOffsets();
-    res += TestSupported.test_patternMatch_offsets_negOffsets_ref();
+    res += TestSupported.testPatternMatchOffsets1();
+    res += TestSupported.testPatternMatchOffsets1Ref();
+    res += TestSupported.testPatternMatchOffsets2();
+    res += TestSupported.testPatternMatchOffsets2Ref();
+    res += TestSupported.testPatternMatchOffsets3();
+    res += TestSupported.testPatternMatchOffsets3Ref();
+    res += TestSupported.testPatternMatchOffsets4();
+    res += TestSupported.testPatternMatchOffsets4Ref();
+    res += TestSupported.testPatternMatchOffsetsSameNegOffset();
+    res += TestSupported.testPatternMatchOffsetsSameNegOffsetRef();
+    res += TestSupported.testPatternMatchOffsetsNegOffsets();
+    res += TestSupported.testPatternMatchOffsetsNegOffsetsRef();
     arktest.assertEQ(res, 0);
     return res;
 }

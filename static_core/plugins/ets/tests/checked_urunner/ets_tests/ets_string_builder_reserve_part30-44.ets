@@ -262,7 +262,7 @@ function chainReserve35() : String {
 }
 
 function moreTypesReserve36() : String {
-    const emptyString = "";
+    const emptyString = '';
     let nullString: String = 'null';
     let chArray: FixedArray<char> = [c'!', c'@', c'#', c'$', c'%'];
 

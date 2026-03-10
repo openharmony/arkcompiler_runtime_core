@@ -14,45 +14,46 @@
  */
 
 //! CHECKER       Test memmove
-//! RUN           force_jit: true, options: "--compiler-regex='.*memmove_supported_part2.TestSupported::.*test.*'", entry: "memmove_supported_part2.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*memmove_supported_part2.TestSupported::.*test.*'",
+//!               entry: "memmove_supported_part2.ETSGLOBAL::main"
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_noAlias_locals"
+//! METHOD        "memmove_supported_part2.TestSupported::testNoAliasLocals"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::__noinline__test_noAlias_localAndParam"
+//! METHOD        "memmove_supported_part2.TestSupported::__noinline__testNoAliasLocalAndParam"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_backwardsClosed"
+//! METHOD        "memmove_supported_part2.TestSupported::testBackwardsClosed"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_backwardsOpen"
+//! METHOD        "memmove_supported_part2.TestSupported::testBackwardsOpen"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_forwardClosed"
+//! METHOD        "memmove_supported_part2.TestSupported::testForwardClosed"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_forwardClosed_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testForwardClosedRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_backwardsOpen_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testBackwardsOpenRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_backwardsClosed_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testBackwardsClosedRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_noAlias_locals_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testNoAloasLocalsRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_noAlias_updateFirstOnly_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testNoAliasUpdateFirstOnlyRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 
@@ -60,23 +61,23 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*memmove_supported_part2.TestSupported::.*test.*'"
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_forwardClosed_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testForwardClosedRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_backwardsOpen_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testBackwardsOpenRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_backwardsClosed_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testBackwardsClosedRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_noAlias_locals_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testNoAloasLocalsRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 //!
-//! METHOD        "memmove_supported_part2.TestSupported::test_noAlias_updateFirstOnly_ref"
+//! METHOD        "memmove_supported_part2.TestSupported::testNoAliasUpdateFirstOnlyRef"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 
@@ -91,7 +92,7 @@ function check(arr1: Object, arr2: Object): int {
 let GLOBAL_OFFS: int = 1;
 
 class TestSupported {
-    static test_noAlias_locals(): int {
+    static testNoAliasLocals(): int {
         let src: FixedArray<int> = [1, 2, 3, 4];
         let dst: FixedArray<int> = new FixedArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
@@ -100,7 +101,7 @@ class TestSupported {
         return check(dst, [1, 2, 3, 4]);
     }
 
-    static test_noAlias_locals_ref(): int {
+    static testNoAloasLocalsRef(): int {
         let src: FixedArray<string> = ['1', '2', '3', '4'];
         let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
@@ -109,7 +110,7 @@ class TestSupported {
         return check(dst, ['1', '2', '3', '4']);
     }
 
-    static test_noAlias_updateFirstOnly_ref(): int {
+    static testNoAliasUpdateFirstOnlyRef(): int {
         let src: FixedArray<string> = ['1', '2', '3', '4'];
         let dst: FixedArray<string> = new FixedArray<string>(4);
         TestSupported.__noinline__updateFirst(dst);
@@ -123,12 +124,12 @@ class TestSupported {
         a[0] = '';
     }
 
-    static test_noAlias_localAndParam(): int {
+    static testNoAliasLocalAndParam(): int {
         let src: FixedArray<int> = [1, 2, 3, 4];
-        return check(TestSupported.__noinline__test_noAlias_localAndParam(src), src);
+        return check(TestSupported.__noinline__testNoAliasLocalAndParam(src), src);
     }
 
-    static __noinline__test_noAlias_localAndParam(src: FixedArray<int>): FixedArray<int> {
+    static __noinline__testNoAliasLocalAndParam(src: FixedArray<int>): FixedArray<int> {
         let dst: FixedArray<int> = new FixedArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
@@ -136,7 +137,7 @@ class TestSupported {
         return dst;
     }
 
-    static test_backwardsClosed(): int {
+    static testBackwardsClosed(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -147,7 +148,7 @@ class TestSupported {
         return check(dst, [1, 6, 7, 8, 5]);
     }
 
-    static test_backwardsClosed_ref(): int {
+    static testBackwardsClosedRef(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = src.length - 1; i >= 0; i--) {
@@ -156,7 +157,7 @@ class TestSupported {
         return check(dst, ['1', '6', '7', '8', '5']);
     }
 
-    static test_backwardsOpen(): int {
+    static testBackwardsOpen(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let x = GLOBAL_OFFS;
@@ -166,7 +167,7 @@ class TestSupported {
         return check(dst, [7, 8, 3, 4, 5]);
     }
 
-    static test_backwardsOpen_ref(): int {
+    static testBackwardsOpenRef(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = src.length - 1; i > 0; i--) {
@@ -175,7 +176,7 @@ class TestSupported {
         return check(dst, ['7', '8', '3', '4', '5']);
     }
 
-    static test_forwardClosed(): int {
+    static testForwardClosed(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -186,7 +187,7 @@ class TestSupported {
         return check(dst, [1, 6, 7, 8, 5]);
     }
 
-    static test_forwardClosed_ref(): int {
+    static testForwardClosedRef(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = 0; i <= src.length - 1; i++) {
@@ -198,16 +199,16 @@ class TestSupported {
 
 function main(): int {
     let res: int = 0;
-    res += TestSupported.test_noAlias_locals();
-    res += TestSupported.test_noAlias_locals_ref();
-    res += TestSupported.test_noAlias_localAndParam();
-    res += TestSupported.test_noAlias_updateFirstOnly_ref();
-    res += TestSupported.test_backwardsClosed();
-    res += TestSupported.test_backwardsClosed_ref();
-    res += TestSupported.test_backwardsOpen();
-    res += TestSupported.test_backwardsOpen_ref();
-    res += TestSupported.test_forwardClosed();
-    res += TestSupported.test_forwardClosed_ref();
+    res += TestSupported.testNoAliasLocals();
+    res += TestSupported.testNoAloasLocalsRef();
+    res += TestSupported.testNoAliasLocalAndParam();
+    res += TestSupported.testNoAliasUpdateFirstOnlyRef();
+    res += TestSupported.testBackwardsClosed();
+    res += TestSupported.testBackwardsClosedRef();
+    res += TestSupported.testBackwardsOpen();
+    res += TestSupported.testBackwardsOpenRef();
+    res += TestSupported.testForwardClosed();
+    res += TestSupported.testForwardClosedRef();
     arktest.assertEQ(res, 0);
     return res;
 }

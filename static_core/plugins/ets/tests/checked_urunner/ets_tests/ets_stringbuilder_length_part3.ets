@@ -185,8 +185,9 @@ function getStringLengthCount32(){
 function getStringLengthCount22(){
   let sb = new StringBuilder();
   let len0 = sb.stringLength;
-  if (true)
+  if (true) {
     sb.append(0);
+  }
   let len1 = sb.stringLength;
   return len1;
 }

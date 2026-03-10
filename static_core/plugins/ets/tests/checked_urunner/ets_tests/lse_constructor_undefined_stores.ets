@@ -14,7 +14,8 @@
  */
 
 //! CHECKER      Check LSE eliminates redundant undefined stores in constructor
-//! RUN          force_jit: true, options: "--compiler-regex='.*MyClass.*'", entry: "lse_constructor_undefined_stores.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex='.*MyClass.*'",
+//!              entry: "lse_constructor_undefined_stores.ETSGLOBAL::main"
 //! METHOD       "lse_constructor_undefined_stores.MyClass::<ctor>"
 //! PASS_BEFORE  "LSE"
 //! INST_COUNT   /StoreObject.*a/, 6
@@ -55,7 +56,7 @@
 //! RUN          entry: "lse_constructor_undefined_stores.ETSGLOBAL::main"
 
 class A {
-    value: int
+    public value: int
 
     constructor(value: int) {
         this.value = value
@@ -63,9 +64,9 @@ class A {
 }
 
 class MyClass {
-    a: A
-    b: A
-    c: A
+    public a: A
+    public b: A
+    public c: A
 
     constructor(aVal: A, bVal: A, cVal: A) {
         this.a = aVal
