@@ -1,6 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,11 +137,15 @@ private:
     std::vector<napi_property_descriptor> BuildJSProperties(napi_env &env, Span<Field *> fields,
                                                             Span<EtsMethodSet *> methods);
 
+    void DefinePropertiesBatch(napi_env env, napi_value jsCtor, Span<const napi_property_descriptor> jsProps);
     static napi_value GetGlobalSymbolIterator(napi_env &env);
 
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
     void BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method);
     void SetUpMimicHandler(napi_env env);
+    bool SetupJsProxyWrapper(InteropCtx *ctx, EtsClass *etsClass);
+    void DefineJSClass(napi_env env, const std::vector<napi_property_descriptor> &jsProps, napi_value *jsCtor);
+    void FinalizeClassDefinition(napi_env env, napi_value jsCtor, const MethodsVec &methods);
     static napi_value CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper);
     static napi_value MimicGetHandler(napi_env env, napi_callback_info info);
     static napi_value MimicSetHandler(napi_env env, napi_callback_info info);
