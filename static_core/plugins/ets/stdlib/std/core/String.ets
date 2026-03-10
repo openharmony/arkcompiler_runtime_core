@@ -422,7 +422,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns the comparison result
      */
     public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): int {
-        return new Intl.Collator(locale, options).compare(this, that).toInt()
+        return new Intl.Collator(locale, options).compare(this, that)
     }
 
     /**
