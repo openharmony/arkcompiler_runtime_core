@@ -780,6 +780,37 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
     NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
 }
 
+void EtsClassWrapper::DefinePropertiesBatch(napi_env env, napi_value jsCtor,
+                                            Span<const napi_property_descriptor> jsProps)
+{
+    napi_value jsProto;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &jsProto));
+
+    std::vector<napi_property_descriptor> staticProps;
+    std::vector<napi_property_descriptor> instanceProps;
+
+    staticProps.reserve(jsProps.size());
+    instanceProps.reserve(jsProps.size());
+
+    for (const auto &prop : jsProps) {
+        if ((prop.attributes & napi_static) != 0) {
+            staticProps.push_back(prop);
+        } else {
+            instanceProps.push_back(prop);
+        }
+    }
+
+    constexpr size_t BATCH_SIZE = 512;
+    for (size_t i = 0; i < staticProps.size(); i += BATCH_SIZE) {
+        size_t count = std::min(BATCH_SIZE, staticProps.size() - i);
+        NAPI_CHECK_FATAL(napi_define_properties(env, jsCtor, count, &staticProps[i]));
+    }
+    for (size_t i = 0; i < instanceProps.size(); i += BATCH_SIZE) {
+        size_t count = std::min(BATCH_SIZE, instanceProps.size() - i);
+        NAPI_CHECK_FATAL(napi_define_properties(env, jsProto, count, &instanceProps[i]));
+    }
+}
+
 /*static*/
 std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsClass *etsClass, const char *jsBuiltinName,
                                                          const OverloadsMap *overloads)
@@ -807,26 +838,12 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
         INTEROP_LOG(FATAL) << "built-in class " << etsClass->GetDescriptor() << " is final";
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
-    if (!etsClass->IsFinal()) {
-        auto allEtsMethod = etsClass->GetMethods();
-        auto ungroupedMethods = CollectAllPandaMethods(allEtsMethod.begin(), allEtsMethod.end());
-
-        _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
-        if (_this->jsproxyWrapper_ == nullptr) {
-            // NOTE(konstanting): we assume that the method list stays the same for every proxied class
-            auto *proxyWrapper =
-                js_proxy::JSProxy::CreateBuiltinProxy(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
-            if (proxyWrapper == nullptr) {
-                return nullptr;
-            }
-            _this->jsproxyWrapper_ = proxyWrapper;
-            ctx->SetJsProxyInstance(etsClass, _this->jsproxyWrapper_);
-        }
+    if (!_this->SetupJsProxyWrapper(ctx, etsClass)) {
+        return nullptr;
     }
+
     napi_value jsCtor {};
-    NAPI_CHECK_FATAL(napi_define_class(env, etsClass->GetDescriptor(), NAPI_AUTO_LENGTH,
-                                       EtsClassWrapper::JSCtorCallback, _this.get(), jsProps.size(), jsProps.data(),
-                                       &jsCtor));
+    _this->DefineJSClass(env, jsProps, &jsCtor);
 
     if (etsClass == PlatformTypes()->coreObject) {
         SetNullPrototype(env, jsCtor);
@@ -838,15 +855,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
         return _this;
     }
 
-    SetAttachCallbackForClass(env, jsCtor, methods, etsClass);
-
-    auto base = _this->baseWrapper_;
-    napi_value fakeSuper = _this->HasBuiltin() ? _this->GetBuiltin(env)
-                                               : (base->HasBuiltin() ? base->GetBuiltin(env) : base->GetJsCtor(env));
-
-    SimulateJSInheritance(env, jsCtor, fakeSuper);
-    NAPI_CHECK_FATAL(napi_object_seal(env, jsCtor));
-    NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsCtorRef_));
+    _this->FinalizeClassDefinition(env, jsCtor, methods);
 
     return _this;
 }
@@ -875,6 +884,56 @@ void EtsClassWrapper::SetUpMimicHandler(napi_env env)
 
     NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandlerRef, "get", getHandlerFunc));
     NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandlerRef, "set", setHandlerFunc));
+}
+
+bool EtsClassWrapper::SetupJsProxyWrapper(InteropCtx *ctx, EtsClass *etsClass)
+{
+    if (etsClass->IsFinal()) {
+        return true;
+    }
+    auto allEtsMethod = etsClass->GetMethods();
+    auto ungroupedMethods = CollectAllPandaMethods(allEtsMethod.begin(), allEtsMethod.end());
+
+    this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
+    if (this->jsproxyWrapper_ == nullptr) {
+        // NOTE(konstanting): we assume that the method list stays the same for every proxied class
+        auto *proxyWrapper =
+            js_proxy::JSProxy::CreateBuiltinProxy(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+        if (proxyWrapper == nullptr) {
+            return false;
+        }
+        this->jsproxyWrapper_ = proxyWrapper;
+        ctx->SetJsProxyInstance(etsClass, this->jsproxyWrapper_);
+    }
+    return true;
+}
+
+void EtsClassWrapper::DefineJSClass(napi_env env, const std::vector<napi_property_descriptor> &jsProps,
+                                    napi_value *jsCtor)
+{
+    constexpr size_t MAX_PROPS_IN_DEFINE_CLASS = 1024;
+    if (jsProps.size() <= MAX_PROPS_IN_DEFINE_CLASS) {
+        NAPI_CHECK_FATAL(napi_define_class(env, etsClass_->GetDescriptor(), NAPI_AUTO_LENGTH,
+                                           EtsClassWrapper::JSCtorCallback, this, jsProps.size(), jsProps.data(),
+                                           jsCtor));
+    } else {
+        NAPI_CHECK_FATAL(napi_define_class(env, etsClass_->GetDescriptor(), NAPI_AUTO_LENGTH,
+                                           EtsClassWrapper::JSCtorCallback, this, 0, nullptr, jsCtor));
+        this->DefinePropertiesBatch(env, *jsCtor, Span<const napi_property_descriptor>(jsProps.data(), jsProps.size()));
+    }
+}
+
+void EtsClassWrapper::FinalizeClassDefinition(napi_env env, napi_value jsCtor, const MethodsVec &methods)
+{
+    SetAttachCallbackForClass(env, jsCtor, const_cast<MethodsVec &>(methods), etsClass_);
+
+    auto base = this->baseWrapper_;
+    napi_value fakeSuper = this->HasBuiltin() ? this->GetBuiltin(env)
+                                              : (base->HasBuiltin() ? base->GetBuiltin(env) : base->GetJsCtor(env));
+
+    SimulateJSInheritance(env, jsCtor, fakeSuper);
+    NAPI_CHECK_FATAL(napi_object_seal(env, jsCtor));
+    NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &this->jsCtorRef_));
 }
 
 /*static*/

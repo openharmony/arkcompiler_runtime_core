@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License") \;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,6 +125,8 @@
     FN_MACRO(napi_get_value_bigint_words, napi_env, env, napi_value, value, int *, sign_bit, size_t *, word_count,     \
              uint64_t *, words)                                                                                        \
     FN_MACRO(napi_get_arraybuffer_info, napi_env, env, napi_value, arraybuffer, void **, data, size_t *, byte_length)  \
+    FN_MACRO(napi_define_properties, napi_env, env, napi_value, object, size_t, property_count,                        \
+             const napi_property_descriptor *, properties)                                                             \
     FN_MACRO(napi_define_class, napi_env, env, const char *, utf8name, size_t, length, napi_callback, constructor,     \
              void *, data, size_t, property_count, const napi_property_descriptor *, properties, napi_value *, result) \
     FN_MACRO(napi_is_date, napi_env, env, napi_value, value, bool *, is_date)                                          \
