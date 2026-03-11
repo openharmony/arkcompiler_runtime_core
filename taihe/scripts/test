@@ -283,7 +283,7 @@ TESTS = {
 MODE_TO_TESTS = {
     "github-push-ci": ["pytest", "core", "ani", "cmake"],
     "github-pr-ci": ["pytest", "core", "ani", "cmake"],
-    "ggw-ci": ["pytest", "ani", "bin_ani"],
+    "ggw-ci": ["pytest", "bin_ani"],
 }
 
 
