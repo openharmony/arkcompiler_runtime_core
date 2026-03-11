@@ -27,6 +27,8 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 
+#include "test_utils.h"
+
 // NOLINTBEGIN(readability-magic-numbers)
 
 namespace ark::coretypes::test {
@@ -1940,6 +1942,89 @@ TEST_F(StringTest, TreeStringGC)
     ASSERT_EQ(right->IsLineString(), true);
     ASSERT_EQ(String::StringsAreEqual(left, sub1Handle.GetPtr()), true);
     ASSERT_EQ(String::StringsAreEqual(right, sub2Handle.GetPtr()), true);
+}
+
+class StringOOMTest : public testing::Test {
+public:
+    StringOOMTest()
+    {
+        Runtime::Create(CreateOOMOptions());
+        thread_ = MTManagedThread::GetCurrent();
+        ASSERT(thread_ != nullptr);
+        thread_->ManagedCodeBegin();
+    }
+
+    ~StringOOMTest() override
+    {
+        thread_->ManagedCodeEnd();
+        Runtime::Destroy();
+    }
+
+    NO_COPY_SEMANTIC(StringOOMTest);
+    NO_MOVE_SEMANTIC(StringOOMTest);
+
+    LanguageContext GetLanguageContext()
+    {
+        return Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    }
+
+    static RuntimeOptions CreateOOMOptions()
+    {
+        RuntimeOptions options;
+        options.SetShouldLoadBootPandaFiles(false);
+        options.SetShouldInitializeIntrinsics(false);
+        options.SetHeapSizeLimit(HEAP_SIZE);
+        options.SetCompilerEnableJit(false);
+        options.SetGcTriggerType("debug-never");
+        options.SetGcWorkersCount(0);
+        options.SetExplicitConcurrentGcEnabled(false);
+        return options;
+    }
+
+    static constexpr size_t HEAP_SIZE = 8_MB;
+
+protected:
+    MTManagedThread *thread_ {};
+};
+
+TEST_F(StringOOMTest, AllocSlicedStringObjectWithOOM)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    auto ctx = GetLanguageContext();
+    HandleScope<ObjectHeader *> scope(thread_);
+
+    String *src = mem::ObjectAllocator::AllocString(common::SlicedString::SIZE);
+    ASSERT_NE(src, nullptr);
+
+    coretypes::String *objString;
+    do {
+        objString = mem::ObjectAllocator::AllocString(common::SlicedString::SIZE);
+    } while (objString != nullptr);
+
+    String *slicedStr = String::GetSlicedString(src, 0, 1, ctx, vm, true, false);
+    ASSERT_EQ(slicedStr, nullptr);
+}
+
+TEST_F(StringOOMTest, AllocTreeStringObjectWithOOM)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    auto ctx = GetLanguageContext();
+    HandleScope<ObjectHeader *> scope(thread_);
+
+    String *left = mem::ObjectAllocator::AllocString(common::TreeString::SIZE);
+    String *right = mem::ObjectAllocator::AllocString(common::TreeString::SIZE);
+    ASSERT_NE(left, nullptr);
+    ASSERT_NE(right, nullptr);
+
+    coretypes::String *objString;
+    do {
+        objString = mem::ObjectAllocator::AllocString(common::TreeString::SIZE);
+    } while (objString != nullptr);
+
+    VMHandle<coretypes::String> leftHandle(thread_, left);
+    VMHandle<coretypes::String> rightHandle(thread_, right);
+    String *treeStr = String::CreateTreeString(thread_, leftHandle, rightHandle, 2, true, ctx, vm, true, false);
+    ASSERT_EQ(treeStr, nullptr);
 }
 }  // namespace ark::coretypes::test
 

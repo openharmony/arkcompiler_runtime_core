@@ -472,8 +472,9 @@ String *String::AllocSlicedStringObject(const LanguageContext &ctx, PandaVM *vm,
         slicedStr = reinterpret_cast<common::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
             slicedStrCls, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT));
     }
-
-    slicedStr->SetMixHashcode(0);
+    if (LIKELY(slicedStr != nullptr)) {
+        slicedStr->SetMixHashcode(0);
+    }
     return String::Cast(slicedStr);
 }
 
@@ -496,7 +497,9 @@ String *String::AllocTreeStringObject(ManagedThread *thread, const LanguageConte
         treeStr = reinterpret_cast<common::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
             treeStrCls, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT));
     }
-    treeStr->SetMixHashcode(0);
+    if (LIKELY(treeStr != nullptr)) {
+        treeStr->SetMixHashcode(0);
+    }
     return String::Cast(treeStr);
 }
 
