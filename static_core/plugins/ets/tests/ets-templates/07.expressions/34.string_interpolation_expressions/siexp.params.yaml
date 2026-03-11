@@ -254,3 +254,30 @@ cases:
     - use: |-
         const v = `...${null}...${undefined}...`
         const expected = '...null...undefined...'      
+
+    - use: |-
+        const v = kis(5)
+        const expected = '50_50_70'
+      defs: |-
+        const kis: (k:int) => string = k => `${k}0_${k++}0_${++k}0`
+      xcheck: |-
+        arktest.assertTrue(v instanceof string)
+
+    - use: |-
+        const v = kis(5)
+        const expected = '50_50_70_80'
+      defs: |-
+        const cl: (k: int) => int = k => ++k
+        const kis: (k:int) => string = k => `${k}0_${k++}0_${++k}0_${cl(k)}0`
+        
+
+    - use: |-
+        const xx = (({ markers: [...kinds.map(k => `${k}0;`)]} as IOP).markers ?? [''])
+        const v = xx instanceof Array ? xx[2] : 'empty'
+        const expected = 'three0;'
+      defs: |-
+        const kinds = ['one', 'two', 'three']
+        interface Marker {}
+        interface IOP {
+          markers?: string | string[] | Marker | Marker[]
+        }
