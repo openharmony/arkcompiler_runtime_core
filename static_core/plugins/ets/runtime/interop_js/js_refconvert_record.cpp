@@ -68,6 +68,16 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     }
     napi_valuetype vtype;
     NAPI_CHECK_FATAL(napi_typeof(env, jsArgs[1], &vtype));
+
+    // Record keys should be assignable to {BaseEnum, Numeric, String}
+    // Only napi_string and napi_number are supported (simplified check)
+    // napi_symbol and other types should return undefined
+    if (vtype != napi_string && vtype != napi_number) {
+        // For unsupported types (like Symbol), return undefined
+        return GetUndefined(env);
+    }
+
+    // Handle special PROXY_NAPI_WRAPPER case only for string type
     if (vtype == napi_string) {
         std::string value = GetString(env, jsArgs[1]);
         if (value == ets_proxy::SharedReferenceStorage::PROXY_NAPI_WRAPPER) {
