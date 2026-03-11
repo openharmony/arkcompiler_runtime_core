@@ -61,8 +61,8 @@ bool LLVMIrConstructor::EmitArrayCopyWithin(Inst *inst)
 bool LLVMIrConstructor::EmitStdStringSubstring(Inst *inst)
 {
     auto entrypointId = GetGraph()->GetRuntime()->IsUseAllStrings()
-                            ? RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_ALL_STRINGS_COMPRESSED
-                            : RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED;
+                            ? RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_ALL_STRINGS
+                            : RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB;
     return EmitFastPath(inst, entrypointId, 3U);
 }
 

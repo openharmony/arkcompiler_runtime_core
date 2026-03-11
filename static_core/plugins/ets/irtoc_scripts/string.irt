@@ -2698,9 +2698,8 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
-def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enabled, cgmode = :FastPath)
+def GenerateSubstringFromStringTlab(all_strings_enabled, cgmode = :FastPath)
   suffix = (all_strings_enabled ? 'AllStrings' : '')
-  suffix += (string_compression_enabled ? 'Compressed' : '')
   suffix += (cgmode == :NativePlus ? 'NativePlus' : '')
   available_regs = $panda_mask
   function("SubStringFromStringTlab#{suffix}".to_sym,
@@ -2724,11 +2723,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
 
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-    if string_compression_enabled
-      length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
-    else
-      length := length_packed
-    end
+    length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
 
     # If begin_index < 0, then it is assumed to be equal to zero
     If(begin_index, Cast(0).i32).LT.Unlikely.b {
@@ -2764,13 +2759,8 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
     }
 
-    if string_compression_enabled
-      uncompressed := is_string_uncompressed_u32(length_packed)
-      offset := Shl(bx6, uncompressed).u32
-    else
-      uncompressed := Cast(1).u32
-      offset := ShlI(bx6).Imm(1).u32
-    end
+    uncompressed := is_string_uncompressed_u32(length_packed)
+    offset := Shl(bx6, uncompressed).u32
 
     # NativePlus is not yet supported for unified strings
     if all_strings_enabled && cgmode == :FastPath
@@ -2787,16 +2777,23 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       fromStr := Phi(str, strParent).ref
       resultStartIndex := Phi(bx6, addedStartIndex).u32
 
+      # If chars within the specified range could be compressed then route through fast_substring.
+      # Otherwise we could create uncompressed sliced string of compressible chars, which is wrong.
+      If(uncompressed, 1).EQ.Unlikely.b {
+        fromStrData := Add(Cast(fromStr).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+        fromStrData := Add(fromStrData, resultStartIndex).ptr
+        compressible := is_array_of_compressable_chars(fromStrData, Cast(charCount).u64)
+        If(compressible, 1).EQ.Likely.b {
+          Goto(:CreateLineString)
+        }
+      }
+
       If(charCount, Constants::SLICED_STRING_MIN_LENGTH).GE.b {
         Goto(:CreateSlicedString)
       }
 
       If(charCount, 1).EQ.Unlikely.b {
-        if string_compression_enabled
-          char := LoadCompressedStringChar(fromStr, resultStartIndex, length_packed).u16
-        else
-          char := LoadArray(fromStr, resultStartIndex).u16
-        end
+        char := LoadCompressedStringChar(fromStr, resultStartIndex, length_packed).u16
         If(char, Constants::ASCII_CHAR_CACHE_SIZE).B.b {
           cache := get_platform_type_ref(Constants::ASCII_CHAR_CACHE_OFFSET)
           If(cache, 0).NE.Likely.b {
@@ -2805,7 +2802,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
         }
       }
 
-      # create line substring from line string
+    Label(:CreateLineString)
       result := fast_substring(fromStr, length, resultStartIndex, charCount, uncompressed, cgmode)
       Return(result).ptr
 
@@ -2846,12 +2843,10 @@ LabelGlobal(:SlowPathEntrypoint)
   }
 end  # def GenerateSubstringFromStringTlab
 
-GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=true)
-GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=false)
-GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true)
-GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=false)
-GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=true, :NativePlus)
-GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true, :NativePlus)
+GenerateSubstringFromStringTlab(all_strings_enabled=false)
+GenerateSubstringFromStringTlab(all_strings_enabled=false, :NativePlus)
+GenerateSubstringFromStringTlab(all_strings_enabled=true)
+GenerateSubstringFromStringTlab(all_strings_enabled=true, :NativePlus)
 
 
 ###
