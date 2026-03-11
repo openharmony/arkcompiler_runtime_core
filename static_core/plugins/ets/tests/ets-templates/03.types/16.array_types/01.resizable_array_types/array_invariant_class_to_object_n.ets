@@ -14,16 +14,15 @@
  */
 
 /*---
-desc: The test uses the array type alias as the function parameter type(boolean).
+desc: Arrays are invariant
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Array<A>' cannot be assigned to type 'Array<Object>'"
 ---*/
 
-function printArray(arr: boolean[]) {
-  return arr;
-}
+class A {}
 
-function main(): void {
-  let a: boolean[] = [true, false];
-  let b = printArray(a);
+let arrA: A[] = [new A, new A]
 
-  arktest.assertTrue(a === b);
+function main() {
+    let arrObj: Object[] = arrA
 }

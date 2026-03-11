@@ -196,6 +196,12 @@
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/05.array_literal/arr_n_2.ets
 
+#33619
+07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_assn.ets
+07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_call.ets
+07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_cast.ets
+07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_decl.ets
+
 #31022 Method in object literal rejected
 07.expressions/06.object_literal/spec_ex1.ets
 07.expressions/06.object_literal/spec_ex3.ets

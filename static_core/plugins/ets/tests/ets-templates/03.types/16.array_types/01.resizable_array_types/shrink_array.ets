@@ -14,14 +14,23 @@
  */
 
 /*---
-desc: Test whether the elements of the 3D array can be accessed normally.
+desc: Shrinking array by setting length for both T[] and Array<T> forms.
 ---*/
 
-type ThreeDArray = string[][][];
+function main(): int {
+  let suite = new arktest.ArkTestsuite("Shrink Array");
 
-function main(): void {
+  suite.addTest("Shrink T[] form by setting length", () => {
+    let arr: String[] = ["Hello", "World", "Of", "ArkTS"]
+    arr.length = 2
+    arktest.assertEQ(arr.length, 2)
+  });
 
-  let arrThree: ThreeDArray = [[["aa", "bb"], ["cc", "dd"]], [["ee", "ff"], ["gg", "hh"], ["ii", "jj"]]];
-  let a = arrThree[0][1][0];
-  arktest.assertEQ(a, "cc");
+  suite.addTest("Shrink Array<T> form by setting length", () => {
+    let arr: Array<String> = ["Hello", "World", "Of", "ArkTS"]
+    arr.length = 2
+    arktest.assertEQ(arr.length, 2)
+  });
+
+  return suite.run()
 }

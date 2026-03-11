@@ -14,12 +14,16 @@
  */
 
 /*---
-desc: Test to reduce the array length(number[]).
+desc: Arrays are invariant
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Array<A>' cannot be assigned to type 'Array<I>'"
 ---*/
 
-function main(): void {
-  let array1: number[] = [0, 1, 2, 3];
+interface I {}
+class A implements I {}
 
-  let a: number = array1.length;
-  arktest.assertEQ(a, 4);
+let arrA: A[] = [new A, new A]
+
+function main() {
+    let arrI: I[] = arrA
 }
