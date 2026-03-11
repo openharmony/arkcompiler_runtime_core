@@ -360,7 +360,7 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst
 
             argLength = CreateStringBuilderConstructorArgumentLength(GetGraph(), argString, ctorCall);
             argIsCompressed = CreateStringBuilderConstructorArgumentIsCompressed(GetGraph(), argString, ctorCall);
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), argString, argIsCompressed);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {argString, argIsCompressed});
             break;
 
         case StringBuilderConstructorSignature::STRING:
@@ -369,7 +369,7 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst
 
             argLength = CreateStringBuilderConstructorArgumentLength(GetGraph(), argString, ctorCall);
             argIsCompressed = CreateStringBuilderConstructorArgumentIsCompressed(GetGraph(), argString, ctorCall);
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), argString, argIsCompressed);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {argString, argIsCompressed});
             break;
 
         default:
@@ -382,7 +382,7 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst
     // Create StoreObject instruction to store Object[] array
     auto storeObjectBuffer =
         StoreStringBuilderBufferField(GetGraph(), newObjectsArray, instance, stringBuilderClass, ctorCall);
-    ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), newObjectsArray, storeObjectBuffer);
+    ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {newObjectsArray, storeObjectBuffer});
 
     // Create StoreObject instruction to store initial buffer index
     StoreStringBuilderIndexField(

@@ -371,6 +371,32 @@ public:
         return false;
     }
 
+    void FixSaveStatesForPhi(Inst *cand, Loop *loop, PhiInst *phi)
+    {
+        for (size_t i = 0; i < phi->GetInputsCount(); i++) {
+            auto bb = loop->GetHeader()->GetPredecessor(i);
+            auto phiInput = phi->GetInput(i).GetInst();
+            if (bb == loop->GetPreHeader() && cand->IsLoad() && cand->IsMovableObject()) {
+                ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), ObjCtx {cand, phi});
+            } else if (phiInput->IsMovableObject()) {
+                ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(),
+                                                          ObjCtx {phiInput, bb->GetLastInst(), nullptr, bb});
+            }
+        }
+    }
+
+    void FixSaveStatesForHeapValue(Loop *loop, struct Lse::HeapValue *hvalue)
+    {
+        ASSERT(hvalue->val != nullptr);
+        if (hvalue->val->IsMovableObject()) {
+            ASSERT(!loop->IsIrreducible());
+            auto head = loop->GetHeader();
+            // Add cand value to all SaveStates in this loop and inner loops
+            ssb_.SearchAndCreateMissingObjInSaveState(head->GetGraph(),
+                                                      ObjCtx {hvalue->val, head->GetLastInst(), nullptr, head});
+        }
+    }
+
     void LoopDoElimination(Inst *cand, Loop *loop, PhiInst *phi, InstVector *insts)
     {
         auto replacement = phi != nullptr ? phi : cand;
@@ -392,24 +418,9 @@ public:
         }
         // And fix savestates for loads
         if (phi != nullptr) {
-            for (size_t i = 0; i < phi->GetInputsCount(); i++) {
-                auto bb = loop->GetHeader()->GetPredecessor(i);
-                auto phiInput = phi->GetInput(i).GetInst();
-                if (bb == loop->GetPreHeader() && cand->IsLoad() && cand->IsMovableObject()) {
-                    ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), cand, phi);
-                } else if (phiInput->IsMovableObject()) {
-                    ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), phiInput, bb->GetLastInst(), nullptr, bb);
-                }
-            }
+            FixSaveStatesForPhi(cand, loop, phi);
         } else {
-            ASSERT(hvalue.val != nullptr);
-            if (hvalue.val->IsMovableObject()) {
-                ASSERT(!loop->IsIrreducible());
-                auto head = loop->GetHeader();
-                // Add cand value to all SaveStates in this loop and inner loops
-                ssb_.SearchAndCreateMissingObjInSaveState(head->GetGraph(), hvalue.val, head->GetLastInst(), nullptr,
-                                                          head);
-            }
+            FixSaveStatesForHeapValue(loop, &hvalue);
         }
     }
 
@@ -905,6 +916,19 @@ bool Lse::ProcessHeapValues(HeapValue &heapValue, BasicBlock *block, BasicBlockH
     return true;
 }
 
+void Lse::FixSaveStatesForPhi(PhiInst *phi)
+{
+    // Here case: !GetGraph()->IsBytecodeOptimizer() && phi->IsReferenceOrAny()
+    for (auto i = 0U; i < phi->GetInputsCount(); i++) {
+        auto input = phi->GetInput(i);
+        if (input.GetInst()->IsMovableObject()) {
+            auto bb = phi->GetPhiInputBb(i);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(),
+                                                      ObjCtx {input.GetInst(), bb->GetLastInst(), nullptr, bb});
+        }
+    }
+}
+
 /**
  * When creating phis while merging predecessor heaps, we don't know yet if
  * we're creating a useful phi, and can't fix SaveStates because of that.
@@ -922,14 +946,7 @@ void Lse::FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk)
         } else if (GetGraph()->IsBytecodeOptimizer() || !phi->IsReferenceOrAny()) {
             continue;
         }
-        // Here case: !GetGraph()->IsBytecodeOptimizer() && phi->IsReferenceOrAny()
-        for (auto i = 0U; i < phi->GetInputsCount(); i++) {
-            auto input = phi->GetInput(i);
-            if (input.GetInst()->IsMovableObject()) {
-                auto bb = phi->GetPhiInputBb(i);
-                ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), input.GetInst(), bb->GetLastInst(), nullptr, bb);
-            }
-        }
+        FixSaveStatesForPhi(phi);
     }
 }
 
@@ -1047,6 +1064,21 @@ void Lse::DeleteInstruction(Inst *inst, Inst *value)
     }
 }
 
+void Lse::UpdateSaveStatesForDelete(Inst *inst, Inst *value, Inst *origin)
+{
+    if (!value->IsDominate(inst)) {
+        // This is a shadowed store. No need to bridge value
+        ASSERT(origin->IsStore());
+    } else if (!GetGraph()->IsBytecodeOptimizer() && value->IsMovableObject()) {
+        if (!value->IsPhi() && origin->IsMovableObject() && origin->IsLoad() && origin->IsDominate(inst)) {
+            // this branch is not required, but can be faster if origin is closer to inst than value
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {origin, inst});
+        } else {
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {value, inst});
+        }
+    }
+}
+
 void Lse::DeleteInstructions(const BasicBlockHeap &eliminated)
 {
     for (auto elim : eliminated) {
@@ -1066,18 +1098,7 @@ void Lse::DeleteInstructions(const BasicBlockHeap &eliminated)
 
         GetGraph()->GetEventWriter().EventLse(inst->GetId(), inst->GetPc(), origin->GetId(), origin->GetPc(),
                                               GetEliminationCode(inst, origin));
-        // Try to update savestates
-        if (!value->IsDominate(inst)) {
-            // This is a shadowed store. No need to bridge value
-            ASSERT(origin->IsStore());
-        } else if (!GetGraph()->IsBytecodeOptimizer() && value->IsMovableObject()) {
-            if (!value->IsPhi() && origin->IsMovableObject() && origin->IsLoad() && origin->IsDominate(inst)) {
-                // this branch is not required, but can be faster if origin is closer to inst than value
-                ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), origin, inst);
-            } else {
-                ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), value, inst);
-            }
-        }
+        UpdateSaveStatesForDelete(inst, value, origin);
         DeleteInstruction(inst, value);
     }
 }
@@ -1126,8 +1147,8 @@ void Lse::ApplyHoistToCandidate(Loop *loop, Inst *alive)
     if (!GetGraph()->IsBytecodeOptimizer() && alive->IsMovableObject()) {
         ASSERT(!loop->IsIrreducible());
         // loop backedges will be walked inside SSB
-        ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), alive, loop->GetHeader()->GetLastInst(), nullptr,
-                                                  loop->GetHeader());
+        ssb_.SearchAndCreateMissingObjInSaveState(
+            GetGraph(), ObjCtx {alive, loop->GetHeader()->GetLastInst(), nullptr, loop->GetHeader()});
     }
     applied_ = true;
 }

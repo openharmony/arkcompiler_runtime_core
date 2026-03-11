@@ -15,7 +15,25 @@
 
 type F<T> = FixedArray<T>;
 type F4<T> = FixedArray<FixedArray<FixedArray<FixedArray<T>>>>;
-type F10<T> = FixedArray<FixedArray<FixedArray<FixedArray<FixedArray<FixedArray<FixedArray<FixedArray<FixedArray<FixedArray<T>>>>>>>>>>;
+type F10<T> = FixedArray<
+                FixedArray<
+                  FixedArray<
+                    FixedArray<
+                      FixedArray<
+                        FixedArray<
+                          FixedArray<
+                            FixedArray<
+                              FixedArray<
+                                FixedArray<T>
+                              >
+                            >
+                          >
+                        >
+                      >
+                    >
+                  >
+                >
+              >;
 type F50<T> = F10<F10<F10<F10<F10<T>>>>>;
 type F254<T> = F4<F50<F50<F50<F50<F50<T>>>>>>;
 type F255<T> = F<F254<T>>;
@@ -33,33 +51,45 @@ function checkDeepSubtypingPositive() {
     const o257: F257<object> = [];
 
     arktest.assertTrue(Class.of(s254).isSubtypeOf(Class.of(o254)),
-    'Error: type of the 254 times nested FixedArray of string must be a subtype of the 254 times nested FixedArray of object');
+    'Error: type of the 254 times nested FixedArray of string must be a subtype \
+of the 254 times nested FixedArray of object');
     arktest.assertTrue(Class.of(s255).isSubtypeOf(Class.of(o254)),
-    'Error: type of the 255 times nested FixedArray of string must be a subtype of the 254 times nested FixedArray of object');
+    'Error: type of the 255 times nested FixedArray of string must be a subtype \
+of the 254 times nested FixedArray of object');
     arktest.assertTrue(Class.of(s256).isSubtypeOf(Class.of(o254)),
-    'Error: type of the 256 times nested FixedArray of string must be a subtype of the 254 times nested FixedArray of object');
+    'Error: type of the 256 times nested FixedArray of string must be a subtype \
+of the 254 times nested FixedArray of object');
     arktest.assertTrue(Class.of(s257).isSubtypeOf(Class.of(o254)),
-    'Error: type of the 257 times nested FixedArray of string must be a subtype of the 254 times nested FixedArray of object');
+    'Error: type of the 257 times nested FixedArray of string must be a subtype \
+of the 254 times nested FixedArray of object');
 
     arktest.assertTrue(Class.of(s255).isSubtypeOf(Class.of(o255)),
-    'Error: type of the 255 times nested FixedArray of string must be a subtype of the 255 times nested FixedArray of object');
+    'Error: type of the 255 times nested FixedArray of string must be a subtype \
+of the 255 times nested FixedArray of object');
     arktest.assertTrue(Class.of(s256).isSubtypeOf(Class.of(o255)),
-    'Error: type of the 256 times nested FixedArray of string must be a subtype of the 255 times nested FixedArray of object');
+    'Error: type of the 256 times nested FixedArray of string must be a subtype \
+of the 255 times nested FixedArray of object');
     arktest.assertTrue(Class.of(s257).isSubtypeOf(Class.of(o255)),
-    'Error: type of the 257 times nested FixedArray of string must be a subtype of the 255 times nested FixedArray of object');
+    'Error: type of the 257 times nested FixedArray of string must be a subtype \
+of the 255 times nested FixedArray of object');
 
     arktest.assertTrue(Class.of(s256).isSubtypeOf(Class.of(o256)),
-    'Error: type of the 256 times nested FixedArray of string must be a subtype of the 256 times nested FixedArray of object');
+    'Error: type of the 256 times nested FixedArray of string must be a subtype \
+of the 256 times nested FixedArray of object');
     arktest.assertTrue(Class.of(s257).isSubtypeOf(Class.of(o256)),
-    'Error: type of the 257 times nested FixedArray of string must be a subtype of the 256 times nested FixedArray of object');
+    'Error: type of the 257 times nested FixedArray of string must be a subtype \
+of the 256 times nested FixedArray of object');
 
     arktest.assertTrue(Class.of(s257).isSubtypeOf(Class.of(o257)),
-    'Error: type of the 257 times nested FixedArray of string must be a subtype of the 257 times nested FixedArray of object');
+    'Error: type of the 257 times nested FixedArray of string must be a subtype \
+of the 257 times nested FixedArray of object');
 
     arktest.assertTrue(Class.of(s257).isSubtypeOf(Class.of(s257)),
-    'Error: type of the 257 times nested FixedArray of string must be a subtype of the 257 times nested FixedArray of string');
+    'Error: type of the 257 times nested FixedArray of string must be a subtype \
+of the 257 times nested FixedArray of string');
     arktest.assertTrue(Class.of(o257).isSubtypeOf(Class.of(o256)),
-    'Error: type of the 257 times nested FixedArray of object must be a subtype of the 256 times nested FixedArray of object');
+    'Error: type of the 257 times nested FixedArray of object must be a subtype \
+of the 256 times nested FixedArray of object');
 }
 
 function checkDeepSubtypingNegative () {
@@ -72,41 +102,55 @@ function checkDeepSubtypingNegative () {
     const o257: F257<object> = [];
 
     arktest.assertFalse(Class.of(o254).isSubtypeOf(Class.of(s254)),
-    'Error: type of the 254 times nested FixedArray of object must not be a subtype of the 254 times nested FixedArray of string');
+    'Error: type of the 254 times nested FixedArray of object must not be a subtype \
+of the 254 times nested FixedArray of string');
     arktest.assertFalse(Class.of(o255).isSubtypeOf(Class.of(s254)),
-    'Error: type of the 255 times nested FixedArray of object must not be a subtype of the 254 times nested FixedArray of string');
+    'Error: type of the 255 times nested FixedArray of object must not be a subtype \
+of the 254 times nested FixedArray of string');
     arktest.assertFalse(Class.of(o256).isSubtypeOf(Class.of(s254)),
-    'Error: type of the 256 times nested FixedArray of object must not be a subtype of the 254 times nested FixedArray of string');
+    'Error: type of the 256 times nested FixedArray of object must not be a subtype \
+of the 254 times nested FixedArray of string');
     arktest.assertFalse(Class.of(o257).isSubtypeOf(Class.of(s254)),
-    'Error: type of the 257 times nested FixedArray of object must not be a subtype of the 254 times nested FixedArray of string');
+    'Error: type of the 257 times nested FixedArray of object must not be a subtype \
+of the 254 times nested FixedArray of string');
 
     arktest.assertFalse(Class.of(o254).isSubtypeOf(Class.of(s255)),
-    'Error: type of the 254 times nested FixedArray of object must not be a subtype of the 255 times nested FixedArray of string');
+    'Error: type of the 254 times nested FixedArray of object must not be a subtype \
+of the 255 times nested FixedArray of string');
     arktest.assertFalse(Class.of(o255).isSubtypeOf(Class.of(s255)),
-    'Error: type of the 255 times nested FixedArray of object must not be a subtype of the 255 times nested FixedArray of string');
+    'Error: type of the 255 times nested FixedArray of object must not be a subtype \
+of the 255 times nested FixedArray of string');
     arktest.assertFalse(Class.of(o256).isSubtypeOf(Class.of(s255)),
-    'Error: type of the 256 times nested FixedArray of object must not be a subtype of the 255 times nested FixedArray of string');
+    'Error: type of the 256 times nested FixedArray of object must not be a subtype \
+of the 255 times nested FixedArray of string');
     arktest.assertFalse(Class.of(o257).isSubtypeOf(Class.of(s255)),
-    'Error: type of the 257 times nested FixedArray of object must not be a subtype of the 255 times nested FixedArray of string');
+    'Error: type of the 257 times nested FixedArray of object must not be a subtype \
+of the 255 times nested FixedArray of string');
 
     arktest.assertFalse(Class.of(o254).isSubtypeOf(Class.of(o255)),
-    'Error: type of the 254 times nested FixedArray of object must not be a subtype of the 255 times nested FixedArray of object');
+    'Error: type of the 254 times nested FixedArray of object must not be a subtype \
+of the 255 times nested FixedArray of object');
     arktest.assertFalse(Class.of(o255).isSubtypeOf(Class.of(o256)),
-    'Error: type of the 255 times nested FixedArray of object must not be a subtype of the 256 times nested FixedArray of object');
+    'Error: type of the 255 times nested FixedArray of object must not be a subtype \
+of the 256 times nested FixedArray of object');
     arktest.assertFalse(Class.of(o256).isSubtypeOf(Class.of(o257)),
-    'Error: type of the 256 times nested FixedArray of object must not be a subtype of the 257 times nested FixedArray of object');
+    'Error: type of the 256 times nested FixedArray of object must not be a subtype \
+of the 257 times nested FixedArray of object');
 
     arktest.assertFalse(Class.of(s254).isSubtypeOf(Class.of(o255)),
-    'Error: type of the 254 times nested FixedArray of string must not be a subtype of the 255 times nested FixedArray of object');
+    'Error: type of the 254 times nested FixedArray of string must not be a subtype \
+of the 255 times nested FixedArray of object');
     arktest.assertFalse(Class.of(s255).isSubtypeOf(Class.of(o256)),
-    'Error: type of the 255 times nested FixedArray of string must not be a subtype of the 256 times nested FixedArray of object');
+    'Error: type of the 255 times nested FixedArray of string must not be a subtype \
+of the 256 times nested FixedArray of object');
     arktest.assertFalse(Class.of(s256).isSubtypeOf(Class.of(o257)),
-    'Error: type of the 256 times nested FixedArray of string must not be a subtype of the 257 times nested FixedArray of object');
+    'Error: type of the 256 times nested FixedArray of string must not be a subtype \
+of the 257 times nested FixedArray of object');
 }
 
 function main(): int {
-    let suite = new arktest.ArkTestsuite("Deep Subtyping Check test");
-    suite.addTest("checkDeepSubtypingPositive", checkDeepSubtypingPositive);
-    suite.addTest("checkDeepSubtypingNegative", checkDeepSubtypingNegative);
+    let suite = new arktest.ArkTestsuite('Deep Subtyping Check test');
+    suite.addTest('checkDeepSubtypingPositive', checkDeepSubtypingPositive);
+    suite.addTest('checkDeepSubtypingNegative', checkDeepSubtypingNegative);
     return suite.run();
 }

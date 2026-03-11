@@ -1540,6 +1540,15 @@ void Lowering::JoinFcmpInst(IfImmInst *inst, CmpInst *input)
     LowerIfImmToIf(inst, input, cc, input->GetOperandsType());
 }
 
+void Lowering::FixSaveState(IfImmInst *inst, Inst *input)
+{
+    for (auto &newInput : input->GetInputs()) {
+        auto realNewInput = input->GetDataFlowInput(newInput.GetInst());
+        if (realNewInput->IsMovableObject()) {
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {realNewInput, inst});
+        }
+    }
+}
 void Lowering::LowerIf(IfImmInst *inst)
 {
     ASSERT(inst->GetCc() == ConditionCode::CC_NE || inst->GetCc() == ConditionCode::CC_EQ);
@@ -1571,12 +1580,7 @@ void Lowering::LowerIf(IfImmInst *inst)
         input->CastToCompare()->SetCc(cc);
     }
     if (!GetGraph()->IsBytecodeOptimizer()) {
-        for (auto &newInput : input->GetInputs()) {
-            auto realNewInput = input->GetDataFlowInput(newInput.GetInst());
-            if (realNewInput->IsMovableObject()) {
-                ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), realNewInput, inst);
-            }
-        }
+        FixSaveState(inst, input);
     }
     auto cst = input->GetInput(1).GetInst();
     DataType::Type type =

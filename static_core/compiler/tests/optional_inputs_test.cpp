@@ -43,8 +43,11 @@ TEST_F(OptionalInputsTest, TestAccessorsPresent)
         }
     };
 
-#define HANDLE_INST(OPCODE, ...) checkInst(CreateInst<Opcode::OPCODE>());  // CC-OFF(G.PRE.09) code generation
-    OPCODE_LIST(HANDLE_INST);
+#define HANDLE_INST(OPCODE, ...)                 \
+    {                                            \
+        checkInst(CreateInst<Opcode::OPCODE>()); \
+    }
+    OPCODE_LIST(HANDLE_INST)
 #undef HANDLE_INST
 }
 

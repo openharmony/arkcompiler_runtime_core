@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,12 +147,14 @@ private:
                                               Inst *curInst);
     bool ProcessHeapValues(HeapValue &heapValue, BasicBlock *block, BasicBlockHeapIter predInstIt,
                            PredBlocksItersPair iters, Marker phiFixupMrk);
+    void FixSaveStatesForPhi(PhiInst *phi);
     void FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk);
     const char *GetEliminationCode(Inst *inst, Inst *origin);
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);
     void TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps, const BasicBlockHeap *eliminated);
     void ProcessAllBBs(HeapEqClasses *heaps, Marker phiFixupMrk);
     void DeleteInstruction(Inst *inst, Inst *value);
+    void UpdateSaveStatesForDelete(Inst *inst, Inst *value, Inst *origin);
     void DeleteInstructions(const BasicBlockHeap &eliminated);
     void RecordInstOrder();
 

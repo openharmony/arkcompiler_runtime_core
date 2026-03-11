@@ -161,7 +161,7 @@ Inst *CreateLenArray(Graph *graph, Inst *newArray)
 void OptimizeStringConcat::FixBrokenSaveStates(Inst *source, Inst *target)
 {
     if (source->IsMovableObject()) {
-        ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), source, target);
+        ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {source, target});
     }
 }
 

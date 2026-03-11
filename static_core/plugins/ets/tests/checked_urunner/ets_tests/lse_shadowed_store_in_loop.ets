@@ -45,7 +45,7 @@
 //! RUN          entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 
 class A {
-    value: int
+    public value: int
 
     constructor(value: int) {
         this.value = value
@@ -53,7 +53,7 @@ class A {
 }
 
 class Container {
-    x: A | undefined
+    public x: A | undefined
 }
 
 function leakRef(c: Container) {}

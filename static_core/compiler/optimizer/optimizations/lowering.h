@@ -408,6 +408,7 @@ private:
     // Optimize order of input arguments for decreasing using accumulator (Bytecodeoptimizer only).
     static void OptimizeIfInput(compiler::Inst *ifInst);
     static void JoinFcmpInst(IfImmInst *inst, CmpInst *input);
+    void FixSaveState(IfImmInst *inst, Inst *input);
     void LowerIf(IfImmInst *inst);
     static void InPlaceLowerIfImm(IfImmInst *inst, Inst *input, Inst *cst, ConditionCode cc, DataType::Type inputType);
     static void LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, DataType::Type inputType);

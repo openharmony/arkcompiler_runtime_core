@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -225,7 +225,7 @@ void Licm::MoveInstructions(BasicBlock *preHeader, Loop *loop)
         GetGraph()->GetEventWriter().EventLicm(inst->GetId(), inst->GetPc(), loop->GetId(),
                                                preHeader->GetLoop()->GetId());
         if (inst->IsMovableObject()) {
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), inst, target, nullptr, targetBB);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {inst, target, nullptr, targetBB});
         }
     }
 }
