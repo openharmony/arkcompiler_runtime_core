@@ -77,12 +77,12 @@ cases:
     decl_variants:
       - |-
         enum Enum: long { Red, Green = 10, Blue,
-          First = -9223372036854775808, Second = 12345,
+          First = -9223372036854775807-1, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }
       - |-
         const enum Enum: long { Red, Green = 10, Blue,
-          First = -9223372036854775808, Second = 12345,
+          First = -9223372036854775807-1, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
@@ -105,7 +105,7 @@ cases:
         arktest.assertTrue(c.valueOf() instanceof long)
         arktest.assertEQ(c.valueOf(), Enum.Blue.valueOf())
         arktest.assertEQ(Enum[c], "Blue")
-        c = Enum.fromValue(-9223372036854775808)
+        c = Enum.fromValue(-9223372036854775807-1)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertEQ(c, Enum.First)
         arktest.assertTrue(c.valueOf() instanceof long)

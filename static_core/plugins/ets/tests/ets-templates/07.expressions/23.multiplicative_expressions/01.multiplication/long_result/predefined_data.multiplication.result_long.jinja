@@ -56,7 +56,7 @@
   {'type1': 'long', 'value1': '0o777_777_777_777_777_777_777', 'type2': 'long', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '32. Multiplication of Max Long (octal) and long = 1.'},
   {'type1': 'long', 'value1': '0b111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111', 'type2': 'long', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '33. Multiplication of Max Long (binary) and long = 1.'},
   
-  {'type1': 'Long', 'value1': '-9223372036854775808', 'type2': 'long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '34. Multiplication of Min Long (decimal) and long = 1.'},
+  {'type1': 'Long', 'value1': '-9223372036854775807-1', 'type2': 'long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807-1', 'desc': '34. Multiplication of Min Long (decimal) and long = 1.'},
   {'type1': 'Long', 'value1': '-0b111111111111111111111111111111111111111111111111111111111111111', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '35. Multiplication of a negated binary literal (max Long) by the long value 1.'},
   {'type1': 'Long', 'value1': '-0x7FFF_FFFF_FFFF_FFFF', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '36. Multiplication of a negated hex literal (max Long) by the long value 1.'},
   {'type1': 'Long', 'value1': '-0o777777777777777777777', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '37. Multiplication of a negated octal literal (max Long) by the long value 1.'},
@@ -96,7 +96,7 @@
   {'type1': 'long', 'value1': 'Long.MAX_VALUE', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '21. Multiplication of Max Long and int = 1.'},
   {'type1': 'Long', 'value1': 'Long.MAX_VALUE', 'type2': 'int', 'value2': '0', 'resultType': 'long', 'result': '0', 'desc': '22. Multiplication of Max Long and int = 0.'},
   {'type1': 'long', 'value1': '-Long.MAX_VALUE', 'type2': 'int', 'value2': '-1', 'resultType': 'long', 'result': 'Long.MAX_VALUE', 'desc': '23. Multiplication of negative Max Long and int = -1.'},
-  {'type1': 'Long', 'value1': 'Long.MIN_VALUE', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '24. Multiplication of Min Long and int = 1.'},
+  {'type1': 'Long', 'value1': 'Long.MIN_VALUE', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807-1', 'desc': '24. Multiplication of Min Long and int = 1.'},
   {'type1': 'long', 'value1': 'Long.MIN_VALUE', 'type2': 'int', 'value2': '0', 'resultType': 'long', 'result': '0', 'desc': '25. Multiplication of Min Long and int = 0.'},
   {'type1': 'Long', 'value1': '-Long.MIN_VALUE', 'type2': 'int', 'value2': '-1', 'resultType': 'long', 'result': 'Long.MIN_VALUE', 'desc': '26. Multiplication of negative Min Long and int = -1.'},
 
@@ -104,7 +104,7 @@
   {'type1': 'long', 'value1': 'Long.MAX_VALUE', 'type2': 'Long', 'value2': 'new Long(1)', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '28. Multiplication of Max Long and alias Long = 1.'},
   {'type1': 'Long', 'value1': 'Long.MAX_VALUE', 'type2': 'Long', 'value2': 'new Long(0)', 'resultType': 'long', 'result': '0', 'desc': '29. Multiplication of Max Long and alias Long = 0.'},
   {'type1': 'long', 'value1': '-Long.MAX_VALUE', 'type2': 'Long', 'value2': 'new Long(-1)', 'resultType': 'long', 'result': 'Long.MAX_VALUE', 'desc': '30. Multiplication of negative Max Long and alias Long = -1.'},
-  {'type1': 'Long', 'value1': 'Long.MIN_VALUE', 'type2': 'Long', 'value2': 'new Long(1)', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '31. Multiplication of Min Long and alias Long = 1.'},
+  {'type1': 'Long', 'value1': 'Long.MIN_VALUE', 'type2': 'Long', 'value2': 'new Long(1)', 'resultType': 'long', 'result': '-9223372036854775807-1', 'desc': '31. Multiplication of Min Long and alias Long = 1.'},
   {'type1': 'long', 'value1': 'Long.MIN_VALUE', 'type2': 'Long', 'value2': 'new Long(0)', 'resultType': 'long', 'result': '0', 'desc': '32. Multiplication of Min Long and alias Long = 0.'},
   {'type1': 'Long', 'value1': '-Long.MIN_VALUE', 'type2': 'Long', 'value2': 'new Long(-1)', 'resultType': 'long', 'result': 'Long.MIN_VALUE', 'desc': '33. Multiplication of negative Min Long and alias Long = -1.'},
 
@@ -113,7 +113,7 @@
   {'type1': 'long', 'value1': '0o777_777_777_777_777_777_777', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '36. Multiplication of Max Long (octal) and int = 1.'},
   {'type1': 'long', 'value1': '0b111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '37. Multiplication of Max Long (binary) and int = 1.'},
   
-  {'type1': 'Long', 'value1': '-9223372036854775808', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '38. Multiplication of Min Long (decimal) and int = 1.'},
+  {'type1': 'Long', 'value1': '-9223372036854775807-1', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807-1', 'desc': '38. Multiplication of Min Long (decimal) and int = 1.'},
   {'type1': 'Long', 'value1': '-0b111111111111111111111111111111111111111111111111111111111111111', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '39. Multiplication of a negated binary literal (max Long) by the long value 1.'},
   {'type1': 'Long', 'value1': '-0x7FFF_FFFF_FFFF_FFFF', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '40. Multiplication of a negated hex literal (max Long) by the long value 1.'},
   {'type1': 'Long', 'value1': '-0o777777777777777777777', 'type2': 'Int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '41. Multiplication of a negated octal literal (max Long) by the long value 1.'},

@@ -18,10 +18,10 @@ cases:
           let a: [byte, int, long]|undefined
       use: |-
           // assignment context, tuple of value types
-          a = [0b11, 42, -9223372036854775808]
+          a = [0b11, 42, -9223372036854775807-1]
           arktest.assertEQ(a![0], 3)
           arktest.assertEQ(a![1], 42)
-          arktest.assertEQ(a![2], -9223372036854775808)
+          arktest.assertEQ(a![2], -9223372036854775807-1)
 
     - decl: |-
           let a: [float, short, double, number]|undefined
@@ -37,11 +37,11 @@ cases:
           let a: [Byte, Short, Int, Long]|undefined
       use: |-
           // assignment context, tuple of value types
-          a = [1, 2, 3, -9223372036854775808,]
+          a = [1, 2, 3, -9223372036854775807-1,]
           arktest.assertEQ(a![0], 1)
           arktest.assertEQ(a![1], 2)
           arktest.assertEQ(a![2], 3)
-          arktest.assertEQ(a![3], -9223372036854775808)
+          arktest.assertEQ(a![3], -9223372036854775807-1)
 
     - decl: |-
           let a: [Number, Float, Int]|undefined
@@ -97,10 +97,10 @@ cases:
           let a: [[Float, Float], [Long, Long], [Short]]|undefined
       use: |-
           // assignment context, tuple of tuple of value types
-          a = [[-16777215, 16777215], [-9223372036854775808, 9223372036854775807], [32767]]
+          a = [[-16777215, 16777215], [-9223372036854775807-1, 9223372036854775807], [32767]]
           arktest.assertEQ(a![0][0], -16777215.0f)
           arktest.assertEQ(a![0][1], 16777215.0f)
-          arktest.assertEQ(a![1][0], -9223372036854775808)
+          arktest.assertEQ(a![1][0], -9223372036854775807-1)
           arktest.assertEQ(a![1][1], 9223372036854775807)
           arktest.assertEQ(a![2][0], 32767)
 
@@ -144,11 +144,11 @@ cases:
           let a: [byte[], long[], string[]]|undefined
       use: |-
           // assignment context, tuple of arrays
-          a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']]
+          a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']]
           arktest.assertEQ(a![0][0], 0)
           arktest.assertEQ(a![0][1], 15)
           arktest.assertEQ(a![0][2], 127)
-          arktest.assertEQ(a![1][0], -9223372036854775808)
+          arktest.assertEQ(a![1][0], -9223372036854775807-1)
           arktest.assertEQ(a![1][1], 9223372036854775807)
           arktest.assertEQ(a![2][0], 'a')
           arktest.assertEQ(a![2][1], 'b')
@@ -158,11 +158,11 @@ cases:
           let a: [Array<byte>, Array<long>, Array<string>]|undefined
       use: |-
           // declaration context, tuple of arrays
-          a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']]
+          a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']]
           arktest.assertEQ(a![0][0], 0)
           arktest.assertEQ(a![0][1], 15)
           arktest.assertEQ(a![0][2], 127)
-          arktest.assertEQ(a![1][0], -9223372036854775808)
+          arktest.assertEQ(a![1][0], -9223372036854775807-1)
           arktest.assertEQ(a![1][1], 9223372036854775807)
           arktest.assertEQ(a![2][0], 'a')
           arktest.assertEQ(a![2][1], 'b')
@@ -172,11 +172,11 @@ cases:
           let a: [FixedArray<byte>, FixedArray<long>, FixedArray<string>]|undefined
       use: |-
           // declaration context, tuple of arrays
-          a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']]
+          a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']]
           arktest.assertEQ(a![0][0], 0)
           arktest.assertEQ(a![0][1], 15)
           arktest.assertEQ(a![0][2], 127)
-          arktest.assertEQ(a![1][0], -9223372036854775808)
+          arktest.assertEQ(a![1][0], -9223372036854775807-1)
           arktest.assertEQ(a![1][1], 9223372036854775807)
           arktest.assertEQ(a![2][0], 'a')
           arktest.assertEQ(a![2][1], 'b')

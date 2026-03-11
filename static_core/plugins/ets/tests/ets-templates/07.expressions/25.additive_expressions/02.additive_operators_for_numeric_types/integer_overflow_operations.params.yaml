@@ -65,22 +65,22 @@ operations:
       value1: 0x7FFF_FFFF_FFFF_FFFF, type1: "long", 
       value2: 1, type2: "long", 
       operation: "+", 
-      result_value: -0x8000_0000_0000_0000, result_type: "long"
+      result_value: -0x7FFF_FFFF_FFFF_FFFF-1, result_type: "long"
     }
   - {
       value1: -0x7FFF_FFFF_FFFF_FFFF, type1: "long", 
       value2: 1, type2: "long", 
       operation: "-", 
-      result_value: -0x8000_0000_0000_0000, result_type: "long"
+      result_value: -0x7FFF_FFFF_FFFF_FFFF-1, result_type: "long"
     }
   - {
-      value1: -0x8000_0000_0000_0000, type1: "long", 
+      value1: -0x7FFF_FFFF_FFFF_FFFF-1, type1: "long", 
       value2: 0, type2: "long", 
       operation: "-", 
-      result_value: -0x8000_0000_0000_0000, result_type: "long"
+      result_value: -0x7FFF_FFFF_FFFF_FFFF-1, result_type: "long"
     }
   - {
-      value1: -0x8000_0000_0000_0000, type1: "long", 
+      value1: -0x7FFF_FFFF_FFFF_FFFF-1, type1: "long", 
       value2: 1, type2: "long", 
       operation: "-", 
       result_value: 0x7FFF_FFFF_FFFF_FFFF, result_type: "long"

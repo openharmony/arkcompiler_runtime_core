@@ -44,9 +44,9 @@ function main(): void {
     arktest.assertEQ(+i, -2147483648)
     arktest.assertTrue(+i instanceof int)
 
-    let l: long = +-9223372036854775808
+    let l: long = +-9223372036854775807-1
     arktest.assertEQ(+l, l);
-    arktest.assertEQ(+l, -9223372036854775808);
+    arktest.assertEQ(+l, -9223372036854775807-1);
     arktest.assertTrue(+l instanceof long)
 
     let bi: bigint = +42n
