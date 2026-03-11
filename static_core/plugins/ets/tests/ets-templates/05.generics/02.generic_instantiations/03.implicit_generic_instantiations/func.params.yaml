@@ -122,7 +122,7 @@ cases:
               return p ?? q
           }
       use: |-
-          arktest.assertEQ(foo("a", "b"), "a")
+          arktest.assertEQ(foo(new string("a"), new string("b")), "a")
   # specific cases: tuple types, FixedArray, Any, union types, bigint, literal types, function types,
   # undefined, null, Array<T> or T[], FixedArray<T>
     - decl: |-

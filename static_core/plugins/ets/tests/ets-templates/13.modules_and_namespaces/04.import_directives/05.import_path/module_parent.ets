@@ -18,5 +18,5 @@ tags: [not-a-test, compile-only]
 ---*/
 
 export function importedFromFile() : string {
-    return "module_a.ets"
+    return "../module_parent.ets"
 }

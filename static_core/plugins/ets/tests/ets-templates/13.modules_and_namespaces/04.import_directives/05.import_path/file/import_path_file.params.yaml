@@ -12,11 +12,11 @@
 # limitations under the License.
 
 import_stmts:
-  - { import: 'import * as all from "./module_a"', res: '"module_a.ets"' }
-  - { import: 'import * as all from "./module_a.ets"', res: '"module_a.ets"' }
-  - { import: 'import * as all from "./nesteddir/module_a"', res: '"nesteddir/module_a.ets"' }
-  - { import: 'import * as all from "./nesteddir/module_a.ets"', res: '"nesteddir/module_a.ets"' }
-  - { import: 'import * as all from "./nesteddir/../module_a"', res: '"module_a.ets"' }
-  - { import: 'import * as all from "./nesteddir/../module_a.ets"', res: '"module_a.ets"' }
-  - { import: 'import * as all from "../module_a"', res: '"../module_a.ets"' }
-  - { import: 'import * as all from "../module_a.ets"', res: '"../module_a.ets"' }
+  - { import: 'import * as all from "./module_same"', res: '"./module_same.ets"' }
+  - { import: 'import * as all from "./module_same.ets"', res: '"./module_same.ets"' }
+  - { import: 'import * as all from "./nesteddir/module_nested"', res: '"nesteddir/module_nested.ets"' }
+  - { import: 'import * as all from "./nesteddir/module_nested.ets"', res: '"nesteddir/module_nested.ets"' }
+  - { import: 'import * as all from "./nesteddir/../module_same"', res: '"./module_same.ets"' }
+  - { import: 'import * as all from "./nesteddir/../module_same.ets"', res: '"./module_same.ets"' }
+  - { import: 'import * as all from "../module_parent"', res: '"../module_parent.ets"' }
+  - { import: 'import * as all from "../module_parent.ets"', res: '"../module_parent.ets"' }

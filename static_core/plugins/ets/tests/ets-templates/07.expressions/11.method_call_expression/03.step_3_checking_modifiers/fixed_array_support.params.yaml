@@ -15,23 +15,23 @@
 cases:
     - decl: |-
         class A {
-            static met<T>(): FixedArray<T> {
-                let res: FixedArray<string> = ["a"]
+            static met<T>(x: T): FixedArray<T> {
+                let res: FixedArray<T> = [x]
                 return res
             }
         }
       use: |-
-        arktest.assertEQ(A.met<string>()[0], "a")
+        arktest.assertEQ(A.met<string>("a")[0], "a")
     - decl: |-
         class A<T> {
-            met(): FixedArray<T> {
-                let res: FixedArray<string> = ["a"]
+            met(x: T): FixedArray<T> {
+                let res: FixedArray<T> = [x]
                 return res
             }
         }
       use: |-
         let a = new A<string>()
-        arktest.assertEQ(a.met()[0], "a")
+        arktest.assertEQ(a.met("a")[0], "a")
     - decl: |-
         class A<T> {
           met(x: FixedArray<T>): T {

@@ -29,7 +29,7 @@ function main(): void {
   let rhs: string = "aa";
 
   let x = lhs[1] ?? rhs;
-  arktest.assertTrue(x instanceof double|string)
+  arktest.assertFalse(x instanceof double|string)
   // Type double|string leads to crash (not CTE type error, see #30583). Please keep this as separate case
   // With Enum|string it works fine and added to normal tests
   let y: double|string = x

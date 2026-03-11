@@ -18,5 +18,5 @@ tags: [not-a-test, compile-only]
 ---*/
 
 export function importedFromFile() : string {
-    return "nesteddir/module_a.ets"
+    return "nesteddir/module_nested.ets"
 }

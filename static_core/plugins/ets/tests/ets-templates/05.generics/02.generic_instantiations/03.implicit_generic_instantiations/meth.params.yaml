@@ -150,7 +150,7 @@ cases:
           }
       use: |-
           let cls = new Cls()
-          arktest.assertEQ(cls.foo("a", "b"), "a")      
+          arktest.assertEQ(cls.foo(new string("a"), new string("b")), "a")
   # specific cases: tuple types, FixedArray, Any, union types, bigint, literal types, function types,
   # undefined, null, Array<T> or T[]
     - decl: |-

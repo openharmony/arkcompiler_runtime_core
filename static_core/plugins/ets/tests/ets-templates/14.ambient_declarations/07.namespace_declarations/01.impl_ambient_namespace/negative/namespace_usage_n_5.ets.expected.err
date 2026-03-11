@@ -11,7 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/verifier: Cannot link class: Cannot find method '%%set-a (Lstd/core/String;)V' in class
-E/verifier: Cannot link class: Cannot find method '%%get-a ()Lstd/core/String;' in class
+E/verifier: Cannot link class: Cannot find method '%%get-a ()Lstd/core/String;' in class 'namespace_declarations_n_5.Ambient.A'
 E/verifier: Verifier error 54: Cache miss for method at offset
 E/verifier: Verifier error 62: Cannot resolve method id
+E/verifier: Method verification failed: void namespace_usage_n_5.ETSGLOBAL::usage()
+E/verifier: Class verification failed: 'namespace_usage_n_5.ETSGLOBAL' method: void namespace_usage_n_5.ETSGLOBAL::usage()
+E/runtime: Cannot initialize class 'namespace_usage_n_5.ETSGLOBAL'
+Unhandled exception: std.core.LinkerVerificationError
