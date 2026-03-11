@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import re
+from collections import OrderedDict
 from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import replace
@@ -40,14 +41,12 @@ from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
 from runner.types.test_env import TestEnv
 from runner.types.test_report import TestReport
-from runner.utils import get_validator_class, to_bool
+from runner.utils import get_validator_class
 
 if TYPE_CHECKING:
     pass
 
 _LOGGER = Log.get_logger(__file__)
-
-IS_PANDA = "is-panda"
 
 
 class ComparisonUtils:
@@ -169,7 +168,7 @@ class TestStandardFlow(ITestFlow, Test):
 
         self.parent_test_id = parent_test_id
 
-        self.is_panda = to_bool(test_env.config.workflow.parameters.get(IS_PANDA, False))
+        self.is_panda = test_env.config.workflow.is_panda
 
         # If test fails it contains reason of first failed step
         # It's supposed if the first step is failed then no step is executed further
@@ -184,32 +183,6 @@ class TestStandardFlow(ITestFlow, Test):
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
         self.validator_utils.add_additional_validator()
-
-    @property
-    def direct_dependent_tests(self) -> list['TestStandardFlow']:
-        if not self.metadata.files:
-            return []
-        for file in self.metadata.files:
-            if file.endswith(".d.ets"):
-                raise InvalidConfiguration(f"Test {self.test_id} has a dependent .d.ets file")
-        id_pos: int = str(self.path).find(self.test_id)
-        test_root: str = str(self.path)[:id_pos]
-
-        dependent_tests: list[TestStandardFlow] = []
-
-        for file in self.metadata.files:
-            new_test_file_path: Path = self.path.parent.joinpath(file).resolve()
-            new_test_id: str = new_test_file_path.relative_to(test_root).as_posix()
-            if (test := self.test_env.test_flow_registry.find(new_test_id)) is None:
-                test = self.__class__(test_env=self.test_env,
-                                      test_path=new_test_file_path,
-                                      params=self.test_extra_params,
-                                      test_id=new_test_id,
-                                      is_dependent=True,
-                                      parent_test_id=self.test_id)
-                test = self.test_env.test_flow_registry.register(test)
-            dependent_tests.append(cast(TestStandardFlow, test))
-        return dependent_tests
 
     @property
     def is_negative_runtime(self) -> bool:
@@ -240,7 +213,7 @@ class TestStandardFlow(ITestFlow, Test):
         if self._dependent_tests:
             return self._dependent_tests
 
-        self._dependent_tests.extend(self.direct_dependent_tests)
+        self._dependent_tests.extend(self.search_dependent_tests())
         for test in self._dependent_tests:
             package = test.metadata.get_package_name()
             self.dependent_packages[package] = self.dependent_packages.get(package, False) or test.is_negative_compile
@@ -251,11 +224,11 @@ class TestStandardFlow(ITestFlow, Test):
 
     @property
     def dependent_abc_files(self) -> list[str]:
-        abc_files_lists = [[*df.dependent_abc_files, df.test_abc.as_posix()] for df in self.dependent_tests]
-        result = []
-        for abc_files_list in abc_files_lists:
-            result += abc_files_list
-        return list(result)
+        return list(OrderedDict.fromkeys(
+            abc_file
+            for df in self.dependent_tests
+            for abc_file in [*df.dependent_abc_files, df.test_abc.as_posix()]
+        ))
 
     @property
     def invalid_tags(self) -> list:
@@ -346,6 +319,34 @@ class TestStandardFlow(ITestFlow, Test):
 
         self.is_completed = True
         return self
+
+    def search_dependent_tests(self) -> list['TestStandardFlow']:
+        if not self.metadata.files:
+            return []
+
+        if files := [file for file in self.metadata.files if file.endswith(".d.ets")]:
+            raise InvalidConfiguration(f"Test {self.test_id} should not refer to a dependent .d.ets file(s): {files}")
+
+        id_pos: int = str(self.path).find(self.test_id)
+        test_root: str = str(self.path)[:id_pos]
+        dependent_tests: list[TestStandardFlow] = []
+
+        for file in self.metadata.files:
+            new_test_file_path: Path = self.path.parent.joinpath(file).resolve()
+            new_test_id: str = new_test_file_path.relative_to(test_root).as_posix()
+
+            if (test := self.test_env.test_flow_registry.find(new_test_id)) is None:
+                test = self.__class__(test_env=self.test_env,
+                                      test_path=new_test_file_path,
+                                      params=self.test_extra_params,
+                                      test_id=new_test_id,
+                                      is_dependent=True,
+                                      parent_test_id=self.test_id)
+                test = self.test_env.test_flow_registry.register(test)
+
+            dependent_tests.append(cast(TestStandardFlow, test))
+
+        return dependent_tests
 
     def prepare_compiler_step(self, step: Step) -> Step:
         if self.__is_dependent:
@@ -549,8 +550,8 @@ class TestStandardFlow(ITestFlow, Test):
 
     def _collect_steps(self, compile_only_test: bool, allowed_steps: list[StepKind]) -> list[Step]:
         return [step for step in self.test_env.config.workflow.steps
-                 if step.executable_path is not None and
-                 ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
+                if step.executable_path is not None and
+                ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
 
     def _finalize_test_status(self, steps: list[Step]) -> None:
         ran_steps = [step for step in steps if step.passed is not None]
@@ -697,7 +698,7 @@ class ValidatorUtils:
         return ValidationResult(True, ValidatorFailKind.NONE, "")
 
     def _init_validator(self) -> IValidator:
-        validator_class_name = self.test_env.config.test_suite.get_parameter("validator")
+        validator_class_name = self.test_env.config.test_suite.validator_class
         if validator_class_name is None:
             return BaseValidator()
         validator_class = get_validator_class(validator_class_name)
