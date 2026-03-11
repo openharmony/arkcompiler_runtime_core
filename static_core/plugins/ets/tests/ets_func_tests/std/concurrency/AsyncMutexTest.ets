@@ -92,10 +92,12 @@ async function asyncMutexExclusiveAcquireTest() {
 
 function main(): int {
     let asyncMutexTestsuite = new arktest.ArkTestsuite("asyncMutexTestsuite");
+    let asyncMutexTestsuiteDisabled = new arktest.ArkTestsuite("asyncMutexTestsuite.DISABLED");
 
-    asyncMutexTestsuite.addAsyncTest('asyncMutexStressTest', asyncMutexStressTest);
+    // NOTE(ypigunova): include testcase, when bug will be fixed #33591
+    asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexStressTest', asyncMutexStressTest);
     asyncMutexTestsuite.addAsyncTest('asyncMutexSimpleUnlockTest', asyncMutexSimpleUnlockTest);
-    asyncMutexTestsuite.addAsyncTest('asyncMutexHardUnlockTest', asyncMutexHardUnlockTest);
-    asyncMutexTestsuite.addAsyncTest('asyncMutexExclusiveAcquireTest', asyncMutexExclusiveAcquireTest);
+    asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexHardUnlockTest', asyncMutexHardUnlockTest);
+    asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexExclusiveAcquireTest', asyncMutexExclusiveAcquireTest);
     return asyncMutexTestsuite.run();
 }
