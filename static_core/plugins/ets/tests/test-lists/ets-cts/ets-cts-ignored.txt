@@ -1063,6 +1063,22 @@
 11.enumerations/enum_cte_n_42.ets
 11.enumerations/enum_cte_n_43.ets
 
+#33476
+13.modules_and_namespaces/02.module_header/module_header.ets
+13.modules_and_namespaces/02.module_header/module_header_export.ets
+
+#33474
+13.modules_and_namespaces/02.module_header/module_header_declare.ets
+
+#33475
+13.modules_and_namespaces/02.module_header/module_header_declare_nonambient_n.ets
+
+#33507
+13.modules_and_namespaces/06.exported_declarations/export_reexport_name_clash_n.ets
+
+#33476
+13.modules_and_namespaces/09.multifile_module/multifile_module_mismatched_export_n.ets
+
 #26714
 13.modules_and_namespaces/04.import_directives/test.ets
 
