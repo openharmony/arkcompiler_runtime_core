@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,8 +31,8 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(str(metadata.tags), '[]')
         self.assertIsNone(metadata.desc)
         self.assertIsNone(metadata.files)
-        self.assertIsNone(metadata.expected_out)
-        self.assertIsNone(metadata.expected_error)
+        self.assertEqual(str(metadata.expected_out), '{}')
+        self.assertEqual(str(metadata.expected_error), '{}')
 
     def test_metadata_main_items(self) -> None:
         metadata = TestMetadata.create_filled_metadata({

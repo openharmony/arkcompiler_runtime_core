@@ -18,12 +18,14 @@ desc: Simultaneously run task A() (throws an exception) and task B() (successful
 assert: Stderr contains error A.
 tags: [negative]
 expected_out:
-- Task A start
-- Task B start
-expected_error: |-
-  Unhandled exception: escompat.Error
-  Error: concurrent_nested_n.ets: task A failed
-          at concurrent_nested_n.ETSGLOBAL.%async-A (concurrent_nested_n.ets:40:0)
+    runtime:
+        - "Task A start"
+        - "Task B start"
+expected_error:
+    runtime:
+        - "Unhandled exception: escompat.Error"
+        - "Error: concurrent_nested_n.ets: task A failed"
+        - "at concurrent_nested_n.ETSGLOBAL.%async-A (concurrent_nested_n.ets:40:0)"
 ---*/
 
 async function delay(): Promise<string> {

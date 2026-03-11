@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,16 +19,15 @@ limitations under the License.
 desc: >-
     {{test.desc|indent}}
 tags: [negative]
-expected_error: >-
-    E/runtime: Cannot initialize class 'rte_n.ETSGLOBAL'
-
-    Unhandled exception: std.core.ArithmeticError
-
-    ArithmeticError: / by zero
-        at std.core.ArithmeticError.<ctor> (Errors.ets:114:0)
-        at rte_module_n.ETSGLOBAL.foo (rte_module_n.ets:27:0)
-        at rte_module_n.ETSGLOBAL.<cctor> (rte_module_n.ets:29:0)
-        at rte_n.ETSGLOBAL.<cctor> (rte_n.ets:-1:0)
+expected_error:
+    'runtime':
+        - "E/runtime: Cannot initialize class 'rte_n.ETSGLOBAL'"
+        - 'Unhandled exception: std.core.ArithmeticError'
+        - 'ArithmeticError: / by zero'
+        - '    at std.core.ArithmeticError.<ctor> (Errors.ets:114:0)'
+        - '    at rte_module_n.ETSGLOBAL.foo (rte_module_n.ets:27:0)'
+        - '    at rte_module_n.ETSGLOBAL.<cctor> (rte_module_n.ets:29:0)'
+        - '    at rte_n.ETSGLOBAL.<cctor> (rte_n.ets:-1:0)'
 {% if test.files is defined %}
 files: [{{test.files|join(', ')}}]
 {% endif %}

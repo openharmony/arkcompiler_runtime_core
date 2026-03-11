@@ -61,6 +61,9 @@ ALLOWED_TEST_EXTS = (
     (".ets",),
 )
 
+ExpectedData = str | list[str] | dict[str, str | list[str]]
+ExpectedField = dict[str, list[str]]
+
 
 class FontColor(BaseEnum):
     RED_BOLD = "\033[31;1m"
@@ -177,9 +180,12 @@ def remove_template_copyright(template_text: str) -> str:
     return '\n'.join([line for line in lines if not line.startswith('#')])
 
 
-def read_expected_file(path_to_file: Path) -> str:
-    with open(path_to_file, encoding='utf-8') as f:
-        return ''.join(line for line in f if not line.startswith('#')).strip()
+def read_expected_file(path_to_file: Path) -> list[str] | None:
+    try:
+        with open(path_to_file, encoding='utf-8') as f:
+            return [line.strip() for line in f if not line.startswith('#')]
+    except FileNotFoundError:
+        return None
 
 
 def get_opener(mode: int, extra_flags: int = 0) -> Callable[[str | Path, int], int]:

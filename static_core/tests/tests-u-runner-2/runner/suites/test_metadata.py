@@ -23,9 +23,11 @@ from typing import Any
 import yaml
 from yaml.scanner import ScannerError
 
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import InvalidConfiguration, InvalidTestMarkUpException
 from runner.enum_types.base_enum import BaseEnum
 from runner.logger import Log
+from runner.options.options_step import StepKind
+from runner.utils import ExpectedData, ExpectedField
 
 METADATA_PATTERN = re.compile(r"(?<=/\*---)(.*?)(?=---\*/)", flags=re.DOTALL)
 DOTS_WHITESPACES_PATTERN = r"(\.\w+)*"
@@ -103,8 +105,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     es2panda_options: list[str] = field(default_factory=list)
     spec: str | None = None
     arktsconfig: Path | None = None
-    expected_out: str | None = None
-    expected_error: str | None = None
+    expected_out: ExpectedField = field(default_factory=dict)
+    expected_error: ExpectedField = field(default_factory=dict)
     # Test262 specific metadata keys
     description: str | None = None
     defines: str | None = None
@@ -118,6 +120,24 @@ class TestMetadata:     # type: ignore[explicit-any]
     locale: str | None = None
     # ark_tests/parser
     issues: str | None = None
+
+    @staticmethod
+    def normalize_expected_field(exp_field: ExpectedData) -> dict[str, list[str]]:
+        """
+        we expect expected_out/ expected_err to be in format {step_name | step_kind: list[str]},
+        if step_name/ step_kind is not set explicitly - consider expected output to be related to compiler step
+        """
+        if isinstance(exp_field, list):
+            return {StepKind.COMPILER.value: exp_field}
+        if isinstance(exp_field, str):
+            return {StepKind.COMPILER.value: [exp_str for exp_str in exp_field.splitlines() if exp_str.strip()]}
+        if isinstance(exp_field, dict):
+            normalized: dict[str, list[str]] = {}
+            for key, val in exp_field.items():
+                normalized[key] = [val] if isinstance(val, str) else val
+            return normalized
+
+        raise InvalidTestMarkUpException("Incorrect format of the expected_out or expected_error field in test mark-up")
 
     @classmethod
     def get_metadata(cls, path: Path) -> 'TestMetadata':
@@ -154,10 +174,14 @@ class TestMetadata:     # type: ignore[explicit-any]
             del metadata['flags']
         if isinstance(type(metadata.get('ark_options')), str):
             metadata['ark_options'] = [metadata['ark_options']]
-        if isinstance(metadata.get('expected_out'), list):
-            metadata['expected_out'] = '\n'.join(metadata['expected_out'])
-        if isinstance(metadata.get('expected_error'), list):
-            metadata['expected_error'] = '\n'.join(metadata['expected_error'])
+
+        expected_out = metadata.get('expected_out')
+        expected_error = metadata.get('expected_error')
+
+        if expected_out is not None:
+            metadata['expected_out'] = TestMetadata.normalize_expected_field(expected_out)
+        if expected_error is not None:
+            metadata['expected_error'] = TestMetadata.normalize_expected_field(expected_error)
         arktsconfig = metadata.get('arktsconfig')
         package = metadata.get("package")
         if arktsconfig is not None:

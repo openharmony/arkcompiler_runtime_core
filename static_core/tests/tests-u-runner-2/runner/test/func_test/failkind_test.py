@@ -205,7 +205,7 @@ class FailKindTest(TestCase):
                 test_result = self.run_test()
 
                 self.assertFalse(test_result.passed)
-                self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
+                self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT_FAIL")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -243,7 +243,8 @@ class FailKindTest(TestCase):
                     test_utils.set_process_mock(mock_popen, return_code=0, error_out="default: 1")
                     test_result = self.run_test()
                     self.assertFalse(test_result.passed)
-                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_STDERR_NOT_EMPTY")
+                    self.assertEqual(test_result.fail_kind,
+                                     f"{FailKindTest.COMPILER_STEP_NAME}_STDERR_NOT_EMPTY")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)

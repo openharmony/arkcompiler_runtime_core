@@ -125,7 +125,10 @@ class HtmlReport(Report):
 
     def make_report(self) -> str:
         output = self._consolidate_stdout()
-        expected, actual = self.__make_output_diff_html(self.test.expected, output)
+
+        # should be refactored because expected may contain expected output related to any workflow step
+        # but actual_report  contains data from the last step executed
+        expected, actual = self.__make_output_diff_html("\n".join(self.test.expected), output)
         test_expected, test_actual = "\n".join(expected), "\n".join(actual)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.html")
@@ -201,7 +204,10 @@ class MdReport(Report):
 
     def make_report(self) -> str:
         output = self._consolidate_stdout()
-        result = self.__make_output_diff_md(self.test.expected, output)
+
+        # should be refactored because expected may contain expected output related to any workflow step
+        # but actual_report  contains data from the last step executed
+        result = self.__make_output_diff_md("\n".join(self.test.expected), output)
         test_result = "\n".join(result)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.md")

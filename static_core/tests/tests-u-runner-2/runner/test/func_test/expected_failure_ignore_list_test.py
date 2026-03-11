@@ -25,6 +25,8 @@ from unittest.mock import patch
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.options.cli_options import get_args
 from runner.options.config import Config
+from runner.options.options_step import StepKind
+from runner.options.options_step_utils import StepFields
 from runner.reports.report_format import ReportFormat
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
@@ -36,12 +38,24 @@ class FailuresFromIgnoreTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    step_fields: ClassVar[StepFields]
 
     @staticmethod
     def get_config() -> Config:
         args = get_args()
         config = Config(args)
         return config
+
+    @staticmethod
+    def create_step(step_kind: StepKind) -> StepFields:
+        return StepFields(
+            step_kind=step_kind.value,
+            step_name="test step"
+        )
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.step_fields = cls.create_step(StepKind.COMPILER)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -104,11 +118,13 @@ class FailuresFromIgnoreTest(TestCase):
                 test.passed = False
                 test.reports[ReportFormat.LOG] = "failure"
                 if test.test_id == "test3.ets":
-                    _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output_test3,
+                    _ = BaseValidator.check_return_code(cast(TestStandardFlow, test),
+                                                        FailuresFromIgnoreTest.step_fields, test_output_test3,
                                                         err_output, 0)
                 else:
-                    _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output,
-                                                        err_output, 0)
+                    _ = BaseValidator.check_return_code(cast(TestStandardFlow, test),
+                                                        FailuresFromIgnoreTest.step_fields,
+                                                        test_output, err_output, 0)
 
             runner.results = actual_tests
             failed = runner.summarize()
@@ -146,8 +162,8 @@ class FailuresFromIgnoreTest(TestCase):
             for test in actual_tests:
                 test.passed = False
                 test.reports[ReportFormat.LOG] = "failure"
-                _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output,
-                                                    err_output, 0)
+                _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), FailuresFromIgnoreTest.step_fields,
+                                                    test_output, err_output, 0)
             runner.results = actual_tests
             failed = runner.summarize()
             actual_stat = {"passed": runner.passed, "ignored": runner.ignored,

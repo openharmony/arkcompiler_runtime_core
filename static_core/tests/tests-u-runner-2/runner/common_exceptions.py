@@ -64,6 +64,10 @@ class RunnerCustomSchemeException(RunnerException):
     pass
 
 
+class InvalidTestMarkUpException(RunnerException):
+    pass
+
+
 class TestNotExistException(RunnerException):
     pass
 

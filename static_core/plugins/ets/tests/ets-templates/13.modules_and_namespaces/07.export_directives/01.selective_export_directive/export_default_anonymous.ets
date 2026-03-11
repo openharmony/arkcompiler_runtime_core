@@ -18,6 +18,9 @@ desc:  The directive in the example below exports constant variable of some type
 files: ['./export_default_anonymous/export_string.ets', 
 './export_default_anonymous/export_number.ets',
 './export_default_anonymous/export_newclass.ets']
+expected_error:
+    compiler:
+        - "Warning: default element has already imported"
 ---*/
 
 import { default as export_string, a as a1, b as b1 } from "./export_default_anonymous/export_string.ets";
