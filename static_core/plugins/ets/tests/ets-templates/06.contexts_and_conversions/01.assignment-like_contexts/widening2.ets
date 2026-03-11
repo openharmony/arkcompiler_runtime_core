@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Assignment contexts allow the use of conversion followed by a widening reference conversion
-params: Conversion from '{{c.src_type}}' to '{{c.dst_type}}'
+desc: >-
+    Assignment contexts allow the use of conversion followed by a widening reference conversion
 ---*/
 
-function main(): void {
-  {% for v in c['values'] %}
-  let src_{{loop.index}}: {{c.src_type}} = {{v|safe}};
-  let dst_{{loop.index}}: {{c.dst_type}} = src_{{loop.index}};
-  arktest.assertNE(dst_{{loop.index}}, null)
-  {% endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widening2");
+
+    {% for c in cases %}
+        testSuite.addTest("widening_{{loop.index}}", () => {
+            {% for v in c['values'] %}
+            let src_{{loop.index}}: {{c.src_type}} = {{v|safe}};
+            let dst_{{loop.index}}: {{c.dst_type}} = src_{{loop.index}};
+            arktest.assertNE(dst_{{loop.index}}, null)
+            {%- endfor %}
+        }); 
+    {% endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

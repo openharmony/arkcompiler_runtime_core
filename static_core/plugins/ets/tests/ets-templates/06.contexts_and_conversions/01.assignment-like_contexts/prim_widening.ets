@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-{% for wid in widening_primitives %}
-
 /*---
-desc: Widening primitive type {{wid.origin}}
+desc: Widening primitive types
 ---*/
-
-let origin: {{wid.origin}} = 0;
-function main(): void {
-{%- for t in wid['dest'] %}
-  let x{{t}}: {{t}} = origin;
+{% for wid in widening_primitives %}
+let origin{{loop.index}}: {{wid.origin}} = 0;
 {%- endfor %}
-}
 
-{% endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widdening_primitives");
+
+    {% for wid in widening_primitives %}
+        {% set outer_loop_index = loop.index %}
+        testSuite.addTest("widening_primitive{{loop.index}}", () => {
+            {%- for t in wid['dest'] %}
+                let x{{t}}{{outer_loop_index}}: {{t}} = origin{{outer_loop_index}};
+            {%- endfor %}
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
+}

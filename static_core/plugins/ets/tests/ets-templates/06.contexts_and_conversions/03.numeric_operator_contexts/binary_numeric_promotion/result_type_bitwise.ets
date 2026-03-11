@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: |-
     When an operator applies binary numeric promotion to a pair of operands,
@@ -25,51 +24,61 @@ desc: |-
       •	Otherwise, if either operand is of type float, the other is converted to float.
       •	Otherwise, if either operand is of type long, the other is converted to long.
       •	Otherwise, both operands are converted to type int.
-params: {{c.type}}, integer bitwise operators
+    integer bitwise operators
 ---*/
 
 enum IntEnum {One = 1, Two, Three}
 
 function foo(p: byte): int {
-  return 1;
+    return 1;
 }
 
 function foo(p: short): int {
-  return 2;
+    return 2;
 }
 
 function foo(p: int): int {
-  return 3;
+    return 3;
 }
 
 function foo(p: long): int {
-  return 4;
+    return 4;
 }
 
 function foo(p: char): int {
-  return 5;
+    return 5;
 }
 
 function foo(p: boolean): int {
-  return 6;
+    return 6;
 }
 
 function foo(p: float): int {
-  return 7;
+    return 7;
 }
 
 function foo(p: double): int {
-  return 8;
+    return 8;
 }
 
 function foo(p: Object): int {
-  return 40;
+    return 40;
 }
 
-function main(): void {
-  let v: {{c.type}} = {{c.val}};
-  let r: {{c.rt}} = {{c.rv}};
-  let result: int = foo(v {{c.op}} r);
-  arktest.assertEQ(result, {{c.res}})
+
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_numeric_promotion_bitwise");
+
+    {% for c in cases %} 
+        testSuite.addTest("promotion_{{loop.index}}", () => {
+            let v: {{c.type}} = {{c.val}};
+            let r: {{c.rt}} = {{c.rv}};
+            let result: int = foo(v {{c.op}} r);
+            arktest.assertEQ(result, {{c.res}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

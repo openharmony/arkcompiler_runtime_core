@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,32 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
 /*---
-desc: Assignment contexts allow the use a widening reference conversion.
-params: Assignment of '{{case.src_type|safe}}' to '{{case.dst_type|safe}}'
+desc: >-
+    Assignment contexts allow the use a widening reference conversion.
 ---*/
+
 interface I {}
 class A implements I {}
 class B extends A {}
 class C extends B {}
 
+{%- for case in cases %}
 {{case.defs|safe}}
+{%- endfor %}
 
-function main(): void {
-  let src: {{case.src_type|safe}} = new {{case.src_class|safe}}();
-  let dst: {{case.dst_type|safe}} = src;  // this assignment is tested
-  arktest.assertEQ(dst, src)
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widening_references");
+
+    {% for case in cases %}
+        testSuite.addTest("reference_{{loop.index}}", () => {
+            let src: {{case.src_type|safe}} = new {{case.src_class|safe}}();
+            let dst: {{case.dst_type|safe}} = src;  // this assignment is tested
+            arktest.assertEQ(dst, src)
+        }); 
+    {% endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

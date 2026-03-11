@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,14 @@ desc: >-
     A widening reference conversion exists from any reference type S to any reference
     type T, provided S is a subtype of T.
 tags: [compile-only, negative]
+expected_out: "{{t.expected}}"
 ---*/
 
 {{t.defs}}
 
 function main() {
-  let src: {{t.stype}} = {{t.src|safe}};
-  let dst: {{t.dtype}} = src as {{t.dtype}};
-  arktest.assertEQ(src, dst) // reference equality
+    let src: {{t.stype}} = {{t.src|safe}};
+    let dst: {{t.dtype}} = src as {{t.dtype}};
+    arktest.assertEQ(src, dst) // reference equality
 }
 {% endfor %}

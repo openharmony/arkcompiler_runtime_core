@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,16 @@
 desc: >-
     Unary numeric promotion is performed on expressions in the following situation:
     Each operand, separately, of a shift operator.
-params: "{{op.name}}, {{c.vtype}} or {{c.rtype}} cannot be promoted to primitive integral."
+    "{{op.name}}, {{c.vtype}} or {{c.rtype}} cannot be promoted to primitive integral."
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 function main() {
 
-  let v: {{c.vtype}} = {{c.vval}};
-  let r: {{c.rtype}} = {{c.rval}};
-  arktest.assertEQ(v {{op.op}} r, 0)
+    let v: {{c.vtype}} = {{c.vval}};
+    let r: {{c.rtype}} = {{c.rval}};
+    arktest.assertEQ(v {{op.op}} r, 0)
   
 }
 {% endfor %}

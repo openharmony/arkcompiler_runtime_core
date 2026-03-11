@@ -1,0 +1,71 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+#0
+  - { src_type: 'A<X>', dst_type: 'A<Y>', expected: "Semantic error ESE0318: Type 'A<X>' cannot be assigned to type 'A<Y>'" }
+#1
+  - { src_type: 'A<Y>', dst_type: 'A<X>', expected: "Semantic error ESE0318: Type 'A<Y>' cannot be assigned to type 'A<X>'" }
+#2
+  - { src_type: 'A<X>', dst_type: 'A<out Y>', expected: "Semantic error ESE0170: Type 'A<T>' is generic but type argument were not provided." }
+#3
+  - { src_type: 'A<Y>', dst_type: 'A<in X>', expected: "Semantic error ESE0170: Type 'A<T>' is generic but type argument were not provided." }
+#4
+  - { src_type: 'Aout<X>', dst_type: 'Aout<Y>', expected: "Semantic error ESE0318: Type 'Aout<X>' cannot be assigned to type 'Aout<Y>'" }
+#5
+  - { src_type: 'Aout<X>', dst_type: 'Aout<out Y>', expected: "Semantic error ESE0170: Type 'Aout<T>' is generic but type argument were not provided." }
+#6
+  - { src_type: 'Ain<Y>', dst_type: 'Ain<X>', expected: "Semantic error ESE0318: Type 'Ain<Y>' cannot be assigned to type 'Ain<X>'" }
+#7
+  - { src_type: 'Ain<Y>', dst_type: 'Ain<in X>', expected: "Semantic error ESE0170: Type 'Ain<T>' is generic but type argument were not provided." }
+#8
+  - { src_type: 'A<X>', dst_type: 'B<X>', expected: "Semantic error ESE0318: Type 'A<X>' cannot be assigned to type 'B<X>'" }
+#9
+  - { src_type: 'A<Y>', dst_type: 'B<X>', expected: "Semantic error ESE0318: Type 'A<Y>' cannot be assigned to type 'B<X>'" }
+#10
+  - { src_type: 'A<X>', dst_type: 'B<Y>', expected: "Semantic error ESE0318: Type 'A<X>' cannot be assigned to type 'B<Y>'" }
+#11
+  - { src_type: 'A<Y>', dst_type: 'B<Y>', expected: "Semantic error ESE0318: Type 'A<Y>' cannot be assigned to type 'B<Y>'" }
+#12
+  - { src_type: 'A<X>', dst_type: 'B<out X>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#13
+  - { src_type: 'A<Y>', dst_type: 'B<out X>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#14
+  - { src_type: 'A<X>', dst_type: 'B<out Y>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#15
+  - { src_type: 'A<Y>', dst_type: 'B<out Y>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#16
+  - { src_type: 'A<X>', dst_type: 'B<in X>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#17
+  - { src_type: 'A<Y>', dst_type: 'B<in X>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#18
+  - { src_type: 'A<X>', dst_type: 'B<in Y>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#19
+  - { src_type: 'A<Y>', dst_type: 'B<in Y>', expected: "Semantic error ESE0170: Type 'B<T>' is generic but type argument were not provided." }
+#20
+  - { src_type: 'B<Y>', dst_type: 'A<X>', expected: "Semantic error ESE0318: Type 'B<Y>' cannot be assigned to type 'A<X>'" }
+#21
+  - { src_type: 'B<Y>', dst_type: 'A<in X>', expected: "Semantic error ESE0170: Type 'A<T>' is generic but type argument were not provided." }
+#22
+  - { src_type: 'B<X>', dst_type: 'A<Y>', expected: "Semantic error ESE0318: Type 'B<X>' cannot be assigned to type 'A<Y>'" }
+#23
+  - { src_type: 'B<X>', dst_type: 'A<out Y>', expected: "Semantic error ESE0170: Type 'A<T>' is generic but type argument were not provided." }
+#24
+  - { src_type: 'Bout<X>', dst_type: 'Aout<Y>', expected: "Semantic error ESE0318: Type 'Bout<X>' cannot be assigned to type 'Aout<Y>'" }
+#25
+  - { src_type: 'Bout<X>', dst_type: 'Aout<out Y>', expected: "Semantic error ESE0170: Type 'Aout<T>' is generic but type argument were not provided." }
+#26
+  - { src_type: 'Bin<Y>', dst_type: 'Ain<X>', expected: "Semantic error ESE0318: Type 'Bin<Y>' cannot be assigned to type 'Ain<X>'" }
+#27
+  - { src_type: 'Bin<Y>', dst_type: 'Ain<in X>', expected: "Semantic error ESE0170: Type 'Ain<T>' is generic but type argument were not provided." }

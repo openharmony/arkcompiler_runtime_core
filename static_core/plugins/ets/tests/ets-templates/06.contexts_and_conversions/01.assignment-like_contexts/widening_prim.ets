@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,25 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
 /*---
-desc: Assignment contexts allow the use of the widening primitive conversion.
-params: Conversion from '{{case.src_type}}' to '{{case.dst_type}}'
+desc: >-
+    Assignment contexts allow the use of the widening primitive conversion.
 ---*/
 
-function main(): void {
-  let orig: {{case.src_type}} = {{case.src_val|safe}};
-  let src: {{case.src_type}} = orig;
-  let dst: {{case.dst_type}} = {% if case.src_to_dst is defined %}{{case.src_to_dst|safe}}{% else %}src{% endif %};  // testing this assignment
-  arktest.assertEQ(dst, {{case.dst_val}})
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widening_primitive");
+
+    {% for case in cases %}
+        testSuite.addTest("primitive{{loop.index}}", () => {
+            let orig: {{case.src_type}} = {{case.src_val|safe}};
+            let src: {{case.src_type}} = orig;
+            // testing this assignment
+            let dst: {{case.dst_type}} = {% if case.src_to_dst is defined %}{{case.src_to_dst|safe}}{% else %}src{% endif %}; 
+            arktest.assertEQ(dst, {{case.dst_val}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

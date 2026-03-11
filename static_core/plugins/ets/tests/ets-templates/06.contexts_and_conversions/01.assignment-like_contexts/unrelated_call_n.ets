@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 {% for c in cases %}
 /*---
-desc: Compile-time error if the chain of conversions contains two parameterized types that are not in the subtype relation.
-params: Invalid conversion from '{{c.fromtype}}' to '{{c.totype}}'
+desc: >-
+    Compile-time error if the chain of conversions contains two parameterized types that are not in the subtype relation.
+    Invalid conversion from '{{c.fromtype}}' to '{{c.totype}}'
 tags: [negative, compile-only]
+expected_out: "{{c.expected}}"
 ---*/
 
 interface I {}
@@ -28,23 +30,23 @@ class C extends B {}
 class R {}
 
 class Clazz {
-  public fld1: {{c.totype}};
-  public fld2: {{c.totype}}|null;
+    public fld1: {{c.totype}};
+    public fld2: {{c.totype}}|null;
 
-  public constructor(p: {{c.totype}}) {
-    this.fld1 = p;
-  }
+    public constructor(p: {{c.totype}}) {
+        this.fld1 = p;
+    }
 
-  public foo(p: {{c.totype}}): void {
-    this.fld2 = p;
-  }
+    public foo(p: {{c.totype}}): void {
+        this.fld2 = p;
+    }
 }
 
 function main(): void {
-  let v: {{c.fromtype}} = {{c.fromval | safe}};
-  let obj: Clazz = new Clazz(v);
-  obj.foo(v);
-  arktest.assertEQ(obj.fld1, v)
-  arktest.assertEQ(obj.fld2, v)
+    let v: {{c.fromtype}} = {{c.fromval | safe}};
+    let obj: Clazz = new Clazz(v);
+    obj.foo(v);
+    arktest.assertEQ(obj.fld1, v)
+    arktest.assertEQ(obj.fld2, v)
 }
 {% endfor %}

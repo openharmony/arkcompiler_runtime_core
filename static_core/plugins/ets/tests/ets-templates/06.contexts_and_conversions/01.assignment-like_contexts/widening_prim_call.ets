@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,32 +13,44 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Invocation contexts allow a widening primitive conversion.
-params: Widening primitive conversion to '{{c.ctype}}'
+desc: >-
+    Invocation contexts allow a widening primitive conversion.
+    Widening primitives conversion
 ---*/
 
-class A {
-  public fld1: {{c.ctype}};
-  public fld2: {{c.ctype}};
+{% for c in cases %}
+class A{{loop.index}} {
+    public fld1: {{c.ctype}};
+    public fld2: {{c.ctype}};
 
-  public constructor(p: {{c.ctype}}) {
-    this.fld1 = p;
-  }
+    public constructor(p: {{c.ctype}}) {
+        this.fld1 = p;
+    }
 
-  public foo(p: {{c.ctype}}): void {
-    this.fld2 = p;
-  }
+    public foo(p: {{c.ctype}}): void {
+        this.fld2 = p;
+    }
 }
+{%- endfor %}
 
-function main(): void {
-  {% for t in c['values'] %}
-  let v{{loop.index}}: {{t.type}} = {{t.val|safe}};
-  let obj{{loop.index}}: A = new A({% if t.obj_param_trans is defined %}{{t.obj_param_trans|safe}}(v{{loop.index}}){% else %}v{{loop.index}}{% endif %});
-  obj{{loop.index}}.foo({% if t.obj_param_trans is defined %}{{t.obj_param_trans|safe}}(v{{loop.index}}){% else %}v{{loop.index}}{% endif %});
-  arktest.assertEQ(obj{{loop.index}}.fld1, {{t.val2|safe}})
-  arktest.assertEQ(obj{{loop.index}}.fld2, {{t.val2|safe}})
-  {% endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widening_primitive_call");
+
+    {% for c in cases %}
+        {% set outer_loop_index = loop.index %}
+        testSuite.addTest("primitive_call{{loop.index}}", () => {
+            {% for t in c['values'] %}
+                let v{{outer_loop_index}}_{{loop.index}}: {{t.type}} = {{t.val|safe}};
+                let obj{{outer_loop_index}}_{{loop.index}} = new A{{outer_loop_index}}({% if t.obj_param_trans is defined %}{{t.obj_param_trans|safe}}(v{{outer_loop_index}}_{{loop.index}}){% else %}v{{outer_loop_index}}_{{loop.index}}{% endif %});
+                obj{{outer_loop_index}}_{{loop.index}}.foo({% if t.obj_param_trans is defined %}{{t.obj_param_trans|safe}}(v{{outer_loop_index}}_{{loop.index}}){% else %}v{{outer_loop_index}}_{{loop.index}}{% endif %});
+                arktest.assertEQ(obj{{outer_loop_index}}_{{loop.index}}.fld1, {{t.val2|safe}})
+                arktest.assertEQ(obj{{outer_loop_index}}_{{loop.index}}.fld2, {{t.val2|safe}})
+            {%- endfor %}
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

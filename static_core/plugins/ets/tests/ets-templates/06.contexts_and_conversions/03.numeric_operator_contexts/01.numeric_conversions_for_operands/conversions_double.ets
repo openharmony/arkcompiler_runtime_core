@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-{% for op in operators %}
-
 /*---
 desc: Widening numeric operands to the largest type.
 ---*/
 
-function main(): void {
-  let x: double = 1;
-  let y: double = 1;
-  arktest.assertEQ((x {{op[0]}} y), {{op[1]}})
-  arktest.assertEQ((y {{op[0]}} x), {{op[1]}})
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Context_widening_primitives_double");
+
+    {% for op in operators %} 
+        testSuite.addTest("conversion_{{loop.index}}", () => {
+            let x: double = 1;
+            let y: double = 1;
+            arktest.assertEQ((x {{op[0]}} y), {{op[1]}})
+            arktest.assertEQ((y {{op[0]}} x), {{op[1]}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,35 +15,37 @@
 
 {% for case in cases %}
 /*---
-desc: Invocation contexts allow the use a widening reference conversion.
+desc: >-
+    Invocation contexts allow the use a widening reference conversion.
+    {{case.val | safe}} to {{case.type}}
 tags: [compile-only, negative]
-params: {{case.val | safe}} to {{case.type}}
+expected_out: "{{case.expected}}" 
 ---*/
 
 class B <T extends {{case.type}}> {
-  {%- for v in case['ptype'] %}
-  fld1_{{v}}: {{v}};
-  fld2_{{v}}: {{v}};
-  {%- endfor %}
+    {%- for v in case['ptype'] %}
+    fld1_{{v}}: {{v}};
+    fld2_{{v}}: {{v}};
+    {%- endfor %}
 
-  constructor({% for v in case['ptype'] %}p{{loop.index}}: T{{ ", " if not loop.last }}{% endfor %}) {
-    {%- for v in case['ptype'] %}
-    this.fld1_{{v}} = p{{loop.index}}
-    {%- endfor %}
-  }
+    constructor({% for v in case['ptype'] %}p{{loop.index}}: T{{ ", " if not loop.last }}{% endfor %}) {
+        {%- for v in case['ptype'] %}
+        this.fld1_{{v}} = p{{loop.index}}
+        {%- endfor %}
+    }
 
-  public foo({% for v in case['ptype'] %}p{{loop.index}}: T{{ ", " if not loop.last }}{% endfor %}): void {
-    {%- for v in case['ptype'] %}
-    this.fld2_{{v}} = p{{loop.index}}
-    {%- endfor %}
-    {%- for v in case['ptype'] %}
-    arktest.assertEQ(this.fld1_{{v}}, this.fld2_{{v}})
-    {%- endfor %}
-  }
+    public foo({% for v in case['ptype'] %}p{{loop.index}}: T{{ ", " if not loop.last }}{% endfor %}): void {
+        {%- for v in case['ptype'] %}
+        this.fld2_{{v}} = p{{loop.index}}
+        {%- endfor %}
+        {%- for v in case['ptype'] %}
+        arktest.assertEQ(this.fld1_{{v}}, this.fld2_{{v}})
+        {%- endfor %}
+    }
 }
 
 function main(): void {
-  let b: B<{{case.type}}> = new B <{{case.type}}> ({% for v in case['ptype'] %}{{case.val | safe}}{{ ", " if not loop.last }}{% endfor %});
-  b.foo({% for v in case['ptype'] %}{{case.val | safe}}{{ ", " if not loop.last }}{% endfor %});
+    let b: B<{{case.type}}> = new B <{{case.type}}> ({% for v in case['ptype'] %}{{case.val | safe}}{{ ", " if not loop.last }}{% endfor %});
+    b.foo({% for v in case['ptype'] %}{{case.val | safe}}{{ ", " if not loop.last }}{% endfor %});
 }
-{% endfor %}
+{%- endfor %}
