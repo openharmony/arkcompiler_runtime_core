@@ -1025,7 +1025,9 @@ class JSONWriter {
                 this.writeClassValue(obj, objCls)
             }
         } else {
-            throw new AssertionError("Unsupported object type: " + typeof obj)
+            const objClass = Class.ofAny(obj)
+            const message = objClass ? objClass.getName() : 'value has no class metadata'
+            throw new TypeError('Unsupported object type: ' + message)
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,10 +43,14 @@ export class Object {
     constructor () {};
 
     /**
-    * Converts this object to a string
-    *
-    * @returns result of the conversion
-    */
+     * Converts this object to a string
+     *
+     * @returns { String } A string representing the object.
+     * @throws { TypeError } The object is an unexpected fixedarray.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toString(): String {
         const thisObj = this
         if (thisObj instanceof Function) {
@@ -86,7 +90,7 @@ export class Object {
             } else if (thisObj instanceof FixedArray<double>) {
                 return join(thisObj, ",")
             } else {
-                throw new AssertionError("unexpected FixedArray type: " + thisType.getName())
+                throw new TypeError("unexpected FixedArray type: " + thisType.getName())
             }
         }
 
@@ -203,7 +207,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type");
+        throw new TypeError("Invalid object type");
     }
 
     public static values(rec: Record<PropertyKey, Any>): Any[] {
@@ -292,7 +296,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type")
+        throw new TypeError("Invalid object type")
     }
 
     /**
@@ -387,7 +391,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type")
+        throw new TypeError("Invalid object type")
     }
 
     public static getOwnPropertyNames(rec: Record<PropertyKey, Any>): string[] {
@@ -435,7 +439,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type")
+        throw new TypeError("Invalid object type")
     }
 
     /**

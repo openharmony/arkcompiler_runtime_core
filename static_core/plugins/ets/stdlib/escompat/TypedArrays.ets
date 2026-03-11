@@ -815,7 +815,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Int8Array } - A new Int8Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -828,7 +828,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafe(i, x.value!.toByte())
         }
@@ -2610,7 +2610,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Int16Array } - A new Int16Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -2623,7 +2623,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafe(i, x.value!.toShort())
         }
@@ -4388,7 +4388,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Int32Array } - A new Int32Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -4401,7 +4401,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafe(i, x.value!.toInt())
         }
@@ -6188,7 +6188,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param { Set<BigInt> } set - A set object to convert to an array.
      * @returns { BigInt64Array } - A new BigInt64Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -6201,7 +6201,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafe(i, x.value!.getLong())
         }
@@ -7953,7 +7953,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<number> } set - A set object to convert to an array.
      * @returns { Float32Array } - A new Float32Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -7966,7 +7966,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafe(i, x.value!.toFloat())
         }
@@ -9640,7 +9640,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<number> } set - A set object to convert to an array.
      * @returns { Float64Array } - A new Float64Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -9653,7 +9653,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafe(i, x.value!.toDouble())
         }

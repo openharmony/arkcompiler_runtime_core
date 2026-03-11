@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -268,13 +268,23 @@ export abstract class Type extends Object {
             case TypeKind.ENUM:
                 return new EnumType(td, contextLinker)
             default:
-                throw new AssertionError("Unexpected TypeKind " + kind)
+                throw new TypeError("Unexpected TypeKind " + kind)
         }
     }
 
+    /**
+     * from
+     *
+     * @returns {Type}
+     * @throws { TypeError } - Input parameter error.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from<T>(): Type {
         //should never be executed since FE lowering this
-        throw new AssertionError("Type.from call will be casted by frontend")
+        throw new TypeError("Type.from call will be casted by frontend")
     }
 
     /**
@@ -2171,6 +2181,18 @@ export final class ArrayType extends Type {
         return ArrayType.getInstance(arrayClass)
     }
 
+    /**
+     * Gets ArrayType instance from Class and optional element type descriptor
+     *
+     * @param {Class} arrayClass Array class
+     * @param {RuntimeTypeDescriptor} [elemTD] Optional element type descriptor
+     * @returns {ArrayType} ArrayType instance
+     * @throws { TypeError } Unexpected TypeKind
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
         elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)
         const contextLinker = arrayClass.getLinker()
@@ -2201,7 +2223,7 @@ export final class ArrayType extends Type {
             case TypeKind.UNION:
                 return new ArrayType(arrayClass, elemTD)
             default:
-                throw new AssertionError("Unexpected TypeKind " + ek)
+                throw new TypeError("Unexpected TypeKind " + ek)
         }
     }
 
