@@ -105,9 +105,6 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_11.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_12.ets
 
-#31911
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_n_7.ets
-
 #32423
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_18.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_19.ets
@@ -1004,7 +1001,7 @@
 #28527
 09.classes/09.constructor_declaration/cons_parameters_gen_20.ets
 
-#67 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
+#32614 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
 09.classes/09.constructor_declaration/cons_parameters_gen_23.ets
 
 #33293 Class initialization execution sequence is not correct
@@ -1152,9 +1149,6 @@
 #33339
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_n.d.ets
 
-#33238
-15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping.ets
-
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
 
@@ -1226,12 +1220,6 @@
 
 #31036
 15.semantic_rules/02.subtyping/08.subtyping_for_intersection_types/inter_type_is_sub_of_type_any_on_non_gen.ets
-
-#30709
-15.semantic_rules/02.subtyping/09.subtyping_for_difference_types/type_t_is_sub_of_diff_on_predefined_2.ets
-
-#30710
-15.semantic_rules/02.subtyping/09.subtyping_for_difference_types/type_t_is_sub_of_diff_on_str_lit_1.ets
 
 #30711
 15.semantic_rules/02.subtyping/09.subtyping_for_difference_types/type_t_is_sub_of_diff_on_non_gen_2.ets
@@ -1308,8 +1296,6 @@
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_29.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_37.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_45.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_23.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_37.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_25.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_33.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_n_0.ets
