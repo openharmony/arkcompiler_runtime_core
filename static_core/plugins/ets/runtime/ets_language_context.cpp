@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,8 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
-
+#include "plugins/ets/runtime/types/ets_error.h"
+#include "plugins/ets/runtime/types/ets_array.h"
 #include <array>
 
 namespace ark::ets {
@@ -72,7 +73,36 @@ void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) cons
 
     EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> exc(coroutine, EtsObject::Create(cls));
-    ASSERT(exc.GetPtr() != nullptr);
+
+    auto *error = Error::FromEtsObject(exc.GetPtr());
+    if (UNLIKELY(error == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return;
+    }
+    EtsHandle<Error> errHandle(coroutine, error);
+
+    auto *name = cls->GetName();
+    if (UNLIKELY(name == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return;
+    }
+    errHandle->SetName(coroutine, name);
+
+    auto *message = EtsString::CreateNewEmptyString();
+    if (UNLIKELY(message == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return;
+    }
+    errHandle->SetMessage(coroutine, message);
+
+    auto *stackLines =
+        EtsTypedObjectArray<EtsStackTraceElement>::Create(PlatformTypes(coroutine)->coreStackTraceElement, 0U);
+    if (UNLIKELY(stackLines == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return;
+    }
+    errHandle->SetStackLines(coroutine, stackLines);
+
     coroutine->SetException(exc.GetPtr()->GetCoreType());
 }
 
