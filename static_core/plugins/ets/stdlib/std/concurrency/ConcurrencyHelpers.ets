@@ -59,7 +59,9 @@ class NativeAsyncWorkHelper {
         NativeAsyncWorkHelper.queueInternal(executeCb, completeCb, data);
     }
     static async queueInternal(executeCb: long, completeCb: long, data: long) {
-        let p = launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal, executeCb, data, true);
+        let p = launch() {
+           NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
+        }
         p.Await();
         NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal(completeCb, data, true);
     }
@@ -78,10 +80,14 @@ class NativeAsyncWorkHelper {
         };
         if (timeout > 0) {
             setTimeout(() => {
-                launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.eventNativeInvokeInternal, launchParams, executeCb, data, true);
+                launch(launchParams) {
+                    NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
+                };
             }, timeout.toInt());
         } else {
-            launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.eventNativeInvokeInternal, launchParams, executeCb, data, true);
+            launch(launchParams) {
+                NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
+            };
         }
     }
     static eventNativeInvokeInternal(nativeCb: long, data: long, needNativeScope: boolean) {

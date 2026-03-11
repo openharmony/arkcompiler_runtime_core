@@ -37,7 +37,10 @@ function main(): int {
         let jobs = new Array<Job<void>>(100);
         pressureFlag = 0;
         for (let i: int = 0; i < 100; i++) {
-            jobs[i] = launch<void, (i: number) => void>(removeForPressure, pressureFlag);
+            let localPressureFlag = pressureFlag;
+            jobs[i] = launch() {
+                removeForPressure(localPressureFlag)
+            }
             pressureFlag += 1;
         }
         for (let i: int = 0; i < 100; i++) {

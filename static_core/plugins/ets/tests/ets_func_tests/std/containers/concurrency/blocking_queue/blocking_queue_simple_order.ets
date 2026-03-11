@@ -19,7 +19,7 @@ type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
 function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
-	arr.push(launch <T, ()=>T>(func));
+	arr.push(launch(func));
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
@@ -58,8 +58,8 @@ function testOrderPopAndPushF(queue: BlockingQueueI) {
 		arktest.assertEQ(queue.pop(), i);
 	};
 	awaitAll([
-		launch<void, ()=>void>(pushF),
-		launch<void, ()=>void>(popF)
+		launch(pushF),
+		launch(popF)
 	]);
 
 	arktest.assertTrue(queue.isEmpty());
@@ -79,8 +79,8 @@ function testOrderAddAndPollF(queue: BlockingQueueI) {
 		}
 	}
 	awaitAll([
-		launch<void, ()=>void>(addF),
-		launch<void, ()=>void>(pollF),
+		launch(addF),
+		launch(pollF),
 	]);
 }
 

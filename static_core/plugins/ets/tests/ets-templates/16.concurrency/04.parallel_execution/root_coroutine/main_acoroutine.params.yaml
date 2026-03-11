@@ -23,9 +23,7 @@ cases:
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
       };
       
-      let job: Job<boolean> = launch<boolean, () => boolean>(() => {
-          return CoroutineExtras.isMainWorker();
-      }, params);
+      let job: Job<boolean> = launch<boolean>(params, CoroutineExtras.isMainWorker);
 
       arktest.assertTrue(job.Await())
 

@@ -281,7 +281,7 @@ export class EAWorker {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [MAIN_WORKER_ID]),
             abortFlag: abort
         };
-        return launch<R, () => R>(wrappedTask, lParams);
+        return launch(lParams, wrappedTask)
     }
 
     /**
@@ -393,7 +393,7 @@ export abstract class InternalWorker {
 
     protected runImpl<R>(task: () => R): Job<R> {
         let wGroup: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [this.workerId])};
-        return launch<R, () => R>(this.wrapTask<R>(task), wGroup);
+        return launch(wGroup, this.wrapTask<R>(task))
     }
 
     /**

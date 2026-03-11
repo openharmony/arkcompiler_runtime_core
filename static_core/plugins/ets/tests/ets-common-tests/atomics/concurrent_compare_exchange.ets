@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,14 +30,18 @@ function testMain() {
     arr_2 = new Int32Array(buf_2, 0, 1);
 
     for (let i = 0; i < 5; i++) {
-        launch<Int, (i: byte) => Int>(workerI8, i.toByte())
+        launch<Int>() {
+            return workerI8(i.toByte())
+        }
     }
     while (Atomics.load(arr, 0) != 5) {
     }
     L.log('Finished for Int8Array')
 
     for (let i = 0; i < 5; i++) {
-        launch<Int, (i: int) => Int>(workerI32, i as int)
+        launch<Int>() {
+            return workerI32(i as int)
+        }
     }
     while (Atomics.load(arr_2, 0) != 5) {
     }

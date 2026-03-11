@@ -176,7 +176,7 @@ cases:
 
     - decl: |-
           async function foo(): Promise<int[]> {
-              return launch<int[], () => int[]>((): int[] => [1, 2, 3]).Await()
+              return launch<int[]>() { return [1, 2, 3]}.Await()
           }
       use: |-
           // Promise of array
@@ -233,7 +233,9 @@ cases:
 
     - decl: |-
           async function foo(p: int): Promise<[Boolean, Error]> {
-              return launch<[Boolean, Error], (x: int) => [Boolean, Error]>((x: int): [Boolean, Error] => [x > 0, new Error()], p).Await()
+              return launch<[Boolean, Error]>() {
+              return [p > 0, new Error()]
+            }.Await()
           }
       use: |-
           // Promise of tuple
@@ -384,7 +386,8 @@ cases:
               return p
           }
           async function foo<T>(p: T): Promise<T> {
-              return launch<T, (t: T) => T>(bar<T>, p).Await();
+            return launch<T>() {
+              return bar(p)}.Await();
           }
 
           class A<T> {

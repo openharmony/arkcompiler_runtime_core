@@ -48,9 +48,9 @@ function doInWorker(func: () => void): Job<void> {
     let params = new LaunchParams();
     params.workerGroupId = WorkerGroup.generateGroupId(WorkerDomain.GENERAL);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    let job = launch<void, ()=>void>(() => {
+    let job = launch(params) {
         func();
-    }, params);
+    };
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     return job;
 }

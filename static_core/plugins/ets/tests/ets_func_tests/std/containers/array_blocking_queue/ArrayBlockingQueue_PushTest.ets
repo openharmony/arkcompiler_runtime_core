@@ -47,7 +47,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestInt", () =>
     {
-        let p1 = launch<void, () => void>(pusherInt);
+        let p1 = launch(pusherInt);
         let arrayToCheck = popperInt();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(testArrayInt[i], arrayToCheck[i]);
@@ -57,7 +57,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestObj", () =>
     {
-        let p1 = launch<void, () => void>(pusherObj);
+        let p1 = launch(pusherObj);
         let arrayToCheck = popperObj();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(testArrayObj[i], arrayToCheck[i]);
@@ -67,7 +67,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
-        let p1 = launch<void, () => void>(pusherStr);
+        let p1 = launch(pusherStr);
         let arrayToCheck = popperStr();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);

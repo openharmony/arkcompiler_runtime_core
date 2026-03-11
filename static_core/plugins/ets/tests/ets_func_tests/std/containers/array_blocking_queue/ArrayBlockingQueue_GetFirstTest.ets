@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,7 +123,7 @@ function main(): int {
             let el = queueInt.getFirst();
             arktest.assertEQ(el, queueInt.pop());
         }
-        let p1 = launch<void, () => void>(queueIntGetFirstdata);
+        let p1 = launch(queueIntGetFirstdata);
         let frontNum: int = 10;
         queueInt.push(frontNum);
         p1.Await();
@@ -143,7 +143,7 @@ function main(): int {
             arktest.assertEQ(el, queueInt.pop());
         }
         arktest.assertEQ(queueInt.size, 0);
-        let p1 = launch<void, () => void>(queueIntGetFirstdata);
+        let p1 = launch(queueIntGetFirstdata);
         let frontNum: int = 10;
         queueInt.push(frontNum);
         p1.Await();
@@ -154,11 +154,11 @@ function main(): int {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
-        let p1 = launch<void, () => void>(queueIntGetFirstF1data);
+        let p1 = launch(queueIntGetFirstF1data);
         queueInt.push(10);
         queueInt.push(20);
         p1.Await();
-        let p2 = launch<void, () => void>(queueIntGetEndB1data);
+        let p2 = launch(queueIntGetEndB1data);
         p2.Await();
         arktest.assertEQ(queueInt.size, 2);
     });
@@ -170,9 +170,9 @@ function main(): int {
             queueInt.pop();
         }
         arktest.assertTrue(queueInt.isEmpty());
-        let p1 = launch<void, () => void>(queueIntAddTwodata);
-        let p2 = launch<void, () => void>(queueIntGetFirstF1data);
-        let p3 = launch<void, () => void>(queueIntGetFirstF2data);
+        let p1 = launch(queueIntAddTwodata);
+        let p2 = launch(queueIntGetFirstF1data);
+        let p3 = launch(queueIntGetFirstF2data);
         p1.Await();
         p2.Await();
         p3.Await();
@@ -187,10 +187,10 @@ function main(): int {
         }
         queueInt.push(10);
         queueInt.push(30);
-        let p1 = launch<void, () => void>(queueIntGetFirstdata);
+        let p1 = launch(queueIntGetFirstdata);
         queueInt.push(20);
         p1.Await();
-        let p2 = launch<void, () => void>(queueIntGetFirstdata);
+        let p2 = launch(queueIntGetFirstdata);
         p2.Await();
         arktest.assertEQ(queueInt.getFirst(), 10);
     });

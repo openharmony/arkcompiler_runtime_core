@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,7 +232,9 @@ function setTimeoutWithFuncAndDifferentDelay() {
 
 function clearTimeoutFromAnotherWorkerTest() {
     let id = setTimeout(() => { arktest.assertTrue(false); }, longTimeout);
-    launch<void, (i: int) => void>(clearTimeout, id);
+    launch() {
+        clearTimeout(id)
+    };
 }
 
 function compareTwoStringArrays(array1: string[] , array2: string[]): boolean {
@@ -280,27 +282,27 @@ function sameWorkerIdTest() {
 }
 
 function testSetTimeoutLaunch() {
-    launch<void, () => void>(setTimeoutTest);
+    launch(setTimeoutTest);
 }
 
 function testClearTimeoutLaunch() {
-    launch<void, () => void>(clearTimeoutTest);
+    launch(clearTimeoutTest);
 }
 
 function testClearIntervalFromCbLaunch() {
-    launch<void, () => void>(clearIntervalTestFromCallback);
+    launch(clearIntervalTestFromCallback);
 }
 
 function testClearIntervalFromTimerLaunch() {
-    launch<void, () => void>(clearIntervalFromAnotherTimer);
+    launch(clearIntervalFromAnotherTimer);
 }
 
 function testCearTimeoutFromWorkerLaunch() {
-    launch<void, () => void>(clearTimeoutFromAnotherWorkerTest);
+    launch(clearTimeoutFromAnotherWorkerTest);
 }
 
 function testSameWorkerIdTestLaunch() {
-    launch<void, () => void>(sameWorkerIdTest);
+    launch(sameWorkerIdTest);
 }
 
 function main(): int {

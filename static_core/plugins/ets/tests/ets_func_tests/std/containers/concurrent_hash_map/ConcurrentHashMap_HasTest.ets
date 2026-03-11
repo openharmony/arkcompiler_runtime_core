@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,8 +65,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(hasAll);
-        let p2 = launch<void, () => void>(hasAll);
+        let p1 = launch(hasAll);
+        let p2 = launch(hasAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(Atomics.load(flag, 0) >= 10);
@@ -77,8 +77,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(hasAll);
-        let p2 = launch<void, () => void>(deleteAllBack);
+        let p1 = launch(hasAll);
+        let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
         arktest.assertTrue(Atomics.load(flag, 0) >= 10);
@@ -89,8 +89,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(hasAll);
-        let p2 = launch<void, () => void>(replaceAll);
+        let p1 = launch(hasAll);
+        let p2 = launch(replaceAll);
         p1.Await();
         p2.Await();
         arktest.assertEQ(Atomics.load(flag, 0), 10);
@@ -105,8 +105,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(hasAll);
-        let p2 = launch<void, () => void>(isEmptyFun);
+        let p1 = launch(hasAll);
+        let p2 = launch(isEmptyFun);
         p1.Await();
         p2.Await();
         arktest.assertEQ(Atomics.load(flag, 0), 10);
@@ -117,8 +117,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(hasAll);
-        let p2 = launch<void, () => void>(clearAll);
+        let p1 = launch(hasAll);
+        let p2 = launch(clearAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(Atomics.load(flag, 0) >= 0);
@@ -129,8 +129,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(hasAll);
-        let p2 = launch<void, () => void>(removeAllBack);
+        let p1 = launch(hasAll);
+        let p2 = launch(removeAllBack);
         p1.Await();
         p2.Await();
         arktest.assertTrue(Atomics.load(flag, 0) >= 0);

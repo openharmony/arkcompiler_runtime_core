@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,17 +56,18 @@ class C {
  */
 function testLaunchLambdas(): void {
     // Launch l0 function with no arguments
-    const l0Result = launch<string, () => string>(l0).Await();
+    const l0Result = launch(l0).Await();
     
     // Launch l1 function with one string argument 'l1_arg_0'
-    const l1Result = launch<string, (a0: string) => string>(l1, 'l1_arg_0').Await();
+    const l1Result = launch<string>() {
+        return l1('l1_arg_0')
+    }.Await();
 
     // Launch l2 function with three arguments: string, number, and a custom object
-    const l2ResultJob: Job<string> = launch<
-        string,
-        (a0: string, a1: number, a2: MyPayload) => string
-    >(l2, 'l2_arg_0', 2.73, new MyPayload(3.14));
-    
+    const l2ResultJob: Job<string> = launch<string>() {
+        return l2('l2_arg_0', 2.73, new MyPayload(3.14))
+    };
+
     const l2Result = l2ResultJob.Await();
 
     // Assert that the results match the expected values
@@ -81,19 +82,20 @@ function testLaunchLambdas(): void {
  */
 function testLaunchFunctions(): void {
     // Launch f0 function with no arguments
-    const f0ResultJob: Job<string> = launch<string, () => string>(f0);
+    const f0ResultJob: Job<string> = launch(f0);
     const f0Result = f0ResultJob.Await();
 
     // Launch f1 function with one string argument 'f1_arg_0'
-    const f1ResultJob: Job<string> = launch<string, (a0: string) => string>(f1, 'f1_arg_0');
+    const f1ResultJob: Job<string> = launch<string>() {
+        return f1('f1_arg_0')
+    };
     const f1Result = f1ResultJob.Await();
 
     // Launch f2 function with three arguments: string, number, and a custom object
-    const f2ResultJob: Job<string> = launch<
-        string,
-        (a0: string, a1: number, a2: MyPayload) => string
-    >(f2, 'f2_arg_0', 2.73, new MyPayload(3.14));
-    
+    const f2ResultJob: Job<string> = launch<string>() {
+        return f2('f2_arg_0', 2.73, new MyPayload(3.14))
+    };
+
     const f2Result = f2ResultJob.Await();
 
     // Assert that the results match the expected values
@@ -108,17 +110,18 @@ function testLaunchFunctions(): void {
  */
 function testLaunchStatic(): void {
     // Launch C.s0 static method with no arguments
-    const s0Result = launch<string, () => string>(C.s0).Await();
+    const s0Result = launch(C.s0).Await();
 
     // Launch C.s1 static method with one string argument 'C.s1_arg_0'
-    const s1Result = launch<string, (a0: string) => string>(C.s1, 'C.s1_arg_0').Await();
+    const s1Result = launch<string>() {
+        return C.s1('C.s1_arg_0')
+    }.Await();
 
     // Launch C.s2 static method with three arguments: string, number, and a custom object
-    const s2ResultJob: Job<string> = launch<
-        string,
-        (a0: string, a1: number, a2: MyPayload) => string
-    >(C.s2, 'C.s2_arg_0', 2.73, new MyPayload(3.14));
-    
+    const s2ResultJob: Job<string> = launch<string>() {
+        return C.s2('C.s2_arg_0', 2.73, new MyPayload(3.14))
+    };
+
     const s2Result = s2ResultJob.Await();
 
     // Assert that the results match the expected values

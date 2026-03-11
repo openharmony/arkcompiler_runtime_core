@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ function compare_worker_ids(): int {
     L.log('Testing launch in a separate worker');
 
     let id_main: int = CoroutineExtras.getWorkerId();
-    let id_coro: int = (launch<Int, () => Int>(return_worker_id).Await()) as int;
+    let id_coro: int = (launch(return_worker_id).Await()) as int;
     if (id_main != id_coro) {
         L.log('Successfully ran coro in a separate worker. Main WID: ' + id_main + ', Coro WID: ' + id_coro);
         return 0;
@@ -77,21 +77,27 @@ function job(n: int): NullableType {
 function run_batch_launch(batch_size: int, iters: int): int {
     L.log('Testing batch launch of ' + batch_size + ' coroutines');
     for (let i = 0; i < batch_size; ++i) {
-        launch<NullableType, (i: int) => NullableType>(job, iters);
+        launch<NullableType>() {
+            return job(iters)
+        };
     }
     return 0;
 }
 
 function await_chain(n: int): NullableType {
     if (n > 0) {
-        launch<NullableType, (i: int) => NullableType>(await_chain, n-1).Await();
+        launch<NullableType>() {
+            return await_chain(n-1)
+        }.Await();
     }
     return null;
 }
 
 function run_await_chain(len: int): int {
     L.log('Testing await chain of ' + len + ' items');
-    launch<NullableType, (i: int) => NullableType>(await_chain, len);
+    launch<NullableType>() {
+        return await_chain(len)
+    };
     return 0;
 }
 
@@ -102,7 +108,7 @@ function simple(): NullableType {
 function run_batch_await(batch_size: int): int {
     L.log('Testing batch await of ' + batch_size + ' coroutines');
     for (let i = 0; i < batch_size; ++i) {
-        let j = launch<NullableType, () => NullableType>(simple);
+        let j = launch(simple);
         j.Await();
     }
     return 0;

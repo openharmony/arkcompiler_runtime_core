@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,9 @@ function returnValue(i: int): String {
 function launchCoroutines(n_cor: int): int {
     let p: (Job<String> | undefined)[] = new (Job<String> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch<String, (i: int) => String>(returnValue, i);
+        p[i] = launch<String>() {
+            return returnValue(i)
+        };
     }
     for (let i = 0; i < n_cor; ++i) {
         let val = (p[i]!).Await();
@@ -44,7 +46,7 @@ function throwError(): Object {
 function launchCoroutinesWithError(n_cor: int): int { 
     let p: (Job<Object> | undefined)[] = new (Job<Object> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch<Object, () => Object>(throwError);
+        p[i] = launch(throwError);
     }
     for (let i = 0; i < n_cor; ++i) {
         try {

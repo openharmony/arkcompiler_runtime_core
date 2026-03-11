@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,12 +46,16 @@ function verifyWorkerId(domain: WorkerDomain, hint: Array<WorkerId>, expected: A
     workerGroupAssertNe(params.workerGroupId, WorkerGroup.INVALID_ID);
     if (mayThrow) {
         try {
-            launch<void, (expected: Array<WorkerId>) => void>(verifyWorkerIdCallback, params, expected).Await();
+            launch(params){
+                verifyWorkerIdCallback(expected)
+            }.Await();
         } catch (e) {
             arktest.assertEQ((e as Error).message, 'Unable to launch coroutine: no suitable worker was found');
         }
     } else {
-        launch<void, (expected: Array<WorkerId>) => void>(verifyWorkerIdCallback, params, expected).Await();
+        launch(params) {
+            verifyWorkerIdCallback(expected)
+        }.Await();
     }
 }
 
@@ -68,7 +72,7 @@ function testGeneralDomain() {
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         const params: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)};
         workerGroupAssertNe(params.workerGroupId, WorkerGroup.INVALID_ID);
-        launch<void, () => void>((): void => { generalWorkerIds.add(getWorkerId()); }, params).Await();
+        launch(params) { generalWorkerIds.add(getWorkerId()); }.Await();
     }
     arktest.assertFalse(generalWorkerIds.has(mainId));
     const generalWorkerIdsArr = Array.from<WorkerId>(generalWorkerIds);
@@ -96,9 +100,9 @@ function testGeneralDomain() {
     let jobs = Array<Job<void>>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test(false);
-        launch<void, () => void>((): void => { test(false); }).Await();
+        launch() { test(false); }.Await();
         ea.run<void>(() => { test(false); }).Await();
-        jobs.push(launch<void, () => void>((): void => { test(true); }));
+        jobs.push(launch() { test(true); });
         jobs.push(ea.run<void>(() => { test(true); }));
     }
 
@@ -119,7 +123,7 @@ function testExactIdDomain() {
     const mainId = getWorkerId();
     workerIds.add(mainId);
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-        launch<void, () => void>((): void => { workerIds.add(getWorkerId()); }).Await();
+        launch() { workerIds.add(getWorkerId()); }.Await();
     }
     const workerIdsArr = Array.from<WorkerId>(workerIds);
 
@@ -134,9 +138,9 @@ function testExactIdDomain() {
     let jobs = Array<Job<void>>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test(false);
-        launch<void, () => void>((): void => { test(false); }).Await();
+        launch() { test(false); }.Await();
         ea.run<void>(() => { test(false); }).Await();
-        jobs.push(launch<void, () => void>((): void => { test(true); }));
+        jobs.push(launch() { test(true); });
         jobs.push(ea.run<void>(() => { test(true); }));
     }
 
@@ -165,9 +169,9 @@ function testMainDomain() {
     let jobs = Array<Job<void>>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test(false);
-        launch<void, () => void>((): void => { test(false); }).Await();
+        launch(){ test(false); }.Await();
         ea.run<void>(() => { test(false); }).Await();
-        jobs.push(launch<void, () => void>((): void => { test(true); }));
+        jobs.push(launch() { test(true); });
         jobs.push(ea.run<void>(() => { test(true); }));
     }
 
@@ -205,7 +209,7 @@ function testEADomain() {
     // NOTE: await all jobs so eaworkers won't be destroyed before generateGroupId + launch
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test(false);
-        launch<void, () => void>((): void => { test(false); }).Await();
+        launch() { test(false); }.Await();
         ea1.run<void>(() => { test(false); }).Await();
         ea2.run<void>(() => { test(false); }).Await();
     }
@@ -216,7 +220,7 @@ function testEADomain() {
 
 function testInvalidGroupId() {
     const params: LaunchParams = {workerGroupId: WorkerGroup.INVALID_ID};
-    arktest.expectThrow(() => { launch<void, () => void>((): void => {}, params).Await(); }, (e: Error) => {
+    arktest.expectThrow(() => { launch(params) {}.Await(); }, (e: Error) => {
         return (e as Error).message === 'Cannot launch with invalid group id!';
     });
 }

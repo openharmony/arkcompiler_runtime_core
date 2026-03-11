@@ -37,7 +37,7 @@ cases:
       const params: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
-      let job: Job<int> = launch<int, () => int>(CoroutineExtras.getWorkerId, params);
+      let job: Job<int> = launch<int>(params, CoroutineExtras.getWorkerId);
       const launchedWorkerId = job.Await();
       
       arktest.assertEQ(launchedWorkerId, eaWorkerId, "Launched worker id is not EA");

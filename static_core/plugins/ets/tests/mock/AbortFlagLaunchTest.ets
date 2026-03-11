@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ function SetTimeoutTest(): void {
 function AbortTest(): void {
     const params: LaunchParams = {abortFlag: true,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
     try {
-        let j = launch<int, () => int>(Failing, params);
+        let j = launch(params, Failing);
         j.Await();
     } catch (e) {
     }
@@ -33,7 +33,7 @@ function AbortTest(): void {
 function NoAbortTest(): void {
     const params: LaunchParams = {abortFlag: false,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
     try {
-        let j = launch<int, () => int>(Failing, params);
+        let j = launch(params, Failing);
         j.Await();
     } catch (e) {
     }

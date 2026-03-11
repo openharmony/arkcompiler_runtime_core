@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ async function foo() {
 async function bar() {
     executionOrder.checkpoint(2);
     let emptyBody = () => { return 0; };
-    promiseIsPending ? launch<Int, () => Int>(emptyBody).Await()
+    promiseIsPending ? launch(emptyBody).Await()
                      : await Promise.resolve(0);
     executionOrder.checkpoint(5);
 }

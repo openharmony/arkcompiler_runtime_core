@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,9 @@ function loadThisWorker(wId: int) {
     };
     const WORKLOAD = 5;
     for (let i = 0; i < WORKLOAD; i++) {
-        launch<void, (wId: int) => void>(task, wGroup, wId);
+        launch(wGroup) {
+            return task(wId)
+        };
     }
 }
 
@@ -60,7 +62,7 @@ function testLaunch(): void {
 }
 
 function checkLaunchMigration(): void {
-    launch<void, () => void>(testLaunch).Await();
+    launch(testLaunch).Await();
 }
 
 function testAwaitMigration(): void {

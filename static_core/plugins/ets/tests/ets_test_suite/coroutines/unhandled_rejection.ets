@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ let callWaitAll: boolean = true;
 function JobHandler(reason: Error, obj: Object): void {
     if (callWaitAll) {
         callWaitAll = false;
-        launch<void, () => void>(WaitAll);
+        launch(WaitAll);
     }
     // should be no-throw
     asynclock.lockAsync((): void => {
@@ -79,8 +79,8 @@ function testUnhandledRejection(): void {
         PromiseHandler(reason, obj);
     });
 
-    let g = launch<string, () => string>(Failing);
-    launch<Promise<string>, () => Promise<string>>(AsyncFailing);
+    let g = launch(Failing);
+    launch(AsyncFailing);
     AsyncFailing();
     let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {

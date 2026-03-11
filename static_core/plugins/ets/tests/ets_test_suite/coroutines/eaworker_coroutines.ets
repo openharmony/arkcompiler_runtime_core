@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ async function throwAsyncError(): Promise<void> {
 }
 
 function testFooLaunch(): number {
-    let job : Job<number> = launch<number, ()=>number>(foo);
+    let job : Job<number> = launch(foo);
     let result = job.Await();
 
     return result;
@@ -56,19 +56,21 @@ function testFooLaunch(): number {
 
 function testAddSchedule(): void {
     clearCounter();
-    let job: Job<void> = launch<void, (num: int)=>void>(add, INCREMENT);
+    let job: Job<void> = launch() {
+        add(INCREMENT)
+    }
 
     Coroutine.Schedule();
 }
 
 function recursiveFoo(): Job<number> {
-    let job: Job<number> = launch<number, ()=>number>(testFooLaunch);
+    let job: Job<number> = launch(testFooLaunch);
 
     return job;
 }  
 
 function testRecursiveLaunch(): number {
-    let job: Job<Job<number>> = launch<Job<number>, ()=>Job<number>>(recursiveFoo);
+    let job: Job<Job<number>> = launch(recursiveFoo);
     let result = job.Await().Await();
 
     return result;
@@ -76,7 +78,7 @@ function testRecursiveLaunch(): number {
 
 function testLaunchThrow(): boolean {
     try {
-        let job: Job<void> = launch<void, ()=>void>(throwLaunchError);
+        let job: Job<void> = launch(throwLaunchError);
         job.Await();
     } catch (e) {
         return e instanceof Error;
@@ -168,7 +170,7 @@ function testACoroutineCallAJCoroutine(): void {
     ew.start();
     let job1 = ew.run<number>(() => {
         return waitForCompletion<number>(async (): Promise<number> => {
-            let job2: Job<Promise<number>> = launch<Promise<number>, ()=>Promise<number>>(fooAsync)
+            let job2: Job<Promise<number>> = launch(fooAsync)
             let p = job2.Await();
             let result = await p;
             return result;
@@ -179,7 +181,7 @@ function testACoroutineCallAJCoroutine(): void {
 }
 
 async function AsyncCallLaunch(): Promise<Job<number>> {
-    let job: Job<number> = launch<number, ()=>number>(foo);
+    let job: Job<number> = launch(foo);
 
     return job;
 }

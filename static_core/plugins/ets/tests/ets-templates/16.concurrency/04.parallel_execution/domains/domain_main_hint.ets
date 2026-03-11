@@ -45,7 +45,7 @@ function main(): void {
     };
 
     // Launch coroutine and verify it runs on main worker
-    let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+    let job: Job<int> = launch<int>(params, getWorkerId);
     const launchedWorkerId: int = job.Await();
 
     arktest.assertEQ(launchedWorkerId, mainWorkerId, 

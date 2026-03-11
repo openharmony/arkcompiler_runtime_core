@@ -94,10 +94,10 @@ cases:
               }
           )
 
-          const resultFromOtherCoroutine: string = launch<string, () => string>((): string => {
+          const resultFromOtherCoroutine: string = launch<string>() {
               const promiseResult: string = await sharedPromise
               return promiseResult + '_PROCESSED'
-          }).Await()
+          }.Await()
 
           arktest.assertTrue(resultFromOtherCoroutine == 'COROUTINE_SAFE_PROCESSED')          
 
@@ -118,13 +118,13 @@ cases:
           const originalResult: string = await sharedPromise
           arktest.assertTrue(originalResult == 'BOTH_COROUTINES_SAFE')
 
-          const resultFromOtherCoroutine: string = launch<string, () => string>((): string => {
+          const resultFromOtherCoroutine: string = launch<string>() {
               const processedPromise: Promise<string> = sharedPromise.then<string>((value: string): string => {
                   return value + '_WITH_THEN'
               })
               const promiseResult: string = await processedPromise
               return promiseResult
-          }).Await()
+          }.Await()
 
           arktest.assertTrue(resultFromOtherCoroutine == 'BOTH_COROUTINES_SAFE_WITH_THEN')          
 
@@ -148,7 +148,7 @@ cases:
 
           const waitForOriginal: Promise<void> = originalPromise.then(() => {})
 
-          const resultFromOtherCoroutine: string = launch<string, () => string>((): string => {              
+          const resultFromOtherCoroutine: string = launch<string>() {
               await waitForOriginal
                             
               const otherPromise: Promise<string> = sharedPromise.then<string>((value: string): string => {
@@ -157,7 +157,7 @@ cases:
               
               const promiseResult: string = await otherPromise
               return promiseResult
-          }).Await()
+          }.Await()
 
           const originalResult: string = await originalPromise
           

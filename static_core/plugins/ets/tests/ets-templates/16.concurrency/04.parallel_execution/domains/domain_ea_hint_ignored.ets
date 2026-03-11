@@ -53,7 +53,7 @@ function main(): void {
         workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, hint)
     };
 
-    let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+    let job: Job<int> = launch<int>(params, getWorkerId);
     const launchedWorkerId: int = job.Await();
 
     // Verify coroutine executed on EA worker

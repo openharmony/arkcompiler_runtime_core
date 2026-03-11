@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -353,7 +353,7 @@ function testSetIntervalWithString(isExternalTimer: boolean): void {
             clearInterval(id1);
             clearInterval(id2);
             globalTest!.setPassed();
-        } 
+        }
         checkpoint ++ ;
     }, delay)
     globalTest!.checkpoint(1);
@@ -378,7 +378,7 @@ function testClearTimerCrossWorker(isExternalTimer: boolean)
             setTimeout(() => { while (!isCleared.get()) {} }, 0);
             return setTimeout(() => { arktest.assertTrue(false); }, delay);
         };
-        let id = launch<int, () => int>(workerTimerCb).Await();
+        let id = launch(workerTimerCb).Await();
         clearTimeout(id);
         isCleared.set(true);
     }
@@ -389,10 +389,10 @@ function testClearTimerCrossWorker(isExternalTimer: boolean)
         let errorThrown = false;
         let id = setTimeout(() => { arktest.assertTrue(isCleared.get()); }, delay);
         try {
-            launch<void, () => void>((): void => {
+            launch() {
                 isCleared.set(true);
                 clearTimeout(id);
-            }).Await();
+            }.Await();
         } catch (e) {
             arktest.assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
             errorThrown = true;

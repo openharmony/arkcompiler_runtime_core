@@ -16,7 +16,7 @@
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
 function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
-	arr.push(launch <T, ()=>T>(func));
+	arr.push(launch(func));
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
@@ -92,7 +92,7 @@ function testConcurrentGetAndSet2() {
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(getJobs, getF);
 	}
-	launch<void, ()=>void>(setF).Await();
+	launch(setF).Await();
 	awaitAll(getJobs);
 }
 

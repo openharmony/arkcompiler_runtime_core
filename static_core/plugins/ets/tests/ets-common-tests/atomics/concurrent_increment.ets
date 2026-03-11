@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,12 +28,12 @@ function testMain() {
     arr_u32 = new Int32Array(buf_2, 0, 1);
     arr_u32[0] = N
 
-    launch<Int, () => Int>(incrementer)
+    launch(incrementer)
     while (Atomics.load(arr, 0) != RESULT) {
         wait()
     }
 
-    launch<Int, () => Int>(decrementer)
+    launch(decrementer)
     while (Atomics.load(arr_u32, 0) != 0) {
         wait()
     }

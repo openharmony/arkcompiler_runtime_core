@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -19,32 +19,28 @@ let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
 function testMain() {
-    let consumerJob = launch<Int, () => Int>(consumer)
+    let consumerJob = launch(consumer)
     heavyComputation()
-    let producerJob = launch<Int, () => Int>(producer)
+    let producerJob = launch(producer)
 
     producerJob.Await();
     consumerJob.Await();
 }
 
 function producer(): Int {
-    let c = Console.getInstance() // workaround, issue: #12996
-    
     for (let i = 1; i < 10; i++) {
-        c.println('sending ' + i)
+        console.log('sending ' + i)
         send(i)
-        c.println("sent " + i)
+        console.log("sent " + i)
     }
     return 1
 }
 
 function consumer(): Int {
-    let c = Console.getInstance() // workaround, issue: #12996 
-
     for (let i = 1; i < 10; i++) {
-        c.println('receiving')
+        console.log('receiving')
         let x = read()
-        c.println('received ' + x)
+        console.log('received ' + x)
         arktest.assertEQ(x, i)
     }
     return 1

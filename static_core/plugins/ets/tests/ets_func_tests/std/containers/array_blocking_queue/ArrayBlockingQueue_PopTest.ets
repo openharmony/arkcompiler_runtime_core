@@ -28,7 +28,7 @@ function main(): int {
 
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
-        let p1 = launch<void, () => void>(pusherStr);
+        let p1 = launch(pusherStr);
         let arrayToCheck = popperStr();
         p1.Await();
         for (let i = 0; i < elementsNum; i++) {
@@ -61,14 +61,16 @@ function main(): int {
             let el = queueIntPop2.getFirst();
             arktest.assertEQ(el, queueIntPop2.pop());
         }
-        let p1 = launch<void, (queueIntPop2: containers.ArrayBlockingQueue<int>) => void>(ArrayBlockingQueuePop, queueIntPop2);
+        let p1 = launch() {
+            ArrayBlockingQueuePop(queueIntPop2)
+        };
         let i = queueIntPop2.pop();
         p1.Await();
         arktest.assertEQ(i, 10);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt003", () =>
     {
-        let p1 = launch<void, () => void>(queueIntPopNdata);
+        let p1 = launch(queueIntPopNdata);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPopN.push(i);
         }
@@ -98,7 +100,7 @@ function main(): int {
         }
         let jobs = new Array<Job<void>>(100);
         for (let i: int = 0; i < elementsNum; ++i) {
-           jobs[i] = launch<void, () => void>(queueIntPopdata); 
+           jobs[i] = launch(queueIntPopdata);
         }
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPopN.push(i);
@@ -116,8 +118,8 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.push(i);
         }
-        let p1 = launch<void, () => void>(queueIntFrontF1data);
-        let p2 = launch<void, () => void>(queueIntPopFdata);
+        let p1 = launch(queueIntFrontF1data);
+        let p2 = launch(queueIntPopFdata);
         p1.Await();
         p2.Await();
         arktest.assertEQ(queueInt.size, elementsNum - 1);

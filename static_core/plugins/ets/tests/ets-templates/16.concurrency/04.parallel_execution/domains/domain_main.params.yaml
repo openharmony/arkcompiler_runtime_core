@@ -27,7 +27,7 @@ cases:
       };
 
       // Launch a coroutine in MAIN domain and get the worker ID it runs on
-      let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+      let job: Job<int> = launch<int>(params, getWorkerId);
       const launchedWorkerId: int = job.Await();
 
       // Verify that the coroutine ran on the main worker
@@ -46,7 +46,7 @@ cases:
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          let job: Job<int> = launch<int, () => int>(getWorkerId, mainParams);
+          let job: Job<int> = launch<int>(mainParams, getWorkerId);
           return job.Await();
       }
     logic: |-
@@ -60,7 +60,7 @@ cases:
       };
 
       // From General worker, launch to MAIN domain and get the worker ID
-      let job: Job<int> = launch<int, () => int>(launchToMainAndGetWorkerId, generalParams);
+      let job: Job<int> = launch<int>(generalParams, launchToMainAndGetWorkerId);
       const resultWorkerId: int = job.Await();
 
       // Verify that the inner coroutine (launched to MAIN from General) ran on main worker
@@ -77,7 +77,7 @@ cases:
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          let job: Job<int> = launch<int, () => int>(getWorkerId, mainParams);
+          let job: Job<int> = launch<int>(mainParams, getWorkerId);
           return job.Await();
       }
     logic: |-

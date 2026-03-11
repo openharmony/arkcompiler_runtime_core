@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,8 +62,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         arktest.assertFalse(concurrentHashMapOne.isEmpty());
-        let p1 = launch<void, () => void>(isEmptyFun);
-        let p2 = launch<void, () => void>(clearAll);
+        let p1 = launch(isEmptyFun);
+        let p2 = launch(clearAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -75,8 +75,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         arktest.assertFalse(concurrentHashMapOne.isEmpty());
-        let p1 = launch<void, () => void>(isEmptyFun);
-        let p2 = launch<void, () => void>(removeAll);
+        let p1 = launch(isEmptyFun);
+        let p2 = launch(removeAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());

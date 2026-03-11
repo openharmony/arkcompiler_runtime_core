@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,9 @@ function check_sync_id_nonmain(number_of_coros: int): int {
     let promises: (Job<Int> | undefined)[] = new (Job<Int> | undefined)[number_of_coros];
 
     for (let i = 0; i < number_of_coros; ++i) {
-        promises[i] = launch<Int, (i: int) => Int>(checker, id_current);
+        promises[i] = launch<Int>() {
+            return checker(id_current)
+        }
     }
     continue_execution.set(true);
     let result: int = 0;

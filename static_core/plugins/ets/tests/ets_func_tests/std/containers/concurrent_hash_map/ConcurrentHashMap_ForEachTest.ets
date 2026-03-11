@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,8 +110,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch<void, () => void>(forEachZero);
-        let p2 = launch<void, () => void>(setAll);
+        let p1 = launch(forEachZero);
+        let p2 = launch(setAll);
         p1.Await();
         p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
@@ -123,8 +123,8 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch<void, () => void>(forEachZero);
-        let p2 = launch<void, () => void>(deleteAllBack);
+        let p1 = launch(forEachZero);
+        let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -135,8 +135,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(forEachZero);
-        let p2 = launch<void, () => void>(getAll);
+        let p1 = launch(forEachZero);
+        let p2 = launch(getAll);
         p1.Await();
         p2.Await();
         arktest.assertEQ(Atomics.load(flag, 0), 10);
@@ -147,8 +147,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(clearAll);
-        let p2 = launch<void, () => void>(forEachZero);
+        let p1 = launch(clearAll);
+        let p2 = launch(forEachZero);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -158,8 +158,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch<void, () => void>(setAll);
-        let p2 = launch<void, () => void>(forEachOne);
+        let p1 = launch(setAll);
+        let p2 = launch(forEachOne);
         p1.Await();
         p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
@@ -171,8 +171,8 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch<void, () => void>(deleteAllBack);
-        let p2 = launch<void, () => void>(forEachOne);
+        let p1 = launch(deleteAllBack);
+        let p2 = launch(forEachOne);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -184,8 +184,8 @@ function main(): int {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(getAll);
-        let p2 = launch<void, () => void>(forEachOne);
+        let p1 = launch(getAll);
+        let p2 = launch(forEachOne);
         p1.Await();
         p2.Await();
         for (let i: int = 0; i < 10; i++) {
@@ -198,8 +198,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(clearAll);
-        let p2 = launch<void, () => void>(forEachOne);
+        let p1 = launch(clearAll);
+        let p2 = launch(forEachOne);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -209,8 +209,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch<void, () => void>(setAll);
-        let p2 = launch<void, () => void>(forEachTwo);
+        let p1 = launch(setAll);
+        let p2 = launch(forEachTwo);
         p1.Await();
         p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
@@ -222,8 +222,8 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch<void, () => void>(forEachTwo);
-        let p2 = launch<void, () => void>(deleteAllBack);
+        let p1 = launch(forEachTwo);
+        let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -236,8 +236,8 @@ function main(): int {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(getAll);
-        let p2 = launch<void, () => void>(forEachTwo);
+        let p1 = launch(getAll);
+        let p2 = launch(forEachTwo);
         p1.Await();
         p2.Await();
         for (let i: int = 0; i < 10; i++) {
@@ -253,8 +253,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(clearAll);
-        let p2 = launch<void, () => void>(forEachTwo);
+        let p1 = launch(clearAll);
+        let p2 = launch(forEachTwo);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -264,8 +264,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch<void, () => void>(setAll);
-        let p2 = launch<void, () => void>(forEachThree);
+        let p1 = launch(setAll);
+        let p2 = launch(forEachThree);
         p1.Await();
         p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
@@ -277,8 +277,8 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch<void, () => void>(forEachThree);
-        let p2 = launch<void, () => void>(deleteAllBack);
+        let p1 = launch(forEachThree);
+        let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -289,8 +289,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(getAll);
-        let p2 = launch<void, () => void>(forEachThree);
+        let p1 = launch(getAll);
+        let p2 = launch(forEachThree);
         p1.Await();
         p2.Await();
         for (let i: int = 0; i < 10; i++) {
@@ -306,8 +306,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(clearAll);
-        let p2 = launch<void, () => void>(forEachThree);
+        let p1 = launch(clearAll);
+        let p2 = launch(forEachThree);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());

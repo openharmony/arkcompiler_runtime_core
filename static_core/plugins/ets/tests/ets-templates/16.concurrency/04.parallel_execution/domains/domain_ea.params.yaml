@@ -42,7 +42,7 @@ cases:
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
       
-      let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+      let job: Job<int> = launch<int>(params, getWorkerId);
       const launchedWorkerId: int = job.Await();
 
       // Verify that the coroutine ran on the EA worker
@@ -82,7 +82,7 @@ cases:
       const params1: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId1])
       };
-      let job1: Job<int> = launch<int, () => int>(getWorkerId, params1);
+      let job1: Job<int> = launch<int>(params1, getWorkerId);
       arktest.assertEQ(job1.Await(), eaWorkerId1, 
           "Coroutine with hint [eaWorkerId1] should execute on EA worker 1");
 
@@ -90,7 +90,7 @@ cases:
       const params2: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId2])
       };
-      let job2: Job<int> = launch<int, () => int>(getWorkerId, params2);
+      let job2: Job<int> = launch<int>(params2, getWorkerId);
       arktest.assertEQ(job2.Await(), eaWorkerId2, 
           "Coroutine with hint [eaWorkerId2] should execute on EA worker 2");
 
@@ -98,7 +98,7 @@ cases:
       const params3: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId1, eaWorkerId2])
       };
-      let job3: Job<int> = launch<int, () => int>(getWorkerId, params3);
+      let job3: Job<int> = launch<int>(params3, getWorkerId);
       const resultId: int = job3.Await();
       arktest.assertTrue(resultId == eaWorkerId1 || resultId == eaWorkerId2, 
           "Coroutine with hint [eaWorkerId1, eaWorkerId2] should execute on one of the EA workers");
@@ -166,7 +166,7 @@ cases:
       };
 
       for (let i = 0; i < 10; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const resultId: int = job.Await();
           
           arktest.assertTrue(validEaIds.includes(resultId),

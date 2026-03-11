@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +20,13 @@ function create_7000_coro_test() {
     let arr = new Int32Array(new ArrayBuffer(16384))
 
     let wait_func = (arr: Int32Array) => {Atomics.wait(arr, 0, 0);}
-    let mainWaitJob = launch<void, (arr: Int32Array) => void> (wait_func, arr);
+    let mainWaitJob = launch() {
+        wait_func(arr)
+    };
     let awaitIt = ()=>{ mainWaitJob.Await(); }
 
     for (let i = 1; i < coro_to_create; ++ i) {
-        launch<void, () => void> (awaitIt);
+        launch(awaitIt);
     }
 
     Atomics.store(arr, 0, 1);

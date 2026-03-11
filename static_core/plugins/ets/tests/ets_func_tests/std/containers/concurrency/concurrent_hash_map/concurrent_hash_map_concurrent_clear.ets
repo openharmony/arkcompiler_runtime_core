@@ -16,7 +16,7 @@
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
 function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
-	arr.push(launch <T, ()=>T>(func));
+	arr.push(launch(func));
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
@@ -81,7 +81,7 @@ function testConcurrentClearAndGet() {
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(getJobs, getF);
 	}
-	launch<void, ()=>void>(map.clear).Await();
+	launch(map.clear).Await();
 	awaitAll(getJobs);
 	arktest.assertTrue(map.isEmpty());
 }
@@ -107,7 +107,7 @@ function testConcurrentClearAndRemove() {
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(rmJobs, rmF);
 	}
-	launch<void, ()=>void>(map.clear).Await();
+	launch(map.clear).Await();
 	awaitAll(rmJobs);
 	arktest.assertTrue(map.isEmpty());
 }
@@ -131,7 +131,7 @@ function testConcurrentSizeAndSR1() {
 			Coroutine.Schedule();
 		}
 	}
-	let sizeJob = launch<void, ()=>void>(sizeF);
+	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);
@@ -159,7 +159,7 @@ function testConcurrentSizeAndSRI() {
 			Coroutine.Schedule();
 		}
 	}
-	let sizeJob = launch<void, ()=>void>(sizeF);
+	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);

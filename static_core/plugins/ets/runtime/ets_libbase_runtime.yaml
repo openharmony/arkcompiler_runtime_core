@@ -9987,8 +9987,7 @@ intrinsics:
     signature:
       ret: std.core.Job
       args:
-        - std.core.Object
-        - std.core.Object[]
+        - std.core.Function0
         - u1
         - i64[]
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative

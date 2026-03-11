@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ function testMain() {
     let corArrayTmp = new Array<Job<int>>>();
     setUpBarrier(N)
     for (let i = 0; i < N; i++) {
-        let job = launch<Int, () => Int>(task)
+        let job = launch(task)
         corArrayTmp.push(job);
     }
     for (let i = 0; i < N; i++) {
@@ -34,12 +34,10 @@ function testMain() {
 }
 
 function task(): Int {
-    let c = Console.getInstance() // workaround, issue: #12996 
-
     heavyComputation()
-    c.println("task completed, waiting")
+    console.log("task completed, waiting")
     wait()
-    c.println("wait completed")
+    console.log("wait completed")
     return 1
 }
 

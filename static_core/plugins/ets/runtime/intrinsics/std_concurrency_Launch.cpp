@@ -53,8 +53,8 @@ static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> fu
 
 template <typename CoroResult>
 // CC-OFFNXT(huge_method) solid logic
-ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
-                     CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::AnyId(), bool postToMain = false)
+ObjectHeader *Launch(EtsObject *func, bool abortFlag, CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::AnyId(),
+                     bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
@@ -70,16 +70,11 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
                           "Cannot launch coroutines in the current context!");
         return nullptr;
     }
-    if (arr == nullptr) {
-        ThrowNullPointerException(ctx, coro);
-        return nullptr;
-    }
     if (groupId == CoroutineWorkerGroup::InvalidId()) {
         ThrowRuntimeException("Cannot launch with invalid group id!");
         return nullptr;
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
-    VMHandle<EtsArray> array(coro, arr->GetCoreType());
     VMHandle<EtsObject> function(coro, func->GetCoreType());
     EtsMethod *method = ResolveInvokeMethod(coro, function);
     if (method == nullptr) {
@@ -100,7 +95,12 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
-    auto realArgs = PandaVector<Value> {Value(function->GetCoreType()), Value(array->GetCoreType())};
+    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    if (UNLIKELY(argArray == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+    auto realArgs = PandaVector<Value> {Value(function->GetCoreType()), Value(argArray->GetCoreType())};
 
     groupId = postToMain ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN) : groupId;
 
@@ -121,16 +121,11 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
 }
 
 extern "C" {
-EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
-{
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, CoroutineWorkerGroup::AnyId(), true));
-}
-
-EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag, EtsLongArray *groupId)
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsBoolean abortFlag, EtsLongArray *groupId)
 {
     ASSERT(groupId->GetLength() == 2U);
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U,
-                                                CoroutineWorkerGroup::FromTuple({groupId->Get(0), groupId->Get(1)})));
+    return static_cast<EtsJob *>(
+        Launch<EtsJob>(func, abortFlag != 0U, CoroutineWorkerGroup::FromTuple({groupId->Get(0), groupId->Get(1)})));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)

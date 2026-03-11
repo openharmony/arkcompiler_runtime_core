@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,6 @@
  */
 
 package std.concurrency;
-
-type CoroFunT<A, R> = (
-  a0: A,
-  a1: A,
-  a2: A,
-  a3: A,
-  a4: A,
-  a5: A,
-  a6: A,
-  a7: A,
-  a8: A,
-  a9: A,
-  a10: A,
-  a11: A,
-  a12: A,
-  a13: A,
-  a14: A,
-  a15: A
-) => R;
-
 
 /**
  * @class LaunchParams Class for coroutine launch params.
@@ -57,8 +37,8 @@ export class LaunchParams {
  *
  * @internal
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
+export function launch<R>(launchParams: LaunchParams, coroFun: () => R): Job<R> {
+  return launchInternal<R>(coroFun, launchParams);
 }
 
 /**
@@ -71,8 +51,8 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams
  *
  * @internal
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<Any>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<Any>);
+export function launch<R>(coroFun: () => R): Job<R> {
+  return launchInternal<R>(coroFun);
 }
 
 /**
@@ -162,11 +142,11 @@ export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     return job.Await();
 }
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
+function launchInternal<R>(coroFun: () => R, launchParams?: LaunchParams): Job<R> {
   if (launchParams) {
-    return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag, launchParams.workerGroupId);
+    return launchInternalJobNative<R>(coroFun, launchParams.abortFlag, launchParams.workerGroupId);
   }
-  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, false, WorkerGroup.ANY_ID);
+  return launchInternalJobNative<R>(coroFun, false, WorkerGroup.ANY_ID);
 }
 
-native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<Any>, abortFlag: boolean, gid: WorkerGroupId): Job<R>;
+native function launchInternalJobNative<R>(coroFun: () => R, abortFlag: boolean, gid: WorkerGroupId): Job<R>;

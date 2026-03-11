@@ -545,7 +545,7 @@ cases:
               }
 
               bar(): Job<this> {
-                  return launch<A, () => A>(this.foo().foo().foo)
+                  return launch(this.foo().foo().foo)
               }
           }
       use: |-

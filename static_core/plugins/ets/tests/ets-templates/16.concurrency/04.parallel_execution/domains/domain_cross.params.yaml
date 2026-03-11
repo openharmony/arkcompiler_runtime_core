@@ -30,7 +30,7 @@ cases:
 
       // Launch multiple coroutines from Main domain to General domain
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, generalParams);
+          let job: Job<int> = launch<int>(generalParams, getWorkerId);
           const generalWorkerId: int = job.Await();
 
           // Verify: coroutine in General domain should NOT run on main worker
@@ -63,7 +63,7 @@ cases:
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
 
-      let job: Job<int> = launch<int, () => int>(getWorkerId, eaParams);
+      let job: Job<int> = launch<int>(eaParams, getWorkerId);
       const launchedWorkerId: int = job.Await();
 
       // Verify: coroutine launched from Main to EA domain should run on the EA worker
@@ -85,7 +85,7 @@ cases:
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          let job: Job<int> = launch<int, () => int>(getWorkerId, mainParams);
+          let job: Job<int> = launch<int>(mainParams, getWorkerId);
           return job.Await();
       }
     logic: |-
@@ -99,7 +99,7 @@ cases:
       };
 
       // From General domain, launch to Main domain and get the worker ID
-      let job: Job<int> = launch<int, () => int>(launchToMainFromGeneral, generalParams);
+      let job: Job<int> = launch<int>(generalParams, launchToMainFromGeneral);
       const resultWorkerId: int = job.Await();
 
       // Verify: coroutine launched from General to Main should run on main worker
@@ -118,7 +118,7 @@ cases:
           const eaParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [targetEaWorkerId])
           };
-          let job: Job<int> = launch<int, () => int>(getWorkerId, eaParams);
+          let job: Job<int> = launch<int>(eaParams, getWorkerId);
           return job.Await();
       }
     logic: |-
@@ -141,7 +141,7 @@ cases:
       };
 
       // From General domain, launch to EA domain and get the worker ID
-      let job: Job<int> = launch<int, () => int>(launchToEaFromGeneral, generalParams);
+      let job: Job<int> = launch<int>(generalParams, launchToEaFromGeneral);
       const resultWorkerId: int = job.Await();
 
       // Verify: coroutine launched from General to EA should run on EA worker
@@ -163,7 +163,7 @@ cases:
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          let job: Job<int> = launch<int, () => int>(getWorkerId, mainParams);
+          let job: Job<int> = launch<int>(mainParams, getWorkerId);
           return job.Await();
       }
     logic: |-
@@ -203,7 +203,7 @@ cases:
           const generalParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
           };
-          let job: Job<int> = launch<int, () => int>(getWorkerId, generalParams);
+          let job: Job<int> = launch<int>(generalParams, getWorkerId);
           return job.Await();
       }
     logic: |-

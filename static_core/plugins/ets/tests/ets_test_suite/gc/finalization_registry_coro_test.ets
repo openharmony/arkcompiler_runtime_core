@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,9 @@ let promise_array: Array<Job<void>> = new Array<Job<void>>;
 function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 
 	for (let i = 0; i < promise_count; i++) {
-		promise_array.push(launch<void, (a: FinalizationRegistry<String> | null, b: Int, c: Object) => void>(addToRegistry, finreg, 3, token));
+		promise_array.push(launch() {
+			addToRegistry(finreg, 3, token)
+		});
 	}
 
 	for (let i = 0; i < promise_array.length; i++) {
@@ -92,10 +94,18 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 		return finreg.unregister(s);
 	};
 
-	launch<void, (finreg: FinalizationRegistry<String>, token: Object) => void>(unregister, finreg!, token1).Await();
-	launch<void, (finreg: FinalizationRegistry<String>, token: Object) => void>(unregister, finreg!, token2).Await();
-	launch<void, (finreg: FinalizationRegistry<String>, token: Object) => void>(unregister, finreg!, token3).Await();
-	launch<void, (finreg: FinalizationRegistry<String>, token: Object) => void>(unregister, finreg!, token4).Await();
+	launch() {
+		unregister(finreg!, token1)
+	}.Await();
+	launch() {
+		unregister(finreg!, token2)
+	}.Await();
+	launch() {
+		unregister(finreg!, token3)
+	}.Await();
+	launch() {
+		unregister(finreg!, token4)
+	}.Await();
 
  arktest.assertEQ(0, finreg!.getSize(), "Size of unregister is invalid");
 
@@ -106,7 +116,9 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
  arktest.assertEQ(obj_array.length * object_count, finreg!.getSize(), "Register function is invalid");
 
 	for (let i = 0; i < obj_array.length; i++) {
-		unreg_array.push(launch<void, (a: FinalizationRegistry<String> | null, b: Object) => void>(removeFromRegistry, finreg!, obj_array[i]));
+		unreg_array.push(launch() {
+			removeFromRegistry(finreg!, obj_array[i])
+		});
 	}
 
 	for (let i = 0; i < unreg_array.length; ++i) {
