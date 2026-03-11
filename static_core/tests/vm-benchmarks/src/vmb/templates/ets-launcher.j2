@@ -33,6 +33,8 @@ class VmbLauncher {
     static IT: int = {{it}};
     static WT: int = {{wt}};
     static FI: int = {{fi}};
+    static CL: int = {{cl}};
+    static CT: double = {{ct}};
     static loopCount1: long = 0;
     static totalOps: long = 0;
     static totalNs: long = 0;
@@ -52,6 +54,27 @@ class VmbLauncher {
     {% endif %}
     }
 
+    static coroutinesTeardown(): long {
+        let start = Chrono.nanoNow();
+        VmbLauncher.log("Force Coroutines Teardown");
+        let current_coroutines_pool_size: double = VmbLauncher.CL * VmbLauncher.CT;
+        while (current_coroutines_pool_size > 0) {
+            // request count of current coroutines when method provided -- now just stub cycle
+            current_coroutines_pool_size -= 0.0000001;
+        }
+        return Chrono.nanoNow() - start;
+    }
+
+    static forceGC(): void {
+        VmbLauncher.log("Force GC");
+        let gc = GC.startGC(GC.Cause.THRESHOLD);
+        GC.waitForFinishGC(gc);
+        VmbLauncher.log("Force GC");
+        gc = GC.startGC(GC.Cause.THRESHOLD);
+        GC.waitForFinishGC(gc);
+        // No sleep in ETS: sleep({{gc}})
+    }
+
     static tune(bench: {{state_name}}): void {
         let iterMs: number = 1 * S2MS;
         let loopMs: number = 0;
@@ -61,11 +84,33 @@ class VmbLauncher {
             loopCount = loopCount * 2;
             let start: number = Chrono.nanoNow();
             for (let i: number = 0; i < loopCount; i++) {
+            {% if cl > 0 %}
+                try {
+                    {{method_call}}
+                }
+                catch (error) {
+                    if (error instanceof CoroutinesLimitExceedError) {
+                        VmbLauncher.log('CoroutinesLimitExceedError: ' + error.toString());
+                        let teardown_time = VmbLauncher.coroutinesTeardown();
+                        VmbLauncher.log('Coroutines Teardown has taken ' + teardown_time + 'ns');
+                        start -= teardown_time;
+                        break;
+                    }
+                }
+            {% else %}
                 {{method_call}}
+            {% endif %}
             }
             loopNs = Chrono.nanoNow() - start;
             loopMs = loopNs / NS2MS;
         }
+        {% if cl > 0 %}
+            VmbLauncher.log('Calculated iterations after tune: ' + loopCount);
+            loopCount *= VmbLauncher.CT;
+            VmbLauncher.log('Adjusting iterations count: ' + loopCount);
+        {% else %}
+            // No force Coroutines Teardown
+        {% endif %}
         VmbLauncher.loopCount1 = loopCount * iterMs / loopMs >> 0;
         if (VmbLauncher.loopCount1 === 0) {
             VmbLauncher.loopCount1++;
@@ -84,15 +129,15 @@ class VmbLauncher {
             let elapsedMs: long = 0;
             let elapsedNs: long = 0;
         {% if gc > 0 %}
-            VmbLauncher.log("Force GC");
-            let gc = GC.startGC(GC.Cause.THRESHOLD);
-            GC.waitForFinishGC(gc);
-            VmbLauncher.log("Force GC");
-            gc = GC.startGC(GC.Cause.THRESHOLD);
-            GC.waitForFinishGC(gc);
-            // No sleep in ETS: sleep({{gc}})
+            VmbLauncher.forceGC();
         {% else %}
             // No force GC
+        {% endif %}
+        {% if cl > 0 %}
+            let teardown_time = VmbLauncher.coroutinesTeardown();
+            VmbLauncher.log('Coroutines Teardown has taken ' + teardown_time + 'ns');
+        {% else %}
+            // No force Coroutines Teardown
         {% endif %}
             let start: long = Chrono.nanoNow();
             while (elapsedMs < iterMs) {

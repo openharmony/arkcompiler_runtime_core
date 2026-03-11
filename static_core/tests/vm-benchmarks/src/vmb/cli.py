@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -70,9 +70,10 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('-gc', '--sys-gc-pause', default=None, type=int,
                         help='If <val> >= 0 invoke GC twice '
                         'and wait <val> ms before iteration')
-    parser.add_argument("-c", "--concurrency-level",
-                        default=None, type=str,
-                        help="Concurrency level (DEPRECATED)")
+    parser.add_argument("-cl", "--coroutines-limit", default=None, type=int,
+                        help="If <val> >= 0 check that concurrency limit not exceeded after each iteration")
+    parser.add_argument("-ct", "--coroutines-threshold", default=None, type=float,
+                        help="If <val> >= 0 check that used as ratio to prevent CoroutinesLimitExceedError")
     parser.add_argument("-compiler-inlning", "--compiler-inlining",
                         default=None, type=str,
                         help="enable compiler inlining")

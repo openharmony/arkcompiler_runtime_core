@@ -173,6 +173,11 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
 * `-fi` (`--fast-iters`) Number of 'fast' iterations
   (no warmup, no tuning cycles).
   Benchmark will run this number of iterations, regardless of time elapsed.
+* `-cl` (`--coroutines-limit`) consider bench as limited by max size of coroutines pool;
+  default is 0 which means ignore active coroutines state; any positive value means control
+  of bench loop to prevent exceeding this limit
+* `-ct` (`--coroutines-threshold`) use it as ratio to limit amount of coroutines to prevent
+  CoroutinesLimitExceedError
 
 ## No run option
 `--no-run` (or `-N`) option disables all command's execution.
