@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let s: Set<number>;
+import st from "@ohos.lang.interop";
+export declare let s: st.Set<number>;
 export declare const weakMap: WeakMap<Object, string>;
 export declare let w: WeakSet<Object>;
-export declare let map: Map<string, number>;
+export declare let map: st.Map<string, number>;
 export declare let f32: Float32Array;
 export declare let f64: Float64Array;
 export declare let i8: Int8Array;
@@ -36,4 +37,4 @@ export type Matrix = number[][];
 export type Handler = (s: string, no: number) => string;
 export type Predicate<T> = (x: T) => boolean;
 export type NullableNumber = number | null;
-export type Dictionary = Map<string, string>;
+export type Dictionary = st.Map<string, string>;

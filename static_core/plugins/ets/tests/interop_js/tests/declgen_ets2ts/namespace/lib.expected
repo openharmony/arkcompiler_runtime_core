@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare function foo(arg: BarNameSpace.Callback): void;
 export declare function bar(arg: BarNameSpace.FooNameSpace.Callback2): void;
 export declare let rectangleShape: MySpace.IShape;

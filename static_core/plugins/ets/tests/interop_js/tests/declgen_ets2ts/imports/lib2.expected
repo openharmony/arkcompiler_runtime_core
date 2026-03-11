@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export type IntAlias = number;
 export declare class Lib2Class {
     public get val(): number;

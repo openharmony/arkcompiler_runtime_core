@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare let p1: CP1;
 export declare function foo1(a: CP2): CP3;
 export declare let p5: CP4 | CP5;

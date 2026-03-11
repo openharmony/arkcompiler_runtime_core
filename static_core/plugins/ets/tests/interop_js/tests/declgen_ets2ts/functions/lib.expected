@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare function SumDouble(a: number, b: number): number;
 export declare function SumBoxedDouble(a: number, b: number): number;
 export declare function SumString(a: string, b: string): string;

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare let a1: string;
 export declare function b1(num: number): void;
 export declare class c1 {
