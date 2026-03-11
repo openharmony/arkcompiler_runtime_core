@@ -718,6 +718,11 @@
 08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
 08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
 
+#33488
+08.statements/12.return_statements/return_5.ets
+08.statements/12.return_statements/return_6.ets
+08.statements/12.return_statements/return_7.ets
+
 #33390
 08.statements/13.switch_statements/switch_with_expression_neg_0.ets
 08.statements/13.switch_statements/switch_with_expression_neg_1.ets
@@ -725,6 +730,9 @@
 08.statements/13.switch_statements/switch_with_expression_neg_3.ets
 08.statements/13.switch_statements/switch_with_expression_neg_4.ets
 08.statements/13.switch_statements/switch_with_expression_neg_5.ets
+
+#33182
+09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
 
 #32625
 09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/implementing_property_neg_simple_wrong_type_n.ets

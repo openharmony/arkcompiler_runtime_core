@@ -18,6 +18,7 @@
 desc: >-
     Default constructors added, superclass with parameter.
 tags: [compile-only, negative]
+expected_out: "{{c.exp_out}}"
 ---*/
 
 class Base {

@@ -17,6 +17,7 @@ limitations under the License.
 /*---
 desc: Local declaration - use a name declared in another block.
 tags: [compile-only, negative]
+expected_out: "{{c.exp_out}}"
 ---*/
 
 function add5(b: int): int {

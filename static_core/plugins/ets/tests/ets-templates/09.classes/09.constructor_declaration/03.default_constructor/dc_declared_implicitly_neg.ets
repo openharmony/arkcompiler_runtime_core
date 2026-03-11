@@ -18,6 +18,7 @@
 desc: >-
     Class declarations with default constructors declared implicitly.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0139: Signature constructor(): void is not visible here."
 ---*/
 
 class A {
@@ -26,6 +27,5 @@ class A {
 
 function main() {
     let a: A = new A();
-    arktest.assertTrue(a instanceof A);
 }
 {%- endfor %}

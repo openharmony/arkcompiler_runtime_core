@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,32 +21,47 @@ block_statements:
           return 5
         }
       }
+    exp_out: "Syntax error ESY0287: Unexpected return value."
   - decl: |
       class A {
         constructor() {
           return 5
         }
       }
+    exp_out: "Semantic error ESE0033: Return statement with expression isn't allowed in constructor."
   - decl: |
       class A {
         foo(): void { return 5 }
       }
+    exp_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
   - decl: |
-      class A {
-        foo(): void { return 5 }
-      }
-  - decl: |
-      class A {
-        foo(): int { return }
-      }
+      function foo(): void { return 5 }
+    exp_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
   - decl: |
       class A {
         foo(): int { return }
       }
+    exp_out: "Semantic error ESE0032: Missing return value."
+  - decl: |
+      class A {
+        foo(): int { return false }
+      }
+    exp_out: "Semantic error ESE0091: Type 'Boolean' is not compatible with the enclosing method's return type 'Int'"
+  - decl: |
+      class A {
+        return
+      }
+    exp_out: "Syntax error ESY0227: Unexpected token 'return'."
   - decl: |
       return
-
+    exp_out: "Syntax error ESY0163: return keyword should be used in function body."
   - decl: |
       {
         return
       }
+    exp_out: "Syntax error ESY0163: return keyword should be used in function body."
+  - decl: |
+      namespace NS {
+        return
+      }
+    exp_out: "Syntax error ESY0163: return keyword should be used in function body."
