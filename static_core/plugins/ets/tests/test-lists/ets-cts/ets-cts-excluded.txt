@@ -25,7 +25,7 @@
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.assignability_with_initializer/initializer_compatibility_n_11.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.assignability_with_initializer/initializer_compatibility_n_12.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_12.ets
-05.generics/03.utility_types/06.record_utility_type/union_in_rec.ets
+03.types/21.utility_types/06.record_utility_type/union_in_rec.ets
 08.statements/09.for_of_statements/for_of_15.ets
 
 #30101 Tests shouldn't rely on default arktsconfig contents.:
@@ -77,4 +77,4 @@
 18.annotations/01.declaring_annotations/declaration_default_values_7.ets
 
 # 28232 runtime timeout only in CI
-05.generics/03.utility_types/01.awaited_utility_type/awaited_return_1.ets
+03.types/21.utility_types/01.awaited_utility_type/awaited_return_1.ets

@@ -70,7 +70,7 @@
 # 20423 es2panda aborts due to assertion error when run with '--debug-info'
 07.expressions/07.spread_expression/spex_28.ets
 07.expressions/07.spread_expression/spex_func_27.ets
-05.generics/03.utility_types/04.required_utility_type/required_module_interface_0.ets
+03.types/21.utility_types/04.required_utility_type/required_module_interface_0.ets
 07.expressions/04.named_reference/qualified_name_0.ets
 07.expressions/04.named_reference/qualified_name_1.ets
 07.expressions/28.equality_expressions/eq_19.ets
