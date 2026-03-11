@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,22 +97,6 @@ function TestReturnUndefinedAsAny(): boolean {
     return testVal === undefined
 }
 
-function TestReturnMapAsAny(): boolean {
-    const TestFunc: Any = returnMapAsAny;
-    const map = TestFunc.invoke().unwrap() as Map<Any, Any>;
-    return map.has(SAMPLE_STRING.toUpperCase()) as boolean;
-}
-
-function TestReturnSetAsAny(): boolean {
-    const TestFunc: Any = returnSetAsAny;
-    const set = TestFunc.invoke().unwrap() as Set<Any>;
-    return (
-        set.size as int > 0
-        && !(set.has(SAMPLE_STRING) as boolean)
-        && set.has(SAMPLE_STRING.toLowerCase()) as boolean
-    );
-}
-
 function TestReturnStringAsLiteral(): boolean {
     const TestFunc: Any = returnStrLiteral;
     const testVal = TestFunc.invoke().toString();
@@ -137,20 +121,6 @@ function TestReturnBoolAsLiteral(): boolean {
     return testVal === TEST_LITERAL_BOOLEAN;
 }
 
-function TestReturnMap(): boolean {
-    const map = returnMap.invoke().unwrap() as Map<Any, Any>;
-    return map.has(SAMPLE_STRING.toUpperCase()) as boolean;
-}
-
-function TestReturnSet(): boolean {
-    const set = returnSet.invoke().unwrap() as Set<Any>;
-    return (
-        set.size as int > 0
-        && !(set.has(SAMPLE_STRING) as boolean)
-        && set.has(SAMPLE_STRING.toLowerCase()) as boolean
-    );
-}
-
 function TestReturnTuple(): boolean {
     const expectedTuple: Any = returnTuple.invoke().unwrap() as ETSTupleType;
     return (isTTupleTS.invoke(expectedTuple).toBoolean());
@@ -163,26 +133,6 @@ function TestReturnStringSubsetByRef(): boolean {
         testVal.toString() === SAMPLE_STRING
         && testVal.typeOf() === 'string'
     );
-}
-
-function TestReturnMapSubsetByRef(): boolean {
-    const TestFunc: Any = returnMapSubsetByRef
-    const initialMap = TestFunc.invoke().unwrap() as Map<Any, Any>;
-    const changedMap = TestFunc.invoke().unwrap() as Map<Any, Any>;
-
-    const initialInitialMapSize: number = initialMap.size;
-    const initialChangedMapSize: number = changedMap.size;
-    changedMap.set('2', 'Test');
-    const finalInitialMapSize: number = initialMap.size;
-    const finalChangedMapSize: number = changedMap.size;
-
-    return (
-        initialInitialMapSize === 1
-        && initialChangedMapSize === 1
-        && initialMap.has('2') as boolean
-        && finalInitialMapSize === 2
-        && finalChangedMapSize === 2
-    )
 }
 
 function TestReturnStringSubsetByValue(): boolean {

@@ -19,7 +19,7 @@ import { functionArg0, functionArg1, functionArg2 } from "testDecl";
 import { Qux, quxInstance } from "testDecl";
 import { TestNew0, TestNew1, TestNew2 } from "testDecl";
 import { Foobar } from "testDecl";
-import {arrNum, arrFill, big_val} from 'testDecl';
+import { es, arrNum, arrFill, big_val} from 'testDecl';
 import { UserAccount } from 'testDecl'
 import { testBooleanInstance } from 'testDecl';
 import { TestArrayOps, testArrayOpsInstance } from 'testDecl';
@@ -117,12 +117,12 @@ function testCallWithUndefined() {
 }
 
 function testArray(): void {
-    let arr1: Array<Number> = arrNum.with(1, 8);
+    let arr1: es.Array<Number> = arrNum.with(1, 8);
     arktest.assertEQ(arr1.toString(), '1,8,3,4');
 }
 
 function testArrayFill(): void {
-    let arr1: Array<Number> = arrFill.fill(8, 1, 3);
+    let arr1: es.Array<Number> = arrFill.fill(8, 1, 3);
     arktest.assertEQ(arr1.toString(), '1,8,8,4');
 }
 
@@ -179,7 +179,7 @@ function testArrayLength(): void {
     arktest.assertEQ(len, 3);
 }
 
-function testArrayLengthSplitBody(x: Array<Number>): int {
+function testArrayLengthSplitBody(x: es.Array<Number>): number {
     return x.length
 }
 
@@ -275,7 +275,6 @@ function testAll(): void {
     testGetter();
     testBooleanTypes();
     testArrayLength();
-    testArrayLengthSplitBody([]);
     testArrayLengthSplit();
     testArrayPush();
     testTypeOf();

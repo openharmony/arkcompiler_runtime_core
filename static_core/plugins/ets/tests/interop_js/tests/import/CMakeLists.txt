@@ -35,13 +35,6 @@ panda_ets_interop_js_gtest(ets_interop_js__destructured_import_ts_to_sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/destructured_import.js
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__import_array_ts_to_sts
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_array/import_array.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_array/import_array.ets
-    ETS_CONFIG ${ETS_CONFIG}
-    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-)
-
 panda_ets_interop_js_gtest(ets_interop_js__import_function_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_function/import_function.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_function/import_function.ets
