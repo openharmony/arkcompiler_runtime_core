@@ -18,21 +18,13 @@
 
 namespace ark {
 
-Job *JobManager::CreateJob(PandaString name, Job::EntrypointInfo &&epInfo, JobPriority priority, Job::Type type,
-                           bool abortFlag)
-{
-    auto id = AllocateJobId();
-    auto *job = Job::Create(std::move(name), id, std::move(epInfo), priority, type, abortFlag);
-    return job;
-}
-
 void JobManager::DestroyJob(Job *job)
 {
     if (job == nullptr) {
         return;
     }
     FreeJobId(job->GetId());
-    Job::Destroy(job);
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(job);
 }
 
 void JobManager::InitializeWorkerIdAllocator()

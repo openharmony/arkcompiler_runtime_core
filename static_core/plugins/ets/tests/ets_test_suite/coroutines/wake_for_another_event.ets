@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,8 +44,7 @@ async function testWakeForEvent() {
 }
 
 function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.wake_for_another_event');
-    testSuite.addAsyncTest('testWakeForEvent', testWakeForEvent);
-    let res = testSuite.run();
-    return res;
+    // NOTE(panferovi): #34019 (fix arktest.addAsyncTest)
+    testWakeForEvent();
+    return 0;
 }

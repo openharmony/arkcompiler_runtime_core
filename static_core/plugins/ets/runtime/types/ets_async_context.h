@@ -33,6 +33,7 @@ class EtsAsyncContextTest;
 class EtsAsyncContext final : public EtsObject {
 public:
     static EtsAsyncContext *Create(EtsExecutionContext *executionCtx);
+    static EtsAsyncContext *GetCurrent(EtsExecutionContext *executionCtx);
 
     inline void SetReturnValue(EtsExecutionContext *executionCtx, EtsPromise *returnValue);
     inline void SetAwaitee(EtsExecutionContext *executionCtx, EtsPromise *awaitee);

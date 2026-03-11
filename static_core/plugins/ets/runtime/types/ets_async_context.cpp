@@ -20,6 +20,8 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/stackless/suspendable_job.h"
 
 namespace ark::ets {
 
@@ -74,6 +76,18 @@ EtsAsyncContext *EtsAsyncContext::Create(EtsExecutionContext *executionCtx)
     asyncCtx->SetFrameOffsets(executionCtx, frameOffsets);
 
     return asyncCtx.GetPtr();
+}
+
+/* static */
+EtsAsyncContext *EtsAsyncContext::GetCurrent(EtsExecutionContext *executionCtx)
+{
+    if LIKELY (!executionCtx->GetMT()->GetCurrentFrame()->IsResumed()) {
+        return nullptr;
+    }
+    auto *job = SuspendableJob::FromExecutionContext(JobExecutionContext::CastFromMutator(executionCtx->GetMT()));
+    auto *asyncCtxRef = EtsReference::CastFromReference(job->GetSuspensionContext());
+    auto *refStorage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
+    return asyncCtxRef == nullptr ? nullptr : EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(asyncCtxRef));
 }
 
 void EtsAsyncContext::AddReference(EtsExecutionContext *executionCtx, uint32_t idx, EtsObject *ref)

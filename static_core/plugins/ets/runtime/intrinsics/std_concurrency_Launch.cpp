@@ -56,8 +56,8 @@ static EtsMethod *ResolveInvokeMethod(EtsExecutionContext *executionCtx, VMHandl
 
 template <typename CoroResult>
 // CC-OFFNXT(huge_method) solid logic
-ObjectHeader *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id groupId = JobWorkerThreadGroup::AnyId(),
-                     bool postToMain = false)
+CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id groupId = JobWorkerThreadGroup::AnyId(),
+                   bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
@@ -92,8 +92,8 @@ ObjectHeader *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id g
         return nullptr;
     }
 
-    PandaEtsVM *etsVm = executionCtx->GetPandaVM();
-    auto *ref = etsVm->GetGlobalObjectStorage()->Add(coroResultHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
+    auto *storage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
+    auto *ref = storage->Add(coroResultHandle.GetPtr()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, jobMan);
 
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
@@ -119,7 +119,7 @@ ObjectHeader *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id g
         if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
             jobMan->DestroyJob(job);
         }
-        etsVm->GetGlobalObjectStorage()->Remove(ref);
+        storage->Remove(ref);
         return nullptr;
     }
 
@@ -130,8 +130,7 @@ extern "C" {
 EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsBoolean abortFlag, EtsLongArray *groupId)
 {
     ASSERT(groupId->GetLength() == 2U);
-    return static_cast<EtsJob *>(
-        Launch<EtsJob>(func, abortFlag != 0U, JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)})));
+    return Launch<EtsJob>(func, abortFlag != 0U, JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)}));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)

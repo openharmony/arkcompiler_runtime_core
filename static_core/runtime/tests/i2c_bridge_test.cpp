@@ -135,7 +135,7 @@ static void VoidNoArg(Method *method)
 template <bool IS_DYNAMIC = false>
 static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
-    return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
+    return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev, CallFlags {});
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeVoidNoArg)

@@ -92,6 +92,9 @@ public:
     // Indicate whether this frame is static or dynamic, which decides the frame layout
     static constexpr size_t IS_DYNAMIC = 128U;
 
+    // Indicate whether this frame is called from a scheduler or not
+    static constexpr size_t IS_RESUMED = 256U;
+
     ALWAYS_INLINE inline Frame(void *ext, Method *method, Frame *prev, uint32_t nregs)
         : prev_(prev),
           method_(method),
@@ -104,13 +107,14 @@ public:
           inst_(nullptr)
     {
     }
-    ALWAYS_INLINE inline Frame(void *ext, Method *method, Frame *prev, uint32_t nregs, uint32_t numActualArgs)
+    ALWAYS_INLINE inline Frame(void *ext, Method *method, Frame *prev, uint32_t nregs, uint32_t numActualArgs,
+                               size_t flags)
         : prev_(prev),
           method_(method),
           nregs_(nregs),
           numActualArgs_(numActualArgs),
           bcOffset_(0),
-          flags_(0),
+          flags_(flags),
           ext_(ext),
           nextInst_(nullptr),
           inst_(nullptr)
@@ -323,6 +327,11 @@ public:
     ALWAYS_INLINE inline void SetDynamic()
     {
         flags_ = flags_ | IS_DYNAMIC;
+    }
+
+    ALWAYS_INLINE inline bool IsResumed() const
+    {
+        return (flags_ & IS_RESUMED) != 0;
     }
 
     template <bool IS_DYNAMIC = false>
@@ -764,7 +773,8 @@ static_assert(EMPTY_EXT_FRAME_DATA_SIZE == 0, "Nonzero EMPTY_EXT_FRAME_DATA_SIZE
 
 template <class ExtT = EmptyExtFrameData>
 ALWAYS_INLINE inline Frame *CreateFrame(mem::StackFrameAllocator *stackFrameAllocator, uint32_t nregsSize,
-                                        Method *method, Frame *prev, uint32_t nregs, uint32_t numActualArgs)
+                                        Method *method, Frame *prev, uint32_t nregs, uint32_t numActualArgs,
+                                        size_t flags = 0)
 {
     constexpr uint32_t EXT_SIZE = ExtFrame<ExtT>::GetExtSize();
 
@@ -774,7 +784,7 @@ ALWAYS_INLINE inline Frame *CreateFrame(mem::StackFrameAllocator *stackFrameAllo
         return nullptr;
     }
     // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
-    return new (Frame::FromExt(mem, EXT_SIZE)) Frame(mem, method, prev, nregs, numActualArgs);
+    return new (Frame::FromExt(mem, EXT_SIZE)) Frame(mem, method, prev, nregs, numActualArgs, flags);
 }
 
 ALWAYS_INLINE inline void DestroyFrame(mem::StackFrameAllocator *stackFrameAllocator, Frame *frame)

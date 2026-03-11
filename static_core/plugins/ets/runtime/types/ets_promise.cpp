@@ -36,7 +36,7 @@ EtsPromise *EtsPromise::Create(EtsExecutionContext *executionCtx)
     ASSERT(hPromise.GetPtr() != nullptr);
     auto *mutex = EtsMutex::Create(executionCtx);
     hPromise->SetMutex(executionCtx, mutex);
-    auto *event = EtsEvent::Create(executionCtx);
+    auto *event = EtsEventWithDependencies::Create(executionCtx);
     hPromise->SetEvent(executionCtx, event);
     return hPromise.GetPtr();
 }
@@ -54,8 +54,12 @@ void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx)
         executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, executionCtx);
     }
 
-    // Unblock awaitee coros
-    GetEvent(executionCtx)->Fire();
+    // Unblock awaitee jobs
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
+        GetEvent(executionCtx)->Fire();
+    } else {
+        GetEvent(executionCtx)->ResolveDependencies();
+    }
 
     for (int idx = 0; idx < queueSize; ++idx) {
         auto *thenCallback = cbQueue->Get(idx);

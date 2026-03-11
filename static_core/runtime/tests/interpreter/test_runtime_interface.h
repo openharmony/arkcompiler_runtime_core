@@ -412,7 +412,7 @@ public:
         if (UNLIKELY(mem == nullptr)) {
             return nullptr;
         }
-        return new (Frame::FromExt(mem, extSz)) ark::Frame(mem, method, prev, nregs, numActualArgs);
+        return new (Frame::FromExt(mem, extSz)) ark::Frame(mem, method, prev, nregs, numActualArgs, 0);
     }
 
     static void FreeFrame(ManagedThread *thread, Frame *frame)

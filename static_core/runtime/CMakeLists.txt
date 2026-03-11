@@ -174,6 +174,7 @@ set(SOURCES
     execution/priority_queue.cpp
     execution/stackless/stackless_job_manager.cpp
     execution/stackless/stackless_job_worker_thread.cpp
+    execution/stackless/suspendable_job.cpp
     execution/coroutines/coroutine.cpp
     execution/coroutines/coroutine_manager.cpp
     execution/coroutines/coroutine_worker.cpp

@@ -175,13 +175,13 @@ public:
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
     }
 
-    EtsEvent *GetEvent(EtsExecutionContext *executionCtx) const
+    EtsEventWithDependencies *GetEvent(EtsExecutionContext *executionCtx) const
     {
         auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, event_));
-        return EtsEvent::FromCoreType(obj);
+        return EtsEventWithDependencies::FromCoreType(obj);
     }
 
-    void SetEvent(EtsExecutionContext *executionCtx, EtsEvent *event)
+    void SetEvent(EtsExecutionContext *executionCtx, EtsEventWithDependencies *event)
     {
         ASSERT(event != nullptr);
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
@@ -255,14 +255,6 @@ public:
         return mutex->IsHeld();
     }
 
-    /// Blocks current coroutine until promise is resolved/rejected
-    void Wait()
-    {
-        auto *event = GetEvent(EtsExecutionContext::GetCurrent());
-        ASSERT(event != nullptr);
-        event->Wait();
-    }
-
     void ChangeStateToPendingFromLinked()
     {
         ASSERT(IsLinked());
@@ -285,7 +277,7 @@ private:
 
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsMutex> mutex_;
-    ObjectPointer<EtsEvent> event_;
+    ObjectPointer<EtsEventWithDependencies> event_;
     ObjectPointer<EtsObjectArray>
         callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
     ObjectPointer<EtsIntArray> workerDomainQueue_;  // the queue of callbacks' launch mode

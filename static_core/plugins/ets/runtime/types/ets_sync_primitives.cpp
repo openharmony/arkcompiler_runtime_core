@@ -68,10 +68,10 @@ void EtsMutex::Lock()
     if (waiters_.fetch_add(1, std::memory_order_acq_rel) == 0) {
         return;
     }
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *executionCtx = JobExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
-    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-    auto awaitee = EtsWaitersList::Node(jobManager);
+    auto event = BlockingEvent {executionCtx->GetManager()};
+    auto awaitee = EtsWaitersList::Node(&event);
     SuspendCoroutine(&awaitee);
 }
 
@@ -107,13 +107,14 @@ void EtsEvent::Wait()
 {
     // Atomic with acq_rel order reason: sync Wait/Fire in other threads
     auto state = state_.fetch_add(ONE_WAITER, std::memory_order_acq_rel);
+    ASSERT(!HasDependencyBit(state));
     if (IsFireState(state)) {
         return;
     }
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *executionCtx = JobExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
-    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-    auto awaitee = EtsWaitersList::Node(jobManager);
+    auto event = BlockingEvent {executionCtx->GetManager()};
+    auto awaitee = EtsWaitersList::Node(&event);
     SuspendCoroutine(&awaitee);
 }
 
@@ -121,6 +122,7 @@ void EtsEvent::Fire()
 {
     // Atomic with acq_rel order reason: sync Wait/Fire in other threads
     auto state = state_.exchange(FIRE_STATE, std::memory_order_acq_rel);
+    ASSERT(!HasDependencyBit(state));
     if (IsFireState(state)) {
         return;
     }
@@ -146,10 +148,10 @@ void EtsCondVar::Wait(EtsHandle<EtsMutex> &mutex)
     ASSERT(mutex->IsHeld());
     waiters_++;
     mutex->Unlock();
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *executionCtx = JobExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
-    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-    auto awaitee = EtsWaitersList::Node(jobManager);
+    auto event = BlockingEvent {executionCtx->GetManager()};
+    auto awaitee = EtsWaitersList::Node(&event);
     SuspendCoroutine(&awaitee);
     mutex->Lock();
 }
@@ -246,8 +248,8 @@ void EtsRWLock::ReadLock()
 
     if (!State::HasReadLock(newState)) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
-        auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-        auto readAwaitee = EtsWaitersList::Node(jobManager);
+        auto event = BlockingEvent {JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()};
+        auto readAwaitee = EtsWaitersList::Node(&event);
         EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetReaders(executionCtx), &readAwaitee);
     }
 }
@@ -264,8 +266,8 @@ void EtsRWLock::WriteLock()
 
     if (!State::HasWriteLock(newState) || State::HasWriteLock(oldState)) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
-        auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-        auto writeAwaitee = EtsWaitersList::Node(jobManager);
+        auto event = BlockingEvent {JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()};
+        auto writeAwaitee = EtsWaitersList::Node(&event);
         EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetWriters(executionCtx), &writeAwaitee);
     }
 }
@@ -307,6 +309,52 @@ uint64_t EtsRWLock::GetState() const
 bool EtsRWLock::IsHeld() const
 {
     return !State::IsUnlocked(GetState());
+}
+
+EtsEventWithDependencies *EtsEventWithDependencies::Create(EtsExecutionContext *executionCtx)
+{
+    return static_cast<EtsEventWithDependencies *>(EtsEvent::Create(executionCtx));
+}
+
+void EtsEventWithDependencies::AddDependency(JobEvent *dependency)
+{
+    // Atomic with relaxed order reason: acq_rel in CAS
+    auto state = state_.load(std::memory_order_relaxed);
+    // Atomic with acq_rel order reason: sync Wait/Fire in other threads
+    while (!state_.compare_exchange_weak(state, (state + ONE_WAITER) | DEPENDENCY_BIT, std::memory_order_acq_rel,
+                                         std::memory_order_relaxed)) {
+    }
+    ASSERT(HasDependencyBit(state_));
+    if (IsFireState(state)) {
+        dependency->Happen();
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(dependency);
+        return;
+    }
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *awaitee = Runtime::GetCurrent()->GetInternalAllocator()->New<EtsWaitersList::Node>(dependency);
+    GetWaitersList(executionCtx)->PushBack(awaitee);
+}
+
+void EtsEventWithDependencies::ResolveDependencies()
+{
+    auto state = state_.exchange(FIRE_STATE | DEPENDENCY_BIT, std::memory_order_acq_rel);
+    ASSERT(HasDependencyBit(state_));
+    if (IsFireState(state)) {
+        return;
+    }
+
+    auto *waitersList = GetWaitersList(EtsExecutionContext::GetCurrent());
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    for (auto waiters = GetNumberOfWaiters(state); waiters > 0; --waiters) {
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+        auto *node = waitersList->PopFront();
+        auto *blocker = node->GetEvent();
+        allocator->Delete(node);
+        blocker->Happen();
+        // NOTE(panferovi): is there any better place to remove blocker??
+        allocator->Delete(blocker);
+    }
 }
 
 }  // namespace ark::ets

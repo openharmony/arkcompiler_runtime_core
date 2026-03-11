@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "execution/stackless/stackless_job_manager.h"
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -20,14 +21,18 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/runtime/types/ets_async_context-inl.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/job_queue.h"
-#include "plugins/ets/runtime/ets_execution_context.h"
-#include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/job_events.h"
 #include "runtime/include/mem/panda_containers.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_launch.h"
+#include "runtime/execution/job_worker_group.h"
+#include "runtime/execution/stackless/suspendable_job.h"
 
 namespace ark::ets::intrinsics {
 
@@ -161,40 +166,75 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     EtsPromise::LaunchCallback(executionCtx, hcallback.GetPtr(), groupId);
 }
 
-static EtsObject *AwaitProxyPromise(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &promiseHandle)
+static void LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job, EtsAsyncContext *asyncCtx,
+                                    EtsPromise *promise)
 {
-    /**
-     * This is a backed by JS equivalent promise.
-     * ETS mode: error, no one can create such a promise!
-     * JS mode:
-     *      - add a callback to JQ, that will:
-     *          - resolve the promise with some value OR reject it
-     *          - unblock the executionCtx via event
-     *          - schedule();
-     *      - create a blocker event and link it to the promise
-     *      - block current coroutine on the event
-     *      - Schedule();
-     *          (the last two steps are actually the cm->await()'s job)
-     *      - return promise.value() if resolved or throw() it if rejected
-     */
-    ASSERT(promiseHandle.GetPtr() != nullptr);
-    promiseHandle->Wait();
-    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
+    auto *etsCtx = EtsExecutionContext::FromMT(executionCtx);
+    asyncCtx->SetAwaitee(etsCtx, promise);
+    auto *jobMan = executionCtx->GetManager();
+    auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(jobMan);
+    auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
+    [[maybe_unused]] auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId, dependency});
+    ASSERT(launchResult == LaunchResult::OK);
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    promise->GetEvent(etsCtx)->AddDependency(dependency);
+}
 
-    // will get here after the JS callback is called
+static PandaVector<Value> FillEntrypointArgs(Method *method)
+{
+    PandaVector<Value> args;
+    panda_file::ShortyIterator argIt {method->GetShorty()};
+    ++argIt;  // skip return value
+    if (!method->IsStatic()) {
+        args.push_back(Value(static_cast<ObjectHeader *>(nullptr)));
+    }
+    for (; argIt != panda_file::ShortyIterator(); ++argIt) {
+        ASSERT((*argIt).IsValid());
+        args.push_back((*argIt).IsReference() ? Value(static_cast<ObjectHeader *>(nullptr)) : Value(0));
+    }
+    return args;
+}
+
+static EtsObject *HandleAwaitStackful(EtsPromise *promise)
+{
+    auto *etsCtx = EtsExecutionContext::GetCurrent();
+    auto *executionCtx = JobExecutionContext::CastFromMutator(etsCtx->GetMT());
+
+    [[maybe_unused]] EtsHandleScope scope(etsCtx);
+    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
+
+    {
+        ScopedNativeCodeThread n(executionCtx);
+        executionCtx->GetManager()->ExecuteJobs();
+    }
+
+    /* CASE 2. This is a native ETS promise */
+    LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
+    promiseHandle->GetEvent(etsCtx)->Wait();
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
+    LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
+
+    /**
+     * The promise is already resolved or rejected. Further actions:
+     *      ETS mode:
+     *          if resolved: return Promise.value
+     *          if rejected: throw Promise.value
+     *      JS mode: NOTE!
+     *          - suspend coro, create resolved JS promise and put it to the Q, on callback resume the coro
+     *            and possibly throw
+     *          - JQ::put(current_coro, promise)
+     *
+     */
     if (promiseHandle->IsResolved()) {
-        LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been resolved.";
-        return promiseHandle->GetValue(executionCtx);
+        LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
+        return promiseHandle->GetValue(etsCtx);
     }
-    // rejected
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(),
-                                                                                       executionCtx);
+        etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
     }
-    LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
-    auto *exc = promiseHandle->GetValue(executionCtx);
-    ASSERT(exc != nullptr);
-    executionCtx->GetMT()->SetException(exc->GetCoreType());
+    LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
+    auto *exc = promiseHandle->GetValue(etsCtx);
+    etsCtx->GetMT()->SetException(exc->GetCoreType());
     return nullptr;
 }
 
@@ -213,46 +253,37 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
         return nullptr;
     }
 
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
+        return HandleAwaitStackful(promise);
+    }
+
+    auto *asyncCtx = EtsAsyncContext::GetCurrent(etsCtx);
+    if (asyncCtx != nullptr) {
+        auto *stacklessJobMan = static_cast<StacklessJobManager *>(executionCtx->GetManager());
+        auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
+        stacklessJobMan->AwaitAsynchronous(dependency);
+        promise->GetEvent(etsCtx)->AddDependency(dependency);
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+        return asyncCtx;
+    }
+
     [[maybe_unused]] EtsHandleScope scope(etsCtx);
     EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
 
-    {
-        ScopedNativeCodeThread n(executionCtx);
-        executionCtx->GetManager()->ExecuteJobs();
+    asyncCtx = EtsAsyncContext::Create(etsCtx);
+    if UNLIKELY (asyncCtx == nullptr) {
+        return nullptr;
     }
-
-    /* CASE 1. This is a converted JS promise */
-    if (promiseHandle->IsProxy()) {
-        return AwaitProxyPromise(etsCtx, promiseHandle);
-    }
-
-    /* CASE 2. This is a native ETS promise */
-    LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
-    promiseHandle->Wait();
-    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
-    LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
-
-    /**
-     * The promise is already resolved or rejected. Further actions:
-     *      ETS mode:
-     *          if resolved: return Promise.value
-     *          if rejected: throw Promise.value
-     *      JS mode: NOTE!
-     *          - suspend executionCtx, create resolved JS promise and put it to the Q, on callback resume the
-     * executionCtx and possibly throw
-     *          - JQ::put(current_coro, promise)
-     *
-     */
-    if (promiseHandle->IsResolved()) {
-        LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
-        return promiseHandle->GetValue(etsCtx);
-    }
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
-    }
-    LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
-    auto *exc = promiseHandle->GetValue(etsCtx);
-    executionCtx->SetException(exc->GetCoreType());
-    return nullptr;
+    auto refStor = EtsExecutionContext::FromMT(executionCtx)->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *aCtxRef = EtsReference::CastToReference(refStor->NewEtsRef(asyncCtx, EtsReference::EtsObjectType::LOCAL));
+    auto *asyncMethod = executionCtx->GetCurrentFrame()->GetMethod();
+    auto args = FillEntrypointArgs(asyncMethod);
+    auto epInfo = Job::ManagedEntrypointInfo {nullptr, asyncMethod, std::move(args)};
+    auto *job = executionCtx->GetManager()->CreateJob<SuspendableJob>(asyncMethod->GetFullName(), std::move(epInfo));
+    job->SetSuspensionContext(aCtxRef);
+    LaunchJobWithDependency(executionCtx, job, asyncCtx, promiseHandle.GetPtr());
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    return asyncCtx;
 }
+
 }  // namespace ark::ets::intrinsics

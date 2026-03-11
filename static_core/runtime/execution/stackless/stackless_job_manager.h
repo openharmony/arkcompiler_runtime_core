@@ -49,6 +49,8 @@ public:
     void Await(JobEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(JobEvent *blocker) override;
 
+    void AwaitAsynchronous(JobEvent *awaitee);
+
     JobExecutionContext *AttachExclusiveWorker(Runtime *runtime, PandaVM *vm) override;
     bool DetachExclusiveWorker() override;
     bool IsExclusiveWorkersLimitReached() const override;
@@ -135,7 +137,7 @@ private:
 
     // events that control program completion
     os::memory::Mutex programCompletionLock_;
-    GenericEvent programCompletionEvent_;
+    BlockingEvent programCompletionEvent_;
 };
 
 }  // namespace ark

@@ -36,7 +36,7 @@ public:
     NO_COPY_SEMANTIC(JobEvent);
     NO_MOVE_SEMANTIC(JobEvent);
 
-    enum class Type { NONE, GENERIC, COMPLETION, CHANNEL, IO, TIMER };
+    enum class Type { NONE, GENERIC, COMPLETION, CHANNEL, IO, TIMER, BLOCKING };
 
     virtual ~JobEvent()
     {
@@ -84,7 +84,7 @@ protected:
     static constexpr EventId DEFAULT_EVENT_ID = 0;
 
     explicit JobEvent(Type t, JobManager *jobManager, EventId id = DEFAULT_EVENT_ID)
-        : type_(t), jobManager_(jobManager), eventId_(id)
+        : jobManager_(jobManager), type_(t), eventId_(id)
     {
     }
 
@@ -100,11 +100,13 @@ protected:
         Unlock();
     }
 
+protected:
+    JobManager *jobManager_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
+
 private:
     Type type_ = Type::NONE;
     bool happened_ GUARDED_BY(this) = false;
     bool locked_ = false;
-    JobManager *jobManager_ = nullptr;
     EventId eventId_;
 
     os::memory::RecursiveMutex mutex_;
@@ -193,6 +195,35 @@ private:
     /// the time is represented in microseconds
     std::atomic<uint64_t> currentTime_ = 0;
     uint64_t expirationTime_ = 0;
+};
+
+/**
+ * @brief Blocking event used by synchronization primitives.
+ *
+ * This event is created as a temporary stack-local object when a job needs to block
+ * waiting for a synchronization primitive (mutex lock, event fire, etc.).
+ *
+ * Usage pattern:
+ * 1. Create BlockingEvent on stack (or obtain from pool)
+ * 2. Add to waiters list of the synchronization primitive
+ * 3. Call Wait() - this blocks the coroutine
+ * 4. When the primitive signals, the event is automatically cleaned up
+ *
+ * Execution model differences:
+ * - stackless: BlockingEvent::Wait blocks the worker thread itself. Other jobs
+ *   cannot be executed on the same worker while the current job is blocked
+ * - stackful: BlockingEvent::Wait suspends only the current coroutine/fiber, allowing
+ *   other coroutines to run on the same worker thread
+ */
+class BlockingEvent : public JobEvent {
+public:
+    explicit BlockingEvent(JobManager *jobManager) : JobEvent(Type::BLOCKING, jobManager) {}
+    ~BlockingEvent() override = default;
+
+    NO_COPY_SEMANTIC(BlockingEvent);
+    NO_MOVE_SEMANTIC(BlockingEvent);
+
+    void Wait() RELEASE(this);
 };
 
 }  // namespace ark

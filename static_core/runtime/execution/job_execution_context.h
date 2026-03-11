@@ -96,7 +96,7 @@ public:
 
     virtual void CacheBuiltinClasses() {}
 
-    void OnJobCompletion([[maybe_unused]] Value result) {};
+    virtual void OnJobCompletion(Value result);
 
 protected:
     // CC-OFFNXT(G.FUN.01-CPP) solid logic

@@ -36,12 +36,13 @@
 .record arkruntime.AsyncContext <external>
 .record std.core.Promise <external>
 .record std.core.Object <external>
+.record Y <external>
 
 .function arkruntime.AsyncContext arkruntime.AsyncContext.current() <external>
-.function arkruntime.AsyncContext arkruntime.AsyncContext.init() <external>
 .function std.core.Promise arkruntime.AsyncContext.resolve(arkruntime.AsyncContext a0, std.core.Object a1) <external>
-.function std.core.Promise std.core.Promise.resolve(std.core.Object a0) <external>
-.function std.core.Object std.core.Promise.awaitResolution(std.core.Promise a0) <external>
+.function Y arkruntime.AsyncContext.awaitResult(arkruntime.AsyncContext a0) <external>
+.function std.core.Promise std.core.Promise.resolve(Y a0) <external>
+.function Y std.core.Promise.awaitResolution(std.core.Promise a0) <external>
 
 .record Pair {
     std.core.Object ref
@@ -50,18 +51,18 @@
 
 # NOTE(panferovi): add @async annotation
 .function std.core.Promise async_foo(std.core.Promise a0) {
-    call.short arkruntime.AsyncContext.current                        # async function prologue begin
+    call.short arkruntime.AsyncContext.current                      # async function prologue begin
     sta.obj v0                                                      #
-    ets.async.dispatch v0                                           #
-                                                                    #
-    call.short arkruntime.AsyncContext.init                           #
-    sta.obj v0                                                      # end
+    ets.async.dispatch v0                                           # end
 
     newobj v1, std.core.Object                                      # let ref = new Object();
     movi.64 v2, 42                                                  # let primitive = 42;
 
     call.virt.short std.core.Promise.awaitResolution, a0            #
+   	checkcast arkruntime.AsyncContext                               #
+    sta.obj v0                                                      #
     ets.async.suspend v0                                            #
+	call.virt.short arkruntime.AsyncContext.awaitResult, v0         #
     checkcast Pair                                                  #
     sta.obj v3                                                      # let pair = await p;
 
@@ -70,7 +71,7 @@
     lda.64 v2                                                       #
     stobj.64 v3, Pair.primitive                                     # pair.primitive = primitive;
 
-    call.virt.short arkruntime.AsyncContext.resolve, v0, v3           #
+    call.virt.short arkruntime.AsyncContext.resolve, v0, v3         #
     return.obj                                                      # return pair;
 }
 
@@ -80,10 +81,6 @@
     sta.obj v0                                                      # let p = Promise.resolve(pair);
 
     call.short async_foo, v0                                        # async_foo(p);
-
-    # we need to call async_foo once again (to execute dispatch inst)
-    # until this is supported in the CoroutineManager
-    call.short async_foo, v0
 
     return.void
 }

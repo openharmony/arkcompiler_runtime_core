@@ -15,11 +15,13 @@
 #ifndef PANDA_RUNTIME_EXECUTION_JOB_MANAGER_H
 #define PANDA_RUNTIME_EXECUTION_JOB_MANAGER_H
 
-#include "libarkbase/clang.h"
 #include "runtime/thread_manager.h"
+#include "runtime/include/runtime.h"
 #include "runtime/execution/job.h"
 #include "runtime/execution/job_worker_group.h"
 #include "runtime/execution/job_launch.h"
+#include "libarkbase/clang.h"
+#include <type_traits>
 
 namespace ark {
 
@@ -81,8 +83,17 @@ public:
     virtual void RegisterExecutionContext(JobExecutionContext *executionCtx) = 0;
     virtual bool TerminateExecutionContext(JobExecutionContext *executionCtx) = 0;
 
-    Job *CreateJob(PandaString name, Job::EntrypointInfo &&epInfo, JobPriority priority = JobPriority::DEFAULT_PRIORITY,
-                   Job::Type type = Job::Type::MUTATOR, bool abortFlag = false);
+    template <typename JobT = Job, typename = std::enable_if_t<std::is_base_of_v<Job, JobT>>>
+    JobT *CreateJob(PandaString name, Job::EntrypointInfo &&epInfo,
+                    JobPriority priority = JobPriority::DEFAULT_PRIORITY, Job::Type type = Job::Type::MUTATOR,
+                    bool abortFlag = false)
+    {
+        auto id = AllocateJobId();
+        mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
+        auto *job = allocator->New<JobT>(std::move(name), id, std::move(epInfo), priority, type, abortFlag);
+        return job;
+    }
+
     void DestroyJob(Job *job);
 
     virtual LaunchResult Launch(Job *job, const LaunchParams &params) = 0;

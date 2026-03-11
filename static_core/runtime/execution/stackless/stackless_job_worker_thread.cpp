@@ -53,6 +53,8 @@ void StacklessJobWorkerThread::ExecuteJobs()
 
 void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
 {
+    ASSERT(awaitee->GetType() == JobEvent::Type::BLOCKING);
+
     if (awaitee->Happened()) {
         awaitee->Unlock();
         LOG(DEBUG, COROUTINES) << "StacklessJobWorkerThread::WaitForEvent finished (no await happened)";
@@ -60,44 +62,47 @@ void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
     }
 
     {
-        os::memory::LockHolder lh(pendingEventsLock_);
+        os::memory::LockHolder lh(waitersLock_);
         awaitee->Unlock();
-        pendingEvents_.insert(awaitee);
+        waiters_.emplace(awaitee, Job::GetCurrent());
     }
 
-    do {
-        ExecuteJobs();
-        // NOTE(panferovi): should we wait for runnables or event completion?
-    } while (!WaitForEventOrRunnables(awaitee));
-}
-
-bool StacklessJobWorkerThread::WaitForEventOrRunnables(JobEvent *awaitee)
-{
-    if (!EventIsInPendingQueue(awaitee)) {
-        return true;
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        waitersLock_.Lock();
+        auto evtIt = waiters_.find(awaitee);
+        // NOTE(panferovi): we need to fix ABA problem here
+        if (evtIt == waiters_.end()) {
+            waitersLock_.Unlock();
+            return;
+        }
+        os::memory::LockHolder lh(runnablesLock_);
+        waitersLock_.Unlock();
+        runnablesCv_.Wait(&runnablesLock_);
     }
-    os::memory::LockHolder lh(runnablesLock_);
-    if (!runnables_.Empty() || !IsActive()) {
-        return false;
-    }
-    runnablesCv_.Wait(&runnablesLock_);
-    LOG(DEBUG, EXECUTION) << "StacklessJobWorkerThread::WaitForRunnablesOrEventCompletion: wakeup!";
-    return false;
 }
 
 void StacklessJobWorkerThread::UnblockWaiters(JobEvent *blocker)
 {
-    os::memory::LockHolder lh(pendingEventsLock_);
-    pendingEvents_.erase(blocker);
-    runnablesCv_.Signal();
+    os::memory::LockHolder lh(waitersLock_);
+    if (auto waiter = waiters_.find(blocker); waiter != waiters_.end()) {
+        auto *job = waiter->second;
+        waiters_.erase(waiter);
+        if (blocker->GetType() == JobEvent::Type::BLOCKING) {
+            // we shouldn't add job to the runnables in this case
+            runnablesCv_.Signal();
+            return;
+        }
+        PushToRunnableQueue(job, job->GetPriority());
+    }
 }
 
 bool StacklessJobWorkerThread::EventIsInPendingQueue(JobEvent *event)
 {
-    os::memory::LockHolder lh(pendingEventsLock_);
-    auto evtIt = pendingEvents_.find(event);
+    os::memory::LockHolder lh(waitersLock_);
+    auto evtIt = waiters_.find(event);
     // NOTE(panferovi): we need to fix ABA problem here
-    if (evtIt != pendingEvents_.end()) {
+    if (evtIt != waiters_.end()) {
         return true;
     }
     return false;
@@ -106,9 +111,7 @@ bool StacklessJobWorkerThread::EventIsInPendingQueue(JobEvent *event)
 void StacklessJobWorkerThread::AddRunnableJob(Job *job)
 {
     ASSERT(job != nullptr);
-    job->SetStatus(Job::Status::RUNNABLE);
     RegisterIncomingJob(job);
-    os::memory::LockHolder lock(runnablesLock_);
     PushToRunnableQueue(job, job->GetPriority());
 }
 
@@ -117,6 +120,25 @@ void StacklessJobWorkerThread::AddJobAndExecute(Job *job)
     ASSERT(job != nullptr);
     RegisterIncomingJob(job);
     ExecuteJob(job);
+}
+
+void StacklessJobWorkerThread::AddJobWithDependency(Job *job, JobEvent *dependency)
+{
+    ASSERT(job != nullptr);
+    ASSERT(dependency != nullptr);
+    LOG_IF(dependency->GetType() != JobEvent::Type::GENERIC, FATAL, EXECUTION)
+        << "Currently only GenericEvent is supported";
+    dependency->Lock();
+    if (dependency->Happened()) {
+        dependency->Unlock();
+        AddRunnableJob(job);
+        return;
+    }
+    os::memory::LockHolder lh(waitersLock_);
+    dependency->Unlock();
+    RegisterIncomingJob(job);
+    job->SetStatus(Job::Status::BLOCKED);
+    waiters_.emplace(dependency, job);
 }
 
 void StacklessJobWorkerThread::OnStartup()
@@ -140,7 +162,6 @@ void StacklessJobWorkerThread::AttachExecutionContext(JobExecutionContext *execu
     ASSERT(executionCtx != nullptr);
     SetSchedulerExecutionCtx(executionCtx);
     executionCtx->SetWorker(this);
-    RegisterIncomingJob(executionCtx->GetJob());
 }
 
 void StacklessJobWorkerThread::ThreadProc()
@@ -169,6 +190,8 @@ void StacklessJobWorkerThread::ScheduleLoopBody()
 
 void StacklessJobWorkerThread::PushToRunnableQueue(Job *job, JobPriority priority)
 {
+    job->SetStatus(Job::Status::RUNNABLE);
+    os::memory::LockHolder lock(runnablesLock_);
     runnables_.Push(job, priority);
     UpdateLoadFactorImpl();
     runnablesCv_.Signal();
@@ -196,7 +219,7 @@ bool StacklessJobWorkerThread::ExecuteRunnableJob()
 void StacklessJobWorkerThread::ExecuteJob(Job *job)
 {
     GetSchedulerExecutionCtx()->ExecuteJob(job);
-    if (job->GetStatus() != Job::Status::BLOCKED) {
+    if (job->GetStatus() == Job::Status::RUNNING) {
         job->SetStatus(Job::Status::TERMINATING);
         jobManager_->RemoveJobFromRegistry(job);
         jobManager_->DestroyJob(job);

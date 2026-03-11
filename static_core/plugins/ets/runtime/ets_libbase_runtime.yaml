@@ -5876,6 +5876,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsAsyncContextResult
 
+  - name: StdAsyncContextAwaitResult
+    space: ets
+    class_name: arkruntime.AsyncContext
+    method_name: awaitResult
+    static: false
+    signature:
+      ret: Y
+      args: []
+    impl: ark::ets::intrinsics::EtsAsyncContextAwaitResult
+
 ########################
 # std.core.Job #
 ########################

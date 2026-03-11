@@ -43,15 +43,14 @@ EtsAsyncContext *EtsAsyncContextInit()
 EtsAsyncContext *EtsAsyncContextCurrent()
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
-    auto *refStorage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
-    auto *ctxRef = EtsCoroutine::CastFromThread(executionCtx->GetMT())->GetAsyncContext();
-    return ctxRef == nullptr ? nullptr : EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(ctxRef));
+    return EtsAsyncContext::GetCurrent(executionCtx);
 }
 
 EtsPromise *EtsAsyncContextResolve(EtsAsyncContext *asyncCtx, EtsObject *val)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *returnValue = asyncCtx->GetReturnValue(executionCtx);
+    EtsHandleScope s(executionCtx);
     EtsHandle<EtsPromise> hpromise(executionCtx, returnValue);
     EtsHandle<EtsObject> hval(executionCtx, val);
     EtsMutex::LockHolder lh(hpromise);
@@ -64,6 +63,7 @@ EtsPromise *EtsAsyncContextReject(EtsAsyncContext *asyncCtx, EtsError *err)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *returnValue = asyncCtx->GetReturnValue(executionCtx);
+    EtsHandleScope s(executionCtx);
     EtsHandle<EtsPromise> hpromise(executionCtx, returnValue);
     EtsHandle<EtsError> herr(executionCtx, err);
     EtsMutex::LockHolder lh(hpromise);
@@ -78,6 +78,18 @@ EtsObject *EtsAsyncContextResult(EtsAsyncContext *asyncCtx)
     auto *returnValue = asyncCtx->GetReturnValue(executionCtx);
     ASSERT(returnValue->IsResolved() || returnValue->IsRejected());
     return returnValue->GetValue(executionCtx);
+}
+
+EtsObject *EtsAsyncContextAwaitResult(EtsAsyncContext *asyncCtx)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *awaiteeP = asyncCtx->GetAwaitee(executionCtx);
+    ASSERT(awaiteeP->IsResolved() || awaiteeP->IsRejected());
+    if (awaiteeP->IsResolved()) {
+        return awaiteeP->GetValue(executionCtx);
+    }
+    executionCtx->GetMT()->SetException(awaiteeP->GetValue(executionCtx)->GetCoreType());
+    return nullptr;
 }
 
 }  // namespace ark::ets::intrinsics

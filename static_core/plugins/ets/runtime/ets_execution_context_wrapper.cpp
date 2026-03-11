@@ -14,13 +14,20 @@
  */
 
 #include "plugins/ets/runtime/ets_execution_context_wrapper.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
+#include "plugins/ets/runtime/types/ets_job.h"
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/job_worker_thread.h"
 #include "runtime/execution/job_manager.h"
+#include "runtime/execution/job_events.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
+
+static EtsObject *GetReturnValueAsObject(EtsExecutionContext *executionCtx, panda_file::Type returnType,
+                                         Value returnValue);
 
 EtsExecutionContextWrapper::EtsExecutionContextWrapper(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                                                        Job *job)
@@ -56,6 +63,73 @@ void EtsExecutionContextWrapper::UpdateCachedObjects()
 void EtsExecutionContextWrapper::CacheBuiltinClasses()
 {
     executionCtx_.CacheBuiltinClasses();
+}
+
+void EtsExecutionContextWrapper::OnJobCompletion(Value result)
+{
+    auto *completionEvt = GetJob()->GetCompletionEvent();
+    if (completionEvt == nullptr) {
+        return;
+    }
+    auto *retValueRef = completionEvt->ReleaseReturnValueObject();
+    if (retValueRef == nullptr) {
+        JobExecutionContext::OnJobCompletion(result);
+        return;
+    }
+
+    EtsObject *retObject = nullptr;
+    if (!HasPendingException()) {
+        panda_file::Type returnType = GetJob()->GetManagedEntrypoint()->GetReturnType();
+        retObject = GetReturnValueAsObject(GetExecutionCtx(), returnType, result);
+    }
+
+    auto *storage = executionCtx_.GetPandaVM()->GetGlobalObjectStorage();
+    auto *completedJob = EtsJob::FromCoreType(storage->Get(retValueRef));
+    storage->Remove(retValueRef);
+    ASSERT(completedJob != nullptr);
+    ASSERT(completedJob->GetClass() == PlatformTypes(GetExecutionCtx())->coreJob);
+
+    // An exception may occur while boxin primitive return value in GetReturnValueAsObject
+    if (HasPendingException()) {
+        auto *exc = GetException();
+        if (!GetJob()->HasAbortFlag()) {
+            ClearException();
+        }
+        EtsJob::EtsJobFail(completedJob, EtsObject::FromCoreType(exc));
+        return;
+    }
+    EtsJob::EtsJobFinish(completedJob, retObject);
+}
+
+static EtsObject *GetReturnValueAsObject(EtsExecutionContext *executionCtx, panda_file::Type returnType,
+                                         Value returnValue)
+{
+    switch (returnType.GetId()) {
+        case panda_file::Type::TypeId::VOID:
+            return nullptr;  // a representation of ets "undefined"
+        case panda_file::Type::TypeId::U1:
+            return EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, returnValue.GetAs<EtsBoolean>());
+        case panda_file::Type::TypeId::I8:
+            return EtsBoxPrimitive<EtsByte>::Create(executionCtx, returnValue.GetAs<EtsByte>());
+        case panda_file::Type::TypeId::I16:
+            return EtsBoxPrimitive<EtsShort>::Create(executionCtx, returnValue.GetAs<EtsShort>());
+        case panda_file::Type::TypeId::U16:
+            return EtsBoxPrimitive<EtsChar>::Create(executionCtx, returnValue.GetAs<EtsChar>());
+        case panda_file::Type::TypeId::I32:
+            return EtsBoxPrimitive<EtsInt>::Create(executionCtx, returnValue.GetAs<EtsInt>());
+        case panda_file::Type::TypeId::F32:
+            return EtsBoxPrimitive<EtsFloat>::Create(executionCtx, returnValue.GetAs<EtsFloat>());
+        case panda_file::Type::TypeId::F64:
+            return EtsBoxPrimitive<EtsDouble>::Create(executionCtx, returnValue.GetAs<EtsDouble>());
+        case panda_file::Type::TypeId::I64:
+            return EtsBoxPrimitive<EtsLong>::Create(executionCtx, returnValue.GetAs<EtsLong>());
+        case panda_file::Type::TypeId::REFERENCE:
+            return EtsObject::FromCoreType(returnValue.GetAs<ObjectHeader *>());
+        default:
+            LOG(FATAL, EXECUTION) << "Unsupported return type: " << returnType;
+            break;
+    }
+    return nullptr;
 }
 
 }  // namespace ark::ets

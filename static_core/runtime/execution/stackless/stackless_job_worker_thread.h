@@ -53,6 +53,8 @@ public:
 
     void AddJobAndExecute(Job *job);
 
+    void AddJobWithDependency(Job *job, JobEvent *dependency);
+
     void OnStartup() override;
 
     void Deactivate();
@@ -80,13 +82,11 @@ private:
 
     void WaitForRunnables();
 
-    bool WaitForEventOrRunnables(JobEvent *awaitee);
-
     void UpdateLoadFactor();
 
     void UpdateLoadFactorImpl() REQUIRES(runnablesLock_);
 
-    void PushToRunnableQueue(Job *job, JobPriority priority) REQUIRES(runnablesLock_);
+    void PushToRunnableQueue(Job *job, JobPriority priority);
 
     void RegisterIncomingJob(Job *newJob);
 
@@ -102,8 +102,8 @@ private:
     os::memory::ConditionVariable runnablesCv_;
     PriorityQueue<Job> runnables_ GUARDED_BY(runnablesLock_);
 
-    os::memory::Mutex pendingEventsLock_;
-    PandaUnorderedSet<JobEvent *> pendingEvents_;
+    os::memory::Mutex waitersLock_;
+    PandaMap<JobEvent *, Job *> waiters_ GUARDED_BY(waitersLock_);
 
     /// the moving average number of coroutines in the runnable queue
     std::atomic<double> loadFactor_ = 0;

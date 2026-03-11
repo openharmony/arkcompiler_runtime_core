@@ -137,7 +137,7 @@ void Coroutine::ExecuteJob(Job *job)
     }
     ASSERT(job->GetStatus() != Job::Status::BLOCKED);
     job->SetExecutionContext(nullptr);
-    if (HasPendingException() && GetJob()->HasAbortFlag()) {
+    if (HasPendingException() && job->HasAbortFlag()) {
         HandleUncaughtException();
     }
 }

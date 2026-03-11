@@ -73,10 +73,10 @@ public:
     }
 
     ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregsSize, Method *method,
-                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs)
+                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs, CallFlags callFlags)
     {
         return interpreter::RuntimeInterface::CreateFrameWithActualArgsAndSize(nregsSize, nregs, numActualArgs, method,
-                                                                               prev);
+                                                                               prev, callFlags);
     }
 };
 
@@ -129,10 +129,10 @@ public:
     }
 
     ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregsSize, Method *method,
-                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs)
+                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs, CallFlags callFlags)
     {
         return interpreter::RuntimeInterface::CreateFrameWithActualArgsAndSize(nregsSize, nregs, numActualArgs, method,
-                                                                               prev);
+                                                                               prev, callFlags);
     }
 };
 
@@ -168,7 +168,8 @@ ValueT Method::GetReturnValueFromAcc(interpreter::AccVRegister &aacVreg)
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args)
+inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args,
+                                        [[maybe_unused]] CallFlags callFlags)
 {
     Frame *currentFrame = thread->GetCurrentFrame();
     Span<Value> argsSpan(args, numArgs);
@@ -211,10 +212,11 @@ inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs,
 }
 
 template <class InvokeHelper, class ValueT>
-ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualArgs, ValueT *args)
+ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, CallFlags callFlags)
 {
     Frame *currentFrame = thread->GetCurrentFrame();
-    PandaUniquePtr<Frame, FrameDeleter> frame = InitFrame<InvokeHelper>(thread, numActualArgs, args, currentFrame);
+    PandaUniquePtr<Frame, FrameDeleter> frame =
+        InitFrame<InvokeHelper>(thread, numActualArgs, args, currentFrame, callFlags);
     if (UNLIKELY(frame.get() == nullptr)) {
         ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return GetReturnValueFromException<InvokeHelper, ValueT>();
@@ -279,7 +281,7 @@ inline coretypes::TaggedValue Method::InvokeDyn(ManagedThread *thread, uint32_t 
 template <class InvokeHelper>
 inline coretypes::TaggedValue Method::InvokeDyn(ManagedThread *thread, uint32_t numArgs, coretypes::TaggedValue *args)
 {
-    return InvokeImpl<InvokeHelper>(thread, numArgs, args, false);
+    return InvokeImpl<InvokeHelper>(thread, numArgs, args, CallFlags {});
 }
 
 inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const uint8_t *pc,
@@ -338,11 +340,12 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
 }
 
 template <class InvokeHelper, class ValueT>
-Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args)
+Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args,
+                                      CallFlags callFlags)
 {
     Frame *currentFrame = thread->GetCurrentFrame();
     PandaUniquePtr<Frame, FrameDeleter> frame =
-        InitFrameWithNumVRegs<InvokeHelper, ValueT, true>(thread, numVregs, numArgs, args, currentFrame);
+        InitFrameWithNumVRegs<InvokeHelper, ValueT, true>(thread, numVregs, numArgs, args, currentFrame, callFlags);
     if (UNLIKELY(frame.get() == nullptr)) {
         ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return nullptr;
@@ -367,17 +370,18 @@ inline void Method::ExitNativeMethodFrame(ManagedThread *thread)
 
 template <class InvokeHelper, class ValueT>
 PandaUniquePtr<Frame, FrameDeleter> Method::InitFrame(ManagedThread *thread, uint32_t numActualArgs, ValueT *args,
-                                                      Frame *currentFrame)
+                                                      Frame *currentFrame, CallFlags callFlags)
 {
     ASSERT(codeId_.IsValid());
     auto numVregs = GetNumVregs();
-    return InitFrameWithNumVRegs<InvokeHelper, ValueT, false>(thread, numVregs, numActualArgs, args, currentFrame);
+    return InitFrameWithNumVRegs<InvokeHelper, ValueT, false>(thread, numVregs, numActualArgs, args, currentFrame,
+                                                              callFlags);
 }
 
 template <class InvokeHelper, class ValueT, bool IS_NATIVE_METHOD>
 PandaUniquePtr<Frame, FrameDeleter> Method::InitFrameWithNumVRegs(ManagedThread *thread, uint32_t numVregs,
                                                                   uint32_t numActualArgs, ValueT *args,
-                                                                  Frame *currentFrame)
+                                                                  Frame *currentFrame, CallFlags callFlags)
 {
     Span<ValueT> argsSpan(args, numActualArgs);
 
@@ -388,10 +392,10 @@ PandaUniquePtr<Frame, FrameDeleter> Method::InitFrameWithNumVRegs(ManagedThread 
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (IS_NATIVE_METHOD) {
         framePtr = interpreter::RuntimeInterface::CreateNativeFrameWithActualArgs<InvokeHelper::IS_DYNAMIC>(
-            frameSize, numActualArgs, this, currentFrame);
+            frameSize, numActualArgs, this, currentFrame, callFlags);
     } else {  // NOLINTNEXTLINE(readability-braces-around-statements)
         framePtr = InvokeHelper::CreateFrame(thread, Frame::GetActualSize<InvokeHelper::IS_DYNAMIC>(frameSize), this,
-                                             currentFrame, frameSize, numActualArgs);
+                                             currentFrame, frameSize, numActualArgs, callFlags);
     }
     PandaUniquePtr<Frame, FrameDeleter> frame(framePtr, FrameDeleter(thread));
     if (UNLIKELY(frame.get() == nullptr)) {
@@ -405,7 +409,7 @@ PandaUniquePtr<Frame, FrameDeleter> Method::InitFrameWithNumVRegs(ManagedThread 
 }
 
 template <class InvokeHelper, class ValueT>
-ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, bool proxyCall)
+ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, CallFlags callFlags)
 {
     DecrementHotnessCounter<true>(thread, 0, nullptr);
     if (UNLIKELY(thread->HasPendingException())) {
@@ -415,20 +419,20 @@ ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT 
     // Currently, proxy methods should always be invoked in the interpreter. This constraint should be relaxed once
     // we support same frame layout for interpreter and compiled methods.
     // NOTE(msherstennikov): remove `proxy_call`
-    bool runInterpreter = !HasCompiledCode() || proxyCall;
-    ASSERT(!(proxyCall && IsNative()));
+    bool runInterpreter = !HasCompiledCode() || callFlags.IsProxy();
+    ASSERT(!(callFlags.IsProxy() && IsNative()));
     if (!runInterpreter) {
         if constexpr (InvokeHelper::IS_DYNAMIC) {  // NOLINT(readability-braces-around-statements)
             return InvokeHelper::CompiledCodeExecute(thread, this, numActualArgs, args);
         } else {  // NOLINT(readability-misleading-indentation)
-            return InvokeCompiledCode(thread, numActualArgs, args);
+            return InvokeCompiledCode(thread, numActualArgs, args, callFlags);
         }
     }
     if (!thread->template StackOverflowCheck<true, false>()) {
         return GetReturnValueFromException<InvokeHelper, ValueT>();
     }
 
-    return InvokeInterpretedCode<InvokeHelper>(thread, numActualArgs, args);
+    return InvokeInterpretedCode<InvokeHelper>(thread, numActualArgs, args, callFlags);
 }
 
 template <class AccVRegisterPtrT>

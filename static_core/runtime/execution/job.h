@@ -107,7 +107,6 @@ public:
         explicit ManagedEntrypointInfo(CompletionEvent *event, Method *entry, PandaVector<Value> &&args)
             : completionEvent(event), entrypoint(entry), arguments(std::move(args))
         {
-            ASSERT(event != nullptr);
             ASSERT(entry != nullptr);
         }
 
@@ -192,9 +191,8 @@ public:
     /// @param executionCtx updates job's execution context
     inline void SetExecutionContext(JobExecutionContext *executionCtx);
     /// invokes job's entrypoint within execution context
-    void InvokeEntrypoint();
+    virtual void InvokeEntrypoint();
 
-private:
     Job(PandaString name, Id id, EntrypointInfo &&epInfo, JobPriority priority, Type type, bool abortFlag)
         : name_(std::move(name)),
           id_(id),
@@ -206,8 +204,12 @@ private:
     }
     NO_COPY_SEMANTIC(Job);
     DEFAULT_MOVE_SEMANTIC(Job);
-    ~Job() = default;
+    virtual ~Job() = default;
 
+protected:
+    void InvokeEntrypointImpl(bool resumedFrame);
+
+private:
     /// job's stuff
     PandaString name_;
     Id id_;
@@ -221,9 +223,6 @@ private:
 
     /// current execution context
     JobExecutionContext *executionCtx_ = nullptr;
-
-    // Allocator calls our protected ctor
-    friend class mem::Allocator;
 };
 
 }  // namespace ark

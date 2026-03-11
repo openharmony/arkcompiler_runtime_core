@@ -555,8 +555,6 @@ public:
         auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
 
         if (asyncCtx == nullptr) {
-            ObjectHeader *undefined = nullptr;
-            this->GetAccAsVReg().SetReference(undefined);
             this->template MoveToNextInst<FORMAT, true>();
             return;
         }
@@ -594,10 +592,6 @@ public:
 
         asyncCtx->SetRefCount(0);
         asyncCtx->SetPrimCount(0);
-
-        auto *awaiteePromise = asyncCtx->GetAwaitee(executionCtx);
-        ASSERT(!awaiteePromise->IsPending());
-        this->GetAccAsVReg().SetReference(EtsObject::ToCoreType(awaiteePromise->GetValue(executionCtx)));
 
         // load resume point id
         auto resumePointId = reinterpret_cast<const uint8_t *>(asyncCtx->GetAwaitId());

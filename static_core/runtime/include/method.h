@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,29 @@ public:
 
 private:
     ManagedThread *thread_;
+};
+
+class CallFlags {
+public:
+    CallFlags() : callFlags_(DEFAULT_CALL) {}
+    explicit CallFlags(uint8_t callFlags) : callFlags_(callFlags) {}
+
+    static constexpr uint8_t DEFAULT_CALL = 0;
+    static constexpr uint8_t IS_PROXY = 1;
+    static constexpr uint8_t IS_RESUMED = 1U << 1U;
+
+    bool IsProxy() const
+    {
+        return (callFlags_ & IS_PROXY) != 0;
+    }
+
+    bool IsResumed() const
+    {
+        return (callFlags_ & IS_RESUMED) != 0;
+    }
+
+private:
+    uint8_t callFlags_;
 };
 
 class Method {
@@ -262,7 +285,7 @@ public:
      * Invoke the method as a static method.
      * Number of arguments and their types must match the method's signature
      */
-    PANDA_PUBLIC_API Value Invoke(ManagedThread *thread, Value *args, bool proxyCall = false);
+    PANDA_PUBLIC_API Value Invoke(ManagedThread *thread, Value *args, CallFlags callFlags = CallFlags {});
 
     void InvokeVoid(ManagedThread *thread, Value *args)
     {
@@ -308,7 +331,8 @@ public:
      * data - ark::ExtFrame language-related extension data
      */
     template <class InvokeHelper, class ValueT>
-    Frame *EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args);
+    Frame *EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args,
+                                  CallFlags callFlags);
 
     /*
      * Pop native method frame
@@ -938,7 +962,7 @@ private:
     inline void FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
                                 PandaVector<uint32_t> &branches, PandaVector<uint32_t> &throws) const;
 
-    Value InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args);
+    Value InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args, CallFlags callFlags);
 
     Value GetReturnValueFromTaggedValue(uint64_t retValue)
     {
@@ -969,16 +993,16 @@ private:
     }
 
     template <class InvokeHelper, class ValueT>
-    ValueT InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualArgs, ValueT *args);
+    ValueT InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, CallFlags callFlags);
 
     template <class InvokeHelper, class ValueT>
     PandaUniquePtr<Frame, FrameDeleter> InitFrame(ManagedThread *thread, uint32_t numActualArgs, ValueT *args,
-                                                  Frame *currentFrame);
+                                                  Frame *currentFrame, CallFlags callFlags);
 
     template <class InvokeHelper, class ValueT, bool IS_NATIVE_METHOD>
     PandaUniquePtr<Frame, FrameDeleter> InitFrameWithNumVRegs(ManagedThread *thread, uint32_t numVregs,
-                                                              uint32_t numActualArgs, ValueT *args,
-                                                              Frame *currentFrame);
+                                                              uint32_t numActualArgs, ValueT *args, Frame *currentFrame,
+                                                              CallFlags callFlags);
 
     template <class InvokeHelper, class ValueT>
     ValueT GetReturnValueFromException();
@@ -987,7 +1011,7 @@ private:
     ValueT GetReturnValueFromAcc(interpreter::AccVRegister &aacVreg);
 
     template <class InvokeHelper, class ValueT>
-    ValueT InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, bool proxyCall);
+    ValueT InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, CallFlags callFlags);
 
     template <bool IS_CALL>
     inline bool DecrementHotnessCounterForTaggedFunction(ManagedThread *thread, uintptr_t bcOffset, bool osr,

@@ -207,7 +207,7 @@ TEST_F(HeapVerifierTest, VerifyRoot)
     {
         PandaUniquePtr<Method> fakeMethod = MakeFakeMethod();
         auto frame = std::unique_ptr<Frame, decltype(frameDeleter)>(
-            CreateFrameWithSize(NUM_VREGS * 2, NUM_VREGS, fakeMethod.get(), nullptr), frameDeleter);
+            CreateFrameWithSize(NUM_VREGS * 2, NUM_VREGS, fakeMethod.get(), nullptr, CallFlags {}), frameDeleter);
         ASSERT(frame != nullptr);
         ManagedThread::GetCurrent()->SetCurrentFrame(frame.get());
         EXPECT_EQ(verifier.VerifyRoot(), EXPECTED_FAIL_COUNT_ZERO);

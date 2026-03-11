@@ -60,7 +60,13 @@ export final class AsyncContext {
 
     /**
      * Method returns value that was used to resolve or reject associated promise  
-     * @returns { Promise<Any> } rejected promise 
+     * @returns { Any } async context's result 
      */
     native result(): Any;
+
+    /**
+     * Method returns value that was awaited
+     * @returns { Promise<Any> } awaited promise's result 
+     */
+    native awaitResult(): Any;
 }

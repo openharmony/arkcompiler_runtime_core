@@ -215,7 +215,7 @@ Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::Entit
     SetCompilationStatus(CompilationStage::NOT_COMPILED);
 }
 
-Value Method::Invoke(ManagedThread *thread, Value *args, bool proxyCall)
+Value Method::Invoke(ManagedThread *thread, Value *args, CallFlags callFlags)
 {
 #ifndef NDEBUG
     if (thread->HasPendingException()) {
@@ -227,7 +227,7 @@ Value Method::Invoke(ManagedThread *thread, Value *args, bool proxyCall)
     if (thread->HasPendingException()) {
         return Value();
     }
-    return InvokeImpl<InvokeHelperStatic>(thread, GetNumArgs(), args, proxyCall);
+    return InvokeImpl<InvokeHelperStatic>(thread, GetNumArgs(), args, callFlags);
 }
 
 PANDA_PUBLIC_API panda_file::Type Method::GetReturnType() const

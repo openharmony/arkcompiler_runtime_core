@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,14 +175,13 @@ async function testDoubleFunc(): Promise<void> {
 }
 
 function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.launch_return');
-    testSuite.addAsyncTest('testByteFunc', testByteFunc);
-    testSuite.addAsyncTest('testCharFunc', testCharFunc);
-    testSuite.addAsyncTest('testShortFunc', testShortFunc);
-    testSuite.addAsyncTest('testIntFunc', testIntFunc);
-    testSuite.addAsyncTest('testLongFunc', testLongFunc);
-    testSuite.addAsyncTest('testFloatFunc', testFloatFunc);
-    testSuite.addAsyncTest('testDoubleFunc', testDoubleFunc);
-    let res = testSuite.run();
-    return res;
+    // NOTE(panferovi): #34019 (fix arktest.addAsyncTest)
+    testByteFunc();
+    testCharFunc();
+    testShortFunc();
+    testIntFunc();
+    testLongFunc();
+    testFloatFunc();
+    testDoubleFunc();
+    return 0;
 }
