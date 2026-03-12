@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,25 +58,25 @@ inline const char *SpaceTypeToString(SpaceType type)
 {
     switch (type) {
         case SpaceType::SPACE_TYPE_UNDEFINED:
-            return "ark-Undefined Space";
+            return "ArkTs Static Undefined Space";
         case SpaceType::SPACE_TYPE_OBJECT:
-            return "ark-Object Space";
+            return "ArkTs Static Object Space";
         case SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT:
-            return "ark-Humongous Object Space";
+            return "ArkTs Static Humongous Object Space";
         case SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT:
-            return "ark-Non Movable Space";
+            return "ArkTs Static Non Movable Space";
         case SpaceType::SPACE_TYPE_INTERNAL:
-            return "ark-Internal Space";
+            return "ArkTs Static Internal Space";
         case SpaceType::SPACE_TYPE_CODE:
-            return "ark-Code Space";
+            return "ArkTs Static Code Space";
         case SpaceType::SPACE_TYPE_COMPILER:
-            return "ark-Compiler Space";
+            return "ArkTs Static Compiler Space";
         case SpaceType::SPACE_TYPE_FRAMES:
-            return "ark-Frames Space";
+            return "ArkTs Static Frames Space";
         case SpaceType::SPACE_TYPE_NATIVE_STACKS:
-            return "ark-Native Stacks Space";
+            return "ArkTs Static Native Stacks Space";
         default:
-            return "ark-Unknown Space";
+            return "ArkTs Static Unknown Space";
     }
 }
 
