@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Overload Declarations - optional and rest parameters methods overload.
-tags: []
 ---*/
 
 class A {

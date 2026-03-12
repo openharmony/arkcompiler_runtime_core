@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Overload resolution for an instance method overload always uses the type of the object reference known at compile time.
-tags: []
 ---*/
 
 class A {

@@ -13,38 +13,20 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{%- for c in cases %}
+
 /*---
-desc: Overload Resolution for Overload Declarations - function overload.
-tags: []
+desc: |-
+    A compile-time error also occurs if a name referred by qualifiedName is one of the following:
+    - Undefined or inaccessible;
+tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
-function max2i(a: int, b: int): int {
-    return 100 + (a > b ? a : b);
-}
-
-function max2d(a: double, b: double): double {
-    return 200 + (a > b ? a : b);
-}
-
-function maxN(...a: double[]): double {
-    let max: double = a[0];
-    for (let x: number of a) {
-        if (x > max) {
-             max = x;
-        }
-    }
-    return 300 + max;
-}
-
-overload maxFn { {{c.list}} };
+{{c.decl}}
 
 function main() {
-    let i: int = 1;
-    let j: int = 2;
-    let pi: number = 3.14;
-
-    arktest.assertEQ({{c.result}}, {{c.call}});
+    {{ (c.main or '') | indent }}
 }
-
-{% endfor %}
+{%- endfor %}

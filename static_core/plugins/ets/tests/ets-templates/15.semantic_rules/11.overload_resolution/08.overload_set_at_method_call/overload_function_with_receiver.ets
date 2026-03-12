@@ -13,35 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: Additional processing of an overload set is used at Method Call Expression 
+      because an identifier at the call site can denote both instance methods 
+      and Functions with Receiver.
 ---*/
 
-final class A {
-    public size: number = 0;
+class C {}
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
-}
+function foo(this: C): int { return 1 }
+function foo(this: C, s: string): int { return 2 }
+function foo(c: C, n: number): int { return 3 }
 
 function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
+    let c = new C()
+    arktest.assertEQ(c.foo(), 1, 'foo1 call expected');
+    arktest.assertEQ(c.foo('1'), 2, 'foo2 call expected');
+    arktest.assertEQ(foo(c), 1, 'foo1 call expected');
+    arktest.assertEQ(foo(c, 1), 3, 'foo3 with receiver call expected');
 }
-
-{% endfor %}

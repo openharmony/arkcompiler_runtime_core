@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Overload Declarations - numeric parameters counstructor overload.
-tags: []
 ---*/
 
 class A {

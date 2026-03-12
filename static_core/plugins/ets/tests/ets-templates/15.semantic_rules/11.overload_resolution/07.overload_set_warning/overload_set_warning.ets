@@ -13,35 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: A compile-time warning is issued if the order of entities in an overload 
+      set implies that some overloaded entity can never be selected for a call.
+tags: [compile-only]
+expected_out: "TODO: CTWarning unknown"
 ---*/
 
-final class A {
-    public size: number = 0;
+function f1(p: number) {}
+function f2(p: number|string) {}
+function f3(p: string) {}
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
-}
-
-function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
-}
-
-{% endfor %}
+overload foo { f1, f2, f3 }

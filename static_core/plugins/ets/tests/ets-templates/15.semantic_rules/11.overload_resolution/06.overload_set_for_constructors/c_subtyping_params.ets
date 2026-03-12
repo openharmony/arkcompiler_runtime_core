@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Overload Declarations - subtyping parameters constructor overload.
-tags: []
 ---*/
 
 class A {}

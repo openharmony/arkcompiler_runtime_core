@@ -15,33 +15,37 @@
 
 {% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+assertion: If an overload set is formed from explicit overloads only, then the order 
+           of the overload set is the same as the order of the entities listed.
+desc: Overload Resolution for Overload Declarations - explicit function overload.
 ---*/
 
-final class A {
-    public size: number = 0;
-
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
+function max2i(a: int, b: int): int {
+    return 100 + (a > b ? a : b);
 }
+
+function max2d(a: double, b: double): double {
+    return 200 + (a > b ? a : b);
+}
+
+function maxN(...a: double[]): double {
+    let max: double = a[0];
+    for (let x: number of a) {
+        if (x > max) {
+             max = x;
+        }
+    }
+    return 300 + max;
+}
+
+overload maxFn { {{c.list}} };
 
 function main() {
     let i: int = 1;
+    let j: int = 2;
     let pi: number = 3.14;
-    let a: A = new A({{c.param}});
 
-    arktest.assertEQ({{c.result}}, a.size);
+    arktest.assertEQ({{c.result}}, {{c.call}});
 }
 
 {% endfor %}

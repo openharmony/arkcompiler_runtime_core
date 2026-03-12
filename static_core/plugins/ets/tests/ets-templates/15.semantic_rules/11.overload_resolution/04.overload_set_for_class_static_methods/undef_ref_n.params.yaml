@@ -15,18 +15,18 @@
 cases:
     - decl: |-
           class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
+              static foo(...p: Any[]) { return 1 }
+              static foo(p: Any) { return 2 }
           }
       main: |-
-          let v = new A().foo(x)
+          let v = A.foo(x)
       expected_out: 'Semantic error ESE0143: Unresolved reference x'
 
     - decl: |-
           class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
+              static foo(...p: Any[]) { return 1 }
+              static foo(p: Any) { return 2 }
           }
       main: |-
-          let v = new A().foo(x.fld)
+          let v = A.foo(x.fld)
       expected_out: 'Semantic error ESE0143: Unresolved reference x'

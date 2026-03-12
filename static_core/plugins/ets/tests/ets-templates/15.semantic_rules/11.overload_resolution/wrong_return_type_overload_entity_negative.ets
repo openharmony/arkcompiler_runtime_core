@@ -13,35 +13,13 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: Return types of overload entities are not considered by overload resolution.
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE0318: Type 'String' cannot be assigned to type 'Double'"
 ---*/
 
-final class A {
-    public size: number = 0;
+function foo(n: number): number { return n }
+function foo(s: string): string { return s }
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
-}
-
-function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
-}
-
-{% endfor %}
+let x: number = foo("1")
