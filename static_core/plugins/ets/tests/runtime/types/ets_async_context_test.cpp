@@ -57,12 +57,17 @@ public:
 
     static std::vector<MirrorFieldInfo> GetAsyncContextMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsAsyncContext, awaitee_, "awaitee"),
-                                             MIRROR_FIELD_INFO(EtsAsyncContext, returnValue_, "returnValue"),
-                                             MIRROR_FIELD_INFO(EtsAsyncContext, vregsMask_, "vregsMask"),
-                                             MIRROR_FIELD_INFO(EtsAsyncContext, vregsRefs_, "vregsRefs"),
-                                             MIRROR_FIELD_INFO(EtsAsyncContext, vregsPrimitives_, "vregsPrimitives"),
-                                             MIRROR_FIELD_INFO(EtsAsyncContext, awaitId_, "awaitId")};
+        return std::vector<MirrorFieldInfo> {
+            MIRROR_FIELD_INFO(EtsAsyncContext, awaitee_, "awaitee"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, returnValue_, "returnValue"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, refValues_, "refValues"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, primValues_, "primValues"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, refCount_, "refCount"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, primCount_, "primCount"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, frameOffsets_, "frameOffsets"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, awaitId_, "awaitId"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, compiledCode_, "compiledCode"),
+        };
     }
 
 protected:

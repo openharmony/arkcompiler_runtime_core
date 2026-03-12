@@ -509,17 +509,33 @@ public:
         asyncCtx->SetAwaitId(resumePointId);
 
         // save vregs to context
-        // NOTE(panferovi, #33620): need to check if AsyncContext has enough memory to save vregs
         auto frameHandler = GetFrameHandler(frame);
         auto *coro = this->GetCoro();
-        for (size_t idx = 0; idx < frame->GetSize(); ++idx) {
-            auto vreg = frameHandler.GetVReg(idx);
+        auto *frameOffsets = asyncCtx->GetFrameOffsets(coro);
+        uint32_t frameSize = frame->GetSize();
+        uint32_t idx = 0;
+        for (uint32_t frameIdx = 0; frameIdx < frameSize; frameIdx++) {
+            auto vreg = frameHandler.GetVReg(frameIdx);
             if (vreg.HasObject()) {
+                frameOffsets->Set(idx, frameIdx);
                 asyncCtx->AddReference(coro, idx, EtsObject::FromCoreType(vreg.GetReference()));
-            } else {
-                asyncCtx->AddPrimitive(coro, idx, vreg.GetValue());
+                idx++;
             }
         }
+
+        uint32_t refCount = std::exchange(idx, 0);
+        for (uint32_t frameIdx = 0; frameIdx < frameSize; frameIdx++) {
+            auto vreg = frameHandler.GetVReg(frameIdx);
+            if (!vreg.HasObject()) {
+                frameOffsets->Set(refCount + idx, frameIdx);
+                asyncCtx->AddPrimitive(coro, idx, vreg.GetValue());
+                idx++;
+            }
+        }
+        uint32_t primCount = idx;
+        asyncCtx->SetRefCount(refCount);
+        asyncCtx->SetPrimCount(primCount);
+        asyncCtx->SetCompiledCode(0);
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -532,6 +548,7 @@ public:
         auto *coro = this->GetCoro();
         auto *frame = this->GetFrame();
         auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
+        ASSERT(asyncCtx->GetCompiledCode() == 0);
 
         if (asyncCtx == nullptr) {
             ObjectHeader *undefined = nullptr;
@@ -542,17 +559,32 @@ public:
 
         // load vregs from context
         auto frameHandler = GetFrameHandler(frame);
-        auto *vregsRefs = asyncCtx->GetVRegsRefs(coro);
-        auto *vregsPrimitives = asyncCtx->GetVRegsPrimitives(coro);
-        for (size_t idx = 0; idx < frame->GetSize(); ++idx) {
-            auto vreg = frameHandler.GetVReg(idx);
-            // NOTE(panferovi): maybe there is another way to check that the register is a reference
-            if (asyncCtx->GetVRegType(coro, idx) == EtsAsyncContext::VRegType::REFERENCE_TYPE) {
-                vreg.SetReference(EtsObject::ToCoreType(vregsRefs->Get(idx)));
-            } else {
-                vreg.SetPrimitive(vregsPrimitives->Get(idx));
-            }
+
+        auto *refValues = asyncCtx->GetRefValues(coro);
+        auto *primValues = asyncCtx->GetPrimValues(coro);
+        auto *frameOffsets = asyncCtx->GetFrameOffsets(coro);
+        uint32_t refCount = asyncCtx->GetRefCount();
+        uint32_t frameSize = frame->GetSize();
+
+        ASSERT(refCount + asyncCtx->GetPrimCount() == frameSize);
+        for (uint32_t idx = 0; idx < refCount; idx++) {
+            auto offset = frameOffsets->Get(idx);
+            auto vreg = frameHandler.GetVReg(offset);
+            auto *ref = refValues->Get(idx);
+            vreg.SetReference(EtsObject::ToCoreType(ref));
+            refValues->Set(idx, nullptr);
         }
+
+        uint32_t primCount = frameSize - refCount;
+        for (uint32_t idx = 0; idx < primCount; idx++) {
+            auto offset = frameOffsets->Get(refCount + idx);
+            auto vreg = frameHandler.GetVReg(offset);
+            auto prim = primValues->Get(idx);
+            vreg.SetPrimitive(prim);
+        }
+
+        asyncCtx->SetRefCount(0);
+        asyncCtx->SetPrimCount(0);
 
         auto *awaiteePromise = asyncCtx->GetAwaitee(coro);
         ASSERT(!awaiteePromise->IsPending());

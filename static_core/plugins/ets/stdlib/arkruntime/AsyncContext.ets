@@ -23,10 +23,16 @@ package arkruntime;
 export final class AsyncContext {
     private awaitee: Promise<Any> | undefined = undefined;
     private returnValue: Promise<Any> | undefined = undefined;
-    private vregsMask: FixedArray<byte> | undefined = undefined;
-    private vregsRefs: FixedArray<Any> | undefined = undefined;
-    private vregsPrimitives: FixedArray<long> | undefined = undefined;
+
+    private refValues: FixedArray<Any> | undefined = undefined;
+    private primValues: FixedArray<long> | undefined = undefined;
+    private frameOffsets: FixedArray<short> | undefined = undefined;
+
+    private refCount: long;
+    private primCount: long;
+
     private awaitId: long = -1;
+    private compiledCode: long = 0;
 
     /**
      * Method creates AsyncContext represents context of current async function
