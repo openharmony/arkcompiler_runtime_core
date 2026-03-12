@@ -16,6 +16,9 @@
 {%- for c in cases %}
 /*---
 desc: >-
+    A constructor declaration starts with the keyword constructor, and has optional name.
+    In any other syntactical aspect, a constructor declaration is similar to
+    a method declaration with no return type.
     The syntax and semantics of a constructor's formal parameters are
     identical to those of a method.
 ---*/

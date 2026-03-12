@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,32 +15,24 @@
 
 /*---
 desc: >-
-    A constructor is used in the creation of an object that is an instance of a class.
+    Constructors are used to initialize objects that are instances of a class.
     Private constructor.
 ---*/
 
 class A {
-    public static inst: A|undefined = undefined
-    public tag: string
+    static inst: A = new A()
 
-    private constructor fromString(p: string) {
-        this.tag = p
+    static getInstance(): A {
+        return A.inst
     }
 
-    static getInstance(t: string): A {
-        if (A.inst == undefined) {
-            A.inst = new A.fromString(t)
-        }
-        return A.inst!
-    }
+    private constructor() {}
 }
 
 function main() {
-    let a = A.getInstance("Hello!")
+    let a = A.getInstance()
     arktest.assertTrue(a instanceof A)
-    arktest.assertEQ(a.tag, "Hello!")
 
-    let b = A.getInstance("Bye!")
+    let b = A.getInstance()
     arktest.assertEQ(b, a)
-    arktest.assertEQ(b.tag, "Hello!")
 }

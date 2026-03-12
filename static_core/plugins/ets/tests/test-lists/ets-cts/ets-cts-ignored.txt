@@ -1088,18 +1088,11 @@
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_26.ets
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_27.ets
 
-#28235
-09.classes/09.constructor_declaration/constructor_declaration_private3.ets
-09.classes/09.constructor_declaration/constructor_declaration_protected3.ets
-09.classes/09.constructor_declaration/constructor_declaration_singleton4.ets
-09.classes/09.constructor_declaration/constructor_declaration_singleton5.ets
-09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters6.ets
-
 #28527
 09.classes/09.constructor_declaration/cons_parameters_gen_20.ets
 
 #32614 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
-09.classes/09.constructor_declaration/cons_parameters_gen_23.ets
+09.classes/09.constructor_declaration/cons_parameters_gen_24.ets
 
 #33500 es2panda aborts when implicit super() calls a superconstructor with rest parameter
 09.classes/09.constructor_declaration/01.constructor_body/implicit_superclass_constructor_call4.ets
@@ -1108,11 +1101,10 @@
 09.classes/09.constructor_declaration/01.constructor_body/check_fld_init25.ets
 09.classes/09.constructor_declaration/01.constructor_body/check_fld_init26.ets
 
-#28235 Constructor Names not yet work
-09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_same_class1.ets
-09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass06.ets
-09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass08.ets
-09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass10.ets
+#33660
+09.classes/09.constructor_declaration/01.constructor_body/direct_invocation_itself_n.ets
+09.classes/09.constructor_declaration/01.constructor_body/indirect_invocation_itself1_n.ets
+09.classes/09.constructor_declaration/01.constructor_body/indirect_invocation_itself2_n.ets
 
 #32863  CTE expected when 'this' is used in constructor arguments
 09.classes/09.constructor_declaration/01.constructor_body/this_in_args/01_n.ets
@@ -1120,12 +1112,11 @@
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_4.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_11.ets
 
-#32851   expected CTE when explicit constructor call is used as expression
-09.classes/09.constructor_declaration/02.explicit_constructor_call/invalid_cons_call_neg_2.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/invalid_cons_call_neg_3.ets
-
-#32267 No CTE extending class from Base with private default constructor
-09.classes/09.constructor_declaration/02.explicit_constructor_call/invalid_cons_call_neg_1.ets
+#33718 No CTE when a method from superclass is called before superconstructor
+09.classes/09.constructor_declaration/02.explicit_constructor_call/call_to_this_super_3.ets
+09.classes/09.constructor_declaration/02.explicit_constructor_call/call_to_this_super_9.ets
+09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_17.ets
+09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_18.ets
 
 #30451 cannot spread arguments for tuple
 09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_3.ets
@@ -1995,7 +1986,7 @@
 15.semantic_rules/11.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_0.ets
 15.semantic_rules/11.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_1.ets
 
-#32340 Methods from direct superclass or superinterface not added to explicit overload set 
+#32340 Methods from direct superclass or superinterface not added to explicit overload set
 15.semantic_rules/11.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_negative_1.ets
 
 #32319 CTE if implicitly overloaded function explicitly added to overload list
@@ -2004,7 +1995,7 @@
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_0.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_1.ets
 
-#32340 Methods from direct superclass or superinterface not added to explicit overload set 
+#32340 Methods from direct superclass or superinterface not added to explicit overload set
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_2.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_3.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_4.ets
@@ -2540,6 +2531,20 @@
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/12_n.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/13_n.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/14_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_private.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_private_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_protected.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_protected_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_singleton1.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_singleton2.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/constructor_declaration_with_type_parameters3.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/invocation_another_constructor_of_superclass02.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/invocation_another_constructor_of_same_class.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/invocation_another_constructor_of_superclass01.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/invocation_another_constructor_of_superclass03.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/direct_invocation_itself_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/indirect_invocation_itself1_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/indirect_invocation_itself2_n.ets
 
 #33192 function with the same name as global doesn't work as receiver
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_4.ets

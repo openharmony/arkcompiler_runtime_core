@@ -36,9 +36,9 @@ cases:
                   this('')
               }
               constructor(v: string) {
-                this(true)
+                  this(true)
               }
               constructor(v: boolean) {
-                this()
+                  this()
               }
           }
