@@ -99,3 +99,20 @@ function_decls:
         let foo = (this: int): this => {return this}  // return type with the keyword this as type annotation can be used in class instance methods only
       call: |
         foo(1)
+
+    - expected_out: '"Syntax error ESY0309: Result of ''typeof'' operator is not supported to be used as type annotation."'
+      decl: |
+        function foo(): typeof string {
+          return 'string';
+        }
+      call: |
+        foo()
+
+    - expected_out: '"Syntax error ESY0309: Result of ''typeof'' operator is not supported to be used as type annotation."'
+      decl: |
+        function foo(): Promise<typeof string> {
+          return 'string';
+        }
+      call: |
+        foo()
+

@@ -88,3 +88,19 @@ function_decls:
           let arr: Color[] =  new Color[1](new Color())
           arr[0] = Color.Red
           foo(arr);
+
+    # use typeof as type declaration
+    - decl: |-
+        function foo(input: typeof string) {
+        }
+      call: |-
+        foo('I am string')
+      expected_out: "Syntax error ESY0309: Result of 'typeof' operator is not supported to be used as type annotation."
+
+    # use typeof as type declaration
+    - decl: |-
+        function foo<T>(input: T) {
+        }
+      call: |-
+        foo<typeof 'string'>('I am string')
+      expected_out: "Syntax error ESY0309: Result of 'typeof' operator is not supported to be used as type annotation."
