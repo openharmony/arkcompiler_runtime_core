@@ -101,7 +101,7 @@ public:
 
     ani_status RegisterNativeFunctions(ani_env *env)
     {
-        ani_ref classRef = GetClassRefObject(env, "ets_functions.ETSGLOBAL");
+        ani_ref classRef = GetClassRefObject(env, "ts_arkts_interop_js.ETSGLOBAL");
         if (classRef == nullptr) {
             return ANI_ERROR;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +15,23 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const UnionClass = etsVm.getClass('Lgeneric/test/UnionClass;');
-const createUnionObjectFromEts = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'create_union_object_from_ets');
+const UnionClass = etsVm.getClass('Lgeneric/UnionClass;');
+const createUnionObjectFromEts = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'create_union_object_from_ets');
 
-const AbstractClass = etsVm.getClass('Lgeneric/test/AbstractClass;');
-const createAbstractObjectFromEts = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'create_abstract_object_from_ets');
+const AbstractClass = etsVm.getClass('Lgeneric/AbstractClass;');
+const createAbstractObjectFromEts = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'create_abstract_object_from_ets');
 
-const GIClass = etsVm.getClass('Lgeneric/test/GIClass;');
-const createInterfaceObjectFromEts = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'create_interface_object_from_ets');
+const GIClass = etsVm.getClass('Lgeneric/GIClass;');
+const createInterfaceObjectFromEts = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'create_interface_object_from_ets');
 
-const GClass = etsVm.getClass('Lgeneric/test/GClass;');
-const createGenericObjectFromEts = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'create_generic_object_from_ets');
+const GClass = etsVm.getClass('Lgeneric/GClass;');
+const createGenericObjectFromEts = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'create_generic_object_from_ets');
 
-const genericFunction = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'generic_function');
+const genericFunction = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'generic_function');
 
-const tupleDeclaredType = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'tuple_declared_type');
+const tupleDeclaredType = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'tuple_declared_type');
 
-const genericSubsetRef = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'generic_subset_ref');
+const genericSubsetRef = etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'generic_subset_ref');
 
 const num = 1;
 const bool = true;
@@ -39,7 +39,7 @@ const data = { data: 'string' };
 const str = 'string';
 
 const getIssueExtras = () => ({
-	explicitlyDeclaredType: etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'explicitly_declared_type'),
+	explicitlyDeclaredType: etsVm.getFunction('Lgeneric/ETSGLOBAL;', 'explicitly_declared_type'),
 });
 
 const exported = {

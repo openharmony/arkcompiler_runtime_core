@@ -98,7 +98,7 @@ function(add_tests pref suff)
         FILE ${test_name}.ets
         TEST_NAME ${suff}
         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
-        ENTRYPOINT "EtsAniTests"
+        ENTRYPOINT "${test_name}"
         OPTIONS ${RT_OPTION} "--compiler-regex='.*ETSGLOBAL::.*'"
         TEST_PATH ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.ets
     )

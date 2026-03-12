@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 import { PRIVATE_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const PrivateGetterClass = etsVm.getClass('Lgetter/test/PrivateGetterClass;');
-const createPrivateGetterClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_private_getter_class_from_ets');
+const PrivateGetterClass = etsVm.getClass('Lgetter/PrivateGetterClass;');
+const createPrivateGetterClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_private_getter_class_from_ets');
 
 
 function checkrPivateGetterClassalue() {

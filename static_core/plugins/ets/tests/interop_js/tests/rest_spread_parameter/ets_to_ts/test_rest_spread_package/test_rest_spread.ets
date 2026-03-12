@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package rest_spread.test;
-
 function checkRestOfNumber(obj: FixedArray<number>, ...nums: FixedArray<number>) {
     if(obj.length !== nums.length)
         return false;

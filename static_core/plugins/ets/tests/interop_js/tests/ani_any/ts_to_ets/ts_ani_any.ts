@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,11 +75,11 @@ class Dog extends Animal {}
 function main(): void {
     const etsVm = globalThis.gtest.etsVm;
 
-    ASSERT_TRUE(etsVm.getFunction("Lets_any/ETSGLOBAL;", "etsCheckAnyGetPropertyFromTS")());
-    ASSERT_TRUE(etsVm.getFunction("Lets_any/ETSGLOBAL;", "etsCheckAnySetPropertyToTS")());
-    ASSERT_TRUE(etsVm.getFunction("Lets_any/ETSGLOBAL;", "etsCheckAnyCallMethodFromTS")());
-    ASSERT_TRUE(etsVm.getFunction("Lets_any/ETSGLOBAL;", "etsCheckAnyNewFromTS")());
-    ASSERT_TRUE(etsVm.getFunction("Lets_any/ETSGLOBAL;", "etsCheckAnyInstanceOfFromTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_ani_any/ETSGLOBAL;", "etsCheckAnyGetPropertyFromTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_ani_any/ETSGLOBAL;", "etsCheckAnySetPropertyToTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_ani_any/ETSGLOBAL;", "etsCheckAnyCallMethodFromTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_ani_any/ETSGLOBAL;", "etsCheckAnyNewFromTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_ani_any/ETSGLOBAL;", "etsCheckAnyInstanceOfFromTS")());
 }
 
 main();

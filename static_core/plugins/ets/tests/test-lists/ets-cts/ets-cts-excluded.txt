@@ -1,5 +1,9 @@
 # move from exclude to ignore list on 4/12
 
+# Exclude the test as the 'package' keyword is no in the language anymore
+# https://gitcode.com/openharmony/arkcompiler_ets_frontend/issues/8924
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/pkg01_test.ets
+
 ################################################
 # primitive types refactoring. Need to rework the following tests, because they're incorrect:
 ################################################

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-package sealed_function.test;
-
-const arrow_func: (x: double) => double;
-static {
-    arrow_func = (x: double) => x * x
-}
+const arrow_func: (x: double) => double = (x: double) => x * x;
 
 function sum_double(v0: double, v1: double): double {
     return v0 + v1;

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package rest_spread.test;
-
 function checkRestOfNumber(f: JSValue): boolean {
     return ESValue.wrap(f).invoke([11, 22, 33], 11, 22, 33).toBoolean();
 }

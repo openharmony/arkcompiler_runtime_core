@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package msig
-
 interface A {}
 class B {}
 enum E { R }

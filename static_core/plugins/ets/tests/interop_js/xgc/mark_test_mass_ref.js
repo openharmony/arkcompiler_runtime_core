@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ let gEtsVm;
 // clear the cross-reference objects that are referenced by the active objects
 function clearActiveRef() {
     gArray = new Array();
-    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -36,7 +36,7 @@ function clearRefStorage() {
  * js obj <- sts pobj <- sts obj <- root
  */
 function sweepTest01(num) {
-    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObject');
     for (let i = 0; i < num; i++) {
         proxyJsObject(Promise.resolve(), false, false);
         proxyJsObject(Promise.resolve(), true, false);
@@ -49,7 +49,7 @@ function sweepTest01(num) {
  * root   -> js obj   -> js pobj -> sts obj
  */
 function sweepTest02(num) {
-    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
     for (let i = 0; i < num; i++) {
         createStsObject(false, false);
         gArray.push(createStsObject(false, false));
@@ -64,8 +64,8 @@ function sweepTest02(num) {
  * root   -> js obj   -> js pobj -> sts obj
  */
 function sweepTest03(num) {
-    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
-    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
     for (let i = 0; i < num; i++) {
         proxyJsObject(Promise.resolve(), false, false);
         proxyJsObject(Promise.resolve(), true, false);
@@ -87,7 +87,7 @@ function sweepTest03(num) {
 function sweepRecursiveTest01(num, isRootRef1, isRootRef2, isRootRef3) {
     let obj1 = Promise.resolve();
     let obj2 = Promise.resolve();
-    const proxyJsObjectWithReturnValue = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
+    const proxyJsObjectWithReturnValue = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
     obj2.ref = proxyJsObjectWithReturnValue(obj1, num, isRootRef3, false);
     if (isRootRef1) {
         gArray.push(obj1);
@@ -120,9 +120,9 @@ function createRecursiveJsObject(num) {
  */
 function sweepRecursiveTest02(num, isRootRef1, isRootRef2, isRootRef3) {
     let ret = createRecursiveJsObject(num);
-    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObject');
     proxyJsObject(ret.head, isRootRef2, false);
-    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
     ret.tail.ref = createStsObject(isRootRef1, false);
     if (isRootRef3) {
         gArray.push(ret.head);

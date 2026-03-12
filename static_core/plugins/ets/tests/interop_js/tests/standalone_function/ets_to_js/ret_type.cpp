@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,9 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_ret_type_object_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_ret_type_object_call.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_function_ret_type_class_call)
+// NOTE #8924 Can be enabled once a way to access class object can be suggested in the JS code
+// (see the referenced file)
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_ret_type_class_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_ret_type_class_call.js"));
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const mySet = etsVm.getClass('Lset/test/ETSGLOBAL;').mySet;
-const HasSetElement = etsVm.getFunction('Lset/test/ETSGLOBAL;', 'HasSetElement');
-const GetSetSize = etsVm.getFunction('Lset/test/ETSGLOBAL;', 'GetSetSize');
+const mySet = etsVm.getClass('Lset/ETSGLOBAL;').mySet;
+const HasSetElement = etsVm.getFunction('Lset/ETSGLOBAL;', 'HasSetElement');
+const GetSetSize = etsVm.getFunction('Lset/ETSGLOBAL;', 'GetSetSize');
 
 function testSetAdd(): boolean {
     let res: boolean = true;

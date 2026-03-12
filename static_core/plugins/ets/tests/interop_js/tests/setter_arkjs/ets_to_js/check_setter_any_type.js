@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 const etsVm = globalThis.gtest.etsVm;
 const string = 'string';
-const SetterAnyType = etsVm.getClass('Lsetter/test/SetterAnyType;');
-const createSetterAnyTypeClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_setter_any_type_class');
+const SetterAnyType = etsVm.getClass('Lsetter_ets/SetterAnyType;');
+const createSetterAnyTypeClass = etsVm.getFunction('Lsetter_ets/ETSGLOBAL;', 'create_setter_any_type_class');
 
 
 function checkSetterAnyType() {

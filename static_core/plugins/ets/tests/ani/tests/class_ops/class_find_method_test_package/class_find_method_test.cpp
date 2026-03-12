@@ -44,7 +44,7 @@ private:
     void GetFunc(ani_function *fn, const char *funcName)
     {
         ani_module module;
-        ASSERT_EQ(env_->FindModule("test", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("class_find_method_test", &module), ANI_OK);
         ASSERT_NE(module, nullptr);
 
         ASSERT_EQ(env_->Module_FindFunction(module, funcName, nullptr, fn), ANI_OK);
@@ -64,7 +64,7 @@ public:
                               const ani_value *args = nullptr, ani_int expectedResult = TEST_EXPECTED_VALUE1)
     {
         ani_class cls;
-        const std::string className = std::string("test.") + clsDescriptor;
+        const std::string className = std::string("class_find_method_test.") + clsDescriptor;
         ASSERT_EQ(env_->FindClass(className.c_str(), &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
@@ -377,7 +377,7 @@ TEST_F(ClassFindMethodTest, generics)
 TEST_F(ClassFindMethodTest, binded_method)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("test.FindNativeMethods", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.FindNativeMethods", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -393,7 +393,7 @@ TEST_F(ClassFindMethodTest, binded_method)
 TEST_F(ClassFindMethodTest, FindOverloadedConstructor)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.FindOverloadedConstructor", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.FindOverloadedConstructor", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
@@ -401,7 +401,7 @@ TEST_F(ClassFindMethodTest, FindOverloadedConstructor)
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &ctor), ANI_OK);
 
-    ASSERT_EQ(env_->FindClass("test.FindConstructorWithDefaultParams", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.FindConstructorWithDefaultParams", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Int}C{std.core.Int}:", &ctor), ANI_OK);
@@ -410,7 +410,7 @@ TEST_F(ClassFindMethodTest, FindOverloadedConstructor)
 TEST_F(ClassFindMethodTest, FindCtor_NumberDefaultParam_BoxedDoubleSignature)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.FindCtorNumberDefaultParam", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.FindCtorNumberDefaultParam", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     // Expect boxed std.core.Double constructor signature.
@@ -520,7 +520,7 @@ TEST_F(ClassFindMethodTest, invalid_argument_cls)
 TEST_F(ClassFindMethodTest, invalid_arguments)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -538,7 +538,7 @@ TEST_F(ClassFindMethodTest, invalid_arguments)
 TEST_F(ClassFindMethodTest, has_static_method_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -549,7 +549,7 @@ TEST_F(ClassFindMethodTest, has_static_method_1)
 TEST_F(ClassFindMethodTest, has_static_method_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -560,7 +560,7 @@ TEST_F(ClassFindMethodTest, has_static_method_2)
 TEST_F(ClassFindMethodTest, static_method_not_found_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -570,7 +570,7 @@ TEST_F(ClassFindMethodTest, static_method_not_found_1)
 TEST_F(ClassFindMethodTest, static_method_not_found_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -580,7 +580,7 @@ TEST_F(ClassFindMethodTest, static_method_not_found_2)
 TEST_F(ClassFindMethodTest, static_method_invalid_argument_name)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -596,7 +596,7 @@ TEST_F(ClassFindMethodTest, static_method_invalid_argument_cls)
 TEST_F(ClassFindMethodTest, static_method_invalid_arguments)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -613,7 +613,7 @@ TEST_F(ClassFindMethodTest, static_method_invalid_arguments)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Operations", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Operations", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -628,7 +628,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_001)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.ClassA", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.ClassA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodA {};
@@ -658,7 +658,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_002)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.ClassA", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.ClassA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodB {};
@@ -677,7 +677,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_003)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.ClassB", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.ClassB", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodA {};
@@ -695,7 +695,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_004)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.ClassA", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.ClassA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodA {};
@@ -713,7 +713,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_005)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.BasicCalculator", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.BasicCalculator", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method staticMethod {};
@@ -726,7 +726,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
     ASSERT_EQ(multiply, TEST_EXPECTED_VALUE1 * TEST_EXPECTED_VALUE5);
 
     ani_class subCls {};
-    ASSERT_EQ(env_->FindClass("test.SubCalculator", &subCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.SubCalculator", &subCls), ANI_OK);
     ASSERT_NE(subCls, nullptr);
 
     ani_method constructorMethod {};
@@ -762,7 +762,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.test002A.test002B.TestA002", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.test002A.test002B.TestA002", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -786,7 +786,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_002)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.TestA003", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.TestA003", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -838,7 +838,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_003)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.TestA004", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.TestA004", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -890,7 +890,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_004)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.TestA005", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.TestA005", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -918,7 +918,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_005)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Teen", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Teen", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -946,7 +946,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_006)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Student", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Student", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -974,11 +974,11 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_007)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_008)
 {
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("test.TestB008", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.TestB008", &clsB), ANI_OK);
     ASSERT_NE(clsB, nullptr);
 
     ani_class clsA {};
-    ASSERT_EQ(env_->FindClass("test.TestA008", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.TestA008", &clsA), ANI_OK);
     ASSERT_NE(clsA, nullptr);
 
     ani_method constructorMethodB {};
@@ -990,7 +990,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_008)
     ASSERT_NE(constructorMethodA, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(clsB, "int_method", "C{test.TestA008}:i", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsB, "int_method", "C{class_find_method_test.TestA008}:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_object objectB {};
@@ -1011,14 +1011,14 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_008)
 TEST_F(ClassFindMethodTest, find_func_abstract)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.CombineA", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.CombineA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("test.CombineB", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.CombineB", &clsB), ANI_OK);
     ASSERT_NE(clsB, nullptr);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
@@ -1038,7 +1038,7 @@ TEST_F(ClassFindMethodTest, find_func_abstract)
 TEST_F(ClassFindMethodTest, find_func_final)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.AF", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.AF", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
@@ -1062,7 +1062,7 @@ TEST_F(ClassFindMethodTest, find_func_final)
 TEST_F(ClassFindMethodTest, find_func_in_class_c)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.CombineC", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.CombineC", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
@@ -1086,7 +1086,7 @@ TEST_F(ClassFindMethodTest, find_func_in_class_c)
 TEST_F(ClassFindMethodTest, find_func_in_namespace)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.nsa.nsb.A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.nsa.nsb.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
@@ -1110,14 +1110,14 @@ TEST_F(ClassFindMethodTest, find_func_in_namespace)
 TEST_F(ClassFindMethodTest, duplicate_no_signature)
 {
     ani_class baseCls {};
-    ASSERT_EQ(env_->FindClass("test.A", &baseCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.A", &baseCls), ANI_OK);
     ASSERT_NE(baseCls, nullptr);
 
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(baseCls, "overloadedBase", nullptr, &method), ANI_AMBIGUOUS);
 
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("test.B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "overloadedBase", nullptr, &method), ANI_AMBIGUOUS);
     ASSERT_EQ(env_->Class_FindMethod(cls, "overloaded", nullptr, &method), ANI_AMBIGUOUS);
@@ -1126,14 +1126,14 @@ TEST_F(ClassFindMethodTest, duplicate_no_signature)
 TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
 {
     ani_class baseCls {};
-    ASSERT_EQ(env_->FindClass("test.A", &baseCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.A", &baseCls), ANI_OK);
     ASSERT_NE(baseCls, nullptr);
 
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(baseCls, "staticOverloadedBase", nullptr, &method), ANI_AMBIGUOUS);
 
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("test.B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloadedBase", nullptr, &method), ANI_AMBIGUOUS);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloaded", nullptr, &method), ANI_AMBIGUOUS);
@@ -1142,7 +1142,7 @@ TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
 TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.AllFunctions", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.AllFunctions", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
@@ -1173,7 +1173,7 @@ TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 TEST_F(ClassFindMethodTest, no_static_virtual_function)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.MixedFunctions", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.MixedFunctions", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method staticMethod {};
@@ -1186,7 +1186,7 @@ TEST_F(ClassFindMethodTest, no_static_virtual_function)
 TEST_F(ClassFindMethodTest, static_no_duplicate)
 {
     ani_class baseCls {};
-    ASSERT_EQ(env_->FindClass("test.NotOverloaded", &baseCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.NotOverloaded", &baseCls), ANI_OK);
     ASSERT_NE(baseCls, nullptr);
 
     ani_static_method smethod {};
@@ -1199,24 +1199,24 @@ TEST_F(ClassFindMethodTest, static_no_duplicate)
 TEST_F(ClassFindMethodTest, check_initalization)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.NotOverloaded", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.NotOverloaded", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.NotOverloaded"));
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "notOverloaded", nullptr, &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.NotOverloaded"));
 }
 
 TEST_F(ClassFindMethodTest, wrong_signature)
 {
     ani_class cls {};
     ani_method m {};
-    ASSERT_EQ(env_->FindClass("test.C", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.C", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std/core/String}:i", &m), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std.core.String}:i", &m), ANI_OK);
 
     ani_static_method sm {};
-    ASSERT_EQ(env_->FindClass("test.CheckWrongSignature", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.CheckWrongSignature", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std/core/String}:", &sm), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std.core.String}:", &sm), ANI_OK);
 }
@@ -1224,9 +1224,9 @@ TEST_F(ClassFindMethodTest, wrong_signature)
 TEST_F(ClassFindMethodTest, check_hierarchy)
 {
     ani_class clsParent {};
-    ASSERT_EQ(env_->FindClass("test.Parent", &clsParent), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Parent", &clsParent), ANI_OK);
     ani_class clsChild {};
-    ASSERT_EQ(env_->FindClass("test.Child", &clsChild), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Child", &clsChild), ANI_OK);
 
     // |-------------------------------------------------------------------------------------------|
     // |                  |    Parent class   |     Child class   |    The same method is found    |
@@ -1257,9 +1257,9 @@ TEST_F(ClassFindMethodTest, check_hierarchy)
 TEST_F(ClassFindMethodTest, check_hierarchy_static)
 {
     ani_class clsParent {};
-    ASSERT_EQ(env_->FindClass("test.Parent", &clsParent), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Parent", &clsParent), ANI_OK);
     ani_class clsChild {};
-    ASSERT_EQ(env_->FindClass("test.Child", &clsChild), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Child", &clsChild), ANI_OK);
 
     // |--------------------------------------------------------------------------------------------------|
     // |                         |    Parent class   |     Child class   |    The same method is found    |
@@ -1291,136 +1291,136 @@ TEST_F(ClassFindMethodTest, check_hierarchy_static)
 TEST_F(ClassFindMethodTest, check_initialization0)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Parent", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":", &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Parent", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":", &method), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Parent", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":", &method), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Child", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":", &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Child", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":", &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization5)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Child", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":", &method), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization6)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Grandchild", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Grandchild", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":", &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization7)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Grandchild", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Grandchild", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":", &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 TEST_F(ClassFindMethodTest, check_initialization8)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Grandchild", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_method_test.Grandchild", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":", &method), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Parent"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Child"));
-    ASSERT_FALSE(IsRuntimeClassInitialized("test.Grandchild"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_method_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

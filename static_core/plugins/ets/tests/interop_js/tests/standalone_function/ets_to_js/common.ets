@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,37 +13,35 @@
  * limitations under the License.
  */
 
-package interopStandaloneFnTest
-
-class ClassWithMethodEts {
+export class ClassWithMethodEts {
     public methodInClass(): int {
         return 1;
     }
 };
 
-function makeFunctionReturningValueType<T>(seed: Object): () => T {
+export function makeFunctionReturningValueType<T>(seed: Object): () => T {
     return () => {
         let outputValue: T = seed as T;
         return outputValue;
     }
 }
 
-type U = number | string;
+export type U = number | string;
 
 interface InterfaceWithMethodEts {
     methodInInterface(): number
 }
 
-class ImplInterfaceWithMethodEts implements InterfaceWithMethodEts {
+export class ImplInterfaceWithMethodEts implements InterfaceWithMethodEts {
     public override methodInInterface(): number {
         return 1;
     }
 }
 
-function standaloneFunctionEts(): () => int {
+export function standaloneFunctionEts(): () => int {
     return makeFunctionReturningValueType<int>(1);
 }
 
-interface RefObject {
+export interface RefObject {
     id: number
 }

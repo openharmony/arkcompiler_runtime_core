@@ -32,11 +32,11 @@ const checkObj = (arg) => arg !== null && typeof arg === 'object' && !Array.isAr
 const checkInstance = (instance, checkClass) => instance instanceof checkClass;
 
 function getClass(name) {
-    return etsVm.getClass(`Lgeneric_static/test/${name};`);
+    return etsVm.getClass(`Lgeneric_static/${name};`);
 }
 
 function getFunction(name) {
-    return etsVm.getFunction('Lgeneric_static/test/ETSGLOBAL;', name);
+    return etsVm.getFunction('Lgeneric_static/ETSGLOBAL;', name);
 }
 
 module.exports = {

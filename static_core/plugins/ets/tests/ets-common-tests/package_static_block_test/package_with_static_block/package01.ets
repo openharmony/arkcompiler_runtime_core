@@ -17,8 +17,6 @@
   tags: [not-a-test]
 ---*/
 
-package package_with_static_block;
-
 // Note: memberExpression could be constant when it is enum property access, this check will be enabled after Issue23082
 export enum ME {
     START = 1,

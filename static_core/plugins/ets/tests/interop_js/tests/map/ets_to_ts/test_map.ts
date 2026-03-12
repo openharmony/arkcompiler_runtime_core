@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,11 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const myMap = etsVm.getClass('Lmap/test/ETSGLOBAL;').myMap;
-const GetMapElement = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'GetMapElement');
-const HasMapElement = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'HasMapElement');
-const GetMapSize = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'GetMapSize');
-const WeekDays = etsVm.getClass('Lmap/test/ETSGLOBAL;').WeekDays;
+const myMap = etsVm.getClass('Lmap/ETSGLOBAL;').myMap;
+const GetMapElement = etsVm.getFunction('Lmap/ETSGLOBAL;', 'GetMapElement');
+const HasMapElement = etsVm.getFunction('Lmap/ETSGLOBAL;', 'HasMapElement');
+const GetMapSize = etsVm.getFunction('Lmap/ETSGLOBAL;', 'GetMapSize');
+const WeekDays = etsVm.getClass('Lmap/ETSGLOBAL;').WeekDays;
 
 function testMapSet(): boolean {
     let res: boolean = true;

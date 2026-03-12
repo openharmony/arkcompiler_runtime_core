@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ let gEtsVm;
 // clear the cross-reference objects that are referenced by the active objects
 function clearActiveRef() {
     gArray = new Array();
-    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -38,8 +38,8 @@ function passiveXGCTest() {
     let jsNumAfter = 0;
     let stsNumAfter = 0;
     checkXRefsNumber(jsNum, stsNum);
-    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
-    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
     for (let i = 0; i < gThreasholdSize; i++) {
         let j = i % 4;
         switch (j) {
@@ -70,7 +70,7 @@ gEtsVm = init('mark_test_passive_xgc_module', 'xgc_tests.abc');
 
 let res = passiveXGCTest();
 // When the threshold is exceeded, the XGC is triggered
-const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
 createStsObject(false, false);
 
 checkXRefsNumber(res.jsNumAfter, res.stsNumAfter + 1);

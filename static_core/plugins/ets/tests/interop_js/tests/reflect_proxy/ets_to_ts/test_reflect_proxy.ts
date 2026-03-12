@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,11 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-let getProxyA = etsVm.getFunction('Lreflect_proxy/test/ETSGLOBAL;', 'getProxyA');
-let getProxyAB = etsVm.getFunction('Lreflect_proxy/test/ETSGLOBAL;', 'getProxyAB');
-let testProxyA = etsVm.getFunction('Lreflect_proxy/test/ETSGLOBAL;', 'testProxyA');
-let testProxyAB = etsVm.getFunction('Lreflect_proxy/test/ETSGLOBAL;', 'testProxyAB');
-let SomeObject = etsVm.getClass('Lreflect_proxy/test/SomeObject;');
+let getProxyA = etsVm.getFunction('Lreflect_proxy/ETSGLOBAL;', 'getProxyA');
+let getProxyAB = etsVm.getFunction('Lreflect_proxy/ETSGLOBAL;', 'getProxyAB');
+let testProxyA = etsVm.getFunction('Lreflect_proxy/ETSGLOBAL;', 'testProxyA');
+let testProxyAB = etsVm.getFunction('Lreflect_proxy/ETSGLOBAL;', 'testProxyAB');
+let SomeObject = etsVm.getClass('Lreflect_proxy/SomeObject;');
 
 function testReflectProxyA(): void {
     let val = getProxyA();

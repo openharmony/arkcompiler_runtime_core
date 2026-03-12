@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 const { init, validationXGCResult, triggerXGC, JsTestClass } = require('./mark_test_xgc_utils.js');
 let etsVm = init('mark_test_xgc_module', 'mark_test_xgc.abc');
-let stsEtsClass = etsVm.getClass('Lxgc_test_ets/TestStsClass;');
+let stsEtsClass = etsVm.getClass('Lmark_test_xgc/TestStsClass;');
 
 function myObjectTest() {
     let obj1 = new JsTestClass();

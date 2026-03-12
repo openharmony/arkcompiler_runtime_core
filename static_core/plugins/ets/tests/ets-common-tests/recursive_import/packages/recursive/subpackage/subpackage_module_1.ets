@@ -17,8 +17,6 @@
 tags: [not-a-test]
 ---*/
 
-package subpackage;
-
 import * as all from "../../recursive";
 
 export let b: String = "hello";

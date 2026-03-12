@@ -15,10 +15,10 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-let checkRestOfNumber = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfNumber');
-let checkRestOfString = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfString');
-let checkRestOfTuple = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfTuple');
-let checkRestofUnion = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestofUnion');
+let checkRestOfNumber = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestOfNumber');
+let checkRestOfString = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestOfString');
+let checkRestOfTuple = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestOfTuple');
+let checkRestofUnion = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestofUnion');
 
 function testRestOfNumber() {
     ASSERT_TRUE(checkRestOfNumber([1, 2, 3], 1, 2, 3));

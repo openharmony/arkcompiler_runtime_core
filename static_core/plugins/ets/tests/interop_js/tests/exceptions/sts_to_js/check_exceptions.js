@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 const stsVm = globalThis.gtest.etsVm;
 
-const throwErrorFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwErrorFromSts');
-const throwErrorWithCauseFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwErrorWithCauseFromSts');
-const throwCustomErrorFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwCustomErrorFromSts');
+const throwErrorFromSts = stsVm.getFunction('Lexceptions/ETSGLOBAL;', 'throwErrorFromSts');
+const throwErrorWithCauseFromSts = stsVm.getFunction('Lexceptions/ETSGLOBAL;', 'throwErrorWithCauseFromSts');
+const throwCustomErrorFromSts = stsVm.getFunction('Lexceptions/ETSGLOBAL;', 'throwCustomErrorFromSts');
 
 function catchErrorFromSts() {
     try {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package xgc_ea
-
 const SHARED_OBJECTS_COUNT: int = 10;
 
 class SharedClass {
@@ -22,11 +20,9 @@ class SharedClass {
 }
 // NOTE(mgroshev): revert this change, when #29283
 let sharedObjects: Array<(WeakRef<SharedClass>)>;
-static {
-    sharedObjects = new Array<(WeakRef<SharedClass>)>();
-    for (let i: int = 0; i < SHARED_OBJECTS_COUNT; ++i) {
-        sharedObjects.push(new WeakRef<SharedClass>(new SharedClass()));
-    }
+sharedObjects = new Array<(WeakRef<SharedClass>)>();
+for (let i: int = 0; i < SHARED_OBJECTS_COUNT; ++i) {
+    sharedObjects.push(new WeakRef<SharedClass>(new SharedClass()));
 }
 
 

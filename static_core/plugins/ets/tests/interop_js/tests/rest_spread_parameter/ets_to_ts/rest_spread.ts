@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-let checkRestOfNumber = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfNumber');
-let checkRestOfString = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfString');
-let checkRestOfTuple = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfTuple');
-let checkRestofUnion = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestofUnion');
+let checkRestOfNumber = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestOfNumber');
+let checkRestOfString = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestOfString');
+let checkRestOfTuple = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestOfTuple');
+let checkRestofUnion = etsVm.getFunction('Ltest_rest_spread/ETSGLOBAL;', 'checkRestofUnion');
 
 function testRestOfNumber(): void {
     ASSERT_TRUE(checkRestOfNumber([1, 2, 3], 1, 2, 3));

@@ -1,6 +1,6 @@
 
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,11 @@ const stsVm = globalThis.gtest.etsVm;
 const jsInt = 1;
 const jsString = 'Test';
 
-const InvokeClass = stsVm.getClass('Lcallable_signature/test/InvokeClass;');
-const InstantiateClass = stsVm.getClass('Lcallable_signature/test/InstantiateClass;');
+const InvokeClass = stsVm.getClass('Lcallable_signature/InvokeClass;');
+const InstantiateClass = stsVm.getClass('Lcallable_signature/InstantiateClass;');
 
-const invokeMethodFromSts = stsVm.getFunction('Lcallable_signature/test/ETSGLOBAL;', 'invokeMethodFromSts');
-const instantiateMethodFromSts = stsVm.getFunction('Lcallable_signature/test/ETSGLOBAL;', 'instantiateMethodFromSts');
+const invokeMethodFromSts = stsVm.getFunction('Lcallable_signature/ETSGLOBAL;', 'invokeMethodFromSts');
+const instantiateMethodFromSts = stsVm.getFunction('Lcallable_signature/ETSGLOBAL;', 'instantiateMethodFromSts');
 
 module.exports = {
     jsInt,

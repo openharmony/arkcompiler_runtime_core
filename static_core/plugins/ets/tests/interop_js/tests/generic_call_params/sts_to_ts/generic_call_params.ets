@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,11 @@
  * limitations under the License.
  */
 
-package generic_call_params.test;
-
 type Union = string | int;
 const etsString = 'string';
 const etsInt = 1;
 const privateEtsInt = 2;
-const add:(a: int, b: int) => int;
-static {
-    add = (a: int, b: int): int => a + b;
-}
+const add:(a: int, b: int) => int = (a: int, b: int): int => a + b;
 
 function applyFunctionGenericUnion<T extends Union>(value1: T, value2: T, func: (a: T, b: T) => T): T {
     return func(value1, value2);

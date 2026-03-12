@@ -15,7 +15,7 @@
 
 /*---
 desc: Top-level declarations can be made exported by using a selective export directive.
-files: ['./pkg01/a.ets', './pkg01/b.ets', './pkg01/c.ets', './pkg01/d.ets']
+files: ['./pkg01/a.ets', './pkg01/b.ets', './pkg01/c.ets', './pkg01/d.ets', './pkg01/index.ets']
 ---*/
 
 import { ClassA, InterfaceA, foo, BAR } from './pkg01'

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ let gEtsVm;
 function clearActiveRef() {
     gObj = Promise.resolve();
     gInlineObj = Promise.resolve();
-    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -49,7 +49,7 @@ function clearRefStorage() {
  */
 function cycleTest(isRootRef1, isRootRef2, isRootRef3, isRootRef4) {
     let obj = Promise.resolve();
-    const cycle = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'cycle');
+    const cycle = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'cycle');
     if (isRootRef2) {
         obj.ref = gInlineObj;
         gInlineObj.ref = cycle(obj, isRootRef4, isRootRef3);

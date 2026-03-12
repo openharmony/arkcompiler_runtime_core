@@ -19,8 +19,6 @@ files:
 tags: [not-a-test]
 ---*/
 
-package recursive;
-
 import * as all from "./subpackage";
 
 export let a: String = "hello";

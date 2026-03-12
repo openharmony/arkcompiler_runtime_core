@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ function loadStaticVM(): Object {
 }
 
 function getSTSWeakRef(etsVm): WeakRef<Object> {
-    return new WeakRef(etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObjectWithWeakRef')());
+    return new WeakRef(etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSObjectWithWeakRef')());
 }
 
 function main(): void {
@@ -44,13 +44,13 @@ function main(): void {
     }
     globalThis.ArkTools.GC.clearWeakRefForTest();
     // It should trigger XGC trigger
-    let stsObject = etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObject')();
+    let stsObject = etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSObject')();
     print('--- Start JS GC Full ---');
     globalThis.ArkTools.GC.clearWeakRefForTest();
     let gcId = globalThis.ArkTools.GC.startGC('full');
     globalThis.ArkTools.GC.waitForFinishGC(gcId);
     print('--- Finish JS GC Full ---');
-    etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunPandaGC')();
+    etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'RunPandaGC')();
     //
     if (wr.deref() !== undefined) {
         throw new Error('XGC trigger was not called');

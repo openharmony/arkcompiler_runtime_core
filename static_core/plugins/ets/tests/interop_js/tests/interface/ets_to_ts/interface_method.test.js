@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,32 +28,32 @@ function isObject(variable) {
 // NOTE #1835 #17769 set "true" when literal types and optional methods are fully fixed
 const FIXES_IMPLEMENTED = false;
 
-const MODULE_PATH = 'Linterface_method/test/ETSGLOBAL;';
+const MODULE_PATH = 'Linterface_method/ETSGLOBAL;';
 
-const AnyTypeMethodClass = etsVm.getClass('Linterface_method/test/AnyTypeMethodClass;');
+const AnyTypeMethodClass = etsVm.getClass('Linterface_method/AnyTypeMethodClass;');
 const createInterfaceClassAnyTypeMethod = etsVm.getFunction(MODULE_PATH, 'create_interface_class_any_type_method');
 
-const UnionTypeMethodClass = etsVm.getClass('Linterface_method/test/UnionTypeMethodClass;');
+const UnionTypeMethodClass = etsVm.getClass('Linterface_method/UnionTypeMethodClass;');
 const createInterfaceClassUnionTypeMethod = etsVm.getFunction(MODULE_PATH, 'create_interface_class_union_type_method');
 
-const TupleTypeMethodClass = etsVm.getClass('Linterface_method/test/TupleTypeMethodClass;');
+const TupleTypeMethodClass = etsVm.getClass('Linterface_method/TupleTypeMethodClass;');
 const createInterfaceClassTupleTypeMethod = etsVm.getFunction(MODULE_PATH, 'create_interface_class_tuple_type_method');
 
-const SubsetByRefClass = etsVm.getClass('Linterface_method/test/SubsetByRefClass;');
-const subsetByRefInterface = etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'subset_by_ref_interface');
+const SubsetByRefClass = etsVm.getClass('Linterface_method/SubsetByRefClass;');
+const subsetByRefInterface = etsVm.getFunction('Linterface_method/ETSGLOBAL;', 'subset_by_ref_interface');
 const callSubsetByRefInterfaceFromEts = etsVm.getFunction(MODULE_PATH, 'call_subset_by_ref_interface_from_ets');
 
-const SubsetByValueClass = etsVm.getClass('Linterface_method/test/SubsetByValueClass;');
+const SubsetByValueClass = etsVm.getClass('Linterface_method/SubsetByValueClass;');
 const createSubsetByValueClassFromEts = etsVm.getFunction(MODULE_PATH, 'create_subset_by_value_class_from_ets');
 
 const getExtras = () => ({
-	WithOptionalMethodClass: etsVm.getClass('Linterface_method/test/WithOptionalMethodClass;'),
-	createClassWithOptionalMethod: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'create_class_with_optional_method'),
-	WithoutOptionalMethodClass: etsVm.getClass('Linterface_method/test/TupleClass;'),
-	createClassWOOptionals: getFunction('Linterface_method/test/ETSGLOBAL;', 'create_class_without_optional_method'),
-	optionalArg: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'optional_arg'),
-	optionalArgArray: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'optional_arg_array'),
-	LiteralValueMethodClass: etsVm.getClass('Linterface_method/test/LiteralValueMethodClass;'),
+	WithOptionalMethodClass: etsVm.getClass('Linterface_method/WithOptionalMethodClass;'),
+	createClassWithOptionalMethod: etsVm.getFunction('Linterface_method/ETSGLOBAL;', 'create_class_with_optional_method'),
+	WithoutOptionalMethodClass: etsVm.getClass('Linterface_method/TupleClass;'),
+	createClassWOOptionals: getFunction('Linterface_method/ETSGLOBAL;', 'create_class_without_optional_method'),
+	optionalArg: etsVm.getFunction('Linterface_method/ETSGLOBAL;', 'optional_arg'),
+	optionalArgArray: etsVm.getFunction('Linterface_method/ETSGLOBAL;', 'optional_arg_array'),
+	LiteralValueMethodClass: etsVm.getClass('Linterface_method/LiteralValueMethodClass;'),
 	etsFnInterfaceLiteralValueClass: 'create_interface_literal_value_class_from_ets',
 	createInterfaceLiteralValueClassFromEts: etsVm.getFunction(MODULE_PATH, etsFnInterfaceLiteralValueClass),
 });

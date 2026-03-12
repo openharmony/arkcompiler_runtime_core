@@ -14,7 +14,7 @@
  */
 const { etsVm, getTestModule } = require('../scenarios.test.abc');
 
-const etsMod = getTestModule('scenarios_test');
+const etsMod = getTestModule('scenarios');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const functionArgTypeConflictEts = etsMod.getFunction('functionArgTypeConflictMap');
 

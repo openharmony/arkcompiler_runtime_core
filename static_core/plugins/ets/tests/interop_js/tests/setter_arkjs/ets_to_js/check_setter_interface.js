@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 const etsVm = globalThis.gtest.etsVm;
 const string = 'string';
-const InterfaceSetter = etsVm.getClass('Lsetter/test/InterfaceSetter;');
-const createInterfaceClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_interface_class');
+const InterfaceSetter = etsVm.getClass('Lsetter_ets/InterfaceSetter;');
+const createInterfaceClass = etsVm.getFunction('Lsetter_ets/ETSGLOBAL;', 'create_interface_class');
 
 function checkSetterInterface() {
 	const interfaceSetter = new InterfaceSetter();

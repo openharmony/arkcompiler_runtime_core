@@ -17,8 +17,6 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-package pkg01;
-
 const BAR: int = 146
 const BAZ: int = 147
 
