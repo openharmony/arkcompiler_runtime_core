@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,32 +13,17 @@
 
 version: 0.0.0.1
 type: test-suite
-suite-name: ets-cts
+suite-name: ets-cts-ch23
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets-templates
-list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts
+list-roots:
+    - root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts
+      name: ets-cts
 generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.EtsTemplatesGenerator
 
 parameters:
     extension: ets
     load-runtimes: ets
-    work-dir: ${WORK_DIR}/${suite-name}
+    work-dir: ${WORK_DIR}/ets-cts
 
 collections:
-    02.lexical_elements: >-
-    03.types: >-
-    04.names_declarations_and_scopes: >-
-    05.generics: >-
-    06.contexts_and_conversions: >-
-    07.expressions: >-
-    08.statements: >-
-    09.classes: >-
-    10.interfaces: >-
-    11.enumerations: >-
-    12.error_handling: >-
-    13.modules_and_namespaces: >-
-    14.ambient_declarations: >-
-    15.semantic_rules: >-
-    16.concurrency: >-
-    17.experimental_features: >-
-    18.annotations: >-
-    20.implementation_details: >-
+    23.binary_compatibility: >-
