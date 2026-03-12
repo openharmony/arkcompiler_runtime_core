@@ -45,6 +45,8 @@
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -226,6 +228,125 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
     ani_fixedarray_ref fixRefArray {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Ref(arrayType, arrLength, initValue, &fixRefArray));
     return CreateSTValueInstance(env, fixRefArray);
+}
+
+napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 0) {
+        InteropCtx::ThrowJSError(env, "NewSTArray: bad args, actual args count: " + std::to_string(jsArgc));
+        return nullptr;
+    }
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(coro);
+
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    ScopedManagedCodeThread managedScope(coro);
+
+    EtsClass *arrayClass = PlatformTypes()->escompatArray;
+    EtsObject *arrayInstance = arrayClass->CreateInstance();
+    if (UNLIKELY(arrayInstance == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        InteropCtx::ThrowJSError(env, "Failed to create st.Array");
+        return nullptr;
+    }
+
+    ets_proxy::EtsClassWrappersCache *cache = ctx->GetEtsClassWrappersCache();
+    auto wrapper = cache->Lookup(arrayClass);
+    return wrapper->Wrap(ctx, arrayInstance);
+}
+
+EtsObject *CreateInstanceWithInt(napi_env env, EtsClass *etsClass, int32_t value)
+{
+    EtsMethod *ctor = etsClass->GetDirectMethod(panda_file_items::CTOR.data(), "I:V");
+    if (UNLIKELY(ctor == nullptr) || !ctor->IsPublic()) {
+        InteropCtx::ThrowJSError(env, "No default public constructor in");
+        return nullptr;
+    }
+
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
+    if (UNLIKELY(!etsClass->IsInitialized() && !linker->InitializeClass(coro, etsClass))) {
+        return nullptr;
+    }
+    EtsObject *obj = EtsObject::Create(etsClass);
+    if (UNLIKELY(obj == nullptr)) {
+        return nullptr;
+    }
+
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> objHandle(coro, obj);
+    const size_t ctorArgCount = 2;
+    std::array<Value, ctorArgCount> args {Value(obj->GetCoreType()), Value(value)};
+    ctor->GetPandaMethod()->Invoke(coro, args.data());
+    if (UNLIKELY(coro->HasPendingException())) {
+        return nullptr;
+    }
+    return objHandle.GetPtr();
+}
+
+napi_value STValueNewSTSetImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 0) {
+        InteropCtx::ThrowJSError(env, "NewSTSet: bad args, actual args count: " + std::to_string(jsArgc));
+        return nullptr;
+    }
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(coro);
+
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    ScopedManagedCodeThread managedScope(coro);
+
+    EtsClass *setClass = PlatformTypes()->coreSet;
+    EtsObject *setInstance = CreateInstanceWithInt(env, setClass, 8);
+    if (UNLIKELY(setInstance == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        InteropCtx::ThrowJSError(env, "Failed to create st.Set");
+        return nullptr;
+    }
+
+    ets_proxy::EtsClassWrappersCache *cache = ctx->GetEtsClassWrappersCache();
+    auto wrapper = cache->Lookup(setClass);
+    return wrapper->Wrap(ctx, setInstance);
+}
+
+napi_value STValueNewSTMapImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 0) {
+        InteropCtx::ThrowJSError(env, "NewSTMap: bad args, actual args count: " + std::to_string(jsArgc));
+        return nullptr;
+    }
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(coro);
+
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    ScopedManagedCodeThread managedScope(coro);
+
+    EtsClass *mapClass = PlatformTypes()->coreMap;
+    EtsObject *mapInstance = CreateInstanceWithInt(env, mapClass, 8);
+    if (UNLIKELY(mapInstance == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        InteropCtx::ThrowJSError(env, "Failed to create st.Map");
+        return nullptr;
+    }
+
+    ets_proxy::EtsClassWrappersCache *cache = ctx->GetEtsClassWrappersCache();
+    auto wrapper = cache->Lookup(mapClass);
+    return wrapper->Wrap(ctx, mapInstance);
 }
 
 // static newArray(len: number, initialElement: STValue): STValue

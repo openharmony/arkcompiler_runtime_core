@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ function testPrimitiveTypes(etsVm: any): void {
 function testArrayAndObjectTypes(etsVm: any): void {
     etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefNumberArray")();
     const arr = nativeGetRef();
-    ASSERT_TRUE(arr instanceof Array);
+    ASSERT_TRUE(!(arr instanceof Array));
     ASSERT_EQ(arr.length, 5);
     ASSERT_EQ(arr[2], 3);
 
@@ -57,13 +57,13 @@ function testArrayAndObjectTypes(etsVm: any): void {
 function testMapAndSetTypes(etsVm: any): void {
     etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefMap")();
     const map = nativeGetRef();
-    ASSERT_TRUE(map instanceof Map);
+    ASSERT_TRUE(!(map instanceof Map));
     ASSERT_EQ(map.get("a"), 10);
     ASSERT_EQ(map.get("b"), 20);
 
     etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefSet")();
     const set = nativeGetRef();
-    ASSERT_TRUE(set instanceof Set);
+    ASSERT_TRUE(!(set instanceof Set));
     ASSERT_TRUE(set.has("x"));
     ASSERT_TRUE(set.has("y"));
 }

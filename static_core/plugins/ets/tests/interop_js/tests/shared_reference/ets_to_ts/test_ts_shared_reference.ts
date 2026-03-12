@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,8 @@ const areRangeErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;',
 const areSyntaxErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areSyntaxErrorEqual');
 const areURIErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areURIErrorEqual');
 
-export let jsArray = ['foo', 1, true];
+export let jsArray = etsVm.STValue.newSTArray();
+jsArray.push('foo', 1, true);
 export let o = {a:1};
 let bar = (): void => {
     print('hello');
@@ -50,11 +51,15 @@ let dateStr: Date = new Date(strTime);
 ASSERT_TRUE(!areDatasEqual(dateStr));
 ASSERT_TRUE(areDatasEqual(dateStr));
 
-const map = new Map([['key1', 1]]);
+const map = etsVm.STValue.newSTMap();
+map.set('key1', 1);
 ASSERT_TRUE(!areMapsEqual(map));
 ASSERT_TRUE(areMapsEqual(map));
 
-const set = new Set([1, 2, 3]);
+const set = etsVm.STValue.newSTSet();
+set.add(1);
+set.add(2);
+set.add(3);
 ASSERT_TRUE(!areSetsEqual(set));
 ASSERT_TRUE(areSetsEqual(set));
 

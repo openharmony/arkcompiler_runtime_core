@@ -54,6 +54,10 @@ export declare class STValue {
 
     static typeIsAssignableFrom(from_type: STValue, to_type: STValue): boolean
 
+    static isSTArray(value: object): boolean
+    static isSTSet(value: object): boolean
+    static isSTMap(value: object): boolean
+
     classInstantiate(ctorSignature: string, args: Array<STValue>): STValue
 
     namespaceGetVariable(name: string, variableType: SType): STValue

@@ -465,6 +465,12 @@ napi_value GetSTValueClass(napi_env env)
                                   0},
         napi_property_descriptor {"newArray", 0, STValueNewArrayImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"toJSON", 0, DynamicToJSONImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"newSTArray", 0, STValueNewSTArrayImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"newSTSet", 0, STValueNewSTSetImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"newSTMap", 0, STValueNewSTMapImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"isSTArray", 0, STValueIsSTArrayImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"isSTSet", 0, STValueIsSTSetImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"isSTMap", 0, STValueIsSTMapImpl, 0, 0, 0, napi_default, 0},
     };
     NAPI_CHECK_FATAL(napi_define_properties(env, stValueCtor, staticProperties.size(), staticProperties.data()));
 

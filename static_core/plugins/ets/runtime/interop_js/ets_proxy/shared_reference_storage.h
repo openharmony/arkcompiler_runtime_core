@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,7 @@ public:
 
     SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject, napi_value jsObject);
 
+    template <bool NEED_ADD_NATIVE_SCOPE = true>
     PANDA_PUBLIC_API SharedReference *GetReference(napi_env env, napi_value jsObject) const;
     PANDA_PUBLIC_API SharedReference *GetReference(EtsObject *etsObject) const;
 
@@ -133,6 +134,10 @@ private:
                                                              napi_ref jsRef) REQUIRES(storageLock_);
     PANDA_PUBLIC_API SharedReference *GetReference(void *data) const;
     PANDA_PUBLIC_API void RemoveReference(SharedReference *sharedRef);
+
+    /// Helper method for GetReference template
+    ALWAYS_INLINE SharedReference *GetReferenceImpl(napi_env env, napi_value jsObject) const;
+
     /**
      * Remove all unmarked references from related chain which contains passed shared references
      * @param sharedRef non-empty shared reference from this storage table

@@ -123,15 +123,30 @@ SharedReference *ExtractMaybeReference(napi_env env, napi_value jsObject)
     return AtomicLoad(static_cast<SharedReference **>(data), std::memory_order_acquire);
 }
 
+template <bool NEED_ADD_NATIVE_SCOPE>
 SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject) const
 {
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    if constexpr (NEED_ADD_NATIVE_SCOPE) {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        return GetReferenceImpl(env, jsObject);
+    } else {
+        ASSERT_SCOPED_NATIVE_CODE();
+        return GetReferenceImpl(env, jsObject);
+    }
+}
+
+ALWAYS_INLINE SharedReference *SharedReferenceStorage::GetReferenceImpl(napi_env env, napi_value jsObject) const
+{
     void *data = ExtractMaybeReference(env, jsObject);
     if (UNLIKELY(data == nullptr)) {
         return nullptr;
     }
     return GetReference(data);
 }
+
+// Explicit template instantiations
+template SharedReference *SharedReferenceStorage::GetReference<true>(napi_env, napi_value) const;
+template SharedReference *SharedReferenceStorage::GetReference<false>(napi_env, napi_value) const;
 
 SharedReference *SharedReferenceStorage::GetReference(void *data) const
 {

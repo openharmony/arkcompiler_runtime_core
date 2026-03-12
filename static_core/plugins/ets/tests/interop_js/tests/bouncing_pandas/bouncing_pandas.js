@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ export function bouncingPandas() {
 
 	const SBody = gtest.etsVm.getClass('Lbouncing_pandas/SBody;');
 
-	const arrSBody = [];
+	const arrSBody = gtest.etsVm.STValue.newSTArray();
 	const step = 13;
 	for (let i = 0; i < countSB; ++i) {
 		let el = new SBody();
@@ -34,7 +34,7 @@ export function bouncingPandas() {
 		el.v.x = 5;
 		el.v.y = 5;
 
-		arrSBody[i] = el;
+		arrSBody.push(el);
 	}
 	let recomputeFrameSBody = gtest.etsVm.getFunction('Lbouncing_pandas/ETSGLOBAL;', 'recomputeFrameSBody');
 	const resArr = recomputeFrameSBody(arrSBody, vec);

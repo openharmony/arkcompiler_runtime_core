@@ -33,6 +33,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -1017,13 +1018,28 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
 
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
-    EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(SET_INDEX_METHOD, nullptr);
-    ASSERT(method != nullptr);
+    auto *cls = etsThis->GetClass();
+    const size_t setterStartIndex = 2;
+    const size_t setterArgSize = 1;
+    size_t startIndex = 1;
+    size_t argSize = 2;
 
     Span sp(jsArgs->begin(), jsArgs->end());
 
-    const size_t startIndex = 1;
-    const size_t argSize = 2;
+    EtsMethod *method = nullptr;
+
+    if (GetValueType<true>(env, jsArgs[startIndex]) == napi_string) {
+        auto methodName = GetString(env, jsArgs[startIndex]);
+        method = cls->GetInstanceMethod((PandaString(SETTER_BEGIN).append(methodName)).c_str(), nullptr);
+        startIndex = setterStartIndex;
+        argSize = setterArgSize;
+    } else {
+        method = cls->GetInstanceMethod(SET_INDEX_METHOD, nullptr);
+    }
+    if (method == nullptr) {
+        InteropCtx::ThrowJSError(env, "there is no setter method on target object.");
+        return nullptr;
+    }
     CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
 
     napi_value trueValue;

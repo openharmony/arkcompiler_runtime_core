@@ -36,6 +36,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
@@ -505,5 +506,60 @@ napi_value STValueObjectInstanceOfImpl(napi_env env, napi_callback_info info)
     napi_value jsBoolean {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, resBoolean == ANI_TRUE, &jsBoolean));
     return jsBoolean;
+}
+
+// Helper function to check if a JS value is a specific ETS type
+template <typename CheckFunc>
+napi_value CheckSTypeImpl(napi_env env, napi_callback_info info, CheckFunc &&checkFunc)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *ctx = InteropCtx::Current(coro);
+
+    std::array<napi_value, 2U> jsArgv {};
+    size_t jsArgc = 1;
+    napi_get_cb_info(env, info, &jsArgc, jsArgv.data(), nullptr, nullptr);
+    if (jsArgc != 1) {
+        ThrowJSBadArgCountError(env, jsArgc, 1);
+        return nullptr;
+    }
+
+    ets_proxy::SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference<false>(env, jsArgv[0]);
+    if (sharedRef == nullptr) {
+        napi_value jsBoolean {};
+        NAPI_CHECK_FATAL(napi_get_boolean(env, false, &jsBoolean));
+        return jsBoolean;
+    }
+
+    bool result = false;
+    {
+        ScopedManagedCodeThread managedScope(coro);
+        auto *etsObject = sharedRef->GetEtsObject();
+        result = checkFunc(etsObject, coro);
+    }
+    napi_value jsBoolean {};
+    NAPI_CHECK_FATAL(napi_get_boolean(env, result, &jsBoolean));
+    return jsBoolean;
+}
+
+napi_value STValueIsSTArrayImpl(napi_env env, napi_callback_info info)
+{
+    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, EtsCoroutine *coro) {
+        return EtsEscompatArray::IsExactlyEscompatArray(etsObject, coro);
+    });
+}
+
+napi_value STValueIsSTSetImpl(napi_env env, napi_callback_info info)
+{
+    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, [[maybe_unused]] EtsCoroutine *coro) {
+        return etsObject->GetClass() == PlatformTypes()->coreSet;
+    });
+}
+
+napi_value STValueIsSTMapImpl(napi_env env, napi_callback_info info)
+{
+    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, [[maybe_unused]] EtsCoroutine *coro) {
+        return etsObject->GetClass() == PlatformTypes()->coreMap;
+    });
 }
 }  // namespace ark::ets::interop::js

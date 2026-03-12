@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ function testCheckNumberArray(): void {
     numArr.push(INSERT_NUMBER2);
     numArr.push(INSERT_NUMBER3);
     ASSERT_TRUE(numArr[2] === GetNumArr(2) && numArr[3] === GetNumArr(3) && numArr[4] === GetNumArr(4));
-    ASSERT_TRUE(numArr instanceof Array);
+    ASSERT_TRUE(!(numArr instanceof Array));
 }
 
 function testChecStringArray(): void {
@@ -48,7 +48,7 @@ function testChecStringArray(): void {
     strArr.push(INSERT_STRING2);
     strArr.push(INSERT_STRING3);
     ASSERT_TRUE(strArr[2] === GetStrArr(2) && strArr[3] === GetStrArr(3) && strArr[4] === GetStrArr(4));
-    ASSERT_TRUE(strArr instanceof Array);
+    ASSERT_TRUE(!(strArr instanceof Array));
 }
 
 function testCheckBooleanArray(): void {
@@ -56,7 +56,7 @@ function testCheckBooleanArray(): void {
     booArr[1] = INSERT_BOOLEAN1;
     booArr.push(INSERT_BOOLEAN2);
     ASSERT_TRUE(booArr[1] === GetBooArr(1) && booArr[2] === GetBooArr(2));
-    ASSERT_TRUE(booArr instanceof Array);
+    ASSERT_TRUE(!(booArr instanceof Array));
 }
 
 testCheckNumberArray();
