@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -879,6 +879,7 @@ protected:
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
     void MtAllocIterateTest(size_t minElementsCount, size_t maxElementsCount, size_t rangeIterationSize)
     {
+        static_assert(MIN_ALLOC_SIZE >= sizeof(ObjectHeader));
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
         // We have an issue with QEMU during MT tests. Issue 2852
         static_assert(THREADS_COUNT == 1);
@@ -926,6 +927,7 @@ protected:
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
     void MtAllocCollectTest(size_t minElementsCount, size_t maxElementsCount, size_t maxThreadWithCollect = 1)
     {
+        static_assert(MIN_ALLOC_SIZE >= sizeof(ObjectHeader));
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
         // We have an issue with QEMU during MT tests. Issue 2852
         static_assert(THREADS_COUNT == 1);
