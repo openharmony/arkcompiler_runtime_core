@@ -390,6 +390,13 @@ if(NOT (PANDA_TARGET_ARM32 OR PANDA_TARGET_X86))
     )
 endif()
 
+# aptool is only built for AMD64 and ARM64
+if(PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
+    list(APPEND PANDA_COMPILER_TESTS_SOURCES
+        tests/aptool_dump_test.cpp
+    )
+endif()
+
 # Distinguish 'PANDA_COMPILER_TARGET_..' and 'PANDA_TARGET_..' because for PANDA_TARGET_AMD64 tests
 # are being executed for Arch::AARCH64
 if(PANDA_COMPILER_TARGET_AARCH64 OR PANDA_TARGET_ARM32)
@@ -594,6 +601,11 @@ if(NOT PANDA_MINIMAL_VIXL AND PANDA_WITH_TESTS AND PANDA_COMPILER_ENABLE)
   # TODO(igorban): Enable build in other platforms
   if (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
     add_dependencies(compiler_unit_tests ark_aotdump)
+    add_dependencies(compiler_unit_tests ark_aptool)
+
+    # Copy aptool test data files to build directory
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/apdump/
+         DESTINATION ${CMAKE_BINARY_DIR}/compiler/tests/data/apdump/)
   endif()
 
   panda_target_include_directories(compiler_unit_tests SYSTEM
@@ -724,6 +736,7 @@ add_subdirectory(tools/paoc ark_aot)
 
 if (NOT PANDA_MINIMAL_VIXL AND (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64))
     add_subdirectory(tools/aotdump aotdump)
+    add_subdirectory(tools/aptool aptool)
 endif()
 add_subdirectory(aot)
 add_subdirectory(aot/aot_builder aot_builder)

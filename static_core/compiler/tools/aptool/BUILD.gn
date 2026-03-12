@@ -1,0 +1,95 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
+
+config("aptool_public_config") {
+  include_dirs = [
+    "$ark_root/compiler/tools/aptool",
+    "$target_gen_dir",
+    "$ark_root",
+    "$ark_root/runtime",
+    "$ark_root/libarkfile",
+    "$ark_root/assembler",
+  ]
+}
+
+ark_gen_file("dump_options_h") {
+  template_file = "$ark_root/templates/options/options.h.erb"
+  data = [ "dump/dump_options.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
+  output_file = "$target_gen_dir/generated/dump_options.h"
+}
+
+_ark_aptool_sources = [
+  "main.cpp",
+  "common/utils.cpp",
+  "common/profile_loader.cpp",
+  "common/abc_metadata.cpp",
+  "dump/filter.cpp",
+  "dump/yaml_writer.cpp",
+  "dump/dump_command.cpp",
+]
+
+_ark_aptool_configs = [
+  ":aptool_public_config",
+  "$ark_root:ark_config",
+  "$ark_root/runtime:arkruntime_public_config",
+  "$ark_root/libarkbase:arkbase_public_config",
+  "$ark_root/libarkfile:arkfile_public_config",
+  "$ark_root/assembler:arkassembler_public_config",
+]
+
+_ark_aptool_deps = [
+  ":dump_options_h",
+  "$ark_root/libarkbase:libarktsbase",
+  "$ark_root/libarkfile:libarktsfile",
+  "$ark_root/assembler:libarktsassembler",
+]
+
+_ark_aptool_external_deps = [ sdk_libc_secshared_dep ]
+
+ohos_executable("ark_aptool") {
+  sources = _ark_aptool_sources
+
+  configs = _ark_aptool_configs
+
+  deps = _ark_aptool_deps
+  if (current_toolchain == host_toolchain) {
+    deps += [
+      "$ark_root/compiler:libarktscompiler_host",
+      "$ark_root/runtime:libarkruntime_host",
+    ]
+  } else {
+    deps += [
+      "$ark_root/compiler:libarktscompiler",
+      "$ark_root/runtime:libarkruntime",
+    ]
+  }
+
+  external_deps = _ark_aptool_external_deps
+
+  install_enable = true
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+# Public build target: ./build.sh --build-target ark_aptool_host
+group("ark_aptool_host") {
+  deps = [ ":ark_aptool(${host_toolchain})" ]
+}
