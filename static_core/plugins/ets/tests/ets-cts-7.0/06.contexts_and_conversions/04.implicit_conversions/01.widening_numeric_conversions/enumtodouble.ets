@@ -17,7 +17,7 @@
 desc: Casting conversions enum to double.
 ---*/
 
-enum Status {
+enum Status:long {
   Active = 3_000_000_001,
   Inactive = 3_000_000_002,
   Pending = 3_000_000_003

@@ -65,7 +65,7 @@ cases:
         for get constant from value.
     decl_variants:
       - |-
-        enum Enum { Red, Green = 10, Blue,
+        enum Enum:long { Red, Green = 10, Blue,
           First = -9223372036854775807-1, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }

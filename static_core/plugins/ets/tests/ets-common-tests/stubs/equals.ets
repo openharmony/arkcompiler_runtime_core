@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ enum Color {
     YELLOW = -2147483648,
 }
 
-enum Color64 {
+enum Color64:long {
     RED,
     GREEN,
     BLUE = 2147483647,

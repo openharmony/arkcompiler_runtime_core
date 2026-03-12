@@ -19,7 +19,7 @@ desc: >-
     Each operand, separately, of a shift operator.
 ---*/
 
-enum IntEnum {One = 1, Two = 0xFFFFFFFF, Three}
+enum IntEnum:long {One = 1, Two = 0xFFFFFFFF, Three}
 
 function foo(p: byte): int {
     return 1;

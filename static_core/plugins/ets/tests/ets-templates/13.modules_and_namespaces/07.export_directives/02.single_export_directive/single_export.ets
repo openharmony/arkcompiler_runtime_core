@@ -32,7 +32,7 @@ let varBool: boolean = false;
 let varArray: number[] = Array.create<number>(10, 0);
 let varBigInt: BigInt = new BigInt(42);
 
-export const enum EnumColor { Red, Green, Blue }
+export enum EnumColor { Red, Green, Blue }
 let varEnum: EnumColor = EnumColor.Green;
 
 

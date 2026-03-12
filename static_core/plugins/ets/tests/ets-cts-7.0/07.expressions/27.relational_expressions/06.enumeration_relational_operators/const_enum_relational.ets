@@ -19,19 +19,19 @@ desc: >-
   enumeration type can be compared using relational operators <, <=, >, >=.
 ---*/
 
-const enum NumericEnum {
+enum NumericEnum {
     First = 0,
     Second = 1,
     Third = 2
 }
 
-const enum StringEnum {
+enum StringEnum {
     Alpha = "A",
     Beta = "B",
     Gamma = "C"
 }
 
-const enum AllSame {
+enum AllSame {
     X = 11,
     Y = 11,
     Z = 11

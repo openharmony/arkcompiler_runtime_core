@@ -237,7 +237,7 @@ cases:
     - from_type: Color
       to_type: double
       defs: |-
-          enum Color { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
+          enum Color:long { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
       values:
           - { expr: Color.Red, val: 3000000001.0 }
           - { expr: Color.Green, val: 3000000002.0 }
@@ -246,7 +246,7 @@ cases:
     - from_type: Color
       to_type: number
       defs: |-
-          enum Color { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
+          enum Color:long { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
       values:
           - { expr: Color.Red, val: 3000000001.0 }
           - { expr: Color.Green, val: 3000000002.0 }

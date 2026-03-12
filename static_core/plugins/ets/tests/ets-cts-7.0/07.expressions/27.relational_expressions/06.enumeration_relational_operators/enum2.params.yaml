@@ -29,7 +29,7 @@ cases:
 
     - decl: |-
           // different numeric types literals
-          enum Color { Red = 0B11111111111111111111111111111111, Green, Blue = 0xF, White, Gray, Black, Pink}
+          enum Color:long { Red = 0B11111111111111111111111111111111, Green, Blue = 0xF, White, Gray, Black, Pink}
       checks: |-
           arktest.assertTrue(Color.Red == 4294967295, "Red problem")
           arktest.assertTrue(Color.Green == 4294967296, "Green problem")
@@ -100,7 +100,7 @@ cases:
     - decl: |-
           // different numeric types literals - long
           const l: long = 0xFFFF
-          enum NumT {Lng = 0xFFFF, Next = 0xFFFF + 5}
+          enum NumT:long {Lng = 0xFFFF, Next = 0xFFFF + 5}
       checks: |-
           arktest.assertTrue(NumT.Lng.valueOf() == l, "Long problem")
           arktest.assertTrue(NumT.Next.valueOf() === l + 5, "Long.Next problem")

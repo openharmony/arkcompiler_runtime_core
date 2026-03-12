@@ -1573,7 +1573,7 @@ enum Color {
     Yellow = -2147483648,
 }
 
-enum Color64 {
+enum Color64:long {
     Red,
     Green,
     Blue = 9223372036854775807,

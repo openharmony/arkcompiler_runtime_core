@@ -232,12 +232,3 @@ cases:
         a = i;
       }
       arktest.assertTrue( a > 9 );
-
-  - doc: Incomplete init, continue, update.
-    decl: |-
-      let a: int = -1
-      for(;0;) {
-        const enum E {a}
-        a +=1
-      }
-      arktest.assertEQ(-1, a);

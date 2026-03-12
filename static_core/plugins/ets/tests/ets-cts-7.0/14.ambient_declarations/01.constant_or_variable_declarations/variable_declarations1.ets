@@ -35,10 +35,10 @@ export let c2: Object[] = [1.0];
 export enum Color1 { Red, Green, Blue }
 export let varColor1: Color1 = Color1.Red;
 
-export const enum Color2 { Red = 1 , Green = 2, Blue =  3 }
+export enum Color2 { Red = 1 , Green = 2, Blue =  3 }
 export let varColor2: Color2 = Color2.Red;
 
-export const enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
+export enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
 export let varColor3: Color3 = Color3.Red;
 
 export enum Color4 { Red, Green, Blue }

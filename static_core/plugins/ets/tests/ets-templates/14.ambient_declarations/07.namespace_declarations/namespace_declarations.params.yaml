@@ -51,8 +51,8 @@ declarations:
     }
   - >
     declare namespace Ambient {
-      const enum Season {Winter, Spring, Summer, Autumn}
-      export const enum SeasonExp {Winter, Spring, Summer, Autumn}
+      enum Season {Winter, Spring, Summer, Autumn}
+      export enum SeasonExp {Winter, Spring, Summer, Autumn}
     }
   - >
     declare namespace Ambient {
@@ -68,7 +68,7 @@ declarations:
           class A {}
           interface I {}
           enum Color {White, Blue, Red}
-          const enum Season {Winter, Spring, Summer, Autumn}
+          enum Season {Winter, Spring, Summer, Autumn}
           type Matrix = number[][]
       } 
       export namespace NestedAmbientExp {
@@ -78,7 +78,7 @@ declarations:
         export class A {}
         export interface I {}
         export enum Color {White, Blue, Red}
-        export const enum Season {Winter, Spring, Summer, Autumn}
+        export enum Season {Winter, Spring, Summer, Autumn}
         export type Matrix = number[][]
       }
     }

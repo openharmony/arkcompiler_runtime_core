@@ -62,8 +62,8 @@ topLevelTypes:
 # Optional parameters и default values
   - "function greet(name: string, greeting: string = 'Hello'): string { return greeting + name; }"
   
-# Const enum
-  - "const enum Direction { Up, Down, Left, Right }"
+# Enum
+  - "enum Direction { Up, Down, Left, Right }"
   
 # Ambient declarations
   - "declare const DEBUG: boolean;"

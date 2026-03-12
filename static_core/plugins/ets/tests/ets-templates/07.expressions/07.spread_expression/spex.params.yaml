@@ -109,7 +109,7 @@ cases:
           arktest.assertEQ(r[2], Color.Blue)
 
     - decl: |-
-          const enum Color { Red, Green, Blue }
+          enum Color { Red, Green, Blue }
       use: |-
           // spread of enums
           let a: Color[] = [Color.Red, Color.Green]

@@ -594,18 +594,6 @@
 #33978
 11.enumerations/enum_decl_22.ets
 
-#33980
-11.enumerations/enum_cte_n_ce_0_0.ets
-11.enumerations/enum_cte_n_ce_1_0.ets
-11.enumerations/enum_cte_n_ce_2_0.ets
-11.enumerations/enum_cte_n_ce_3_0.ets
-11.enumerations/enum_cte_n_ce_4_0.ets
-11.enumerations/enum_cte_n_ce_5_0.ets
-11.enumerations/enum_cte_n_ce_6_0.ets
-11.enumerations/enum_cte_n_ce_7_0.ets
-11.enumerations/enum_cte_n_ce_8_0.ets
-11.enumerations/enum_cte_n_ce_9_0.ets
-
 #33639
 11.enumerations/01.enumeration_base_type/enum_int_3.ets
 11.enumerations/01.enumeration_base_type/enum_int_4.ets

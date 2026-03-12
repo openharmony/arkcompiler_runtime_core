@@ -586,7 +586,7 @@ cases:
             value: '"b"'
 
     - decl: |-
-          enum LongEnum { A = 0x7FFF_FFFF_1, B}
+          enum LongEnum:long { A = 0x7FFF_FFFF_1, B}
       use: |-
           const m: Record<LongEnum, number> = {
               LongEnum.A: 1,

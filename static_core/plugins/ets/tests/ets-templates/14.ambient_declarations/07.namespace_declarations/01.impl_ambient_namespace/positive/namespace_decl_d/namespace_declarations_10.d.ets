@@ -29,7 +29,7 @@ export declare namespace Ambient {
       class A {}
       interface I {}
       enum Color {White, Blue, Red}
-      const enum Season {Winter, Spring, Summer, Autumn}
+      enum Season {Winter, Spring, Summer, Autumn}
       type Matrix = number[][]
   } 
   export namespace NestedAmbientExp {
@@ -39,7 +39,7 @@ export declare namespace Ambient {
     export class A { a: string }
     export interface I { a: string}
     export enum Color {White, Blue, Red}
-    export const enum Season {Winter, Spring, Summer, Autumn}
+    export enum Season {Winter, Spring, Summer, Autumn}
     export type Matrix = number[][]
   }
 }
