@@ -83,6 +83,8 @@ static void AppStateCallback(int state, int64_t timeStamp)
             [[fallthrough]];
         case AppState::State::COLD_START_FINISHED:
             etsVm->GetGC()->PostponeGCEnd();
+            etsVm->GetGC()->Trigger(
+                MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
             LOG(INFO, GC) << "App cold start finished";
             break;
         default:

@@ -117,11 +117,23 @@ size_t GCTriggerHeap::ComputeTarget(size_t heapSizeBeforeGc, size_t heapSize)
     return heapSize + std::max(delta, minExtraSize_);
 }
 
-void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc)
+void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc, size_t bytesInHeap)
 {
-    if (gc->IsPostponeEnabled() && ++gcPostponeCount_ == POSTPONE_GC_LIMIT) {
+    if (bytesInHeap - gc->GetSmartGCInitHeapMemSize() >= POSTPONE_GC_LIMIT) {
         gc->PostponeGCEnd();
-        gcPostponeCount_ = 0;
+        auto task = MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos());
+        gc->Trigger(std::move(task));
+        return;
+    }
+
+    // Atomic with relaxed order reason: data race with target_footprint_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    if (bytesInHeap >= targetFootprint_.load(std::memory_order_relaxed)) {
+        size_t target = this->ComputeTarget(bytesInHeap, bytesInHeap);
+
+        // Atomic with relaxed order reason: data race with target_footprint_ with no synchronization or ordering
+        // constraints imposed on other reads or writes
+        targetFootprint_.store(target, std::memory_order_relaxed);
     }
 }
 
@@ -132,12 +144,13 @@ void GCTriggerHeap::TriggerGcIfNeeded(GC *gc)
         return;
     }
 
+    size_t bytesInHeap = memStats_->GetFootprintHeap();
     if (!gc->CanAddGCTask()) {
-        FinishPostponeGCIfNeeded(gc);
+        if (gc->IsPostponeEnabled()) {
+            FinishPostponeGCIfNeeded(gc, bytesInHeap);
+        }
         return;
     }
-
-    size_t bytesInHeap = memStats_->GetFootprintHeap();
     // Atomic with relaxed order reason: data race with target_footprint_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     if (UNLIKELY(bytesInHeap >= targetFootprint_.load(std::memory_order_relaxed))) {
