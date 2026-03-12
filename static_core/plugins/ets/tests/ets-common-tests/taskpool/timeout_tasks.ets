@@ -38,7 +38,9 @@ async function taskExecuteWithinTimeout(): Promise<void> {
 
     let task2 = new taskpool.Task(longFunc, 300);
     arktest.expectError(() => {
-        await taskpool.execute(task2, { timeout: 50 });
+        waitForCompletion(async () => {
+            await taskpool.execute(task2, { timeout: 50 });
+        })
     }, new Error('taskpool:: task has been timeout'));
 
     let longTask1 = new taskpool.LongTask(longFunc, 50);
@@ -51,14 +53,18 @@ async function taskExecuteWithinTimeout(): Promise<void> {
 
     let longTask2 = new taskpool.LongTask(longFunc, 300);
     arktest.expectError(() => {
-        await taskpool.execute(longTask2, { timeout: 50 });
+        waitForCompletion(async () => {
+            await taskpool.execute(longTask2, { timeout: 50 });
+        })
     }, new Error('taskpool:: task has been timeout'));
 }
 
 async function taskWithTimeoutCannotExecuteAgain(): Promise<void> {
     let task = new taskpool.Task(longFunc, 200);
     arktest.expectError(() => {
-        await taskpool.execute(task, { timeout: 20 });
+        waitForCompletion(async () => {
+            await taskpool.execute(task, { timeout: 20 });
+        })
     }, new Error('taskpool:: task has been timeout'));
 
     arktest.expectError(() => {
@@ -138,7 +144,9 @@ async function timeoutTaskSendData() {
 
     let p = taskpool.execute(task, { timeout: 300 });
     arktest.expectError(() => {
-        await p;
+        waitForCompletion(async () => {
+            await p;
+        })
     }, new Error('taskpool:: task has been timeout'));
 
     if (onStartCalled) {
@@ -261,7 +269,9 @@ async function taskGroupExecuteWithinTimeout(): Promise<void> {
     group2.addTask(task3);
     group2.addTask(task4);
     arktest.expectError(() => {
-        await taskpool.execute(group2, { timeout: 50 });
+        waitForCompletion(async () => {
+            await taskpool.execute(group2, { timeout: 50 });
+        })
     }, new Error('taskpool:: task group has been timeout'));
 
     let group3 = new taskpool.TaskGroup();
@@ -273,7 +283,9 @@ async function taskGroupExecuteWithinTimeout(): Promise<void> {
     group3.addTask(task5);
     group3.addTask(task6);
     arktest.expectError(() => {
-        await taskpool.execute(group3, { timeout: 200 });
+        waitForCompletion(async () => {
+            await taskpool.execute(group3, { timeout: 200 });
+        })
     }, new Error('task failed'));
 
     let group4 = new taskpool.TaskGroup();
@@ -290,7 +302,9 @@ async function taskGroupExecuteWithinTimeout(): Promise<void> {
     group4.addTask(task7);
     group4.addTask(task8);
     arktest.expectError(() => {
-        await taskpool.execute(group4, { timeout: 50 });
+        waitForCompletion(async () => {
+            await taskpool.execute(group4, { timeout: 50 });
+        })
     }, new Error('taskpool:: task group has been timeout'));
 }
 
@@ -374,7 +388,9 @@ async function taskGroupWithTimeoutCannotExecuteWithoutTimeout(): Promise<void> 
     group.addTask(task2);
 
     arktest.expectError(() => {
-        await taskpool.execute(group, { timeout: 50 });
+        waitForCompletion(async () => {
+            await taskpool.execute(group, { timeout: 50 });
+        })
     }, new Error('taskpool:: task group has been timeout'));
 
     arktest.expectError(() => {
@@ -397,7 +413,9 @@ async function timeoutNotTriggerSuccessAndFailedCallbacks(): Promise<void> {
     task.onExecutionFailed(taskOnExecutionFailedCallback);
 
     arktest.expectError(() => {
-        await taskpool.execute(task, { timeout: 100 });
+        waitForCompletion(async () => {
+            await taskpool.execute(task, { timeout: 100 });
+        })
     }, new Error('taskpool:: task has been timeout'));
 
     arktest.assertEQ(taskOnExecutionSucceededStr, '');
@@ -429,7 +447,9 @@ async function timeoutNotTriggerSuccessAndFailedCallbacks(): Promise<void> {
     group.addTask(task2);
 
     arktest.expectError(() => {
-        await taskpool.execute(group, { timeout: 100 });
+        waitForCompletion(async () => {
+            await taskpool.execute(group, { timeout: 100 });
+        })
     }, new Error('taskpool:: task group has been timeout'));
 
     arktest.assertEQ(groupOnExecutionSucceededStr1, '');

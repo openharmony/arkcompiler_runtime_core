@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +125,7 @@ async function testStreamReadableSetEncodingAndReadableBehavior() {
         readable.push('hello');
         arktest.assertTrue(readable.readable, "readable should be true");
     }, 0);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyRead3 extends stream.Readable {
@@ -231,7 +231,7 @@ async function testReadableStreamReadableEndedEdgeCase() {
     readable.push('a');
     readable.push(null);
     readable.push(null);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyRead5 extends stream.Readable {

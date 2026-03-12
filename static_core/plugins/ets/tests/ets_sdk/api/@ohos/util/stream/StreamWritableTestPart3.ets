@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,7 @@ async function testWritableWritevFinish() {
         arktest.assertEQ(error.message, 'write test error');
     }));
     writableStream.end('my test');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable2 extends stream.Writable {
@@ -107,7 +107,7 @@ async function testWritableWritevError() {
         arktest.assertEQ(error.message, 'write error');
     }));
     writable.end('my test');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable3 extends stream.Writable {
@@ -136,7 +136,7 @@ async function testWritableWritevErrorScenarioOne() {
     setTimeout(() => {
         writable.end('test');
     }, 10);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable4 extends stream.Writable {
@@ -169,7 +169,7 @@ async function testWritableWritevErrorScenarioTwo() {
     setTimeout(() => {
         writable.end('test');
     }, 0)
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class TestWritable extends stream.Writable {

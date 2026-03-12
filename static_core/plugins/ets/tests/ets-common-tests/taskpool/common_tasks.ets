@@ -124,7 +124,7 @@ async function taskExecuteDelayedTest(): Promise<void> {
         arktest.assertEQ(res1, 'Concurrent function failed');
         let task2 = new taskpool.Task(longFunc, 50);
         arktest.expectError(() => {
-            await taskpool.executeDelayed(-100, task2);
+            waitForCompletion(async () => {await taskpool.executeDelayed(-100, task2);})
         }, new Error('taskpool:: The delayTime is less than zero'));
     } catch (e) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
@@ -174,7 +174,7 @@ async function getDelayedTaskInfoWithCancelTest(): Promise<void> {
     }
     arktest.assertEQ(taskpool.State.CANCELED.valueOf(), state);
     arktest.expectError(() => {
-        await p;
+        waitForCompletion(async () => {await p;})
     }, new Error('taskpool:: task has been canceled'));
 }
 
@@ -507,7 +507,7 @@ async function callbackTest() {
     failedTask.onStartExecution(onStartExecutionCallback);
     failedTask.onExecutionSucceeded(onExecutionSucceededCallback);
     failedTask.onExecutionFailed(onExecutionFailedCallback);
-    arktest.expectError(() => { await taskpool.execute(failedTask) },
+    arktest.expectError(() => { waitForCompletion(async () => { await taskpool.execute(failedTask) }) },
                 new Error('Concurrent function failed'));
     arktest.assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
     arktest.assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
@@ -550,7 +550,7 @@ async function isCancelTest() {
     let wasCanceled = isCanceled.wait();
     // Check isCanceled from taskpool
     arktest.assertEQ(wasCanceled, true);
-    arktest.expectError(() => { await p }, new Error('taskpool:: task has been canceled'));
+    arktest.expectError(() => { waitForCompletion(async () => { await p }) }, new Error('taskpool:: task has been canceled'));
 }
 
 async function isCancelPromiseTest() {
@@ -580,7 +580,7 @@ async function isCancelPromiseTest() {
     let wasCanceled = isCanceled.wait();
     // Check isCanceled from taskpool
     arktest.assertEQ(wasCanceled, true);
-    arktest.expectError(() => { await p }, new Error('taskpool:: task has been canceled'));
+    arktest.expectError(() => { waitForCompletion(async () => { await p }) }, new Error('taskpool:: task has been canceled'));
 }
 
 async function cancelNonExecutingTaskTest() {
@@ -592,7 +592,7 @@ async function cancelNonExecutingTaskTest() {
     }, expectedError);
     arktest.expectError(() => {
         let t = new taskpool.Task(returnAbc);
-        await taskpool.execute(t);
+        waitForCompletion(async () => {await taskpool.execute(t);})
         taskpool.cancel(t);
     }, expectedError);
     // tasks with params
@@ -603,7 +603,7 @@ async function cancelNonExecutingTaskTest() {
     }, expectedError);
     arktest.expectError(() => {
         let t = new taskpool.Task(sum, 10, 20);
-        await taskpool.execute(t);
+        waitForCompletion(async () => {await taskpool.execute(t);})
         taskpool.cancel(t);
     }, expectedError);
 }
@@ -618,7 +618,7 @@ async function cancelExecutingTaskTest():Promise<void> {
     let p1 = taskpool.execute(task1);
     taskpool.cancel(task1);
     isExecuting.fire();
-    arktest.expectError(() => { await p1 }, new Error('taskpool:: task has been canceled'));
+    arktest.expectError(() => { waitForCompletion(async () => { await p1 }) }, new Error('taskpool:: task has been canceled'));
     let res = await taskpool.execute(task1);
     arktest.assertEQ(res, 'abc');
     let task2 = new taskpool.Task(testCancelFunc, 300);
@@ -678,10 +678,10 @@ async function checkIsDoneAndCancelTaskTest() {
     waitCancel.set(false);
     while (isRunning.get()) {}
     arktest.assertEQ(isCanceled.get(), true);
-    arktest.expectError(() => { await p1 }, new Error('taskpool:: task has been canceled'));
+    arktest.expectError(() => { waitForCompletion(async () => { await p1 }) }, new Error('taskpool:: task has been canceled'));
     let task2 = new taskpool.Task(testCancelFunc, 100);
     arktest.expectError(() => {
-        await taskpool.execute(task2);
+        waitForCompletion(async () => {await taskpool.execute(task2);})
         // If isDone is true, cancel the task will throw an error.
         if (task2.isDone()) {
             taskpool.cancel(task2);
@@ -819,8 +819,8 @@ async function dependencyExecutedTaskTest() {
     arktest.expectError(() => { task1.removeDependency(task4); }, new Error('taskpool:: task has no dependency'));
     let res3 = await taskpool.execute(task1);
     arktest.assertEQ(res3, 'abc');
-    arktest.expectError(() => { await taskpool.execute(task1) }, expectedAgainExecuteError);
-    arktest.expectError(() => { await taskpool.execute(task3) }, expectedAgainExecuteError);
+    arktest.expectError(() => { waitForCompletion(async () => { await taskpool.execute(task1) }) }, expectedAgainExecuteError);
+    arktest.expectError(() => { waitForCompletion(async () => { await taskpool.execute(task3) }) }, expectedAgainExecuteError);
     // Try to remove dependency after execute
     let isRuning1 = new Event();
     let isRuning2 = new Event();
@@ -902,7 +902,7 @@ async function sendDataAndCancelTest() {
         arktest.assertEQ(e.message, 'taskpool:: task is not executed or has been executed');
         return undefined;
     }
-    arktest.expectError(() => { await p }, new Error('taskpool:: task has been canceled'));
+    arktest.expectError(() => { waitForCompletion(async () => { await p }) }, new Error('taskpool:: task has been canceled'));
     // When the task is canceled, recvCallback will no longer be executed.
     arktest.assertEQ(value, 10);
 }
@@ -963,7 +963,7 @@ async function taskPoolInTaskPoolTest() {
     };
     let outerFunc = (): string => {
         let innerTask = new taskpool.Task(innerFunc, 10);
-        let innerRes = await taskpool.execute(innerTask);
+        let innerRes = waitForCompletion(async () => {return await taskpool.execute(innerTask);})
         arktest.assertEQ(innerRes, 20);
         res += 20;
         return '';
@@ -1093,7 +1093,7 @@ async function dependencyErrorTaskTest() {
         checkPoints.push(4);
     })
     arktest.expectError(() => {
-        await taskpool.execute(task1);
+        waitForCompletion(async () => {await taskpool.execute(task1);})
     }, new Error('error'));
     await p2;
     arktest.assertEQ(checkPoints.length, 4);

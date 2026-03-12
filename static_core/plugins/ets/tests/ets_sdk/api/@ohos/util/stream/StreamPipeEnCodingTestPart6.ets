@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ async function testDuplexStreamSetDefaultEncodingGbk() {
     let result = duplex.setDefaultEncoding('gbk');
     duplex.write('你好');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyDuplex2 = 0;
@@ -124,7 +124,7 @@ async function testDuplexStreamSetDefaultEncodingGb2312() {
     let result = duplex.setDefaultEncoding('gb2312');
     duplex.write('你好');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyTransform3 = 0;
@@ -152,7 +152,7 @@ async function testTransformStreamWriteEncodingGb18030() {
     let transform = new MyTransform3();
     transform.write('你好123', 'gb18030');
     transform.end();
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyTransform4 = 0;
@@ -180,5 +180,5 @@ async function testTransformStreamWriteEncodingGbk() {
     let transform = new MyTransform4();
     transform.write('你好123', 'gbk');
     transform.end();
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }

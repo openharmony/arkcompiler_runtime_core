@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,7 +137,7 @@ async function testTransformCorkUncork() {
     transformStream.on('finish', (): void => {
         func(null);
     });
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_TestTransform3 = 0;
@@ -165,7 +165,7 @@ async function testTransformErrorEvent() {
     transformStream.on('error', mustCall());
     transformStream.write('test');
     setTimeout(() => {
-        arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+        arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
     }, 10);
 }
 

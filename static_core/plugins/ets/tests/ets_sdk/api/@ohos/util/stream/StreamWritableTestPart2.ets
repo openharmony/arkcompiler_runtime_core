@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,7 +103,7 @@ async function testWritableMultipleCallbacks() {
         arktest.assertEQ(error.name, 'BusinessError');
     }));
     writableStream.write('test');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable2 extends stream.Writable {
@@ -126,7 +126,7 @@ async function testWritableCallbackRepeatedly() {
         arktest.assertEQ(error.message, 'Callback called multiple times.');
         arktest.assertEQ(error.name, 'BusinessError');
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable3 extends stream.Writable {
@@ -151,7 +151,7 @@ async function testWritableCallbackDuplicate() {
         arktest.assertEQ(error.message, 'Callback called multiple times');
         arktest.assertEQ(error.name, 'BusinessError');
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable4 extends stream.Writable {
@@ -175,7 +175,7 @@ async function testWritableWriteError() {
     writableStream.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.message, 'Write after end.');
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable5 extends stream.Writable {

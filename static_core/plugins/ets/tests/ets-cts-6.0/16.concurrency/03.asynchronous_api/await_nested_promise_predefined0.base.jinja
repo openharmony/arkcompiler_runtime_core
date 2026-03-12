@@ -37,7 +37,9 @@ async function waitedPromise(): Promise<{{type_name}}> {
   // Asynchronous simulation
   return new Promise<{{type_name}}>((resolve) => {
     setTimeout(() => {
+      waitForCompletion(async () => {
         resolve(await nestedPromise());
+      })
     }, 100);
   });
 }

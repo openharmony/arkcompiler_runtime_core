@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ async function testWritableStreamEndEncodingGbk() {
 
     let writable = new MyWrite1();
     writable.end('你好', 'gbk', mustCall());
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite2 = 0;
@@ -123,7 +123,7 @@ async function testWritableStreamEndEncodingGb2312() {
 
     let writable = new MyWrite2();
     writable.end('你好', 'gb2312', mustCall());
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite3 = 0;
@@ -150,7 +150,7 @@ async function testWritableStreamSetDefaultEncodingGb18030() {
     let writable = new MyWrite3();
     writable.setDefaultEncoding('gb18030');
     writable.write('你好');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite4 = 0;
@@ -177,5 +177,5 @@ async function testWritableStreamSetDefaultEncodingGbk() {
     let writable = new MyWrite4();
     writable.setDefaultEncoding('gbk');
     writable.write('你好');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }

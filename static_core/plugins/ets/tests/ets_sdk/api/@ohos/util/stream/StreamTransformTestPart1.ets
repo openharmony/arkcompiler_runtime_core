@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,7 @@ async function testTransformCallbackTwice() {
     }));
 
     transform.write('test');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamTransformConstructor001
@@ -230,7 +230,7 @@ async function testTransformReadOperation() {
     transformStream.on('data', (chunk: Object): void => {
         func.unsafeCall(chunk);
     });
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamTransform006
@@ -315,7 +315,7 @@ async function testTransformReadCallback() {
         arktest.assertTrue(transform.doReadCalled);
     }, 0);
     setTimeout(() => {
-        arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+        arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
     }, 10);
 }
 
