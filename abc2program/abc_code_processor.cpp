@@ -153,8 +153,11 @@ uint32_t AbcCodeProcessor::GetInstIdxByInstPc(uint32_t inst_pc) const
 uint32_t AbcCodeProcessor::GetInstPcByInstIdx(uint32_t inst_idx) const
 {
     auto it = inst_idx_pc_map_.find(inst_idx);
-    ASSERT(it != inst_idx_pc_map_.end());
-    return it->second;
+    if (it != inst_idx_pc_map_.end()) {
+        return it->second;
+    }
+    LOG(FATAL, ABC2PROGRAM) << "Invalid inst_idx: " << inst_idx;
+    return 0;
 }
 
 void AbcCodeProcessor::AddJumpLabels() const

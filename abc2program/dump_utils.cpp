@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "abc2program_log.h"
 #include "common/abc_file_utils.h"
 #include "dump_utils.h"
 
@@ -70,15 +71,21 @@ FunctionKindToStringMap PandasmDumperUtils::function_kind_to_string_map_ = {
 std::string PandasmDumperUtils::GetFunctionKindString(panda_file::FunctionKind function_kind)
 {
     auto it = function_kind_to_string_map_.find(function_kind);
-    ASSERT(it != function_kind_to_string_map_.end());
-    return it->second;
+    if (it != function_kind_to_string_map_.end()) {
+        return it->second;
+    }
+    LOG(FATAL, ABC2PROGRAM) << "Invalid function_kind";
+    return "";  // unreachable
 }
 
 std::string PandasmDumperUtils::LiteralTagToString(const panda_file::LiteralTag &tag)
 {
     auto it = literal_tag_to_string_map_.find(tag);
-    ASSERT(it != literal_tag_to_string_map_.end());
-    return it->second;
+    if (it != literal_tag_to_string_map_.end()) {
+        return it->second;
+    }
+    LOG(FATAL, ABC2PROGRAM) << "Invalid LiteralTag";
+    return "";  // unreachable
 }
 
 bool PandasmDumperUtils::IsMatchLiteralId(const pandasm::InsPtr &pa_ins)
@@ -90,8 +97,11 @@ bool PandasmDumperUtils::IsMatchLiteralId(const pandasm::InsPtr &pa_ins)
 size_t PandasmDumperUtils::GetLiteralIdIndex4Ins(const pandasm::InsPtr &pa_ins)
 {
     auto it = opcode_literal_id_index_map_.find(pa_ins->GetOpcode());
-    ASSERT(it != opcode_literal_id_index_map_.end());
-    return it->second;
+    if (it != opcode_literal_id_index_map_.end()) {
+        return it->second;
+    }
+    LOG(FATAL, ABC2PROGRAM) << "Invalid opcode for literal id";
+    return 0;  // unreachable
 }
 
 std::string PandasmDumperUtils::GetMappedLabel(const std::string &label, const LabelMap &label_map)
