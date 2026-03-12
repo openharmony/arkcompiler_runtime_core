@@ -37,9 +37,15 @@ public:
 
     static EtsString *CreateFromUtf8(const char *utf8, uint32_t length);
 
+    /**Utf8 Compressed String */
+    static EtsString *CreateFromOneByte(const uint8_t *utf8, uint32_t length);
+
     static EtsString *CreateFromAscii(const char *str, uint32_t length);
 
     static EtsString *CreateFromUtf16(const uint16_t *utf16, uint32_t length);
+
+    /**Utf16 UnCompressed String*/
+    static EtsString *CreateFromUtf16UnCompressed(const uint16_t *utf16, uint32_t length);
 
     static EtsString *CreateNewStringFromCharCode(EtsInt charCode);
 

@@ -71,6 +71,43 @@ EtsString *EtsString::CreateFromUtf8(const char *utf8, uint32_t length)
         coretypes::LineString::CreateFromUtf8(data, length, ctx, Runtime::GetCurrent()->GetPandaVM()));
 }
 
+EtsString *EtsString::CreateFromOneByte(const uint8_t *utf8, uint32_t length)
+{
+    ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *vm = coro->GetPandaVM();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    if (length == 0) {
+        return reinterpret_cast<EtsString *>(
+            coretypes::LineString::CreateEmptyLineString(ctx, Runtime::GetCurrent()->GetPandaVM()));
+    }
+    if (utf8 == nullptr) {
+        ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
+        return nullptr;
+    }
+
+    return reinterpret_cast<EtsString *>(
+        coretypes::LineString::CreateFromMUtf8(utf8, length, length, true, ctx, vm, true, false));
+}
+
+EtsString *EtsString::CreateFromUtf16UnCompressed(const uint16_t *utf16, uint32_t length)
+{
+    ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *vm = coro->GetPandaVM();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    if (length == 0) {
+        return reinterpret_cast<EtsString *>(
+            coretypes::LineString::CreateEmptyLineString(ctx, Runtime::GetCurrent()->GetPandaVM()));
+    }
+    if (utf16 == nullptr) {
+        ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
+        return nullptr;
+    }
+    return reinterpret_cast<EtsString *>(
+        coretypes::LineString::CreateFromUtf16(utf16, length, false, ctx, vm, true, false));
+}
+
 /* static */
 EtsString *EtsString::CreateFromAscii(const char *str, uint32_t length)
 {

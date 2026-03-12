@@ -19,6 +19,7 @@ let testAll = etsVm.getFunction('Ltest_any_static/ETSGLOBAL;', 'testAll');
 export class Foo {
     bar: number = 0xcafe;
     baz: string = 'hello world';
+    zhcn: string = '中國';
 }
 
 export let fooInstance = new Foo();

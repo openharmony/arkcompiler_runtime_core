@@ -91,6 +91,15 @@ napi_is_xref_type([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_get_value_string_utf8_hybrid([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value value,
+                                  [[maybe_unused]] void *string_object)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
 // NOLINTEND(readability-identifier-naming)
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
