@@ -623,6 +623,13 @@ void EncodeVisitor::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *visitor
     enc->GetEncoder()->SetFalseResult();
 }
 
+void EncodeVisitor::VisitDispatch([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
+{
+    // NOTE(compiler): Implement encoding for Dispatch
+    auto enc = static_cast<EncodeVisitor *>(visitor);
+    enc->GetEncoder()->SetFalseResult();
+}
+
 void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
 {
     auto instLoadArray = inst->CastToLoadArray();

@@ -2429,6 +2429,42 @@ void GraphChecker::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[may
                                         std::cerr << "SaveStateSuspend can't have users");
 }
 
+void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    [[maybe_unused]] auto graph = static_cast<GraphChecker *>(v)->GetGraph();
+    [[maybe_unused]] auto startBlock = graph->GetStartBlock();
+    [[maybe_unused]] auto dispatchBlock = inst->GetBasicBlock();
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, startBlock->GetSuccsBlocks().size() == 1U,
+                                        std::cerr
+                                            << "Start block must have exactly one successor for Dispatch shape\n");
+    [[maybe_unused]] auto prologueBlock = startBlock->GetSuccessor(0U);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock != startBlock,
+                                        std::cerr << "Dispatch instruction must not be in start block: " << *inst
+                                                  << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, prologueBlock->GetSuccsBlocks().size() == 2U,
+                                        std::cerr << "Dispatch prologue block must be a two-way branch: " << *inst
+                                                  << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetPredsBlocks().size() == 1U,
+                                        std::cerr << "Dispatch block must have exactly one predecessor: " << *inst
+                                                  << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, dispatchBlock->GetPredecessor(0U) == prologueBlock,
+        std::cerr << "Dispatch block must be reached from the post-start prologue block: " << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetSuccsBlocks().size() == 1U,
+                                        std::cerr << "Dispatch block must have one successor: " << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetSuccessor(0U)->IsEndBlock(),
+                                        std::cerr << "Dispatch block must terminate to end block: " << *inst
+                                                  << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, dispatchBlock->GetFirstInst() == inst && dispatchBlock->GetLastInst() == inst,
+        std::cerr << "Dispatch must be the only executable instruction in its basic block: " << *inst << std::endl);
+
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(), std::cerr << "Dispatch can't have users");
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(inst->GetInput(0U).GetInst()->GetType()),
+                                        std::cerr << "Dispatch instruction input must be reference: " << *inst
+                                                  << std::endl);
+}
+
 void GraphChecker::VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),

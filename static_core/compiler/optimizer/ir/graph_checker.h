@@ -229,6 +229,7 @@ private:
     static PANDA_PUBLIC_API void VisitSafePoint([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitSaveStateOsr([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static PANDA_PUBLIC_API void VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);

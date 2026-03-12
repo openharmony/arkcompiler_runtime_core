@@ -193,6 +193,8 @@ protected:
 
     static void VisitSaveStateSuspend(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitDispatch(GraphVisitor *visitor, Inst *inst);
+
     static void VisitLoadArray(GraphVisitor *visitor, Inst *inst);
 
     static void VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *inst);
