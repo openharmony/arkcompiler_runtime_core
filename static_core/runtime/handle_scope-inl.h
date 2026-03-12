@@ -24,8 +24,7 @@ namespace ark {
 template <typename T>
 inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
 {
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
     ASSERT(thread != nullptr);
     HandleScope<T> *topScope = thread->GetTopScope<T>();
     if (topScope != nullptr) {
@@ -37,8 +36,7 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
 template <typename T>
 inline HandleScope<T>::HandleScope(ManagedThread *thread, T value) : thread_(thread)
 {
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     HandleScope<T> *topScope = thread->GetTopScope<T>();
     ASSERT(topScope != nullptr);
@@ -50,8 +48,7 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread, T value) : thread_(thr
 template <typename T>
 inline HandleScope<T>::~HandleScope()
 {
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     thread_->PopHandleScope<T>();
     thread_->GetHandleStorage<T>()->FreeHandles(beginIndex_);

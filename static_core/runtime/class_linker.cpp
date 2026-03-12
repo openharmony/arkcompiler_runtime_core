@@ -1606,8 +1606,7 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
 {
     ASSERT(context != nullptr);
     ASSERT(descriptor != nullptr);
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     ScopedTrace scopedTrace("ClassLinker::GetClass", isTraceEnabled_);
 
@@ -1661,8 +1660,7 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
                              ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(context != nullptr);
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     ScopedTrace scopedTrace("ClassLinker::GetClass", isTraceEnabled_);
 

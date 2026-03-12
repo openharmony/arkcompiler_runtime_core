@@ -27,8 +27,7 @@ namespace ark {
 inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::EntityId id,
                                     ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     Class *klass = caller.GetPandaFile()->GetPandaCache()->GetClassFromCache(id);
     if (klass != nullptr) {
