@@ -1,0 +1,4 @@
+[
+    "./convert-decl.d.ts",
+    "./convert-main.ts"
+]

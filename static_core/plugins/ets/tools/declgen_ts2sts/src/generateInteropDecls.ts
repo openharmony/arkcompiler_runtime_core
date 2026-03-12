@@ -65,7 +65,8 @@ export function generateInteropDeclsFromCode(config: CodeInputParams): string[] 
     inputDirs: [],
     rootDir: config.rootDir,
     tsconfig: undefined,
-    includePaths: config.includePaths
+    includePaths: config.includePaths,
+    enableInteropFeatures: true
   }
 
   const declgen = new Declgen(
