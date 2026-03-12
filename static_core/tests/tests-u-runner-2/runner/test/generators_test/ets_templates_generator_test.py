@@ -19,7 +19,7 @@ import os
 import shutil
 from collections.abc import Callable
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -33,6 +33,9 @@ from runner.test.generators_test.ets_data import data_test_suite0
 class EtsGeneratorTest(TestCase):
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
     config: Config
+    data_folder: ClassVar[Callable[[], Path]] = lambda: test_utils.data_folder(__file__, test_data_folder="conf_coll")
+    test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
+        'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
 
     def load_config(self) -> None:
         self.config = Config(self.args)
@@ -48,7 +51,7 @@ class EtsGeneratorTest(TestCase):
         return generated_tests
 
     def setUp(self) -> None:
-        self.args = copy.deepcopy(data_test_suite0.args)
+        self.args: dict[str, Any] = copy.deepcopy(data_test_suite0.args)  # type: ignore[explicit-any]
 
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
@@ -204,6 +207,10 @@ class EtsGeneratorTest(TestCase):
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
         self.args['test_suite.parameters.filter'] = 'simple*'
+
+        suite = self.args.setdefault("test_suite.data", {})
+        suite["test-root"] = str(test_source_path)
+
         self.load_config()
 
         generated_tests = self.generate_tests(test_source_path, test_gen_path)
@@ -236,6 +243,10 @@ class EtsGeneratorTest(TestCase):
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
         self.args['test_suite.parameters.filter'] = '*declaration*'
+
+        suite = self.args.setdefault("test_suite.data", {})
+        suite["test-root"] = str(test_source_path)
+
         self.load_config()
 
         generated_tests = self.generate_tests(test_source_path, test_gen_path)
@@ -299,6 +310,9 @@ class EtsGeneratorTest(TestCase):
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
         self.args['test_suite.parameters.filter'] = 'types*'
+
+        suite = self.args.setdefault("test_suite.data", {})
+        suite["test-root"] = str(test_source_path)
         self.load_config()
 
         generated_tests = self.generate_tests(test_source_path, test_gen_path)
@@ -330,6 +344,9 @@ class EtsGeneratorTest(TestCase):
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
         self.args['test_suite.parameters.filter'] = 'inner*/test*/*types*'
+
+        suite = self.args.setdefault("test_suite.data", {})
+        suite["test-root"] = str(test_source_path)
         self.load_config()
 
         generated_tests = self.generate_tests(test_source_path, test_gen_path)

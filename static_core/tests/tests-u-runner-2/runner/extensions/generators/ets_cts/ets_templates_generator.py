@@ -37,9 +37,10 @@ class EtsTemplatesGenerator(IGenerator):
     def __init__(self, source: Path, target: Path, config: Config) -> None:
         super().__init__(source, target, config)
         self.extension = f".{self._config.test_suite.extension()}"
-        self.filter: str = str(self._config.test_suite.get_parameter("filter"))
-        self.test_file = self._config.test_suite.get_parameter("test-file")
+        self.filter: str = self._config.test_suite.filter
+        self.test_file = self._config.test_suite.test_lists.explicit_file
         self._generated_deps: set[Path] = set()
+        self._test_root = config.test_suite.test_root
 
     @staticmethod
     def get_expected_files_for_test(test_path: Path) -> list[Path]:
@@ -78,7 +79,7 @@ class EtsTemplatesGenerator(IGenerator):
 
     def _get_matched_paths(self) -> set[Path]:
         matched: set[Path] = set()
-        test_root = Path(self._source)
+        test_root = Path(self._test_root)
         flt = self.filter
 
         patterns = [flt, f"{flt}/**/*"]
@@ -151,7 +152,7 @@ class EtsTemplatesGenerator(IGenerator):
         test_full_name = os.path.relpath(path, self._source)
         output = self._target / test_full_name
 
-        bench = Benchmark(path, output, test_full_name, self._source, self.extension)
+        bench = Benchmark(path, output, test_full_name, self._test_root, self.extension)
         generated_tests = bench.generate()
         if len(generated_tests) > 1:
             self._generated_deps.add(path)
