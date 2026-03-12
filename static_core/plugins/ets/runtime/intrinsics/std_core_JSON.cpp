@@ -15,8 +15,11 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_reflect_field.h"
+#include "plugins/ets/runtime/types/ets_reflect_method.h"
 #include "helpers/json_helper.h"
+#include "libarkfile/method_data_accessor-inl.h"
 
 namespace ark::ets::intrinsics {
 
@@ -68,6 +71,22 @@ EtsString *StdCoreJSONGetJSONRename(EtsReflectField *reflectField)
         }
     });
     return retStrHandle.GetPtr();
+}
+
+EtsBoolean StdCoreJSONGetJSONStringifyGetter(EtsReflectMethod *reflectMethod)
+{
+    EtsMethod *method = reflectMethod->GetEtsMethod();
+    bool result = false;
+    const panda_file::File &pf = *method->GetPandaMethod()->GetPandaFile();
+    panda_file::MethodDataAccessor mda(pf, method->GetPandaMethod()->GetFileId());
+    mda.EnumerateAnnotations([&pf, &result](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_coreJSONStringifyGetter),
+                         pf.GetStringData(ada.GetClassId()).data)) {
+            result = true;
+        }
+    });
+    return static_cast<EtsBoolean>(result);
 }
 
 extern "C" EtsString *StdCoreJSONStringifyFast(EtsObject *value)
