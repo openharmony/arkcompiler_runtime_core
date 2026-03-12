@@ -113,10 +113,6 @@
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/ambient_n_1.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/ambient_n_3.ets
 
-#32380
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/infer_ternary_0.ets
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/infer_ternary_1.ets
-
 #29318
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
@@ -375,14 +371,8 @@
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_7.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_8.ets
 
-#30891
-07.expressions/23.exponentiation_expression/enum.ets
-
 #33285
 07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
-
-#30583
-07.expressions/20.nullish-coalescing_expression/resulting_type_crash.ets
 
 #31967
 07.expressions/21.unary_expressions/05.unary_plus/sign_plus_byte_short_to_int/unary_plus.byte_short.inside_function_const_let.ets
@@ -731,9 +721,6 @@
 08.statements/13.switch_statements/switch_with_expression_neg_4.ets
 08.statements/13.switch_statements/switch_with_expression_neg_5.ets
 
-#33182
-09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
-
 #32625
 09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/implementing_property_neg_simple_wrong_type_n.ets
 
@@ -996,10 +983,6 @@
 #32614 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
 09.classes/09.constructor_declaration/cons_parameters_gen_23.ets
 
-#33293 Class initialization execution sequence is not correct
-09.classes/09.constructor_declaration/01.constructor_body/spec_example1.ets
-09.classes/09.constructor_declaration/01.constructor_body/spec_example1b.ets
-
 #33500 es2panda aborts when implicit super() calls a superconstructor with rest parameter
 09.classes/09.constructor_declaration/01.constructor_body/implicit_superclass_constructor_call4.ets
 
@@ -1085,13 +1068,6 @@
 13.modules_and_namespaces/04.import_directives/03.selective_binding/import_example_n_2.ets
 13.modules_and_namespaces/04.import_directives/03.selective_binding/import_example_n_3.ets
 13.modules_and_namespaces/04.import_directives/03.selective_binding/import_example_n_4.ets
-
-
-#30658 incorrect linkage
-13.modules_and_namespaces/04.import_directives/05.import_path/file/import_path_file_2.ets
-13.modules_and_namespaces/04.import_directives/05.import_path/file/import_path_file_3.ets
-13.modules_and_namespaces/04.import_directives/05.import_path/file/import_path_file_6.ets
-13.modules_and_namespaces/04.import_directives/05.import_path/file/import_path_file_7.ets
 
 #28972 CTE on string[] type parameter
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_1.ets
