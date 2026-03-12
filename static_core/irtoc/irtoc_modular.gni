@@ -53,24 +53,27 @@ template("irtoc_modular_compile") {
                irtoc_plugins_file,
              ]
     inputs += plugin_irtoc_plugins
-    _irt_args = rebase_path(_scripts, root_build_dir)
-    _outputs_rebased = rebase_path(outputs, root_build_dir)
+    _irt_args = rebase_path(_scripts, _build_dir)
+    _outputs_rebased = rebase_path(outputs, _build_dir)
+    working_dir = rebase_path(_build_dir, root_build_dir)
     args = [
       "--input",
       string_join(":", _irt_args),
       "--output",
       string_join(":", _outputs_rebased),
       "--ark_source_dir",
-      rebase_path(ark_root, root_build_dir),
+      rebase_path(ark_root, _build_dir),
       "--isa",
-      rebase_path(ark_isa_yaml, root_build_dir),
+      rebase_path(ark_isa_yaml, _build_dir),
       "--arch",
       target_cpu,
+      "--working-dir",
+      working_dir,
       "--ir-api",
       "ir-constructor",
       "{{defines}}",
       "--plugins",
-      rebase_path(irtoc_plugins_file, root_build_dir),
+      rebase_path(irtoc_plugins_file, _build_dir),
     ]
 
     configs = [ "${ark_root}:ark_config(${default_toolchain})" ]
