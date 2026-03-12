@@ -156,6 +156,7 @@
     I("Lstd/core/JsonSerializable;", "toJSON", ":Lstd/core/String;", coreJsonSerializableToJSON)                     \
     /* RegExp */                                                                                                     \
     T("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                         \
+    T("Lstd/core/RegExp;", coreRegExp)                                                                               \
     /* Date */                                                                                                       \
     T("Lstd/core/Date;", coreDate)                                                                                   \
     /* Do not add anything below this line. */

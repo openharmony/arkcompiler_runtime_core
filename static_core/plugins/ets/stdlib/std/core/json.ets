@@ -993,7 +993,7 @@ class JSONWriter {
                 || obj instanceof Uint16Array || obj instanceof Uint32Array || obj instanceof Float32Array || obj instanceof Float64Array
                 || obj instanceof BigUint64Array || obj instanceof Uint8ClampedArray) {
             this.writeTypedArray(obj)
-        } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map) {
+        } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map || obj instanceof RegExp) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Object) {
             const objCls = Class.of(obj)

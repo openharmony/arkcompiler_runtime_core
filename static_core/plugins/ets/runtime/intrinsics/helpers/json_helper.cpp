@@ -217,6 +217,12 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
     auto coro = EtsCoroutine::GetCurrent();
     EtsHandleScope scope(coro);
 
+    bool isContain = PushValue(value);
+    if (isContain) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "cyclic object value");
+        return false;
+    }
+
     bool isSuccessful = false;
     buffer_ += "[";
 
@@ -249,6 +255,7 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
     }
 
     buffer_ += "]";
+    PopValue(value);
     return isSuccessful;
 }
 
@@ -715,7 +722,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         }
         coro->ManagedCodeBegin();
     } else if (value->IsInstanceOf(platformTypes->corePromise) || value->IsInstanceOf(platformTypes->coreSet) ||
-               valueCls == platformTypes->coreMap) {
+               valueCls == platformTypes->coreMap || value->IsInstanceOf(platformTypes->coreRegExp)) {
         // Instead of checking subtyping between `value` and `Map`, we check that classes exactly match.
         // Such behavior is required to correctly fall back in case of user-extended `Record`, which is
         // also subtype of `Map`
