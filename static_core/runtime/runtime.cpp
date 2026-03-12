@@ -925,7 +925,7 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
     }
 
     auto aotBootCtx = classLinker_->GetClassContextForAot(options_.IsAotVerifyAbsPath());
-    if (options_.GetPandaFiles().empty() && !options_.IsStartAsZygote()) {
+    if (options_.GetPandaFiles().empty() && !options_.IsStartAsZygote() && options_.IsLoadInBoot()) {
         // Main from panda.cpp puts application file into boot panda files as the last element.
         // During AOT compilation of boot files no application panda files were used.
         auto idx = aotBootCtx.find_last_of(compiler::AotClassContextCollector::DELIMETER);
