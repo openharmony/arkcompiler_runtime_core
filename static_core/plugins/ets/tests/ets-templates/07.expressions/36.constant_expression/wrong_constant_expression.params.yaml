@@ -20,9 +20,9 @@ cases:
       let a: int = 3
       enum E { V = a }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Post-increment is explicitly excluded by spec
   - desc: Post-increment operator is not allowed in constant expressions.
@@ -30,9 +30,9 @@ cases:
       let a: int = 3
       enum E { V = a++ }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Pre-increment is explicitly excluded by spec
   - desc: Pre-increment operator is not allowed in constant expressions.
@@ -40,9 +40,9 @@ cases:
       let a: int = 3
       enum E { V = ++a }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Post-decrement is explicitly excluded by spec
   - desc: Post-decrement operator is not allowed in constant expressions.
@@ -50,9 +50,9 @@ cases:
       let a: int = 3
       enum E { V = a-- }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Pre-decrement is explicitly excluded by spec
   - desc: Pre-decrement operator is not allowed in constant expressions.
@@ -60,9 +60,9 @@ cases:
       let a: int = 3
       enum E { V = --a }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Function call is not a constant expression
   - desc: Function call result is not a constant expression.
@@ -71,36 +71,36 @@ cases:
     use: |
       enum E { V = f() }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Method call is not a constant expression
   - desc: Method call is not a constant expression.
     use: |
       enum E { V = "hello".length }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Constructor call is not a constant expression
   - desc: Constructor call is not a constant expression.
     use: |
       enum E { V = Number(1.0) }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # Runtime value is not a constant expression
   - desc: Runtime value is not a constant expression.
     use: |
       enum E { V = Date.now() }
     expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
 
   # --- Abrupt completion of constant expressions ---
 

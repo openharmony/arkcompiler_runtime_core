@@ -29,8 +29,8 @@ cases:
   - { type1: int,   value1: 10,    type2: float,  value2: 3.0f, sign: '*', expected: 30.0f  }
 
   # int + number
-  - { type1: int,   value1: 10,    type2: number, value2: 2.5,  sign: '+', expected: 12.5   }
-  - { type1: int,   value1: 10,    type2: number, value2: 3.0,  sign: '*', expected: 30.0   }
+  - { type1: int,   value1: 10,    type2: double, value2: 2.5,  sign: '+', expected: 12.5   }
+  - { type1: int,   value1: 10,    type2: double, value2: 3.0,  sign: '*', expected: 30.0   }
 
   # byte + short
   - { type1: byte,  value1: 5,     type2: short,  value2: 100,  sign: '+', expected: 105    }
@@ -39,4 +39,4 @@ cases:
   - { type1: long,  value1: 100,   type2: float,  value2: 0.5f, sign: '+', expected: 100.5f }
 
   # float + number
-  - { type1: float, value1: 1.5f,  type2: number, value2: 2.5,  sign: '+', expected: 4.0    }
+  - { type1: float, value1: 1.5f,  type2: double, value2: 2.5,  sign: '+', expected: 4.0    }

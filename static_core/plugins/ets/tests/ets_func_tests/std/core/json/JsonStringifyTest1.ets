@@ -336,7 +336,7 @@ function jsonStringifyTupleWithUndefinedValue(): void {
     arktest.assertEQ(JSON.stringify(set.next().value), "[null,null]");
 }
 
-enum EnumTest {
+enum EnumTest:double {
     e1 = 2.0,
     e2 = 1.23,
     e3 = 5.1,

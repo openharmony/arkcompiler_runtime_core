@@ -38,7 +38,7 @@ cases:
         }
     expected_type: int|Record<string, int_nullish>
 
-  - decl: "enum Enum { A = 1.2, B = 0.0}"
+  - decl: "enum Enum:double { A = 1.2, B = 0.0}"
     lhs_decl: "Array<Enum> = [Enum.A, Enum.B];"
     lhs_access: [1]
     rhs_decl: string = "aa";
@@ -63,7 +63,7 @@ cases:
                 "b": 1,
                 "c": undefined,
               }
-      enum Enum { A = 1.2, B = 0.0}
+      enum Enum:double { A = 1.2, B = 0.0}
     lhs_decl: "Array<Record<string, int_nullish>> = [rec];"
     lhs_access: '[0]["a"]'
     rhs_decl: number = Enum.B;

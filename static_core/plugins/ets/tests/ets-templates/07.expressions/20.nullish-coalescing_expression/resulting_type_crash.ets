@@ -22,7 +22,7 @@ desc: The type of a nullish-coalescing expression is a normalized union type (se
 
 type int_nullish = int | null | undefined
 
-enum Enum { A = 1.2, B = 0.0}
+enum Enum:double { A = 1.2, B = 0.0}
 
 function main(): void {
   let lhs: Array<Enum> = [Enum.A, Enum.B];

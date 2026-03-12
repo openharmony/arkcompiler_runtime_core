@@ -206,20 +206,20 @@ cases:
       expected_type: int|string
 
     - decl: |-
-        enum Enum { A = 1.2, B = 0.0}
+        enum Enum:double { A = 1.2, B = 0.0}
       type: double
       value: 'Enum.B'
       expected_type: double|string
 
     - decl: |-
-        enum Enum { A = 1.2, B = 0.0}
+        enum Enum:double { A = 1.2, B = 0.0}
       type: Array<Enum>
       value: '[Enum.A, Enum.B]'
       access: [1]
       expected_type: Enum|string
 
     - decl: |-
-        enum Enum { A = 1.2, B = 0.0}
+        enum Enum:double { A = 1.2, B = 0.0}
       type: Array<Enum>
       value: '[Enum.A, Enum.B]'
       expected_type: Array<Enum>|string
