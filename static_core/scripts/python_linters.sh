@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -88,7 +88,7 @@ set +e
 
 EXIT_CODE=0
 
-skip_options="^${sources_dir}/third_party/\|^${sources_dir}/plugins/ets/tests/debugger/src/arkdb/"
+skip_options="^${sources_dir}/third_party/\|^${sources_dir}/plugins/ets/tests/debugger/src/arkdb/\|^${sources_dir}/docs/"
 if [ -n "$SKIP_FOLDERS" ]; then
     for pt in $SKIP_FOLDERS; do
         skip_options="${skip_options}\|^${sources_dir}/${pt}/"
