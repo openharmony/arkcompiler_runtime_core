@@ -77,6 +77,12 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
                 interpreterType = InterpreterType::CPP;
             }
 #endif
+#if defined(PANDA_SDK_LINUX_X64_FORCE_CPP_INTERPRETER)
+            if (interpreterType != InterpreterType::CPP) {
+                LOG(INFO, RUNTIME) << "interpreter type is downgraded into CPP for Linux x86_64 SDK runtime default";
+                interpreterType = InterpreterType::CPP;
+            }
+#endif
         }
     }
     return interpreterType;

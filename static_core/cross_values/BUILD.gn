@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-
 action("cross_values_generate") {
   arch = ""
   if (current_cpu == "arm") {
@@ -75,17 +74,27 @@ action("cross_values_getters_generate") {
   script = "$ark_root/cross_values/cross_values_getters_generator.rb"
   outputs = [ "$target_gen_dir/cross_values.h" ]
 
+  generated_values_dir = "$target_gen_dir/generated_values"
+  cross_values_generate_dep = ":cross_values_generate"
+  if (current_toolchain == host_toolchain && !panda_runtime_sdk_build) {
+    generated_values_dir =
+        get_label_info(":cross_values_generate(${default_toolchain})",
+                       "target_gen_dir") + "/generated_values"
+    cross_values_generate_dep =
+        ":cross_values_generate(${default_toolchain})"
+  }
+
   preprocessed_defines =
       get_path_info("$target_gen_dir/asm_defines_def.cpp", "out_dir") +
       "/asm_defines_def_cpp_gen/asm_defines_def.o"
   args = [
     rebase_path(preprocessed_defines, root_build_dir),
-    rebase_path("$target_gen_dir/generated_values", root_build_dir),
+    rebase_path(generated_values_dir, root_build_dir),
     rebase_path(outputs[0], root_build_dir),
   ]
 
   deps = [
     ":asm_defines_def_cpp_gen",
-    ":cross_values_generate",
+    cross_values_generate_dep,
   ]
 }

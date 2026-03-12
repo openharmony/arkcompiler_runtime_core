@@ -91,6 +91,23 @@ config("interop_js_public_config") {
   defines = []
   if (ark_ets_hybrid) {
     defines += [ "PANDA_JS_ETS_HYBRID_MODE" ]
+  }
+
+  if (panda_runtime_sdk_build) {
+    if (current_toolchain == host_toolchain &&
+        host_os == "linux") {
+      include_dirs += [
+        "//prebuilts/build-tools/common/nodejs/current/include/node",
+      ]
+    } else if (ark_standalone_build || ark_static_standalone_build) {
+      node_version = "v18.13.0"
+      distro = "linux-x64"
+
+      include_dirs += [ "$ark_root/third_party/nodejs/node-${node_version}-${distro}/include/node" ]
+      if (current_toolchain == host_toolchain) {
+        include_dirs += [ "$ark_third_party_root/node/src" ]
+      }
+    }
   } else if (ark_standalone_build || ark_static_standalone_build) {
     node_version = "v18.13.0"
     distro = "linux-x64"
