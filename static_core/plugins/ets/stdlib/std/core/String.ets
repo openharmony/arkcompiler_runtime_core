@@ -1454,7 +1454,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @since 24
      */
     public charCodeAt(index: int): int {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
+        if (index < 0 || index >= this.getLength()) {
             throw new RangeError(`Invalid index: ${index}`);
         }
         return this.charAt(index).toInt()
