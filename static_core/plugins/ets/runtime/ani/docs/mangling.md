@@ -64,9 +64,6 @@ EnumEncoding ::=
     'E' '{' RuntimeName '}'
     ;
 
-PartialEncoding ::=
-    'P' '{' RuntimeName '}'
-    ;
 ```
 
 ### Fixed Arrays
