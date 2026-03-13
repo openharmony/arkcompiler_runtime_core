@@ -130,3 +130,11 @@ class TestGenerationException(RunnerException):
         else:
             message = ""
         super().__init__(message)
+
+
+class CompileEtsTestPartException(RunnerException):
+    pass
+
+
+class CompileEtsTestPartTimeoutException(RunnerException):
+    pass

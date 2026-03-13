@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+ /*---
+arktsconfig: arktsconfig.json
+file_name: ani_test_bind_ops_class_bind_native_methods
+---*/
+
 namespace test002A {
     namespace test002B {
         class TestA002 {

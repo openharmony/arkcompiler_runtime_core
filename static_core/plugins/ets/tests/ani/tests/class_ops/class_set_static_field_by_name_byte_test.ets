@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_class_ops_call_set_static_field_by_name_byte
+---*/
 
 class ByteStatic {
     static byte_value: byte = 0;

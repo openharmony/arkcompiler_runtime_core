@@ -19,14 +19,34 @@ parameters:
     build: ${PANDA_BUILD}
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
     work-dir: ${parameters.work-dir}
+    load-runtimes: ets
+    opt-level: 2
+    es2panda-timeout: 30
+    verifier-timeout: 30
+    extension: ets
+    es2panda-args: [ ]
+    boot-panda-files: ""
     runner-args: []
 steps:
+    compile:
+      from: es2panda-verifier
+      opt-level: ${parameters.opt-level}
+      build: ${parameters.build}
+      work-dir: ${parameters.work-dir}
+      extension: ${parameters.extension}
+      load-runtimes: ${parameters.load-runtimes}
+      enable-es2panda: true
+      enable-verifier: false
+      es2panda-timeout: ${parameters.es2panda-timeout}
+      verifier-timeout: ${parameters.verifier-timeout}
+      es2panda-args: ${parameters.es2panda-args}
+      boot-panda-files: ${parameters.boot-panda-files}
     run-ani-tests:
-        timeout: 30
-        enabled: true
-        step-type: gtest-runner
-        args:
-          - "${parameters.runner-args}"
-        env:
-          ARK_ETS_STDLIB_PATH:
-          - "${parameters.stdlib}"
+      timeout: 30
+      enabled: true
+      step-type: gtest-runner
+      args:
+        - "${parameters.runner-args}"
+      env:
+        ARK_ETS_STDLIB_PATH:
+        - "${parameters.stdlib}"

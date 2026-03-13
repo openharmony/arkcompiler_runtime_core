@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_class_ops_class_get_static_field_byte
+---*/
+
 class TestByte {
     static byte_value: byte = 126;
     static string_value: String = "true";

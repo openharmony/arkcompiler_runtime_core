@@ -14,9 +14,18 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: ani-tests
-test-root: ${PANDA_BUILD}/tests/native
+test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ani-tests
 
 parameters:
     work-dir: ${WORK_DIR}/${suite-name}
-    gtest-abc: ${PANDA_BUILD}/abc-gtests
+    gtest-abc: ${parameters.work-dir}/intermediate
+    gtest-bin-root: ${PANDA_BUILD}/tests/native
+    gtest-zip-prefix: ani_test
+
+collections:
+    ani/tests:
+        generator-class: runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler.GTestEtsCompiler
+    mock:
+        generator-class: runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler.GTestEtsCompiler
+        

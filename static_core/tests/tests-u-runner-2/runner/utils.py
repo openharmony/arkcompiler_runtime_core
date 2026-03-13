@@ -54,6 +54,8 @@ from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
 
+NamingRule = Callable[[str, str], tuple[str, str]]
+
 ALLOWED_TEST_EXTS = (
     (".d", ".ets"),
     (".ets",),
@@ -562,6 +564,67 @@ def strip_test_name(test_name: Path) -> tuple[str, str]:
             return base, ext_str
 
     raise ValueError(f"Unsupported test extension for: {name!r}")
+
+
+def ani_name_rule(name: str, test_pref: str) -> tuple[str, str]:
+    """
+    make correct test for ani test gtest package zip
+    """
+    if name.startswith("ani_verify_test") or name.startswith("ani_test"):
+        return name, ""
+    if name.startswith("verify_"):
+        return name.removeprefix("verify_"), "ani_verify_test"
+    return name, test_pref
+
+
+def make_gtest_name(file_path: Path, test_pref: str | None, rule: NamingRule | None = None) -> str:
+    """
+        Build a zip archive name from a file path.
+
+        The function derives the base name from ``file_path.name`` and normalizes it:
+
+        - Strips one of the known suffixes (first match): ``.ets.abc``, ``.abc``, ``.ets``.
+        - Optionally applies a custom naming ``rule``
+        - Removes a trailing ``"_test"`` from the resulting name.
+        - Returns ``"{test_pref}_{name}"`` (with ``test_pref`` treated as ``""`` if None).
+
+        Parameters
+        ----------
+        file_path:
+            Path to the test-related file (e.g., ``*.ets``, ``*.abc``, ``*.ets.abc``).
+        test_pref:
+            Optional prefix to prepend to the resulting name. If None, treated as an empty
+            string.
+        rule:
+            Optional callable that receives ``(name, test_pref)`` and returns a tuple
+            ``(new_name, new_pref)``. Used to implement custom naming logic.
+
+        Returns
+        -------
+        str
+            The generated test name.
+    """
+
+    name = file_path.name
+
+    if test_pref is None:
+        test_pref = ""
+
+    for s in (".ets.abc", ".abc", ".ets"):
+        if name.endswith(s):
+            name = name[:-len(s)]
+            break
+
+    if rule is not None:
+        name, new_pref = rule(name, test_pref)
+        if new_pref == "":
+            return name
+        test_pref = new_pref
+
+    if name.endswith("_test"):
+        name = name[:-len("_test")]
+
+    return f"{test_pref}_{name}"
 
 
 def unlines(lines: Iterable[str]) -> str:

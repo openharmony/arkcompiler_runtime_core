@@ -57,7 +57,8 @@ class GTestFlow(ITestFlow, GTest):
         self.metadata = TestMetadata.create_empty_metadata(test_path, find_package=False)
         self._is_negative_compile = False
         self.is_negative_runtime = False
-        self.gtest_abc = self.test_env.config.test_suite.get_parameter("gtest-abc")
+        self.gtest_abc: str | None = self.test_env.config.test_suite.get_parameter("gtest-abc")
+        self.gtest_bin_root: str | None = self.test_env.config.test_suite.get_parameter("gtest-bin-root")
         self.flow_utils = StandardFlowUtils(test_env)
 
     @property
@@ -71,7 +72,7 @@ class GTestFlow(ITestFlow, GTest):
     def do_run(self) -> Self:
         if self.is_completed:
             return self
-        steps = list(self.test_env.config.workflow.steps)
+        steps = [step for step in self.test_env.config.workflow.steps if step.enabled]
         if not steps:
             self.passed = None
             self.fail_kind = 'None'

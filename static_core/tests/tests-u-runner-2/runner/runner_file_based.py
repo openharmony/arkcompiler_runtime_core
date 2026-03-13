@@ -42,12 +42,24 @@ from runner.types.test_env import TestEnv
 _LOGGER = Log.get_logger(__file__)
 
 
+class RunnerUtils:
+    @staticmethod
+    def set_cmd_prefix(config: Config) -> list[str]:
+        match config.general.qemu:
+            case QemuKind.ARM64:
+                return ["qemu-aarch64", "-L", "/usr/aarch64-linux-gnu/"]
+            case QemuKind.ARM32:
+                return ["qemu-arm", "-L", "/usr/arm-linux-gnueabihf"]
+            case _:
+                return []
+
+
 class RunnerFileBased(Runner):
 
     def __init__(self, config: Config, name: str) -> None:
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
-        self.cmd_prefix = self._set_cmd_prefix(config)
+        self.cmd_prefix = RunnerUtils.set_cmd_prefix(config)
 
         self.__set_test_list_options()
 
@@ -57,16 +69,6 @@ class RunnerFileBased(Runner):
     @abstractmethod
     def default_work_dir_root(self) -> Path:
         pass
-
-    @staticmethod
-    def _set_cmd_prefix(config: Config) -> list[str]:
-        if config.general.qemu == QemuKind.ARM64:
-            return ["qemu-aarch64", "-L", "/usr/aarch64-linux-gnu/"]
-
-        if config.general.qemu == QemuKind.ARM32:
-            return ["qemu-arm", "-L", "/usr/arm-linux-gnueabihf"]
-
-        return []
 
     @cached_property
     def work_dir(self) -> WorkDir:

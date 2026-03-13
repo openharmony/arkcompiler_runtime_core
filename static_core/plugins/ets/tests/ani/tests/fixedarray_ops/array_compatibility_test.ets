@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_fixedarray_compatibility
+---*/
 
 function getArray(): int[] {
     let a: int[] = [1, 2, 3, 4, 5]

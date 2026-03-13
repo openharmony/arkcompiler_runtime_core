@@ -20,11 +20,13 @@ import re
 import shutil
 import subprocess
 from collections import Counter
+from dataclasses import replace
 from functools import cached_property
 from glob import glob
 from os import path
 from pathlib import Path
 from typing import ClassVar, cast
+from zipfile import ZipFile
 
 from runner.chapters import Chapters
 from runner.common_exceptions import (
@@ -40,12 +42,20 @@ from runner.extensions.suites.test_suite_registry import ITestSuite
 from runner.logger import Log
 from runner.options.options import IOptions
 from runner.options.options_collections import CollectionsOptions
+from runner.options.options_step import StepKind
 from runner.options.root_dir import RootDir
 from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
 from runner.types.test_env import TestEnv
-from runner.utils import correct_path, get_group_number, get_test_id, is_executable_file
+from runner.utils import (
+    ani_name_rule,
+    correct_path,
+    get_group_number,
+    get_test_id,
+    is_executable_file,
+    make_gtest_name,
+)
 
 _LOGGER = Log.get_logger(__file__)
 DEFAULT_EXTENSION = "ets"
@@ -694,12 +704,26 @@ class GTestSuite(TestSuite):
     def __init__(self, test_env: TestEnv) -> None:
         super().__init__(test_env)
         self.__test_root = Path(self.config.test_suite.test_root)
+        self.__gtest_bin_root = self.config.test_suite.get_parameter("gtest-bin-root")
         self.precompiled_test_files: bool = cast(bool, self.config.test_suite.get_parameter("precompiled-test-files"))
         self.workflow_kind = self.config.workflow.workflow_type
+        self.__gtest_zip_prefix: str | None = cast(str, test_env.config.test_suite.get_parameter("gtest-zip-prefix"))
 
     @property
     def gtest_root(self) -> Path:
+        if self.__gtest_bin_root is not None:
+            return Path(self.__gtest_bin_root)
+
+        raise InvalidConfiguration(f"Path to gtest binaries is not specified"
+                                   f" in the test suite {self.config.test_suite.suite_name}")
+
+    @property
+    def gtest_source_root(self) -> Path:
         return self.__test_root
+
+    @property
+    def intermediate(self) -> Path:
+        return self.test_root.parent / "intermediate"
 
     @staticmethod
     def get_class_and_tests(test_file: str, qemu_prefix: list, file_path: Path | None = None,
@@ -798,10 +822,49 @@ class GTestSuite(TestSuite):
                     result.append(test_path)
         return result
 
+    def _archive_ets_files(self, ets_test_parts: set[Path]) -> None:
+        """
+        Ets test parts need to be renamed and zip-ed
+        """
+        file_name = "classes"
+        file_ext = "abc"
+
+        for test_file in ets_test_parts:
+            naming_rule = ani_name_rule if self.__gtest_zip_prefix == "ani_test" else None
+            zip_name = make_gtest_name(test_file, self.__gtest_zip_prefix, rule=naming_rule)
+            zip_path = test_file.parent / f"{zip_name}_gtest_package.zip"
+            arcname = f"{file_name}.{file_ext}"
+
+            with ZipFile(zip_path, "w") as z:
+                z.write(test_file, arcname=arcname)
+
+            test_file.unlink()
+
+    def _disable_es2panda_step(self) -> None:
+
+        steps = self.config.workflow.steps
+        for i, step in enumerate(steps):
+            if step.step_kind == StepKind.COMPILER:
+                steps[i] = replace(step, enabled=False)
+
+        _LOGGER.short(f"es2panda step for workflow {self.config.workflow.name} is disabled")
+
     def process(self, force_generate: bool) -> list[ITestFlow]:
         raw_set: list[Path] = []
+        ets_raw_set: set[Path] = set()
+
         self._explicit_file = self._set_explicit_file()
         self._explicit_list = self._set_explicit_list()
+
+        for step in self._preparation_steps:
+            ets_raw_set.update(step.transform(force_generate))
+
+        compiled_ets_set: set[Path] = set(self.intermediate.rglob("**/*"))
+
+        self._disable_es2panda_step()
+
+        self._archive_ets_files(compiled_ets_set)
+
         if self._explicit_file is not None:
             self._process_tests(raw_set, force_generate, str(self._explicit_file), update_explicit=True)
         elif self.explicit_list is not None:

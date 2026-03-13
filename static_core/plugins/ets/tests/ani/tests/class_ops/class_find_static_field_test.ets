@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_class_ops_class_find_static_field
+---*/
 
 class Singleton {
     static instance: int = 0;

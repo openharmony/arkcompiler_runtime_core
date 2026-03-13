@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -241,6 +241,5 @@ add_entrypoints_yaml(${CMAKE_CURRENT_SOURCE_DIR}/runtime/ets_entrypoints.yaml)
 
 # Write to a file the list of all binaries
 get_property(stash_files GLOBAL PROPERTY ets_stash_list)
-list(APPEND stash_files "abc-gtests")
 list(JOIN stash_files "\n" file_content)
 file(WRITE ${PANDA_BINARY_ROOT}/ets_stash_files.txt "${file_content}\n")
