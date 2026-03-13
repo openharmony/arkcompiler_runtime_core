@@ -21,7 +21,6 @@
 namespace ark::ets::panda_file_items {
 
 static constexpr std::string_view CTOR = "<ctor>";
-// clang-format on
 
 }  // namespace ark::ets::panda_file_items
 

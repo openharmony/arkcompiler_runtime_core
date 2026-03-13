@@ -56,13 +56,13 @@ namespace ark::verifier {
 using TryBlock = panda_file::CodeDataAccessor::TryBlock;
 using CatchBlock = panda_file::CodeDataAccessor::CatchBlock;
 
+bool CheckAsyncAnnotation(Method const *method);
+
 VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const *job)
 {
     auto *method = job->JobMethod();
 
-    auto *klass = method->GetClass();
-
-    Type methodClassType {klass};
+    Type methodClassType {method->GetClass()};
 
     VerificationContext verifCtx {typeSystem, job, methodClassType};
     // NOTE(vdyadov): ASSERT(cflow_info corresponds method)
@@ -94,7 +94,7 @@ VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const
     LOG_VERIFIER_DEBUG_RESULT(signature->result.ToString(typeSystem));
 
     /*
-    3. Add checkpoint for exc. handlers
+    2. Add checkpoint for exc. handlers
     */
     method->EnumerateTryBlocks([&](TryBlock const &tryBlock) {
         uint8_t const *code = method->GetInstructions();
@@ -112,7 +112,13 @@ VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const
     });
 
     /*
-    3. add Start entry of method
+    3. Check async annotation
+    */
+    // NOTE(panferovi) should this be moved to the plugin??
+    verifCtx.SetAsyncAnnotation(CheckAsyncAnnotation(method));
+
+    /*
+    4. add Start entry of method
     */
 
     const uint8_t *methodPcStartPtr = method->GetInstructions();
@@ -293,7 +299,39 @@ VerificationStatus VerifyMethod(VerificationContext &verifCtx)
         worstSoFar = std::max(worstSoFar, VerificationStatus::WARNING);
     }
 
+    // NOTE(panferovi) should this be moved to the plugin??
+    if (verifCtx.HasAsyncAnnotation()) {
+        ScopedChangeMutatorStatus st {ManagedThread::GetCurrent(), MutatorStatus::RUNNING};
+        auto *method = verifCtx.GetMethod();
+        auto langCtx = LanguageContext(plugins::GetLanguageContextBase(method->GetClass()->GetSourceLang()));
+        auto promiseDesc = langCtx.GetPromiseClassDescriptor();
+        auto promiseCls = verifCtx.GetJob()->GetService()->classLinker->GetExtension(langCtx)->GetClass(promiseDesc);
+        if (verifCtx.ReturnType() != Type(promiseCls)) {
+            return VerificationStatus::ERROR;
+        }
+    }
+
     return worstSoFar;
+}
+
+bool CheckAsyncAnnotation(Method const *method)
+{
+    const panda_file::File &pf = *method->GetPandaFile();
+    panda_file::MethodDataAccessor mda(pf, method->GetFileId());
+    auto langCtx = LanguageContext(plugins::GetLanguageContextBase(method->GetClass()->GetSourceLang()));
+    const auto *asyncAnnoDesc = langCtx.GetAsyncAnnotationDescriptor();
+    auto hasAsyncAnnotation = false;
+    if (asyncAnnoDesc != nullptr) {
+        auto asyncAnnoDescStr = std::string(utf::Mutf8AsCString(asyncAnnoDesc));
+        mda.EnumerateAnnotations([&](panda_file::File::EntityId annId) {
+            panda_file::AnnotationDataAccessor ada(pf, annId);
+            auto className = panda_file::StringDataToString(pf.GetStringData(ada.GetClassId()));
+            if (className == asyncAnnoDescStr) {
+                hasAsyncAnnotation = true;
+            }
+        });
+    }
+    return hasAsyncAnnotation;
 }
 
 }  // namespace ark::verifier

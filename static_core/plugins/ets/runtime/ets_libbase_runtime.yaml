@@ -31,6 +31,9 @@ coretypes:
   mirror_class: ark::ets::EtsString
   string_class: true
 
+- managed_class: arkruntime.AsyncContext
+  mirror_class: ark::ets::EtsAsyncContext
+
 - managed_class: std.core.Promise
   mirror_class: ark::ets::EtsPromise
 
@@ -81,6 +84,9 @@ coretypes:
 
 - managed_class: std.core.StackTraceElement
   mirror_class: ark::ets::EtsStackTraceElement
+
+- managed_class: escompat.Error
+  mirror_class: ark::ets::EtsError
 
 - managed_class: std.core.ErrorOptions
   mirror_class: ark::ets::EtsErrorOptions
@@ -5799,6 +5805,59 @@ intrinsics:
       ret: void
       args: [ ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryFinishCleanup
+
+###########################
+# arkruntime.AsyncContext #
+###########################
+  - name: StdAsyncContextInit
+    space: ets
+    class_name: arkruntime.AsyncContext
+    method_name: init
+    static: true
+    signature:
+      ret: arkruntime.AsyncContext
+      args: []
+    impl: ark::ets::intrinsics::EtsAsyncContextInit
+
+  - name: StdAsyncContextCurrent
+    space: ets
+    class_name: arkruntime.AsyncContext
+    method_name: current
+    static: true
+    signature:
+      ret: arkruntime.AsyncContext
+      args: []
+    impl: ark::ets::intrinsics::EtsAsyncContextCurrent
+
+  - name: StdAsyncContextResolve
+    space: ets
+    class_name: arkruntime.AsyncContext
+    method_name: resolve
+    static: false
+    signature:
+      ret: std.core.Promise
+      args: [std.core.Object]
+    impl: ark::ets::intrinsics::EtsAsyncContextResolve
+
+  - name: StdAsyncContextReject
+    space: ets
+    class_name: arkruntime.AsyncContext
+    method_name: reject
+    static: false
+    signature:
+      ret: std.core.Promise
+      args: [escompat.Error]
+    impl: ark::ets::intrinsics::EtsAsyncContextReject
+
+  - name: StdAsyncContextResult
+    space: ets
+    class_name: arkruntime.AsyncContext
+    method_name: result
+    static: false
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsAsyncContextResult
 
 ########################
 # std.core.Job #

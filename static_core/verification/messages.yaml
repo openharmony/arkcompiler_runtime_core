@@ -572,6 +572,16 @@ messages:
     short_message: >
       Union type is not canonized: '${type}'. Expected: '${expected_type}'.
 
+  DispatchInstOutsideAsyncFunction:
+    number: 72
+    level: error
+    message: Unexpected `ets.async.dispatch` instruction outside of async function.
+
+  SuspendInstOutsideAsyncFunction:
+    number: 73
+    level: error
+    message: Unexpected `ets.async.suspend` instruction outside of async function.
+
   CflowInvalidJumpOutsideMethodBody:
     number: 1000
     args: method_name, jump_target_offset, jump_instruction_offset

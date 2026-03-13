@@ -34,5 +34,7 @@ template <bool IS_STRICT = false>
 void BuildEquals(const BytecodeInstruction *bcInst);
 virtual void BuildTypeof(const BytecodeInstruction *bcInst);
 virtual void BuildIstrue(const BytecodeInstruction *bcInst);
+virtual void BuildSuspend(const BytecodeInstruction *bcInst);
+virtual void BuildDispatch(const BytecodeInstruction *bcInst);
 
 #endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H

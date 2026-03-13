@@ -45,6 +45,16 @@
     BuildIstrue(instruction);
     % when "NULLCHECK"
     BuildNullcheck(instruction);
+    % when "ASYNC"
+    %   opcode = inst.opcode.upcase.split('_')[2]
+    %   case opcode
+    %   when "DISPATCH"
+    BuildDispatch(instruction);
+    %   when "SUSPEND"
+    BuildSuspend(instruction);
+    %   else
+    UNREACHABLE();
+    %   end
     % else
     UNREACHABLE();
     % end

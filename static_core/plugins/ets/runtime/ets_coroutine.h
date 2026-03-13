@@ -25,6 +25,7 @@
 
 namespace ark::ets {
 class PandaEtsVM;
+class EtsReference;
 
 /// @brief The eTS coroutine. It is aware of the native interface and reference storage existance.
 class EtsCoroutine : public Coroutine {
@@ -103,6 +104,16 @@ public:
     void SetupNullValue(ObjectHeader *obj)
     {
         nullValue_ = obj;
+    }
+
+    ALWAYS_INLINE EtsReference *GetAsyncContext() const
+    {
+        return asyncContext_;
+    }
+
+    void SetAsyncContext(EtsReference *ctxRef)
+    {
+        asyncContext_ = ctxRef;
     }
 
     static constexpr uint32_t GetTlsNullValueOffset()
@@ -192,6 +203,8 @@ private:
     void *jobClassPtr_ {nullptr};
 
     ObjectHeader *nullValue_ {};
+
+    EtsReference *asyncContext_ {nullptr};
 
     static ExternalIfaceTable emptyExternalIfaceTable_;
 

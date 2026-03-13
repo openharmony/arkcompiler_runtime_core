@@ -54,6 +54,7 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     class_ = compute(langCtx_.GetClassClassDescriptor());
     object_ = compute(langCtx_.GetObjectClassDescriptor());
     string_ = compute(langCtx_.GetStringClassDescriptor());
+    asyncCtx_ = compute(langCtx_.GetAsyncContextClassDescriptor());
     // Throwable is not given to us as descriptor for some reason. NOTE(gogabr): correct this.
     auto throwableClassName = langCtx_.GetVerificationTypeThrowable();
     if (throwableClassName != nullptr) {

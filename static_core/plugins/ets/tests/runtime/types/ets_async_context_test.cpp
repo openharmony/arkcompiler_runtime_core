@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,18 @@
 
 #include <gtest/gtest.h>
 
-#include "types/ets_error.h"
+#include "ets_coroutine.h"
+
+#include "ets_vm.h"
+#include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 
 namespace ark::ets::test {
 
-class EtsErrorTest : public testing::Test {
+class EtsAsyncContextTest : public testing::Test {
 public:
-    EtsErrorTest()
+    EtsAsyncContextTest()
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(true);
@@ -43,36 +47,34 @@ public:
         vm_ = coroutine->GetPandaVM();
     }
 
-    ~EtsErrorTest() override
+    ~EtsAsyncContextTest() override
     {
         Runtime::Destroy();
     }
 
-    NO_COPY_SEMANTIC(EtsErrorTest);
-    NO_MOVE_SEMANTIC(EtsErrorTest);
+    NO_COPY_SEMANTIC(EtsAsyncContextTest);
+    NO_MOVE_SEMANTIC(EtsAsyncContextTest);
 
-    static std::vector<MirrorFieldInfo> GetErrorMembers()
+    static std::vector<MirrorFieldInfo> GetAsyncContextMembers()
     {
-        return std::vector<MirrorFieldInfo> {
-            MIRROR_FIELD_INFO(EtsError, name_, "name_"),
-            MIRROR_FIELD_INFO(EtsError, message_, "message_"),
-            MIRROR_FIELD_INFO(EtsError, stackLines_, "stackLines"),
-            MIRROR_FIELD_INFO(EtsError, stack_, "stack_"),
-            MIRROR_FIELD_INFO(EtsError, cause_, "cause_"),
-            MIRROR_FIELD_INFO(EtsError, code_, "code_"),
-        };
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsAsyncContext, awaitee_, "awaitee"),
+                                             MIRROR_FIELD_INFO(EtsAsyncContext, returnValue_, "returnValue"),
+                                             MIRROR_FIELD_INFO(EtsAsyncContext, vregsMask_, "vregsMask"),
+                                             MIRROR_FIELD_INFO(EtsAsyncContext, vregsRefs_, "vregsRefs"),
+                                             MIRROR_FIELD_INFO(EtsAsyncContext, vregsPrimitives_, "vregsPrimitives"),
+                                             MIRROR_FIELD_INFO(EtsAsyncContext, awaitId_, "awaitId")};
     }
 
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-// Check both EtsErrorTest and ark::Class<escompat.Error> has the same number of fields
+// Check both EtsAsyncContext and ark::Class<AsyncContext> has the same number of fields
 // and at the same offsets
-TEST_F(EtsErrorTest, EscompatErrorMemoryLayout)
+TEST_F(EtsAsyncContextTest, AsyncContextMemoryLayout)
 {
-    EtsClass *errorClass = PlatformTypes(vm_)->escompatError;
-    MirrorFieldInfo::CompareMemberOffsets(errorClass, GetErrorMembers());
+    auto *asyncContextClass = PlatformTypes(vm_)->arkruntimeAsyncContext;
+    MirrorFieldInfo::CompareMemberOffsets(asyncContextClass, GetAsyncContextMembers());
 }
 
 }  // namespace ark::ets::test

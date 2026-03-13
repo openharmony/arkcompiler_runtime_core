@@ -190,6 +190,16 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     } else {
         return;
     }
+%   elsif i.properties.include?('suspend')
+    if (handler.GetFrame()->IsStackless()) {
+        handler.template HandleSuspendStackless<BytecodeInstruction::Format::PREF_V8>();
+        ASSERT(frame->GetMethod()->GetPandaFile()->GetHeader()->quickenedFlag
+            || handler.IsPrimaryOpcodeValid());
+        DISPATCH(state.GetDispatchTable(), handler.GetExceptionOpcode());
+    } else {
+        // it means that the method was called by Invoke and prev frame is a cpp frame
+        return;
+    }
 %   else
 %     if !i.exceptions.include?('x_none')
     ASSERT(frame->GetMethod()->GetPandaFile()->GetHeader()->quickenedFlag

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #ifndef PLUGINS_ETS_INTERPRETER_INTERPRETER_INL_H
 #define PLUGINS_ETS_INTERPRETER_INTERPRETER_INL_H
 
+#include <cstdint>
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/mem/internal_allocator.h"
@@ -26,6 +28,8 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/types/ets_async_context.h"
+#include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -449,6 +453,114 @@ public:
             return;
         }
         this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleSuspendStackless()
+    {
+        ASSERT(this->GetFrame()->IsStackless());
+
+        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
+
+        auto *coro = this->GetCoro();
+        auto *frame = this->GetFrame();
+        auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
+
+        // NOTE(panferovi): need to handle compiler -> interpreter call
+        auto *prev = frame->GetPrevFrame();
+
+        // return to the caller frame
+        frame->GetAcc().Set(asyncCtx->GetReturnValue(coro));
+
+        Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(coro, frame->GetMethod());
+
+        this->GetInstructionHandlerState()->UpdateInstructionHandlerState(
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            prev->GetInstruction() + prev->GetBytecodeOffset(), prev);
+
+        this->SetDispatchTable(this->GetThread()->template GetCurrentDispatchTable<IS_DEBUG>());
+        RuntimeIfaceT::SetCurrentFrame(coro, prev);
+
+        this->GetAcc() = frame->GetAcc();
+        this->SetInst(prev->GetNextInstruction());
+
+        RuntimeIfaceT::FreeFrame(this->GetThread(), frame);
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsAsyncSuspend()
+    {
+        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
+
+        LOG_INST() << "ets.async.suspend v" << v;
+
+        auto *frame = this->GetFrame();
+        ASSERT(frame != nullptr);
+
+        auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
+        if (UNLIKELY(asyncCtx == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+            return;
+        }
+
+        // store resume point id
+        auto resumePointId = reinterpret_cast<int64_t>(this->GetInst().GetNext().GetAddress());
+        asyncCtx->SetAwaitId(resumePointId);
+
+        // save vregs to context
+        // NOTE(panferovi, #33620): need to check if AsyncContext has enough memory to save vregs
+        auto frameHandler = GetFrameHandler(frame);
+        auto *coro = this->GetCoro();
+        for (size_t idx = 0; idx < frame->GetSize(); ++idx) {
+            auto vreg = frameHandler.GetVReg(idx);
+            if (vreg.HasObject()) {
+                asyncCtx->AddReference(coro, idx, EtsObject::FromCoreType(vreg.GetReference()));
+            } else {
+                asyncCtx->AddPrimitive(coro, idx, vreg.GetValue());
+            }
+        }
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsAsyncDispatch()
+    {
+        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
+
+        LOG_INST() << "ets.async.dispatch v" << v;
+
+        auto *coro = this->GetCoro();
+        auto *frame = this->GetFrame();
+        auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
+
+        if (asyncCtx == nullptr) {
+            ObjectHeader *undefined = nullptr;
+            this->GetAccAsVReg().SetReference(undefined);
+            this->template MoveToNextInst<FORMAT, true>();
+            return;
+        }
+
+        // load vregs from context
+        auto frameHandler = GetFrameHandler(frame);
+        auto *vregsRefs = asyncCtx->GetVRegsRefs(coro);
+        auto *vregsPrimitives = asyncCtx->GetVRegsPrimitives(coro);
+        for (size_t idx = 0; idx < frame->GetSize(); ++idx) {
+            auto vreg = frameHandler.GetVReg(idx);
+            // NOTE(panferovi): maybe there is another way to check that the register is a reference
+            if (asyncCtx->GetVRegType(coro, idx) == EtsAsyncContext::VRegType::REFERENCE_TYPE) {
+                vreg.SetReference(EtsObject::ToCoreType(vregsRefs->Get(idx)));
+            } else {
+                vreg.SetPrimitive(vregsPrimitives->Get(idx));
+            }
+        }
+
+        auto *awaiteePromise = asyncCtx->GetAwaitee(coro);
+        ASSERT(!awaiteePromise->IsPending());
+        this->GetAccAsVReg().SetReference(EtsObject::ToCoreType(awaiteePromise->GetValue(coro)));
+
+        // load resume point id
+        auto resumePointId = reinterpret_cast<const uint8_t *>(asyncCtx->GetAwaitId());
+        this->template JumpTo<true>(resumePointId);
     }
 
 private:
