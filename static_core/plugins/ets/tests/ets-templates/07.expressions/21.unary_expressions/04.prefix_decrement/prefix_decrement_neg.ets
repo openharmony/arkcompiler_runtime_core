@@ -18,6 +18,8 @@
 desc: >-
     A compile-time error occurs if the type of the expression is not convertible
 tags: [compile-only, negative]
+expected_out: >-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}

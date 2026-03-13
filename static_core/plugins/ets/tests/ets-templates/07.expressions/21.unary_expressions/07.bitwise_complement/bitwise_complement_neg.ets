@@ -18,6 +18,8 @@
 desc: Bitwise complement operator
 assertion: Bitwise complement operator is applied to an operand of a numeric type or type bigint.
 tags: [negative, compile-only]
+expected_out: >-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}

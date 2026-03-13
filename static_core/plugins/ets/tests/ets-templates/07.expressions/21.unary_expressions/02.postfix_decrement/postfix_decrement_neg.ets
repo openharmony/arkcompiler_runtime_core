@@ -18,6 +18,8 @@
 desc: >-
     The expression must be left-hand-side expression
 tags: [compile-only, negative]
+expected_out: >-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}

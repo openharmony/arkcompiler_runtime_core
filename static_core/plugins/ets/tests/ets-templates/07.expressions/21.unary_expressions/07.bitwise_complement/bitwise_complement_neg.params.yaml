@@ -16,19 +16,29 @@ cases:
     - use: |-
         let c = "text"
         let d = ~c
+      expected_out: >-
+        Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
     - use: |-
         let a: int[] = [1]
         let b = ~a
+      expected_out: >-
+        Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
     - use: |-
         let f = (): int => { return 13 }
         let g = ~f
+      expected_out: >-
+        Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
     - decl: |-
         class C { f(): int { return 13 } }
       use: |-
         let c = new C
         let d = ~c
+      expected_out: >-
+        Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
     - decl: |-
         class C { f(): int { return 13 } }
       use: |-
         let c = new C
         let d = ~c
+      expected_out: >-
+        Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
