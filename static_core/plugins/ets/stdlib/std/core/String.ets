@@ -766,20 +766,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     private static native concat3(str1: String, str2: String, str3: String): String;
     private static native concat4(str1: String, str2: String, str3: String, str4: String): String;
 
-    /*
-     * Creates a String using substitutions
-     *
-     * @param d a template
-     *
-     * @param substs strings to be substituted
-     *
-     * @returns string with respected data being substituted
-     */
-    // TODO(ivan-tyulyandin): uncomment when #12735 will be fixed
-    // public static raw(d: String, substs: ...String): String {
-    //     throw new Error('String.raw: not implemented')
-    // }
-
     /**
      * Replaces all occurrences of the specified character
      *     with another specified character. If no specified

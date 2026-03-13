@@ -26,7 +26,7 @@ native function isFuncObjAsyncImpl(target: Object): boolean
 /**
  * Core namespace for reflection operations, providing access to metadata such as classes, interfaces,
  * methods, and properties at runtime.
- * 
+ *
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
@@ -98,9 +98,7 @@ export function getInstanceFieldsRecursive(targetClass: Class): Array<InstanceFi
     let res = new Array<InstanceField>()
     let cls: Class | undefined = targetClass
     while (cls != undefined) {
-        for (let field of cls!.getInstanceFields()) {
-            res.push(field)
-        }
+        res.unshift(...cls!.getInstanceFields())
         cls = cls!.getSuper()
     }
     return res

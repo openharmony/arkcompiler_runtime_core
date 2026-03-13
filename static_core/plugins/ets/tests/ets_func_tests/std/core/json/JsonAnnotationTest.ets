@@ -17,13 +17,13 @@ const INT8_MAX: number = Byte.MAX_VALUE; //127
 const INT8_MIN: number = Byte.MIN_VALUE; //-128
 
 class TestClass1 {
-    @JSONRename("__backing_user")
-    user: string = ""
+    @JSONRename('__backing_user')
+    user: string = ''
     @JSONStringifyIgnore
     @JSONParseIgnore
     password: number = 0
     @JSONParseIgnore
-    nickname: string = ""
+    nickname: string = ''
 
     setPassword(pwd: number) {
         this.password = pwd
@@ -37,95 +37,95 @@ class TestClass1 {
 }
 
 class TestClass2 {
-    @JSONRename("nickname")
-    user: string = ""
+    @JSONRename('nickname')
+    user: string = ''
     password: number = 0
-    nickname: string = ""
+    nickname: string = ''
 }
 
 class TestClass3 {
-    @JSONRename("nickname1")
-    user: string = ""
+    @JSONRename('nickname1')
+    user: string = ''
     password: number = 0
-    @JSONRename("nickname1")
-    nickname: string = ""
+    @JSONRename('nickname1')
+    nickname: string = ''
 }
 
 class TestClass4 {
-    @JSONRename("nickname1")
-    user: string = ""
+    @JSONRename('nickname1')
+    user: string = ''
     password: number = 0
-    nickname: string = ""
+    nickname: string = ''
 }
 
 class TestClass5 {
-    name1: string = "class5"
+    name1: string = 'class5'
 }
 
 class TestClass6 extends TestClass5 {
-    name1: string = "class6"
-    nickname: string = "class6_nickname"
+    name1: string = 'class6'
+    nickname: string = 'class6_nickname'
 }
 
 class TestClass7 extends TestClass5 {
-    name1: string = "class7"
-    nickname: string = "class7_nickname"
+    name1: string = 'class7'
+    nickname: string = 'class7_nickname'
 }
 
 class TestClass8 {
-    @JSONRename("name8")
-    name1: string = "TestClass8"
-    nickname: string = "class8_nickname"
+    @JSONRename('name8')
+    name1: string = 'TestClass8'
+    nickname: string = 'class8_nickname'
 }
 
 class TestClass9 {
-    name1: string = "TestClass9"
+    name1: string = 'TestClass9'
     nickname: TestClass8 = new TestClass8()
 }
 
 class TestClass10 extends TestClass8 {
-    @JSONRename("name8")
-    name10: string = "TestClass10"
+    @JSONRename('name8')
+    name10: string = 'TestClass10'
 }
 
 class TestClass11 extends TestClass8 {
-    @JSONRename("name1")
-    name11: string = "TestClass11"
+    @JSONRename('name1')
+    name11: string = 'TestClass11'
 }
 
 class TestClass12 extends TestClass8 {
-    @JSONRename("name12test")
-    name12: string = "TestClass12"
+    @JSONRename('name12test')
+    name12: string = 'TestClass12'
 }
 
 class TestClass13 {
-    @JSONRename("name9")
-    name1: string = "TestClass13"
-    @JSONRename("nicknametest")
-    nickname: string = "class13_nickname"
-    nickname2: string = "class13_nickname2"
-    nickname3: string = "class13_nickname3"
+    @JSONRename('name9')
+    name1: string = 'TestClass13'
+    @JSONRename('nicknametest')
+    nickname: string = 'class13_nickname'
+    nickname2: string = 'class13_nickname2'
+    nickname3: string = 'class13_nickname3'
 }
 
 class TestClass14 extends TestClass13 {
-    @JSONRename("name14test")
-    name10: string = "TestClass14"
-    name9: string = "TestClass14"
-    nicknametest: string = "class14_nickname"
-    nickname3: string = "class14_nickname3"
+    @JSONRename('name14test')
+    name10: string = 'TestClass14'
+    name9: string = 'TestClass14'
+    nicknametest: string = 'class14_nickname'
+    nickname3: string = 'class14_nickname3'
 }
 
 class TestClass15 {
-    @JSONRename("record15")
+    @JSONRename('record15')
     record: Record<string, Any> = new Record<string, Any>()
-    @JSONRename("map15")
+    @JSONRename('map15')
     map: Map<string, string> = new Map<string, string>()
-    @JSONRename("nestedRecord15")
+    @JSONRename('nestedRecord15')
     nestedRecord: Record<string, Any> = new Record<string, Any>()
     @JSONStringifyIgnore
     i8Array: Int8Array = Int8Array.of(INT8_MAX, INT8_MIN, 100, INT8_MIN + 1)
-    @JSONRename("fixArray15")
-    fixArray: FixedArray<String> = ["\a", "\b"]
+    @JSONRename('fixArray15')
+    fixArray: FixedArray<String> = ['\a', '\b']
 }
 
 class TestClass16 {
@@ -139,15 +139,15 @@ class TestClass16 {
 function jsonStringify() {
     let obj: TestClass1 = new TestClass1()
     obj.setPassword(123456)
-    obj.setUserName("tester")
-    obj.setNickName("test123")
+    obj.setUserName('tester')
+    obj.setNickName('test123')
     let json = JSON.stringify(obj)
     arktest.assertEQ(json, '{"__backing_user":"tester","nickname":"test123"}')
     let jsonObj: TestClass1 = JSON.parse<TestClass1>(json, Type.of(obj)) as TestClass1
     arktest.assertEQ(Object.keys(jsonObj).length, 3)
-    arktest.assertEQ(jsonObj?.user, "tester")
+    arktest.assertEQ(jsonObj?.user, 'tester')
     arktest.assertEQ(jsonObj?.password, 0)
-    arktest.assertEQ(jsonObj?.nickname, "")
+    arktest.assertEQ(jsonObj?.nickname, '')
 }
 
 function checkThrow(fn: () => void, expectMsg: string) {
@@ -163,18 +163,18 @@ function checkThrow(fn: () => void, expectMsg: string) {
 function jsonThrowWithRename() {
     let obj: TestClass2 = new TestClass2()
     obj.password = 123456
-    obj.user = "tester"
-    obj.nickname = "test123"
-    const expectMsg = "Cannot rename nickname in keys of JsonAnnotationTest.TestClass2"
+    obj.user = 'tester'
+    obj.nickname = 'test123'
+    const expectMsg = 'Double usage of `nickname` in JsonAnnotationTest.TestClass2. The name also is used by JSONRename in base class'
     checkThrow(() => {JSON.stringify(obj)}, expectMsg)
 }
 
 function jsonThrowWithDoubleRename() {
     let obj: TestClass3 = new TestClass3()
     obj.password = 123456
-    obj.user = "tester"
-    obj.nickname = "test123"
-    const expectMsg = "Cannot double rename nickname1 in keys of JsonAnnotationTest.TestClass3"
+    obj.user = 'tester'
+    obj.nickname = 'test123'
+    const expectMsg = 'Cannot double rename nickname1 in keys of JsonAnnotationTest.TestClass3'
     checkThrow(() => {JSON.stringify(obj)}, expectMsg)
 }
 
@@ -193,10 +193,10 @@ function jsonParseThrow() {
     arktest.assertEQ(obj2!.password, 0)
     let jsonObj: TestClass4 = JSON.parse<TestClass4>(json3, Class.of(obj))!
     arktest.assertEQ(Object.keys(jsonObj).length, 3)
-    arktest.assertEQ(jsonObj?.user, "tester")
+    arktest.assertEQ(jsonObj?.user, 'tester')
     arktest.assertEQ(jsonObj?.password, 123456)
-    arktest.assertEQ(jsonObj?.nickname, "test123")
-    arktest.assertEQ(Object.hasOwn(jsonObj, "nickname1"), false)
+    arktest.assertEQ(jsonObj?.nickname, 'test123')
+    arktest.assertEQ(Object.hasOwn(jsonObj, 'nickname1'), false)
 }
 
 function jsonStringifyExtend() {
@@ -215,40 +215,38 @@ function jsonStringifyNest() {
     arktest.assertEQ(json9, '{"name1":"TestClass9","nickname":{"name8":"TestClass8","nickname":"class8_nickname"}}')
     let jsonObj: TestClass9 = JSON.parse<TestClass9>(json9, Type.from<TestClass9>()) as TestClass9
     arktest.assertEQ(Object.keys(jsonObj).length, 2)
-    arktest.assertEQ(jsonObj.name1, "TestClass9")
+    arktest.assertEQ(jsonObj.name1, 'TestClass9')
     arktest.assertEQ(Type.of(jsonObj.nickname).equals(Type.of(obj8)), true)
     let obj3 = (jsonObj.nickname) as TestClass8
-    arktest.assertEQ(Object.hasOwn(obj3, "name8"), false)
-    arktest.assertEQ(obj3.name1, "TestClass8")
-    arktest.assertEQ(obj3.nickname, "class8_nickname")
+    arktest.assertEQ(Object.hasOwn(obj3, 'name8'), false)
+    arktest.assertEQ(obj3.name1, 'TestClass8')
+    arktest.assertEQ(obj3.nickname, 'class8_nickname')
 }
 
 
 function jsonThrowWithExtends() {
     let obj10: TestClass10 = new TestClass10()
     let obj11: TestClass11 = new TestClass11()
-    const expectMsg1 = "Cannot double rename name8 in keys of JsonAnnotationTest.TestClass10"
-    const expectMsg2 = "Cannot rename name1 in keys of JsonAnnotationTest.TestClass11"
+    const expectMsg1 = 'Cannot double rename name8 in keys of JsonAnnotationTest.TestClass10'
+    const expectMsg2 = 'Double usage of `name1` in JsonAnnotationTest.TestClass11. The name also is used by JSONRename in base class'
     checkThrow(() => {JSON.stringify(obj10)}, expectMsg1)
     checkThrow(() => {JSON.stringify(obj11)}, expectMsg2)
 }
 
 function jsonTestWithExtends() {
     let obj: TestClass14 = new TestClass14()
-    const targetOutput = '{"name9":"TestClass14","nicknametest":"class14_nickname",' +
-        '"nickname2":"class13_nickname2","nickname3":"class14_nickname3","name14test":"TestClass14"}'
-    let json = JSON.stringify(obj)
-    arktest.assertEQ(json, targetOutput)
+    const expectMsg = 'Double usage of `name9` in JsonAnnotationTest.TestClass14. The name also is used by JSONRename in base class'
+    checkThrow(() => {JSON.stringify(obj)}, expectMsg)
 }
 
 function jsonTestWithTypes() {
     let obj: TestClass15 = new TestClass15()
-    obj.record["name"] = "arkts"
-    obj.record["version"] = 1
-    obj.map.set("key1", "value1")
-    obj.nestedRecord = { "name": "arkts", "version": 1}
-    const nest: Record<string, Any> = { "desc": "nested" }
-    obj.nestedRecord["nested"] = nest
+    obj.record['name'] = 'arkts'
+    obj.record['version'] = 1
+    obj.map.set('key1', 'value1')
+    obj.nestedRecord = { 'name': 'arkts', 'version': 1}
+    const nest: Record<string, Any> = { 'desc': 'nested' }
+    obj.nestedRecord['nested'] = nest
     let json = JSON.stringify(obj)
     const targetOutput = '{"record15":{"name":"arkts","version":1},"map15":{},' +
         '"nestedRecord15":{"name":"arkts","version":1,"nested":{"desc":"nested"}},"fixArray15":["a","\\b"]}'
