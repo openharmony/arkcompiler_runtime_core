@@ -1142,7 +1142,7 @@ export namespace taskpool {
                 if (InternalTask.of(task).isPeriodicTask) {
                     throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
                 }
-                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0 || InternalTask.of(this).asyncId.load() != 0) {
+                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0 || InternalTask.of(task).asyncId.load() != 0) {
                     throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_OR_ASYNC_RUNNER_TASK_RELIED_ON, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on");
                 }
                 if (InternalTask.of(task).groupId != 0) {

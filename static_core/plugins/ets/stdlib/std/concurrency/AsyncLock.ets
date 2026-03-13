@@ -144,13 +144,26 @@ export class AsyncLock {
         }
     }
 
+    private throwsignalAbortError<U>(options : AsyncLockOptions<U>) {
+        let signalReason = options.signal!.reason;
+        if (signalReason instanceof Error) {
+            throw signalReason;
+        } else if (signalReason instanceof string) {
+            throw new Error(signalReason);
+        } else if (signalReason instanceof int) {
+            throw new Error(Int.toString(signalReason));
+        } else {
+            throw new Error('AsyncLock:: Operation aborted by signal');
+        }
+    }
+
     private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
         try {
             return Promise.resolve<T>(callback()).finally(() => {
                 this.unlock(asyncLockInfo);
                 if (options.signal != null && options.signal!.aborted == true) {
                     this.fireCondEvent();
-                    throw new Error('AsyncLock:: Operation aborted by signal');
+                    this.throwsignalAbortError<U>(options)
                 }
             });
         } catch(e) {
@@ -204,11 +217,10 @@ export class AsyncLock {
 
         try {
             while (isDone.get() == false) {
-
-                 if (options.signal != null && options.signal!.aborted == true) {
-                     this.removePendingRequest(asyncLockInfo);
-                     this.fireCondEvent();
-                     throw new Error('AsyncLock:: Operation aborted by signal');
+                if (options.signal != null && options.signal!.aborted == true) {
+                    this.removePendingRequest(asyncLockInfo);
+                    this.fireCondEvent();
+                    this.throwsignalAbortError<U>(options);
                 }
                 if (isTimeoutExec.get() == true) {
                     this.removePendingRequest(asyncLockInfo);
