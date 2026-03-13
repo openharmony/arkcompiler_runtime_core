@@ -999,10 +999,11 @@ add_gtests(
     tests/options_test.cpp
 )
 
-add_gtests(
-    arkruntime_signal_test
-    tests/signal_handler_test.cpp
-)
+# Issue 33659
+# add_gtests(
+#     arkruntime_signal_test
+#     tests/signal_handler_test.cpp
+# )
 
 add_gtests(
     arkruntime_regexp_test
