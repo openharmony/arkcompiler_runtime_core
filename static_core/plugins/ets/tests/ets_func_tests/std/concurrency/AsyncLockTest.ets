@@ -542,7 +542,7 @@ async function multipleWakeupTest(): Promise<boolean> {
     while (Atomics.load(flagBuf, 0) == 0) {
     }
     let count = 10;
-    let promises = new Array<Promise<void>>(count);
+    let promises = Array.create<Promise<void>>(count, Promise.resolve());
     let lock = AsyncLock.request(lockName);
     for (let i = 0; i < count; ++i) {
         promises[i] = lock.lockAsync<void>(async () => {

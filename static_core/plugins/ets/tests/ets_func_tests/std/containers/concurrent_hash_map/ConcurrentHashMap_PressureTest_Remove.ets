@@ -34,7 +34,7 @@ function main(): int {
             let j: string = `${i}`;
             concurrentHashMapOne.set(i, j);
         }
-        let jobs = new Array<Job<void>>(100);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         pressureFlag = 0;
         for (let i: int = 0; i < 100; i++) {
             let localPressureFlag = pressureFlag;
@@ -44,7 +44,7 @@ function main(): int {
             pressureFlag += 1;
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(concurrentHashMapOne.size, 0);
         for (let i: int = 0; i < 100; i++) {

@@ -84,10 +84,7 @@ function sharedLockTest() {
     const coroutines = 10;
 
     let rLock = new RWLock().readLock();
-    let jobs = new Array<CompletableJob<void>>(coroutines);
-    for (let i: int = 0; i < coroutines; ++i) {
-        jobs[i] = new CompletableJob<void>();
-    }
+    let jobs = new Array<CompletableJob<void>>(coroutines, (index: int) => new CompletableJob<void>());
     let sharedJob = new SharedJob<CompletableJob<void>>(jobs);
     runConcurrently((id: int) => {
         rLock.lock();

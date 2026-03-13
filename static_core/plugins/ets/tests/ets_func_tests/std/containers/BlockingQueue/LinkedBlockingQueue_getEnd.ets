@@ -99,7 +99,7 @@ function getEndConcurrentTest() {
 }
 
 function getEndConcurrent(testBQ: containers.LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
-    let arrPromise = new Array<Promise<void>>(PUSH_COUNT_PER_JOB)
+    let arrPromise = Array.create<Promise<void>>(PUSH_COUNT_PER_JOB, Promise.resolve())
     for (let i: int = 0; i < PUSH_COUNT_PER_JOB; i++) {
         let val = i
         arrPromise[i] = lock.lockAsync(() => {

@@ -115,7 +115,7 @@ async function testConcurrentReads() {
     let workerCount = 50;
     let iterationsPerWorker = 10;
 
-    let promises = new Array<Promise<Any>>(workerCount);
+    let promises: Promise<Any>[] = [];
     for(let i = 0; i < workerCount; i++) {
         promises.push(taskpool.execute(() => {
             for(let j = 0; j < iterationsPerWorker; j++) {
@@ -133,7 +133,7 @@ async function testConcurrentWrites() {
     let workerCount = 20;
     let iterationsPerWorker = 5;
 
-    let promises = new Array<Promise<Any>>(workerCount);
+    let promises: Promise<Any>[] = [];
     for(let i = 0; i < workerCount; i++) {
         let workerId = i;
         promises.push(taskpool.execute(() => {

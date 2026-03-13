@@ -29,14 +29,14 @@ function main(): int {
             addMore(i);
         }
         arktest.assertEQ(ConcurrentSetTestOne.size, 100);
-        let jobs = new Array<Job<void>>(100);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         for (let i: int = 0; i < 100; i++) {
             jobs[i] = launch() {
                 deleteMore(i)
             };
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });

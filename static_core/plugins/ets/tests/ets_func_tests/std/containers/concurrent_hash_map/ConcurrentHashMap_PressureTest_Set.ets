@@ -28,7 +28,7 @@ function main(): int {
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
-        let jobs = new Array<Job<void>>(100);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         pressureFlag = 0;
         for (let i: int = 0; i < 100; i++) {
             let num = pressureFlag;
@@ -38,7 +38,7 @@ function main(): int {
             pressureFlag += 1;
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(concurrentHashMapOne.size, 100);
         for (let i: int = 0; i < 100; i++) {
