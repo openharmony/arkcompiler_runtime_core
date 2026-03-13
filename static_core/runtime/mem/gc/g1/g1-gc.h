@@ -576,7 +576,7 @@ private:
     bool singlePassCompactionEnabled_ {false};
     size_t origionSize_ {0};
     size_t sensitiveSize_ {0};
-    static constexpr size_t ADJUST_SPACE_RATE = 32;
+    static constexpr size_t ADJUST_SPACE_RATE = 8;
 
     template <class, bool>
     friend class RefCacheBuilder;

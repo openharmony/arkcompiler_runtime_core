@@ -2797,6 +2797,7 @@ void G1GC<LanguageConfig>::PostponeGCStart()
         sensitiveSize_ = Runtime::GetOptions().GetHeapSizeLimit() / ADJUST_SPACE_RATE;
     }
     origionSize_ = GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(sensitiveSize_);
+    GC::SetSmartGCInitHeapMemSize(this->GetPandaVm()->GetMemStats()->GetFootprintHeap());
     GC::PostponeGCStart();
 }
 

@@ -386,6 +386,16 @@ public:
 
     virtual void PostForkCallback([[maybe_unused]] size_t restoreLimit) {}
 
+    size_t GetSmartGCInitHeapMemSize()
+    {
+        return smartGCInitHeapMemSize_;
+    }
+
+    void SetSmartGCInitHeapMemSize(size_t initHeapMemSize)
+    {
+        smartGCInitHeapMemSize_ = initHeapMemSize;
+    }
+
     /// Check if the object addr is in the GC sweep range
     virtual bool InGCSweepRange([[maybe_unused]] const ObjectHeader *obj) const
     {
@@ -803,6 +813,7 @@ private:
     std::atomic<bool> isPostponeEnabled_ {false};
     std::atomic<bool> fastGC_ {false};
     bool clearSoftReferencesEnabled_ {false};
+    size_t smartGCInitHeapMemSize_ {0};
 };
 
 /**

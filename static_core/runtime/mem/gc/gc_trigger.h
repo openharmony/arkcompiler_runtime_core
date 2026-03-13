@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -172,9 +172,9 @@ protected:
     size_t maxExtraSize_ {DEFAULT_MAX_EXTRA_HEAP_SIZE};        // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    void FinishPostponeGCIfNeeded(GC *gc);
+    void FinishPostponeGCIfNeeded(GC *gc, size_t bytesInHeap);
 
-    static constexpr uint32_t POSTPONE_GC_LIMIT = 10;
+    static constexpr size_t POSTPONE_GC_LIMIT = 80_MB;
 
     HeapSpace *heapSpace_ {nullptr};
     size_t minTargetFootprint_ {DEFAULT_MIN_TARGET_FOOTPRINT};
