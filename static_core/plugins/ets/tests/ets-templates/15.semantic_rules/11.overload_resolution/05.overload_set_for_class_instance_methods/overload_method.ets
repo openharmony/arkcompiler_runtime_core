@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Overload Resolution for Overload Declarations - method overload.
-tags: []
 ---*/
 
 final class A {

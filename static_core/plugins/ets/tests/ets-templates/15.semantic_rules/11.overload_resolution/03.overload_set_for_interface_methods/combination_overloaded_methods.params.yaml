@@ -1,0 +1,50 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - desc: |-
+        Overloaded method with optional param is after method with mandatory param
+      decl: |-
+        interface I {
+          foo(x: number): string { return 'foo1' }
+          foo(s: string): string { return 'foo2' }
+          fooOpt(x?: number): string { return 'fooOpt' }
+
+          overload foo { foo, fooOpt }
+        }
+
+        class C implements I {}
+      call: |-
+        let c = new C
+        arktest.assertEQ(c.foo(1), 'foo1', 'foo1 call expected');
+        arktest.assertEQ(c.foo('1'), 'foo2', 'foo2 call expected');
+        arktest.assertEQ(c.foo(), 'fooOpt', 'fooOpt call expected');
+        
+    - desc: |-
+        Overloaded method with optional param is before method with mandatory param
+      decl: |-
+        interface I {
+          foo(x: number): string { return 'foo1' }
+          foo(s: string): string { return 'foo2' }
+          fooOpt(x?: number): string { return 'fooOpt' }
+
+          overload foo { fooOpt, foo }
+        }
+
+        class C implements I {}
+      call: |-
+        let c = new C
+        arktest.assertEQ(c.foo(1), 'fooOpt', 'fooOpt call expected');
+        arktest.assertEQ(c.foo('1'), 'foo2', 'foo2 call expected');
+        arktest.assertEQ(c.foo(), 'fooOpt', 'fooOpt call expected');

@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Overload Declarations - array and tuple parameters constructor overload.
-tags: []
 ---*/
 
 class A {

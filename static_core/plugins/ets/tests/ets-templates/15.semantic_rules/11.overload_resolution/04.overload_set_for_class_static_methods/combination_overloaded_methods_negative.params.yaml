@@ -14,19 +14,21 @@
 ---
 cases:
     - decl: |-
-          class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
-          }
-      main: |-
-          let v = new A().foo(x)
-      expected_out: 'Semantic error ESE0143: Unresolved reference x'
+        class C {
+          static fooN(n: number) {}
+          static foo() {}
+          static fooX(x?: number) {}
+
+          static overload foo { fooN, fooX }
+        }
+      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
 
     - decl: |-
-          class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
-          }
-      main: |-
-          let v = new A().foo(x.fld)
-      expected_out: 'Semantic error ESE0143: Unresolved reference x'
+        class C {
+          static fooN(n: number) {}
+          static foo() {}
+          static fooX(x?: number) {}
+
+          static overload foo { foo, fooZ, fooX }
+        }
+      expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method."

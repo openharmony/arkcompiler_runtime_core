@@ -13,20 +13,8 @@
 
 ---
 cases:
-    - decl: |-
-          class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
-          }
-      main: |-
-          let v = new A().foo(x)
-      expected_out: 'Semantic error ESE0143: Unresolved reference x'
-
-    - decl: |-
-          class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
-          }
-      main: |-
-          let v = new A().foo(x.fld)
-      expected_out: 'Semantic error ESE0143: Unresolved reference x'
+  - { call: 'max(i, j)', result: 202 }
+  - { call: 'max(i, pi)', result: 203.14 }
+  - { call: 'max(pi, 5.5)', result: 205.5 }
+  - { call: 'max(i, j, 10, 4)', result: 310 }
+  - { call: 'max(i)', result: 301 }

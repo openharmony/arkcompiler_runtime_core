@@ -1,0 +1,96 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - desc: |-
+        Overloaded method with optional param is after method with mandatory param
+      decl: |-
+        class C {
+          foo(x: number): string { return 'foo1' }
+          foo(s: string): string { return 'foo2' }
+          fooOpt(x?: number): string { return 'fooOpt' }
+
+          overload foo { foo, fooOpt }
+        }
+      call: |-
+        let c = new C
+        arktest.assertEQ(c.foo(1), 'foo1', 'foo1 call expected');
+        arktest.assertEQ(c.foo('1'), 'foo2', 'foo2 call expected');
+        arktest.assertEQ(c.foo(), 'fooOpt', 'fooOpt call expected');
+        
+    - desc: |-
+        Overloaded method with optional param is before method with mandatory param
+      decl: |-
+        class C {
+          foo(x: number): string { return 'foo1' }
+          foo(s: string): string { return 'foo2' }
+          fooOpt(x?: number): string { return 'fooOpt' }
+
+          overload foo { fooOpt, foo }
+        }
+      call: |-
+        let c = new C
+        arktest.assertEQ(c.foo(1), 'fooOpt', 'fooOpt call expected');
+        arktest.assertEQ(c.foo('1'), 'foo2', 'foo2 call expected');
+        arktest.assertEQ(c.foo(), 'fooOpt', 'fooOpt call expected');
+        
+    - desc: |-
+        An overload set for a class with a superclass and a superinterface
+      decl: |-
+        interface I {
+          foo(x: number): string // foo1
+        }
+
+        class C {
+          foo(s: string): string { return 'foo2' }
+        }
+
+        class D extends C implements I {
+          foo(x: number): string { return 'foo1' } // implements foo1
+          foo(b: boolean): string { return 'foo3' }
+        }
+      call: |-
+        let d = new D
+        arktest.assertEQ(d.foo(1), 'foo1', 'foo1 call expected');
+        arktest.assertEQ(d.foo('1'), 'foo2', 'foo2 call expected');
+        arktest.assertEQ(d.foo(true), 'foo3', 'foo3 call expected');
+        
+    - desc: |-
+        That only direct supertypes are considered for overload set
+      decl: |-
+        class A {}
+
+        interface I {
+          foo(x: number): string { return 'foo1' }
+        }
+
+        class C implements I {
+          foo(x: A): string { return 'foo2' }
+        }
+
+        class D extends C {
+          foo(s: string): string { return 'foo3' } 
+          foo(x: A | null): string { return 'foo4' } // overrides foo2
+        }
+
+        class E extends D {
+          foo(x: number): string { return 'foo5' } // overrides foo1
+        }
+      call: |-
+        let e = new E
+        arktest.assertEQ(e.foo(1), 'foo5', 'foo5 call expected');
+        arktest.assertEQ(e.foo('1'), 'foo3', 'foo3 call expected');
+        arktest.assertEQ(e.foo(new A), 'foo4', 'foo4 call expected');
+        arktest.assertEQ(e.foo(null), 'foo4', 'foo4 call expected');
+       

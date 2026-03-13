@@ -1,0 +1,79 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          function foo(p: int) { return 1 }
+          function bar(p: string) { return 2 }
+
+          overload fm { foo, bar }
+
+          class A {
+              m1(p: int) { return 3 }
+              m2(p: string) { return 4 }
+
+              overload fm { m1, m2 }
+          }
+
+      call: |-
+          arktest.assertEQ(fm(1), 1, "foo call expected")
+          arktest.assertEQ(fm('1'), 2, "bar call expected")
+          let a = new A
+          arktest.assertEQ(a.fm(1), 3, "m1 call expected")
+          arktest.assertEQ(a.fm('1'), 4, "m2 call expected")
+          
+    - decl: |-
+          class A {
+              m1(p: int) { return 3 }
+              m2(p: string) { return 4 }
+
+              overload fm { m1, m2 }
+          }
+
+          function foo(p: int) { return 1 }
+          function bar(p: string) { return 2 }
+
+          overload fm { foo, bar }
+
+      call: |-
+          arktest.assertEQ(fm(1), 1, "foo call expected")
+          arktest.assertEQ(fm('1'), 2, "bar call expected")
+          let a = new A
+          arktest.assertEQ(a.fm(1), 3, "m1 call expected")
+          arktest.assertEQ(a.fm('1'), 4, "m2 call expected")
+          
+    - decl: |-
+          class A {
+              m1(p: int) { return 1 }
+              m2(p: string) { return 2 }
+
+              overload fm { m1, m2 }
+          }
+
+          class B {
+              m1(p: int) { return 3 }
+              m2(p: string) { return 4 }
+
+              overload fm { m1, m2 }
+          }
+
+      call: |-
+          let a = new A
+          arktest.assertEQ(a.fm(1), 1, "A.m1 call expected")
+          arktest.assertEQ(a.fm('1'), 2, "A.m2 call expected")
+
+          let b = new B
+          arktest.assertEQ(b.fm(1), 3, "B.m1 call expected")
+          arktest.assertEQ(b.fm('1'), 4, "B.m2 call expected")
+        

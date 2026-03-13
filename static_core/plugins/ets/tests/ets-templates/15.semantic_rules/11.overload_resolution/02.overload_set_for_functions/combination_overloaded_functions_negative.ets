@@ -13,35 +13,17 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: If an overload set is a combination of implicitly and explicitly overloaded entities,
+      then an explicit overload list must contain the name of an implicitly overloaded entity.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
 ---*/
 
-final class A {
-    public size: number = 0;
+function fooN(n: number): string { return 'fooN' }
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
+function foo(): string { return 'foo1' }
 
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
+function fooX(x?: number): string { return 'fooX' }
 
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
-}
-
-function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
-}
-
-{% endfor %}
+overload foo { fooN, fooX }

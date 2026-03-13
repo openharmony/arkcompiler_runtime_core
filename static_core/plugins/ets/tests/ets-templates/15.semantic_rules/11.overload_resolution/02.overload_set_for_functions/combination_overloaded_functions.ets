@@ -14,34 +14,25 @@
  */
 
 {% for c in cases %}
+
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: If an overload set is a combination of implicitly and explicitly overloaded entities,
+      then the order is based of the order of the explicit overload list. All implicitly 
+      overloaded entities are listed in the textual order of declaration, and are included
+      into the explicit overload list at the position of the overloaded name.
 ---*/
 
-final class A {
-    public size: number = 0;
-
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
-}
+{{c.decl}}
 
 function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
+    let testSuite = new arktest.ArkTestsuite('{{c.descr}}')
+    {% for a in c.asserts %}
+    testSuite.addTest('test_{{loop.index}}', () => {
+        {{a}}
+    })
+    {% endfor %}
+    let res = testSuite.run()
+    return res
 }
 
 {% endfor %}

@@ -13,35 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{%- for c in cases %}
+
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: Only a single overload set is created for each overloaded name in a scope.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0351: Variable 'fb' has already been declared."
 ---*/
 
-final class A {
-    public size: number = 0;
+{{c.decl}}
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
-}
-
-function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
-}
-
-{% endfor %}
+{%- endfor %}

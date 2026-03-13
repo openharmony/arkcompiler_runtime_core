@@ -14,19 +14,22 @@
 ---
 cases:
     - decl: |-
-          class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
-          }
-      main: |-
-          let v = new A().foo(x)
-      expected_out: 'Semantic error ESE0143: Unresolved reference x'
+        interface I {
+          fooN(n: number)
+          foo()
+          fooX(x?: number)
+
+          overload foo { fooN, fooX }
+        }
 
     - decl: |-
-          class A {
-              foo(...p: Any[]) { return 1 }
-              foo(p: Any) { return 2 }
-          }
-      main: |-
-          let v = new A().foo(x.fld)
-      expected_out: 'Semantic error ESE0143: Unresolved reference x'
+        interface I {
+          foo()
+        }
+       
+        interface J extends I {
+          fooN(n: number)
+          fooX(x?: number)
+
+          overload foo { fooN, fooX }
+        }

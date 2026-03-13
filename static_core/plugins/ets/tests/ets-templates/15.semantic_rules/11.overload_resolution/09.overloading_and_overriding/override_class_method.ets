@@ -13,35 +13,25 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: As a compile-time polymorphism, overload resolution selects the method 
+      to call from a class type or an interface type known at compile time.
 ---*/
 
-final class A {
-    public size: number = 0;
+class C1 {}
+class C2 extends C1 {}
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
+class A {
+    foo(c: C2): string { return "A.C2" }
+    foo(c: C1): string { return "A.C1" }
+}
 
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
+class B extends A {
+    override foo(c: C2): string { return "B.C2" }
 }
 
 function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
+    let a: A = new B()
+    arktest.assertEQ(a.foo(new C2()), 'B.C2', 'B.foo(C2) call expected');
+    arktest.assertEQ(a.foo(new C1()), 'A.C1', 'A.foo(C1) call expected');
 }
-
-{% endfor %}

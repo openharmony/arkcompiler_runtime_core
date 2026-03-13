@@ -1905,6 +1905,7 @@
 15.semantic_rules/10.overloading/interfaces/overloading_1.ets
 15.semantic_rules/10.overloading/interfaces/overloading_3.ets
 15.semantic_rules/10.overloading/interfaces/overloading_4.ets
+15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_2.ets
 15.semantic_rules/13.static_initialization/bad-static-location.ets
 15.semantic_rules/semantic_rules_case_06.ets
 15.semantic_rules/semantic_rules_case_10.ets

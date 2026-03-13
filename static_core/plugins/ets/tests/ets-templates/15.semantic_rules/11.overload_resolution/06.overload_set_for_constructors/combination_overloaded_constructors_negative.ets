@@ -13,35 +13,16 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: If an overload set is a combination of implicitly and explicitly overloaded entities,
+      then an explicit overload list must contain the name of an implicitly overloaded entity.
+tags: [compile-only, negative]
+expected_out: "TODO: Expected output is unknown"
 ---*/
 
-final class A {
-    public size: number = 0;
-
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
+class C {
+    constructor() {}
+    constructor(s: string) {}
+    constructor fromNumber(n: number) {}
+    overload constructor { fromString }
 }
-
-function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
-}
-
-{% endfor %}
