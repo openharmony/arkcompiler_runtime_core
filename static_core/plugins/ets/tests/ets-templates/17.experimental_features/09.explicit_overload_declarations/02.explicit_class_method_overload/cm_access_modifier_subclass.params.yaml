@@ -27,10 +27,10 @@ cases:
 
   - { mod1: public,    mod2: public,    mod3: public,    modA: private,   modB: protected }
   - { mod1: public,    mod2: public,    mod3: protected, modA: private,   modB: protected }
-  - { mod1: public,    mod2: public,    mod3: private,   modA: private,   modB: protected }
+  - { mod1: public,    mod2: public,    mod3: public,   modA: private,   modB: protected }
   - { mod1: protected, mod2: protected, mod3: public,    modA: private,   modB: protected }
   - { mod1: protected, mod2: protected, mod3: protected, modA: private,   modB: protected }
-  - { mod1: protected, mod2: protected, mod3: private,   modA: private,   modB: protected }
+  - { mod1: protected, mod2: protected, mod3: public,   modA: private,   modB: protected }
 
   - { mod1: public,    mod2: public,    mod3: public,    modA: public,    modB: private   }
   - { mod1: public,    mod2: public,    mod3: protected, modA: public,    modB: private   }
