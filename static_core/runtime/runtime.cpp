@@ -197,7 +197,7 @@ tooling::DebugInterface &Runtime::DebugSession::GetDebugger()
 }
 
 // all GetLanguageContext(...) methods should be based on this one
-LanguageContext Runtime::GetLanguageContext(panda_file::SourceLang lang)
+LanguageContext Runtime::GetLanguageContext(panda_file::SourceLang lang) const
 {
     if (g_ctxsJsRuntime != nullptr) {
         // Deprecated. Only for capability with js_runtime.
@@ -209,7 +209,7 @@ LanguageContext Runtime::GetLanguageContext(panda_file::SourceLang lang)
     return LanguageContext(ctx);
 }
 
-LanguageContext Runtime::GetLanguageContext(const Method &method)
+LanguageContext Runtime::GetLanguageContext(const Method &method) const
 {
     // Check class source lang
     auto *cls = method.GetClass();
@@ -222,17 +222,17 @@ LanguageContext Runtime::GetLanguageContext(const Method &method)
     return GetLanguageContext(res.value());
 }
 
-LanguageContext Runtime::GetLanguageContext(const Class &cls)
+LanguageContext Runtime::GetLanguageContext(const Class &cls) const
 {
     return GetLanguageContext(cls.GetSourceLang());
 }
 
-LanguageContext Runtime::GetLanguageContext(const BaseClass &cls)
+LanguageContext Runtime::GetLanguageContext(const BaseClass &cls) const
 {
     return GetLanguageContext(cls.GetSourceLang());
 }
 
-LanguageContext Runtime::GetLanguageContext(panda_file::ClassDataAccessor *cda)
+LanguageContext Runtime::GetLanguageContext(panda_file::ClassDataAccessor *cda) const
 {
     auto res = cda->GetSourceLang();
     if (res) {
@@ -242,7 +242,7 @@ LanguageContext Runtime::GetLanguageContext(panda_file::ClassDataAccessor *cda)
     return GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
 }
 
-LanguageContext Runtime::GetLanguageContext(const std::string &runtimeType)
+LanguageContext Runtime::GetLanguageContext(const std::string &runtimeType) const
 {
     return GetLanguageContext(plugins::RuntimeTypeToLang(runtimeType));
 }
@@ -1270,8 +1270,9 @@ void Runtime::NotifyAboutLoadedModules()
     }
 }
 
-Expected<LanguageContext, Runtime::Error> Runtime::ExtractLanguageContext(const panda_file::File *pf,
-                                                                          std::string_view entryPoint)
+// NOTE(dslynko, #33663): change return type to `Expected<LanguageContext, Runtime::Error>` after resolution
+static Expected<std::pair<LanguageContext, PandaString>, Runtime::Error> ExtractLanguageContext(
+    const Runtime *const runtime, const panda_file::File *pf, std::string_view entryPoint)
 {
     PandaString className;
     PandaString methodName;
@@ -1286,33 +1287,47 @@ Expected<LanguageContext, Runtime::Error> Runtime::ExtractLanguageContext(const 
 
     auto classId = pf->GetClassId(classNameBytes);
     if (!classId.IsValid() || pf->IsExternal(classId)) {
+        // NOTE(dslynko, #33663): remove plugin-dependent names after resolution
+        if (className.find("ETSGLOBAL") == PandaString::npos) {
+            className.append(".ETSGLOBAL");
+            auto updatedEntryPoint = className + "::" + methodName;
+            return ExtractLanguageContext(runtime, pf, updatedEntryPoint);
+        }
+
         LOG(ERROR, RUNTIME) << "Cannot find class '" << className << "'";
         return Unexpected(Runtime::Error::CLASS_NOT_FOUND);
     }
 
     panda_file::ClassDataAccessor cda(*pf, classId);
-    LanguageContext ctx = GetLanguageContext(&cda);
+    LanguageContext ctx = runtime->GetLanguageContext(&cda);
     bool found = false;
-    cda.EnumerateMethods([this, &pf, methodNameBytes, &found, &ctx](panda_file::MethodDataAccessor &mda) {
+    cda.EnumerateMethods([runtime, &pf, methodNameBytes, &found, &ctx](panda_file::MethodDataAccessor &mda) {
         if (!found && utf::IsEqual(pf->GetStringData(mda.GetNameId()).data, methodNameBytes)) {
             found = true;
             auto val = mda.GetSourceLang();
             if (val) {
-                ctx = GetLanguageContext(val.value());
+                ctx = runtime->GetLanguageContext(val.value());
             }
         }
     });
 
     if (!found) {
+        // NOTE(dslynko, #33663): remove plugin-dependent names after resolution
+        if (className.find("ETSGLOBAL") == PandaString::npos) {
+            className.append(".ETSGLOBAL");
+            auto updatedEntryPoint = className + "::" + methodName;
+            return ExtractLanguageContext(runtime, pf, updatedEntryPoint);
+        }
+
         LOG(ERROR, RUNTIME) << "Cannot find method '" << entryPoint << "'";
         return Unexpected(Runtime::Error::METHOD_NOT_FOUND);
     }
 
-    return ctx;
+    return std::pair {ctx, className + "::" + methodName};
 }
 
-std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::string_view filename,
-                                                                           std::string_view entryPoint)
+Expected<PandaString, Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::string_view filename,
+                                                                                   std::string_view entryPoint)
 {
     bool isLoaded = false;
     classLinker_->EnumerateBootPandaFiles([&isLoaded, filename](const panda_file::File &pf) {
@@ -1324,25 +1339,26 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     });
 
     if (isLoaded) {
-        return {};
+        return PandaString(entryPoint);
     }
 
     auto pf = panda_file::OpenPandaFileOrZip(filename);
     if (pf == nullptr) {
-        return Runtime::Error::PANDA_FILE_LOAD_ERROR;
+        return Unexpected(Runtime::Error::PANDA_FILE_LOAD_ERROR);
     }
 
-    auto res = ExtractLanguageContext(pf.get(), entryPoint);
+    auto res = ExtractLanguageContext(this, pf.get(), entryPoint);
     if (!res) {
-        return res.Error();
+        return Unexpected(res.Error());
+    }
+    auto [ctx, updatedEntryPoint] = res.Value();
+
+    if (!classLinker_->HasExtension(ctx)) {
+        LOG(ERROR, RUNTIME) << "class linker hasn't " << ctx << " language extension";
+        return Unexpected(Runtime::Error::CLASS_LINKER_EXTENSION_NOT_FOUND);
     }
 
-    if (!classLinker_->HasExtension(res.Value())) {
-        LOG(ERROR, RUNTIME) << "class linker hasn't " << res.Value() << " language extension";
-        return Runtime::Error::CLASS_LINKER_EXTENSION_NOT_FOUND;
-    }
-
-    auto *ext = classLinker_->GetExtension(res.Value());
+    auto *ext = classLinker_->GetExtension(ctx);
     appContext_.lang = ext->GetLanguage();
     appContext_.ctx = classLinker_->GetAppContext(filename);
     if (appContext_.ctx == nullptr) {
@@ -1367,7 +1383,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     classLinker_->GetAotManager()->SetAppClassContext(aotCtx, options_.IsArkAot());
 
     tooling::DebugInf::AddCodeMetaInfo(pf.get());
-    return {};
+    return updatedEntryPoint;
 }
 
 Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filename, std::string_view entryPoint,
@@ -1382,10 +1398,12 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
         StartDProfiler(appName);
     }
 
-    auto ctxErr = CreateApplicationClassLinkerContext(filename, entryPoint);
-    if (ctxErr) {
-        return Unexpected(ctxErr.value());
+    auto entryPointOrError = CreateApplicationClassLinkerContext(filename, entryPoint);
+    if (!entryPointOrError) {
+        return Unexpected(entryPointOrError.Error());
     }
+    // NOTE(dslynko, #33663): remove after after resolution
+    auto updatedEntryPoint = *entryPointOrError;
 
     if (pandaVm_->GetLanguageContext().IsEnabledCHA()) {
         classLinker_->GetAotManager()->VerifyClassHierarchy();
@@ -1415,7 +1433,7 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
         return 0;
     }
 
-    return Execute(entryPoint, args);
+    return Execute(updatedEntryPoint, args);
 }
 
 Expected<int, Runtime::Error> Runtime::Execute(std::string_view entryPoint, const std::vector<std::string> &args)

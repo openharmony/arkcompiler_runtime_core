@@ -103,12 +103,12 @@ public:
 
     using DebugSessionHandle = std::shared_ptr<DebugSession>;
 
-    LanguageContext GetLanguageContext(const std::string &runtimeType);
-    LanguageContext GetLanguageContext(const Method &method);
-    LanguageContext GetLanguageContext(const Class &cls);
-    LanguageContext GetLanguageContext(const BaseClass &cls);
-    LanguageContext GetLanguageContext(panda_file::ClassDataAccessor *cda);
-    LanguageContext GetLanguageContext(panda_file::SourceLang lang);
+    LanguageContext GetLanguageContext(const std::string &runtimeType) const;
+    LanguageContext GetLanguageContext(const Method &method) const;
+    LanguageContext GetLanguageContext(const Class &cls) const;
+    LanguageContext GetLanguageContext(const BaseClass &cls) const;
+    LanguageContext GetLanguageContext(panda_file::ClassDataAccessor *cda) const;
+    LanguageContext GetLanguageContext(panda_file::SourceLang lang) const;
 
     static bool CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator);
 
@@ -450,8 +450,6 @@ public:
     PandaString GetMemoryStatistics();
     PandaString GetFinalStatistics();
 
-    Expected<LanguageContext, Error> ExtractLanguageContext(const panda_file::File *pf, std::string_view entryPoint);
-
     UnwindStackFn GetUnwindStackFn() const
     {
         return unwindStackFn_;
@@ -475,7 +473,9 @@ public:
 private:
     void NotifyAboutLoadedModules();
 
-    std::optional<Error> CreateApplicationClassLinkerContext(std::string_view filename, std::string_view entryPoint);
+    // NOTE(dslynko, #33663): change return type to `std::optional<Runtime::Error>` after resolution
+    Expected<PandaString, Runtime::Error> CreateApplicationClassLinkerContext(std::string_view filename,
+                                                                              std::string_view entryPoint);
 
     bool LoadVerificationConfig();
 
