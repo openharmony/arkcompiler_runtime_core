@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,21 +11,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
-{% for c in cases %}
+{% yaml "unary_minus.byte_short.test_data.yaml" as td%}
+{% for c in td.testData2 %}
 /*---
-desc: Unary minus operator
-assertion: The type of the operand expression with the unary minus operator must be convertible to a numeric type. 
-           Otherwise, a compile-time error occurs.
+desc: >-
+  {{c.desc}} Negative test (upper level, decl let, init in function). 
+  When using the unary minus operator for operations on short and byte types, conversion to the int type occurs. 
+  Attempting to assign this converted value to a variable of the original type (byte or short) results in a compile-time error.
 expected_out: >-
-    Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
+  Semantic error ESE0318: Type '{{c.resultType | capitalize}}' cannot be assigned to type '{{c.type | capitalize}}'
 tags: [negative, compile-only]
 ---*/
 
-{{c.decl}}
+let valLet3: {{c.type}}
 
 function main(): void {
-    {{c.use|indent}}
+  valLet3 = {{c.format | format(c.value)}}
 }
 {% endfor %}
+
