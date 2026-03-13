@@ -16,8 +16,6 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include "runtime/execution/job_execution_context.h"
-#include "plugins/ets/runtime/ets_execution_context.h"
 #include "include/managed_thread.h"
 #include "runtime/mem/heap_manager.h"
 #include "runtime/runtime_helpers.h"
@@ -31,6 +29,8 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_typeapi_type.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "runtime/execution/job_execution_context.h"
 #include "runtime/include/thread_scopes.h"
 
 #include "runtime/include/stack_walker.h"
@@ -277,15 +277,18 @@ extern "C" void StdSystemScheduleCoroutine()
 
 extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 {
-    constexpr auto POLICIES_MAPPING =
-        std::array {CoroutineSchedulingPolicy::ANY_WORKER, CoroutineSchedulingPolicy::NON_MAIN_WORKER};
-    ASSERT((policy >= 0) && (static_cast<size_t>(policy) < POLICIES_MAPPING.size()));
-    CoroutineSchedulingPolicy newPolicy = POLICIES_MAPPING[policy];
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    if (Coroutine::MutatorIsCoroutine(executionCtx)) {
+        constexpr auto POLICIES_MAPPING =
+            std::array {CoroutineSchedulingPolicy::ANY_WORKER, CoroutineSchedulingPolicy::NON_MAIN_WORKER};
+        ASSERT((policy >= 0) && (static_cast<size_t>(policy) < POLICIES_MAPPING.size()));
+        CoroutineSchedulingPolicy newPolicy = POLICIES_MAPPING[policy];
 
-    Coroutine *coro = Coroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *cm = static_cast<CoroutineManager *>(coro->GetVM()->GetThreadManager());
-    cm->SetSchedulingPolicy(newPolicy);
+        Coroutine *coro = Coroutine::CastFromMutator(executionCtx);
+        ASSERT(coro != nullptr);
+        auto *cm = static_cast<CoroutineManager *>(coro->GetVM()->GetThreadManager());
+        cm->SetSchedulingPolicy(newPolicy);
+    }
 }
 
 extern "C" int32_t StdSystemGetCoroutineId()
@@ -478,9 +481,13 @@ extern "C" EtsInt EtsStdCoreUint8ClampedArrayToUint8Clamped(EtsDouble val)
 
 extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetCoroutineManager()->GetConfig().enableExternalTimer);
-    return ToEtsBoolean((extTimerOption != 0U) && coro->GetWorker()->IsExternalSchedulingEnabled());
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    if (Coroutine::MutatorIsCoroutine(executionCtx)) {
+        auto *coro = Coroutine::CastFromMutator(executionCtx);
+        auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetCoroutineManager()->GetConfig().enableExternalTimer);
+        return ToEtsBoolean((extTimerOption != 0U) && coro->GetWorker()->IsExternalSchedulingEnabled());
+    }
+    return ToEtsBoolean(false);
 }
 
 extern "C" void StdSystemDumpUhandledFailedJobs()

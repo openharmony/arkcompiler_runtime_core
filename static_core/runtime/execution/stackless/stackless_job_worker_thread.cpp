@@ -47,7 +47,10 @@ StacklessJobWorkerThread::StacklessJobWorkerThread(Runtime *runtime, PandaVM *vm
 
 void StacklessJobWorkerThread::ExecuteJobs()
 {
-    while (ExecuteRunnableJob()) {
+    bool hasRunnables = true;
+    while (hasRunnables) {
+        ProcessTimerEvents();
+        hasRunnables = ExecuteRunnableJob();
     }
 }
 
@@ -55,17 +58,15 @@ void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
 {
     ASSERT(awaitee->GetType() == JobEvent::Type::BLOCKING);
 
+    ProcessTimerEvents();
+
     if (awaitee->Happened()) {
         awaitee->Unlock();
         LOG(DEBUG, COROUTINES) << "StacklessJobWorkerThread::WaitForEvent finished (no await happened)";
         return;
     }
 
-    {
-        os::memory::LockHolder lh(waitersLock_);
-        awaitee->Unlock();
-        waiters_.emplace(awaitee, Job::GetCurrent());
-    }
+    AddJobInWaiters(awaitee, Job::GetCurrent());
 
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
@@ -80,6 +81,14 @@ void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
         waitersLock_.Unlock();
         runnablesCv_.Wait(&runnablesLock_);
     }
+}
+
+void StacklessJobWorkerThread::AddJobInWaiters(JobEvent *blocker, Job *job)
+{
+    UpdateMinExpirationTime(blocker);
+    os::memory::LockHolder lh(waitersLock_);
+    blocker->Unlock();
+    waiters_.emplace(blocker, job);
 }
 
 void StacklessJobWorkerThread::UnblockWaiters(JobEvent *blocker)
@@ -126,19 +135,15 @@ void StacklessJobWorkerThread::AddJobWithDependency(Job *job, JobEvent *dependen
 {
     ASSERT(job != nullptr);
     ASSERT(dependency != nullptr);
-    LOG_IF(dependency->GetType() != JobEvent::Type::GENERIC, FATAL, EXECUTION)
-        << "Currently only GenericEvent is supported";
     dependency->Lock();
     if (dependency->Happened()) {
         dependency->Unlock();
         AddRunnableJob(job);
         return;
     }
-    os::memory::LockHolder lh(waitersLock_);
-    dependency->Unlock();
     RegisterIncomingJob(job);
     job->SetStatus(Job::Status::BLOCKED);
-    waiters_.emplace(dependency, job);
+    AddJobInWaiters(dependency, job);
 }
 
 void StacklessJobWorkerThread::OnStartup()
@@ -230,7 +235,15 @@ void StacklessJobWorkerThread::WaitForRunnables()
 {
     os::memory::LockHolder lh(runnablesLock_);
     while (runnables_.Empty() && IsActive()) {
-        runnablesCv_.Wait(&runnablesLock_);
+        auto waitingTime = GetShortestTimerDelay();
+        if (waitingTime == 0) {
+            runnablesCv_.Wait(&runnablesLock_);
+        } else {
+            if (waitingTime > 0) {
+                runnablesCv_.TimedWait(&runnablesLock_, waitingTime);
+            }
+            break;
+        }
     }
     LOG(DEBUG, EXECUTION) << "StacklessJobWorkerThread::WaitForRunnables: wakeup!";
 }
@@ -250,6 +263,63 @@ void StacklessJobWorkerThread::CacheLocalObjectsInExecutionCtx()
 {
     GetSchedulerExecutionCtx()->CacheBuiltinClasses();
     GetSchedulerExecutionCtx()->UpdateCachedObjects();
+}
+
+void StacklessJobWorkerThread::ProcessTimerEvents()
+{
+    auto currTime = jobManager_->GetCurrentTime();
+    if (currTime < minExpirationTime_) {
+        return;
+    }
+
+    PandaVector<TimerEvent *> expiredTimers;
+    uint64_t minCurrDelay = MAX_EXPIRATION_TIME;
+    {
+        os::memory::LockHolder lh(waitersLock_);
+        currTime = jobManager_->GetCurrentTime();
+        for (auto &[evt, _] : waiters_) {
+            if (evt->GetType() == JobEvent::Type::TIMER) {
+                auto *timerEvent = static_cast<TimerEvent *>(evt);
+                timerEvent->SetCurrentTime(currTime);
+                auto delay = timerEvent->GetDelay();
+                if (timerEvent->IsExpired()) {
+                    expiredTimers.push_back(timerEvent);
+                } else if (delay < minCurrDelay) {
+                    minCurrDelay = delay;
+                    minExpirationTime_ = timerEvent->GetExpirationTime();
+                }
+            }
+        }
+    }
+    if (minCurrDelay == MAX_EXPIRATION_TIME) {
+        minExpirationTime_ = MAX_EXPIRATION_TIME;
+    }
+
+    std::sort(expiredTimers.begin(), expiredTimers.end(),
+              [](const TimerEvent *evt1, const TimerEvent *evt2) { return evt1->GetId() < evt2->GetId(); });
+    for (auto *evt : expiredTimers) {
+        evt->Happen();
+    }
+}
+
+int64_t StacklessJobWorkerThread::GetShortestTimerDelay()
+{
+    if (minExpirationTime_ == MAX_EXPIRATION_TIME) {
+        return 0;
+    }
+    auto currTime = jobManager_->GetCurrentTime();
+    if (minExpirationTime_ <= currTime) {
+        return -1;
+    }
+    return (minExpirationTime_ - currTime) / 1000U + 1;  // NOLINT(readability-magic-numbers)
+}
+
+void StacklessJobWorkerThread::UpdateMinExpirationTime(JobEvent *blocker)
+{
+    if (blocker->GetType() == JobEvent::Type::TIMER) {
+        auto *timer = static_cast<TimerEvent *>(blocker);
+        minExpirationTime_ = std::min(minExpirationTime_, timer->GetExpirationTime());
+    }
 }
 
 }  // namespace ark
