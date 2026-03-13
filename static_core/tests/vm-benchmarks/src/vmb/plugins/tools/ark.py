@@ -19,7 +19,7 @@ import logging
 from pathlib import Path
 from vmb.target import Target
 from vmb.tool import ToolBase, OptFlags
-from vmb.unit import BenchUnit, BUStatus
+from vmb.unit import BENCH_PREFIX, BenchUnit, BUStatus
 from vmb.result import JITStat
 
 log = logging.getLogger('vmb')
@@ -87,7 +87,7 @@ class Tool(ToolBase):
         if OptFlags.AOTPGO in self.flags:
             options += '--compiler-enable-jit=false '
         return self.cmd.format(
-            name=name, abc=abc, options=options, gclog=gclog, aot_opts=aot_opts)
+            name=f'{BENCH_PREFIX}{name}', abc=abc, options=options, gclog=gclog, aot_opts=aot_opts)
 
     def do_exec(self, bu: BenchUnit, profile: bool = False) -> None:
         bu_flags, _ = self.get_bu_opts(bu)

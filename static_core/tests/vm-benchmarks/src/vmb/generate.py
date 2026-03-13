@@ -237,7 +237,7 @@ class BenchGenerator:
             lang_impl.get_custom_fields(tpl_values, custom_values))
         # fill template with values
         bench = template.render(**tpl_values)
-        bench_file = bench_dir.joinpath(f'bench_{values.bench_name}{outext}')
+        bench_file = bench_dir.joinpath(f'{BENCH_PREFIX}{values.bench_name}{outext}')
         log.trace('Bench: %s', bench_file)
         with create_file(bench_file) as f:
             f.write(bench)
