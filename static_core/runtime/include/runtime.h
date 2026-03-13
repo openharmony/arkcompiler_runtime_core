@@ -51,6 +51,7 @@
 #include "libarkbase/os/library_loader.h"
 #include "runtime/include/loadable_agent.h"
 #include "runtime/tooling/tools.h"
+#include "plugins/ets/runtime/ani/ani.h"
 
 namespace ark {
 
@@ -102,6 +103,7 @@ public:
     };
 
     using DebugSessionHandle = std::shared_ptr<DebugSession>;
+    using UncaughtExceptionCallback = std::function<void(ani_error aniError)>;
 
     LanguageContext GetLanguageContext(const std::string &runtimeType);
     LanguageContext GetLanguageContext(const Method &method);
@@ -472,6 +474,18 @@ public:
         return &entrypoints_;
     }
 
+    void SetUncaughtExceptionCallback(UncaughtExceptionCallback callback)
+    {
+        uncaughtExceptionCallback_ = std::move(callback);
+    }
+
+    void HandleUncaughtException(ani_error aniError)
+    {
+        if (uncaughtExceptionCallback_ != nullptr) {
+            uncaughtExceptionCallback_(aniError);
+        }
+    }
+
 private:
     void NotifyAboutLoadedModules();
 
@@ -595,6 +609,8 @@ private:
     tooling::Tools tools_;
 
     EntrypointsTable entrypoints_ {};
+
+    UncaughtExceptionCallback uncaughtExceptionCallback_;
 
     NO_COPY_SEMANTIC(Runtime);
     NO_MOVE_SEMANTIC(Runtime);

@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #endif
+#include <functional>
 #include <string>
 #include <vector>
 #include <ani.h>
@@ -37,6 +38,7 @@
 #endif
 
 namespace ark::ets {
+using ETSUncaughtExceptionCallback = std::function<void(ani_error aniError)>;
 class PANDA_ETS_ANI_EXPO_PUBLIC_API ETSAni {
 public:
     static constexpr std::string_view AOT_FILES_OPTION_PREFIX = "--ext:--aot-files=";
@@ -45,6 +47,8 @@ public:
     static constexpr std::string_view ETSSTDLIB_ABC = "/system/framework/etsstdlib_bootabc.abc";
     static void Prefork(ani_env *env, void *napienv);
     static void Postfork(ani_env *env, const std::vector<ani_option> &options, bool postZygoteFork = true);
+    static void RegisterETSUncaughtExceptionHandler(ETSUncaughtExceptionCallback callback);
+    static void HandleUncaughtException(ani_error aniError);
 
 private:
     static void TryLoadAotFileForBoot();
