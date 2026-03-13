@@ -66,16 +66,11 @@ export class RegExpResultArray extends Array<String | undefined> {
     public groups: RegExpGroupsContainer | undefined = undefined
 
     constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<int>>) {
-        super(0)
+        super(result.length, (idx: int) => result[idx])
         this.isCorrect = true
         this.index_ = index
         this.input_ = input
         this.indices_ = indices
-
-        this.extendTo(result.length, undefined as (String | undefined))
-        for (let i: int = 0; i < result.length; i++) {
-            this.$_set(i, result.$_get(i))
-        }
     }
 
     protected constructor() {
@@ -552,6 +547,14 @@ export class RegExp extends Object {
     private source_: String = ""
     private flags_: String = ""
     private flagsSorted_: boolean = false
+    private isGlobal: boolean = false
+    private isUnicode: boolean = false
+    private isUnicodeSets: boolean = false
+    private isSticky: boolean = false
+    private isIgnoreCase: boolean = false
+    private isIndices: boolean = false
+    private isDotAll: boolean = false
+    private isMultiline: boolean = false
 
     /**
      * Gets the flags of the regular expression.
@@ -576,7 +579,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get global(): boolean {
-        return this.flags_.contains("g", 0)
+        return this.isGlobal
     }
 
     /**
@@ -587,7 +590,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get dotAll(): boolean {
-        return this.flags_.contains("s", 0)
+        return this.isDotAll
     }
 
     /**
@@ -598,7 +601,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get hasIndices(): boolean {
-        return this.flags_.contains("d", 0)
+        return this.isIndices
     }
 
     /**
@@ -609,7 +612,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get ignoreCase(): boolean {
-        return this.flags_.contains("i", 0)
+        return this.isIgnoreCase
     }
 
     /**
@@ -620,7 +623,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get multiline(): boolean {
-        return this.flags_.contains("m", 0)
+        return this.isMultiline
     }
 
     /**
@@ -631,7 +634,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get sticky(): boolean {
-        return this.flags_.contains("y", 0)
+        return this.isSticky
     }
 
     /**
@@ -642,7 +645,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get unicode(): boolean {
-        return this.flags_.contains("u", 0)
+        return this.isUnicode
     }
 
     /**
@@ -653,7 +656,7 @@ export class RegExp extends Object {
      * @since 24
      */
     get unicodeSets(): boolean {
-        return this.flags_.contains("v", 0)
+        return this.isUnicodeSets
     }
 
     /**
@@ -712,36 +715,9 @@ export class RegExp extends Object {
     }
 
     /**
-     * Compiles a regular expression
-     * @returns { RegExp } Returns the compiled RegExp object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public native compile(): RegExp;
-
-    /**
      * Parse a regular expression
      */
     private native static parse(pattern: String, flags: String): void
-
-    /**
-     * Recompiles a regular expression with new source and flags after the RegExp object has already been created
-     *
-     * @param { String } pattern the text of the regular expression.
-     * @param { String } [flags] any combination of flag values.
-     * @returns { RegExp } Returns the recompiled RegExp object itself.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public compile(pattern: String, flags?: String): RegExp {
-        this.pattern_ = pattern
-        this.flags_ = RegExp.normalizeFlags(pattern, flags === undefined ? "" : flags!)
-        this.flagsSorted_ = false
-        this.source_ = RegExp.escapePattern(pattern)
-        return this.compile()
-    }
 
     private native execImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpExecArray;
 
@@ -965,7 +941,7 @@ export class RegExp extends Object {
      */
     public split(str: String, limit: Int | undefined): String[] {
         let unicodeMatching = this.unicode
-        let newFlags = this.sticky ? this.flags : this.flags + "y";
+        let newFlags = this.sticky ? this.flags_ : this.flags_ + "y";
         let splitter = new RegExp(this.pattern_, newFlags)
         let lim: long;
         if (limit == undefined) {
@@ -1209,6 +1185,14 @@ export class RegExp extends Object {
         re.pattern_ = pattern
         re.flags_ = RegExp.normalizeFlags(pattern, flags)
         re.source_ = RegExp.escapePattern(pattern)
+        re.isGlobal = re.flags_.contains("g", 0)
+        re.isUnicode = re.flags_.contains("u", 0)
+        re.isUnicodeSets = re.flags_.contains("v", 0)
+        re.isMultiline = re.flags_.contains("m", 0)
+        re.isSticky = re.flags_.contains("y", 0)
+        re.isIgnoreCase = re.flags_.contains("i", 0)
+        re.isIndices = re.flags_.contains("d", 0)
+        re.isDotAll = re.flags_.contains("s", 0)
         RegExp.parse(pattern, re.flags_)
     }
 
