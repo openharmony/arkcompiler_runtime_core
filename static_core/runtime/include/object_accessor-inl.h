@@ -32,8 +32,8 @@ inline ObjectHeader *ObjectAccessor::GetObject(const void *obj, size_t offset)
 #if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
-        void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-        return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(&field));
+        void **field = reinterpret_cast<void **>(ToUintPtr(obj) + offset);
+        return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(field));
     }
 #endif  // ARK_USE_COMMON_RUNTIME
     // We don't have GC with read barriers now
@@ -82,8 +82,8 @@ inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThr
 #if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
-        void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-        return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(&field));
+        void **field = reinterpret_cast<void **>(ToUintPtr(obj) + offset);
+        return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(field));
     }
 #endif  // ARK_USE_COMMON_RUNTIME
     // We don't have GC with read barriers now
@@ -261,8 +261,8 @@ inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset,
 #if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
-        void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-        return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(&field));
+        void **field = reinterpret_cast<void **>(ToUintPtr(obj) + offset);
+        return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(field));
     }
 #endif  // ARK_USE_COMMON_RUNTIME
     if (!IS_DYN) {

@@ -274,8 +274,8 @@ static void MemAtomicSwapReadBarrier(mem::GCBarrierSet *barrierSet, T *aAddr, T 
 {
     auto *a1 = reinterpret_cast<std::atomic<T> *>(aAddr);
     auto *a2 = reinterpret_cast<std::atomic<T> *>(bAddr);
-    auto v1 = reinterpret_cast<T>(barrierSet->ReadBarrier(reinterpret_cast<void **>(aAddr)));
-    auto v2 = reinterpret_cast<T>(barrierSet->ReadBarrier(reinterpret_cast<void **>(bAddr)));
+    auto v1 = reinterpret_cast<T>(barrierSet->ReadBarrier(reinterpret_cast<void **>(&aAddr)));
+    auto v2 = reinterpret_cast<T>(barrierSet->ReadBarrier(reinterpret_cast<void **>(&bAddr)));
     // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
     // of the memory ordering at a higher logical level
     a2->store(v1, std::memory_order_relaxed);
