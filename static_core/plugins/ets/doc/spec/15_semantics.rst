@@ -968,21 +968,32 @@ Subtyping for Function Types
 .. meta:
     frontend_status: Done
 
-Function type ``F`` with parameters ``FP``:sub:`1` ``, ... , FP``:sub:`m`
-and return type ``FR``  is a *subtype* of function type ``S`` with parameters
-``SP``:sub:`1` ``, ... , SP``:sub:`n` and return type ``SR`` if **all** of the
-following conditions are met:
+Function type ``F`` with parameters ``FP``:sub:`1` ``, ... , FP``:sub:`m`,
+rest parameter ``FPrest`` (if present) and return type ``FR``  is a
+*subtype* of function type ``S`` with parameters
+``SP``:sub:`1` ``, ... , SP``:sub:`n`, rest parameter ``SPrest``
+(if present) and return type ``SR`` if **all** of the following conditions
+are met:
 
--  ``m`` :math:`\leq` ``n``.
--  Parameter type of ``SP``:sub:`i` for each ``i`` :math:`\leq` ``m`` is a
-   subtype of parameter type of ``FP``:sub:`i` (contravariance).
--  ``FP``:sub:`i` is a rest parameter only if ``SP``:sub:`i` is a rest parameter.
--  ``FP``:sub:`i` is an optional parameter only if ``SP``:sub:`i` is an optional
-   parameter.
--  ``FP``:sub:`i` is a required parameter only if ``SP``:sub:`i` is a required
-   parameter.
--  Type ``FR`` is a subtype of ``SR`` (covariance).
+- Number of optional and required parameters of ``F`` (``m``) is equal or
+  less than number of optional and required parameters of ``S`` (``n``).
 
+- Number of required parameters of ``F`` is equal or less than number
+  of required paramers of ``S``.
+
+- If the rest parameter ``FPrest`` is present then ``SPrest`` is present.
+
+- For each ``i <= m``, type of ``SP``:sub:`i` is a subtype of type
+  of ``FP``:sub:`i`.
+
+- If the rest parameter ``FPrest`` is present:
+
+  - For each ``i > m``, parameter type ``SP`` must be a subtype of the
+    element type of type of ``FPrest``.
+
+  - Type of ``SPrest`` should be a subtype of type of ``FPrest``.
+
+- The resultant type ``FR`` is a subtype of ``SR``.
 
 
 .. index::
@@ -1105,12 +1116,12 @@ system as represented in the example below:
 Subtyping for Intersection Types
 ================================
 
-Intersection type ``I`` defined as (``I``:sub:`1` ``& ... | I``:sub:`n`)
+Intersection type ``I`` defined as (``I``:sub:`1` ``& ... & I``:sub:`n`)
 is a subtype of type ``T`` if ``I``:sub:`i` is a subtype of ``T``
 for some *i*.
 
 Type ``T`` is a subtype of intersection type
-(``I``:sub:`1` ``& ... | I``:sub:`n`) if ``T`` is a subtype of each
+(``I``:sub:`1` ``& ... & I``:sub:`n`) if ``T`` is a subtype of each
 ``I``:sub:`i`.
 
 .. index::
@@ -1508,7 +1519,7 @@ This technique called *type inference* allows keeping type safety and
 program code readability, doing less typing, and focusing on business logic.
 Type inference is applied by the compiler in the following contexts:
 
-- :ref:`Type Inference for Numeric Literals`;
+- :ref:`Type Inference for Constant Expressions`;
 - Variable and constant declarations (see :ref:`Type Inference from Initializer`);
 - Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`);
 - Function, method or lambda return type (see :ref:`Return Type Inference`);
@@ -1552,39 +1563,34 @@ Type inference is applied by the compiler in the following contexts:
 
 |
 
-.. _Type Inference for Numeric Literals:
+.. _Type Inference for Constant Expressions:
 
-Type Inference for Numeric Literals
-===================================
+Type Inference for Constant Expressions
+=======================================
 
 .. meta:
     frontend_status: Partly
 
-The type of a numeric literal (see :ref:`Numeric Literals`) is first
+The type of a constant expression (see :ref:`Constant Expressions`) is first
 inferred from the context, if the context allows.
 The following contexts allow inference:
 
 - :ref:`Assignment-like Contexts`;
-- :ref:`Cast Expression` context.
+- :ref:`Cast Expression` context;
+- :ref:`Numeric Operator Contexts`.
 
-The default type of a numeric literal is used in all other cases as follows:
+If context does not allow to to infer type, the *value default type* is set as follows:
 
-- ``int`` or ``long`` for an integer literal (see :ref:`Integer Literals`); or
-- ``double`` or ``float`` for a floating-point literal (see
-  :ref:`Floating-Point Literals`).
+- ``int`` for a constant expression of a *big integer type* 
+  (see :ref:`Specifics of Constant Expressions Evaluation`) if its value
+  can be represented by a 32-bit number;
+- ``long`` for a constant expression of a *big integer type* 
+  (see :ref:`Specifics of Constant Expressions Evaluation`) if its value
+  can be represented by a 64-bit number;
+- ``double`` or ``float`` for a floating-point constant expression 
+  (see :ref:`Specifics of Constant Expressions Evaluation`).
 
-The default type is used in :ref:`Numeric Operator Contexts` as the type of
-a literal is not inferred:
-
-.. code-block:: typescript
-   :linenos:
-
-    let b: byte = 63 + 64 // compile-time error as type of expression is 'int'
-    let s: short = -32767 // compile-time error as type of expression is 'int'
-
-    let x: b = 1 as short // compile-time error as type of expression is 'short'
-
-Type inference is used only where the *target type* is one of the following two:
+Type inference is used only where the *target type* is one of the following:
 
 - Case 1: *Numeric type* (see :ref:`Numeric Types`); or
 - Case 2: Union type (see :ref:`Union Types`) containing at least one
@@ -1592,12 +1598,13 @@ Type inference is used only where the *target type* is one of the following two:
 
 **Case 1: Target type is a numeric type**
 
-Where a *target type* is numeric, the type of a literal is inferred from the
-*target type* if one of following conditions is met:
+Where a *target type* is numeric, the type of a constant expression is inferred
+from the *target type* and the value of the const expression,
+if one of following conditions is met:
 
-#. *Target type* is equal to or larger than the literal default type; or
+#. *Target type* is equal to or larger than the value default type; or
 
-#. Literal is an *integer literal* with the value that fitting into the range
+#. Value is an *integer value* that fitting into the range
    of the *target type*.
 
 .. note::
@@ -1605,7 +1612,7 @@ Where a *target type* is numeric, the type of a literal is inferred from the
    and no type inference occurs.
 
 If none of the conditions above is met, then the *target type* is not a
-valid type for the literal, and a :index:`compile-time error` occurs.
+valid type for the constant expression, and a :index:`compile-time error` occurs.
 
 Type inference for a numeric *target type* is represented in the examples below:
 
@@ -1616,9 +1623,13 @@ Type inference for a numeric *target type* is represented in the examples below:
    :linenos:
 
     let l: long = 1     // OK, target type is larger than literal default type
-    let b: byte = 127   // OK, integer literal value fits type 'byte'
+    let b: byte = 127   // OK, integer value fits type 'byte'
     let f: float = 123f // OK, target type is the same as literal default type
     let g: double = 11  // OK, target type is larger than literal default type
+
+    b = 63 + 64           // OK, integer value fits type 'byte'
+    b = 1 as short        // OK, integer value fits type 'byte'
+    let s: short = -32767 // OK, integer value fits type 'short'
 
     l = 1.0    // compile-time error, 'double' cannot be assigned to 'long'
     b = 128    // compile-time error, value is out of range
@@ -1631,15 +1642,15 @@ In the case the *target type* is a union type
 :math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, then the inferred
 literal type is determined as follows:
 
-#. If no ``N``:sub:`i` suits the literal, then the default literal type is used;
+#. If no ``N``:sub:`i` suits the value, then the default type is used;
 
-#. If only a single ``N``:sub:`i` suits the literal, then ``N``:sub:`i` is the
+#. If only a single ``N``:sub:`i` suits the value, then ``N``:sub:`i` is the
    inferred type;
 
-#. If several ``N`` types suit the literal, then the following checks are
+#. If several ``N`` types suit the value, then the following checks are
    performed:
 
-   - If the literal is an *integer literal*, and only one suitable *integer*
+   - If the value is an integer value, and only one suitable *integer*
      ``N``:sub:`i` is present, then this ``N``:sub:`i` is the inferred type.
 
 Otherwise, a :index:`compile-time error` occurs due to type inference ambiguity.
@@ -2127,15 +2138,15 @@ This is discussed in detail in :ref:`Subtyping for Difference Types`.
 Computing Smart Types
 =====================
 
-Computing smart types is based on *locations*. A *location* is a set of
+Computing smart types is based on *must-alias sets*. A *must-alias set* is a set of
 variables known to have the same value in a given context.
 
-Two maps are used to specify a context *(l, s)*, where:
+Two maps are used to specify a context ``(l, s)``, where:
 
--  *l: V* :math:`\rightarrow` *L*, map from variables *V* to locations *L*;
+-  *l: V* :math:`\rightarrow` *L*, map from variables *V* to must-alias sets *L*;
 
--  *s: L* :math:`\rightarrow` *T*, map from locations to smart types *T*
-   ascribed to those locations.
+-  *s: L* :math:`\rightarrow` *T*, map from must-alias sets to smart types *T*
+   ascribed to those sets.
 
 Contexts are computed in relation to nodes of :ref:`Control-flow Graph`.
 Control-flow graph (CFG) contains the following kinds of nodes:
@@ -2152,7 +2163,7 @@ Control-flow graph (CFG) contains the following kinds of nodes:
 
 .. index::
    smart type
-   location
+   must-alias set
    set of variables
    context
    value
@@ -2174,27 +2185,40 @@ Control-flow graph (CFG) contains the following kinds of nodes:
 
 The way maps *(l, s*) are changed when processing specific nodes is described
 below.
+
+The notation :math:`N(x)` is used to denote a union of type ``x`` and all types
+to which type ``x`` can be converted, namely:
+
+    - If ``x`` is a numeric type, then a larger numeric type;
+    - If ``x`` is an enumeration type, then *enumeration base type*.
+
 The notation :math:`x'` is used to denote a map that replaces any previous map
 during node evaluation.
 
-At a **variable declaration** ``let v``:
+At a **variable declaration** ``let v: T``:
 
--  ``l(v):={v}``.
+-  ``l(v):={v}``;
+-  ``s(l(v)):={T}``, where ``T`` is a the declared type of ``v``, 
+   that is either set explicitly, or inferred from an initializer expression.
 
-At an **assignment to the variable** ``v``: ``v = e``:
+In an **assignment to the variable** ``v``: ``v = e``:
 
--  If *e* is a variable, and no implicit conversions are performed:
-   ``l'(v):=l'(e):={v}`` :math:`\cup` ``l(e)``.
+-  If *e* is a variable, and no implicit conversions are performed, then:
 
--  Otherwise, ``s'(l(v)):=s(N(T((e)))``, where ``T(e)`` is the smart type of *e*,
-   and *N(x)* adds to type *x* all types to which type *x* can be converted,
-   namely:
+    - ``l'(v):={v}`` :math:`\cup` ``l(e)``;
+    - ``l'(u):={v}`` :math:`\cup` ``l(e)`` for each ``u`` :math:`\in` ``l(e)``;
+    - ``l'(u):=l(v)-{v}`` for each ``u`` :math:`\in` ``l(v)-{v}``;
+    - ``s'(l'(v)):=s(l(e))``;
+    - ``s'(l(v)-{v}):=s(l(v))``.
 
-    - Larger numeric type if *x* is a numeric type;
-    - *Enumeration base type* if *x* is an enumeration type.
+-  Otherwise:
+    
+    - ``l'(v):={v}``;
+    - ``l'(u):=l(v)-{v}`` for each ``u`` :math:`\in` ``l(v)-{v}``;
+    - ``s'(l'(v)):=N(T(e)``, where ``T(e)`` is the smart type of ``e``.
 
-The following table summarizes the contexts for map evaluation at an
-*assumption node*:
+Maps evaluation at an *assumption node* are summarized in the
+following table:
 
 .. index::
    map
@@ -2242,12 +2266,12 @@ The following table summarizes the contexts for map evaluation at an
      - ``s'(l(v)):=s(l(v))-null``
 
    * - *v* ``==`` ``undefined``
-     - ``s'(l(v)):=undefined``
+     - ``s'(l(v)):=undefined|null``
 
      - ``s'(l(v)):= s(l(v))-undefined-null``
 
    * - *v* ``==`` ``null``
-     - ``s'(l(v)):=null``
+     - ``s'(l(v)):=null|undefined``
 
      - ``s'(l(v)):= s(l(v))-undefined-null``
 
@@ -2297,7 +2321,7 @@ The following table summarizes the contexts for map evaluation at an
 .. note::
 
    #. In the table above the operator ``'==='`` can be replaced for ``'=='``
-      except where ``'=='`` is used explicitly.
+      except where the separate case for ``'=='`` is listed explicitly.
 
    #. For branching on ``typeof`` *v* ``===`` *str*, type *T* is
       evaluated in accordance with the value of *str* as follows:
@@ -2313,6 +2337,8 @@ The following table summarizes the contexts for map evaluation at an
         - ``boolean``
       * - ``"string"``
         - ``string``
+      * - ``"bigint"``
+        - ``bigint``
       * - ``"char"``
         - ``char``
       * - ``"undefined"``
@@ -2320,28 +2346,25 @@ The following table summarizes the contexts for map evaluation at an
       * - A name of a numeric type
         - The same numeric type
       * - ``"object"``
-        - ``Object - boolean - string - char - all numeric types``
+        - ``Object - boolean - string - bigint - char - all numeric types``
 
+At a **node that joins two CFG branches**, namely
+``C``:sub:`1` ``= ( l``:sub:`1`, ``s``:sub:`1` ``)``, and
+``C``:sub:`2` ``= ( l``:sub:`2`, ``s``:sub:`2` ``)``, 
+the following is performed for each variable ``v``: 
 
-   At a node that joins two CFG branches, namely
-   ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``, and
-   ``C``:sub:`2` :math:`\leq` ``l``:sub:`2`, ``s``:sub:`2` ``>``, for each
-   variable *v*:
+- ``l'(v):=l``:sub:`1` ``(v)``:math:`\cap` ``l``:sub:`2` ``(v)``; and
+- ``s'(l'(v)):=s``:sub:`1` ``(l``:sub:`1` ``(v))|s``:sub:`2` ``(l``:sub:`2` ``(v))``.
 
-   - ``l'(v):=l``:sub:`1` ``(v)``:math:`\cap` ``l``:sub:`2` ``(v)``; and
-   - ``s'(l'(v)):=s``:sub:`1` ``(l'``:sub:`1` ``(v))|s``:sub:`2` ``(l'``:sub:`2` ``(v))``.
+At each **backedge node**, the following updates are performed for each variable ``m``
+modified in the loop body:
 
-   At each *backedge node*, smart type of each variable attached to the node is
-   set to its declared type.
-
+- ``l'(u):=l(m)-{m}`` for each ``u`` :math:`\in` ``l(m)-{m}``;
+- ``l'(m):={m}``;
+- ``s'(l'(m)):={T}``, where ``T`` is the declared type of ``m``.
+ 
 .. index::
-   operator
-   branching
    value
-   boolean
-   string
-   char
-   numeric type
    node
    branch
    variable

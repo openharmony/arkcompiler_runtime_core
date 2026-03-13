@@ -863,24 +863,6 @@ non-exported in the case of aliasing. |TS| allows such declarations.
     // compile-time error in ArkTS as B is not exported
     // acceptable situation in TypeScript
 
-
-|
-
-.. _Differences in Ambient Constant Declarations:
-
-Differences in Ambient Constant Declarations
---------------------------------------------
-
-|LANG| enforces exact constant type annotation rather than inferring the type
-from a constant value as is allows in |TS|.
-
-.. code-block:: typescript
-   :linenos:
-
-    declare const a = 1
-    // compile-time error in ArkTS as type is not specified
-    // acceptable declaration in TypeScript assuming 'a' is of type number
-
 |
 
 .. _TS Definite Assignment Assertion:

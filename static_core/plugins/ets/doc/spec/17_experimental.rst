@@ -231,67 +231,37 @@ If a literal cannot be represented by an unsigned 16-bit value, then a
 .. meta:
     frontend_status: Partly
 
-Equality and relational operators can be applied to ``char`` values (see
-:ref:`Character Relational Operators` and :ref:`Equality Expressions`).
+Equality operators (see :ref:`Equality Expressions`) and relational operators
+:ref:`Relational Expressions`) can be used if:
 
-The *equality operator* checking a value of ``char`` type
-against a value of a non-``char`` type returns ``false``. If the result
-is known at compile time to always evaluate as ``false``,
-a :index:`compile-time warning` is issued (see :ref:`Equality Expressions`):
+-  both operands are of ``char`` type; or
+-  one operand is of ``char`` type and other is of a numeric type
+   (see :ref:`char Conversions for Relational and Equality Operands`);
+-  otherwise, a :index:`compile-time error` occurs.
+
+In first case, the operation is performed as an integer comparison of two unsigned 16-bit values.
+In the second case, the operation is performed as an integer comparison of the correspondent
+numeric type.
 
 .. code-block:: typescript
    :linenos:
 
-   let a0: char = c'a'
-   let a1 = new char
-   a1 = c'a'
+   let c: char = c'A'
+   let c1 = new char
+   c1 = c'A'
 
    // The followihg lines both print true as values are equal
-   console.log(a0 == a1)  // true
-   console.log(a0 === a1) // true
+   console.log(c == c1)  // true
+   console.log(c === c1) // true
 
-   let x: number = 1
-
-   // Equality where one operand is char and the other is non-char causes error
-   a0 == x  // compile-time error
-
-   // Example with runtime error
-   let u: char | number;
-
-   u = c'x'
-   u == a0  // OK, both operands are `char`
-   u = 1.0
-   x == a0 // compile-time warning,  known at compile time to
-           // always evaluate as 'false'
-   u == a0  // 'false' for any  values of 'a' and any numbers in 'u'
-            // because  types 'number' and 'char' do not overlap
-
-Attempting to mix ``char`` values and numeric values as an operand in
-a relational expression causes a :index:`compile-time error`:
-
-.. code-block:: typescript
-   :linenos:
-
-   let c1 = c'a'
-   let c2 = c'b'
-   c1 < c2    // true
-   c1 <= c'a' // true
-
-   c1 = c'\u7FFF'
-   c2 = c'\uFFFF'
-   c1 < c2 // true, comparison of unsigned integers
-
-   c1 < 50 // compile-time error
-
-.. index::
-   character
-   value
-   char type
-   equality operator
-   value equality operator
-   value equality
-   operand
+   console.log(c == 0x41) // true
    
+   c1 = c'B'
+   console.log(c < c1)  // true
+   console.log(c < 0x41)  // false
+   
+   console.log(c > 3.14)  // true
+  
 |
 
 .. _Fixed-Size Array Types:
@@ -3034,26 +3004,23 @@ Derived classes or interfaces can be used as receivers:
     g.foo(new C)    // implicit instantiation
     g.foo<C>(new C) // explicit instantiation
 
-A :index:`compile-time error` occurs if the name of a *function with receiver*
-(including generic functions) and the name of an accessible instance method or
-field of the receiver type (see :ref:`Accessible`) are the same:
+When the receiver type contains an accessible
+instance method (see :ref:`Accessible`) with the same name as the
+function with receiver, the instance method has a priority
+over the implicitly called function with receiver. The function with receiver
+still can be called explicitly:
 
 .. code-block:: typescript
    :linenos:
 
       class A {
-          foo () { ... }
-          bar(): A { return this; }
+          foo (): int { return 1; }
       }
 
-      // compile-time error to prevent ambiguity below
-      function foo(this: A) { ... }
+      function foo(this: A): int { return 2; }
 
-      // compile-time error to prevent ambiguity below
-      function bar<T extends Object>(this : T) : T { return this }
-
-      (new A).foo()
-      (new A).bar()
+      console.log((new A).foo())  // instance method called, prints '1'
+      console.log(foo(new A)) // explicit call of a receiver function, prints '2'
 
 
 *Functions with receiver* are dispatched statically. What function is being
@@ -3839,9 +3806,10 @@ Accessor Declarations
 
 Accessor is either a top-level declaration (see
 :ref:`Top-level Declarations`) or a declaration inside a namespace
-(see :ref:`Namespace Declarations`) that can be used to replace a variable
-and provide additional control in an operation of getting or setting a variable
-value. An accessor can be either a getter or a setter.
+(see :ref:`Namespace Declarations`) that declares a getter, a setter, or
+functions with predefined signatures. The syntatic form of accessor usage
+mimics code patterns used to work with variables, i.e., getting or setting a
+variable value.
 
 The syntax of *accessor declarations* is presented below:
 
@@ -3920,15 +3888,17 @@ following example:
         saved_age = a
     }
 
-A getter and a setter, unlike functions, can have the same name for they are
-distinguishable by the place of use:
+Which accessor (getter or setter) is to be called is defined by the place of
+use:
 
 .. code-block:: typescript
    :linenos:
 
-   let _name = ""
-   get name(): string { return _name }
-   set name(x: string) { _name = x }
+   get name(): string { return "" }
+   set name(x: string) { }
+
+   console.log (name) // Getter is called
+   name = "some string" // Setter is called
 
 .. index::
    accessor
@@ -3958,6 +3928,9 @@ setters that have the same name.
 
    set hashCode(x: string) {/*body*/}
    get hashCode(): long {/*body*/} // OK
+
+   hashCode = "some string"
+   const l: long = hashCode
 
 .. index::
    accessor declaration

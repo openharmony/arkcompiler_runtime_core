@@ -325,9 +325,14 @@ if such a value is required for further evaluation.
 The type of an expression is determined at compile time (see
 :ref:`Type of Expression`).
 
-Expressions can contain assignments, increment operators, decrement operators,
-method calls, and function calls. The evaluation of an expression can produce
-side effects as a result.
+.. note::
+   An expression is a sequence of operators and
+   operands that specifies a computation. The
+   evaluation of an expression can produce side
+   effects. Any expression can be a subexpression
+   of a more complex expression. E.g., the function
+   call in `f()*3` is in turn a subexpression of a
+   multiplication expression.
 
 *Constant expressions* (see :ref:`Constant Expressions`) are the expressions
 with values that can be determined at compile time.
@@ -476,16 +481,15 @@ Normal and Abrupt Completion of Expression Evaluation
 .. meta:
     frontend_status: Done
 
-Each expression in a normal mode of evaluation requires certain computational
-steps. Normal modes of evaluation for each kind of expression are described
-in the following sections.
-
-An expression evaluation *completes normally* if all computational steps
-are performed without throwing an error.
-
-On the contrary, an expression evaluation *completes abruptly* if an error is
-thrown in the process. The information on the cause of an abrupt completion
-is provided in the value attached to the error object.
+The evaluation of an expression requires several
+steps of computation. An expression is said to
+be *evaluated normally* if all necessary steps of
+the evaluation complete with no error thrown.
+If an error thrown at any step stops the evaluation
+of an expression, then the situation is defined as an
+*abrupt completion*. The cause of an
+*abrupt completion* is explained in the value
+attached to the error object.
 
 .. index::
    normal completion
@@ -496,8 +500,8 @@ is provided in the value attached to the error object.
    error object
    value
 
-A :index:`runtime error` can occur as a result of expression or operator
-evaluation as follows:
+The evaluation of an expression can result in a
+:index:`runtime error` as a result of as follows:
 
 -  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
@@ -575,23 +579,112 @@ Order of Expression Evaluation
 .. meta:
     frontend_status: Done
 
-The operands of an operator are evaluated from left to right in accordance with
-the following rules:
+Subexpressions of an expression are evaluated
+from left to right as represented in the examples
+below:
 
--  The order of evaluation depends on the assignment operator (see
-   :ref:`Assignment`).
+-  Any right-hand-side expression of a
+   binary operator is evaluated only after
+   the left-hand-side expression is fully
+   evaluated:
 
--  Any right-hand expression is evaluated only after the left-hand expression
-   of a binary operator is fully evaluated.
+   .. code-block:: typescript
+      :linenos:
 
--  Any part of the operation can be executed only after every operand of an
-   operator (except conditional operators ``'&&'``, ``'||'``, and ``'?:'``)
-   is fully evaluated.
+      function arg(s: string): int { console.log(s); return 1; }
 
-   The execution of a binary operator that is an integer division ``'/'`` (see
-   :ref:`Division`), or integer remainder ``'%'`` (see :ref:`Remainder`) can
-   throw ``ArithmeticError`` only after the evaluations of both operands
-   complete normally.
+      arg("left") +  arg("right")
+      // Prints:
+      //    left
+      //    right
+
+-  The *condition* of a ternary operator is evaluated first. Then,
+   either the subexpression *whenTrue* or the subexpression
+   *whenFalse* is evaluated depending on the *condition* value:
+
+   .. code-block:: typescript
+      :linenos:
+
+      function arg(s: string): int { console.log(s); return 1; }
+
+      arg("condition True") ? arg("left 1") :  arg("right 1")
+      arg("condition False")*0 ? arg("left 2") :  arg("right 2")
+      // Prints:
+      //    condition True
+      //    left 1
+      //    condition False
+      //    right 2
+
+-  Operands of :ref:`Conditional-And Expression` and
+   :ref:`Conditional-Or Expression` are evaluated from
+   left to right. Depending on the value of the left-hand-side
+   operands, the evaluation of the rightmost operand can
+   be skipped:
+
+   .. code-block:: typescript
+      :linenos:
+
+      function arg(s: string): int { console.log(s); return 1; }
+
+      // Conditional And
+      arg("left And (true)") && arg("right And")
+      console.log("---")
+      arg("left And (false)")*0 && arg("right And")
+      console.log("---")
+
+      // Conditional Or
+      arg("left Or (true)") && arg("right Or")
+      console.log("---")
+      arg("left Or (false)")*0 && arg("right Or")
+      console.log("---")
+
+      // Print
+      //    left And (true)
+      //    right And
+      //    ---
+      //    left And (false)
+      //    ---
+      //    left Or (true)
+      //    ---
+      //    left Or (false)
+      //    right Or
+
+-  Assignment operator behavior requires additional
+   clarification because the operator is right-associative.
+   An expression containing two assignments is
+   represented in the following example:
+
+   .. code-block:: typescript
+      :linenos:
+
+      class A {
+         constructor(s:string) { console.log(s); this.tag = s; }
+         tag: string
+      }
+      function f(s: string) { return new A(s); }
+
+      console.log( f("left").tag = f("middle").tag = f("right").tag )
+      // print
+      //    left
+      //    middle
+      //    right
+      //    right
+
+
+   The following evaluation steps are performed in the example above:
+
+   -  All three subexpressions (left-hand-side, middle, and
+      right-hand-side) are evaluated from left to right. The
+      evaluation of left-hand-side and middle subexpressions
+      results in *lhsExpression*.
+
+   -  After that, two assignments are performed
+      from right to left due to right associativity of
+      the assignment operator. The value of the
+      right-hand-side subexpression is assigned
+      to the middle *lhsExpression*, and then the
+      result of the middle expression is assigned
+      to the left *lhsExpression*.
 
 -  The |LANG| programming language follows the order of evaluation as indicated
    explicitly by parentheses, and implicitly by the precedence of operators.
@@ -649,6 +742,23 @@ expressions, or function call expressions).
 
 If the left-hand argument expression completes abruptly, then no part of the
 right-hand argument expression is evaluated.
+
+.. code-block:: typescript
+   :linenos:
+
+   function arg(s: string): int { console.log(s); return 1; }
+   function errArg(s: string, v: int): int { console.log(s); return 1/v }
+   function test(a: int, b: int, c: int) {}
+
+   test(arg("left"), arg("middle"), arg("right"))
+   test(errArg("errArg (left)", 0), arg("middle"), arg("right"))
+   // Prints:
+   //    left
+   //    middle
+   //    right
+   //    errArg (left)
+   //    ... divideByZero runtime error reported
+
 
 .. index::
    evaluation
@@ -713,7 +823,8 @@ Literal
     frontend_status: Done
 
 *Literals* (see :ref:`Literals`) denote fixed and unchanging values. Type of
-a literal is the type of an expression.
+a literal is the type of an expression. For numeric literals, type of a literal
+is inferred using :ref:`Type Inference for Constant Expressions`.
 
 .. index::
    literal
@@ -767,7 +878,8 @@ it is called a *simple name*.
    - Accessor name.
 
 
--  Local variable or parameter of the surrounding function or method.
+-  Variable, constant, or parameter declared in a surrounding block, function,
+   method, or lambda body.
 
 If not a *simple name*, *qualifiedName* refers to the following:
 
@@ -797,6 +909,7 @@ If a *named reference* refers to a method name, it is called :ref:`Method Refere
    declaration
    module
    variable
+   constant declaration
    parameter
    function
    method
@@ -1281,7 +1394,7 @@ type of the literal. Otherwise, a :index:`compile-time error` occurs:
    // OK, as only type string matches the type of "xxx" literal
 
    let union_5: (number | string )[] | [(number | string), number, boolean] | string = [5, 5]
-   // OK, literal type is a array (number | string )[]
+    // OK, literal type is an array (number | string )[]
 
 .. index::
    tuple
@@ -1702,9 +1815,9 @@ readonly fields of a class:
     let d: C = { field1: 654, field2: 3, field3: "text" }
 
 
-If a class has accessors (see :ref:`Class Accessor Declarations`) for a property,
-and its setter is provided, then this property can be used as a part of an
-object literal. Otherwise, a :index:`compile-time error` occurs:
+If a class has accessor (see :ref:`Class Accessor Declarations`) in a form of
+setter then its name can be used as a part of an object literal.
+Otherwise, a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -2290,7 +2403,7 @@ or for the *rest parameter*:
 
 
 If a *spread expression* is used to pass arguments (see :ref:`Rest Parameter`),
-then the sequence of spread expressions passed as sequential arguments yields 
+then the sequence of spread expressions passed as sequential arguments yields
 a single sequence of values.
 
 .. code-block:: typescript
@@ -2573,7 +2686,7 @@ Field Access Expression
 :ref:`Accessing Static Fields`) or a field of an object to which an object
 reference refers.
 An object reference can have different forms as described in detail in
-:ref:`Accessing Current Object Fields` and :ref:`Accessing SuperClass Properties`.
+:ref:`Accessing Current Object Fields` and :ref:`Accessing SuperClass Accessors`.
 
 .. index::
    field access expression
@@ -2639,14 +2752,14 @@ Accessing Static Fields
 
 When accessing a static field, *objectReference* takes the form *typeReference*.
 
-The result of a *field access expression* of a static field in a class is 
-one of the following: 
+The result of a *field access expression* of a static field in a class is
+one of the following:
 
 -  ``variable`` if the field is not ``readonly``. The resultant value can
    be changed later.
 
 -  ``value`` if the field is ``readonly``, except where *field access* occurs
-   in a initializer block (see :ref:`Static Initialization`).
+   in an initializer block (see :ref:`Static Initialization`).
 
 .. index::
    access
@@ -2691,7 +2804,7 @@ class, or a property of an interface. It is one of the following:
 -  call to a proper getter if the *field access expression* is not assigned a
    new expression; or
 
--  call to a proper setter if the *field access expression* is in the 
+-  call to a proper setter if the *field access expression* is in the
    left-hand-side of the assignment.
 
 Only the *primaryExpression* type (not class type of an actual object
@@ -2716,16 +2829,16 @@ referred at runtime) is used to determine the field or property to be accessed.
 
 |
 
-.. _Accessing SuperClass Properties:
+.. _Accessing SuperClass Accessors:
 
-Accessing SuperClass Properties
+Accessing SuperClass Accessors
 ===============================
 
 .. meta:
     frontend_status: Done
 
 The form ``super.identifier`` is valid to access a superclass accessor (see
-:ref:`Class Accessor Declarations`). 
+:ref:`Class Accessor Declarations`).
 
 A :index:`compile-time error` occurs if identifier in 'super.identifier'
 denotes a field.
@@ -2752,7 +2865,7 @@ denotes a field.
    accessor
    accessor declaration
    superclass
-   superclass property
+   superclass accessor
    identifier
    field
 
@@ -3126,7 +3239,6 @@ The syntax of a *call argument* is presented below:
 
     callArguments:
         '(' argumentSequence? ')' trailingLambda?
-        | trailingLambda
         ;
 
     argumentSequence:
@@ -3786,7 +3898,7 @@ A *class instance creation expression* that refers to classes ``FixedArray``,
 type of some class type, is a special form of *array creation expression*.
 
 Attempting to create a *FixedArray* of elements of which the type is a type parameter
-causes a :index:`compile-time error`. 
+causes a :index:`compile-time error`.
 
 .. code-block:: typescript
    :linenos:
@@ -3997,7 +4109,16 @@ A :index:`compile-time error` occurs if the ``target`` type is type ``never``:
    target type
 
 If ``target`` type is not *preserved up to undefined* by :ref:`Type Erasure`,
-then a :index:`compile-time error` occurs.
+then a :index:`compile-time warning` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    class X<out T> { }
+    function foo(p1: X<Object>) {
+        p1 as X<number> // compile-time warning - such cast converison is type unsafe
+    }
+
 
 Two specific cases of a *cast expression* are described in the sections below:
 
@@ -4027,7 +4148,7 @@ Type Inference in Cast Expression
 The following combinations of ``expr`` and ``target`` are considered for the
 ``expr as target`` expression:
 
--  ``expr`` is a numeric literal, see :ref:`Type Inference for Numeric Literals`
+-  ``expr`` is a numeric literal, see :ref:`Type Inference for Constant Expressions`
    for detail;
 
 -  ``expr`` is an :ref:`Array Literal`, and ``target`` is an *array type* or
@@ -4574,7 +4695,7 @@ is stated explicitly in the following table:
 +------------------------+-------------------------+---------------------------+
 | '!'                    | boolean or type         | boolean                   |
 | (logical complement)   | mentioned in            |                           |
-|                        | :ref:`extended          |                           | 
+|                        | :ref:`extended          |                           |
 |                        | conditional             |                           |
 |                        | expressions`            |                           |
 +------------------------+-------------------------+---------------------------+
@@ -5194,7 +5315,7 @@ table below. Type combinations not listed in the table cause a
 | '<<', '>>'     | bigint                         |  bigint                       |    bigint               |
 +----------------+--------------------------------+-------------------------------+-------------------------+
 | '<<', '>>',    | *1st* is byte, short, int,     |  *2nd* is any numeric         |    int                  |
-|                | float                          |                               |                         |      
+|                | float                          |                               |                         |
 | '>>>'          +--------------------------------+-------------------------------+-------------------------+
 |                | *1st* is long, double          |  *2nd* is any numeric         |    long                 |
 +----------------+--------------------------------+-------------------------------+-------------------------+
@@ -6322,11 +6443,8 @@ Numeric Relational Operators
 .. meta:
     frontend_status: Done
 
-Type of each operand in a ``numeric relational operator`` must be convertible
-to a numeric type (see :ref:`Numeric Types`,
-:ref:`Numeric Conversions for Relational and Equality Operands`), or both operands
-must be of a ``bigint`` type (see :ref:`Type bigint`).
-.
+Type of each operand in a ``numeric relational operator`` must be of a numeric type
+(see :ref:`Numeric Types`, :ref:`Numeric Conversions for Relational and Equality Operands`).
 Otherwise, a :index:`compile-time error` occurs.
 
 Depending on the converted type of operands, a comparison is performed as follows:
@@ -6337,8 +6455,6 @@ Depending on the converted type of operands, a comparison is performed as follow
 -  Floating-point comparison, if the converted operand type is ``float``
    or ``double``.
 
--  Bigint comparison, if type of both operands is ``bigint``.
-
 .. index::
    numeric relational operator
    operand
@@ -6346,11 +6462,8 @@ Depending on the converted type of operands, a comparison is performed as follow
    conversion
    numeric type
    numeric types conversion
-   predefined numeric types conversion
-   bigint type
    signed integer comparison
    floating-point comparison
-   bigint comparison
    converted type
 
 The comparison of floating-point values drawn from any value set must be accurate.
@@ -6381,8 +6494,7 @@ standard specification as follows:
    IEEE 754
 
 Based on the presumption above, the following rules apply to integer
-operands, floating-point operands other than ``NaN``, and ``bigint``
-operands:
+operands, floating-point operands other than ``NaN``:
 
 -  The value produced by the operator ``'<'`` is ``true`` if the value of the
    left-hand-side operand is less than that of the right-hand-side operand.
@@ -6397,24 +6509,17 @@ operands:
    left-hand-side operand is greater than or equal to that of the right-hand-side
    operand. Otherwise, the value is ``false``.
 
-The behavior of comparison of ``numeric`` type operands and
-``bigint`` type operands is represented in the example below:
+The behavior of comparison of ``numeric`` type operands is represented
+in the example below:
 
 .. code-block:: typescript
    :linenos:
 
-   //// BigInt against any numeric - always a compile time error
-   console.log(1n < 34) // compile-time error
-
-   //// BigInt against BigInt
-   console.log(2n < 3n)  // true
-   console.log(2n >= 3n)  // false
-
-   // // integer comparisons
+   // integer comparisons
    console.log( 1 < -3) // false
    console.log(-1 as long >= -1 as short) // true
 
-   // // floating-point comparisons
+   // floating-point comparisons
    console.log(1 <= 1.0f)  // true
    console.log(2 <= 1.0)   // false
 
@@ -6426,6 +6531,66 @@ The behavior of comparison of ``numeric`` type operands and
    NaN
    operator
    value
+
+|
+
+.. _Bigint Relational Operators:
+
+Bigint Relational Operators
+===========================
+
+.. meta:
+    frontend_status: Done
+
+Relational operators can be applied to ``bigint`` values
+(see :ref:`Type bigint`) if:
+
+-  both operands are of ``bigint`` type; or
+-  one operand is of ``bigint`` type and other is of a numeric type.
+
+.. index::
+   relational operator
+   operand
+   numeric type
+   numeric types conversion
+   bigint type
+   bigint comparison
+
+In the second case, a comparison is performed as follows:
+
+-  If a numeric type operand is of an integer type, it is converted to
+   ``bigint`` type and ``bigint`` comparison is performed;
+
+-  If a numeric type operand is of ``double`` type, the ``bigint``
+   operand is converted to ``double`` and then floating-point comparison
+   is performed;
+
+-  If a numeric type operand is of ``float`` type, both operands are converted to
+   ``double`` and then floating-point comparison is performed.
+
+The behavior of comparison of ``numeric`` type operands and
+``bigint`` type operands is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    let b = 2n
+
+    // bigint against bigint
+    console.log(b < 3n)  // true
+    console.log(b >= 3n) // false
+
+    // bigint against an integer type
+    console.log(b < 3)         // true, '2' is converted implicitly to bigint
+    console.log(b < BigInt(3)) // true, the same with explicit conversion
+
+   // bigint against double
+   console.log(b < 3.0)               // true, 'b' is converted to double
+   console.log(b.doubleValue() < 3.0) // the same with explicit conversion
+
+   // bigint against float
+   const f = 3.f
+   console.log(b < f) // true, 'b' and 'f' are converted to bigint
 
 |
 
@@ -6497,16 +6662,15 @@ Results of all boolean comparisons are defined as follows:
 
 |
 
-.. _Character Relational Operators:
+.. _char Relational Operators:
 
-Character Relational Operators
-==============================
+``char`` Relational Operators
+=============================
 
 .. meta:
     frontend_status: Done
 
-A comparison of two operands of type ``char`` is performed
-as an integer comparison of two unsigned 16-bit values:
+See :ref:`char Operations`.
 
 |
 
@@ -6606,6 +6770,10 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
   operands represent the same 16-bit code unit
   (see :ref:`char Operations`);
 
+- One operand is of :ref:`Type char`, other is of a numeric type and
+  operand have the same numeric value (see :ref:`char Operations` and
+  :ref:`char Conversions for Relational and Equality Operands`);
+
 - Both operands are of the same enumeration (see :ref:`Enumerations`) type and
   have the same numeric value or the same string
   contents, depending on the enumeration base type;
@@ -6613,7 +6781,7 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
 
-- Both operands are of the same type and refer to the same object;
+- Both operands are of the same type and refer to the same object.
 
 .. index::
    operand
@@ -6717,6 +6885,39 @@ An equality with values of two union types is represented in the example below:
    equality
    union type
    function
+
+If an *equality expression* is known at compile time to always evaluate
+to ``false`` or ``true`` at runtime, then a :index:`compile-time warning`
+is issued as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    5 == 5  // compile-time warning, always true
+    5 != 5  // compile-time warning, always false
+    5 === 5 // compile-time warning, always true
+    5 !== 5 // compile-time warning, always false
+
+    function  foo(b: boolean | undefined) {
+        let n: number | boolean = 1
+        b == n // compile-time warning, expression is always false due to smart cast
+               // (type of `n` is `number` and does not overlap with type of `b`)
+        n == 1 // compile-time warning, expression is
+               // always true because `n` initialized with 1 and never modified
+    }
+
+    class B {
+        f(): B|undefined { return undefined }
+    }
+    class D extends B {
+        f(): D { return this }
+    }
+
+    function bar(c: B) {
+        if (c instanceof D) {
+            c.f() == undefined // warning, expression is always false
+        }
+    }
 
 |
 
@@ -8299,6 +8500,10 @@ following:
 -  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
 
+-  Simple names that refer to constants declared in a surrounding block,
+   function, method, or lambda body, if the initializer of the referenced
+   constant declaration is itself a constant expression;
+
 -  Unary operators ``'+'``, ``'-'``, ``'~'``, and ``'!'``, but not ``'++'``
    or ``'--'`` (see :ref:`Unary Plus`, :ref:`Unary Minus`,
    :ref:`Prefix Increment`, and :ref:`Prefix Decrement`);
@@ -8337,13 +8542,11 @@ following:
    compile time
    syntax
    constant expression
+   constant declaration
    value type
    normal completion
    literal
-   predefined value type
    string type
-   enumeration type
-   enumeration type constant
    unary operator
    unary plus
    unary minus
@@ -8376,8 +8579,48 @@ following:
    relational operator
    equality operator
    constant expression
-   initializer
-   module
+
+|
+
+.. _Specifics of Constant Expressions Evaluation:
+
+Specifics of Constant Expressions Evaluation
+============================================
+
+.. meta:
+    frontend_status: Done
+
+If a constant expression contains an unary or a binary operator applied
+to numeric operands, the operator is evaluated as follows:
+
+- If any of operands are of type ``double`` or the operator is
+  *exponentiation operator*, other operands are converted to type ``double``
+  before operator evaluation and the result type is ``double``;
+  
+- If any of operands are of type ``float``, other operands are converted
+  to type ``float`` before operator evaluation and the result type is
+  ``float``; or
+
+- Otherwise, all operands are converted to *some big integer type* that allows
+  handling arbitrary-precision integers (like ``bigint`` type) or integers
+  larger than the maximum value of type ``long``.
+  
+If a constant expression consists of a single integer literal or 
+a constant of an integer type, it is also converted to the same big integer type.
+
+:ref:`Type Inference for Constant Expressions` is always used to infer the
+type of constant expression. In other words, *big integer type* is an
+internal compiler type and values of this type cannot occur during execution.
+
+In case of mixed constant expression, each numeric subexpression is evaluated 
+as described above:
+
+.. code-block:: typescript
+   :linenos:
+
+    const c = 3
+
+    c > 1 && c*2 < 8 // numeric subexpressions: (c > 1) and (c*2 < 8)
 
 .. raw:: pdf
 

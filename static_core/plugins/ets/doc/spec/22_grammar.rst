@@ -301,7 +301,6 @@ Grammar Summary
 
     callArguments:
         '(' argumentSequence? ')' trailingLambda?
-        | trailingLambda
         ;
 
     argumentSequence:

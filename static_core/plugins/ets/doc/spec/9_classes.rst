@@ -681,8 +681,8 @@ Getter and setter generated implicitly look as follows:
       as a field causes a :index:`compile-time error` because class members
       must be *distinguishable* (see :ref:`Declarations`).
 
-An interface property implemented as accessor is represented
-in the example below:
+An interface property implemented as an accessor or accessors is represented in
+the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1777,9 +1777,9 @@ class instances as shown in the following examples:
    :linenos:
 
     class C {
-        a = this        // compile-time error
+        a = this        // compile-time warning
 
-        f1 = this.foo() // compile-time error as 'this' method is invoked
+        f1 = this.foo() // compile-time warning as 'this' method is invoked
 
         f2 = "a string field"
 
@@ -1794,7 +1794,7 @@ class instances as shown in the following examples:
     class B {}
     function foo (f: () => B) { return f() }
     class A {
-        field1 = foo(() => this.field2) // compile-time error as this is used in the initializer code
+        field1 = foo(() => this.field2) // compile-time warning as 'this' is used in the initializer code
         field2 = new B
     }
 
@@ -1824,10 +1824,12 @@ Fields with Late Initialization
 type of the field ``f`` is ``T | undefined``. However, the field behaves as a
 field of type ``T`` with any form of access.
 
-*Field with late initialization* must be an *instance field*. If it is defined
-as ``static``, then a :index:`compile-time error` occurs.
+*Field with late initialization* must be an *instance field*. Otherwise,
+a :index:`compile-time error` occurs.
 
-*Field with late initialization* cannot be of a *nullish type* (see
+.. , e.g. if a field with late initialization is defined as ``static``,
+
+*Field with late initialization* must of a *nullish type* (see
 :ref:`Nullish Types`). Otherwise, a :index:`compile-time error` occurs.
 
 As all other fields, a *field with late initialization* must be initialized
@@ -2002,7 +2004,7 @@ initialization is normally performed in the context of *superclass* constructors
     }
 
     class D2 extends D1 {
-        field = D2.init_in_derived()
+        field: number = D2.init_in_derived()
         private static init_in_derived() {
            console.log ("Field initialization in Derived")
            return 42
@@ -2617,9 +2619,13 @@ Class Accessor Declarations
 .. meta:
     frontend_status: Done
 
+
+Class accessors are declared in the form of getters or setters, i.e., methods
+with predefined signatures that suport using field access syntax to call such
+methods. 
+
 Class accessors are often used instead of fields to add additional control for
-operations of getting or setting a field value. An accessor can be either
-a getter or a setter.
+operations of getting or setting a field value.
 
 The syntax of *class accessor declarations* is presented below:
 
@@ -2751,17 +2757,17 @@ If both a getter and a setter with a particular name are defined,
 then both must have the same accessor modifiers. Otherwise, a
 :index:`compile-time error` occurs.
 
-Accessors can be implemented by using a private field or fields to store the
-data as in the example above.
+Accessors implementation can use a private or non-private field or fields to
+store the data as in the examples above and below.
 
 .. code-block:: typescript
    :linenos:
 
     class Person {
-      name: string = ""
+      forename: string = ""
       surname: string = ""
       get fullName(): string {
-        return this.surname + " " + this.name
+        return this.surname + " " + this.forename
       }
     }
     console.log (new Person().fullName)

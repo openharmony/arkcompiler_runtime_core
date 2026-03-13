@@ -322,9 +322,49 @@ below:
    numeric types conversion
    widening numeric conversion
    operand
-   bigint type
    numeric type
    conversion
+   
+|
+
+.. _char Conversions for Relational and Equality Operands:
+
+``char`` Conversions for Relational and Equality Operands
+=========================================================
+
+ .. meta:
+     frontend_status: Done
+
+Relational and equality operators (see :ref:`Relational Expressions` and
+:ref:`Equality Expressions`) allow *implicit conversion* of type ``char`` operand
+if other operand is of a numeric type.
+
+A ``char`` type operand is widened to: 
+
+- type ``int`` if other operand is of types ``byte``, ``char`` or ``int``; or 
+- to a type of other operand.
+
+The situation for the relational operator ``'<'`` is represented in the example
+below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(c: char, b: byte, i: int, l: long, d: double) {
+        c < b // 'c' and 'b' are converted to 'int' prior to comparison
+        c < i // 'c' is converted to 'int' prior to comparison
+        c < l // 'c' is converted to 'long' prior to comparison
+        c < d // 'c' is converted to 'double' prior to comparison
+    }
+
+.. index::
+   char conversion
+   widening numeric conversion
+   operand
+   numeric type
+   conversion   
+
+|
 
 .. _Implicit Conversions:
 
@@ -459,7 +499,7 @@ Otherwise, a :index:`compile-time error` occurs.
    *Before* widening to a union type, the following semantic rules are applied
    in most cases:
 
-    - :ref:`Type Inference for Numeric Literals` if ``v`` is
+    - :ref:`Type Inference for Constant Expressions` if ``v`` is
       a numeric literal; or
 
     - :ref:`Subtyping for Union Types` if ``U``:sub:`i` is equal
