@@ -482,6 +482,12 @@ export class RegExpExecArray extends RegExpResultArray {
     }
 }
 
+function toMatchArray(match: RegExpExecArray): RegExpMatchArray {
+    let matchArray = new RegExpMatchArray(match.index, match.input, match.result, match.indices)
+    matchArray.groups = match.groups
+    return matchArray
+}
+
 class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     private regexp: RegExp
     private string: String
@@ -497,16 +503,17 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         if (this.returned) {
             return new IteratorResult<RegExpMatchArray>();
         }
-        let match = this.regexp.matchInternal(this.string)
+        let match = this.regexp.exec(this.string)
         if (match == null) {
             this.returned = true;
             return new IteratorResult<RegExpMatchArray>()
         }
-        let matchStr = match.$_get(0)
+        let matchArray = toMatchArray(match)
+        let matchStr = matchArray.$_get(0)
         if (matchStr == "") {
             this.regexp.lastIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
         }
-        return new IteratorResult<RegExpMatchArray>(match)
+        return new IteratorResult<RegExpMatchArray>(matchArray)
     }
 
     override $_iterator(): IterableIterator<RegExpMatchArray> {
@@ -526,12 +533,15 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     }
 
     override next(): IteratorResult<RegExpMatchArray> {
-        let match = this.regexp.matchInternal(this.string)
-        if (match == null || this.returned) {
+        if (this.returned) {
+            return new IteratorResult<RegExpMatchArray>()
+        }
+        let match = this.regexp.exec(this.string)
+        if (match == null) {
             return new IteratorResult<RegExpMatchArray>()
         }
         this.returned = true
-        return new IteratorResult<RegExpMatchArray>(match)
+        return new IteratorResult<RegExpMatchArray>(toMatchArray(match))
     }
 
     override $_iterator(): IterableIterator<RegExpMatchArray> {
@@ -811,7 +821,7 @@ export class RegExp extends Object {
      * @FaAndStageModel
      * @since 24
      */
-    public matchInternal(str: String): RegExpMatchArray | null {
+    private matchInternal(str: String): RegExpMatchArray | null {
         return this.matchInternal(str, this.lastIndex)
     }
 
