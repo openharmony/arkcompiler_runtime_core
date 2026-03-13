@@ -13,14 +13,27 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Incorrect Floating-point literals
-tags: [negative, compile-only]
-params: {{c.lit}}
-expected_out: "{{c.exp_out}}"
+desc: Null literal.
 ---*/
 
-let x = {{c.lit}};
-function main(): void {}
-{% endfor %}
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Null literal");
+
+    suite.addTest("Implicit type", () => {
+        let x = null; // x type is expected to be inferred to Object|null type
+        arktest.assertTrue( x === null )
+    });
+
+    suite.addTest("Explicit type", () => {
+        let x: null = null;
+        arktest.assertTrue( x === null )
+    });
+
+    suite.addTest("Union type", () => {
+        let x: Object|null = null;
+        arktest.assertTrue( x === null )
+    });
+
+    return suite.run();
+}

@@ -24,7 +24,7 @@
 03.types/11.type_void_or_undefined/void/generic_void_class.ets
 
 #31484
-02.lexical_elements/09.literals/09.undefined_literal/undefined_literal_void.ets
+02.lexical_elements/09.literals/08.undefined_literal/undefined_literal_void.ets
 03.types/11.type_void_or_undefined/void/void_subtyping_basic_0.ets
 03.types/11.type_void_or_undefined/void/void_subtyping_basic_2.ets
 03.types/11.type_void_or_undefined/void/void_subtyping_basic_3.ets

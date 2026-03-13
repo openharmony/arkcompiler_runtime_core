@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,17 +12,16 @@
 # limitations under the License.
 
 --- # List of invalid bigint literals
+cases:
+    - {lit: '00n',         exp_out: "Syntax error ESY0255: Invalid BigInt number."}
+    - {lit: '0000000123n', exp_out: "Syntax error ESY0255: Invalid BigInt number."}
+    - {lit: '5.5n',        exp_out: "Syntax error ESY0255: Invalid BigInt number."}
+    - {lit: '5.5e5n',      exp_out: "Syntax error ESY0255: Invalid BigInt number."}
 
-bad_bigint_literals:
-    - '00n'
-    - '_123n'
-    - '123_n'
-    - '123n_'
-    - '0xFAFAn'
-    - '0o123377n'
-    - '0b01010101n'
-    - '0000000123n'
-    - '1N'
-    - '123456789abcn'
-    - '5.5n'
-    - '5.5e5n'
+    - {lit: '_123n', exp_out: "Semantic error ESE0143: Unresolved reference _123n"}
+
+    - {lit: '123_n', exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+    
+    - {lit: '123n_',         exp_out: "Syntax error ESY0227: Unexpected token '_'."}
+    - {lit: '1N',            exp_out: "Syntax error ESY0227: Unexpected token 'N'."}
+    - {lit: '123456789abcn', exp_out: "Syntax error ESY0227: Unexpected token 'abcn'."}
