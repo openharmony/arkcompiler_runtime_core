@@ -23,6 +23,8 @@ Each command is a valid code in the `ruby` language.
     - *force_jit: bool* - run jit compilation for every executed method
     - *force_profiling: bool* - enables profdata collection for every interpreter-executed method
     - *pgo_emit_profdata: bool* - enables on-disk generating for profile data to be used in PGO
+    - *compiler_enable_events* - enabkes `--compiler-enable-events` and redirects into file
+    - *log_file* - redirects log into file
 * **RUN_PAOC** run paoc application on the compiled panda file. Output panda file will be passed to the following panda
     run. Thus, `RUN_PAOC` command must be placed before `RUN` command. Following options are allowed:
     - *options: string* - additional options for paoc
@@ -33,16 +35,26 @@ Each command is a valid code in the `ruby` language.
     - *inputs: string* - list of panda files to compile
     - *output: string* - name of AOT file to be generated (incompatible to subsequent `RUN` call for now)
     - *pgo_use_profdata: bool* - usese profile data for PGO. Should be used after `RUN` call with `pgo_emit_profdata` enabled
+    - *compiler_enable_events* - enabkes `--compiler-enable-events` and redirects into file
+    - *log_file* - redirects log into file
 * **RUN_PGO_PROF** - runs panda application with forces profiling and PGO profdata emitting. Output profdata will be passed to the following AOT run that use PGO. Syntax sugar for `RUN` command with `pgo_emit_profdata` enabled
 * **RUN_PGO_PAOC** - runs paoc to compile panda file using collected profdata. Should be run after `RUN` with `pgo_emit_profdata` enabled. Syntax sugar for `RUN_PAOC` call
 * **RUN_LLVM** - runs paoc application on the compiled panda file with LLVM AOT backend. Requires LLVM support at `paoc` and passing `--with-llvm` to `checker.rb`
 * **RUN_AOT** - runs paoc application on the compiled panda file with various AOT modes. Currently, command creates separate checkes for `RUN_PAOC` and `RUN_LLVM` backends
 * **RUN_BCO** - runs frontend with bytecode optimizer
 * **RUN_FRONTEND** - runs frontend with specified options. If no options specified, `--opt-level=2 --ets-strings-concat=true` is used
-* **EVENT** (event: pattern) search event within all events
-* **EVENT_NEXT** (event: pattern) ordered search event, i.e. search from position of the last founded event
-* **EVENT_NOT** (event: pattern) ensure event is not occurred
-* **EVENT_NEXT_NOT** (event: pattern) ensure event is not occurred after current position
+* **EVENT** (event: pattern) search event within all runtime events
+* **EVENT_COMPILER** (event: pattern) search event within all compiler events
+* **LOG_COMPILER** (log_line: pattern) search log line within all log lines
+* **EVENT_NEXT** (event: pattern) ordered search runtime event, i.e. search from position of the last found runtime event
+* **EVENT_COMPILER_NEXT** (event: pattern) ordered search compiler event, i.e. search from position of the last found compiler event
+* **LOG_COMPILER_NEXT** (log_line: pattern) ordered search log line, i.e. search from position of the last found log line
+* **EVENT_NOT** (event: pattern) ensure runtime event is not occurred
+* **EVENT_COMPILER_NOT** (event: pattern) ensure compiler event is not occurred
+* **LOG_COMPILER_NOT** (log_line: pattern) ensure log line is not occurred
+* **EVENT_NEXT_NOT** (event: pattern) ensure runtime event is not occurred after current position
+* **EVENT_COMPILER_NEXT_NOT** (event: pattern) ensure compiler event is not occurred after current position
+* **LOG_COMPILER_NEXT_NOT** (log_line: pattern) ensure log line is not occurred after current position
 * **METHOD** (name: string) start check of specified method, all following checks that require specific method will use method specified by this command
 * **PASS_AFTER** (pass_name: string) specify pass after which IR commands should operate
 * **PASS_BEFORE** (pass_name: string) select pass that is right before the specified one

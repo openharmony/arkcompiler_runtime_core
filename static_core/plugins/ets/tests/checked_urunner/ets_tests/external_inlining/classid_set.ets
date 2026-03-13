@@ -60,7 +60,8 @@ function main1(): int {
 //! RUN_PGO_PROF  entry: "classid_set.ETSGLOBAL::main3", options: "--compiler-regex='.*main3.*' \
 //!               --panda-files=../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! RUN_PGO_PAOC  options: "--compiler-regex='(.*process.*|.*main3.*)' --log-debug=compiler --compiler-log=inlining \
-//!               --panda-files=../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!               --panda-files=../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc",
+//!               log_file: true
 //! METHOD        "classid_set.ETSGLOBAL::main3"
 //! PASS_AFTER    "Inline"
 //! INST          /DeoptimizeIf INLINE_IC/
@@ -68,6 +69,10 @@ function main1(): int {
 //!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! READ_FILE     "console.out"
 //! INST_NOT      "D/interop: Destroy compiled method: classid_set.ETSGLOBAL::main3"
+//!
+//! LOG_COMPILER    /Successfully inlined: classid_set_c.B::getValue/
+//! LOG_COMPILER    /Successfully inlined: classid_set.ETSGLOBAL::process/
+//! LOG_COMPILER    /successfully compiled method: classid_set.ETSGLOBAL::main3/
 
 function main3(): int {
   let b: Base = createB(10);
@@ -85,7 +90,8 @@ function main3(): int {
 //! RUN_PGO_PROF  entry: "classid_set.ETSGLOBAL::main2", options: "--compiler-regex='.*main2.*' \
 //!               --panda-files=../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! RUN_PGO_PAOC  options: "--compiler-regex='(.*process.*|.*main2.*)' --log-debug=compiler --compiler-log=inlining \
-//!               --panda-files=../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!               --panda-files=../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc",
+//!               log_file: true
 //! METHOD        "classid_set.ETSGLOBAL::main2"
 //! PASS_AFTER    "Inline"
 //! INST          /DeoptimizeIf INLINE_IC/
@@ -93,6 +99,10 @@ function main3(): int {
 //!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! READ_FILE     "console.out"
 //! INST_NOT      "D/interop: Destroy compiled method: classid_set.ETSGLOBAL::main2"
+//!
+//! LOGS_COMPILER_COUNT    /Successfully inlined: classid_set_b.A::getValue/, 3
+//! LOGS_COMPILER_COUNT    /Successfully inlined: classid_set_c.B::getValue/, 3
+//! LOGS_COMPILER_COUNT    /Successfully inlined: classid_set.ETSGLOBAL::process/, 2
 
 function main2(): int {
   let a: Base = createA(10);
