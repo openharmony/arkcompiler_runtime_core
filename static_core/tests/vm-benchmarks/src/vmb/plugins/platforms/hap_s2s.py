@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ from typing import List, Optional, Union, Callable
 from vmb.helpers import copy_file, copy_files, create_file_from_template
 from vmb.gensettings import GenSettings
 from vmb.tool import ToolBase
-from vmb.unit import BenchUnit
+from vmb.unit import BENCH_PREFIX, BenchUnit
 from vmb.cli import Args, OptFlags
 from vmb.plugins.platforms.hap_base import HapPlatformBase, ohos_dynamic_paths
 from vmb.plugins.tools.es2panda import make_arktsconfig, fix_arktsconfig
@@ -104,7 +104,7 @@ class Platform(HapPlatformBase):
             create_file_from_template(ability_template,
                                       ability_ts,
                                       BENCH_NAME=bu.name,
-                                      BENCH_FILE_SO=f'bench_{bu.name}.abc.so',
+                                      BENCH_FILE_SO=f'{BENCH_PREFIX}{bu.name}.abc.so',
                                       BENCH_MODE=self.mode)
             # Add bench ability to module.json5
             module_config_copy['module']['abilities'].append(HapPlatformBase.make_ability(bu))
