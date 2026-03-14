@@ -20,15 +20,20 @@ desc: |-
   Extended semantics for logical operators ‘A && B’, ‘A || B’ as per chapter 15.14.1.
   If the value of A is unknown at compile time, then the type of an expression is union A | B.
   Union in tests here is verified by assignability to all involved types.
+test_suffix: "{{case1.type}}"
 ---*/
-//#4097 (urunner) note use this after declgen runs support test suffix: "{{case1.type}}"
 
 class Cls {}
 enum EAB {A, B}
 enum ES {a = "", b = "1"}
 enum EN {a = 0, b = 1}
-// type alias for union for test suffix support
+
+// type aliases for test suffix support
 type union_example = boolean|string
+type array_example = int[]
+type func_example = () => void
+function foo() {}
+type tuple_example = [boolean, int]
 
 function main(): int {
   let testSuite = new arktest.ArkTestsuite("extended_conditional_runtime_type_{{case1.type}}");

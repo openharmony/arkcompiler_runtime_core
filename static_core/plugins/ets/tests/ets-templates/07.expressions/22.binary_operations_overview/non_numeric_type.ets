@@ -18,8 +18,8 @@
 
 /*---
 desc: Binary operations types per table in chapter 7.22 for non-numeric types.
+test_suffix: "{{operator.name}}"
 ---*/
-//#4097 (urunner) note use this after declgen runs support test suffix: "{{operator.name}}"
 
 {{line.decl}}
 
