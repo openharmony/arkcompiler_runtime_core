@@ -9,7 +9,6 @@ std/core/TypeAssignableFromTest.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
 regression/15867_spread_in_arrayof_segfaut.ets
 spec/05.Generics/callFromAsyncLambda.ets
-spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
 # extended
