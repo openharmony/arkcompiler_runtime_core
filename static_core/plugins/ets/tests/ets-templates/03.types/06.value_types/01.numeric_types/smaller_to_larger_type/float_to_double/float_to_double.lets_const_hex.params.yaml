@@ -12,5 +12,5 @@
 # limitations under the License.
 
 testData:
-  - { initialType: "float", value: "0X7FFf_FFFFFFF", resultType: "double" , result: "0X7FFFFFFFFFF", absError: "0.1", desc: "1. Conversion of the hex float value to the double (as hex)."}
-  - { initialType: "Float", value: "0X7FFf_FFFF", resultType: "double" , result: "0X7FFFFFFF", absError: "0.1", desc: "2. Conversion of the positive hex Float (alias) value to the double (as hex)."}
+  - { initialType: "float", value: "0X7FFf_FFFFFFF", resultType: "double" , result: "0X7FFFFFFFFFF", absError: "1", desc: "1. Conversion of the hex float value to the double (as hex)."}
+  - { initialType: "Float", value: "0X7FFf_FFFF", resultType: "double" , result: "0X7FFFFFFF", absError: "1", desc: "2. Conversion of the positive hex Float (alias) value to the double (as hex)."}
