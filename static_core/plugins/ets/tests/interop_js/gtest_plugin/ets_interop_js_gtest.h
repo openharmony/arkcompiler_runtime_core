@@ -32,9 +32,9 @@
 
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10) project code style
-__attribute__((weak)) napi_status napi_load_module_with_module_request([[maybe_unused]] napi_env env,
-                                                                       [[maybe_unused]] const char *request_name,
-                                                                       [[maybe_unused]] napi_value *result);
+__attribute__((weak)) napi_status napi_load_module_with_module_request(
+    [[maybe_unused]] napi_env env, [[maybe_unused]] const char *request_name, [[maybe_unused]] napi_value *result,
+    [[maybe_unused]] const char *abcFilePath = nullptr);
 // NOLINTEND(readability-identifier-naming)
 
 namespace ark::ets::interop::js::testing {

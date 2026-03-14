@@ -36,8 +36,8 @@
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
-napi_status __attribute__((weak))
-napi_load_module_with_module_request(napi_env env, const char *request_name, napi_value *result);
+napi_status __attribute__((weak)) napi_load_module_with_module_request(napi_env env, const char *request_name,
+                                                                       napi_value *result, const char *abcFilePath);
 
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_serialize_hybrid([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value object,
@@ -67,7 +67,7 @@ using common::TaggedType;
            StringStartWith(url, PREFIX_PACKAGE) || (url[0] != '@');
 }
 
-[[maybe_unused]] static JSValue *LoadJSModule(const PandaString &moduleName)
+[[maybe_unused]] static JSValue *LoadJSModule(const PandaString &moduleName, const PandaString &abcFilePath)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -82,7 +82,7 @@ using common::TaggedType;
     napi_status status;
     {
         ScopedNativeCodeThread etsNativeScope(coro);
-        status = napi_load_module_with_module_request(env, moduleName.c_str(), &result);
+        status = napi_load_module_with_module_request(env, moduleName.c_str(), &result, abcFilePath.c_str());
         if (status != napi_ok) {
             INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
             ctx->ForwardJSException(coro);
@@ -538,7 +538,7 @@ static bool NeedWrapDefault(const PandaString &moduleName, const std::string_vie
            moduleName.compare(0, OHOS_PLUGIN_PREFIX_SIZE, OHOS_PLUGIN_PREFIX) == 0 && func == "requireNapi";
 }
 
-JSValue *JSRuntimeLoadModule(EtsString *module)
+JSValue *JSRuntimeLoadModule(EtsString *module, [[maybe_unused]] EtsString *abcFilePath)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -553,7 +553,8 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
     PandaString moduleName = module->GetMutf8();
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     if (NotNativeOhmUrl(moduleName)) {
-        return LoadJSModule(moduleName);
+        PandaString abcFilePathStr = (abcFilePath != nullptr) ? abcFilePath->GetMutf8() : PandaString("");
+        return LoadJSModule(moduleName, abcFilePathStr);
     }
 #endif
     auto [mod, func] = ResolveModuleName(moduleName);
@@ -589,6 +590,11 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
         return JSValue::FromEtsObject(sharedRef->GetEtsObject());
     }
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
+}
+
+JSValue *JSRuntimeLoadModule(EtsString *module)
+{
+    return JSRuntimeLoadModule(module, nullptr);
 }
 
 uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs)
