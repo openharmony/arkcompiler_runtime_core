@@ -165,7 +165,7 @@ export class ArrayBuffer
      * @FaAndStageModel
      * @since 24
      */
-    sliceInternal(begin: int, end: int): ArrayBuffer {
+    private sliceInternal(begin: int, end: int): ArrayBuffer {
         const byteLength = this.getByteLength()
 
         const startIndex = normalizeIndex(begin, byteLength)
