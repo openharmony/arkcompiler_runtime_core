@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,61 +13,69 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     Unary numeric promotion is performed on expressions in the following situation:
     The operand of a unary plus operator.
-params: {{c.type}}
 ---*/
 
 enum IntEnum {One = 1, Two = 0x7FFFFFFF, Three}
 
 function foo(a: byte): int {
-  return 2;
+    return 2;
 }
 
 function foo(a: char): int {
-  return 3;
+    return 3;
 }
 
 function foo(a: short): int {
-  return 4;
+    return 4;
 }
 
 function foo(a: int): int {
-  return 5;
+    return 5;
 }
 
 function foo(a: long): int {
-  return 6;
+    return 6;
 }
 
 function foo(a: float): int {
-  return 7;
+    return 7;
 }
 
 function foo(a: double): int {
-  return 8;
+    return 8;
 }
 
 function foo(a: Object): int {
-  return 1;
+    return 1;
 }
 
-function main(): void {
-  let v: {{c.type}} = {{c.val}};
-  let r0 = foo(+v);
-  let r1 = foo(+ +v);
-  let r2 = foo(+ + +v);
-  let r3 = +v;
-  let r4 = + + v;
-  let r5 = + + + v;
-  arktest.assertEQ(r0, {{c.r[0]}});
-  arktest.assertEQ(r1, {{c.r[1]}});
-  arktest.assertEQ(r2, {{c.r[2]}});
-  arktest.assertEQ(r3, {{c.r[3]}});
-  arktest.assertEQ(r4, {{c.r[4]}});
-  arktest.assertEQ(r5, {{c.r[5]}});
+
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_numeric_unary_plus");
+
+    {% for c in cases %} 
+        testSuite.addTest("unary_plus_{{c.type}}{{loop.index}}", () => {
+            let v: {{c.type}} = {{c.val}};
+            let r0 = foo(+v);
+            let r1 = foo(+ +v);
+            let r2 = foo(+ + +v);
+            let r3 = +v;
+            let r4 = + + v;
+            let r5 = + + + v;
+            arktest.assertEQ(r0, {{c.r[0]}});
+            arktest.assertEQ(r1, {{c.r[1]}});
+            arktest.assertEQ(r2, {{c.r[2]}});
+            arktest.assertEQ(r3, {{c.r[3]}});
+            arktest.assertEQ(r4, {{c.r[4]}});
+            arktest.assertEQ(r5, {{c.r[5]}});
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

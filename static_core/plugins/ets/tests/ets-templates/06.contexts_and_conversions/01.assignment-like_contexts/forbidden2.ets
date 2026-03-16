@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     Any conversion that is not explicitly allowed is forbidden.
 ---*/
 
-{{c.defs}}
+{% for c in cases %}
+    {{c.defs}}
+{%- endfor %}
 
-function main(): void {
-  let src: {{c.stype}} = {{c.sval|safe}};
-  let expectedException = (e: Error): boolean => { return (e instanceof ClassCastError) };
-  arktest.expectThrow(() => { let dst: {{c.dtype}} = src as {{c.dtype}}; }, expectedException);
-  }
-{% endfor %}
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Forbidden_casts");
+
+    {% for c in cases %}
+        testSuite.addTest("forbidden_cast_{{loop.index}}", () => {
+            let src{{loop.index}}: {{c.stype}} = {{c.sval|safe}};
+            let expectedException{{loop.index}} = (e: Error): boolean => { return (e instanceof ClassCastError) };
+            arktest.expectThrow(() => { let dst{{loop.index}}: {{c.dtype}} = src{{loop.index}} as {{c.dtype}}; }, expectedException{{loop.index}});
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
+}

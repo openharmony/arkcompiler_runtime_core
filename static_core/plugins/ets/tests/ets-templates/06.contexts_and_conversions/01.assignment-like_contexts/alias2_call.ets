@@ -13,36 +13,46 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: Invocation contexts followed by a widening primitive conversion.
-params: from '{{c.ref_type}}' to '{{c.type}}'
 ---*/
 
-class A {
-  {%- for v in c['values'] %}
-  public fld_{{loop.index}}: {{c.type}};
-  {%- endfor %}
-
-  public constructor({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}) {
+{% for c in cases %}
+class A{{loop.index}} {
     {%- for v in c['values'] %}
-    this.fld_{{loop.index}} = p{{loop.index}};
+    public fld_{{loop.index}}: {{c.type}};
     {%- endfor %}
-  }
 
-  public foo({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}): void {
-    {%- for v in c['values'] %}
-    arktest.assertEQ(this.fld_{{loop.index}}, p{{loop.index}})
+    public constructor({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}) {
+        {%- for v in c['values'] %}
+        this.fld_{{loop.index}} = p{{loop.index}};
+        {%- endfor %}
+    }
+
+    public foo({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}): void {
+        {%- for v in c['values'] %}
+        arktest.assertEQ(this.fld_{{loop.index}}, p{{loop.index}})
+        {%- endfor %}
+    }
+}
+{%- endfor %}
+
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Alias_calls2");
+
+    {% for c in cases %}
+    {% set outer_loop_index = loop.index %}
+        testSuite.addTest("context_call_alias2_{{loop.index}}", () => {
+            {%- for v in c['values'] %}
+            let v{{outer_loop_index}}_{{loop.index}}: {{c.ref_type}} = {{v|safe}};
+            {%- endfor %}
+
+            let c{{outer_loop_index}} = new A{{outer_loop_index}}({% for v in c['values'] %}v{{outer_loop_index}}_{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
+            c{{outer_loop_index}}.foo({% for v in c['values'] %}v{{outer_loop_index}}_{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
+        });
     {%- endfor %}
-  }
+
+    return testSuite.run();
 }
 
-function main(): void {
-  {%- for v in c['values'] %}
-  let v{{loop.index}}: {{c.ref_type}} = {{v|safe}};
-  {%- endfor %}
-
-  let c: A = new A({% for v in c['values'] %}v{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
-  c.foo({% for v in c['values'] %}v{{loop.index}}{{ ", " if not loop.last }}{% endfor %});
-}
-{% endfor %}

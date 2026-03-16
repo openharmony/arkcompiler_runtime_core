@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,29 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
 desc: >-
     Unary numeric promotion is performed on expressions in the following situation:
     The index expression in an array access expression.
-params: {{c.type}}
 ---*/
 
 enum IntEnum {One = 1, Two = 0x2, Three}
 
-function main() {
-  let v: {{c.type}} = {{c.val}};
-  let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
-  arr[v.toInt()] = v;
-  arktest.assertEQ(arr[v.toInt()], {{c.len}})
+
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_numeric_promotion_unary");
+
+    {% for c in cases %} 
+        testSuite.addTest("promotion_{{loop.index}}", () => {
+            let v: {{c.type}} = {{c.val}};
+            let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
+            arr[v.toInt()] = v;
+            arktest.assertEQ(arr[v.toInt()], {{c.len}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

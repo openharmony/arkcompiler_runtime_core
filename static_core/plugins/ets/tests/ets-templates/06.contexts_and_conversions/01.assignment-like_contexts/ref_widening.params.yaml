@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,12 +13,13 @@
 
 ---
 cases:
+#0-1
   - { stype: 'Object[]', src: 'new Object[1]', dtype: Object }
   - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: Object }
-
+#2-3
   - { stype: '() => void', src: '() => { return; }', dtype: Object }
   - { stype: '(() => void)[]', src: '[]', dtype: Object }
-
+#4-10
   - { stype: 'Byte', src: 'new Byte()', dtype: Object }
   - { stype: 'Short', src: 'new Short()', dtype: Object }
   - { stype: 'Char', src: 'new Char()', dtype: Object }
@@ -26,7 +27,7 @@ cases:
   - { stype: 'Long', src: 'new Long()', dtype: Object }
   - { stype: 'Float', src: 'new Float()', dtype: Object }
   - { stype: 'Double', src: 'new Double()', dtype: Object }
-
+#11-17
   - { stype: 'Byte[]', src: 'new Byte[1]', dtype: Object }
   - { stype: 'Short[]', src: 'new Short[1]', dtype: Object }
   - { stype: 'Char[]', src: 'new Char[1]', dtype: Object }
@@ -34,14 +35,14 @@ cases:
   - { stype: 'Long[]', src: 'new Long[1]', dtype: Object }
   - { stype: 'Float[]', src: 'new Float[1]', dtype: Object }
   - { stype: 'Double[]', src: 'new Double[1]', dtype: Object }
-
+#18-23
   - { stype: 'Byte', src: 'new Byte()', dtype: Integral }
   - { stype: 'Short', src: 'new Short()', dtype: Integral }
   - { stype: 'Int', src: 'new Int()', dtype: Integral }
   - { stype: 'Long', src: 'new Long()', dtype: Integral }
   - { stype: 'Float', src: 'new Float()', dtype: Floating }
   - { stype: 'Double', src: 'new Double()', dtype: Floating }
-
+#24-30
   - { stype: 'Byte', src: 'new Byte()', dtype: 'Comparable<Byte>' }
   - { stype: 'Short', src: 'new Short()', dtype: 'Comparable<Short>' }
   - { stype: 'Char', src: 'new Char()', dtype: 'Comparable<Char>' }
@@ -49,49 +50,49 @@ cases:
   - { stype: 'Long', src: 'new Long()', dtype: 'Comparable<Long>' }
   - { stype: 'Float', src: 'new Float()', dtype: 'Comparable<Float>' }
   - { stype: 'Double', src: 'new Double()', dtype: 'Comparable<Double>' }
-
+#31
   - defs: |-
       enum Color {Red, Green, Blue}
     stype: Color
     src: Color.Red
     dtype: Object
-
+#32
   - defs: |-
-      enum Color {Red, Green, Blue}
-    stype: 'Color[]'
-    src: '[Color.Red, Color.Blue]'
+      enum Color2 {Red, Green, Blue}
+    stype: 'Color2[]'
+    src: '[Color2.Red, Color2.Blue]'
     dtype: Object
-
+#33
   - defs: |-
       interface I {}
       class A implements I {}
     stype: I
     src: new A()
     dtype: Object
-
+#34
   - defs: |-
-      class A {}
-      class B<T> {}
-    stype: B<A>
-    src: new B<A>()
+      class C {}
+      class D<T> {}
+    stype: D<C>
+    src: new D<C>()
     dtype: Object
-
+#35
   - defs: |-
-      class A {}
-      class B<T> {}
-      class C<T> extends B<T> {}
-    stype: C<A>
-    src: new C<A>()
-    dtype: B<A>
-
+      class E {}
+      class F<T> {}
+      class G<T> extends F<T> {}
+    stype: G<E>
+    src: new G<E>()
+    dtype: F<E>
+#36
   - defs: |-
-      interface I {}
-      class B<T> {}
-      class C<T> extends B<T> {}
-    stype: C<I>
-    src: new C<I>()
-    dtype: B<I>
-
+      interface J {}
+      class H<T> {}
+      class K<T> extends H<T> {}
+    stype: K<J>
+    src: new K<J>()
+    dtype: H<J>
+#37
   - stype: |-
       ((a: Double) => double)[][]|null
     src: |-

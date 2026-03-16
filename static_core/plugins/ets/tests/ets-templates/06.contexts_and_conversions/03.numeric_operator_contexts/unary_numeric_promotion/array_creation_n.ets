@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,15 +18,14 @@
 desc: >-
     Unary numeric promotion is performed on expressions in the following situation:
     Each dimension expression in an array creation expression.
-params: {{c.type}} cannot be promoted to int
+    {{c.type}} cannot be promoted to int
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 function main() {
-
-  let v: {{c.type}} = {{c.val}};
-  let arr: FixedArray<FixedArray<{{c.type}}>> = new {{c.type}}[v][v];
-  arktest.assertEQ(arr.length, {{c.len}})
-  
+    let v: {{c.type}} = {{c.val}};
+    let arr: FixedArray<FixedArray<{{c.type}}>> = new {{c.type}}[v][v];
+    arktest.assertEQ(arr.length, {{c.len}})
 }
-{% endfor %}
+{%- endfor %}

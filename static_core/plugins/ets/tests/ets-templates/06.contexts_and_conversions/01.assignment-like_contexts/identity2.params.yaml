@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,36 +13,38 @@
 
 ---
 cases:
+#0
   - { type: long, expr: Long.MAX_VALUE }
+#1
   - { type: float, expr: Float.POSITIVE_INFINITY }
+#2
   - { type: '(a: Boolean) => Object[]', expr: '(a: Boolean): Object[] => { return [a]; }' }
+#3
   - { type: 'String|null', expr: 'null' }
+#4
   - { type: '((a: Object) => Object)[]|null', expr: '[]' }
+#5
   - { type: '(double|null)[][]', expr: '[[1.0, 2.0, null]]' }
-
+#6
   - defs: |-
       interface I {}
       class A implements I {}
     type: I
-    expr: new A()
-    
-
+    expr: new A()  
+#7
   - defs: |-
       enum Color {Red, Green, Blue}
     type: Color
-    expr: Color.Red
-    
-
+    expr: Color.Red  
+#8
   - defs: |-
-      class A {}
-      class B<A> {}
-    type: B<A>
-    expr: new B<A>()
-    
-
+      class C {}
+      class B<C> {}
+    type: B<C>
+    expr: new B<C>()
+#9    
   - defs: |-
-      class A {}
-      class B<T extends A> {}
-    type: B<A>
-    expr: new B<A>()
-    
+      class D {}
+      class F<T extends D> {}
+    type: F<D>
+    expr: new F<D>()

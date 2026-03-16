@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,9 @@
 desc: >-
     Unary numeric promotion is performed on expressions in the following situation:
     The operand of a unary plus operator.
-params: {{c.type}} cannot be promoted
+    {{c.type}} cannot be promoted
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 function foo(a: Object): void {
@@ -39,7 +40,7 @@ function foo(a: double): void {
 }
 
 function main(): void {
-  let v: {{c.type}} = {{c.val}};
-  foo(+v);
+    let v: {{c.type}} = {{c.val}};
+    foo(+v);
 }
 {% endfor %}

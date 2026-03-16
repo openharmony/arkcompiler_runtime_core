@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,6 @@
 
 ---
 cases:
-  - { type: boolean, val: 'true', rt: byte, rv: 1 as byte, op: '==' }
-  - { type: Boolean, val: new Boolean(false), rt: short, rv: 1 as short, op: '!=' }
-  - { type: string, val: '"99"', rt: char, rv: "с'0'", op: '>' }
+  - { type: boolean, val: 'true', rt: byte, rv: 1 as byte, op: '==', expected: "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'Byte'." }
+  - { type: Boolean, val: new Boolean(false), rt: short, rv: 1 as short, op: '!=', expected: "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Boolean' and 'Short'." }
+  - { type: string, val: '"99"', rt: char, rv: "c'0'", op: '>', expected: "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type." }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 {% for case in cases %}
 /*---
 desc: >-
-  A compile-time error if the chain of conversions contains
-  two parameterized types that are not in the subtype relation.
-params: Assignment of '{{case.src_type|safe}}' to '{{case.dst_type|safe}}'
+    A compile-time error if the chain of conversions contains
+    two parameterized types that are not in the subtype relation.
+    Assignment of '{{case.src_type|safe}}' to '{{case.dst_type|safe}}'
 tags: [compile-only, negative]
+expected_out: "{{case.expected}}"
 ---*/
 
 class X {}
@@ -33,8 +34,8 @@ class Bout<out T> extends Aout<T> {}
 class Bin<in T> extends Ain<T> {}
 
 function main(): void {
-  let src: {{case.src_type|safe}} = new {{case.src_type|safe}}();
-  let dst: {{case.dst_type|safe}} = src;  // testing this assignment
-  assertEQ(dst, src)
+    let src: {{case.src_type|safe}} = new {{case.src_type|safe}}();
+    let dst: {{case.dst_type|safe}} = src;  // testing this assignment
+    arktest.assertEQ(dst, src)
 }
 {% endfor %}

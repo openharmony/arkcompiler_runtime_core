@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,30 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
+
 /*---
-desc: Assignment contexts allow the use a widening reference conversion followed by an unboxing conversion.
-params: Assignment of '{{case.type}}' to '{{case.ptype}}'
+desc: >-
+    Assignment contexts allow the use a widening reference conversion followed by an unboxing conversion.
 ---*/
-
-function foo<T extends {{case.type}}>(p: T): {{case.ptype}} {
-  let src: T = p;
-  let dst: {{case.ptype}} = src;
-  return dst;
+{% for case in cases %}
+function foo{{loop.index}}<T extends {{case.type}}>(p: T): {{case.ptype}} {
+    let src: T = p;
+    let dst: {{case.ptype}} = src;
+    return dst;
 }
+{%- endfor %}
 
-function main() {
-  let res: {{case.ptype}} = foo<{{case.type}}>(new {{case.type}}({{case.val|safe}}));
-  arktest.assertEQ(res, {{case.res|safe}})
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widening_refs_unbox");
+
+    {% for case in cases %}
+        testSuite.addTest("unbox_{{loop.index}}", () => {
+            let res: {{case.ptype}} = foo{{loop.index}}<{{case.type}}>(new {{case.type}}({{case.val|safe}}));
+            arktest.assertEQ(res, {{case.res|safe}})
+        }); 
+    {% endfor %}
+
+    return testSuite.run();
+
 }
-{% endfor %}

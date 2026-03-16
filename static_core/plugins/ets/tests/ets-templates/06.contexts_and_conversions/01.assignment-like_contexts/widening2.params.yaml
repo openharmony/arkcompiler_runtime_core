@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,35 +13,35 @@
 
 ---
 cases:
-
+#0
   - src_type: boolean
     dst_type: Object
     values: ['true', 'false']
-
+#1
   - src_type: byte
     dst_type: Integral
     values: [-128 as byte, 0 as byte, 127 as byte]
-
+#2
   - src_type: char
     dst_type: Object
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
-
+#3
   - src_type: short
     dst_type: Object
     values: [Short.MIN_VALUE, (255).toShort()]
-
+#4
   - src_type: int
     dst_type: Integral
     values: [127, 32767, Int.MAX_VALUE]
-
+#5
   - src_type: long
     dst_type: Object
     values: [Long.MIN_VALUE, (9223372036854775807).toLong()]
-
+#6
   - src_type: float
     dst_type: Object
     values: [1.401298464324817e-45f, Float.MAX_VALUE]
-
+#7
   - src_type: double
     dst_type: Object
     values: [-1.401298464324817e-45, Double.MAX_VALUE]

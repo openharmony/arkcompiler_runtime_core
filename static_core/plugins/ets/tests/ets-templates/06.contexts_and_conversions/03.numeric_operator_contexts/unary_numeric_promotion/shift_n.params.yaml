@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,12 +13,12 @@
 
 ---
 cases:
-  - { vtype: boolean, vval: 'true', rtype: int, rval: 1 }
-  - { vtype: Boolean, vval: new Boolean(false), rtype: int, rval: 1 }
-  - { vtype: String, vval: '0', rtype: int, rval: 1 }
-  - { vtype: int, vval: 1, rtype: boolean, rval: 'true' }
-  - { vtype: int, vval: 1, rtype: Boolean, rval: new Boolean(true) }
-  - { vtype: int, vval: 1, rtype: String, rval: '1' }
+  - { vtype: boolean, vval: 'true', rtype: int, rval: 1, expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
+  - { vtype: Boolean, vval: new Boolean(false), rtype: int, rval: 1, expected: "Semantic error ESE0127: No matching call signature for assertEQ(..., Int)" }
+  - { vtype: String, vval: '0', rtype: int, rval: 1, expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
+  - { vtype: int, vval: 1, rtype: boolean, rval: 'true', expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
+  - { vtype: int, vval: 1, rtype: Boolean, rval: new Boolean(true), expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
+  - { vtype: int, vval: 1, rtype: String, rval: '1', expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
 
 ops:
   - { op: '<<', name: shl }

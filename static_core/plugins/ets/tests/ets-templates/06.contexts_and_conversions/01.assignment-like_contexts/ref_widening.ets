@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,27 @@
  * limitations under the License.
  */
 
-{% for t in cases %}
 /*---
 desc: >-
     A widening reference conversion exists from any reference type S to any reference
     type T, provided S is a subtype of T.
 ---*/
 
+{% for t in cases %}
 {{t.defs}}
+{%- endfor %}
 
-function main() {
-  let src: {{t.stype}} = {{t.src|safe}};
-  let dst: {{t.dtype}} = src as {{t.dtype}};
-  arktest.assertEQ(src, dst) // reference equality
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Context_widening");
+
+    {% for t in cases %}
+        testSuite.addTest("context_widening{{loop.index}}", () => {
+            let src: {{t.stype}} = {{t.src|safe}};
+            let dst: {{t.dtype}} = src as {{t.dtype}};
+            arktest.assertEQ(src, dst) // reference equality
+        }); 
+    {% endfor %}
+
+    return testSuite.run();
 }
-{% endfor %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,30 @@
  * limitations under the License.
  */
 
-{% for t in types %}
-{% for op in operators %}
-
 /*---
 desc: Widening numeric operands to the largest type.
 ---*/
 
-function main(): void {
-  let x: bigint = 1n;
-  {% if t == 'bigint' %}
-  let y: {{t}} = 1n;
-  {% else %}
-  let y: {{t}} = 1;
-  {% endif %}
-  arktest.assertEQ(x {{op[0]}} new BigInt(y), {{op[1]}})
-  arktest.assertEQ(new BigInt(y) {{op[0]}} x, {{op[1]}})
-}
+function main(): int {
 
-{% endfor %}
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Context_widening_primitives_bigint");
+
+    {% for t in types %}
+    {% set outer_loop_index = loop.index %}
+    {% for op in operators %} 
+        testSuite.addTest("conversion_{{outer_loop_index}}_{{loop.index}}", () => {
+            let x: bigint = 1n;
+            {% if t == 'bigint' %}
+            let y: {{t}} = 1n;
+            {% else %}
+            let y: {{t}} = 1;
+            {% endif %}
+            arktest.assertEQ(x {{op[0]}} new BigInt(y), {{op[1]}})
+            arktest.assertEQ(new BigInt(y) {{op[0]}} x, {{op[1]}})
+        }); 
+    {%- endfor %}
+    {%- endfor %}
+
+    return testSuite.run();
+
+}
