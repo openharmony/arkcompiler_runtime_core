@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <cstdint>
 
 using StringDecoder = ark::ets::sdk::util::StringDecoder;
+const ani_size kInitialLocalScopeSize = 16;
 
 namespace OHOS {
 class StringDecoderEngine : public FuzzTestEngine {
@@ -37,17 +38,27 @@ public:
     {
         std::string encodingStr = "utf-8";
         StringDecoder decoder(encodingStr);
+        env_->CreateLocalScope(kInitialLocalScopeSize);
+        env_->ResetError();
         decoder.Write(env_, source, offset, length);
+        env_->ResetError();
         decoder.End(env_);
+        env_->ResetError();
+        env_->DestroyLocalScope();
     }
 
     void AniStringDecoderEnd(const char *source, int32_t offset, int32_t length)
     {
         std::string encodingStr = "utf-8";
         StringDecoder decoder(encodingStr);
+        env_->CreateLocalScope(kInitialLocalScopeSize);
+        env_->ResetError();
         decoder.Write(env_, source, offset, length);
+        env_->ResetError();
         int32_t halfLength = length / 2;
         decoder.End(env_, source, offset, halfLength);
+        env_->ResetError();
+        env_->DestroyLocalScope();
     }
 
 private:
