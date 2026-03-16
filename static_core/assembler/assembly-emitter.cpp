@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <ostream>
 
 namespace {
 

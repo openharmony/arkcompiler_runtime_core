@@ -202,12 +202,12 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), {":V", 1, "<ctor>"}},
-            {utf::CStringAsMutf8("$_get"), {"I:Lstd/core/Object;", 2, "$_get"}},
-            {utf::CStringAsMutf8("$_set"), {"ILstd/core/Object;:V", 3, "$_set"}},
-            {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
-            {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
-            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
-            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lstd/core/Array;", 3, "toSpliced"}},
+            {utf::CStringAsMutf8("$_get"), {"I:Lstd:core/Object;", 2, "$_get"}},
+            {utf::CStringAsMutf8("$_set"), {"ILstd:core/Object;:V", 3, "$_set"}},
+            {utf::CStringAsMutf8("at"), {"I:Lstd:core/Object;", 2, "at"}},
+            {utf::CStringAsMutf8("indexOf"), {"Lstd:core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
+            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd:core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
+            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd:core/Object;:Lstd/core/Array;", 3, "toSpliced"}},
             {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
         wArray_ = RegisterClass(PlatformTypes()->escompatArray->GetDescriptor(), nullptr, &W_ARRAY_OVERLOADS);
@@ -254,7 +254,7 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
-             {"{ULstd/core/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2, "<ctor>"}}};
+             {"{ULstd/core/Iterable;Lstd/core/Null;[Lstd:core/Object;}:V", 2, "<ctor>"}}};
         wSet_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreSet->GetDescriptor(), nullptr, &W_SET_OVERLOADS);
     }
 

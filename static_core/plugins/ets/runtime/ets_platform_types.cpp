@@ -169,12 +169,12 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     // NOLINTEND(cppcoreguidelines-macro-usage)
 
     for (size_t i = 0; i < coreFunctions.size(); ++i) {
-        PandaString descr = "Lstd/core/Function" + PandaString(std::to_string(i)) + ";";
+        PandaString descr = "Lstd:core/Function" + PandaString(std::to_string(i)) + ";";
         PreloadType(classLinker, &coreFunctions[i], descr);
         updateOffset(&coreFunctions[i]);
     }
     for (size_t i = 0; i < coreFunctionRs.size(); ++i) {
-        PandaString descr = "Lstd/core/FunctionR" + PandaString(std::to_string(i)) + ";";
+        PandaString descr = "Lstd:core/FunctionR" + PandaString(std::to_string(i)) + ";";
         PreloadType(classLinker, &coreFunctionRs[i], descr);
         updateOffset(&coreFunctionRs[i]);
     }

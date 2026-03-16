@@ -54,10 +54,10 @@ constexpr const char *STYLE_MEDIUM = "medium";
 constexpr const char *STYLE_SHORT = "short";
 
 constexpr const char *ERROR_CTOR_SIGNATURE = ark::ets::stdlib::ERROR_CTOR_SIGNATURE;
-constexpr const char *DTF_PART_IMPL_CTOR_SIGNATURE = "C{std.core.String}C{std.core.String}:";
-constexpr const char *DTRF_PART_IMPL_CTOR_SIGNATURE = "C{std.core.String}C{std.core.String}C{std.core.String}:";
+constexpr const char *DTF_PART_IMPL_CTOR_SIGNATURE = "C{std:core.String}C{std:core.String}:";
+constexpr const char *DTRF_PART_IMPL_CTOR_SIGNATURE = "C{std:core.String}C{std:core.String}C{std:core.String}:";
 constexpr const char *RESOLVED_OPTS_CTOR_SIGNATURE =
-    "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}:";
+    "C{std:core.String}C{std:core.String}C{std:core.String}C{std:core.String}:";
 
 constexpr const char *DTF_PART_LITERAL_TYPE = "literal";
 constexpr const char *DTRF_PART_SOURCE_SHARED = "shared";
@@ -93,7 +93,7 @@ constexpr std::array<const char *, 3> DTRF_PART_SOURCES = {"startRange", "endRan
 static void ThrowRangeError(ani_env *env, const std::string &message)
 {
     ani_class errorClass = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.RangeError", &errorClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.RangeError", &errorClass));
 
     ThrowNewError(env, errorClass, message, ERROR_CTOR_SIGNATURE);
 }
@@ -101,7 +101,7 @@ static void ThrowRangeError(ani_env *env, const std::string &message)
 static std::nullptr_t ThrowInternalError(ani_env *env, const std::string &message)
 {
     ani_class errorClass = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.InternalError", &errorClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.InternalError", &errorClass));
 
     ThrowNewError(env, errorClass, message, ERROR_CTOR_SIGNATURE);
     return nullptr;
@@ -669,7 +669,7 @@ static ani_array FormatToPartsImpl(ani_env *env, ani_object self, ani_double tim
     }
 
     ani_class fmtPartImplCls = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.DateTimeFormatPartImpl", &fmtPartImplCls));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.DateTimeFormatPartImpl", &fmtPartImplCls));
 
     ani_method fmtPartImplCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(fmtPartImplCls, "<ctor>", DTF_PART_IMPL_CTOR_SIGNATURE, &fmtPartImplCtor));
@@ -739,7 +739,7 @@ static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self, ani_s
     ani_string timeZone = CreateUtf16String(env, timeZoneIdChars, timeZoneId.length());
 
     ani_class optsClass = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ResolvedDateTimeFormatOptionsImpl", &optsClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.ResolvedDateTimeFormatOptionsImpl", &optsClass));
 
     ani_method optsCtor = nullptr;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(optsClass, "<ctor>", RESOLVED_OPTS_CTOR_SIGNATURE, &optsCtor));
@@ -770,7 +770,7 @@ static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array partsArr,
                                              const std::vector<std::tuple<UStr, UStr, UStr>> &parts)
 {
     ani_class partImplCls = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.DateTimeRangeFormatPartImpl", &partImplCls));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.DateTimeRangeFormatPartImpl", &partImplCls));
 
     ani_method partImplCtor = nullptr;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(partImplCls, "<ctor>", DTRF_PART_IMPL_CTOR_SIGNATURE, &partImplCtor));
@@ -942,20 +942,20 @@ static ani_array FormatRangeToPartsImpl(ani_env *env, ani_object self, ani_doubl
 ani_status RegisterIntlDateTimeFormatMethods(ani_env *env)
 {
     ani_class dtfClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.DateTimeFormat", &dtfClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.DateTimeFormat", &dtfClass));
 
     std::array dtfMethods {
-        ani_native_function {"formatImpl", "dC{std.core.String}:C{std.core.String}",
+        ani_native_function {"formatImpl", "dC{std:core.String}:C{std:core.String}",
                              reinterpret_cast<void *>(FormatImpl)},
-        ani_native_function {"formatToPartsImpl", "dC{std.core.String}:C{std.core.Array}",
+        ani_native_function {"formatToPartsImpl", "dC{std:core.String}:C{std:core.Array}",
                              reinterpret_cast<void *>(FormatToPartsImpl)},
-        ani_native_function {"formatRangeImpl", "ddC{std.core.String}:C{std.core.String}",
+        ani_native_function {"formatRangeImpl", "ddC{std:core.String}:C{std:core.String}",
                              reinterpret_cast<void *>(FormatRangeImpl)},
-        ani_native_function {"formatRangeToPartsImpl", "ddC{std.core.String}:C{std.core.Array}",
+        ani_native_function {"formatRangeToPartsImpl", "ddC{std:core.String}:C{std:core.Array}",
                              reinterpret_cast<void *>(FormatRangeToPartsImpl)},
-        ani_native_function {"resolvedOptionsImpl", "C{std.core.String}:C{std.core.Intl.ResolvedDateTimeFormatOptions}",
+        ani_native_function {"resolvedOptionsImpl", "C{std:core.String}:C{std:core.Intl.ResolvedDateTimeFormatOptions}",
                              reinterpret_cast<void *>(FormatResolvedOptionsImpl)},
-        ani_native_function {"getLocaleHourCycle", ":C{std.core.String}", reinterpret_cast<void *>(GetLocaleHourCycle)},
+        ani_native_function {"getLocaleHourCycle", ":C{std:core.String}", reinterpret_cast<void *>(GetLocaleHourCycle)},
     };
 
     ani_status status = env->Class_BindNativeMethods(dtfClass, dtfMethods.data(), dtfMethods.size());

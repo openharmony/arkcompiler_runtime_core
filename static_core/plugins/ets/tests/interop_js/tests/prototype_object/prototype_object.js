@@ -16,7 +16,7 @@
 const { getTestModule } = require('prototype_object.test.abc');
 const stsMod = getTestModule('prototype_object');
 
-const sts_obj_class = stsMod.getStdClass('Lstd/core/Object');
+const sts_obj_class = stsMod.getStdClass('Lstd:core/Object');
 const get_user_class = stsMod.getFunction('get_user_class');
 const get_base_class = stsMod.getFunction('get_base_class');
 const get_super_class = stsMod.getFunction('get_super_class');
@@ -37,7 +37,7 @@ function checkStdCoreObject() {
 function checkPrototypeOfCustomObject() {
     ASSERT_TRUE(Object.getPrototypeOf(User_class) === sts_obj_class);
     ASSERT_TRUE((Object.getPrototypeOf(Base_class) === sts_obj_class));
-    
+
     let proto = Object.getPrototypeOf(Super_class);
     ASSERT_TRUE(proto === Base_class);
     ASSERT_TRUE((Object.getPrototypeOf(proto)) === sts_obj_class);
@@ -47,7 +47,7 @@ function checkToStringCall() {
     ASSERT_TRUE(user_obj.toString !== Object.toString);
     ASSERT_TRUE(base_obj.toString !== Object.toString);
     ASSERT_TRUE(super_obj.toString !== Object.toString);
-    user_obj.toString(); 
+    user_obj.toString();
     base_obj.toString();
     super_obj.toString();
 }

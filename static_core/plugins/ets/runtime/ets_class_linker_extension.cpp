@@ -203,13 +203,13 @@ const uint8_t *EtsClassLinkerExtension::GetStringClassDescriptor(ClassRoot strCl
 {
     switch (strCls) {
         case ClassRoot::LINE_STRING:
-            return utf::CStringAsMutf8("Lstd/core/LineString;");
+            return utf::CStringAsMutf8("Lstd:core/LineString;");
 
         case ClassRoot::SLICED_STRING:
-            return utf::CStringAsMutf8("Lstd/core/SlicedString;");
+            return utf::CStringAsMutf8("Lstd:core/SlicedString;");
 
         case ClassRoot::TREE_STRING:
-            return utf::CStringAsMutf8("Lstd/core/TreeString;");
+            return utf::CStringAsMutf8("Lstd:core/TreeString;");
 
         default:
             UNREACHABLE();
@@ -261,6 +261,7 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     }
     SetClassRoot(ClassRoot::OBJECT, objectClass);
 
+    std::cout << "Try to get class class: " << langCtx_.GetClassClassDescriptor() << std::endl;
     auto *classClass = GetClassLinker()->GetClass(langCtx_.GetClassClassDescriptor(), false, GetBootContext());
     if (classClass == nullptr) {
         LOG(ERROR, CLASS_LINKER) << "Cannot create class class '" << langCtx_.GetClassClassDescriptor() << "'";
@@ -279,7 +280,7 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         return false;
     }
     auto *jsValueClass =
-        GetClassLinker()->GetClass(utf::CStringAsMutf8("Lstd/interop/js/JSValue;"), false, GetBootContext());
+        GetClassLinker()->GetClass(utf::CStringAsMutf8("Lstd:interop/js/JSValue;"), false, GetBootContext());
     if (jsValueClass == nullptr) {
         LOG(ERROR, CLASS_LINKER) << "Cannot find XRef class";
         return false;
@@ -706,39 +707,39 @@ Class *EtsClassLinkerExtension::CacheClass(std::string_view descriptor, F const 
 
 void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
 {
-    CacheClass("Lstd/core/String;", [](auto *c) { c->SetValueTyped(); });
-    CacheClass("Lstd/core/LineString;", [](auto *c) { c->SetValueTyped(); });
-    CacheClass("Lstd/core/SlicedString;", [](auto *c) { c->SetValueTyped(); });
-    CacheClass("Lstd/core/TreeString;", [](auto *c) { c->SetValueTyped(); });
-    CacheClass("Lstd/core/Null;", [](auto *c) {
+    CacheClass("Lstd:core/String;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd:core/LineString;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd:core/SlicedString;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd:core/TreeString;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd:core/Null;", [](auto *c) {
         c->SetNullValue();
         c->SetValueTyped();
     });
 
-    CacheClass("Lstd/core/Boolean;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });
-    CacheClass("Lstd/core/Byte;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BYTE); });
-    CacheClass("Lstd/core/Char;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::CHAR); });
-    CacheClass("Lstd/core/Short;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::SHORT); });
-    CacheClass("Lstd/core/Int;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::INT); });
-    CacheClass("Lstd/core/Long;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::LONG); });
-    CacheClass("Lstd/core/Float;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::FLOAT); });
-    CacheClass("Lstd/core/Double;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::DOUBLE); });
+    CacheClass("Lstd:core/Boolean;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });
+    CacheClass("Lstd:core/Byte;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BYTE); });
+    CacheClass("Lstd:core/Char;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::CHAR); });
+    CacheClass("Lstd:core/Short;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::SHORT); });
+    CacheClass("Lstd:core/Int;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::INT); });
+    CacheClass("Lstd:core/Long;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::LONG); });
+    CacheClass("Lstd:core/Float;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::FLOAT); });
+    CacheClass("Lstd:core/Double;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::DOUBLE); });
 
-    CacheClass("Lstd/core/BigInt;", [](auto *c) {
+    CacheClass("Lstd:core/BigInt;", [](auto *c) {
         c->SetBigInt();
         c->SetValueTyped();
     });
-    CacheClass("Lstd/core/Function;", [](auto *c) { c->SetFunction(); });
-    CacheClass("Lstd/core/BaseEnum;", [](auto *c) {
+    CacheClass("Lstd:core/Function;", [](auto *c) { c->SetFunction(); });
+    CacheClass("Lstd:core/BaseEnum;", [](auto *c) {
         c->SetEtsEnum();
         c->SetValueTyped();
     });
 
-    CacheClass("Lstd/core/FinalizableWeakRef;", [](auto *c) {
+    CacheClass("Lstd:core/FinalizableWeakRef;", [](auto *c) {
         c->SetFinalizeReference();
         c->SetWeakReference();
     });
-    CacheClass("Lstd/core/BaseWeakRef;", [](auto *c) { c->SetWeakReference(); });
+    CacheClass("Lstd:core/BaseWeakRef;", [](auto *c) { c->SetWeakReference(); });
 }
 
 void EtsClassLinkerExtension::InitializeBuiltinClasses()

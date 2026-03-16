@@ -157,7 +157,7 @@ EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLink
     }
 
     const auto name = clsName->GetMutf8();
-    auto normNameOpt = signature::NormalizePackageSeparators<PandaString, '.'>(name, 0, name.size());
+    auto normNameOpt = signature::NormalizePackageSeparators<PandaString>(name, 0, name.size());
     if (UNLIKELY(!normNameOpt.has_value())) {
         return nullptr;
     }

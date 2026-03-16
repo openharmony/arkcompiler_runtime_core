@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_METHOD_SIGNATURE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_METHOD_SIGNATURE_H_
 
+#include <cstddef>
 #include "libarkbase/utils/logger.h"
 #include "runtime/include/method.h"
 #include "plugins/ets/runtime/types/ets_value.h"
@@ -31,7 +32,7 @@ public:
     explicit EtsMethodSignature(const std::string_view sign)
     {
         auto signature = PandaString(sign);
-        size_t dots = signature.find(':');
+        size_t dots = FindReturnTypeDelimiter(signature, ':', 'L', ';');
         // Return if ':' wasn't founded or was founded at the end
         if (dots == PandaString::npos || dots == signature.size() - 1) {
             return;
@@ -159,6 +160,23 @@ private:
             default:
                 return EtsType::UNKNOWN;
         }
+    }
+
+    size_t FindReturnTypeDelimiter(const PandaString &signature, char delimiter, char RefBarrierStart, char RefBarrierEnd) const
+    {
+        bool insideRefType = false;
+        for (size_t i = 0; i < signature.length(); ++i) {
+            char current = signature[i];
+            if (current == RefBarrierStart) {
+                insideRefType = true;
+            } else if (current == RefBarrierEnd) {
+                insideRefType = false;
+            } else if (current == delimiter && !insideRefType) {
+                return i;
+            }
+        }
+
+        return std::string::npos;
     }
 };
 

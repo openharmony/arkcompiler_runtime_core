@@ -48,7 +48,7 @@ icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::s
         if (UNLIKELY(U_FAILURE(status))) {
             const auto errorMessage =
                 std::string("Collation '").append(collation).append("' is invalid or not supported");
-            ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
+            ThrowNewError(env, "std:core.RuntimeError", errorMessage.c_str(), "C{std:core.String}:");
             return nullptr;
         }
     }
@@ -61,7 +61,7 @@ icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::s
         std::string localeName;
         dispName.toUTF8String(localeName);
         const auto errorMessage = std::string("Failed to create the collator for ").append(localeName);
-        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std:core.RuntimeError", errorMessage.c_str(), "C{std:core.String}:");
 
         delete newCollator;
         return nullptr;
@@ -86,7 +86,7 @@ icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::s
 
     if (UNLIKELY(U_FAILURE(status))) {
         const auto errorMessage = std::string("Failed to enable normalization for collator.");
-        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std:core.RuntimeError", errorMessage.c_str(), "C{std:core.String}:");
         delete newCollator;
         return nullptr;
     }

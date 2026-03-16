@@ -23,7 +23,7 @@
 #include <vector>
 
 namespace ark::pandasm {
-constexpr const std::string_view MANGLE_BEGIN = ":";
+constexpr const std::string_view MANGLE_BEGIN = "~";
 constexpr const std::string_view MANGLE_SEPARATOR = ";";
 
 constexpr const std::string_view SIGNATURE_BEGIN = MANGLE_BEGIN;

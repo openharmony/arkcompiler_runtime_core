@@ -16,7 +16,7 @@
 const stsVm = globalThis.gtest.etsVm;
 const Animal = stsVm.getClass('Lexport/Animal;');
 const staticRecord = stsVm.getClass('Lexport/ETSGLOBAL;').staticRecord;
-const stdObject = stsVm.getClass('Lstd/core/Object;');
+const stdObject = stsVm.getClass('Lstd:core/Object;');
 
 class Dog extends Animal {
     breed: string;

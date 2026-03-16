@@ -16,7 +16,7 @@
 const etsVm = globalThis.gtest.etsVm;
 
 function testGetClassColonSeparator() {
-    const cls1 = etsVm.getClass('Lstd/core/Object;')
+    const cls1 = etsVm.getClass('Lstd:core/Object;')
     const cls2 = etsVm.getClass('Lstd:core/Object;')
     ASSERT_TRUE(cls1 !== undefined)
     ASSERT_TRUE(cls1 === cls2)

@@ -38,7 +38,7 @@ class DummyRuntimeLinker extends RuntimeLinker {
 class Test {
     static stdCoreObjectName = "std.core.Object";
     static stdCoreObjectWrongName1 = "std/core/Object";
-    static stdCoreObjectWrongName2 = "Lstd/core/Object;";
+    static stdCoreObjectWrongName2 = "Lstd:core/Object;";
     static stdCoreObjectWrongName3 = "Lstd.core.Object;";
     static stdCoreObjectWrongName4 = "[D";
     static additionalClass1Name = "additional1.AdditionalClass1";

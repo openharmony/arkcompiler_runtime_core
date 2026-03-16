@@ -51,9 +51,9 @@ namespace {
 
 constexpr const char *LAST_INDEX_FIELD_NAME = "lastIndex";
 
-constexpr const char *REGEXP_CLASS_NAME = "std.core.RegExp";
-constexpr const char *EXEC_ARRAY_CLASS_NAME = "std.core.RegExpExecArray";
-constexpr const char *MATCH_ARRAY_CLASS_NAME = "std.core.RegExpMatchArray";
+constexpr const char *REGEXP_CLASS_NAME = "std:core.RegExp";
+constexpr const char *EXEC_ARRAY_CLASS_NAME = "std:core.RegExpExecArray";
+constexpr const char *MATCH_ARRAY_CLASS_NAME = "std:core.RegExpMatchArray";
 constexpr const char *INDEX_FIELD_NAME = "index_";
 constexpr const char *RESULT_FIELD_NAME = "resultRaw_";
 constexpr const char *IS_CORRECT_FIELD_NAME = "isCorrect";
@@ -104,12 +104,12 @@ uint32_t CastToBitMask(ani_env *env, ani_string checkStr)
                 flagsBitsTemp = FLAG_STICKY;
                 break;
             default: {
-                ThrowNewError(env, "std.core.IllegalArgumentError", "invalid regular expression flags");
+                ThrowNewError(env, "std:core.IllegalArgumentError", "invalid regular expression flags");
                 return 0;
             }
         }
         if ((flagsBits & flagsBitsTemp) != 0) {
-            ThrowNewError(env, "std.core.IllegalArgumentError", "invalid regular expression flags");
+            ThrowNewError(env, "std:core.IllegalArgumentError", "invalid regular expression flags");
             return 0;
         }
         flagsBits |= flagsBitsTemp;
@@ -136,7 +136,7 @@ std::vector<uint8_t> ExtractStringAsUtf16(ani_env *env, ani_string strANI, const
         }
         auto *buffer = new uint16_t[bufferSize];
         if (buffer == nullptr) {
-            ThrowNewError(env, "std.core.OutOfMemoryError", "Can't create buffer");
+            ThrowNewError(env, "std:core.OutOfMemoryError", "Can't create buffer");
             return result;
         }
         ani_size strSize;
@@ -158,7 +158,7 @@ std::vector<uint8_t> ExtractStringAsUtf16(ani_env *env, ani_string strANI, const
         }
         char *buffer = new char[bufferSize];
         if (buffer == nullptr) {
-            ThrowNewError(env, "std.core.OutOfMemoryError", "Can't create buffer");
+            ThrowNewError(env, "std:core.OutOfMemoryError", "Can't create buffer");
             return result;
         }
         ani_size strSize;
@@ -426,12 +426,12 @@ void RegisterRegExpNativeMethods(ani_env *env)
 {
     const auto regExpImpls = std::array {
         ani_native_function {"execImpl",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpExecArray}",
+                             "C{std:core.String}C{std:core.String}C{std:core.String}iiiz:C{std:core.RegExpExecArray}",
                              reinterpret_cast<void *>(Exec)},
         ani_native_function {"matchImpl",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpMatchArray}",
+                             "C{std:core.String}C{std:core.String}C{std:core.String}iiiz:C{std:core.RegExpMatchArray}",
                              reinterpret_cast<void *>(Match)},
-        ani_native_function {"testImpl", "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:z",
+        ani_native_function {"testImpl", "C{std:core.String}C{std:core.String}C{std:core.String}iiiz:z",
                              reinterpret_cast<void *>(Test)}};
 
     ani_class regexpClassLocal;

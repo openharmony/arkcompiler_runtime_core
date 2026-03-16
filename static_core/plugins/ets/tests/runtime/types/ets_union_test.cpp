@@ -123,9 +123,9 @@ TEST_F(EtsUnionTest, CreateUnionClass)
         {"{ULA;LB;}", {true, "LA;", {"LA;", "LB;"}}},
         {"{ULB;LC;}", {true, "LA;", {"LB;", "LC;"}}},
         {"{ULA;LB;LC;}", {true, "LA;", {"LA;", "LB;", "LC;"}}},
-        {"{ULA;LB;[LC;}", {true, "Lstd/core/Object;", {"LA;", "LB;", "[LC;"}}},
-        {"{ULA;Lstd/core/String;[LC;}", {true, "Lstd/core/Object;", {"LA;", "Lstd/core/String;", "[LC;"}}},
-        {"{ULA;LD;[{ULB;LC;}}", {true, "Lstd/core/Object;", {"LA;", "LD;", "[{ULB;LC;}"}}}};
+        {"{ULA;LB;[LC;}", {true, "Lstd:core/Object;", {"LA;", "LB;", "[LC;"}}},
+        {"{ULA;Lstd/core/String;[LC;}", {true, "Lstd:core/Object;", {"LA;", "Lstd/core/String;", "[LC;"}}},
+        {"{ULA;LD;[{ULB;LC;}}", {true, "Lstd:core/Object;", {"LA;", "LD;", "[{ULB;LC;}"}}}};
 
     for (const auto &[desc, infoList] : descMap) {
         EtsClass *klass = vm_->GetClassLinker()->GetClass(desc.c_str());

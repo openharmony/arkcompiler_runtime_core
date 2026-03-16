@@ -277,7 +277,7 @@ static std::string ValidateAndCanonicalizeCode(ani_env *env, CodeType codeType, 
         if (fallbackStr == "code") {
             return codeStr;
         }
-        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(),
+        ThrowNewError(env, "std:core.RangeError", ("Invalid code: " + codeStr).c_str(),
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 
@@ -366,7 +366,7 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     auto codeType = StringToCodeType(typeStr, isValidCodeType);
 
     if (!isValidCodeType) {
-        ThrowNewError(env, "std.core.RangeError", ("Invalid type: " + typeStr).c_str(),
+        ThrowNewError(env, "std:core.RangeError", ("Invalid type: " + typeStr).c_str(),
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
@@ -381,7 +381,7 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     UErrorCode status = U_ZERO_ERROR;
     auto icuLocale = icu::Locale::forLanguageTag(localeStr, status);
     if ((U_FAILURE(status) != 0)) {
-        ThrowNewError(env, "std.core.RangeError", ("Invalid locale tag: " + localeStr).c_str(),
+        ThrowNewError(env, "std:core.RangeError", ("Invalid locale tag: " + localeStr).c_str(),
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
@@ -405,7 +405,7 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     } else if (fallbackStr == "code") {
         retVal = StdStrToAni(env, codeStr);
     } else {
-        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(),
+        ThrowNewError(env, "std:core.RangeError", ("Invalid code: " + codeStr).c_str(),
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 
@@ -425,13 +425,13 @@ ani_status RegisterIntlDisplayNames(ani_env *env)
 {
     const auto methods = std::array {
         ani_native_function {"ofNative",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core."
-                             "String}C{std.core.String}:C{std.core.String}",
+                             "C{std:core.String}C{std:core.String}C{std:core.String}C{std:core.String}C{std:core."
+                             "String}C{std:core.String}:C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlDisplayNamesOf)},
     };
 
     ani_class displayNamesClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.DisplayNames", &displayNamesClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.DisplayNames", &displayNamesClass));
 
     return env->Class_BindStaticNativeMethods(displayNamesClass, methods.data(), methods.size());
 }

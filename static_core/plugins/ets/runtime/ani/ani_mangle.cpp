@@ -131,7 +131,7 @@ static size_t ParseBody(char type, const std::string_view data, PandaString &str
         return std::string_view::npos;
     }
 
-    auto dataNormOpt = signature::NormalizePackageSeparators<PandaString, '.'>(data, 0, end);
+    auto dataNormOpt = signature::NormalizePackageSeparators<PandaString>(data, 0, end);
     if (UNLIKELY(!dataNormOpt.has_value())) {
         return std::string_view::npos;
     }
@@ -167,9 +167,9 @@ static size_t ParseType(char type, const std::string_view data, PandaString &str
         case 'l': str.push_back('J'); return 1;
         case 'f': str.push_back('F'); return 1;
         case 'd': str.push_back('D'); return 1;
-        case 'Y': str.append("Lstd/core/Object;"); return 1;
-        case 'N': str.append("Lstd/core/Object;"); return 1;
-        case 'U': str.append("Lstd/core/Object;"); return 1;
+        case 'Y': str.append("Lstd:core/Object;"); return 1;
+        case 'N': str.append("Lstd:core/Object;"); return 1;
+        case 'U': str.append("Lstd:core/Object;"); return 1;
         case 'A': bodySize = ParseArrayBody(data.substr(1), str); break;
         case 'X': bodySize = ParseUnionBody(data.substr(1), str); break;
         case 'C':

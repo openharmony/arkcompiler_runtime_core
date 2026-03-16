@@ -265,7 +265,7 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
     if (IsPrimitveDescriptor(sub.GetDescriptor()) || IsPrimitveDescriptor(super.GetDescriptor())) {
         return false;
     }
-    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("Lstd/core/Object;"))) {
+    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("Lstd:core/Object;"))) {
         return true;
     }
     if (ClassHelper::IsArrayDescriptor(super.GetDescriptor())) {

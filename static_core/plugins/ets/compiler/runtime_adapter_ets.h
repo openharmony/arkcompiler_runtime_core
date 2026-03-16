@@ -318,23 +318,23 @@ public:
     }
 
 private:
-    static constexpr std::string_view CLASS_DESCRIPTORS_STRING_BUILDER = "Lstd/core/StringBuilder;";
-    static constexpr std::string_view CLASSES_STRING_BUILDER = "std.core.StringBuilder";
-    static constexpr std::string_view METHODS_STRING_CONCAT = "std.core.String::concat";
-    static constexpr std::string_view METHODS_STRING_GET_LENGTH = "std.core.String::getLength";
-    static constexpr std::string_view METHODS_STRING_BUILDER_APPEND = "std.core.StringBuilder::append";
-    static constexpr std::string_view METHODS_STRING_BUILDER_TO_STRING = "std.core.StringBuilder::toString";
-    static constexpr std::string_view GETTERS_STRING_GET_LENGTH = "std.core.String::%%get-length";
+    static constexpr std::string_view CLASS_DESCRIPTORS_STRING_BUILDER = "Lstd:core/StringBuilder;";
+    static constexpr std::string_view CLASSES_STRING_BUILDER = "std:core.StringBuilder";
+    static constexpr std::string_view METHODS_STRING_CONCAT = "std:core.String::concat";
+    static constexpr std::string_view METHODS_STRING_GET_LENGTH = "std:core.String::getLength";
+    static constexpr std::string_view METHODS_STRING_BUILDER_APPEND = "std:core.StringBuilder::append";
+    static constexpr std::string_view METHODS_STRING_BUILDER_TO_STRING = "std:core.StringBuilder::toString";
+    static constexpr std::string_view GETTERS_STRING_GET_LENGTH = "std:core.String::%%get-length";
     static constexpr std::string_view GETTERS_STRING_BUILDER_GET_STRING_LENGTH =
-        "std.core.StringBuilder::%%get-stringLength";
+        "std:core.StringBuilder::%%get-stringLength";
     static constexpr std::string_view SIGNATURES_RET_VOID = "()V";
     static constexpr std::string_view SIGNATURES_RET_INT = "()I";
     static constexpr std::string_view SIGNATURES_CHAR_ARRAY_RET_VOID = "([C)V";
-    static constexpr std::string_view SIGNATURES_STRING_RET_VOID = "(Lstd/core/String;)V";
-    static constexpr std::string_view SIGNATURES_STRING_ARRAY_RET_STRING = "([Lstd/core/String;)Lstd/core/String;";
-    static constexpr std::string_view SIGNATURES_RET_STRING = "()Lstd/core/String;";
+    static constexpr std::string_view SIGNATURES_STRING_RET_VOID = "(Lstd:core/String;)V";
+    static constexpr std::string_view SIGNATURES_STRING_ARRAY_RET_STRING = "([Lstd:core/String;)Lstd:core/String;";
+    static constexpr std::string_view SIGNATURES_RET_STRING = "()Lstd:core/String;";
     static constexpr std::string_view SIGNATURES_STRING_RET_STRING_BUILDER =
-        "(Lstd/core/String;)Lstd/core/StringBuilder;";
+        "(Lstd:core/String;)Lstd:core/StringBuilder;";
     static constexpr std::string_view FIELDS_LENGTH = "length";
     static constexpr std::string_view CTOR = "<ctor>";
     static constexpr std::string_view CCTOR = "<cctor>";

@@ -280,7 +280,7 @@ ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass
     auto l = icu::Locale::forLanguageTag(tagKey, success);
     if (UNLIKELY(U_FAILURE(success))) {
         std::string message = "Failed to find locale from tag";
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        ThrowNewError(env, "std:core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
 
@@ -296,7 +296,7 @@ ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass
         auto unicodeKeywordValue = l.getUnicodeKeywordValue<std::string>(unicodeKey, success);
         if (UNLIKELY(U_FAILURE(success))) {
             std::string message = "Failed to getUnicodeKeywordValue";
-            ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+            ThrowNewError(env, "std:core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
             return nullptr;
         }
         int keyIndex = UnicodeKeyToLocaleInfo(unicodeKey);
@@ -329,7 +329,7 @@ ani_string StdCoreIntlLocaleDefaultTag(ani_env *env)
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Error receiving default locale language tag: ";
         message += u_errorName(status);
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        ThrowNewError(env, "std:core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     return StdStrToAni(env, tag);
@@ -339,32 +339,32 @@ ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
 {
     const auto methods = std::array {
         ani_native_function {"initLocale", ":", reinterpret_cast<void *>(StdCoreIntlLocaleFillCheckInfo)},
-        ani_native_function {"maximizeInfo", "C{std.core.String}:C{std.core.String}",
+        ani_native_function {"maximizeInfo", "C{std:core.String}:C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleInfo)},
-        ani_native_function {"regionList", ":C{std.core.String}",
+        ani_native_function {"regionList", ":C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleRegionList)},
-        ani_native_function {"langList", ":C{std.core.String}", reinterpret_cast<void *>(StdCoreIntlLocaleLangList)},
-        ani_native_function {"scriptList", ":C{std.core.String}",
+        ani_native_function {"langList", ":C{std:core.String}", reinterpret_cast<void *>(StdCoreIntlLocaleLangList)},
+        ani_native_function {"scriptList", ":C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleScriptList)},
-        ani_native_function {"numberingSystemList", ":C{std.core.String}",
+        ani_native_function {"numberingSystemList", ":C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleNumberingSystemList)},
-        ani_native_function {"defaultLang", ":C{std.core.String}",
+        ani_native_function {"defaultLang", ":C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleDefaultLang)},
-        ani_native_function {"isTagValid", "C{std.core.String}:i",
+        ani_native_function {"isTagValid", "C{std:core.String}:i",
                              reinterpret_cast<void *>(StdCoreIntlLocaleIsTagValid)},
-        ani_native_function {"parseTagImpl", "C{std.core.String}:C{std.core.String}",
+        ani_native_function {"parseTagImpl", "C{std:core.String}:C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)},
     };
 
     ani_class localeClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Locale", &localeClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.Locale", &localeClass));
     ani_status status = env->Class_BindNativeMethods(localeClass, methods.data(), methods.size());
     if (status != ANI_OK) {
         return status;
     }
 
     const std::array staticMethods = {
-        ani_native_function {"defaultTag", ":C{std.core.String}",
+        ani_native_function {"defaultTag", ":C{std:core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleDefaultTag)},
     };
 

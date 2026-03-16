@@ -200,14 +200,14 @@ TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators)
                                   panda_file::Type {panda_file::Type::TypeId::VOID},
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
                               },
-                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/Object;"}}));
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd:core/Object;"}}));
 
     CheckSignatureParsing(":C{std:core.Object}",
                           Method::Proto(
                               Method::Proto::ShortyVector {
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
                               },
-                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/Object;"}}));
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd:core/Object;"}}));
 
     CheckSignatureParsing("A{C{std:core.String}}:",
                           Method::Proto(
@@ -232,7 +232,7 @@ TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators)
                                   panda_file::Type {panda_file::Type::TypeId::VOID},
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
                               },
-                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/Object;"}}));
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd:core/Object;"}}));
 }
 
 TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_Invalid)
@@ -262,7 +262,7 @@ TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_MultipleObjects)
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
                               },
                               Method::Proto::RefTypeVector {
-                                  std::string_view {"Lstd/core/Object;"},
+                                  std::string_view {"Lstd:core/Object;"},
                                   std::string_view {"Lstd/core/String;"},
                                   std::string_view {"Lstd/core/Double;"},
                               }));
@@ -299,7 +299,7 @@ TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_MultipleObjectsWit
             },
             Method::Proto::RefTypeVector {
                 std::string_view {"{U[ILstd/core/Double;Lstd/core/String;}"},
-                std::string_view {"Lstd/core/Object;"},
+                std::string_view {"Lstd:core/Object;"},
                 std::string_view {"Lstd/core/String;"},
                 std::string_view {"Lstd/core/Double;"},
             }));

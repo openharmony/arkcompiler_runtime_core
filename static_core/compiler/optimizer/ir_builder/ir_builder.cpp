@@ -793,7 +793,7 @@ uint32_t IrBuilder::FindCatchBlockInPandaFile(Class *cls, uint32_t pc) const
 
     auto method = GetMethod();
 
-    auto *descriptorStdCoreObject = reinterpret_cast<const uint8_t *>("Lstd/core/Object;");
+    auto *descriptorStdCoreObject = reinterpret_cast<const uint8_t *>("Lstd:core/Object;");
     ark::panda_file::File::EntityId stdCoreObjectId = pandaFile->GetClassId(descriptorStdCoreObject);
     auto *stdCoreObject = rta->ResolveType(method, stdCoreObjectId.GetOffset());
 

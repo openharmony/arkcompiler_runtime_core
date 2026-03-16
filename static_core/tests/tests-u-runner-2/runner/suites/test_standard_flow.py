@@ -98,9 +98,11 @@ class TestStandardFlow(ITestFlow, Test):
             if self.metadata.entry_point else self.__DEFAULT_ENTRY_POINT
         )
         if self.metadata.package is not None:
-            self.main_entry_point = f"{self.metadata.package}.{self.main_entry_point}"
+            self.main_entry_point = f"{self.metadata.package}:{self.main_entry_point}"
         else:
-            self.main_entry_point = f"{test_path.stem}.{self.main_entry_point}"
+            module = test_path.stem
+            module_with_colon = module.replace('.', ':', 1) + '.' if '.' in module else module + ':'
+            self.main_entry_point = f"{module_with_colon}{self.main_entry_point}"
 
         # Defines if in dependent packages there is at least one file compile-only and negative
         self.dependent_packages: dict[str, bool] = {

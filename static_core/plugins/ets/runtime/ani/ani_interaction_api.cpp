@@ -1557,7 +1557,7 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_obje
 
     EtsClass *etsCls = etsFn->GetClass();
     ANI_CHECK_RETURN_IF_EQ(etsCls->IsFunction(), false, ANI_INVALID_TYPE);
-    EtsMethod *method = etsCls->GetInstanceMethod("unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;");
+    EtsMethod *method = etsCls->GetInstanceMethod("unsafeCall", "[Lstd:core/Object;:Lstd:core/Object;");
     // `unsafeCall` must always present for classes marked with `IS_FUNCTION` flag
     ASSERT(method != nullptr);
 

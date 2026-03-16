@@ -329,7 +329,7 @@ public:
 
     std::optional<PandaString> Resolve()
     {
-        auto normNameOpt = signature::NormalizePackageSeparators<PandaString, '.'>(name_, 0, name_.size());
+        auto normNameOpt = signature::NormalizePackageSeparators<PandaString>(name_, 0, name_.size());
         if (UNLIKELY(!normNameOpt.has_value())) {
             return std::nullopt;
         }

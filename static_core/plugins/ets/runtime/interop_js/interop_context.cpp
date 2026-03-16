@@ -458,7 +458,7 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     ASSERT(jsvalueFregistryRef_ != nullptr);
     jsvalueFregistryRegister_ =
         queue->GetClass()
-            ->GetInstanceMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
+            ->GetInstanceMethod("register", "Lstd:core/Object;Lstd:core/Object;Lstd:core/Object;:V")
             ->GetPandaMethod();
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }

@@ -17,6 +17,7 @@
 #include <atomic>
 
 #include "compiler/optimizer/ir/runtime_interface.h"
+#include "ets_platform_types.h"
 #include "include/mem/panda_smart_pointers.h"
 #include "include/mem/panda_string.h"
 #include "jit/profile_saver_worker.h"
@@ -559,7 +560,8 @@ coretypes::String *PandaEtsVM::CreateString(Method *ctor, ObjectHeader *obj)
         if (std::strcmp("[C", strData) == 0) {
             auto *array = reinterpret_cast<EtsArray *>(obj);
             str = EtsString::CreateNewStringFromChars(0, array->GetLength(), array);
-        } else if ((std::strcmp("Lstd/core/String;", strData) == 0)) {
+        } else if ((std::strcmp(PlatformTypes(this)->coreString->GetDescriptor(), strData) == 0)) {
+            std::cout << "FOUND STRING CTOR" << std::endl;
             str = EtsString::CreateNewStringFromString(reinterpret_cast<EtsString *>(obj));
         } else {
             LOG(FATAL, ETS) << "Non-existent ctor";
@@ -817,7 +819,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
 
     auto *ctor =
-        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;Lstd/core/Array;:V");
+        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd:core/RuntimeLinker;Lstd:core/Array;:V");
     ASSERT(ctor != nullptr);
     ctor->GetPandaMethod()->InvokeVoid(coro, args.data());
     if (coro->HasPendingException()) {

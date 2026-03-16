@@ -26,21 +26,21 @@ void StdCoreVerifyBCP47LanguageTag(ani_env *env, [[maybe_unused]] ani_class klas
     auto localeCStr = ConvertFromAniString(env, locale);
     if (localeCStr.length() == 0) {
         std::string message = "Incorrect locale information provided";
-        ThrowNewError(env, "std.core.RangeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        ThrowNewError(env, "std:core.RangeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
     if (!intl::IsStructurallyValidLanguageTag(localeCStr)) {
         std::string message = "Incorrect locale information provided";
-        ThrowNewError(env, "std.core.RangeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        ThrowNewError(env, "std:core.RangeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 }
 
 ani_status RegisterIntlLocaleHelper(ani_env *env)
 {
     const auto methods = std::array {ani_native_function {
-        "verifyBCP47LanguageTag", "C{std.core.String}:", reinterpret_cast<void *>(StdCoreVerifyBCP47LanguageTag)}};
+        "verifyBCP47LanguageTag", "C{std:core.String}:", reinterpret_cast<void *>(StdCoreVerifyBCP47LanguageTag)}};
 
     ani_class localeHelperClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.LocaleHelper", &localeHelperClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.LocaleHelper", &localeHelperClass));
 
     return env->Class_BindStaticNativeMethods(localeHelperClass, methods.data(), methods.size());
 }

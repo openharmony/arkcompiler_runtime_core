@@ -46,7 +46,7 @@ std::string RemoveAccents(ani_env *env, const std::string &str)
     accentsConverter->transliterate(source);
     delete accentsConverter;
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Removing accents failed, transliterate failed",
+        ThrowNewError(env, "std:core.RuntimeError", "Removing accents failed, transliterate failed",
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return std::string();
     }
@@ -96,7 +96,7 @@ ani_int StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class kl
 
     icu::Collator *collator = g_intlState->collatorCache.GetOrCreateCollator(env, lang, collation, caseFirst);
     if (collator == nullptr) {
-        ThrowNewError(env, "std.core.RuntimeError", "Failed to create Collator instance for comparison",
+        ThrowNewError(env, "std:core.RuntimeError", "Failed to create Collator instance for comparison",
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return 0;
     }
@@ -106,7 +106,7 @@ ani_int StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class kl
     icu::UnicodeString target = StdStrToUnicode(str2);
     auto res = collator->compare(source, target, status);
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        ThrowNewError(env, "std:core.RuntimeError", "Comparison failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
     return res;
 }
@@ -114,17 +114,17 @@ ani_int StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class kl
 ani_status RegisterIntlCollator(ani_env *env)
 {
     const auto methods =
-        std::array {ani_native_function {"removePunctuation", "C{std.core.String}:C{std.core.String}",
+        std::array {ani_native_function {"removePunctuation", "C{std:core.String}:C{std:core.String}",
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemovePunctuation)},
-                    ani_native_function {"removeAccents", "C{std.core.String}:C{std.core.String}",
+                    ani_native_function {"removeAccents", "C{std:core.String}:C{std:core.String}",
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemoveAccents)},
                     ani_native_function {
                         "compareByCollation",
-                        "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}:i",
+                        "C{std:core.String}C{std:core.String}C{std:core.String}C{std:core.String}C{std:core.String}:i",
                         reinterpret_cast<void *>(StdCoreIntlCollatorLocaleCmp)}};
 
     ani_class collatorClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Collator", &collatorClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.Collator", &collatorClass));
     return env->Class_BindNativeMethods(collatorClass, methods.data(), methods.size());
 }
 

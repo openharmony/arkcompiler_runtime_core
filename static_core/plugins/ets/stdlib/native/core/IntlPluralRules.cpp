@@ -45,7 +45,7 @@ ani_field g_maximumSignificantDigitsField = nullptr;
 static void CollectSelectOptionsFields(ani_env *env)
 {
     ani_class optionsClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.PluralRulesSelectOptionsImpl", &optionsClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.PluralRulesSelectOptionsImpl", &optionsClass));
 
     ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "locale_", &g_localeField));
     ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "type_", &g_typeField));
@@ -63,7 +63,7 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+    ThrowNewError(env, "std:core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 static icu::Locale GetLocale(const std::string &tag)
@@ -208,7 +208,7 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
 
     auto first = StdStrToAni(env, categories[0]);
     ani_class stringClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.String", &stringClass));
     ani_fixedarray_ref array;
     ANI_FATAL_IF_ERROR(env->FixedArray_New_Ref(stringClass, categories.size(), first, &array));
     for (size_t i = 1; i < categories.size(); ++i) {
@@ -220,14 +220,14 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
 
 ani_status RegisterIntlPluralRules(ani_env *env)
 {
-    std::array methods = {ani_native_function {"selectDouble", "dC{std.core.Object}:C{std.core.String}",
+    std::array methods = {ani_native_function {"selectDouble", "dC{std:core.Object}:C{std:core.String}",
                                                reinterpret_cast<void *>(IcuPluralSelect)},
                           ani_native_function {"getPluralCategories",
-                                               "C{std.core.String}C{std.core.String}:C{std.core.Object}",
+                                               "C{std:core.String}C{std:core.String}:C{std:core.Object}",
                                                reinterpret_cast<void *>(IcuGetPluralCategories)}};
 
     ani_class pluralRulesClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.PluralRules", &pluralRulesClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.PluralRules", &pluralRulesClass));
 
     return env->Class_BindStaticNativeMethods(pluralRulesClass, methods.data(), methods.size());
 }

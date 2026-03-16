@@ -33,7 +33,7 @@
       cctor_name: <cctor>
 
       directive_name: eTS
-      string_class_descriptor: Lstd/core/String;
+      string_class_descriptor: Lstd:core/String;
       any:
         handlers_path: plugins/ets/runtime/interpreter/any_opcodes.inc
 

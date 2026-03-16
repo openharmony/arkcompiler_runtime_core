@@ -61,24 +61,24 @@ PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
     auto stdlibCache = MakePandaUnique<StdlibCache>();
 
     // Cache modules
-    GetGlobalRef(env, "std.core", &stdlibCache->std_core);
+    GetGlobalRef(env, "std:core", &stdlibCache->std_core);
 
     // Cache classes
-    GetGlobalRef(env, "std.core.StringBuilder", &stdlibCache->std_core_String_Builder);
-    GetGlobalRef(env, "std.core.Console", &stdlibCache->std_core_Console);
-    GetGlobalRef(env, "std.core.Array", &stdlibCache->escompat_Array);
+    GetGlobalRef(env, "std:core.StringBuilder", &stdlibCache->std_core_String_Builder);
+    GetGlobalRef(env, "std:core.Console", &stdlibCache->std_core_Console);
+    GetGlobalRef(env, "std:core.Array", &stdlibCache->escompat_Array);
 
     // Cache methods
     CacheMethod(env, stdlibCache->std_core_Console, "error",
-                "C{std.core.Array}:", &stdlibCache->std_core_Console_error);
+                "C{std:core.Array}:", &stdlibCache->std_core_Console_error);
     CacheMethod(env, stdlibCache->std_core_String_Builder, "<ctor>", ":",
                 &stdlibCache->std_core_String_Builder_default_ctor);
-    CacheMethod(env, stdlibCache->std_core_String_Builder, "toString", ":C{std.core.String}",
+    CacheMethod(env, stdlibCache->std_core_String_Builder, "toString", ":C{std:core.String}",
                 &stdlibCache->std_core_String_Builder_toString);
     CacheMethod(env, stdlibCache->std_core_String_Builder, "append",
-                "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.StringBuilder}",
+                "C{std:core.String}C{std:core.String}C{std:core.String}:C{std:core.StringBuilder}",
                 &stdlibCache->std_core_String_Builder_append);
-    CacheMethod(env, stdlibCache->escompat_Array, "pushOne", "C{std.core.Object}:i",
+    CacheMethod(env, stdlibCache->escompat_Array, "pushOne", "C{std:core.Object}:i",
                 &stdlibCache->escompat_Array_pushOne);
 
     // Cache variables

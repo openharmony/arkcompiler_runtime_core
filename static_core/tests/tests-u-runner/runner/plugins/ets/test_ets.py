@@ -37,7 +37,10 @@ class TestETS(TestFileBased):
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
 
         self.metadata: TestMetadata = get_metadata(Path(test_path))
-        self.main_entry_point = f"{self.metadata.module}.ETSGLOBAL::{self.metadata.entry_point or 'main'}"
+        module = self.metadata.module
+        module_with_colon = module.replace('.', ':', 1) + '.' if '.' in module else module + ':'
+        self.main_entry_point = f"{module_with_colon}ETSGLOBAL::{self.metadata.entry_point or 'main'}"
+        print("AAA main_entry_point: " + self.main_entry_point)
         self.test_cli: List[str] = self.metadata.test_cli or []
         package = self.metadata.get_package_name()
         # Defines if in dependent packages there is at least one file compile-only and negative

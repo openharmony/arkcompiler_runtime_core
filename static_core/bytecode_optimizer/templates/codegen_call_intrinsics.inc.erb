@@ -26,7 +26,7 @@
 %         class_name = class_name.gsub('.', sep)
 %         signature = signature.gsub('.', sep)
 %       end
-        BytecodeGen::CallHandler(visitor, inst, <%= "#{class_name}.#{intrinsic.method_name}:#{signature};".inspect %>);
+        BytecodeGen::CallHandler(visitor, inst, <%= "#{class_name}.#{intrinsic.method_name}~#{signature};".inspect %>);
         break;
     }
 % end

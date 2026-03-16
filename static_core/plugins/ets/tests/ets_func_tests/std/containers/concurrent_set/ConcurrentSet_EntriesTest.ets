@@ -33,7 +33,7 @@ function main(): int {
         arktest.assertEQ(iterValue.next().value, undefined);
     });
     // Multiple Threads Test
-    // Unexpected error: ClassCastError: [Lstd/core/Object; cannot be cast to [Double, Double]|undefined
+    // Unexpected error: ClassCastError: [Lstd:core/Object; cannot be cast to [Double, Double]|undefined
     /*
     ConcurrentSetTestsuite.addTest("Entries&AddTest001", () =>
     {
@@ -70,7 +70,7 @@ function main(): int {
     });
     */
 
-    // Unexpected error: ClassCastError: [Lstd/core/Object; cannot be cast to [string, string]|undefined
+    // Unexpected error: ClassCastError: [Lstd:core/Object; cannot be cast to [string, string]|undefined
     /*
     ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
     {

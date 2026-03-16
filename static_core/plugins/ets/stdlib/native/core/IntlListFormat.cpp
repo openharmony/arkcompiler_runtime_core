@@ -39,7 +39,7 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+    ThrowNewError(env, "std:core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 static icu::Locale GetLocale(const std::string &tag)
@@ -97,7 +97,7 @@ static ani_array ToAniArray(ani_env *env, std::vector<ani_string> strings)
     ani_ref undefined {};
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_class stringClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.String", &stringClass));
     ani_array array;
     ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), undefined, &array));
     for (size_t i = 0; i < strings.size(); ++i) {
@@ -168,14 +168,14 @@ ani_status RegisterIntlListFormat(ani_env *env)
 {
     std::array methods = {ani_native_function {
         "formatToPartsNative",
-        "C{std.core.Array}C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.Object}",
+        "C{std:core.Array}C{std:core.String}C{std:core.String}C{std:core.String}:C{std:core.Object}",
         reinterpret_cast<void *>(FormatToParts)}};
 
     g_elementAniStr = StdStrToAni(env, "element");
     g_literalAniStr = StdStrToAni(env, "literal");
 
     ani_class listFormatClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ListFormat", &listFormatClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std:core.Intl.ListFormat", &listFormatClass));
 
     return env->Class_BindStaticNativeMethods(listFormatClass, methods.data(), methods.size());
 }

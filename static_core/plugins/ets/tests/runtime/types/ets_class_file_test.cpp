@@ -130,7 +130,7 @@ TEST_F(EtsClassTest, GetBase)
 
         ASSERT_EQ(klassC->GetBase(), klassB);
         ASSERT_EQ(klassB->GetBase(), klassA);
-        ASSERT_STREQ(klassA->GetBase()->GetDescriptor(), "Lstd/core/Object;");
+        ASSERT_STREQ(klassA->GetBase()->GetDescriptor(), "Lstd:core/Object;");
     }
     {
         const char *source = R"(

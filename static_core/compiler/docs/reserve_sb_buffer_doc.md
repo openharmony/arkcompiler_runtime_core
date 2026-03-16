@@ -78,7 +78,7 @@ prop: prehead
     6.ref  NewObject 11622            v37, ss
     7.void CallStatic.Inlined 541254 std.core.StringBuilder::<ctor> ss
    46.i32  LoadStatic 541156 std.core.StringBuilder.INITIAL_BUF_SIZE v37
-    9.ref  LoadImmediate(class: [Lstd/core/Object;)
+    9.ref  LoadImmediate(class: [Lstd:core/Object;)
    48.i32  NegativeCheck              v46, ss
    50.ref  NewArray 30087             v9, v48, ss
    ...
@@ -104,7 +104,7 @@ prop: prehead
    37.ref  LoadImmediate(class: std.core.StringBuilder)
     6.ref  NewObject 11622            v37, ss
     7.void CallStatic.Inlined 541254 std.core.StringBuilder::<ctor> ss
-    9.ref  LoadImmediate(class: [Lstd/core/Object;)
+    9.ref  LoadImmediate(class: [Lstd:core/Object;)
    50.ref  NewArray 30087             v9, v118, ss
 ```
 Notice, NewArray instruction second argument is now Constant 0x40

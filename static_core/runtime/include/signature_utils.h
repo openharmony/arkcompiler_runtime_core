@@ -23,7 +23,7 @@
 
 namespace ark::signature {
 
-template <typename StringT, char TARGET_SEPARATOR>
+template <typename StringT>
 std::optional<StringT> NormalizePackageSeparators(const std::string_view signature, size_t start, size_t end)
 {
     if (UNLIKELY(start >= end || end > signature.size())) {
@@ -39,7 +39,6 @@ std::optional<StringT> NormalizePackageSeparators(const std::string_view signatu
                 return std::nullopt;  // nested packages are not allowed.
             }
             findColon = true;
-            result[i] = TARGET_SEPARATOR;
         }
     }
 

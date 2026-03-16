@@ -66,42 +66,42 @@ public:
 
     const uint8_t *GetObjectClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/Object;");
+        return utf::CStringAsMutf8("Lstd:core/Object;");
     }
 
     const uint8_t *GetAsyncAnnotationDescriptor() const override
     {
-        return utf::CStringAsMutf8("Larkruntime/annotation/Async;");
+        return utf::CStringAsMutf8("Larkruntime:annotation/Async;");
     }
 
     const uint8_t *GetAsyncContextClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Larkruntime/AsyncContext;");
+        return utf::CStringAsMutf8("Larkruntime:AsyncContext;");
     }
 
     const uint8_t *GetPromiseClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/Promise;");
+        return utf::CStringAsMutf8("Lstd:core/Promise;");
     }
 
     const uint8_t *GetClassClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/Class;");
+        return utf::CStringAsMutf8("Lstd:core/Class;");
     }
 
     const uint8_t *GetUniqueObjectClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/Null;");
+        return utf::CStringAsMutf8("Lstd:core/Null;");
     }
 
     const uint8_t *GetClassArrayClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("[Lstd/core/Class;");
+        return utf::CStringAsMutf8("[Lstd:core/Class;");
     }
 
     const uint8_t *GetStringArrayClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("[Lstd/core/String;");
+        return utf::CStringAsMutf8("[Lstd:core/String;");
     }
 
     const uint8_t *GetCtorName() const override
@@ -116,66 +116,66 @@ public:
 
     const uint8_t *GetNullPointerExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/NullPointerError;");
+        return utf::CStringAsMutf8("Lstd:core/NullPointerError;");
     }
 
     const uint8_t *GetStackOverflowErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/StackOverflowError;");
+        return utf::CStringAsMutf8("Lstd:core/StackOverflowError;");
     }
 
     const uint8_t *GetArrayIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/ArrayIndexOutOfBoundsError;");
+        return utf::CStringAsMutf8("Lstd:core/ArrayIndexOutOfBoundsError;");
     }
 
     const uint8_t *GetIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/IndexOutOfBoundsError;");
+        return utf::CStringAsMutf8("Lstd:core/IndexOutOfBoundsError;");
     }
 
     const uint8_t *GetIllegalStateExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/IllegalStateError;");
+        return utf::CStringAsMutf8("Lstd:core/IllegalStateError;");
     }
     const uint8_t *GetNegativeArraySizeExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/NegativeArraySizeError;");
+        return utf::CStringAsMutf8("Lstd:core/NegativeArraySizeError;");
     }
 
     const uint8_t *GetStringIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/StringIndexOutOfBoundsError;");
+        return utf::CStringAsMutf8("Lstd:core/StringIndexOutOfBoundsError;");
     }
 
     const uint8_t *GetRangeErrorExceptionClassDescriptor() const
     {
-        return utf::CStringAsMutf8("Lstd/core/RangeError;");
+        return utf::CStringAsMutf8("Lstd:core/RangeError;");
     }
 
     const uint8_t *GetArithmeticExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/ArithmeticError;");
+        return utf::CStringAsMutf8("Lstd:core/ArithmeticError;");
     }
 
     const uint8_t *GetClassCastExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/ClassCastError;");
+        return utf::CStringAsMutf8("Lstd:core/ClassCastError;");
     }
 
     const uint8_t *GetAbstractMethodErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerAbstractMethodError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerAbstractMethodError;");
     }
 
     const uint8_t *GetArrayStoreExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/ArrayStoreError;");
+        return utf::CStringAsMutf8("Lstd:core/ArrayStoreError;");
     }
 
     const uint8_t *GetRuntimeExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/RuntimeError;");
+        return utf::CStringAsMutf8("Lstd:core/RuntimeError;");
     }
 
     const uint8_t *GetFileNotFoundExceptionClassDescriptor() const override
@@ -191,7 +191,7 @@ public:
 
     const uint8_t *GetIllegalArgumentExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/IllegalArgumentError;");
+        return utf::CStringAsMutf8("Lstd:core/IllegalArgumentError;");
     }
 
     const uint8_t *GetIllegalAccessExceptionClassDescriptor() const override
@@ -201,67 +201,67 @@ public:
 
     const uint8_t *GetOutOfMemoryErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/OutOfMemoryError;");
+        return utf::CStringAsMutf8("Lstd:core/OutOfMemoryError;");
     }
 
     const uint8_t *GetNoClassDefFoundErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerUnresolvedClassError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerUnresolvedClassError;");
     }
 
     const uint8_t *GetClassCircularityErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerTypeCircularityError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerTypeCircularityError;");
     }
 
     const uint8_t *GetCoroutinesLimitExceedErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/CoroutinesLimitExceedError;");
+        return utf::CStringAsMutf8("Lstd:core/CoroutinesLimitExceedError;");
     }
 
     const uint8_t *GetNoSuchFieldErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerUnresolvedFieldError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerUnresolvedFieldError;");
     }
 
     const uint8_t *GetNoSuchMethodErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerUnresolvedMethodError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerUnresolvedMethodError;");
     }
 
     const uint8_t *GetExceptionInInitializerErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/ExceptionInInitializerError;");
+        return utf::CStringAsMutf8("Lstd:core/ExceptionInInitializerError;");
     }
 
     const uint8_t *GetClassNotFoundExceptionDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerClassNotFoundError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerClassNotFoundError;");
     }
 
     const uint8_t *GetInstantiationErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/InstantiationError;");
+        return utf::CStringAsMutf8("Lstd:core/InstantiationError;");
     }
 
     const uint8_t *GetUnsupportedOperationExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/UnsupportedOperationError;");
+        return utf::CStringAsMutf8("Lstd:core/UnsupportedOperationError;");
     }
 
     const uint8_t *GetVerifyErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerVerificationError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerVerificationError;");
     }
 
     const uint8_t *GetErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lescompat/Error;");
+        return utf::CStringAsMutf8("Lescompat:Error;");
     }
 
     const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerBadSupertypeError;");
+        return utf::CStringAsMutf8("Lstd:core/LinkerBadSupertypeError;");
     }
 
     coretypes::TaggedValue GetInitialTaggedValue() const override
@@ -339,17 +339,17 @@ public:
 
     const char *GetVerificationTypeClass() const override
     {
-        return "std.core.Class";
+        return "std:core.Class";
     }
 
     const char *GetVerificationTypeObject() const override
     {
-        return "std.core.Object";
+        return "std:core.Object";
     }
 
     const char *GetVerificationTypeThrowable() const override
     {
-        return "std.core.Object";
+        return "std:core.Object";
     }
 
     void WrapClassInitializerException([[maybe_unused]] ClassLinker *classLinker,
