@@ -27,9 +27,11 @@ declare module 'qrcode.react';
 
 declare module '*.json';
 
-declare const MonacoEnvironment: {
-    getWorker(workerId: string, label: string): Worker;
-} | undefined;
+interface GlobalThis {
+    MonacoEnvironment?: {
+        getWorker(workerId: string, label: string): Worker;
+    };
+}
 
 interface Window {
     runEnv: {

@@ -21,6 +21,7 @@ import appStateReducer from '../slices/appState';
 import notificationsReducer from '../slices/notifications';
 import { fetchCompileCode, fetchRunCode, fetchCodeByUuid, setCodeAction } from './code';
 import { codeService } from '../../services/code';
+import { setActiveLogTab } from '../slices/appState';
 
 jest.mock('../../services/code');
 jest.mock('../../utils/shareUtils', () => ({
@@ -117,6 +118,88 @@ describe('code thunks', () => {
             const state = store.getState();
             expect(state.code.isRunLoading).toBe(false);
             expect(state.code.runRes).toEqual(mockResult);
+        });
+
+        it('should switch to compilation tab when compile has non-zero exit code', async () => {
+            const mockResult = {
+                compile: { output: '', error: 'Syntax error', exit_code: 1 },
+                run: { output: '', error: '', exit_code: 0 },
+                disassembly: { output: '', code: '', error: '' },
+                verifier: { output: '', error: '' },
+            };
+            (codeService.fetchRun as jest.Mock).mockResolvedValue({
+                data: mockResult,
+                error: '',
+            });
+
+            const store = createTestStore();
+            store.dispatch(setActiveLogTab('runtime'));
+            expect(store.getState().appState.activeLogTab).toBe('runtime');
+
+            await store.dispatch(fetchRunCode());
+
+            expect(store.getState().appState.activeLogTab).toBe('compilation');
+        });
+
+        it('should keep runtime tab when compile succeeds', async () => {
+            const mockResult = {
+                compile: { output: '', error: '', exit_code: 0 },
+                run: { output: 'Hello, ArkTS!', error: '', exit_code: 0 },
+                disassembly: { output: '', code: '', error: '' },
+                verifier: { output: '', error: '' },
+            };
+            (codeService.fetchRun as jest.Mock).mockResolvedValue({
+                data: mockResult,
+                error: '',
+            });
+
+            const store = createTestStore();
+            store.dispatch(setActiveLogTab('runtime'));
+
+            await store.dispatch(fetchRunCode());
+
+            expect(store.getState().appState.activeLogTab).toBe('runtime');
+        });
+
+        it('should keep runtime tab when compile has warning but exit code 0', async () => {
+            const mockResult = {
+                compile: { output: 'Warning W163154: Consider do not use the keyword', error: '', exit_code: 0 },
+                run: { output: 'Hello, ArkTS!', error: '', exit_code: 0 },
+                disassembly: { output: '', code: '', error: '' },
+                verifier: { output: '', error: '' },
+            };
+            (codeService.fetchRun as jest.Mock).mockResolvedValue({
+                data: mockResult,
+                error: '',
+            });
+
+            const store = createTestStore();
+            store.dispatch(setActiveLogTab('runtime'));
+
+            await store.dispatch(fetchRunCode());
+
+            expect(store.getState().appState.activeLogTab).toBe('runtime');
+        });
+
+        it('should switch to compilation tab when aot_compile has non-zero exit code', async () => {
+            const mockResult = {
+                compile: { output: '', error: '', exit_code: 0 },
+                aot_compile: { output: '', error: 'AOT error', exit_code: 1 },
+                run: { output: '', error: '', exit_code: 0 },
+                disassembly: { output: '', code: '', error: '' },
+                verifier: { output: '', error: '' },
+            };
+            (codeService.fetchRun as jest.Mock).mockResolvedValue({
+                data: mockResult,
+                error: '',
+            });
+
+            const store = createTestStore();
+            store.dispatch(setActiveLogTab('runtime'));
+
+            await store.dispatch(fetchRunCode());
+
+            expect(store.getState().appState.activeLogTab).toBe('compilation');
         });
 
         it('should set loading false on run error', async () => {

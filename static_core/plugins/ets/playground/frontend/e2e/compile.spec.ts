@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { test, expect, setupPage, TIMEOUT } from './fixtures';
+import { test, expect, setupPage, typeInEditor, TIMEOUT } from './fixtures';
 
 test.describe('Compilation', () => {
     test.beforeEach(async ({ page }) => {
@@ -44,6 +44,13 @@ test.describe('Compilation', () => {
         await expect(page.getByRole('button', { name: 'Run' })).toBeEnabled({ timeout: TIMEOUT.compile });
         await expect(page.getByRole('tab', { name: 'Execute' })).toHaveAttribute('aria-selected', 'true');
         await expect(page.getByTestId('log-message').filter({ hasText: 'Hello, ArkTS!' })).toBeVisible({ timeout: TIMEOUT.ui });
+    });
+
+    test('should auto-switch to Compile tab when Run has compile error', async ({ page }) => {
+        await typeInEditor(page, 'this is not valid code!!!');
+        await page.getByRole('button', { name: 'Run' }).click();
+        await expect(page.getByRole('button', { name: 'Run' })).toBeEnabled({ timeout: TIMEOUT.compile });
+        await expect(page.getByRole('tab', { name: 'Compile' })).toHaveAttribute('aria-selected', 'true');
     });
 
     test('should auto-switch to Compile tab when Compile is clicked', async ({ page }) => {
