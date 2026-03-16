@@ -1636,6 +1636,9 @@ export namespace util {
          * Since the current interface cannot be correctly determined, it returns false by default
          */
         isAsyncFunction(value: Object): boolean {
+            if (value instanceof Function) {
+                return reflect.isFuncObjAsync(value);
+            }
             return false;
         }
     }
