@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -248,6 +248,14 @@ function jsonStringifyObjWithDoubleArray(): void {
     arktest.assertEQ(JSON.stringify(new ObjWithDoubleArray()), '{"arr":[1]}')
 }
 
+function jsonStringifyNullableArray(): void {
+    let a: Array<int | null> = new Array<int | null>(null, null, null, null, null)
+    let c: Object = a
+
+    arktest.assertEQ(JSON.stringify(a), JSON.stringify(c))
+    arktest.assertEQ('[null,null,null,null,null]', JSON.stringify(c))
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('Json stringify for Array tests');
     suite.addTest('for boolean', jsonStringifyArrayBoolean);
@@ -276,5 +284,6 @@ function main(): int {
     suite.addTest('for object with FixedArray<long> field', jsonStringifyObjWithLongArray)
     suite.addTest('for object with FixedArray<float> field', jsonStringifyObjWithFloatArray)
     suite.addTest('for object with FixedArray<double> field', jsonStringifyObjWithDoubleArray)
+    suite.addTest('for object with not filled array', jsonStringifyNullableArray)
     return suite.run();
 }

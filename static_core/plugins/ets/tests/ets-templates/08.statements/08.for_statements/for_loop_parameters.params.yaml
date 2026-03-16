@@ -121,6 +121,35 @@ cases:
       }
       arktest.assertEQ( c, "string)*+,-./01" );
 
+  - doc: For loop with complicated forInit && forUpdate options configured.
+    add: |-
+      function run(): int {
+        let a1: int = 0;
+        let a2: int = 0;
+        let a3: int = 0;
+      
+        for (a1 = 5; a1 >= 0; a1--) {
+        if (a1 !== 0) {
+          a2 += 1;
+        } else {
+          for (a3 += 1;; a3++) {
+            if (a3 > 2) {
+              break;
+            }
+          }
+        }
+      }
+      
+        if (a1 !== -1 || a2 !== 5 || a3 !== 3) {
+        return 2;
+      }
+      
+        return 0;
+      }
+    decl: |-
+      arktest.assertEQ(0, run());
+      
+
   - doc: For loop with complicated forUpdate option configured.
     add: |-
       function foo(i: int): int {
