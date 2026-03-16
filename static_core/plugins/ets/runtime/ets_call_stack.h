@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,11 @@ public:
     virtual ~EtsCallStack() = default;
 
     struct Record {
-        Record(void *etsCurFrame, char const *codeDescr) : etsFrame(etsCurFrame), descr(codeDescr) {}
+        Record(void *f, bool isSTFrame, char const *d) : frame(f), isStaticFrame(isSTFrame), descr(d) {}
 
-        void *etsFrame {};     // NOLINT(misc-non-private-member-variables-in-classes)
-        char const *descr {};  // NOLINT(misc-non-private-member-variables-in-classes)
+        void *frame {};         // NOLINT(misc-non-private-member-variables-in-classes)
+        bool isStaticFrame {};  // NOLINT(misc-non-private-member-variables-in-classes)
+        char const *descr {};   // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     /// The method returns record of current managed frame

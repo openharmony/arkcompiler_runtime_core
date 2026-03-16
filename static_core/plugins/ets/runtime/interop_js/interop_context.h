@@ -424,6 +424,16 @@ public:
         return sharedEtsVmState_->stsVMInterface.get();
     }
 
+    void SetECMAInterface(arkplatform::EcmaVMInterface *ecmaIface)
+    {
+        ecmaInterface_ = ecmaIface;
+    }
+
+    arkplatform::EcmaVMInterface *GetECMAInterface() const
+    {
+        return ecmaInterface_;
+    }
+
     // hybrid call stack support
     PANDA_PUBLIC_API static InteropCallStack &GetOrCreateCallStack();
 
@@ -509,6 +519,7 @@ private:
     StackInfoManager stackInfoManager_;
 
     PandaUniquePtr<XGCVmAdaptor> ecmaVMIterfaceAdaptor_;
+    arkplatform::EcmaVMInterface *ecmaInterface_ {};
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

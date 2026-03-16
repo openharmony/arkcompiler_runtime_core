@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "runtime/coroutines/coroutine_worker.h"
+#include "runtime/include/stack_walker.h"
+#include "common_interfaces/objects/dynamic_object_accessor_util.h"
 
 namespace ark::ets::interop::js {
 
@@ -29,10 +31,17 @@ inline bool OpenInteropCodeScope(EtsCoroutine *coro, char const *descr)
     }
 
     auto *ctx = InteropCtx::Current(coro);
+    void *topFrame {};
     if constexpr (ETS_TO_JS) {
         ctx->UpdateInteropStackInfoIfNeeded();
+        // ETS → JS: Record static (ETS) frame
+        topFrame = ctx->GetOrCreateCallStack().GetStaticTopFrame();
+    } else {
+        // JS → ETS: Record dynamic (JS) frame
+        topFrame = ctx->GetOrCreateCallStack().GetDynamicTopFrameSP();
     }
-    ctx->GetOrCreateCallStack().AllocRecord(coro->GetCurrentFrame(), descr);
+    ctx->GetOrCreateCallStack().AllocRecord(topFrame, ETS_TO_JS, descr);
+
     return true;
 }
 

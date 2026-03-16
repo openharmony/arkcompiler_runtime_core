@@ -372,20 +372,20 @@ void EtsCoroutine::PrintCallStack() const
     auto istkIt = istk.rbegin();
 
     auto printIstkFrames = [&istkIt, &istk](void *fp) {
-        while (istkIt != istk.rend() && fp == istkIt->etsFrame) {
+        while (istkIt != istk.rend() && fp == istkIt->frame) {
             LOG(ERROR, COROUTINES) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
             istkIt++;
         }
     };
 
     for (auto stack = StackWalker::Create(this); stack.HasFrame(); stack.NextFrame()) {
-        printIstkFrames((istkIt != istk.rend()) ? istkIt->etsFrame : nullptr);
+        printIstkFrames((istkIt != istk.rend()) ? istkIt->frame : nullptr);
         Method *method = stack.GetMethod();
         ASSERT(method != nullptr);
         LOG(ERROR, COROUTINES) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                                << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
-    ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
+    ASSERT(istkIt == istk.rend() || !istkIt->isStaticFrame);
     printIstkFrames(nullptr);
 }
 

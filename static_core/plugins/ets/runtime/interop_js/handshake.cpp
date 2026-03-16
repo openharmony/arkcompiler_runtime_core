@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ void Handshake::VmHandshake(napi_env env, InteropCtx *ctx)
         return;
     }
     ctx->CreateXGCVmAdaptor<XGCVmAdaptor>(env, static_cast<arkplatform::EcmaVMInterface *>(jsvmIface));
+    ctx->SetECMAInterface(static_cast<arkplatform::EcmaVMInterface *>(jsvmIface));
 }
 
 }  // namespace ark::ets::interop::js

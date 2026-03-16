@@ -754,20 +754,20 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     auto istkIt = istk.rbegin();
 
     auto printIstkFrames = [&istkIt, &istk](void *fp) {
-        while (istkIt != istk.rend() && fp == istkIt->etsFrame) {
+        while (istkIt != istk.rend() && fp == istkIt->frame) {
             INTEROP_LOG(ERROR) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
             istkIt++;
         }
     };
 
     for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
-        printIstkFrames(istkIt->etsFrame);
+        printIstkFrames(istkIt->frame);
         Method *method = stack.GetMethod();
         ASSERT(method != nullptr);
         INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                            << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
-    ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
+    ASSERT(istkIt == istk.rend() || !istkIt->isStaticFrame);
     printIstkFrames(nullptr);
 
     auto env = ctx->GetJSEnv();
