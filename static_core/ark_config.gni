@@ -184,6 +184,9 @@ if (target_cpu == "arm") {
   is_llvm_aot = false
 }
 if (target_cpu == "arm64") {
+  is_llvmbackend = false
+  is_llvm_interpreter = false
+  is_llvm_fastpath = false
   is_llvm_aot = false
 }
 
