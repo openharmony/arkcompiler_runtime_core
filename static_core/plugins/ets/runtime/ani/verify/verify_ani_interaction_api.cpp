@@ -5414,6 +5414,118 @@ NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(VEnv *venv, VClas
     return GetInteractionAPI(venv)->Class_BindStaticNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Boolean(VEnv *venv, ani_boolean value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Boolean(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Boolean(VEnv *venv, ani_object obj, ani_boolean *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Boolean(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Byte(VEnv *venv, ani_byte value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Byte(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Byte(VEnv *venv, ani_object obj, ani_byte *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Byte(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Char(VEnv *venv, ani_char value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Char(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Char(VEnv *venv, ani_object obj, ani_char *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Char(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Short(VEnv *venv, ani_short value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Short(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Short(VEnv *venv, ani_object obj, ani_short *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Short(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Int(VEnv *venv, ani_int value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Int(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Int(VEnv *venv, ani_object obj, ani_int *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Int(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Long(VEnv *venv, ani_long value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Long(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Long(VEnv *venv, ani_object obj, ani_long *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Long(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Float(VEnv *venv, ani_float value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Float(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Float(VEnv *venv, ani_object obj, ani_float *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Float(venv->GetEnv(), obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Double(VEnv *venv, ani_double value, ani_object *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Box_Double(venv->GetEnv(), value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Double(VEnv *venv, ani_object obj, ani_double *result)
+{
+    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Double(venv->GetEnv(), obj, result);
+}
+
 // clang-format off
 const __ani_interaction_api VERIFY_INTERACTION_API = {
     nullptr,
@@ -5816,6 +5928,22 @@ const __ani_interaction_api VERIFY_INTERACTION_API = {
     VERIFY_ANI_CAST_API(Any_CallMethod),
     VERIFY_ANI_CAST_API(Any_New),
     VERIFY_ANI_CAST_API(Class_BindStaticNativeMethods),
+    VERIFY_ANI_CAST_API(Primitive_Box_Boolean),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Boolean),
+    VERIFY_ANI_CAST_API(Primitive_Box_Byte),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Byte),
+    VERIFY_ANI_CAST_API(Primitive_Box_Char),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Char),
+    VERIFY_ANI_CAST_API(Primitive_Box_Short),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Short),
+    VERIFY_ANI_CAST_API(Primitive_Box_Int),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Int),
+    VERIFY_ANI_CAST_API(Primitive_Box_Long),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Long),
+    VERIFY_ANI_CAST_API(Primitive_Box_Float),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Float),
+    VERIFY_ANI_CAST_API(Primitive_Box_Double),
+    VERIFY_ANI_CAST_API(Primitive_Unbox_Double),
 };
 // clang-format on
 

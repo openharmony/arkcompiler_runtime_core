@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6158,6 +6158,214 @@ struct __ani_interaction_api {
      */
     ani_status (*Class_BindStaticNativeMethods)(ani_env *env, ani_class cls, const ani_native_function *methods,
                                                 ani_size nr_methods);
+
+    /**
+     * @brief Box a boolean value into an object.
+     *
+     * This function boxes a boolean value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The boolean value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Boolean)(ani_env *env, ani_boolean value, ani_object *result);
+
+    /**
+     * @brief Unbox a boolean object into a boolean value.
+     *
+     * This function unboxes a boolean object into a boolean value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed boolean value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Boolean)(ani_env *env, ani_object obj, ani_boolean *result);
+
+    /**
+     * @brief Box a byte value into an object.
+     *
+     * This function boxes a byte value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The byte value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Byte)(ani_env *env, ani_byte value, ani_object *result);
+
+    /**
+     * @brief Unbox a byte object into a byte value.
+     *
+     * This function unboxes a byte object into a byte value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed byte value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Byte)(ani_env *env, ani_object obj, ani_byte *result);
+
+    /**
+     * @brief Box a char value into an object.
+     *
+     * This function boxes a char value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The char value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Char)(ani_env *env, ani_char value, ani_object *result);
+
+    /**
+     * @brief Unbox a char object into a char value.
+     *
+     * This function unboxes a char object into a char value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed char value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Char)(ani_env *env, ani_object obj, ani_char *result);
+
+    /**
+     * @brief Box a short value into an object.
+     *
+     * This function boxes a short value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The short value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Short)(ani_env *env, ani_short value, ani_object *result);
+
+    /**
+     * @brief Unbox a short object into a short value.
+     *
+     * This function unboxes a short object into a short value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed short value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Short)(ani_env *env, ani_object obj, ani_short *result);
+
+    /**
+     * @brief Box a int value into an object.
+     *
+     * This function boxes a int value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The int value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Int)(ani_env *env, ani_int value, ani_object *result);
+
+    /**
+     * @brief Unbox a int object into a int value.
+     *
+     * This function unboxes a int object into a int value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed int value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Int)(ani_env *env, ani_object obj, ani_int *result);
+
+    /**
+     * @brief Box a long value into an object.
+     *
+     * This function boxes a long value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The long value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Long)(ani_env *env, ani_long value, ani_object *result);
+
+    /**
+     * @brief Unbox a long object into a long value.
+     *
+     * This function unboxes a long object into a long value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed long value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Long)(ani_env *env, ani_object obj, ani_long *result);
+
+    /**
+     * @brief Box a float value into an object.
+     *
+     * This function boxes a float value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The float value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Float)(ani_env *env, ani_float value, ani_object *result);
+
+    /**
+     * @brief Unbox a float object into a float value.
+     *
+     * This function unboxes a float object into a float value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed float value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Float)(ani_env *env, ani_object obj, ani_float *result);
+
+    /**
+     * @brief Box a double value into an object.
+     *
+     * This function boxes a double value into an object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] value The double value to be boxed.
+     * @param[out] result A pointer to restore the resulting boxed object.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Box_Double)(ani_env *env, ani_double value, ani_object *result);
+
+    /**
+     * @brief Unbox a double object into a double value.
+     *
+     * This function unboxes a double object into a double value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] obj The obj to be unboxed.
+     * @param[out] result A pointer to restore the resulting unboxed double value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     * @since 26.0.0
+     */
+    ani_status (*Primitive_Unbox_Double)(ani_env *env, ani_object obj, ani_double *result);
 };
 
 // C++ API
@@ -8066,6 +8274,70 @@ struct __ani_env {
     ani_status Class_BindStaticNativeMethods(ani_class cls, const ani_native_function *methods, ani_size nr_methods)
     {
         return c_api->Class_BindStaticNativeMethods(this, cls, methods, nr_methods);
+    }
+    ani_status Primitive_Box_Boolean(ani_boolean value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Boolean(this, value, result);
+    }
+    ani_status Primitive_Unbox_Boolean(ani_object obj, ani_boolean *result)
+    {
+        return c_api->Primitive_Unbox_Boolean(this, obj, result);
+    }
+    ani_status Primitive_Box_Byte(ani_byte value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Byte(this, value, result);
+    }
+    ani_status Primitive_Unbox_Byte(ani_object obj, ani_byte *result)
+    {
+        return c_api->Primitive_Unbox_Byte(this, obj, result);
+    }
+    ani_status Primitive_Box_Char(ani_char value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Char(this, value, result);
+    }
+    ani_status Primitive_Unbox_Char(ani_object obj, ani_char *result)
+    {
+        return c_api->Primitive_Unbox_Char(this, obj, result);
+    }
+    ani_status Primitive_Box_Short(ani_short value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Short(this, value, result);
+    }
+    ani_status Primitive_Unbox_Short(ani_object obj, ani_short *result)
+    {
+        return c_api->Primitive_Unbox_Short(this, obj, result);
+    }
+    ani_status Primitive_Box_Int(ani_int value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Int(this, value, result);
+    }
+    ani_status Primitive_Unbox_Int(ani_object obj, ani_int *result)
+    {
+        return c_api->Primitive_Unbox_Int(this, obj, result);
+    }
+    ani_status Primitive_Box_Long(ani_long value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Long(this, value, result);
+    }
+    ani_status Primitive_Unbox_Long(ani_object obj, ani_long *result)
+    {
+        return c_api->Primitive_Unbox_Long(this, obj, result);
+    }
+    ani_status Primitive_Box_Float(ani_float value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Float(this, value, result);
+    }
+    ani_status Primitive_Unbox_Float(ani_object obj, ani_float *result)
+    {
+        return c_api->Primitive_Unbox_Float(this, obj, result);
+    }
+    ani_status Primitive_Box_Double(ani_double value, ani_object *result)
+    {
+        return c_api->Primitive_Box_Double(this, value, result);
+    }
+    ani_status Primitive_Unbox_Double(ani_object obj, ani_double *result)
+    {
+        return c_api->Primitive_Unbox_Double(this, obj, result);
     }
 #endif  // __cplusplus
 };
