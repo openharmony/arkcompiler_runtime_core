@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 
 #include "common_components/heap/allocator/region_desc.h"
 
-namespace common {
+namespace common_vm {
 bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDesc)
 {
     //     +-------------+       +--------------+
@@ -141,4 +141,4 @@ void Treap::TreapNode::ReleaseMemory()
     uint32_t cnt = GetCount();
     RegionDesc::ReleaseUnits(idx, cnt);
 }
-} // namespace common
+} // namespace common_vm

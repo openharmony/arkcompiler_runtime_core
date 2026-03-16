@@ -288,7 +288,7 @@ void Mutator::MakeTSANHappyForThreadState()
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-static thread_local common::Mutator *g_SharedExternalMutator = nullptr;
+static thread_local common_vm::Mutator *g_SharedExternalMutator = nullptr;
 
 void Mutator::BindMutator()
 {
@@ -300,7 +300,7 @@ void Mutator::UnbindMutator()
     GetMutator()->UnbindMutator();
 }
 
-bool Mutator::CreateExternalMutatorIfNeeded(bool useSharedMutator, common::Mutator *m)
+bool Mutator::CreateExternalMutatorIfNeeded(bool useSharedMutator, common_vm::Mutator *m)
 {
     if (m != nullptr) {
         mutator_ = m;
@@ -317,25 +317,26 @@ bool Mutator::CreateExternalMutatorIfNeeded(bool useSharedMutator, common::Mutat
         }
         // NOTE(panferovi): replace Mutator::GerCurrent by new interface
         // that obtain Mutator from JS, when it is implemented
-        mutator_ = common::Mutator::GetCurrent() != nullptr ? common::Mutator::GetCurrent()
-                                                            : common::Mutator::CreateAndRegisterNewMutator(nullptr);
+        mutator_ = common_vm::Mutator::GetCurrent() != nullptr
+                       ? common_vm::Mutator::GetCurrent()
+                       : common_vm::Mutator::CreateAndRegisterNewMutator(nullptr);
         ASSERT(mutator_ != nullptr);
         SetSharedExternalMutator(mutator_);
         return true;
     }
 
-    mutator_ = common::Mutator::CreateAndRegisterNewMutator(nullptr);
+    mutator_ = common_vm::Mutator::CreateAndRegisterNewMutator(nullptr);
     return true;
 }
 
 /* static */
-void Mutator::SetSharedExternalMutator(common::Mutator *externalMutator)
+void Mutator::SetSharedExternalMutator(common_vm::Mutator *externalMutator)
 {
     g_SharedExternalMutator = externalMutator;
 }
 
 /* static */
-common::Mutator *Mutator::GetSharedExternalMutator()
+common_vm::Mutator *Mutator::GetSharedExternalMutator()
 {
     return g_SharedExternalMutator;
 }

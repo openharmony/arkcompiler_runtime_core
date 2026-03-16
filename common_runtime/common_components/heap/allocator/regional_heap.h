@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H
-#define COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H
 
 #include <list>
 #include <map>
@@ -41,7 +41,7 @@
 #endif
 #include "common_interfaces/base_runtime.h"
 
-namespace common {
+namespace common_vm {
 class Taskpool;
 
 // RegionalHeap aims to be the API for other components of runtime
@@ -482,6 +482,6 @@ private:
     RawPointerSpace rawpointerSpace_;
     ReadOnlySpace readonlySpace_;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H

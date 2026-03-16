@@ -50,7 +50,7 @@
  * ./build_system.sh --gn-args="ets_runtime_enable_heap_verify=true ets_runtime_enable_rb_dfx=true" ...
  */
 
-namespace common {
+namespace common_vm {
 void VisitRoots(const RefFieldVisitor& visitorFunc);
 void VisitWeakRoots(const WeakRefFieldVisitor& visitorFunc);
 
@@ -560,4 +560,4 @@ void WVerify::DisableReadBarrierDFX(ArkCollector& collector)
     }
 }
 
-}  // namespace common
+}  // namespace common_vm

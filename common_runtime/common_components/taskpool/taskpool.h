@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H
-#define COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H
 
 #include <memory>
 #include <mutex>
@@ -23,7 +23,7 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/base/os/thread.h"
 
-namespace common {
+namespace common_vm {
 class PUBLIC_API Taskpool {
 public:
     PUBLIC_API static Taskpool *GetCurrentTaskpool();
@@ -87,5 +87,5 @@ private:
     volatile int isInitialized_ = 0;
     std::mutex mutex_;
 };
-}  // namespace common
-#endif  // COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H

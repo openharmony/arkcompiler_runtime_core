@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H
-#define COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H
 
 #include <limits>
 #include <cstdint>
 #include "common_interfaces/base/common.h"
 
-namespace panda::common {
+namespace panda::common_vm {
 /*
  * Auxiliary static class that provides access to bits range within an integer value.
  */
@@ -141,5 +141,5 @@ public:
         return Get(value);
     }
 };
-} // namespace panda::common
-#endif  // COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H
+} // namespace panda::common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H

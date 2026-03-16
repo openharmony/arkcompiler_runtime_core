@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "common_components/base/immortal_wrapper.h"
 
-namespace common {
+namespace common_vm {
 static ImmortalWrapper<SatbBuffer> g_instance;
 
 SatbBuffer& SatbBuffer::Instance() noexcept { return *g_instance; }
@@ -39,4 +39,4 @@ bool SatbBuffer::ShouldEnqueue(const BaseObject* obj)
     }
     return !RegionalHeap::EnqueueObject(obj);
 }
-} // namespace common
+} // namespace common_vm

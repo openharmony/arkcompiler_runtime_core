@@ -22,14 +22,14 @@
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/heap/heap_visitor.h"
 
-namespace common {
+namespace common_vm {
 void SetVisitAllStaticRootsCallback(void (*callback)(const RefFieldVisitor &));
 void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &visitorFunc, void *mutator));
 void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &));
 void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
 void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor));
-void SetUpdateReadBarrierEntrypoint(void (*callback)(void *thread, common::GCPhase phase));
-}  // namespace common
+void SetUpdateReadBarrierEntrypoint(void (*callback)(void *thread, common_vm::GCPhase phase));
+}  // namespace common_vm
 
 namespace ark::mem::ets {
 
@@ -44,7 +44,7 @@ static ark::PandaVM *GetPandaVM()
     return runtime->GetPandaVM();
 }
 
-static void VisitAllRoots(const common::RefFieldVisitor &visitorFunc)
+static void VisitAllRoots(const common_vm::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -54,11 +54,11 @@ static void VisitAllRoots(const common::RefFieldVisitor &visitorFunc)
     RootManager<EtsLanguageConfig> rootManager(vm);
     rootManager.VisitNonHeapRoots([&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
     });
 }
 
-static void VisitMutatorRoots(const common::RefFieldVisitor &visitorFunc, void *mutator)
+static void VisitMutatorRoots(const common_vm::RefFieldVisitor &visitorFunc, void *mutator)
 {
     ASSERT(mutator != nullptr);
     trace::ScopedTrace scopedTrace(__FUNCTION__);
@@ -70,11 +70,11 @@ static void VisitMutatorRoots(const common::RefFieldVisitor &visitorFunc, void *
     auto *managedThread = reinterpret_cast<ManagedThread *>(mutator);
     rootManager.VisitRootsForThread(managedThread, [&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
     });
 }
 
-static void VisitGlobalRoots(const common::RefFieldVisitor &visitorFunc)
+static void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -85,13 +85,13 @@ static void VisitGlobalRoots(const common::RefFieldVisitor &visitorFunc)
 
     auto callback = [&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
     };
     rootManager.VisitAotStringRoots(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
     rootManager.VisitVmRoots(callback);
 }
 
-static void UpdateAndSweep(const common::WeakRefFieldVisitor &visitorFunc)
+static void UpdateAndSweep(const common_vm::WeakRefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -102,12 +102,12 @@ static void UpdateAndSweep(const common::WeakRefFieldVisitor &visitorFunc)
 
     rootManager.UpdateAndSweep([&visitorFunc](ObjectHeader **ref) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        return visitorFunc(reinterpret_cast<common::RefField<> &>(*ref)) ? ObjectStatus::ALIVE_OBJECT
-                                                                         : ObjectStatus::DEAD_OBJECT;
+        return visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*ref)) ? ObjectStatus::ALIVE_OBJECT
+                                                                            : ObjectStatus::DEAD_OBJECT;
     });
 }
 
-static void VisitConcurrentRoots(const common::RefFieldVisitor &visitorFunc)
+static void VisitConcurrentRoots(const common_vm::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -118,40 +118,40 @@ static void VisitConcurrentRoots(const common::RefFieldVisitor &visitorFunc)
 
     auto callback = [&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
     };
     rootManager.VisitClassRoots(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
     rootManager.VisitClassLinkerContextRoots(callback);
     vm->VisitStringTable(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
 }
 
-static void UpdateReadBarrierEntrypoint(void *thread, common::GCPhase phase)
+static void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase)
 {
     auto *vm = GetPandaVM();
     auto *gc = static_cast<CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
     auto *managedThread = ManagedThread::CastFromMutator(reinterpret_cast<Mutator *>(thread));
-    if (phase == common::GCPhase::GC_PHASE_PRECOPY) {
+    if (phase == common_vm::GCPhase::GC_PHASE_PRECOPY) {
         gc->EnableReadBarrier(managedThread);
-    } else if (phase == common::GCPhase::GC_PHASE_IDLE) {
+    } else if (phase == common_vm::GCPhase::GC_PHASE_IDLE) {
         gc->DisableReadBarrier(managedThread);
     }
     // Check if a new phase has been added
-    ASSERT(phase == common::GCPhase::GC_PHASE_ENUM || phase == common::GCPhase::GC_PHASE_MARK ||
-           phase == common::GCPhase::GC_PHASE_PRECOPY || phase == common::GCPhase::GC_PHASE_COPY ||
-           phase == common::GCPhase::GC_PHASE_FIX || phase == common::GCPhase::GC_PHASE_IDLE ||
-           phase == common::GCPhase::GC_PHASE_POST_MARK || phase == common::GCPhase::GC_PHASE_FINAL_MARK ||
-           phase == common::GCPhase::GC_PHASE_REMARK_SATB);
+    ASSERT(phase == common_vm::GCPhase::GC_PHASE_ENUM || phase == common_vm::GCPhase::GC_PHASE_MARK ||
+           phase == common_vm::GCPhase::GC_PHASE_PRECOPY || phase == common_vm::GCPhase::GC_PHASE_COPY ||
+           phase == common_vm::GCPhase::GC_PHASE_FIX || phase == common_vm::GCPhase::GC_PHASE_IDLE ||
+           phase == common_vm::GCPhase::GC_PHASE_POST_MARK || phase == common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
+           phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB);
 }
 
 void RegisterCmcGcCallbacks()
 {
     ark::mem::StaticObjectOperator::Initialize();
-    common::SetVisitAllStaticRootsCallback(VisitAllRoots);
-    common::SetVisitStaticMutatorRootsCallback(VisitMutatorRoots);
-    common::SetVisitStaticGlobalRootsCallback(VisitGlobalRoots);
-    common::SetUpdateAndSweepStaticRefsCallback(UpdateAndSweep);
-    common::SetVisitStaticConcurrentRootsCallback(VisitConcurrentRoots);
-    common::SetUpdateReadBarrierEntrypoint(UpdateReadBarrierEntrypoint);
+    common_vm::SetVisitAllStaticRootsCallback(VisitAllRoots);
+    common_vm::SetVisitStaticMutatorRootsCallback(VisitMutatorRoots);
+    common_vm::SetVisitStaticGlobalRootsCallback(VisitGlobalRoots);
+    common_vm::SetUpdateAndSweepStaticRefsCallback(UpdateAndSweep);
+    common_vm::SetVisitStaticConcurrentRootsCallback(VisitConcurrentRoots);
+    common_vm::SetUpdateReadBarrierEntrypoint(UpdateReadBarrierEntrypoint);
 }
 
 }  // namespace ark::mem::ets

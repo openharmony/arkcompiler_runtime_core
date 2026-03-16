@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include "common_components/heap/collector/gc_request.h"
 #include "common_components/tests/test_helper.h"
 
-namespace common {
+namespace common_vm {
 class StubAllocator : public Allocator {
 public:
     HeapAddress Allocate(size_t size, AllocType allocType) override { return 0; }
@@ -49,7 +49,7 @@ public:
 };
 }
 
-namespace common {
+namespace common_vm {
 class DummyCollectorProxy : public CollectorProxy {
 public:
     explicit DummyCollectorProxy(Allocator& alloc, CollectorResources& res)
@@ -68,15 +68,15 @@ public:
 };
 }
 
-namespace common::test {
-class GCRunnerTest : public common::test::BaseTestWithScope {
+namespace common_vm::test {
+class GCRunnerTest : public common_vm::test::BaseTestWithScope {
 protected:
     void SetUp() override
     {
-        allocator_ = std::make_unique<common::StubAllocator>();
-        dummyResources_ = std::make_unique<common::DummyCollectorResources>(*allocator_);
-        proxy_ = std::make_unique<common::StubCollectorProxy>(*allocator_, *dummyResources_);
-        proxyStorage_ = std::make_unique<common::StubCollectorProxy>(*allocator_, *dummyResources_);
+        allocator_ = std::make_unique<common_vm::StubAllocator>();
+        dummyResources_ = std::make_unique<common_vm::DummyCollectorResources>(*allocator_);
+        proxy_ = std::make_unique<common_vm::StubCollectorProxy>(*allocator_, *dummyResources_);
+        proxyStorage_ = std::make_unique<common_vm::StubCollectorProxy>(*allocator_, *dummyResources_);
     }
 
     void TearDown() override
@@ -87,28 +87,28 @@ protected:
         allocator_.reset();
     }
 
-    std::unique_ptr<common::StubAllocator> allocator_;
-    std::unique_ptr<common::StubCollectorProxy> proxy_;
-    std::unique_ptr<common::StubCollectorProxy> proxyStorage_;
-    std::unique_ptr<common::DummyCollectorResources> dummyResources_;
+    std::unique_ptr<common_vm::StubAllocator> allocator_;
+    std::unique_ptr<common_vm::StubCollectorProxy> proxy_;
+    std::unique_ptr<common_vm::StubCollectorProxy> proxyStorage_;
+    std::unique_ptr<common_vm::DummyCollectorResources> dummyResources_;
 };
 
 HWTEST_F_L0(GCRunnerTest, Execute_TerminateGC) {
-    common::GCRunner runner(common::GCTask::GCTaskType::GC_TASK_TERMINATE_GC);
+    common_vm::GCRunner runner(common_vm::GCTask::GCTaskType::GC_TASK_TERMINATE_GC);
     bool result = runner.Execute(proxyStorage_.get());
     EXPECT_FALSE(result);
 }
 
 HWTEST_F_L0(GCRunnerTest, Execute_InvokeGC) {
-    common::GCRunner runner(common::GCTask::GCTaskType::GC_TASK_INVOKE_GC, GC_REASON_BACKUP);
+    common_vm::GCRunner runner(common_vm::GCTask::GCTaskType::GC_TASK_INVOKE_GC, GC_REASON_BACKUP);
     bool result = runner.Execute(proxyStorage_.get());
     EXPECT_TRUE(result);
 }
 
 HWTEST_F_L0(GCRunnerTest, Execute_InvalidTaskType) {
-    common::GCRunner runner(static_cast<common::GCTask::GCTaskType>(
-        static_cast<uint32_t>(common::GCTask::GCTaskType::GC_TASK_DUMP_HEAP_IDE) + 1));
+    common_vm::GCRunner runner(static_cast<common_vm::GCTask::GCTaskType>(
+        static_cast<uint32_t>(common_vm::GCTask::GCTaskType::GC_TASK_DUMP_HEAP_IDE) + 1));
     bool result = runner.Execute(proxyStorage_.get());
     EXPECT_TRUE(result);
 }
-}  // namespace common::test
+}  // namespace common_vm::test

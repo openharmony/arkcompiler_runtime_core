@@ -39,7 +39,8 @@ public:
     TestXGCEcmaVmAdaptor(napi_env env, TestXGCEcmaAdaptorValues *values) : TestXGCVmAdaptor(env), values_(values) {}
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    void MarkFromObject([[maybe_unused]] napi_ref obj, [[maybe_unused]] const common::RefFieldVisitor &visitor) override
+    void MarkFromObject([[maybe_unused]] napi_ref obj,
+                        [[maybe_unused]] const common_vm::RefFieldVisitor &visitor) override
     {
         std::stringstream err;
         err << "Unexpected call of MarkFromObject";

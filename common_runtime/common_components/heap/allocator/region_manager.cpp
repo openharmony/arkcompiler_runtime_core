@@ -46,7 +46,7 @@
 #include <sysinfoapi.h>
 #endif
 
-namespace common {
+namespace common_vm {
 uintptr_t RegionDesc::UnitInfo::totalUnitCount = 0;
 uintptr_t RegionDesc::UnitInfo::unitInfoStart = 0;
 uintptr_t RegionDesc::UnitInfo::heapStartAddress = 0;

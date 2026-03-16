@@ -20,7 +20,7 @@
 #include "qos.h"
 #endif
 
-namespace common {
+namespace common_vm {
 Runner::Runner(uint32_t threadNum, const std::function<void(os::thread::NativeHandleType)> prologueHook,
                const std::function<void(os::thread::NativeHandleType)> epilogueHook)
     : totalThreadNum_(threadNum), prologueHook_(prologueHook), epilogueHook_(epilogueHook)
@@ -132,4 +132,4 @@ void Runner::Run(uint32_t threadId)
     }
     EpilogueHook(thread);
 }
-}  // namespace common
+}  // namespace common_vm

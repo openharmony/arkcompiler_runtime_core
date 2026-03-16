@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@
 #include "common_components/tests/test_helper.h"
 #include <cstdint>
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 const size_t SIZE_SIXTEEN = 16;
 const size_t SIZE_MAX_TEST = 1024;
 const size_t SIZE_HALF_MAX_TEST = 512;
@@ -32,7 +32,7 @@ const uint32_t NUM_TWO = 2;
 const uint32_t NUM_THREE = 3;
 const uint32_t NUM_FIVE = 5;
 
-class RegionManagerTest : public common::test::BaseTestWithScope {
+class RegionManagerTest : public common_vm::test::BaseTestWithScope {
 protected:
     void* regionMemory_;
     size_t totalUnits_ = SIZE_MAX_TEST;

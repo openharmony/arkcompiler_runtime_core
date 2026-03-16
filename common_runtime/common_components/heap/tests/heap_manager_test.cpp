@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 #include "common_components/heap/heap_manager.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
-namespace common::test {
-class HeapManagerTest : public common::test::BaseTestWithScope {
+using namespace common_vm;
+namespace common_vm::test {
+class HeapManagerTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -31,11 +31,11 @@ HWTEST_F_L0(HeapManagerTest, RequestGC)
 {
     HeapManager manager;
     Heap::GetHeap().EnableGC(false);
-    manager.RequestGC(GCReason::GC_REASON_USER, true, common::GC_TYPE_FULL);
+    manager.RequestGC(GCReason::GC_REASON_USER, true, common_vm::GC_TYPE_FULL);
     ASSERT_FALSE(Heap::GetHeap().IsGCEnabled());
 
     Heap::GetHeap().EnableGC(true);
-    manager.RequestGC(GCReason::GC_REASON_USER, true, common::GC_TYPE_FULL);
+    manager.RequestGC(GCReason::GC_REASON_USER, true, common_vm::GC_TYPE_FULL);
     ASSERT_TRUE(Heap::GetHeap().IsGCEnabled());
 }
-} // namespace common::test
+} // namespace common_vm::test

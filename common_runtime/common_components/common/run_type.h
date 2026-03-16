@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_RUN_TYPE_H
-#define COMMON_COMPONENTS_COMMON_RUN_TYPE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_RUN_TYPE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_RUN_TYPE_H
 
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 // slot with size no more than RUN_ALLOC_SMALL_SIZE is small slot.
 // small slot is allocated from cache run in thread-local buffer first.
 // slot with size (RUN_ALLOC_SMALL_SIZE, RUN_ALLOC_LARGE_SIZE] is allocated from global buffer.
@@ -63,6 +63,6 @@ public:
 #define RUNTYPE_RUN_IDX_TO_SIZE(idx) (RunType::TYPES[(idx)].size)
 
 constexpr int DEFAULT_PAGE_PER_RUN = 1;
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_COMMON_RUN_TYPE_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_RUN_TYPE_H

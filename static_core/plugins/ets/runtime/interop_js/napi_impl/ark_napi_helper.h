@@ -21,8 +21,8 @@
 
 namespace ark::ets::interop::js {
 
-using common::BaseObject;
-using common::TaggedType;
+using common_vm::BaseObject;
+using common_vm::TaggedType;
 
 class PUBLIC_API ArkNapiHelper {
 public:
@@ -38,7 +38,7 @@ public:
 
     static inline BaseObject *ToBaseObject(napi_value napiValue)
     {
-        return BaseObject::Cast(static_cast<common::MAddress>(GetTaggedType(napiValue)));
+        return BaseObject::Cast(static_cast<common_vm::MAddress>(GetTaggedType(napiValue)));
     }
 
     static inline napi_value ToNapiValue([[maybe_unused]] TaggedType *taggedType)

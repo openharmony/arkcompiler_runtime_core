@@ -21,7 +21,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
 // so we don't expect reading barrier have the ability to modify the referent field.
 BaseObject* MarkingBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) const
@@ -205,4 +205,4 @@ void MarkingBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, M
     UNREACHABLE_CC();
 }
 
-} // namespace common
+} // namespace common_vm

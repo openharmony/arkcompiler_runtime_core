@@ -26,10 +26,10 @@
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/thread/mutator.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
-class RegionalHeapTest : public common::test::BaseTestWithScope {
+namespace common_vm::test {
+class RegionalHeapTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -61,7 +61,7 @@ protected:
 
 HWTEST_F_L0(RegionalHeapTest, FeedHungryBuffers2)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_FIX);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     AllocationBuffer* buffer1 = new (std::nothrow) AllocationBuffer();
@@ -81,7 +81,7 @@ HWTEST_F_L0(RegionalHeapTest, FeedHungryBuffers2)
 
 HWTEST_F_L0(RegionalHeapTest, FeedHungryBuffers3)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_FIX);
     Heap::GetHeap().GetAllocator().FeedHungryBuffers();
     AllocBufferManager::HungryBuffers hungryBuffers;
@@ -91,7 +91,7 @@ HWTEST_F_L0(RegionalHeapTest, FeedHungryBuffers3)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseEnum)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -103,7 +103,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseEnum)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseMark)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_MARK);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -115,7 +115,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseMark)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseRemarkStab)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_REMARK_SATB);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -127,7 +127,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseRemarkStab)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhasePostMark)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_POST_MARK);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -139,7 +139,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhasePostMark)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhasePrecopy)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_PRECOPY);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -150,7 +150,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhasePrecopy)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseCopy)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_COPY);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -161,7 +161,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseCopy)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseFix)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_FIX);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -172,7 +172,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseFix)
 
 HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseUndef)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_UNDEF);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -183,7 +183,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocRegion_PhaseUndef)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseEnum)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -195,7 +195,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseEnum)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseMark)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_MARK);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -207,7 +207,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseMark)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseRemarkStab)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_REMARK_SATB);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -219,7 +219,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseRemarkStab)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhasePostMark)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_POST_MARK);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -231,7 +231,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhasePostMark)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhasePrecopy)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_PRECOPY);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -242,7 +242,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhasePrecopy)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseCopy)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_COPY);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -253,7 +253,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseCopy)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseFix)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_FIX);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -264,7 +264,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseFix)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseUndef)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_UNDEF);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocateNonMovableRegion();
@@ -275,7 +275,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNonMovableRegion_PhaseUndef)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateThreadLocalRegion2)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_FIX);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -285,7 +285,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateThreadLocalRegion2)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateThreadLocalRegion3)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_COPY);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
@@ -298,7 +298,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateThreadLocalRegion3)
 
 HWTEST_F_L0(RegionalHeapTest, AllocateThreadLocalRegion4)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
@@ -324,7 +324,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateThreadLocalRegion4)
 
 HWTEST_F_L0(RegionalHeapTest, CopyRegion)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -442,7 +442,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocationBuffer_AllocateRawPointerObject_ValidSiz
 
 HWTEST_F_L0(RegionalHeapTest, AllocNonMovableObject)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     RegionManager regionManager;
     NonMovableSpace nonMovableSpace(regionManager);
     EXPECT_EQ(nonMovableSpace.Alloc(sizeof(RegionDesc), false), 0);
@@ -450,7 +450,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocNonMovableObject)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly1)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionManager regionManager;
@@ -461,7 +461,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocReadOnly1)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly2)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_MARK);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -471,7 +471,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocReadOnly2)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly3)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_POST_MARK);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -481,7 +481,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocReadOnly3)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly4)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_PRECOPY);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -491,7 +491,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocReadOnly4)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly5)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_COPY);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -501,7 +501,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocReadOnly5)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly6)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_FIX);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -511,7 +511,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocReadOnly6)
 
 HWTEST_F_L0(RegionalHeapTest, AllocReadOnly7)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_UNDEF);
     ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
@@ -579,7 +579,7 @@ HWTEST_F_L0(RegionalHeapTest, AllocateNoGC4)
 
 HWTEST_F_L0(RegionalHeapTest, MarkJitFortMemInstalled)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_MARK);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     

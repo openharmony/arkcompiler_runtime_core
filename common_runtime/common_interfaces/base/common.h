@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,8 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_BASE_COMMON_H
-#define COMMON_INTERFACES_BASE_COMMON_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_BASE_COMMON_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_BASE_COMMON_H
 
 #include <cstddef>
 #include <cstdint>
@@ -33,7 +33,7 @@
 #ifdef ERROR
 #undef ERROR
 #endif
-namespace common {
+namespace common_vm {
 #ifndef PANDA_TARGET_WINDOWS
 #define PUBLIC_API __attribute__((visibility ("default")))
 #else
@@ -152,9 +152,9 @@ enum class LOG_LEVEL : uint8_t {
 };
 
 static constexpr size_t BITS_PER_BYTE = 8;
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_INTERFACES_BASE_COMMON_H
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_COMMON_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

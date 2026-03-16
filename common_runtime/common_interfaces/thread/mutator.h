@@ -21,8 +21,8 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_THREAD_MUTATOR_H
-#define COMMON_INTERFACES_THREAD_MUTATOR_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_H
 
 #include <atomic>
 #include <condition_variable>
@@ -42,7 +42,7 @@ namespace ark {
 class Coroutine;
 }
 
-namespace common {
+namespace common_vm {
 class Mutator;
 struct ThreadLocalData;
 
@@ -539,8 +539,8 @@ void PreRunManagedCode(Mutator* mutator, int layers, ThreadLocalData* threadData
 
 ThreadLocalData *GetThreadLocalData();
 
-}  // namespace common
-#endif  // COMMON_INTERFACES_THREAD_MUTATOR_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

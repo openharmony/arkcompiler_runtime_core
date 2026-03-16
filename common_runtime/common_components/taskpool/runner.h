@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_TASKPOOL_RUNNER_H
-#define COMMON_COMPONENTS_TASKPOOL_RUNNER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_RUNNER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_RUNNER_H
 
 #include <array>
 #include <memory>
@@ -27,7 +27,7 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/base/os/thread.h"
 
-namespace common {
+namespace common_vm {
 static constexpr uint32_t MIN_TASKPOOL_THREAD_NUM = 3;
 static constexpr uint32_t MAX_TASKPOOL_THREAD_NUM = 5;
 static constexpr uint32_t DEFAULT_TASKPOOL_THREAD_NUM = 0;
@@ -103,5 +103,5 @@ private:
     std::function<void(os::thread::NativeHandleType)> prologueHook_;
     std::function<void(os::thread::NativeHandleType)> epilogueHook_;
 };
-}  // namespace common
-#endif  // COMMON_COMPONENTS_TASKPOOL_RUNNER_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_RUNNER_H

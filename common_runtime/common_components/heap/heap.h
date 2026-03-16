@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_HEAP_H
-#define COMMON_COMPONENTS_HEAP_HEAP_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_H
 
 #include <cstdlib>
 #include <functional>
@@ -29,15 +29,15 @@
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/profiler/heap_profiler_listener.h"
 
-namespace common {
+namespace common_vm {
 class Allocator;
 class AllocationBuffer;
 class FinalizerProcessor;
 class CollectorResources;
 class HeuristicGCPolicy;
-using MemoryReduceDegree = common::MemoryReduceDegree;
-using AppSensitiveStatus = common::AppSensitiveStatus;
-using StartupStatus = common::StartupStatus;
+using MemoryReduceDegree = common_vm::MemoryReduceDegree;
+using AppSensitiveStatus = common_vm::AppSensitiveStatus;
+using StartupStatus = common_vm::StartupStatus;
 
 class Heap {
 public:
@@ -210,5 +210,5 @@ public:
     static HeapAddress heapStartAddr_;
     static HeapAddress heapCurrentEnd_;
 }; // class Heap
-} // namespace common
+} // namespace common_vm
 #endif

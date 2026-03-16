@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
 
 #include <atomic>
 #include <errno.h>
 
-namespace common {
+namespace common_vm {
 class RegionRSet {
 public:
     static constexpr size_t CARD_SIZE = 512;
@@ -103,4 +103,4 @@ private:
 static_assert(RegionRSet::CARD_TABLE_DATA_OFFSET == AlignUp<size_t>(sizeof(RegionRSet),
                                                                     sizeof(RegionRSet::CardElement)));
 }
-#endif // COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H

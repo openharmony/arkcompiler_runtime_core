@@ -17,7 +17,7 @@
 
 #include "common_components/platform/cpu.h"
 
-namespace common {
+namespace common_vm {
 Taskpool *Taskpool::GetCurrentTaskpool()
 {
     static Taskpool *taskpool = new Taskpool();
@@ -74,4 +74,4 @@ void Taskpool::ForEachTask(const std::function<void(Task *)> &f)
     }
     runner_->ForEachTask(f);
 }
-}  // namespace common
+}  // namespace common_vm

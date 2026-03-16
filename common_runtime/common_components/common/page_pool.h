@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@
 #include "common_components/base/mem_utils.h"
 #endif
 
-namespace common {
+namespace common_vm {
 // a page pool maintain a pool of free pages, serve page allocation and free
 class PagePool {
 public:
@@ -167,5 +167,5 @@ private:
     std::atomic<uint32_t> smallPageUsed_ = { 0 };
     uint32_t totalPageCount_ = 0;
 };
-} // namespace common
+} // namespace common_vm
 #endif // ARK_COMM_RUNTIME_ALLOCATOR_PAGE_POOL_H

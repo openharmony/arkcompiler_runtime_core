@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common::utf_helper {
+namespace common_vm::utf_helper {
 constexpr size_t HI_SURROGATE_MIN = 0xd800;
 constexpr size_t HI_SURROGATE_MAX = 0xdbff;
 constexpr size_t LO_SURROGATE_MIN = 0xdc00;
@@ -237,13 +237,13 @@ static inline uint8_t GetValueFromTwoHex(uint8_t front, uint8_t behind)
 {
     size_t high = HexChar16Value(front);
     size_t low = HexChar16Value(behind);
-    uint8_t res = ((high << 4U) | low) & common::utf_helper::BIT_MASK_FF;  // NOLINT 4: means shift left by 4 digits
+    uint8_t res = ((high << 4U) | low) & common_vm::utf_helper::BIT_MASK_FF;  // NOLINT 4: means shift left by 4 digits
     return res;
 }
-}  // namespace common::utf_helper
+}  // namespace common_vm::utf_helper
 
 
-namespace common::utf_helper_replacement {
+namespace common_vm::utf_helper_replacement {
 
 struct Utf8Decoder {
     enum State : uint8_t {
@@ -299,13 +299,13 @@ struct Utf8Decoder {
 };
 static inline uint16_t LeadSurrogate(uint32_t charCode)
 {
-    return common::utf_helper::H_SURROGATE_START +
-        (((charCode - common::utf_helper::SURROGATE_RAIR_START) >> common::utf_helper::UTF16_OFFSET) &
-        common::utf_helper::BIT16_MASK);
+    return common_vm::utf_helper::H_SURROGATE_START +
+        (((charCode - common_vm::utf_helper::SURROGATE_RAIR_START) >> common_vm::utf_helper::UTF16_OFFSET) &
+        common_vm::utf_helper::BIT16_MASK);
 }
 static inline uint16_t TrailSurrogate(uint32_t charCode)
 {
-    return common::utf_helper::L_SURROGATE_START + (charCode & common::utf_helper::BIT16_MASK);
+    return common_vm::utf_helper::L_SURROGATE_START + (charCode & common_vm::utf_helper::BIT16_MASK);
 }
 
 static inline size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8Data, size_t utf8Length, uint16_t *utf16Data)
@@ -317,7 +317,7 @@ static inline size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8Data, size_t ut
 
     Utf8Decoder::State state = Utf8Decoder::State::ACCEPT;
     while (start < end) {
-        if (*start <= common::utf_helper::UTF8_1B_MAX && state == Utf8Decoder::State::ACCEPT) {
+        if (*start <= common_vm::utf_helper::UTF8_1B_MAX && state == Utf8Decoder::State::ACCEPT) {
             *utf16Data++ = static_cast<uint16_t>(*start);
             start++;
             continue;
@@ -326,13 +326,13 @@ static inline size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8Data, size_t ut
         Utf8Decoder::Decode(*start, &state, &current);
         if (state < Utf8Decoder::State::ACCEPT) {
             state = Utf8Decoder::State::ACCEPT;
-            *utf16Data++ = static_cast<uint16_t>(common::utf_helper::UTF16_REPLACEMENT_CHARACTER);
+            *utf16Data++ = static_cast<uint16_t>(common_vm::utf_helper::UTF16_REPLACEMENT_CHARACTER);
             current = 0;
             if (previous_state != Utf8Decoder::State::ACCEPT) {
                 continue;
             }
         } else if (state == Utf8Decoder::State::ACCEPT) {
-            if (current <= common::utf_helper::MaxNonSurrogateCharCode) {
+            if (current <= common_vm::utf_helper::MaxNonSurrogateCharCode) {
                 *utf16Data++ = static_cast<uint16_t>(current);
             } else {
                 *utf16Data++ = LeadSurrogate(current);
@@ -343,7 +343,7 @@ static inline size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8Data, size_t ut
         start++;
     }
     if (state != Utf8Decoder::State::ACCEPT) {
-        *utf16Data++ = static_cast<uint16_t>(common::utf_helper::UTF16_REPLACEMENT_CHARACTER);
+        *utf16Data++ = static_cast<uint16_t>(common_vm::utf_helper::UTF16_REPLACEMENT_CHARACTER);
     }
     return utf16Data - utf16Start;
 }

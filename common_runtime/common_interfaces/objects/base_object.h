@@ -22,8 +22,8 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
-#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 
 #include <stdint.h>
 #include <stdio.h>
@@ -33,7 +33,7 @@
 #include "common_interfaces/objects/base_class.h"
 #include "common_interfaces/objects/base_object_operator.h"
 #include "common_interfaces/objects/base_state_word.h"
-namespace common {
+namespace common_vm {
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
@@ -198,7 +198,7 @@ public:
     void SetFullBaseClassWithoutBarrier(BaseClass* cls)
     {
         state_ = 0;
-        state_.SetFullBaseClassAddress(reinterpret_cast<common::StateWordType>(cls));
+        state_.SetFullBaseClassAddress(reinterpret_cast<common_vm::StateWordType>(cls));
     }
 
     BaseClass *GetBaseClass() const
@@ -238,8 +238,8 @@ using RootVisitor = RawRefVisitor;
 using StackPtrVisitor = RawRefVisitor;
 
 
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

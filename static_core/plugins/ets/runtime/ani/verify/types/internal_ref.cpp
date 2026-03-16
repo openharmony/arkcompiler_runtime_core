@@ -1,6 +1,5 @@
-
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,14 +21,14 @@ namespace ark::ets::ani::verify {
 
 VRef *InternalRef::CastToVRef(InternalRef *iref)
 {
-    ASSERT(((common::ToUintPtr(iref) & TYPE_MASK) != TYPE_VREF) || ManagedCodeAccessor::IsUndefined(iref->ref_));
-    return reinterpret_cast<VRef *>((common::ToUintPtr(iref) | TYPE_VREF));
+    ASSERT(((common_vm::ToUintPtr(iref) & TYPE_MASK) != TYPE_VREF) || ManagedCodeAccessor::IsUndefined(iref->ref_));
+    return reinterpret_cast<VRef *>((common_vm::ToUintPtr(iref) | TYPE_VREF));
 }
 
 InternalRef *InternalRef::CastFromVRef(VRef *vref)
 {
-    ASSERT((common::ToUintPtr(vref) & TYPE_MASK) == TYPE_VREF);
-    return reinterpret_cast<InternalRef *>((common::ToUintPtr(vref) & ~TYPE_MASK));
+    ASSERT((common_vm::ToUintPtr(vref) & TYPE_MASK) == TYPE_VREF);
+    return reinterpret_cast<InternalRef *>((common_vm::ToUintPtr(vref) & ~TYPE_MASK));
 }
 
 bool InternalRef::IsUndefinedStackRef(VRef *vref)
@@ -42,7 +41,7 @@ bool InternalRef::IsStackVRef(VRef *vref)
     if (IsUndefinedStackRef(vref)) {
         return true;
     }
-    return (common::ToUintPtr(vref) & TYPE_MASK) != TYPE_VREF;
+    return (common_vm::ToUintPtr(vref) & TYPE_MASK) != TYPE_VREF;
 }
 
 }  // namespace ark::ets::ani::verify

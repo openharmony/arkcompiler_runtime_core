@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H
-#define COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H
 
 #include "common_components/common/page_pool.h"
 #include "common_components/common/mark_work_stack.h"
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 // snapshot at the beginning buffer
 // mainly used to buffer modified field of mutator write
 class SatbBuffer {
@@ -321,6 +321,6 @@ private:
     LockedList<TreapNode> freeNodes_;
     LockedList<TreapNode> retiredNodes_; // has been filled by mutator, ready for scan
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H

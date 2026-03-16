@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,15 +22,15 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_BASE_BIT_FIELD_H
-#define COMMON_INTERFACES_BASE_BIT_FIELD_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_BASE_BIT_FIELD_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_BASE_BIT_FIELD_H
 
 #include <cstddef>
 #include <limits>
 
 #include "common_interfaces/base/common.h"
 
-namespace common {
+namespace common_vm {
 
 /*
  * Auxiliary static class that provides access to bits range within an integer value.
@@ -150,9 +150,9 @@ public:
     }
 };
 
-}  // namespace common
+}  // namespace common_vm
 
-#endif  // COMMON_INTERFACES_BASE_BIT_FIELD_H
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_BIT_FIELD_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

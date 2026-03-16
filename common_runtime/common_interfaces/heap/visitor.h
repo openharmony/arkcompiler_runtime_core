@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_HEAP_VISITOR_H
-#define COMMON_INTERFACES_HEAP_VISITOR_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
 
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include "common_interfaces/objects/ref_field.h"
 
-namespace common {
+namespace common_vm {
 class BaseObject;
 // For ArkTS1.2，It is just example.
 // using GCRootVisitor = std::function<void(BaseObject *object)>;
@@ -30,5 +30,5 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
 // For ArkTS1.1
 // using WeakRootVisitor = std::function<BaseObject *(BaseObject *p)>;
-}  // namespace common
-#endif  // COMMON_INTERFACES_HEAP_VISITOR_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H

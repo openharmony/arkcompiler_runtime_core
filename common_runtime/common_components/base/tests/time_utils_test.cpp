@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,11 @@
 #include "common_components/tests/test_helper.h"
 #include "common_components/base/c_string.h"
 
-using namespace common;
-using namespace common::TimeUtil;
-namespace common::test {
+using namespace common_vm;
+using namespace common_vm::TimeUtil;
+namespace common_vm::test {
 
-class TimeUtilsTest : public common::test::BaseTestWithScope {
+class TimeUtilsTest : public common_vm::test::BaseTestWithScope {
 };
 
 HWTEST_F_L0(TimeUtilsTest, GetDigitDate)
@@ -87,4 +87,4 @@ HWTEST_F_L0(TimeUtilsTest, MicroSeconds)
     // 验证时间是否递增
     EXPECT_TRUE(micro2 > micro1);
 }
-} // namespace common::test
+} // namespace common_vm::test

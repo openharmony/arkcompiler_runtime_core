@@ -387,7 +387,7 @@ void Runtime::StopCoverageListener()
 static void InitCommonRuntime()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto *baseRuntime = common::BaseRuntime::GetInstance();
+    auto *baseRuntime = common_vm::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Init();
 #endif  // ARK_USE_COMMON_RUNTIME
@@ -570,10 +570,10 @@ bool Runtime::DestroyUnderLockHolder()
 static void FinishCommonRuntime()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto *baseRuntime = common::BaseRuntime::GetInstance();
+    auto *baseRuntime = common_vm::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Fini();
-    common::BaseRuntime::DestroyInstance();
+    common_vm::BaseRuntime::DestroyInstance();
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

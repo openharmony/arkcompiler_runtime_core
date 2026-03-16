@@ -17,11 +17,11 @@
 #define PLUGINS_ETS_RUNTIME_HYBRID_MEM_EXTERNAL_GC_H
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-namespace common {
+namespace common_vm {
 
 void RegisterStaticRootsProcessFunc();
 
-}  // namespace common
+}  // namespace common_vm
 
 #endif  // ARK_USE_COMMON_RUNTIME
 #endif  // PLUGINS_ETS_RUNTIME_HYBRID_MEM_EXTERNAL_GC_H

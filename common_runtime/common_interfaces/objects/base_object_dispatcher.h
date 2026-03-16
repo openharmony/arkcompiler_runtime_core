@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
-#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_object_accessor.h"
@@ -25,7 +25,7 @@
 #include "common_interfaces/objects/static_type_converter_interface.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 class BaseObjectDispatcher {
 enum class ObjectType : uint8_t { STATIC = 0x0, DYNAMIC, UNKNOWN };
 public:
@@ -300,5 +300,5 @@ private:
     DynamicObjectDescriptorInterface *dynObjDescriptor_;
     StaticObjectDescriptorInterface *stcObjDescriptor_;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H

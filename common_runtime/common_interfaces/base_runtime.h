@@ -22,8 +22,8 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_BASE_RUNTIME_H
-#define COMMON_INTERFACES_BASE_RUNTIME_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H
 
 #include <atomic>
 #include <functional>
@@ -32,7 +32,7 @@
 #include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/heap/heap_visitor.h"
 
-namespace common {
+namespace common_vm {
 class BaseStringTableImpl;
 template <typename Impl>
 class BaseStringTableInterface;
@@ -214,8 +214,8 @@ private:
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_BASE_RUNTIME_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

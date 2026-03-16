@@ -36,7 +36,7 @@
 #include <sysinfoapi.h>
 #endif
 
-namespace common {
+namespace common_vm {
 
 void NonMovableSpace::AssembleGarbageCandidates()
 {

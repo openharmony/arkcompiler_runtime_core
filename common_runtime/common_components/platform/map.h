@@ -1,6 +1,5 @@
-
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef COMMON_COMPONENTS_PLATFORM_MAP_H
-#define COMMON_COMPONENTS_PLATFORM_MAP_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_MAP_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_MAP_H
 
 #include <cstddef>
 
-namespace common {
+namespace common_vm {
 bool PageProtect(void *mem, size_t size, int prot);
 }
 

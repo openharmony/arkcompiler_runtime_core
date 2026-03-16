@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "sys/syscall.h"
 #endif
 
-namespace common {
+namespace common_vm {
 #ifndef SYS_futex
 #define SYS_futex __NR_futex
 #endif
@@ -61,4 +61,4 @@ int GetPid()
     return syscall(SYS_getpid);
 #endif
 }
-} // namespace common
+} // namespace common_vm

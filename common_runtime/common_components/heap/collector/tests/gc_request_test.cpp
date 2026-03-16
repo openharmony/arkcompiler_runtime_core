@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common {
-class GCRequestTest : public common::test::BaseTestWithScope {
+namespace common_vm {
+class GCRequestTest : public common_vm::test::BaseTestWithScope {
 };
 
 HWTEST_F_L0(GCRequestTest, ShouldBeIgnored_Heu_Test1) {
@@ -146,4 +146,4 @@ HWTEST_F_L0(GCRequestTest, ShouldBeIgnored_User_Test1) {
     bool result = req.ShouldBeIgnored();
     EXPECT_FALSE(result);
 }
-} // namespace common::test
+} // namespace common_vm::test

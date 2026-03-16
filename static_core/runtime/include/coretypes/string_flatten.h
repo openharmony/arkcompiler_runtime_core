@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,10 +144,10 @@ public:
         std::u16string result;
         if (IsUtf16()) {
             const uint16_t *data = this->GetDataUtf16();
-            result = common::Utf16ToU16String(data, length);
+            result = common_vm::Utf16ToU16String(data, length);
         } else {
             const uint8_t *data = this->GetDataUtf8();
-            result = common::Utf8ToU16String(data, length);
+            result = common_vm::Utf8ToU16String(data, length);
         }
         return result;
     }

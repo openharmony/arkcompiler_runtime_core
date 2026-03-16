@@ -20,22 +20,23 @@
 #include "common_interfaces/objects/static_object_accessor_interface.h"
 
 namespace ark::ets {
-class StaticObjectAccessor : public common::StaticObjectAccessorInterface {
+class StaticObjectAccessor : public common_vm::StaticObjectAccessorInterface {
 public:
-    bool HasProperty(common::Mutator *mutator, const common::BaseObject *obj, const char *name) override;
+    bool HasProperty(common_vm::Mutator *mutator, const common_vm::BaseObject *obj, const char *name) override;
 
-    common::BoxedValue GetProperty(common::Mutator *mutator, const common::BaseObject *obj, const char *name) override;
+    common_vm::BoxedValue GetProperty(common_vm::Mutator *mutator, const common_vm::BaseObject *obj,
+                                      const char *name) override;
 
-    bool SetProperty(common::Mutator *mutator, common::BaseObject *obj, const char *name,
-                     common::BoxedValue value) override;
+    bool SetProperty(common_vm::Mutator *mutator, common_vm::BaseObject *obj, const char *name,
+                     common_vm::BoxedValue value) override;
 
-    bool HasElementByIdx(common::Mutator *mutator, const common::BaseObject *obj, const uint32_t index) override;
+    bool HasElementByIdx(common_vm::Mutator *mutator, const common_vm::BaseObject *obj, const uint32_t index) override;
 
-    common::BoxedValue GetElementByIdx(common::Mutator *mutator, const common::BaseObject *obj,
-                                       const uint32_t index) override;
+    common_vm::BoxedValue GetElementByIdx(common_vm::Mutator *mutator, const common_vm::BaseObject *obj,
+                                          const uint32_t index) override;
 
-    bool SetElementByIdx(common::Mutator *mutator, common::BaseObject *obj, uint32_t index,
-                         const common::BoxedValue value) override;
+    bool SetElementByIdx(common_vm::Mutator *mutator, common_vm::BaseObject *obj, uint32_t index,
+                         const common_vm::BoxedValue value) override;
 
 private:
     static StaticObjectAccessor stcObjAccessor_;

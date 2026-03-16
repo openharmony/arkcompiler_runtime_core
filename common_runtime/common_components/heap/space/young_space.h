@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H
-#define COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H
 
 #include <assert.h>
 #include <list>
@@ -34,7 +34,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common {
+namespace common_vm {
 // regions for small-sized movable objects, which may be moved during gc.
 class YoungSpace : public RegionalSpace {
 public:
@@ -119,5 +119,5 @@ private:
     // recentFullRegionList is a list of regions which become full .
     RegionList recentFullRegionList_;
 };
-} // namespace common
-#endif // COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H
+} // namespace common_vm
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H

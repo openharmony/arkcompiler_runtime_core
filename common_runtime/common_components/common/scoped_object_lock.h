@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H
-#define COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_components/log/log.h"
-namespace common {
+namespace common_vm {
 class ScopedObjectLock {
 public:
     NO_INLINE_CC explicit ScopedObjectLock(BaseObject& obj)
@@ -49,5 +49,5 @@ public:
 private:
     BaseObject* lockedObj_ = { nullptr };
 };
-} // namespace common
+} // namespace common_vm
 #endif // ~COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H

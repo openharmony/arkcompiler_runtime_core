@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "common_components/heap/heap.h"
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 size_t g_gcCount = 0;
 uint64_t g_gcTotalTimeUs = 0;
 size_t g_gcCollectedTotalBytes = 0;
@@ -103,4 +103,4 @@ void GCStats::Dump() const
                     ";total GC time:" + totalGCTime
                 ).c_str());
 }
-} // namespace common
+} // namespace common_vm

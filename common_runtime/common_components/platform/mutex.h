@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_PLATFORM_MUTEX_H
-#define COMMON_COMPONENTS_PLATFORM_MUTEX_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_MUTEX_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_MUTEX_H
 
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/thread/mutator_state_transition.h"
@@ -30,7 +30,7 @@
 #define FATAL_IF_ERROR(f, rc) static_cast<void>(0)
 #endif
 
-namespace common {
+namespace common_vm {
 class Mutex {
 public:
     explicit Mutex(bool isInit = true);

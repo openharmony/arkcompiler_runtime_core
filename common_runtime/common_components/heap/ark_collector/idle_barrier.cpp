@@ -24,7 +24,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 BaseObject* IdleBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) const
 {
     RefField<> oldField(field);
@@ -159,4 +159,4 @@ void IdleBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MInd
     Sanitizer::TsanReadMemoryRange(reinterpret_cast<void*>(srcField), srcSize);
 #endif
 }
-} // namespace common
+} // namespace common_vm

@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include "common_components/heap/collector/collector_proxy.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
-namespace common::test {
-class CollectorProxyTest : public common::test::BaseTestWithScope {
+using namespace common_vm;
+namespace common_vm::test {
+class CollectorProxyTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -41,4 +41,4 @@ HWTEST_F_L0(CollectorProxyTest, RunGarbageCollection)
     collectorProxy.RunGarbageCollection(0, GCReason::GC_REASON_OOM, GCType::GC_TYPE_BEGIN);
     ASSERT_TRUE(Heap::GetHeap().GetGCReason() == GCReason::GC_REASON_OOM);
 }
-} // namespace common::test
+} // namespace common_vm::test

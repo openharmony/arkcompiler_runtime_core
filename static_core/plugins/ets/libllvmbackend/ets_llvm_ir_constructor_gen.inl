@@ -439,7 +439,7 @@ bool LLVMIrConstructor::EmitStringLastIndexOf(Inst *inst)
     builder_.CreateCondBr(startIndexNegative, retBb, chkEmptyBb);
     // Empty string implies no match, i.e. return -1
     SetCurrentBasicBlock(chkEmptyBb);
-    constexpr uint32_t LENGTH_BITS_NUM = common::BaseString::STRING_LENGTH_BITS_NUM;
+    constexpr uint32_t LENGTH_BITS_NUM = common_vm::BaseString::STRING_LENGTH_BITS_NUM;
     constexpr auto LENGTH_ZERO = (((uint32_t)0xFFFFFFFF) << LENGTH_BITS_NUM) >> LENGTH_BITS_NUM;
     auto offset = runtime->GetStringLengthOffset(arch);
     auto strLengthOffset = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), str, offset);
@@ -449,7 +449,7 @@ bool LLVMIrConstructor::EmitStringLastIndexOf(Inst *inst)
     builder_.CreateCondBr(strLengthZero, retBb, chkRangeBb);
     // Make startIndex = str.length - 1 if startIndex >= str.length
     SetCurrentBasicBlock(chkRangeBb);
-    constexpr auto LENGTH_START_BIT = common::BaseString::LengthBits::START_BIT;
+    constexpr auto LENGTH_START_BIT = common_vm::BaseString::LengthBits::START_BIT;
     auto strLength = builder_.CreateLShr(strLengthPacked, builder_.getInt32(LENGTH_START_BIT));
     builder_.CreateCondBr(builder_.CreateICmpULT(startIndex, strLength), callBb, fitBb);
     SetCurrentBasicBlock(fitBb);

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_BASE_CONFIG_H
-#define COMMON_COMPONENTS_BASE_CONFIG_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_BASE_CONFIG_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_CONFIG_H
 
-namespace common {
+namespace common_vm {
     
 #if defined (NEXT_OPTIMIZATION_MACRO)
 #define ENABLE_NEXT_OPTIMIZATION 1
@@ -34,6 +34,6 @@ namespace common {
 
 #define ECMASCRIPT_ENABLE_TRACE_STRING_TABLE 0
 
-}  // namespace common
+}  // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_BASE_CONFIG_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_CONFIG_H

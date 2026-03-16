@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H
-#define COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H
 
 #include <sys/mman.h>
 
@@ -22,7 +22,7 @@
 #include "common_components/base/sys_call.h"
 #include "securec.h"
 
-namespace common {
+namespace common_vm {
 class SafepointPageManager {
 public:
     SafepointPageManager() {}
@@ -61,6 +61,6 @@ private:
     uint8_t* unreadablePage_ = nullptr;
     uint8_t* unreadablePageForRawData_ = nullptr;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOCATOR_H
-#define COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOCATOR_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOCATOR_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOCATOR_H
 
 #include "common_components/heap/allocator/alloc_buffer_manager.h"
 #include "common_components/heap/heap.h"
 
-namespace common {
+namespace common_vm {
 // Allocator abstract class
 class Allocator {
 public:
@@ -91,6 +91,6 @@ private:
     bool InitAyncAllocation();
     bool asyncAllocationInitSwitch_ = true;
 };
-} // namespace common
+} // namespace common_vm
 
 #endif

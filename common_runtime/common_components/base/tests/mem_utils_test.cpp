@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include "common_components/base/mem_utils.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
-namespace common::test {
-class MemUtilsTest : public common::test::BaseTestWithScope {
+using namespace common_vm;
+namespace common_vm::test {
+class MemUtilsTest : public common_vm::test::BaseTestWithScope {
 };
 
 HWTEST_F_L0(MemUtilsTest, CopyZeroBytes)
@@ -47,4 +47,4 @@ HWTEST_F_L0(MemUtilsTest, CopyTwoChunks)
 
     EXPECT_EQ(memcmp(dest, src, totalSize), 0);
 }
-} // namespace common::test
+} // namespace common_vm::test

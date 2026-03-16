@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 #include "common_components/common/run_type.h"
 
-namespace common {
+namespace common_vm {
 // REMEMBER TO CHANGE NUM_OF_RUN_TYPES WHEN YOU ADD/REMOVE CONFIGS
 // this stores a config for each kind of run (represented by an index)
 const RunType RunType::TYPES[NUM_OF_RUN_TYPES] = {
@@ -125,4 +125,4 @@ void RunType::InitRunTypeMap()
     ASSERT_LOGF(RUNTYPE_SIZE_TO_RUN_IDX(RUN_ALLOC_LARGE_SIZE) + 1 == RunType::NUM_OF_RUN_TYPES,
                 "run config inconsistent: large size");
 }
-} // namespace common
+} // namespace common_vm

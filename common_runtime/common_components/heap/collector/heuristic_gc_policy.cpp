@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 #include "common_components/heap/heap.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common {
+namespace common_vm {
 std::atomic<StartupStatus> StartupStatusManager::startupStatus_ = StartupStatus::BEFORE_STARTUP;
 
 void StartupStatusManager::OnAppStartup()
 {
     startupStatus_ = StartupStatus::COLD_STARTUP;
-    Taskpool *threadPool = common::Taskpool::GetCurrentTaskpool();
+    Taskpool *threadPool = common_vm::Taskpool::GetCurrentTaskpool();
     threadPool->PostDelayedTask(
         std::make_unique<StartupTask>(0, threadPool, STARTUP_DURATION_MS), STARTUP_DURATION_MS);
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL,
@@ -203,10 +203,10 @@ void HeuristicGCPolicy::ChangeGCParams(bool isBackground)
             allocated > MIN_BACKGROUND_GC_SIZE) {
             Heap::GetHeap().GetCollector().RequestGC(GC_REASON_BACKGROUND, true, GC_TYPE_FULL);
         }
-        common::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common::PriorityMode::BACKGROUND);
+        common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::BACKGROUND);
         BaseRuntime::GetInstance()->GetGCParam().multiplier = 1;
     } else {
-        common::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common::PriorityMode::FOREGROUND);
+        common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::FOREGROUND);
         // 3: The front-end application waterline is 3 times
         BaseRuntime::GetInstance()->GetGCParam().multiplier = 3;
     }
@@ -238,4 +238,4 @@ bool HeuristicGCPolicy::CheckAndTriggerHintGC(MemoryReduceDegree degree)
     }
     return false;
 }
-} // namespace common
+} // namespace common_vm

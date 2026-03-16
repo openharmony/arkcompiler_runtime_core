@@ -20,8 +20,8 @@
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/thread/mutator.h"
 
-using namespace common;
-namespace common::test {
+using namespace common_vm;
+namespace common_vm::test {
 
 class SatbBufferTest : public BaseTestWithScope {
 protected:
@@ -60,7 +60,7 @@ HWTEST_F_L0(SatbBufferTest, NullptrReturnsFalse)
 
 HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject1)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -75,7 +75,7 @@ HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject1)
 
 HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject2)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -90,7 +90,7 @@ HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject2)
 
 HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject3)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -105,7 +105,7 @@ HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject3)
 
 HWTEST_F_L0(SatbBufferTest, IsYoungSpaceObject4)
 {
-    auto* mutator = common::Mutator::GetMutator();
+    auto* mutator = common_vm::Mutator::GetMutator();
     mutator->SetMutatorPhase(GCPhase::GC_PHASE_ENUM);
     RegionalHeap& theAllocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     uintptr_t addr = theAllocator.AllocOldRegion();
@@ -185,4 +185,4 @@ HWTEST_F_L0(SatbBufferTest, EnqueueObject)
     bool result = SatbBuffer::Instance().ShouldEnqueue(obj);
     EXPECT_FALSE(result);
 }
-}  // namespace common::test
+}  // namespace common_vm::test

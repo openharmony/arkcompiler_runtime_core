@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H
-#define COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H
 
 #include <functional>
 
@@ -22,7 +22,7 @@
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/common/mark_work_stack.h"
 
-namespace common {
+namespace common_vm {
 
 enum class AllocBufferType: uint8_t {
     YOUNG = 0, // for young space
@@ -177,6 +177,6 @@ private:
 };
 
 static_assert(AllocationBuffer::GetTLRegionOffset() == 0);
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H

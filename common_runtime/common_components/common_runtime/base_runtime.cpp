@@ -24,7 +24,7 @@
 #include "common_components/mutator/mutator_manager.h"
 #include "common_interfaces/thread/mutator_state_transition.h"
 
-namespace common {
+namespace common_vm {
 
 std::mutex BaseRuntime::vmCreationLock_;
 BaseRuntime *BaseRuntime::baseRuntimeInstance_ = nullptr;
@@ -261,4 +261,4 @@ void BaseRuntime::NotifyHighSensitive(bool isStart)
     Heap::GetHeap().NotifyHighSensitive(isStart);
 }
 
-}  // namespace common
+}  // namespace common_vm

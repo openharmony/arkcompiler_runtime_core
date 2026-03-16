@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOCATOR_FIX_HEAP_H
-#define COMMON_COMPONENTS_HEAP_ALLOCATOR_FIX_HEAP_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_FIX_HEAP_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_FIX_HEAP_H
 
 #include <functional>
 #include <stack>
 #include <vector>
 #include "common_components/taskpool/task.h"
-namespace common {
+namespace common_vm {
 
 class ArkCollector;
 class MarkingCollector;
@@ -62,7 +62,7 @@ using FixHeapTaskList = std::vector<FixHeapTask>;
 /**
  * Worker class for parallel heap fixing operations
  */
-class FixHeapWorker : public common::Task {
+class FixHeapWorker : public common_vm::Task {
 public:
     /**
      * Result structure containing the collected garbages and stats of heap fixing operations
@@ -121,7 +121,7 @@ private:
 /**
  * Worker class for collecting garbages units after heap fixing operations
  */
-class PostFixHeapWorker : public common::Task {
+class PostFixHeapWorker : public common_vm::Task {
 public:
     PostFixHeapWorker(FixHeapWorker::Result &result, TaskPackMonitor &monitor) noexcept
 
@@ -148,5 +148,5 @@ private:
     FixHeapWorker::Result &result_;
 };
 
-};  // namespace common
+};  // namespace common_vm
 #endif

@@ -194,8 +194,8 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
 extern "C" void *ReadBarrierFuncEntrypoint(void **fieldPtr)
 {
     if constexpr (GCCMCBarrierSet::USE_READ_BARRIERS) {
-        auto field = *reinterpret_cast<common::RefField<false> *>(*fieldPtr);
-        return common::BaseRuntime::ReadBarrier(field.GetTargetObject(), *fieldPtr);
+        auto field = *reinterpret_cast<common_vm::RefField<false> *>(*fieldPtr);
+        return common_vm::BaseRuntime::ReadBarrier(field.GetTargetObject(), *fieldPtr);
     }
     return nullptr;
 }
@@ -218,8 +218,8 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
     if (storedValAddr == nullptr) {
         return;
     }
-    common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
-                                      storedValAddr);
+    common_vm::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
+                                         storedValAddr);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
@@ -232,8 +232,8 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
     while (begin < end) {
         auto value = *begin;
         if (value != 0) {
-            common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), static_cast<void *>(begin),
-                                              ToVoidPtr(value));
+            common_vm::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), static_cast<void *>(begin),
+                                                 ToVoidPtr(value));
         }
         ++begin;
     }
@@ -248,7 +248,7 @@ bool GCCMCBarrierSet::IsReadBarrierEnabled()
 void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
 {
     if constexpr (USE_READ_BARRIERS) {
-        return common::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
+        return common_vm::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
     }
     return nullptr;
 }
@@ -259,11 +259,11 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
         auto *readBarrier = ManagedThread::GetCurrent()->GetReadBarrierEntrypoint();
         if (readBarrier != nullptr) {
             reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(refAddr);
-            auto field = *reinterpret_cast<common::RefField<false> *>(*refAddr);
+            auto field = *reinterpret_cast<common_vm::RefField<false> *>(*refAddr);
             return field.GetTargetObject();
         }
     }
-    auto field = *reinterpret_cast<common::RefField<false> *>(*refAddr);
+    auto field = *reinterpret_cast<common_vm::RefField<false> *>(*refAddr);
     return field.GetTargetObject();
 }
 

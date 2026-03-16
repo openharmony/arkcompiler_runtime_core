@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_TASKPOOL_TASK_H
-#define COMMON_COMPONENTS_TASKPOOL_TASK_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASK_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASK_H
 
 #include <atomic>
 #include <condition_variable>
@@ -22,7 +22,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common {
+namespace common_vm {
 enum class TaskType : uint8_t {
     PGO_RESET_OUT_PATH_TASK,
     PGO_DUMP_TASK,
@@ -158,5 +158,5 @@ private:
     std::condition_variable cv_;
     std::mutex mutex_;
 };
-}  // namespace common
-#endif  // COMMON_COMPONENTS_TASKPOOL_TASK_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASK_H

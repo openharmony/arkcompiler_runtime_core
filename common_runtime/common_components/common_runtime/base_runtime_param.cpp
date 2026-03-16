@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include "common_components/platform/cpu.h"
 
-namespace common {
+namespace common_vm {
 size_t BaseRuntimeParam::InitHeapSize()
 {
     constexpr auto DEFAULT_HEAP_SIZE_PERCENTAGE = 0.6;
@@ -49,4 +49,4 @@ RuntimeParam BaseRuntimeParam::DefaultRuntimeParam()
 
     return param;
 }
-} // namespace common
+} // namespace common_vm

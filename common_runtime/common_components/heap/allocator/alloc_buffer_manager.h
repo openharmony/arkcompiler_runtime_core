@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_BUFFER_MANAGER
-#define COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_BUFFER_MANAGER
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_BUFFER_MANAGER
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_BUFFER_MANAGER
 
 #include <atomic>
 #include <functional>
@@ -24,7 +24,7 @@
 #include "common_components/base/atomic_spin_lock.h"
 #include "common_components/common/page_allocator.h"
 #include "common_components/common/run_type.h"
-namespace common {
+namespace common_vm {
 using AllocBufferVisitor = std::function<void(AllocationBuffer& buffer)>;
 class AllocBufferManager {
 public:
@@ -83,5 +83,5 @@ private:
     std::mutex hungryBuffersLock_;
     AtomicSpinLock allocBufferLock_;
 };
-} // namespace common
+} // namespace common_vm
 #endif // ~COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_BUFFER_MANAGER

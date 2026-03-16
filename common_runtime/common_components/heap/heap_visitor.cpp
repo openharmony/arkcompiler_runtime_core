@@ -17,7 +17,7 @@
 #include "common_components/common_runtime/hooks.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 
 void VisitRoots(const RefFieldVisitor &visitor)
 {
@@ -119,4 +119,4 @@ void AddXRefToRoots()
 void RemoveXRefFromRoots()
 {
 }
-}  // namespace common
+}  // namespace common_vm

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common {
+namespace common_vm {
 void FromSpace::DumpRegionStats() const
 {
     size_t fromRegions = fromRegionList_.GetRegionCount();
@@ -180,4 +180,4 @@ void FromSpace::GetPromotedTo(OldSpace& mspace)
 {
     mspace.PromoteRegionList(exemptedFromRegionList_);
 }
-} // namespace common
+} // namespace common_vm

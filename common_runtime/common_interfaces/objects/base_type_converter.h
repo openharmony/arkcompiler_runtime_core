@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
-#define COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
 
 #include "common_interfaces/objects/base_type.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 // Type Converter implemented for dynamic vm.
 class DynamicTypeConverterInterface {
 public:
@@ -29,5 +29,5 @@ public:
     // convert JSTaggedValue to BaseType
     virtual BaseType UnWrapTagged(JSTaggedValue value) = 0;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H

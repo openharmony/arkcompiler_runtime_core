@@ -431,7 +431,7 @@ extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[m
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    common::BaseRuntime::WriteBarrier(obj, field, ref);
+    common_vm::BaseRuntime::WriteBarrier(obj, field, ref);
 #else
     UNREACHABLE();
 #endif
@@ -442,8 +442,8 @@ extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj,
                                         [[maybe_unused]] ark::ObjectHeader *ref2)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1);
-    common::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2);
+    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1);
+    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2);
 #else
     UNREACHABLE();
 #endif
@@ -453,7 +453,7 @@ extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[ma
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    return common::BaseRuntime::ReadBarrier(obj, field);
+    return common_vm::BaseRuntime::ReadBarrier(obj, field);
 #else
     UNREACHABLE();
     return nullptr;  // No-op
@@ -464,7 +464,7 @@ extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    return common::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
+    return common_vm::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
 #else
     UNREACHABLE();
     return nullptr;  // No-op

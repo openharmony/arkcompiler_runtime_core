@@ -28,7 +28,7 @@
 #include "qos.h"
 #endif
 
-namespace common {
+namespace common_vm {
 bool ArkCollector::IsUnmovableFromObject(BaseObject* obj) const
 {
     // filter const string object.
@@ -159,7 +159,7 @@ static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMar
             obj, &field, targetObj, targetObj->GetTypeInfo(), targetObj->GetSize());
         return;
     }
-    common::MarkingRefField(obj, targetObj, field, markStack, targetRegion);
+    common_vm::MarkingRefField(obj, targetObj, field, markStack, targetRegion);
 }
 
 // note each ref-field will not be marked twice, so each old pointer the markingr meets must come from previous gc.
@@ -390,7 +390,7 @@ private:
     ArkCollector *collector_;
 };
 
-class RemarkingAndPreforwardTask : public common::Task {
+class RemarkingAndPreforwardTask : public common_vm::Task {
 public:
     RemarkingAndPreforwardTask(ArkCollector *collector, GlobalMarkStack &globalMarkStack, TaskPackMonitor &monitor,
                                std::function<Mutator*()>& next)
@@ -556,8 +556,8 @@ CArrayList<BaseObject *> ArkCollector::EnumRoots()
 {
     STWParam stwParam{"wgc-enumroot"};
     EnumRootsBuffer buffer;
-    CArrayList<common::BaseObject *> *results = buffer.GetBuffer();
-    common::RefFieldVisitor visitor = [&results](RefField<>& field) { results->push_back(field.GetTargetObject()); };
+    CArrayList<common_vm::BaseObject *> *results = buffer.GetBuffer();
+    common_vm::RefFieldVisitor visitor = [&results](RefField<>& field) { results->push_back(field.GetTargetObject()); };
 
     if constexpr (policy == EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR) {
         EnumRootsImpl<VisitRoots>(visitor);
@@ -660,7 +660,7 @@ void ArkCollector::PreforwardFlip()
 {
     auto remarkAndForwardGlobalRoot = [this]() {
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
-        SetGCThreadQosPriority(common::PriorityMode::STW);
+        SetGCThreadQosPriority(common_vm::PriorityMode::STW);
         ASSERT_LOGF(GetThreadPool() != nullptr, "thread pool is null");
         TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
         Remark();
@@ -669,7 +669,7 @@ void ArkCollector::PreforwardFlip()
 
         TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
-        SetGCThreadQosPriority(common::PriorityMode::FOREGROUND);
+        SetGCThreadQosPriority(common_vm::PriorityMode::FOREGROUND);
 
         VisitWeakGlobalRoots(weakVisitor, Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
     };
@@ -961,12 +961,12 @@ void ArkCollector::DoGarbageCollection()
 }
 
 CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam& param,
-                                                                 const common::RefFieldVisitor &visitor)
+                                                                 const common_vm::RefFieldVisitor &visitor)
 {
     const auto enumGlobalRoots = [this, &visitor]() {
-        SetGCThreadQosPriority(common::PriorityMode::STW);
+        SetGCThreadQosPriority(common_vm::PriorityMode::STW);
         EnumRootsImpl<VisitGlobalRoots>(visitor);
-        SetGCThreadQosPriority(common::PriorityMode::FOREGROUND);
+        SetGCThreadQosPriority(common_vm::PriorityMode::FOREGROUND);
     };
 
     std::mutex stackMutex;
@@ -1174,7 +1174,7 @@ void ArkCollector::CollectSmallSpace()
     collectorResources_.GetFinalizerProcessor().NotifyToReclaimGarbage();
 }
 
-void ArkCollector::SetGCThreadQosPriority(common::PriorityMode mode)
+void ArkCollector::SetGCThreadQosPriority(common_vm::PriorityMode mode)
 {
 #ifdef ENABLE_QOS
     LOG_COMMON(DEBUG) << "SetGCThreadQosPriority gettid " << gettid();
@@ -1196,9 +1196,9 @@ void ArkCollector::SetGCThreadQosPriority(common::PriorityMode mode)
             UNREACHABLE_CC();
             break;
     }
-    common::Taskpool::GetCurrentTaskpool()->SetThreadPriority(mode);
+    common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(mode);
 #endif
 }
 
 bool ArkCollector::ShouldIgnoreRequest(GCRequest& request) { return request.ShouldBeIgnored(); }
-} // namespace common
+} // namespace common_vm

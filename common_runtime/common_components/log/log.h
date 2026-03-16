@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_LOG_LOG_H
-#define COMMON_COMPONENTS_LOG_LOG_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_H
 
 #include <cstdint>
 #include <string>
@@ -51,7 +51,7 @@
 #define OHOS_HITRACE_COUNT(level, name, count)
 #endif
 
-namespace common {
+namespace common_vm {
 class PUBLIC_API Log {
 public:
     static void Initialize(const LogOptions &options);
@@ -183,19 +183,20 @@ private:
 
 #if defined(ENABLE_HILOG)
 #define ARK_LOG(level, component) \
-    common::Log::LogIsLoggable(Level::level, component) && common::HiLog<LOG_##level, (component)>()
+    common_vm::Log::LogIsLoggable(Level::level, component) && common_vm::HiLog<LOG_##level, (component)>()
 #elif defined(ENABLE_ANLOG)
-#define ARK_LOG(level, component) common::AndroidLog<(Level::level)>()
+// CC-OFFNXT(G.PRE.02-CPP) macro definition
+#define ARK_LOG(level, component) common_vm::AndroidLog<(Level::level)>()
 #else
 #if defined(OHOS_UNIT_TEST)
 #define ARK_LOG(level, component)                                                             \
-    ((Level::level >= Level::INFO) || common::Log::LogIsLoggable(Level::level, component)) && \
-        common::StdLog<(Level::level), (component)>()
+    ((Level::level >= Level::INFO) || common_vm::Log::LogIsLoggable(Level::level, component)) && \
+        common_vm::StdLog<(Level::level), (component)>()
 #else
 // CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
 #define ARK_LOG(level, component)                                                  \
     /* CC-OFFNXT(G.PRE.02) level is enum and can not be enclosed to parentheses */ \
-    common::Log::LogIsLoggable(Level::level, component) && common::StdLog<(Level::level), (component)>()
+    common_vm::Log::LogIsLoggable(Level::level, component) && common_vm::StdLog<(Level::level), (component)>()
 #endif
 #endif
 
@@ -246,14 +247,14 @@ class Timer {
 public:
     explicit Timer(const std::string pName) : name_(pName)
     {
-        if (common::Log::LogIsLoggable(Level::DEBUG, Component::GC)) {
+        if (common_vm::Log::LogIsLoggable(Level::DEBUG, Component::GC)) {
             startTime_ = TimeUtil::MicroSeconds();
         }
     }
 
     ~Timer()
     {
-        if (common::Log::LogIsLoggable(Level::DEBUG, Component::GC)) {
+        if (common_vm::Log::LogIsLoggable(Level::DEBUG, Component::GC)) {
             uint64_t stopTime = TimeUtil::MicroSeconds();
             uint64_t diffTime = stopTime - startTime_;
             VLOG(DEBUG, "%s time: %sus", name_.c_str(), Pretty(diffTime).c_str());
@@ -264,5 +265,5 @@ private:
     std::string name_;
     uint64_t startTime_ = 0;
 };
-}  // namespace common
-#endif  // COMMON_COMPONENTS_LOG_LOG_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_H

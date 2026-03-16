@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,14 @@
 #include "common_components/heap/heap_manager.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 const uint32_t TWO_SECONDS = 2;
 const uint32_t HUNDRED_MILLISECONDS = 100;
 constexpr uint64_t TAG_BOOLEAN = 0x04ULL;
 
-class FinalizerProcessorTest : public common::test::BaseTestWithScope {
+class FinalizerProcessorTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -48,23 +48,23 @@ protected:
 HWTEST_F_L0(FinalizerProcessorTest, RegisterFinalizer_TEST1)
 {
     FinalizerProcessor finalizerProcessor;
-    HeapAddress addr = common::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
+    HeapAddress addr = common_vm::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
     BaseObject *obj = reinterpret_cast<BaseObject*>(addr | TAG_BOOLEAN);
     new (obj) BaseObject(); // Construct BaseObject
     finalizerProcessor.RegisterFinalizer(obj);
-    bool flag = common::RegionalHeap::IsMarkedObject(obj);
+    bool flag = common_vm::RegionalHeap::IsMarkedObject(obj);
     EXPECT_FALSE(flag);
 }
 
 HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST1)
 {
     FinalizerProcessor finalizerProcessor;
-    HeapAddress addr = common::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
+    HeapAddress addr = common_vm::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
     BaseObject *obj = reinterpret_cast<BaseObject*>(addr | TAG_BOOLEAN);
     new (obj) BaseObject(); // Construct BaseObject
     finalizerProcessor.RegisterFinalizer(obj);
     std::function<bool(BaseObject*)> finalizable = [](BaseObject* obj) {
-        return !common::RegionalHeap::IsMarkedObject(obj);
+        return !common_vm::RegionalHeap::IsMarkedObject(obj);
     };
     finalizerProcessor.EnqueueFinalizables(finalizable, 1);
     bool flag = finalizable(obj);
@@ -74,7 +74,7 @@ HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST1)
 HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST2)
 {
     FinalizerProcessor finalizerProcessor;
-    HeapAddress addr = common::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
+    HeapAddress addr = common_vm::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
     BaseObject *obj = reinterpret_cast<BaseObject*>(addr | TAG_BOOLEAN);
     new (obj) BaseObject();
     finalizerProcessor.RegisterFinalizer(obj);
@@ -82,7 +82,7 @@ HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST2)
         return;
     };
     std::function<bool(BaseObject*)> finalizable = [this](BaseObject* obj) {
-        return common::RegionalHeap::IsMarkedObject(obj);
+        return common_vm::RegionalHeap::IsMarkedObject(obj);
     };
     auto before = finalizerProcessor.VisitFinalizers(visitor);
     finalizerProcessor.EnqueueFinalizables(finalizable, 1);
@@ -99,7 +99,7 @@ HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST3)
         return;
     };
     std::function<bool(BaseObject*)> finalizable = [this](BaseObject* obj) {
-        return common::RegionalHeap::IsMarkedObject(obj);
+        return common_vm::RegionalHeap::IsMarkedObject(obj);
     };
     auto num1 = finalizerProcessor.VisitFinalizers(visitor);
     finalizerProcessor.EnqueueFinalizables(finalizable, 0);
@@ -107,7 +107,7 @@ HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST3)
     auto num2 = finalizerProcessor.VisitFinalizers(visitor);
     finalizerProcessor.EnqueueFinalizables(finalizable, 1);
     EXPECT_EQ(num2, 0);
-    HeapAddress addr = common::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
+    HeapAddress addr = common_vm::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
     BaseObject *obj = reinterpret_cast<BaseObject*>(addr | TAG_BOOLEAN);
     new (obj) BaseObject();
     finalizerProcessor.RegisterFinalizer(obj);
@@ -121,7 +121,7 @@ HWTEST_F_L0(FinalizerProcessorTest, EnqueueFinalizables_TEST3)
 HWTEST_F_L0(FinalizerProcessorTest, Run_TEST1)
 {
     FinalizerProcessor finalizerProcessor;
-    HeapAddress addr = common::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
+    HeapAddress addr = common_vm::HeapManager::Allocate(sizeof(BaseObject), AllocType::MOVEABLE_OBJECT, true);
     BaseObject *obj = reinterpret_cast<BaseObject*>(addr | TAG_BOOLEAN);
     new (obj) BaseObject();
     AllocationBuffer* buffer = new (std::nothrow) AllocationBuffer();
@@ -142,4 +142,4 @@ HWTEST_F_L0(FinalizerProcessorTest, Run_TEST1)
     EXPECT_NE(buffer->GetPreparedRegion(), nullptr);
     delete buffer;
 }
-} // namespace common::test
+} // namespace common_vm::test

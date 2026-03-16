@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H
-#define COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H
 
 #include "common_interfaces/objects/base_object.h"
 
-namespace common {
+namespace common_vm {
 struct ObjectSlot {
     ObjectSlot* next;
 };
@@ -47,6 +47,6 @@ public:
 private:
     ObjectSlot* head_ = nullptr;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H

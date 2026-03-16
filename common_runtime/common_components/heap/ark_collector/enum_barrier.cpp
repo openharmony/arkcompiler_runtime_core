@@ -21,7 +21,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-namespace common {
+namespace common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
 // so we don't expect reading barrier have the ability to modify the referent field.
 BaseObject* EnumBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) const
@@ -208,4 +208,4 @@ void EnumBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MInd
     UNREACHABLE_CC();
 }
 
-} // namespace common
+} // namespace common_vm

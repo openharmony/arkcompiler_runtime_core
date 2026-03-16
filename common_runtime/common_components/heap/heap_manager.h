@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H
-#define COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H
 
 #include "common_components/common/type_def.h"
 #include "common_components/heap/collector/gc_request.h"
 #include "common_interfaces/base/runtime_param.h"
 
-namespace common {
+namespace common_vm {
 class BaseObject;
 // replace this for Heap.
 class HeapManager {
@@ -48,5 +48,5 @@ public:
     void ClearReadOnlyFromROSpace();
     bool IsInROSpace(BaseObject *obj);
 };
-} // namespace common
-#endif // COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H
+} // namespace common_vm
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H

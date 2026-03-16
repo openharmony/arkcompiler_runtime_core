@@ -33,7 +33,7 @@
 #include "common_interfaces/thread/mutator_state_transition.h"
 #include "common_interfaces/heap/heap_allocator.h"
 
-namespace common {
+namespace common_vm {
 template <bool ConcurrentSweep>
 BaseString* BaseStringTableInternal<ConcurrentSweep>::AllocateLineStringObject(size_t size)
 {

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-class PageProtectTest : public common::test::BaseTestWithScope {
+class PageProtectTest : public common_vm::test::BaseTestWithScope {
 protected:
     void SetUp() override {}
     void TearDown() override {}
@@ -31,7 +31,7 @@ HWTEST_F_L0(PageProtectTest, TestPageProtect)
     void* mem = mmap(nullptr, pageSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     ASSERT_NE(mem, MAP_FAILED);
 
-    bool success = common::PageProtect(mem, pageSize, PROT_READ);
+    bool success = common_vm::PageProtect(mem, pageSize, PROT_READ);
     EXPECT_TRUE(success);
 
     munmap(mem, pageSize);
@@ -39,6 +39,6 @@ HWTEST_F_L0(PageProtectTest, TestPageProtect)
 
 HWTEST_F_L0(PageProtectTest, TestNullptrMemory)
 {
-    bool success = common::PageProtect(nullptr, getpagesize(), -1);
+    bool success = common_vm::PageProtect(nullptr, getpagesize(), -1);
     EXPECT_FALSE(success);
 }

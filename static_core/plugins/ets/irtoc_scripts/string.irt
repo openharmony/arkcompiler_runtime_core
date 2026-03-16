@@ -34,7 +34,7 @@ module Constants
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
   ASCII_CHAR_CACHE_OFFSET = "cross_values::GetPlatformTypesAsciiCharCacheOffset(graph->GetArch())"
-  STRING_PACKED_LENGTH_ZERO = "(((uint32_t)0xFFFFFFFF) << common::BaseString::STRING_LENGTH_BITS_NUM) >> common::BaseString::STRING_LENGTH_BITS_NUM"
+  STRING_PACKED_LENGTH_ZERO = "(((uint32_t)0xFFFFFFFF) << common_vm::BaseString::STRING_LENGTH_BITS_NUM) >> common_vm::BaseString::STRING_LENGTH_BITS_NUM"
   CHAR_FLIP_CASE_BIT = "1 << 5"
 end
 

@@ -21,7 +21,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-namespace common {
+namespace common_vm {
 BaseObject* PostMarkingBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) const
 {
     RefField<> tmpField(field);
@@ -163,4 +163,4 @@ void PostMarkingBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstFiel
     Sanitizer::TsanReadMemoryRange(reinterpret_cast<void*>(srcField), srcSize);
 #endif
 }
-} // namespace common
+} // namespace common_vm

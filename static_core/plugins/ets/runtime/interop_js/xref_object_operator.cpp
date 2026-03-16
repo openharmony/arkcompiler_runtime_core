@@ -49,7 +49,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const PandaString
     {
         ScopedNativeCodeThread nativeScope(coro);
         resultTaggedType =
-            common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsThis), name.c_str());
+            common_vm::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsThis), name.c_str());
     }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
@@ -226,8 +226,8 @@ EtsObject *XRefObjectOperator::Invoke(EtsCoroutine *coro, Span<VMHandle<ObjectHe
     TaggedType *jsRetTaggedType = nullptr;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        jsRetTaggedType = common::DynamicObjectAccessorUtil::CallFunction(undefinedTaggedType, jsFuncTaggedType,
-                                                                          dynamicArgs.size(), dynamicArgs.data());
+        jsRetTaggedType = common_vm::DynamicObjectAccessorUtil::CallFunction(undefinedTaggedType, jsFuncTaggedType,
+                                                                             dynamicArgs.size(), dynamicArgs.data());
     }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
@@ -307,8 +307,8 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, EtsHandle<EtsObj
     TaggedType *jsRetTaggedType = nullptr;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        jsRetTaggedType = common::DynamicObjectAccessorUtil::CallFunction(jsThisTaggedType, jsMethodTaggedType,
-                                                                          dynamicArgs.size(), dynamicArgs.data());
+        jsRetTaggedType = common_vm::DynamicObjectAccessorUtil::CallFunction(jsThisTaggedType, jsMethodTaggedType,
+                                                                             dynamicArgs.size(), dynamicArgs.data());
     }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);

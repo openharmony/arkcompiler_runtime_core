@@ -16,8 +16,8 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers,
 // readability-else-after-return, hicpp-signed-bitwise)
 
-#ifndef COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
-#define COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
 
 #include <vector>
 
@@ -29,7 +29,7 @@
 #include "common_interfaces/objects/utils/span.h"
 #include <securec.h>
 
-namespace common {
+namespace common_vm {
 std::u16string Utf16ToU16String(const uint16_t *utf16Data, uint32_t dataLen);
 std::u16string Utf8ToU16String(const uint8_t *utf8Data, uint32_t dataLen);
 
@@ -1081,8 +1081,8 @@ inline bool BaseString::IsUtf8EqualsUtf16(const uint8_t *utf8Data, size_t utf8Le
     }
     return utf8Data == utf8End && utf16Data == utf16End;
 }
-}  // namespace common
+}  // namespace common_vm
 
-#endif  // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers, readability-else-after-return,
 // hicpp-signed-bitwise)

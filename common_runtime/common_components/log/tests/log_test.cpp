@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 #include "common_components/log/log_base.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
+using namespace common_vm;
 
 // ==================== Test Fixture ====================
-namespace common::test {
-class LogTest : public common::test::BaseTestWithScope {
+namespace common_vm::test {
+class LogTest : public common_vm::test::BaseTestWithScope {
 protected:
     void SetUp() override
     {
@@ -70,7 +70,7 @@ HWTEST_F_L0(LogTest, PrettyOrderMathNano) {
 }
 }
 
-namespace common {
+namespace common_vm {
 class TestLogRedirect {
 public:
     TestLogRedirect()
@@ -109,10 +109,10 @@ private:
     std::streambuf* originalCerrBuffer;
 #endif
 };
-}  // namespace common
+}  // namespace common_vm
 
-namespace common::test {
-class TimerTest : public common::test::BaseTestWithScope {
+namespace common_vm::test {
+class TimerTest : public common_vm::test::BaseTestWithScope {
 protected:
     void SetUp() override
     {

@@ -21,7 +21,7 @@
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/heap/allocator/regional_heap.h"
 
-namespace common {
+namespace common_vm {
 Address AllocateYoungInAllocBuffer(uintptr_t buffer, size_t size)
 {
     CHECKF(buffer != 0);
@@ -33,7 +33,7 @@ Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size)
 {
     CHECKF(buffer != 0);
     AllocationBuffer *allocBuffer = reinterpret_cast<AllocationBuffer *>(buffer);
-    return allocBuffer->FastAllocateInTlab<common::AllocBufferType::OLD>(size);
+    return allocBuffer->FastAllocateInTlab<common_vm::AllocBufferType::OLD>(size);
 }
 
 Address HeapAllocator::AllocateInYoungOrHuge(size_t size, LanguageType language)
@@ -118,4 +118,4 @@ Address HeapAllocator::AllocateLargeRegion(size_t size)
     return allocator.AllocLargeRegion(size);
 }
 
-}  // namespace common
+}  // namespace common_vm

@@ -30,31 +30,32 @@ class PandaEtsVM;
 
 namespace ark::mem {
 
-class StaticObjectOperator : public common::BaseObjectOperatorInterfaces {
+class StaticObjectOperator : public common_vm::BaseObjectOperatorInterfaces {
 public:
     static void Initialize();
 
-    bool IsValidObject([[maybe_unused]] const common::BaseObject *object) const override
+    bool IsValidObject([[maybe_unused]] const common_vm::BaseObject *object) const override
     {
         return true;
     }
 
-    void ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &fieldHandler,
-                         const common::RefFieldVisitor &weakFieldHandler) const override;
-    size_t ForEachRefFieldAndGetSize(const common::BaseObject *object, const common::RefFieldVisitor &fieldHandler,
-                                     const common::RefFieldVisitor &weakFieldHandler) const override;
-    void ClearRef(common::RefField<> &field) const override;
+    void ForEachRefField(const common_vm::BaseObject *object, const common_vm::RefFieldVisitor &fieldHandler,
+                         const common_vm::RefFieldVisitor &weakFieldHandler) const override;
+    size_t ForEachRefFieldAndGetSize(const common_vm::BaseObject *object,
+                                     const common_vm::RefFieldVisitor &fieldHandler,
+                                     const common_vm::RefFieldVisitor &weakFieldHandler) const override;
+    void ClearRef(common_vm::RefField<> &field) const override;
 
-    size_t GetSize(const common::BaseObject *object) const override
+    size_t GetSize(const common_vm::BaseObject *object) const override
     {
         // ObjectHeader must be binary compatible with BaseObject
         auto *hdr = reinterpret_cast<const ObjectHeader *>(object);
         return hdr->ObjectSize();
     }
 
-    common::BaseObject *GetForwardingPointer(const common::BaseObject *object) const override;
+    common_vm::BaseObject *GetForwardingPointer(const common_vm::BaseObject *object) const override;
 
-    void SetForwardingPointerAfterExclusive(common::BaseObject *object, common::BaseObject *fwdPtr) override;
+    void SetForwardingPointerAfterExclusive(common_vm::BaseObject *object, common_vm::BaseObject *fwdPtr) override;
 
 private:
     static StaticObjectOperator instance_;

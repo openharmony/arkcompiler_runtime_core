@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_INL_H
-#define COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_INL_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_INL_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_INL_H
 
 #include "common_components/log/log.h"
 #include "common_interfaces/objects/readonly_handle.h"
@@ -23,7 +23,7 @@
 #include "common_components/objects/string_table/hashtriemap.h"
 #include "common_components/objects/string_table/integer_cache.h"
 
-namespace common {
+namespace common_vm {
 // Expand to get oldEntry and newEntry, with hash conflicts from 32 bits up to
 // hashShift and Generate a subtree of indirect nodes to hold two new entries.
 template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
