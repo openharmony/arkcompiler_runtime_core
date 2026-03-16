@@ -139,3 +139,108 @@ cases:
         arktest.assertTrue(
             x instanceof ((p1: Array<int>, p2: Array<long>, p3: Array<string>, p4: Array<Object>) => Array<int>) // CTE expected
         )
+
+    # generic function
+    - decl: |-
+          function test<T>(p: Object) {
+              return p instanceof T
+          }
+
+    - decl: |-
+          function test<T extends Error>(p: Object) {
+              return p instanceof T
+          }
+
+    # generic class
+    - decl: |-
+          class A<T> {
+              test(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    - decl: |-
+          class A<T extends Error> {
+              test(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    # generic class method
+    - decl: |-
+          class A {
+              test<T>(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    - decl: |-
+          class A {
+              test<T extends Error>(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    # generic interface
+    - decl: |-
+          interface I<T> {
+              test(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    - decl: |-
+          interface I<T extends Error> {
+              test(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    # generic class, covariant type parameter
+    - decl: |-
+          class X {}
+          class Y extends X {}
+          class A<out T> {
+              readonly fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+              test() {
+                  return p instanceof T
+              }
+          }
+      use: |-
+          let x = new A<X>(new X)
+          console.log(x.fld instanceof Any)
+
+    - decl: |-
+          class A<out T extends Error> {
+              test(p: Object) {
+                  return p instanceof T
+              }
+          }
+
+    # generic function
+    - decl: |-
+          function test<T, U>(p: Object) {
+              return p instanceof (p: T) => U
+          }
+
+    - decl: |-
+          class A {
+              test<T extends number>(p: Object) {
+                  return p instanceof A<number>
+              }
+          }
+
+    - decl: |-
+          function test<T>(p: Object) {
+              return p instanceof (p: T) => void
+          }
+
+    - decl: |-
+          class A {
+              test<T>(p: Object) {
+                  return p instanceof A<T>
+              }
+          }
