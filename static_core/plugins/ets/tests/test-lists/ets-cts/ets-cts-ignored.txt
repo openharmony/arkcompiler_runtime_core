@@ -368,6 +368,17 @@
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_7.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_8.ets
 
+#33188
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_0.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_1.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_2.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_3.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_4.ets
+
+#33191
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_0.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_1.ets
+
 #33285
 07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
 
