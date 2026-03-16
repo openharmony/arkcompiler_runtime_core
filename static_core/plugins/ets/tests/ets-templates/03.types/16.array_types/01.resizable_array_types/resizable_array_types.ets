@@ -13,16 +13,119 @@
  * limitations under the License.
  */
 
- {% for case in cases %}
-
 /*---
-desc: Resizable array types
-
+desc: >-
+    Resizable array type with elements of type T can be declared
+    as Array<T> for various element types.
 ---*/
 
-type NS = String
+function main(): int {
+  let suite = new arktest.ArkTestsuite("Resizable Array Element Types")
 
-function main() {
-   let arr: Array<{{case.type}}> = [{{case.value}}];
+  suite.addTest("Array<byte>", () => {
+    let arr: Array<byte> = [1]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<short>", () => {
+    let arr: Array<short> = [1]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<int>", () => {
+    let arr: Array<int> = [1]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<long>", () => {
+    let arr: Array<long> = [1]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<bigint>", () => {
+    let arr: Array<bigint> = [1n]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<float>", () => {
+    let arr: Array<float> = [1.0f]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<double>", () => {
+    let arr: Array<double> = [1.0]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<boolean>", () => {
+    let arr: Array<boolean> = [true]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<char>", () => {
+    let arr: Array<char> = [c'a']
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<string>", () => {
+    let arr: Array<string> = ['abc']
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<Any>", () => {
+    let arr: Array<Any> = [1]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<Object>", () => {
+    let arr: Array<Object> = [new Object()]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<null>", () => {
+    let arr: Array<null> = [null]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<undefined>", () => {
+    let arr: Array<undefined> = [undefined]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<int | string> with int", () => {
+    let arr: Array<int | string> = [1]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<int | string> with string", () => {
+    let arr: Array<int | string> = ['abc']
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<int[]>", () => {
+    let arr: Array<int[]> = [[1, 0]]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<Array<int>>", () => {
+    let arr: Array<Array<int>> = [[1]]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<FixedArray<int>>", () => {
+    let arr: Array<FixedArray<int>> = [[1, 0]]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<() => void>", () => {
+    let arr: Array<() => void> = [(): void => {}]
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  suite.addTest("Array<'abc' | 'def'>", () => {
+    let arr: Array<'abc' | 'def'> = ['def']
+    arktest.assertEQ(arr.length, 1)
+  })
+
+  return suite.run()
 }
- {% endfor %}

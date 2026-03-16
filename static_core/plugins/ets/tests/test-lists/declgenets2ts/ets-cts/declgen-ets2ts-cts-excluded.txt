@@ -2086,6 +2086,10 @@
 03.types/16.array_types/01.resizable_array_types/put_to_empty_array.ets
 03.types/16.array_types/01.resizable_array_types/resizable_array_operations.ets
 03.types/16.array_types/01.resizable_array_types/shrink_array.ets
+03.types/16.array_types/01.resizable_array_types/resizable_array_types.ets
+03.types/16.array_types/array_index.ets
+03.types/16.array_types/array_type.ets
+03.types/16.array_types/object.ets
 03.types/19.union_types/01.union_types_normalization/utn01.ets
 03.types/19.union_types/01.union_types_normalization/utn02.ets
 03.types/19.union_types/01.union_types_normalization/utn03.ets
