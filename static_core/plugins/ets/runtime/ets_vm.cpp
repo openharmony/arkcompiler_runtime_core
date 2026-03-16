@@ -59,7 +59,7 @@
 #include "libarkbase/taskmanager/task_manager.h"
 
 namespace ark::mem::ets {
-void RegisterCmcGcCallbacks();
+common_vm::VMInterface *RegisterCmcGcCallbacks();
 }  // namespace ark::mem::ets
 
 namespace ark::ets {
@@ -67,7 +67,8 @@ namespace ark::ets {
 static PandaEtsVM *g_pandaEtsVM = nullptr;
 
 // Create MemoryManager by RuntimeOptions
-static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &options)
+static std::pair<mem::MemoryManager *, common_vm::VMInterface *> CreateMM(Runtime *runtime,
+                                                                          const RuntimeOptions &options)
 {
     mem::MemoryManager::HeapOptions heapOptions {
         nullptr,                                      // is_object_finalizeble_func
@@ -88,11 +89,38 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
 
+    common_vm::VMInterface *vmIface {nullptr};
 #if defined(ARK_USE_COMMON_RUNTIME)
-    ark::mem::ets::RegisterCmcGcCallbacks();
+    vmIface = ark::mem::ets::RegisterCmcGcCallbacks();
 #endif
 
-    return mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
+    auto *memMgr = mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
+    return std::make_pair(memMgr, vmIface);
+}
+
+static CoroutineManagerConfig CreateCoroutineManagerConfig(const RuntimeOptions &options)
+{
+    auto &taskPoolMode = options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    CoroutineManagerConfig cfg {
+        // enable drain queue interface
+        options.IsCoroutineEnableFeaturesAniDrainQueue(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable migration
+        options.IsCoroutineEnableFeaturesMigration(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable migrate awakened coroutines
+        options.IsCoroutineEnableFeaturesMigrateAwakened(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // workers_count
+        options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // exclusive workers limit
+        options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable perf stats
+        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable external timer implementation
+        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // number of reserved workers for taskpool
+        taskPoolMode == ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
+            ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
+            : 0};
+    return cfg;
 }
 
 /* static */
@@ -121,13 +149,13 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         return Unexpected(PandaString("Cannot create TaskManager"));
     }
 
-    auto mm = CreateMM(runtime, options);
+    auto [mm, vmIface] = CreateMM(runtime, options);
     if (mm == nullptr) {
         return Unexpected(PandaString("Cannot create MemoryManager"));
     }
 
     auto allocator = mm->GetHeapManager()->GetInternalAllocator();
-    auto vm = allocator->New<PandaEtsVM>(runtime, options, mm);
+    auto vm = allocator->New<PandaEtsVM>(runtime, options, mm, vmIface);
     if (vm == nullptr) {
         return Unexpected(PandaString("Cannot create PandaCoreVM"));
     }
@@ -178,8 +206,9 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
 }
 
 // CC-OFFNXT(G.FUD.05) solid logic
-PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm)
-    : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm)
+PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
+                       common_vm::VMInterface *vmIface)
+    : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm), vmIface_(vmIface)
 {
     ASSERT(runtime_ != nullptr);
     ASSERT(mm_ != nullptr);
@@ -216,27 +245,8 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     fullGCLongTimeListener_ = allocator->New<FullGCLongTimeListener>();
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+    auto cfg = CreateCoroutineManagerConfig(options);
     const auto &coroType = options.GetCoroutineImpl(langStr);
-    CoroutineManagerConfig cfg {
-        // enable drain queue interface
-        options.IsCoroutineEnableFeaturesAniDrainQueue(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable migration
-        options.IsCoroutineEnableFeaturesMigration(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable migrate awakened coroutines
-        options.IsCoroutineEnableFeaturesMigrateAwakened(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // workers_count
-        options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // exclusive workers limit
-        options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable perf stats
-        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable external timer implementation
-        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // number of reserved workers for taskpool
-        options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) ==
-                ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
-            ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
-            : 0};
     if (coroType == "stackful") {
         coroutineManager_ = allocator->New<StackfulCoroutineManager>(cfg, EtsCoroutine::Create<Coroutine>);
     } else {

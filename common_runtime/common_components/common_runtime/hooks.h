@@ -25,38 +25,7 @@
 // Visitor that iterate all `RefField`s in a TaggedObject and add them to
 // `LocalMarkStack` Should be moved to BaseRT and panda namespace later
 namespace common_vm {
-// Roots in BaseRuntime
-PUBLIC_API void VisitBaseRoots(const RefFieldVisitor &visitor);
-// Dynamic VM Roots scanning
-PUBLIC_API void VisitDynamicGlobalRoots(const RefFieldVisitor &visitor);
-PUBLIC_API void VisitDynamicWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc);
-PUBLIC_API void VisitDynamicWeakGlobalRootsOld(const WeakRefFieldVisitor &visitorFunc);
-PUBLIC_API void VisitDynamicLocalRoots(const RefFieldVisitor &visitor);
-PUBLIC_API void VisitDynamicWeakLocalRoots(const WeakRefFieldVisitor &visitorFunc);
-PUBLIC_API void VisitDynamicPreforwardRoots(const RefFieldVisitor &visitorFunc);
-// Inlcude concurrent local and concurrent global roots
-PUBLIC_API void VisitDynamicConcurrentRoots(const RefFieldVisitor &visitorFunc);
-
 PUBLIC_API void InvokeSharedNativePointerCallbacks();
-
-// Visit roots of specific mutator.
-PUBLIC_API void VisitDynamicThreadRoot(const RefFieldVisitor &visitorFunc, void *vm);
-PUBLIC_API void VisitDynamicWeakThreadRoot(const WeakRefFieldVisitor &visitorFunc, void *vm);
-PUBLIC_API void VisitDynamicThreadPreforwardRoot(const RefFieldVisitor &visitorFunc, void *vm);
-
-PUBLIC_API void VisitAllStaticRoots(const RefFieldVisitor &visitorFunc);
-PUBLIC_API void SetVisitAllStaticRootsCallback(void (*callback)(const RefFieldVisitor &));
-PUBLIC_API void VisitStaticMutatorRoots(const RefFieldVisitor &visitorFunc, void *mutator);
-PUBLIC_API void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &, void *));
-PUBLIC_API void VisitStaticGlobalRoots(const RefFieldVisitor &visitor);
-PUBLIC_API void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &));
-PUBLIC_API void UpdateAndSweepStaticRefs(const WeakRefFieldVisitor &visitor);
-PUBLIC_API void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor));
-PUBLIC_API void VisitStaticConcurrentRoots(const RefFieldVisitor &visitor);
-PUBLIC_API void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
-
-PUBLIC_API void UpdateReadBarrierEntrypoint(void *thread, GCPhase gcPhase);
-PUBLIC_API void SetUpdateReadBarrierEntrypoint(void (*callback) (void *thread, GCPhase gcPhase));
 
 PUBLIC_API void AddXRefToDynamicRoots();
 PUBLIC_API void RemoveXRefFromDynamicRoots();

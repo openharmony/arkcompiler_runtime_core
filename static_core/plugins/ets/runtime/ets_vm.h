@@ -69,6 +69,7 @@
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "plugins/ets/runtime/ets_stdlib_cache.h"
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
+#include "common_interfaces/vm_interface.h"
 
 namespace ark::ets {
 class DoubleToStringCache;
@@ -439,7 +440,8 @@ private:
         randomEngine_.emplace(rd());
     }
 
-    explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
+    explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
+                        common_vm::VMInterface *vmIface);
 
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
@@ -478,6 +480,7 @@ private:
     RunEventLoopFunction runEventLoop_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
     PandaUniquePtr<StdlibCache> stdLibCache_ {nullptr};
+    std::unique_ptr<common_vm::VMInterface> vmIface_;
 
     size_t preForkWorkerCount_ = 0;
 

@@ -18,78 +18,10 @@
 
 namespace common_vm {
 
-void (*g_visitAllStaticRootsCallback)(const RefFieldVisitor &) = nullptr;
-void (*g_visitStaticMutatorRootsCallback)(const RefFieldVisitor &, void *mutator) = nullptr;
-void (*g_visitStaticGlobalRootsCallback)(const RefFieldVisitor &) = nullptr;
-void (*g_updateAndSweepStaticRefsCallback)(const WeakRefFieldVisitor &visitor) = nullptr;
-void (*g_updateReadBarrierEntrypoint)(void *thread, GCPhase gcPhase) = nullptr;
-void (*g_visitStaticConcurrentRootsCallback)(const RefFieldVisitor &) = nullptr;
 void (*g_unmarkAllStaticXRefsCallback)() = nullptr;
 void (*g_sweepUnmarkedStaticXRefsCallback)() = nullptr;
 void (*g_addXRefToStaticRootsCallback)() = nullptr;
 void (*g_removeXRefFromStaticRootsCallback)() = nullptr;
-
-void VisitBaseRoots([[maybe_unused]] const RefFieldVisitor &visitor) {}
-
-void VisitAllStaticRoots(const RefFieldVisitor &visitorFunc)
-{
-    if (g_visitAllStaticRootsCallback != nullptr) {
-        g_visitAllStaticRootsCallback(visitorFunc);
-    }
-}
-
-void SetVisitAllStaticRootsCallback(void (*callback)(const RefFieldVisitor &))
-{
-    g_visitAllStaticRootsCallback = callback;
-}
-
-void VisitStaticMutatorRoots(const RefFieldVisitor &visitorFunc, void *mutator)
-{
-    if (g_visitStaticMutatorRootsCallback != nullptr) {
-        g_visitStaticMutatorRootsCallback(visitorFunc, mutator);
-    }
-}
-
-void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &visitorFunc, void *mutator))
-{
-    g_visitStaticMutatorRootsCallback = callback;
-}
-
-void VisitStaticGlobalRoots(const RefFieldVisitor &visitor)
-{
-    if (g_visitStaticGlobalRootsCallback != nullptr) {
-        g_visitStaticGlobalRootsCallback(visitor);
-    }
-}
-
-void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &))
-{
-    g_visitStaticGlobalRootsCallback = callback;
-}
-
-void UpdateAndSweepStaticRefs(const WeakRefFieldVisitor &visitor)
-{
-    if (g_updateAndSweepStaticRefsCallback != nullptr) {
-        g_updateAndSweepStaticRefsCallback(visitor);
-    }
-}
-
-void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor))
-{
-    g_updateAndSweepStaticRefsCallback = callback;
-}
-
-void VisitStaticConcurrentRoots(const RefFieldVisitor &visitor)
-{
-    if (g_visitStaticConcurrentRootsCallback != nullptr) {
-        g_visitStaticConcurrentRootsCallback(visitor);
-    }
-}
-
-void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &))
-{
-    g_visitStaticConcurrentRootsCallback = callback;
-}
 
 void UnmarkAllStaticXRefs()
 {
@@ -131,17 +63,6 @@ void SetRemoveXRefFromStaticRootsCallback(void (*callback)())
     g_removeXRefFromStaticRootsCallback = callback;
 }
 
-void UpdateReadBarrierEntrypoint([[maybe_unused]] void *thread, [[maybe_unused]] GCPhase gcPhase)
-{
-    ASSERT_LOGF(g_updateReadBarrierEntrypoint != nullptr, "function is nullptr");
-    g_updateReadBarrierEntrypoint(thread, gcPhase);
-}
-
-void SetUpdateReadBarrierEntrypoint(void (*callback)(void *thread, GCPhase gcPhase))
-{
-    g_updateReadBarrierEntrypoint = callback;
-}
-
 void SetBaseAddress([[maybe_unused]] uintptr_t base) {}
 
 void SweepThreadLocalJitFort() {}
@@ -164,24 +85,4 @@ void JSGCCallback([[maybe_unused]] void *ecmaVM) {}
 void AddXRefToDynamicRoots() {}
 
 void RemoveXRefFromDynamicRoots() {}
-
-void VisitDynamicThreadRoot([[maybe_unused]] const RefFieldVisitor &visitorFunc, [[maybe_unused]] void *vm) {}
-
-void VisitDynamicWeakThreadRoot([[maybe_unused]] const WeakRefFieldVisitor &visitorFunc, [[maybe_unused]] void *vm) {}
-
-void VisitDynamicThreadPreforwardRoot([[maybe_unused]] const RefFieldVisitor &visitorFunc, [[maybe_unused]] void *vm) {}
-
-void VisitDynamicGlobalRoots([[maybe_unused]] const RefFieldVisitor &visitor) {}
-
-void VisitDynamicWeakGlobalRoots([[maybe_unused]] const WeakRefFieldVisitor &visitorFunc) {}
-
-void VisitDynamicWeakGlobalRootsOld([[maybe_unused]] const WeakRefFieldVisitor &visitorFunc) {}
-
-void VisitDynamicLocalRoots([[maybe_unused]] const RefFieldVisitor &visitor) {}
-
-void VisitDynamicWeakLocalRoots([[maybe_unused]] const WeakRefFieldVisitor &visitorFunc) {}
-
-void VisitDynamicPreforwardRoots([[maybe_unused]] const RefFieldVisitor &visitorFunc) {}
-
-void VisitDynamicConcurrentRoots([[maybe_unused]] const RefFieldVisitor &visitorFunc) {}
 }  // namespace common_vm

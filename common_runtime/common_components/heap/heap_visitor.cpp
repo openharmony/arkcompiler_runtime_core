@@ -16,93 +16,84 @@
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_components/common_runtime/hooks.h"
 #include "common_interfaces/thread/mutator.h"
+#include "common_interfaces/base_runtime.h"
 
 namespace common_vm {
 
 void VisitRoots(const RefFieldVisitor &visitor)
 {
-    VisitDynamicGlobalRoots(visitor);
-    VisitDynamicLocalRoots(visitor);
-    VisitDynamicConcurrentRoots(visitor);
-    VisitAllStaticRoots(visitor);
-    VisitBaseRoots(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitAllRoots(visitor);
+    });
 }
 
 void VisitSTWRoots(const RefFieldVisitor &visitor)
 {
-    VisitDynamicGlobalRoots(visitor);
-    VisitDynamicLocalRoots(visitor);
-    VisitStaticGlobalRoots(visitor);
-    VisitStaticConcurrentRoots(visitor);
-    VisitBaseRoots(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitGlobalRoots(visitor);
+        vm->VisitConcurrentRoots(visitor);
+    });
 }
 
 void VisitConcurrentRoots(const RefFieldVisitor &visitor)
 {
-    VisitDynamicConcurrentRoots(visitor);
-    VisitStaticConcurrentRoots(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitConcurrentRoots(visitor);
+    });
 }
 
 void VisitWeakRoots(const WeakRefFieldVisitor &visitor)
 {
-    VisitDynamicWeakGlobalRoots(visitor);
-    VisitDynamicWeakGlobalRootsOld(visitor);
-    VisitDynamicWeakLocalRoots(visitor);
-    VisitAllStaticRoots(visitor);
-    UpdateAndSweepStaticRefs(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitAllRoots(visitor);
+        vm->UpdateAndSweep(visitor);
+    });
 }
 
 void VisitGlobalRoots(const RefFieldVisitor &visitor)
 {
-    VisitDynamicGlobalRoots(visitor);
-    VisitStaticGlobalRoots(visitor);
-    VisitBaseRoots(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitGlobalRoots(visitor);
+    });
 }
 
 void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung)
 {
-    VisitDynamicWeakGlobalRoots(visitor);
-    if (!isYoung) {
-        VisitDynamicWeakGlobalRootsOld(visitor);
-    }
-    VisitStaticGlobalRoots(visitor);
-    UpdateAndSweepStaticRefs(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitGlobalRoots(visitor);
+        vm->UpdateAndSweep(visitor);
+    });
 }
 
 void VisitPreforwardRoots(const RefFieldVisitor &visitor)
 {
-    VisitDynamicPreforwardRoots(visitor);
+    BaseRuntime::GetInstance()->ForEachVM([&visitor] (VMInterface* vm) {
+        vm->VisitPreforwardRoots(visitor);
+    });
 }
 
 // Visit specific mutator roots.
 void VisitMutatorRoots(const RefFieldVisitor &visitor, Mutator &mutator)
 {
-    if (mutator.GetEcmaVMPtr()) {
-        VisitDynamicThreadRoot(visitor, mutator.GetEcmaVMPtr());
-    }
     void *thread = mutator.GetArkthreadPtr();
     if (thread != nullptr) {
-        VisitStaticMutatorRoots(visitor, thread);
+        BaseRuntime::GetInstance()->ForEachVM([&visitor, thread] (VMInterface* vm) {
+            vm->VisitMutatorRoots(visitor, thread);
+        });
     }
 }
 
 void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator)
 {
-    if (mutator.GetEcmaVMPtr()) {
-        VisitDynamicWeakThreadRoot(visitor, mutator.GetEcmaVMPtr());
-    }
     void *thread = mutator.GetArkthreadPtr();
     if (thread != nullptr) {
-        VisitStaticMutatorRoots(visitor, thread);
+        BaseRuntime::GetInstance()->ForEachVM([&visitor, thread] (VMInterface* vm) {
+            vm->VisitMutatorRoots(visitor, thread);
+        });
     }
 }
 
-void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator)
-{
-    if (mutator.GetEcmaVMPtr()) {
-        VisitDynamicThreadPreforwardRoot(visitor, mutator.GetEcmaVMPtr());
-    }
-}
+void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator) {}
 
 void UnmarkAllXRefs()
 {

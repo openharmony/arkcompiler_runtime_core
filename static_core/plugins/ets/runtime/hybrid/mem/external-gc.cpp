@@ -21,15 +21,7 @@
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/heap/heap_visitor.h"
-
-namespace common_vm {
-void SetVisitAllStaticRootsCallback(void (*callback)(const RefFieldVisitor &));
-void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &visitorFunc, void *mutator));
-void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &));
-void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
-void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor));
-void SetUpdateReadBarrierEntrypoint(void (*callback)(void *thread, common_vm::GCPhase phase));
-}  // namespace common_vm
+#include "common_interfaces/base_runtime.h"
 
 namespace ark::mem::ets {
 
@@ -143,15 +135,55 @@ static void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase)
            phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB);
 }
 
-void RegisterCmcGcCallbacks()
+class StaticVMInterface : public common_vm::VMInterface {
+public:
+    StaticVMInterface()
+    {
+        common_vm::BaseRuntime::GetInstance()->RegisterVM(this);
+    }
+
+    ~StaticVMInterface() override
+    {
+        common_vm::BaseRuntime::GetInstance()->UnregisterVM(this);
+    }
+
+    void VisitAllRoots(const common_vm::RefFieldVisitor &visitor) override
+    {
+        ark::mem::ets::VisitAllRoots(visitor);
+    }
+
+    void VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor, void *mutator) override
+    {
+        ark::mem::ets::VisitMutatorRoots(visitor, mutator);
+    }
+
+    void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitor) override
+    {
+        ark::mem::ets::VisitGlobalRoots(visitor);
+    }
+
+    void VisitConcurrentRoots(const common_vm::RefFieldVisitor &visitor) override
+    {
+        ark::mem::ets::VisitConcurrentRoots(visitor);
+    }
+
+    void UpdateAndSweep(const common_vm::WeakRefFieldVisitor &visitor) override
+    {
+        ark::mem::ets::UpdateAndSweep(visitor);
+    }
+
+    void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase) override
+    {
+        ark::mem::ets::UpdateReadBarrierEntrypoint(thread, phase);
+    }
+
+    void VisitPreforwardRoots([[maybe_unused]] const common_vm::RefFieldVisitor &visitor) override {}
+};
+
+common_vm::VMInterface *RegisterCmcGcCallbacks()
 {
     ark::mem::StaticObjectOperator::Initialize();
-    common_vm::SetVisitAllStaticRootsCallback(VisitAllRoots);
-    common_vm::SetVisitStaticMutatorRootsCallback(VisitMutatorRoots);
-    common_vm::SetVisitStaticGlobalRootsCallback(VisitGlobalRoots);
-    common_vm::SetUpdateAndSweepStaticRefsCallback(UpdateAndSweep);
-    common_vm::SetVisitStaticConcurrentRootsCallback(VisitConcurrentRoots);
-    common_vm::SetUpdateReadBarrierEntrypoint(UpdateReadBarrierEntrypoint);
+    return new StaticVMInterface();
 }
 
 }  // namespace ark::mem::ets
