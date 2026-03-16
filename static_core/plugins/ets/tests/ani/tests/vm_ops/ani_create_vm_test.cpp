@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@ namespace ark::ets::ani::testing {
 
 class CreateVMTest : public ::testing::Test {
 public:
+    static constexpr const ani_size ZERO = 0;
+
     static std::string GetBootPandaFilesOption()
     {
         const char *stdlib = std::getenv("ARK_ETS_STDLIB_PATH");
@@ -74,6 +76,24 @@ TEST_F(CreateVMTest, destroy_vm_with_invalid_args)
     ani_vm *vm = nullptr;
     ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, &vm), ANI_OK);
     ASSERT_EQ(vm->c_api->DestroyVM(nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(vm->DestroyVM(), ANI_OK);
+}
+
+TEST_F(CreateVMTest, destroy_vm_under_pending_error)
+{
+    ani_options options = GetOptions();
+    ani_vm *vm = nullptr;
+    ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, &vm), ANI_OK);
+    ani_env *env = nullptr;
+    ASSERT_EQ(vm->GetEnv(ANI_VERSION_1, &env), ANI_OK);
+
+    const int32_t longStringSize = 10000U;
+    std::string longString(longStringSize, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
     ASSERT_EQ(vm->DestroyVM(), ANI_OK);
 }
 

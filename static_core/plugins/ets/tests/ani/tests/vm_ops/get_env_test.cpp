@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #include "ani_gtest.h"
 #include <thread>
 #include <stdexcept>
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 namespace ark::ets::ani::testing {
 
@@ -62,4 +64,23 @@ TEST_F(GetEnvTest, invalid_argument)
     ani_env *env = nullptr;
     ASSERT_EQ(vm_->c_api->GetEnv(nullptr, ANI_VERSION_1, &env), ANI_INVALID_ARGS);
 }
+
+TEST_F(GetEnvTest, get_env_under_pending_error)
+{
+    ani_env *env = nullptr;
+    ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env), ANI_OK);
+
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    uint32_t version;
+    ASSERT_EQ(env->GetVersion(&version), ANI_OK);
+    ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(readability-magic-numbers)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,8 @@
 
 #include "ani_gtest.h"
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming,
+// readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
 class WeakReferenceCreateTest : public AniTest {};
@@ -222,6 +223,19 @@ TEST_F(WeakReferenceCreateTest, invalid_env)
     ASSERT_EQ(env_->c_api->WeakReference_Create(nullptr, undefinedRef, &wref), ANI_INVALID_ARGS);
 }
 
+TEST_F(WeakReferenceCreateTest, weak_reference_create_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ani_wref wref {};
+    ASSERT_EQ(env_->WeakReference_Create(strRef, &wref), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming,
+// readability-magic-numbers)

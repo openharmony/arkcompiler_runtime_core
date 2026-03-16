@@ -16,6 +16,8 @@
 #include "ani_gtest.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace ark::ets::ani::testing {
 
 class WeakReferenceGetReferenceTest : public AniTest {};
@@ -143,4 +145,23 @@ TEST_F(WeakReferenceGetReferenceTest, invalid_ref_env)
     ASSERT_EQ(env_->c_api->WeakReference_GetReference(nullptr, wref, &wasReleased, &ref), ANI_INVALID_ARGS);
 }
 
+TEST_F(WeakReferenceGetReferenceTest, weak_reference_get_reference_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+
+    ani_wref wref {};
+    ASSERT_EQ(env_->WeakReference_Create(strRef, &wref), ANI_OK);
+
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ani_ref ref;
+    ani_boolean wasReleased;
+    ASSERT_EQ(env_->WeakReference_GetReference(wref, &wasReleased, &ref), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(readability-magic-numbers)

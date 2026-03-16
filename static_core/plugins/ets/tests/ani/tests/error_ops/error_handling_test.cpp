@@ -16,7 +16,7 @@
 #include "ani_gtest.h"
 #include <regex>
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
 class ErrorHandlingTest : public AniTest {
@@ -672,5 +672,52 @@ TEST_F(ErrorHandlingTest, call_error_stack)
     }
 }
 
+TEST_F(ErrorHandlingTest, throw_error_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ani_error error {};
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_EQ(env_->ThrowError(error), ANI_OK);
+}
+
+TEST_F(ErrorHandlingTest, exist_unhandled_error_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ani_boolean result = ANI_TRUE;
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+}
+
+TEST_F(ErrorHandlingTest, reset_error_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+}
+
+TEST_F(ErrorHandlingTest, describe_error_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ASSERT_EQ(env_->DescribeError(), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
