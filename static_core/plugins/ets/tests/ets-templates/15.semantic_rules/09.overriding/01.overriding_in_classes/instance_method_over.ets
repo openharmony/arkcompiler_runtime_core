@@ -20,7 +20,6 @@ desc: >-
     An instance method is defined in a subclass with the same name as the instance method in a superclass.
     If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
     Otherwise, a compile-time error occurs.
-tags: []
 ---*/
 
 let res: number = 0;
@@ -56,16 +55,14 @@ class Base {
 }
 
 class Derived extends Base {
-    /* @@ label1 */override foo({{c.derived}}) { res = 2; }
+    override foo({{c.derived}}) { res = 2; }
 }
 
 function main() {
     res = 0
-    /* @@ label2 */new Derived().foo(/* @@ label3 */{{c.call}});
+    new Derived().foo({{c.call}});
     arktest.assertEQ(res, {{c.res}});
 }
-
-{{c.expected_error}}
 
 {%- endfor %}
 

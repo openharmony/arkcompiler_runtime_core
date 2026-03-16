@@ -13,12 +13,19 @@
 
 ---
 cases:
-  # use method with the same name as private method of the Base class
-
   - decl: |-
       class Derived extends Base implements Interface {
         public_foo() { this.private_foo(); }
         private private_foo() { res = 11; }
+      }
+    use: |-
+      new Derived().public_foo();
+      arktest.assertEQ(res, 11);
+
+  - decl: |-
+      class Derived extends Base implements Interface {
+        public_foo() { this.private_interface_foo(); }
+        private private_interface_foo() { res = 11; }
       }
     use: |-
       new Derived().public_foo();
