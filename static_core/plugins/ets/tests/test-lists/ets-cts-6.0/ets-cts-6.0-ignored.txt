@@ -65,7 +65,7 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_neg_12.ets
 
 #31690
-05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
+20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
 
 #30904 no CTE for FixedArray with the predefined value type
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_0.ets
