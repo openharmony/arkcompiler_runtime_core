@@ -466,21 +466,21 @@ cases:
         nor optional (see Optional Fields). Otherwise, a compile-time error occurs.
     check_variants:
       - {check_type: "int", check_value: "0", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "double", check_value: "0", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "char", check_value: "c'\\u0000'", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "boolean", check_value: "false", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "bigint", check_value: "0n", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "string", check_value: "\"abc\"", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "Object", check_value: "0", cv_decl_data: "",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "C", check_value: "new C()", cv_decl_data: "class C {}",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
     decl_variants:
       - |-
         [cv_decl_data]
@@ -503,13 +503,13 @@ cases:
         nor optional (see Optional Fields). Otherwise, a compile-time error occurs.
     check_variants:
       - {check_type: "int",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "double",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "char",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
       - {check_type: "boolean",
-        expected_out: "Expected CTE output is unknown"}
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
     decl_variants:
       - |-
         class A {
