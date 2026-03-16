@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from abc import abstractmethod
+from dataclasses import dataclass, field
 from datetime import datetime
 from functools import cached_property
 from os import environ
@@ -40,6 +41,16 @@ from runner.test_base import Test
 from runner.types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
+
+
+@dataclass
+class ResultsAnalysis:
+    ignored_but_passed: list[Test] = field(default_factory=list)
+    ignored_still_failed: list[Test] = field(default_factory=list)
+    excluded_but_passed: list[Test] = field(default_factory=list)
+    excluded_still_failed: list[Test] = field(default_factory=list)
+    excluded_after: list[Test] = field(default_factory=list)
+    fail_lists: dict[str, list[Test]] = field(default_factory=dict)
 
 
 class RunnerUtils:
@@ -86,13 +97,12 @@ class RunnerFileBased(Runner):
         _LOGGER.all("Processing run statistics")
 
         results = [result for result in self.results if result.passed is not None]
-        ignored_but_passed, _, excluded_but_passed, excluded_still_failed, fail_lists = (
-            self.__results_analysis(results))
+        analysis_results = self.__results_analysis(results)
 
         total_tests = len(results) + self.excluded
         summary = Summary(
             self.name, total_tests, self.passed, self.failed,
-            self.ignored, len(ignored_but_passed), self.excluded, self.excluded_after
+            self.ignored, len(analysis_results.ignored_but_passed), self.excluded, self.excluded_after
         )
 
         if results:
@@ -106,50 +116,46 @@ class RunnerFileBased(Runner):
             raise common_exceptions.UnknownException("It seems no one test has been launched.")
         if ReportFormat.HTML in self.test_env.report_formats:
             html_view = HtmlView(self.work_dir.report, self.config, summary)
-            html_view.create_html_index(fail_lists, self.test_env.timestamp)
+            html_view.create_html_index(analysis_results.fail_lists, self.test_env.timestamp)
 
         summary.passed = summary.passed - summary.ignored_but_passed
 
         standard_view = StandardView(self.work_dir.report, self.update_excluded, self.excluded_lists, summary)
-        standard_view.summarize_failures(fail_lists)
-        standard_view.create_failures_report(fail_lists)
-        standard_view.create_update_excluded(excluded_but_passed, excluded_still_failed)
-        standard_view.summarize_passed_ignored(ignored_but_passed)
+        standard_view.summarize_failures(analysis_results.fail_lists)
+        standard_view.create_failures_report(analysis_results.fail_lists)
+        standard_view.create_update_excluded(analysis_results.excluded_but_passed,
+                                             analysis_results.excluded_still_failed)
+        standard_view.summarize_passed_ignored(analysis_results.ignored_but_passed)
         self.create_execution_plan()
-        standard_view.display_summary(fail_lists)
+        standard_view.display_summary(analysis_results.fail_lists)
         standard_view.create_time_report(results, self.config.general.time_report)
 
         return self.failed
 
-    def _process_failed(self, test_result: TestStandardFlow | GTestFlow, ignored_still_failed: list[Test],
-                        excluded_still_failed: list[Test], fail_lists: dict[str, list[Test]]) -> None:
+    def _process_failed(self, test_result: TestStandardFlow | GTestFlow, analysis: ResultsAnalysis) -> None:
         if test_result.ignored and test_result.last_failure_check_passed:
             self.ignored += 1
-            ignored_still_failed.append(test_result)
+            analysis.ignored_still_failed.append(test_result)
         elif test_result.path in self.excluded_tests:
-            excluded_still_failed.append(test_result)
+            analysis.excluded_still_failed.append(test_result)
             self.excluded += 1
         else:
             self.failed += 1
             if test_result.fail_kind is None:
                 test_result.fail_kind = "<not set>"
-            if test_result.fail_kind not in fail_lists:
-                fail_lists[test_result.fail_kind] = []
-            fail_lists[test_result.fail_kind].append(test_result)
+            if test_result.fail_kind not in analysis.fail_lists:
+                analysis.fail_lists[test_result.fail_kind] = []
+            analysis.fail_lists[test_result.fail_kind].append(test_result)
 
-    def __results_analysis(self, results: list[Test]) -> \
-            tuple[list[Test], list[Test], list[Test], list[Test], dict[str, list[Test]]]:
+    def __results_analysis(self, results: list[Test]) -> ResultsAnalysis:
         self.failed = 0
         self.ignored = 0
         self.passed = 0
         self.excluded_after = 0
         self.excluded = 0 if self.update_excluded else self.excluded
 
-        ignored_still_failed: list[Test] = []
-        ignored_but_passed: list[Test] = []
-        excluded_still_failed: list[Test] = []
-        excluded_but_passed: list[Test] = []
-        fail_lists: dict[str, list[Test]] = {}
+        analysis = ResultsAnalysis()
+
         for test_result in results:
             if not isinstance(test_result, TestStandardFlow) and not isinstance(test_result, GTestFlow):
                 raise ValueError(f"Incorrect type of test {type(test_result)}. "
@@ -157,17 +163,18 @@ class RunnerFileBased(Runner):
 
             if test_result.excluded:
                 self.excluded_after += 1
+                analysis.excluded_after.append(test_result)
                 continue
 
             if not test_result.passed:
-                self._process_failed(test_result, ignored_still_failed, excluded_still_failed, fail_lists)
+                self._process_failed(test_result, analysis)
             else:
                 self.passed += 1
                 if test_result.ignored:
-                    ignored_but_passed.append(test_result)
+                    analysis.ignored_but_passed.append(test_result)
                 if test_result.path in self.excluded_tests:
-                    excluded_but_passed.append(test_result)
-        return ignored_but_passed, ignored_still_failed, excluded_but_passed, excluded_still_failed, fail_lists
+                    analysis.excluded_but_passed.append(test_result)
+        return analysis
 
     def __set_test_list_options(self) -> None:
         for san in ["ASAN_OPTIONS", "TSAN_OPTIONS", "MSAN_OPTIONS", "LSAN_OPTIONS"]:
