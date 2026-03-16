@@ -118,11 +118,13 @@ cases:
           arktest.assertEQ(foo(a, b), "a")
 
     - decl: |-
+          let a: string = "a"
+          let b: string = "b"
           function foo <T> (p: T, q: T): T {
               return p ?? q
           }
       use: |-
-          arktest.assertEQ(foo(new string("a"), new string("b")), "a")
+          arktest.assertEQ(foo(a, b), a)
   # specific cases: tuple types, FixedArray, Any, union types, bigint, literal types, function types,
   # undefined, null, Array<T> or T[], FixedArray<T>
     - decl: |-

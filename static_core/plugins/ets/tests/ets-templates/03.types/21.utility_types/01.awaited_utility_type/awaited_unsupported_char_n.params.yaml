@@ -21,7 +21,7 @@ cases:
       "Syntax error ESY0242: 'Awaited' is reserved and cannot be used as a variable/type name"
   - decl: "type p = Awaited<new Array<number>>"
     error: |-
-      "Syntax error ESY0295: number is a predefined type, cannot be used as an identifier."
+      "Syntax error ESY0242: 'Awaited' is reserved and cannot be used as a variable/type name"
   - decl: "type p = Awaited<...>"
     error: |-
       "Syntax error ESY0242: 'Awaited' is reserved and cannot be used as a variable/type name"

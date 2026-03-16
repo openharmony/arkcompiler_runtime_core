@@ -67,9 +67,6 @@
 #32226 missing CTE for circular dependency
 03.types/21.utility_types/01.awaited_utility_type/awaited_circular_n.ets
 
-#32457 CTE makes compiler to fail when specifying new object at awaited parameters
-03.types/21.utility_types/01.awaited_utility_type/awaited_unsupported_char_n_2.ets
-
 #31665
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_func_arr_6.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_func_arr_7.ets
@@ -180,6 +177,41 @@
 #754(spec)
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_return_type_n_6.ets
 
+#28900
+05.generics/03.utility_types/incorrect_utility_type_usage_0_0.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_0_1.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_0_2.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_0_3.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_0_6.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_1_0.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_1_1.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_1_2.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_1_3.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_1_6.ets
+
+#32226 missing CTE for circular dependency
+05.generics/03.utility_types/01.awaited_utility_type/awaited_circular_n.ets
+
+#31665
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_func_arr_6.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_func_arr_7.ets
+
+#33270
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_0.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_1.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_2.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_3.ets
+
+#33271
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_1.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_3.ets
+
+#31615 RTE for partial class field assignment
+05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
+
+#28679
+05.generics/03.utility_types/06.record_utility_type/enum_record_0_n.ets
+
 #31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
 20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
 
@@ -257,7 +289,7 @@
 #32641
 07.expressions/09.this_expression/this_in_object_literal.ets
 
-#32421 Support Parametrized FixedArray in class method return type
+#32421
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_0.ets
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_1.ets
 
