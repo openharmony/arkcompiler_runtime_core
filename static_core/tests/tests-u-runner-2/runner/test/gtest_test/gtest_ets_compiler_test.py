@@ -26,7 +26,7 @@ from runner.common_exceptions import CompileEtsTestPartException, CompileEtsTest
 from runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler import GTestEtsCompiler
 from runner.options.cli_options import get_args
 from runner.options.config import Config
-from runner.options.options_step import Step
+from runner.options.options_step import Step, StepKind
 from runner.test import test_utils
 from runner.utils import ani_name_rule, make_gtest_name
 
@@ -225,6 +225,14 @@ class EtsGeneratorTest(TestCase):
         work_dir = Path(os.environ["WORK_DIR"])
         test_gen_path: Path = work_dir.with_name("gen")
         test_intermediate_path = work_dir.with_name("intermediate")
+        step = Step(
+            name="test_step",
+            timeout=0,
+            args=[],
+            env={},
+            step_kind=StepKind.COMPILER
+        )
+
         test_config = self.config_test()
 
         shutil.rmtree(test_gen_path, ignore_errors=True)
@@ -232,7 +240,8 @@ class EtsGeneratorTest(TestCase):
 
         ets_test_generator = GTestEtsCompiler(test_source_path, test_gen_path, test_config)
 
-        self.assertRaises(CompileEtsTestPartException, ets_test_generator.generate)
+        self.assertRaises(CompileEtsTestPartException, ets_test_generator.compile_file, step,
+                          test_source_path / "test_func_call.ets")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -247,6 +256,13 @@ class EtsGeneratorTest(TestCase):
         work_dir = Path(os.environ["WORK_DIR"])
         test_gen_path: Path = work_dir.with_name("gen")
         test_intermediate_path = work_dir.with_name("intermediate")
+        step = Step(
+            name="test_step",
+            timeout=0,
+            args=[],
+            env={},
+            step_kind=StepKind.COMPILER
+        )
         test_config = self.config_test()
 
         shutil.rmtree(test_gen_path, ignore_errors=True)
@@ -254,4 +270,5 @@ class EtsGeneratorTest(TestCase):
 
         ets_test_generator = GTestEtsCompiler(test_source_path, test_gen_path, test_config)
 
-        self.assertRaises(CompileEtsTestPartTimeoutException, ets_test_generator.generate)
+        self.assertRaises(CompileEtsTestPartTimeoutException, ets_test_generator.compile_file, step,
+                          test_source_path / "test_func_call.ets")
