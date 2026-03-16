@@ -379,11 +379,11 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_function_kind_a
     EXPECT_TRUE(function_kind == panda_file::FunctionKind::FUNCTION);
     uint32_t access_flags = function.metadata->GetAccessFlags();
     EXPECT_TRUE((access_flags & ACC_STATIC) != 0);
-    EXPECT_TRUE(lit_function_->GetFunctionKind() == panda::panda_file::FunctionKind::NONE);
+    EXPECT_TRUE(lit_function_->GetFunctionKind() == panda::panda_file::FunctionKind::GENERATOR_FUNCTION);
     EXPECT_TRUE(foo_function_->GetFunctionKind() == panda::panda_file::FunctionKind::FUNCTION);
     EXPECT_TRUE(add_function_->GetFunctionKind() == panda::panda_file::FunctionKind::NC_FUNCTION);
     EXPECT_TRUE(generate_function_->GetFunctionKind() == panda::panda_file::FunctionKind::GENERATOR_FUNCTION);
-    EXPECT_TRUE(method_function_->GetFunctionKind() == panda::panda_file::FunctionKind::ASYNC_FUNCTION);
+    EXPECT_TRUE(method_function_->GetFunctionKind() == panda::panda_file::FunctionKind::ASYNC_GENERATOR_FUNCTION);
     EXPECT_TRUE(async_generate_function_->GetFunctionKind() ==
         panda::panda_file::FunctionKind::ASYNC_GENERATOR_FUNCTION);
     EXPECT_TRUE(async_arrow_function_->GetFunctionKind() == panda::panda_file::FunctionKind::ASYNC_NC_FUNCTION);

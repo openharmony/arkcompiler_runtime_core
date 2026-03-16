@@ -411,7 +411,7 @@ _GLOBAL_1796 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	returnundefined                          # line: 96           # column: 0
 }
 
-.function_kind FunctionKind::ASYNC_FUNCTION
+.function_kind FunctionKind::ASYNC_GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
 .language ECMAScript
@@ -470,7 +470,7 @@ _GLOBAL_1796 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	return                                   # line: 25           # column: 0
 }
 
-.function_kind FunctionKind::NONE
+.function_kind FunctionKind::GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 2
 .language ECMAScript

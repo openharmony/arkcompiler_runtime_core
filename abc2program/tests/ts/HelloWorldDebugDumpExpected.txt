@@ -510,7 +510,7 @@ _GLOBAL_2021 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	    3        3         2           this         any
 }
 
-.function_kind FunctionKind::ASYNC_FUNCTION
+.function_kind FunctionKind::ASYNC_GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
 .language ECMAScript
@@ -600,7 +600,7 @@ _GLOBAL_2021 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	    3        2         2           this         any
 }
 
-.function_kind FunctionKind::NONE
+.function_kind FunctionKind::GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 2
 .language ECMAScript
