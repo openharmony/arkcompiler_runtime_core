@@ -331,8 +331,6 @@ public:
     }
 #endif  // ARK_USE_COMMON_RUNTIME
 
-    void LinkToExternalMutator(bool useSharedMutator, CoroutineWorker *w = nullptr);
-
     /**
      * Set a coroutine parameter abortFlag
      * meaning that the coroutine could abort the program in an uncaugh exeption occured

@@ -154,20 +154,6 @@ void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
     }
 }
 
-void Coroutine::LinkToExternalMutator([[maybe_unused]] bool useSharedMutator, [[maybe_unused]] CoroutineWorker *w)
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    auto wasCreated = CreateExternalMutatorIfNeeded(useSharedMutator, w ? w->GetMutator() : nullptr);
-    if (wasCreated) {
-        auto wasInRunning = GetMutator()->TransferToNativeIfInRunning();
-        GetMutator()->RegisterCoroutine(this);
-        if (wasInRunning) {
-            GetMutator()->TransferToRunningIfInNative();
-        }
-    }
-#endif  // ARK_USE_COMMON_RUNTIME
-}
-
 void Coroutine::Destroy()
 {
     context_->Destroy();

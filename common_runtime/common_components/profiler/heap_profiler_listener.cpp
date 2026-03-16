@@ -56,9 +56,6 @@ void HeapProfilerListener::RegisterOutOfMemoryEventCb(const std::function<void(v
 void HeapProfilerListener::OnOutOfMemoryEventCb()
 {
     void *thread = nullptr;
-    if (!IsGcThread()) {
-        thread = Mutator::GetMutator()->GetJSThread();
-    }
     outOfMemoryEventCb_(thread);
 }
 }  // namespace common_vm

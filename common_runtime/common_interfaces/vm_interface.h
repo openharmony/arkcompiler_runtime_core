@@ -24,11 +24,9 @@ class PUBLIC_API VMInterface {
 public:
     virtual void VisitGlobalRoots(const RefFieldVisitor &visitor) = 0;
     virtual void VisitConcurrentRoots(const RefFieldVisitor &visitor) = 0;
-    virtual void VisitMutatorRoots(const RefFieldVisitor &visitor, void *mutator) = 0;
     virtual void VisitAllRoots(const RefFieldVisitor &visitor) = 0;
     virtual void UpdateAndSweep(const WeakRefFieldVisitor &visitor) = 0;
     virtual void VisitPreforwardRoots(const RefFieldVisitor &visitor) = 0;
-    virtual void UpdateReadBarrierEntrypoint(void *thread, GCPhase phase) = 0;
     virtual void ProcessFinalizationRegistryCleanup() = 0;
     // Deleted copy operations
     VMInterface(const VMInterface &) = delete;

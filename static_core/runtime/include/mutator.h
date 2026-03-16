@@ -45,7 +45,11 @@ class GCBarrierSet;
  * @note Mutator instances are associated with threads via thread-local storage (TLS).
  *       Use GetCurrent() and SetCurrent() to access the current thread's mutator.
  */
+#if defined(ARK_USE_COMMON_RUNTIME)
+class Mutator : public common_vm::Mutator {
+#else
 class Mutator {
+#endif
 public:
     /// @enum Indicates the type of mutator
     enum class MutatorType {
@@ -136,7 +140,7 @@ public:
 #if !defined(ARK_USE_COMMON_RUNTIME)
         return ReadFlag(SUSPEND_REQUEST);
 #else
-        return GetMutator()->HasSuspendRequest();
+        return common_vm::Mutator::HasSuspendRequest();
 #endif
     }
 
@@ -184,21 +188,17 @@ public:
 
     PANDA_PUBLIC_API void WaitSuspension();
 
+#if defined(ARK_USE_COMMON_RUNTIME)
+    void VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor) override;
+    void UpdateReadBarrierEntrypoint(common_vm::GCPhase phase) override;
+#endif
+
     void MakeTSANHappyForThreadState();
 
 #if defined(ARK_USE_COMMON_RUNTIME)
     void BindMutator();
 
     void UnbindMutator();
-
-    /// @returns true if mutator was created
-    bool CreateExternalMutatorIfNeeded(bool useSharedMutator, common_vm::Mutator *m);
-
-    common_vm::Mutator *GetMutator() const
-    {
-        ASSERT(mutator_ != nullptr);
-        return mutator_;
-    }
 #endif  // ARK_USE_COMMON_RUNTIME
 
 #if !defined(NDEBUG)
@@ -307,13 +307,6 @@ private:
         }
         // NOLINTEND(cppcoreguidelines-pro-type-union-access)
     }
-#if defined(ARK_USE_COMMON_RUNTIME)
-    static void SetSharedExternalMutator(common_vm::Mutator *externalMutator);
-    static common_vm::Mutator *GetSharedExternalMutator();
-
-    common_vm::Mutator *mutator_ {nullptr};
-#endif  // ARK_USE_COMMON_RUNTIME
-
     PandaVM *vm_ {nullptr};
     MutatorLock *mutatorLock_ {nullptr};
     MutatorType type_ {MutatorType::NONE};

@@ -77,19 +77,6 @@ void MutatorManager::UnbindMutatorOnly() const
     tlData->mutator = nullptr;
 }
 
-Mutator *MutatorManager::CreateMutator()
-{
-    Mutator *mutator = ThreadLocal::GetMutator();
-    ASSERT_LOGF(mutator != nullptr, "Mutator already exists");
-    MutatorManagementRLock();
-    mutator->Init();
-    mutator->InitTid();
-    BindMutator(*mutator);
-    mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
-    MutatorManagementRUnlock();
-    return mutator;
-}
-
 void MutatorManager::DestroyExpiredMutators()
 {
     expiringMutatorListLock_.lock();
@@ -128,7 +115,6 @@ Mutator *MutatorManager::CreateRuntimeMutator(ThreadType threadType)
     }
     LOGF_CHECK(mutator != nullptr) << "create mutator out of native memory";
     MutatorManagementRLock();
-    mutator->Init();
     mutator->InitTid();
     MutatorManager::Instance().BindMutator(*mutator);
     mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
@@ -303,6 +289,33 @@ void MutatorManager::StartTheWorld() noexcept
 #endif
 }
 
+void MutatorManager::YieldAndRefreshMutatorList(std::list<Mutator *> &pendingMutators,
+                                                const std::function<bool(Mutator &)> &shouldInclude)
+{
+    // Temporarily release WLock to let RegisterNewMutator/UnregisterMutator (which take RLock) proceed.
+    // Without this, a mutator blocked on RLock cannot reach safepoint, causing deadlock.
+    MutatorManagementWUnlock();
+    (void)sched_yield();
+    AcquireMutatorManagementWLock();
+
+    // Remove mutators that were destroyed while WLock was released.
+    for (auto it = pendingMutators.begin(); it != pendingMutators.end();) {
+        if (std::find(allMutatorList_.begin(), allMutatorList_.end(), *it) == allMutatorList_.end()) {
+            it = pendingMutators.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    // Pick up newly registered mutators that match the predicate.
+    VisitAllMutators([&pendingMutators, &shouldInclude](Mutator &mutator) {
+        if (std::find(pendingMutators.begin(), pendingMutators.end(), &mutator) == pendingMutators.end()) {
+            if (shouldInclude(mutator)) {
+                pendingMutators.push_back(&mutator);
+            }
+        }
+    });
+}
+
 void MutatorManager::WaitUntilAllStopped()
 {
     uint64_t beginTime = TimeUtil::MilliSeconds();
@@ -345,7 +358,10 @@ void MutatorManager::WaitUntilAllStopped()
             DumpMutators(timeoutTimes);
         }
 
-        (void)sched_yield();
+        YieldAndRefreshMutatorList(unstoppedMutators, [](Mutator &mutator) {
+            return !mutator.InSaferegion();
+        });
+        remainMutatorsSize = unstoppedMutators.size();
     }
 }
 
@@ -368,6 +384,19 @@ void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &
             }
             ++it;
         }
+
+        if (undoneMutators.empty()) {
+            return;
+        }
+
+        YieldAndRefreshMutatorList(undoneMutators, [phase](Mutator &mutator) {
+            if (mutator.GetMutatorPhase() == phase && mutator.FinishedTransition()) {
+                return false;
+            }
+            mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_GC_PHASE);
+            mutator.SetSafepointActive(true);
+            return true;
+        });
     }
 }
 

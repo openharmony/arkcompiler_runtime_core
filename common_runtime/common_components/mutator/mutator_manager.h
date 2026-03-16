@@ -150,9 +150,6 @@ public:
     bool BindMutatorOnly(Mutator *mutator) const;
     void UnbindMutatorOnly() const;
 
-    // Create and initialize the local mutator, then register to mutatorlist.
-    Mutator* CreateMutator();
-
     void DestroyMutator(Mutator* mutator);
 
     Mutator* CreateRuntimeMutator(ThreadType threadType) __attribute__((noinline));
@@ -227,6 +224,11 @@ public:
     void MutatorManagementWUnlock() { mutatorManagementRWLock_.UnlockWrite(); }
 
     void DestroyExpiredMutators();
+
+    // Release/reacquire WLock to let RegisterNewMutator/UnregisterMutator proceed,
+    // then reconcile pendingMutators with allMutatorList_.
+    void YieldAndRefreshMutatorList(std::list<Mutator *> &pendingMutators,
+                                    const std::function<bool(Mutator &)> &shouldInclude);
 
     bool HasNativeMutator();
 

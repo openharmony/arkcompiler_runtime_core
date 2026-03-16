@@ -404,7 +404,7 @@ public:
         RemarkAndPreforwardVisitor visitor(collectStack, collector_);
         Mutator *mutator = getNextMutator_();
         while (mutator != nullptr) {
-            VisitMutatorRoots(visitor, *mutator);
+            mutator->VisitMutatorRoots(visitor);
             mutator = getNextMutator_();
         }
         collectStack.Publish();
@@ -450,7 +450,7 @@ void ArkCollector::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
     VisitGlobalRoots(visitor);
     Mutator *mutator = getNextMutator();
     while (mutator != nullptr) {
-        VisitMutatorRoots(visitor, *mutator);
+        mutator->VisitMutatorRoots(visitor);
         mutator = getNextMutator();
     }
     collectStack.Publish();
@@ -675,7 +675,7 @@ void ArkCollector::PreforwardFlip()
     };
     FlipFunction forwardMutatorRoot = [this](Mutator &mutator) {
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
-        VisitWeakMutatorRoot(weakVisitor, mutator);
+        mutator.VisitMutatorRoots(weakVisitor);
         RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
         VisitMutatorPreforwardRoot(visitor, mutator);
         // Request finalize callback in each vm-thread when gc finished.
@@ -974,7 +974,7 @@ CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam& param
     FlipFunction enumMutatorRoot = [&rootSet, &stackMutex](Mutator &mutator) {
         CArrayList<BaseObject *> roots;
         RefFieldVisitor localVisitor = [&roots](RefField<> &root) { roots.emplace_back(root.GetTargetObject()); };
-        VisitMutatorRoots(localVisitor, mutator);
+        mutator.VisitMutatorRoots(localVisitor);
         std::lock_guard<std::mutex> lockGuard(stackMutex);
         rootSet.emplace_back(std::move(roots));
     };

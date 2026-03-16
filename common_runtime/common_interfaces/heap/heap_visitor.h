@@ -39,8 +39,6 @@ void VisitGlobalRoots(const RefFieldVisitor &visitor);
 void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc, bool isYoung);
 void VisitPreforwardRoots(const RefFieldVisitor &visitor);
 
-void VisitMutatorRoots(const RefFieldVisitor &visitor, Mutator &mutator);
-void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator);
 void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator);
 // Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);

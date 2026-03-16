@@ -52,22 +52,6 @@ static void VisitAllRoots(const common_vm::RefFieldVisitor &visitorFunc)
     });
 }
 
-static void VisitMutatorRoots(const common_vm::RefFieldVisitor &visitorFunc, void *mutator)
-{
-    ASSERT(mutator != nullptr);
-    trace::ScopedTrace scopedTrace(__FUNCTION__);
-    auto *vm = GetPandaVM();
-    if (vm == nullptr) {
-        return;
-    }
-    RootManager<EtsLanguageConfig> rootManager(vm);
-    auto *managedThread = reinterpret_cast<ManagedThread *>(mutator);
-    rootManager.VisitRootsForThread(managedThread, [&visitorFunc](GCRoot root) {
-        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
-    });
-}
-
 static void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
@@ -119,24 +103,6 @@ static void VisitConcurrentRoots(const common_vm::RefFieldVisitor &visitorFunc)
     vm->VisitStringTable(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
 }
 
-static void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase)
-{
-    auto *vm = GetPandaVM();
-    auto *gc = static_cast<CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
-    auto *managedThread = ManagedThread::CastFromMutator(reinterpret_cast<Mutator *>(thread));
-    if (phase == common_vm::GCPhase::GC_PHASE_PRECOPY) {
-        gc->EnableReadBarrier(managedThread);
-    } else if (phase == common_vm::GCPhase::GC_PHASE_IDLE) {
-        gc->DisableReadBarrier(managedThread);
-    }
-    // Check if a new phase has been added
-    ASSERT(phase == common_vm::GCPhase::GC_PHASE_ENUM || phase == common_vm::GCPhase::GC_PHASE_MARK ||
-           phase == common_vm::GCPhase::GC_PHASE_PRECOPY || phase == common_vm::GCPhase::GC_PHASE_COPY ||
-           phase == common_vm::GCPhase::GC_PHASE_FIX || phase == common_vm::GCPhase::GC_PHASE_IDLE ||
-           phase == common_vm::GCPhase::GC_PHASE_POST_MARK || phase == common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
-           phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB);
-}
-
 static void ProcessFinalizationRegistryCleanup()
 {
     auto *vm = static_cast<ark::ets::PandaEtsVM *>(GetPandaVM());
@@ -163,11 +129,6 @@ public:
         ark::mem::ets::VisitAllRoots(visitor);
     }
 
-    void VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor, void *mutator) override
-    {
-        ark::mem::ets::VisitMutatorRoots(visitor, mutator);
-    }
-
     void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitor) override
     {
         ark::mem::ets::VisitGlobalRoots(visitor);
@@ -181,11 +142,6 @@ public:
     void UpdateAndSweep(const common_vm::WeakRefFieldVisitor &visitor) override
     {
         ark::mem::ets::UpdateAndSweep(visitor);
-    }
-
-    void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase) override
-    {
-        ark::mem::ets::UpdateReadBarrierEntrypoint(thread, phase);
     }
 
     void ProcessFinalizationRegistryCleanup() override

@@ -34,7 +34,6 @@
 #include "common_interfaces/thread/mutator_state_transition.h"
 
 namespace common_vm {
-thread_local Mutator *currentMutator = nullptr;
 
 ThreadLocalData *GetThreadLocalData()
 {
@@ -134,10 +133,7 @@ void Mutator::HandleGCCallback()
     if (vm != nullptr) {
         JSGCCallback(vm);
     }
-    void *thread = GetArkthreadPtr();
-    if (thread != nullptr) {
-        BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
-    }
+    BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
 }
 
 void Mutator::SuspendForStw()
@@ -172,15 +168,8 @@ static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)
     return reinterpret_cast<SatbBuffer::TreapNode *&>(satbNode);
 }
 
-void Mutator::Init()
-{
-    SetCurrent(this);
-    mutatorPhase_.store(GCPhase::GC_PHASE_IDLE);
-}
-
 Mutator::~Mutator()
 {
-    SetCurrent(nullptr);
     tid_ = 0;
     if (satbNode_ != nullptr) {
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
@@ -192,7 +181,6 @@ Mutator *Mutator::NewMutator()
 {
     Mutator *mutator = new (std::nothrow) Mutator();
     LOGF_CHECK(mutator != nullptr) << "new Mutator failed";
-    mutator->Init();
     return mutator;
 }
 
@@ -213,6 +201,9 @@ void Mutator::ResetMutator()
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
         satbNode_ = nullptr;
     }
+    suspensionFlag_.store(0, std::memory_order_relaxed);
+    flipFunction_ = nullptr;
+    transitionState_.store(NO_TRANSITION, std::memory_order_relaxed);
 }
 
 void Mutator::InitTid()
@@ -237,10 +228,12 @@ void Mutator::ClearSatbBufferNode()
     CastSatbNode(satbNode_)->Clear();
 }
 
-void Mutator::VisitMutatorRoots(const RootVisitor &visitor)
+void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor)
 {
-    LOG_COMMON(FATAL) << "Unresolved fatal";
-    UNREACHABLE_CC();
+}
+
+void Mutator::UpdateReadBarrierEntrypoint(common_vm::GCPhase phase)
+{
 }
 
 void Mutator::DumpMutator() const
@@ -309,17 +302,9 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
 {
     HandleGCPhase(newPhase);
     SetSafepointActive(false);
-    mutatorPhase_.store(newPhase, std::memory_order_relaxed);  // handshake between mutator & mainGC thread
-    if (jsThread_ != nullptr) {
-        // non-atomic, should update JSThread local gc state before SuspensionFlag store,
-        // and SuspensionFlag load when transfer to running will guarantee the visibility of
-        // the JSThread local gc state
-        SynchronizeGCPhaseToJSThread(jsThread_, newPhase);
-    }
-    if (thread_ != nullptr) {
-        BaseRuntime::GetInstance()->ForEachVM(
-            [thr = thread_, newPhase](VMInterface *vm) { vm->UpdateReadBarrierEntrypoint(thr, newPhase); });
-    }
+    mutatorPhase_.store(newPhase, std::memory_order_relaxed); // handshake between mutator & mainGC thread
+    BaseRuntime::GetInstance()->ForEachVM(
+        [m = this, newPhase](VMInterface *vm) { m->UpdateReadBarrierEntrypoint(newPhase); });
     // Clear mutator's suspend request after phase transition
     ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE);  // atomic seq-cst
 }
@@ -347,57 +332,27 @@ void PreRunManagedCode(Mutator *mutator, int layers, ThreadLocalData *threadData
     mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
 }
 
-Mutator *Mutator::CreateAndRegisterNewMutator(void *vm)
+void Mutator::RegisterNewMutator(Mutator *mutator)
 {
-    if (ThreadLocal::IsArkProcessor()) {
-        LOG_COMMON(FATAL) << "CreateAndRegisterNewMutator fail";
-        return nullptr;
-    }
-    Mutator *mutator = Mutator::NewMutator();
-    CHECK_CC(mutator != nullptr);
-    mutator->SetEcmaVMPtr(vm);
-
     auto &mutatorManager = MutatorManager::Instance();
     mutatorManager.MutatorManagementRLock();
+    GCPhase phase = Heap::GetHeap().GetGCPhase();
     {
         std::lock_guard<std::mutex> guard(mutatorManager.allMutatorListLock_);
+        DCHECK_CC(std::find(mutatorManager.allMutatorList_.begin(),
+                            mutatorManager.allMutatorList_.end(), mutator) == mutatorManager.allMutatorList_.end());
+        if (UNLIKELY_CC(mutatorManager.StwTriggered())) {
+            mutator->SetSafepointActive(true);
+            mutator->SetSuspensionFlag(SuspensionType::SUSPENSION_FOR_STW);
+        }
         mutatorManager.allMutatorList_.push_back(mutator);
     }
-    mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
+    mutator->SetMutatorPhase(phase);
+    // Enable read barrier for mutators created during concurrent copy/fix.
+    if (phase >= GCPhase::GC_PHASE_PRECOPY) {
+        mutator->TransitionToGCPhaseExclusive(phase);
+    }
     mutatorManager.MutatorManagementRUnlock();
-
-    return mutator;
-}
-
-Mutator *Mutator::GetCurrent()
-{
-    return currentMutator;
-}
-
-void Mutator::SetCurrent(Mutator *mutator)
-{
-    currentMutator = mutator;
-}
-
-void Mutator::RegisterCoroutine(Coroutine *coroutine)
-{
-    MutatorManagedScope scope(this);
-    DCHECK_CC(coroutines_.find(coroutine) == coroutines_.end());
-    coroutines_.insert(coroutine);
-}
-
-void Mutator::UnregisterCoroutine(Coroutine *coroutine)
-{
-    if (coroutines_.find(coroutine) == coroutines_.end()) {
-        return;
-    }
-    DCHECK_CC(!IsInRunningState());
-    TransferToRunning();
-    DCHECK_CC(coroutines_.find(coroutine) != coroutines_.end());
-    coroutines_.erase(coroutine);
-    if (coroutines_.empty() && jsThread_ == nullptr) {
-        Mutator::DestroyMutator(this);
-    }
 }
 
 bool Mutator::TryBindMutator()
@@ -407,11 +362,7 @@ bool Mutator::TryBindMutator()
     }
 
     auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.MutatorManagementRLock();
-
     mutatorManager.BindMutator(*this);
-
-    mutatorManager.MutatorManagementRUnlock();
 
     allocBuffer_ = ThreadLocal::GetAllocBuffer();
     reinterpret_cast<AllocationBuffer *>(allocBuffer_)->IncreaseRefCount();
@@ -421,6 +372,10 @@ bool Mutator::TryBindMutator()
 
 void Mutator::BindMutator()
 {
+    DCHECK_CC(!IsInRunningState());
+    Mutator *curr = ThreadLocal::GetMutator();
+    DCHECK_CC(curr == nullptr || !curr->IsInRunningState());
+
     if (!TryBindMutator()) {
         LOG_COMMON(FATAL) << "BindMutator fail";
         return;
@@ -429,13 +384,10 @@ void Mutator::BindMutator()
 
 void Mutator::UnbindMutator()
 {
+    DCHECK_CC(!IsInRunningState());
     allocBuffer_ = nullptr;
     auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.MutatorManagementRLock();
-
     mutatorManager.UnbindMutator(*this);
-
-    mutatorManager.MutatorManagementRUnlock();
 }
 
 void Mutator::ReleaseAllocBuffer()
@@ -451,10 +403,10 @@ void Mutator::ReleaseAllocBuffer()
     }
 }
 
-void Mutator::DestroyMutator(Mutator *mutator)
+void Mutator::UnregisterMutator(Mutator *mutator)
 {
+    DCHECK_CC(!mutator->IsInRunningState());
     mutator->ReleaseAllocBuffer();
-    mutator->TransferToNative();
 
     auto &mutatorManager = MutatorManager::Instance();
     mutatorManager.MutatorManagementRLock();

@@ -72,27 +72,6 @@ void VisitPreforwardRoots(const RefFieldVisitor &visitor)
     });
 }
 
-// Visit specific mutator roots.
-void VisitMutatorRoots(const RefFieldVisitor &visitor, Mutator &mutator)
-{
-    void *thread = mutator.GetArkthreadPtr();
-    if (thread != nullptr) {
-        BaseRuntime::GetInstance()->ForEachVM([&visitor, thread] (VMInterface* vm) {
-            vm->VisitMutatorRoots(visitor, thread);
-        });
-    }
-}
-
-void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator)
-{
-    void *thread = mutator.GetArkthreadPtr();
-    if (thread != nullptr) {
-        BaseRuntime::GetInstance()->ForEachVM([&visitor, thread] (VMInterface* vm) {
-            vm->VisitMutatorRoots(visitor, thread);
-        });
-    }
-}
-
 void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator) {}
 
 void UnmarkAllXRefs()

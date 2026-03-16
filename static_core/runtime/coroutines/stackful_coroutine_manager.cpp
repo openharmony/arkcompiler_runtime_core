@@ -326,6 +326,10 @@ void StackfulCoroutineManager::RemoveFromRegistry(Coroutine *co)
 
 void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
 {
+#if defined(ARK_USE_COMMON_RUNTIME)
+    // NOTE(ivagin): #33824 move mutator registration under coroListLock_
+    common_vm::Mutator::RegisterNewMutator(co);
+#endif
     os::memory::LockHolder lock(coroListLock_);
     AddToRegistry(co);
     // Propagate SUSPEND_REQUEST flag to the new coroutine to avoid the following situation:
@@ -364,12 +368,13 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
     co->NativeCodeEnd();
     co->UpdateStatus(MutatorStatus::TERMINATING);
 
+#if defined(ARK_USE_COMMON_RUNTIME)
+    // NOTE(ivagin): #33824 move mutator unregistration under coroListLock_
+    common_vm::Mutator::UnregisterMutator(co);
+#endif
     {
         os::memory::LockHolder lList(coroListLock_);
         RemoveFromRegistry(co);
-#if defined(ARK_USE_COMMON_RUNTIME)
-        co->GetMutator()->UnregisterCoroutine(co);
-#endif
         // We need collect TLAB metrics and clear TLAB before calling the manage thread destructor
         // because of the possibility heap use after free. This happening when GC starts execute ResetYoungAllocator
         // method which start iterate set of threads, collect TLAB metrics and clear TLAB. If thread was deleted from
