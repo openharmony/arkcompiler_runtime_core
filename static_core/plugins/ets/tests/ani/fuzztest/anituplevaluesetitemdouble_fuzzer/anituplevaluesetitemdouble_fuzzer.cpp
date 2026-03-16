@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 
 namespace OHOS {
@@ -38,7 +39,8 @@ void AniTupleValueSetItemDoubleFuzzTest(const char *data, size_t size)
     engine->AniGetTuple(&tuple);
 
     ani_double val {};
-    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    FuzzedDataProvider provider(reinterpret_cast<const uint8_t *>(data), size);
+    auto index = provider.ConsumeIntegral<ani_size>();
     env->TupleValue_SetItem_Double(tuple, index, val);
 }
 }  // namespace OHOS
