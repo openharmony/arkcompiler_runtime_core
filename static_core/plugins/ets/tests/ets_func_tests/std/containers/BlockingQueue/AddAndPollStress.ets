@@ -42,7 +42,7 @@ async function addAndPoll() {
 
     // Test body
     let addAndPollStressTest = async (testBQ: containers.BlockingQueue<number>) => {
-        let arrPromise = new Array<Promise<Any>>(20)
+        let arrPromise = Array.create<Promise<Any> | undefined>(20, undefined)
         for (let i = 0; i < 10; i++) {
             arrPromise[i] = taskpool.execute(addSome, testBQ, i * 1000)
         }
@@ -50,7 +50,7 @@ async function addAndPoll() {
             arrPromise[i] = taskpool.execute(pollSome, testBQ, i * 1000)
         }
         for (let i = 0; i < 20; i++) {
-            await arrPromise[i]
+            await arrPromise[i]!
         }
         arktest.assertEQ(testBQ.capacity, 10000)
     }

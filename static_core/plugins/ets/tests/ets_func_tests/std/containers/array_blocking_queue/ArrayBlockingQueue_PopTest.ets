@@ -98,7 +98,7 @@ function main(): int {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
         }
-        let jobs = new Array<Job<void>>(100);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         for (let i: int = 0; i < elementsNum; ++i) {
            jobs[i] = launch(queueIntPopdata);
         }
@@ -106,7 +106,7 @@ function main(): int {
             queueIntPopN.push(i);
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(queueIntPopN.size, 0);
     });

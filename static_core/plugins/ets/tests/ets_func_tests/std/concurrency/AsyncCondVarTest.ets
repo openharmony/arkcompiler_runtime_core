@@ -84,7 +84,7 @@ async function asyncCondVarNotifyAllTest() {
         event.ResetFlag();
         let counter = new AtomicInt(0);
         const tasks_counter = 10;
-        let jobs = new Array<Job<void>>(tasks_counter);
+        let jobs = Array.create<Job<void> | undefined>(tasks_counter, undefined);
         for (let i = 0; i < tasks_counter; ++i) {
             const id = i.toInt();
             jobs[id] = launch() {
@@ -103,7 +103,7 @@ async function asyncCondVarNotifyAllTest() {
         };
         setAll.Await();
         for (let job of jobs) { 
-           job.Await();
+           job!.Await();
         }
         arktest.assertEQ(counter.load(), tasks_counter);
     }

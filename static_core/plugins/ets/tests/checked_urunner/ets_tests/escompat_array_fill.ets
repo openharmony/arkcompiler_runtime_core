@@ -42,7 +42,7 @@ class TestClass {
 }
 
 let arraySize: int = 10;
-let array1: int[] = new Array<int>(arraySize);
+let array1: int[] = Array.create<int>(arraySize, 0);
 
 function checkArray(arr: int[], start: int, end: int, expected: int) {
     for (let i = start; i < end; i++) {

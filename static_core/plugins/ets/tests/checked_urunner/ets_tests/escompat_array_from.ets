@@ -236,11 +236,9 @@ function testArrayFrom() {
     for (let i: int = 0; i < 3; i++) {
         arktest.assertEQ(fromIter[i], i + 1);
     }
-    let arrCustom: (ArrayLike<number> | Iterable<number>)[] = new Array<ArrayLike<number> | Iterable<number>>(2);
     let tmpArrLike: ArrayLikeImplTest<number> = new ArrayLikeImplTest<number>();
     tmpArrLike.push(1);
-    arrCustom[0] = tmpArrLike;
-    arrCustom[1] = new ArrayValueIteratorTest();
+    let arrCustom: (ArrayLike<number> | Iterable<number>)[] = [tmpArrLike, new ArrayValueIteratorTest()];
     let fromArr1 = Array.from(arrCustom[0]);
     let fromArr2 = Array.from(arrCustom[1]);
     for (let i: int = 0; i < 1; i++) {

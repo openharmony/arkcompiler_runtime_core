@@ -31,13 +31,13 @@ function main(): int {
         for (let i = 0; i < stressNum; i++) {
             sMTQueueInt.add(i);
         }
-        let jobs = new Array<Job<void>>(100);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         let p = 0;
         for (let i = 0; i < stressNum; i++) {
             jobs[p++] = launch(sQueuePollData);
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(sMTQueueInt.size, 0);
     });

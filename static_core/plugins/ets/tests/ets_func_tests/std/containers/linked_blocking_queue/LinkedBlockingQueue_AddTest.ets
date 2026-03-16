@@ -51,12 +51,12 @@ function main(): int {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let jobs = new Array<Job<void>>(5);
+        let jobs = Array.create<Job<void> | undefined>(5, undefined);
         for (let i = 0; i < 5; i++) {
             jobs[i] = launch(queueAddData);
         }
         for (let i: int = 0; i < 5; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(mQueueInt.getFirst(), testNum);
     });
@@ -65,14 +65,14 @@ function main(): int {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let jobs = new Array<Job<void>>(6);
+        let jobs = Array.create<Job<void> | undefined>(6, undefined);
         let p = 0;
         for (let i = 0; i < 3; i++) {
             jobs[p++] = launch(queueAddData);
             jobs[p++] = launch(queuePopData);
         }
         for (let i: int = 0; i < 6; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertTrue(mQueueInt.size <= 3);
     });
@@ -81,7 +81,7 @@ function main(): int {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let jobs = new Array<Job<void>>(10);
+        let jobs = Array.create<Job<void> | undefined>(10, undefined);
         let p = 0;
         for (let i = 0; i < 5; i++) {
             jobs[p++] = launch(queueAddData);
@@ -90,7 +90,7 @@ function main(): int {
             jobs[p++] = launch(queueGetFirstData);
         }
         for (let i: int = 0; i < 10; i++) {
-            jobs[i].Await();
+            jobs[i]!.Await();
         }
         arktest.assertEQ(mQueueInt.getFirst(), testNum);
     });

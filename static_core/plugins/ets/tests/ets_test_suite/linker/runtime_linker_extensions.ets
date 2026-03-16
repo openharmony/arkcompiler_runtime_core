@@ -88,7 +88,7 @@ class Test {
     }
 
     private static loadRawFiles(paths: string[]): Array<FixedArray<byte>> {
-        const rawFiles = new Array<FixedArray<byte>>(paths.length);
+        const rawFiles = Array.create<FixedArray<byte>>(paths.length, new FixedArray<byte>(0));
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
             arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);
