@@ -811,7 +811,7 @@ export final class Console {
 
     private static graphTable(head: Array<string>, columns: Array<string>, length: int): Array<string> {
         let columnLen = head.length;
-        let columnWidths: Array<number> = new Array<number>(columnLen);
+        let columnWidths: Array<int> = new Array<int>(columnLen);
         let rowDivider: Array<string> = new Array<string>(columnLen);
         let tableResult: Array<string> = new Array<string>();
         for (let i = 0; i < columnLen; i++) {
@@ -821,15 +821,15 @@ export final class Console {
         for (let i = 0; i < columnLen; i++) {
             for (let j = 0; j < length; j++) {
                 let element = columns[i * length + j];
-                let stringLen = Console.getStringLen(element);
+                let stringLen = element.length;
                 columnWidths[i] = columnWidths[i] > stringLen ? columnWidths[i] : stringLen;
             }
             let middle: string = Console.tableChars.get("middleMiddle")!;
-            rowDivider[i] = Console.stringRepeat(columnWidths[i] + 2, middle);
+            rowDivider[i] = middle.repeat(columnWidths[i] + 2);
         }
-        let indexRow1: string = Console.tableChars.get("topLeft")! + Console.arrayJoin(rowDivider, Console.tableChars.get("topMiddle")!) + Console.tableChars.get("topRight")!;
+        let indexRow1: string = Console.tableChars.get("topLeft")! + rowDivider.join(Console.tableChars.get("topMiddle")!) + Console.tableChars.get("topRight")!;
         let indexRow2: string = Console.renderHead(head, columnWidths);
-        let indexRow3 = Console.tableChars.get("leftMiddle")! + Console.arrayJoin(rowDivider, Console.tableChars.get("rowMiddle")!) + Console.tableChars.get("rightMiddle")!;
+        let indexRow3 = Console.tableChars.get("leftMiddle")! + rowDivider.join(Console.tableChars.get("rowMiddle")!) + Console.tableChars.get("rightMiddle")!;
         tableResult.push(indexRow1);
         tableResult.push(indexRow2);
         tableResult.push(indexRow3);
@@ -837,44 +837,12 @@ export final class Console {
         for (let i = 0; i < rows.length; i++) {
             tableResult.push(rows[i]);
         }
-        let endRow = Console.tableChars.get("bottomLeft")! + Console.arrayJoin(rowDivider, Console.tableChars.get("bottomMiddle")!) + Console.tableChars.get("bottomRight")!;
+        let endRow = Console.tableChars.get("bottomLeft")! + rowDivider.join(Console.tableChars.get("bottomMiddle")!) + Console.tableChars.get("bottomRight")!;
         tableResult.push(endRow);
         return tableResult;
     }
 
-    private static getStringLen(str: string):number {
-        let length = 0;
-        for (let i =0; i < str.length; i++) {
-            if (str[i] != "" && str[i] != undefined && str[i] != null) {
-                length++;
-            }
-        }
-        return length;
-    }
-
-    private static stringRepeat(number: number, tableChars: string): string {
-        let divider: string = "";
-        let length = number;
-        for (let i = 0; i < length; i++) {
-            divider += tableChars;
-        }
-        return divider;
-    }
-
-    private static arrayJoin(rowDivider: Array<string>, tableChars: string): string {
-        let size = rowDivider.length;
-        if (size == 0) {
-            return "no rowDivider";
-        }
-        let result: string = rowDivider[0];
-        for (let i = 1; i < size; i++) {
-            result += tableChars;
-            result += rowDivider[i];
-        }
-        return result;
-    }
-
-    private static renderHead(head: Array<string>, columnWidths: Array<number>) {
+    private static renderHead(head: Array<string>, columnWidths: Array<int>) {
         let result = Console.tableChars.get("left")!;
         let length = columnWidths.length;
         for (let i = 0; i < length; i++) {
@@ -882,7 +850,7 @@ export final class Console {
             let stringLen = elemStr.length;
             let left = (columnWidths[i] - stringLen) / 2;
             let right = columnWidths[i] - stringLen - left;
-            result += Console.stringRepeat(left, " ") + elemStr + Console.stringRepeat(right, " ");
+            result += " ".repeat(left) + elemStr + " ".repeat(right);
             if (i != length - 1) {
                 result += Console.tableChars.get("middle")!;
             }
@@ -891,20 +859,20 @@ export final class Console {
         return result;
     }
 
-    private static printRows(Rows: Array<string>, columnWidths: Array<number>, indexNum: int): Array<string> {
+    private static printRows(Rows: Array<string>, columnWidths: Array<int>, indexNum: int): Array<string> {
         let rows:Array<string> = new Array<string>();
         let length = columnWidths.length;
         for (let i = 0; i < indexNum; i++) {
             let result:string = Console.tableChars.get("left")!;
             for (let j = 0; j < length; j++) {
                 let stringVal = Rows[j * indexNum + i];
-                let stringLen = Console.getStringLen(stringVal);
+                let stringLen = stringVal.length;
                 if (stringLen > 0) {
-                    let left:int = ((columnWidths[j] - stringLen) / 2).toInt();
-                    let right:int = (columnWidths[j] - stringLen - left).toInt();
-                    result += Console.stringRepeat(left, " ") + stringVal + Console.stringRepeat(right, " ");
+                    let left: int = (columnWidths[j] - stringLen) / 2;
+                    let right: int = columnWidths[j] - stringLen - left;
+                    result += " ".repeat(left) + stringVal + " ".repeat(right);
                 } else {
-                    result += Console.stringRepeat(columnWidths[j], " ");
+                    result += " ".repeat(columnWidths[j]);
                 }
                 if (j != length - 1) {
                     result += Console.tableChars.get("middle")!;
