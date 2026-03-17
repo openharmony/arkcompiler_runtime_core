@@ -16,9 +16,7 @@ limitations under the License.
 {% for c in char_relational %}
 
 /*---
-desc: Char relational operator {{c.left}} {{c.op}} {{c.right}} causes compile-time error
-tags: [negative, compile-only]
-expected_out: "Error stub. Error message will be after #32704 fix"
+desc: Char relational operator {{c.left}} {{c.op}} {{c.right}}
 ---*/
 
 function main(): void {
