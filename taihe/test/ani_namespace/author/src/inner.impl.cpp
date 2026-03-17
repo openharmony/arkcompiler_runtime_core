@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -488,9 +488,7 @@ array<int8_t> PrintTestInterfaceArray(::inner::weak::TestInterface testiface)
 
 ::inner::union_primitive PrintTestInterfaceUnion(::inner::weak::TestInterface testiface)
 {
-    ::inner::union_primitive up = testiface->getunion();
-    std::cout << "s: " << up.get_sValue_ref() << std::endl;
-    return up;
+    return testiface->getunion();
 }
 
 map<string, int8_t> PrintTestInterfaceRecord(::inner::weak::TestInterface testiface)

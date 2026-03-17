@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,10 +46,13 @@ public:
         switch (b.get_tag()) {
             case ::function_test::MyUnion::tag_t::sValue:
                 std::cout << "s: " << b.get_sValue_ref() << std::endl;
+                break;
             case ::function_test::MyUnion::tag_t::iValue:
                 std::cout << "i: " << b.get_iValue_ref() << std::endl;
+                break;
             case ::function_test::MyUnion::tag_t::fValue:
-                std::cout << "i: " << b.get_iValue_ref() << std::endl;
+                std::cout << "f: " << b.get_fValue_ref() << std::endl;
+                break;
         }
     }
 
