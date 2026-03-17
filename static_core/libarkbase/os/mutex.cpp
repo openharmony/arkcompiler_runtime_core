@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 
 namespace ark::os::memory {
 
-std::atomic_bool Mutex::no_check_for_deadlock_ = false;
+std::atomic_bool Mutex::noCheckForDeadlock_ = false;
 
 ALWAYS_INLINE inline void FatalIfError(const char *f, int rc)
 {
@@ -175,10 +175,10 @@ void ConditionVariable::Wait(Mutex *mutex)
     FatalIfError("pthread_cond_wait", rc);
 }
 
-struct timespec ConvertTime(uint64_t ms, uint64_t ns, bool is_absolute)
+struct timespec ConvertTime(uint64_t ms, uint64_t ns, bool isAbsolute)
 {
-    struct timespec abs_time = {0, 0};
-    if (!is_absolute) {
+    struct timespec abs_time = {0, 0};  // CC-OFF(G.NAM.03-CPP) project code style
+    if (!isAbsolute) {
         clock_gettime(CLOCK_REALTIME, &abs_time);
     }
     const int64_t MILLISECONDS_PER_SEC = 1000;
@@ -195,9 +195,9 @@ struct timespec ConvertTime(uint64_t ms, uint64_t ns, bool is_absolute)
     return abs_time;
 }
 
-bool ConditionVariable::TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns, bool is_absolute /* = false */)
+bool ConditionVariable::TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns, bool isAbsolute /* = false */)
 {
-    struct timespec abs_time = ConvertTime(ms, ns, is_absolute);
+    struct timespec abs_time = ConvertTime(ms, ns, isAbsolute);  // CC-OFF(G.NAM.03-CPP) project code style
     int rc = pthread_cond_timedwait(&cond_, &mutex->mutex_, &abs_time);
     if (rc != 0) {
         if (rc == ETIMEDOUT) {

@@ -30,10 +30,10 @@ namespace ark::helpers::math {
  * @param x - should be power of 2
  * @return log2(x) or undefined if x 0
  */
-constexpr unsigned GetIntLog2(const unsigned x)
+constexpr uint32_t GetIntLog2(const uint32_t x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<unsigned>(PANDA_BIT_UTILS_CTZ(x));
+    return static_cast<uint32_t>(PANDA_BIT_UTILS_CTZ(x));
 }
 
 /**
@@ -41,21 +41,10 @@ constexpr unsigned GetIntLog2(const unsigned x)
  * @param x - of type long, should be power of 2
  * @return log2(x) or undefined if x 0
  */
-constexpr unsigned long GetIntLog2(const unsigned long x)  // NOLINT(*-runtime-int)
+constexpr uint64_t GetIntLog2(const uint64_t x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<unsigned long>(PANDA_BIT_UTILS_CTZLL(x));  // NOLINT(*-runtime-int)
-}
-
-/**
- * @brief returns log2 for argument
- * @param x - of type long long, should be power of 2
- * @return log2(x) or undefined if x 0
- */
-constexpr unsigned long long GetIntLog2(const unsigned long long x)  // NOLINT(*-runtime-int)
-{
-    ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<unsigned long long>(PANDA_BIT_UTILS_CTZLL(x));  // NOLINT(*-runtime-int)
+    return static_cast<uint64_t>(PANDA_BIT_UTILS_CTZLL(x));
 }
 
 template <typename T>
@@ -97,7 +86,7 @@ constexpr uint32_t GetPowerOfTwoValue32(uint32_t value)
 }
 
 /// Count trailing zeroes
-constexpr unsigned int Ctz(uint32_t value)
+constexpr uint32_t Ctz(uint32_t value)
 {
     constexpr std::array<uint32_t, 32> MULTIPLY_DE_BRUIJN_BIT_POSITION = {0,  1,  28, 2,  29, 14, 24, 3,  30, 22, 20,
                                                                           15, 25, 17, 4,  8,  31, 27, 13, 23, 21, 19,
