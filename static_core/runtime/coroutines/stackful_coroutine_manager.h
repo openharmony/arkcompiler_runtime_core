@@ -139,6 +139,7 @@ public:
 
     CoroutineWorkerGroup::Id GenerateWorkerGroupId(CoroutineWorkerDomain domain,
                                                    const PandaVector<CoroutineWorker::Id> &hint) override;
+    size_t GetCoroutineCount() override;
 
     /// should be called once the VM is ready to create managed objects in the managed heap
     void InitializeManagedStructures() override;
@@ -157,7 +158,6 @@ protected:
     CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 
-    size_t GetCoroutineCount() override;
     size_t GetCoroutineCountLimit() override;
 
     StackfulCoroutineContext *GetCurrentContext();

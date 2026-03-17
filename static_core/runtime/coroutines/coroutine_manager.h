@@ -383,6 +383,9 @@ public:
         return os::time::GetClockTimeInMicro();
     }
 
+    /// Returns number of existing coroutines
+    virtual size_t GetCoroutineCount() = 0;
+
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;
     /// Create native coroutine context instance (implementation dependent)
@@ -398,8 +401,7 @@ protected:
      */
     Coroutine *CreateCoroutineInstance(EntrypointInfo &&epInfo, PandaString name, Coroutine::Type type,
                                        CoroutinePriority priority);
-    /// Returns number of existing coroutines
-    virtual size_t GetCoroutineCount() = 0;
+
     /**
      * @brief returns number of coroutines that could be created till the resource limit is reached.
      * The resource limit definition is specific to the exact coroutines/coroutine manager implementation.

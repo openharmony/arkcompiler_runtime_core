@@ -141,4 +141,9 @@ void EtsWriteUnlock(EtsObject *rwLock)
     EtsRWLock::FromEtsObject(rwLock)->Unlock();
 }
 
+int64_t GetCoroutineCount()
+{
+    return EtsCoroutine::GetCurrent()->GetCoroutineManager()->GetCoroutineCount();
+}
+
 }  // namespace ark::ets::intrinsics
