@@ -312,7 +312,8 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
         SynchronizeGCPhaseToJSThread(jsThread_, newPhase);
     }
     if (thread_ != nullptr) {
-        UpdateReadBarrierEntrypoint(thread_, newPhase);
+        BaseRuntime::GetInstance()->ForEachVM(
+            [thr = thread_, newPhase](VMInterface *vm) { vm->UpdateReadBarrierEntrypoint(thr, newPhase); });
     }
     // Clear mutator's suspend request after phase transition
     ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE); // atomic seq-cst

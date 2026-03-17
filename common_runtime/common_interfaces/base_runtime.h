@@ -28,9 +28,14 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <shared_mutex>
+#include <vector>
+#include <memory>
+#include <unordered_set>
 
 #include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/heap/heap_visitor.h"
+#include "common_interfaces/vm_interface.h"
 
 namespace common_vm {
 class BaseStringTableImpl;
@@ -127,6 +132,10 @@ public:
     void Init();                           // Use default parameters
     void Fini();
 
+    bool RegisterVM(VMInterface *vm);
+    bool UnregisterVM(VMInterface *vm);
+    void ForEachVM(std::function<void(VMInterface *)> action);
+
     // Need refactor, move to other file
     static void WriteRoot(void *obj);
     static void WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator = nullptr);
@@ -213,6 +222,8 @@ private:
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
+    std::unordered_set<VMInterface *> vmIfaces;
+    std::shared_mutex vmIfacesLock;
 };
 }  // namespace common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H

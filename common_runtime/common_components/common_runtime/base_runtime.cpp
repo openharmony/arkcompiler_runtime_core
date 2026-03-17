@@ -141,6 +141,26 @@ void BaseRuntime::Fini()
     initialized_ = false;
 }
 
+bool BaseRuntime::RegisterVM(VMInterface *vm)
+{
+    std::lock_guard vmIfacesWriteLock(vmIfacesLock);
+    auto res = vmIfaces.insert(vm);
+    return res.second;
+}
+
+bool BaseRuntime::UnregisterVM(VMInterface *vm)
+{
+    std::lock_guard vmIfacesWriteLock(vmIfacesLock);
+    auto erased = vmIfaces.erase(vm);
+    return erased != 0;
+}
+
+void BaseRuntime::ForEachVM(std::function<void(VMInterface *)> action)
+{
+    std::shared_lock vmIfacesReadLock(vmIfacesLock);
+    std::for_each(vmIfaces.begin(), vmIfaces.end(), action);
+}
+
 void BaseRuntime::PreFork(Mutator *mutator)
 {
     // Need appspawn space and compress gc.
