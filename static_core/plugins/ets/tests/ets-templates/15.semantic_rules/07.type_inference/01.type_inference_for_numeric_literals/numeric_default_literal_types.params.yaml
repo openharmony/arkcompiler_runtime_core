@@ -22,3 +22,4 @@ cases:
   - { use: "128", value: '(1).toInt()', use_type: ": long", expected_type: long }
   - { use: "3.14", value: '1', use_type: ": string | Object", expected_type: int }
   - { use: "1", value: '1.0', use_type: ": string | Object", expected_type: double }
+  - { use: "3.14", value: '2f', use_type: ": float | double", expected_type: float }
