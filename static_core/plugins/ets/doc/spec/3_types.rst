@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -60,21 +60,22 @@ source code in |LANG|.
    ========================= =========================
    ``byte``, ``short``,      class types,
    ``int``,  ``long``,       interface types,
-   ``float``, ``double``,    array types,
-   ``number``,               fixed array types,
-   ``boolean``, ``char``,    tuple types,
+   ``float``, ``double``,    tuple types,
+   ``number``,               union types,
+   ``boolean``, ``char``,    function types,
 
-   ``string``,               union types,
+   ``string``,               enumeration types,
 
-   ``bigint``,               literal types,
+   ``bigint``,               type parameters,
 
-   ``Any``, ``Object``,      function types,
+   ``Any``, ``Object``,      string literal types
 
-   ``never``, ``void``,      type parameters,
+   ``never``, ``void``,      
 
-   ``undefined``, ``null``,  enumeration types
+   ``undefined``, ``null``,  
    ``Array<T>`` or ``T[]``,  
-   ``FixedArray<T>``
+   ``FixedArray<T>``,
+   ``ValueArray<T>``
    ========================= =========================
 
 .. note::
@@ -93,7 +94,6 @@ source code in |LANG|.
    function type
    type parameter
    enumeration type
-   const enumeration type
    alias
 
 Most *predefined types* have aliases to improve |TS| compatibility as follows:
@@ -198,7 +198,6 @@ User-Defined Types
    class type
    interface type
    enumeration type
-   const enumeration type
    function type
    union type
    type parameter
@@ -362,7 +361,7 @@ Named Types
 .. meta:
     frontend_status: Done
 
-*Named types* are classes, interfaces, enumerations, const enumerations, aliases,
+*Named types* are classes, interfaces, enumerations, aliases,
 type parameters, and predefined types (see :ref:`Predefined Types`), except
 built-in arrays. Other types (i.e., array, function, and union types) are anonymous
 unless aliased. Respective named types are introduced by the following:
@@ -386,7 +385,6 @@ substituted for the type parameters of a named type.
    class
    interface
    enumeration
-   const enumeration type
    alias
    type parameter
    predefined type
@@ -443,11 +441,7 @@ The syntax of *type reference* is presented below:
 .. code-block:: abnf
 
     typeReference:
-        typeReferencePart ('.' typeReferencePart)*
-        ;
-
-    typeReferencePart:
-        identifier typeArguments?
+        qualifiedName typeArguments?
         ;
 
 .. code-block:: typescript
@@ -529,7 +523,6 @@ values.
    enumeration
    user-defined type
    enumeration type
-   const enumeration type
    value
    state
 
@@ -1250,7 +1243,8 @@ Type ``void`` or ``undefined``
     frontend_status: Done
 
 Type names ``void`` and ``undefined`` in fact refer to the same type with the
-single value named ``undefined`` (see :ref:`Undefined Literal`).
+single value named ``undefined`` (see :ref:`Undefined Literal`), and are used
+in this document interchangeably.
 
 .. code-block:: typescript
    :linenos:
@@ -1273,9 +1267,9 @@ single value named ``undefined`` (see :ref:`Undefined Literal`).
     u = v // OK
 
 
-Type ``void`` is used typically as a return type to highlight that a function, a method,
-or a lambda can contain :ref:`Return Statements` with no expression, or no
-return statement at all:
+Type name ``void`` is used typically as a return type to highlight that a
+function, a method, or a lambda can contain :ref:`Return Statements` with no
+expression, or no return statement at all:
 
 .. code-block:: typescript
    :linenos:
@@ -1293,8 +1287,8 @@ return statement at all:
     let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
 
 
-Type ``void`` can be used as a type argument that instantiates a generic type,
-function, or method as follows:
+Type name ``void`` can be used as a type argument that instantiates a generic
+type, function, or method as follows:
 
 .. code-block-meta:
    expect-cte:
@@ -1307,8 +1301,8 @@ function, or method as follows:
       m(): T { return this.f }
       constructor (f: T) { this.f = f }
    }
-   let a1 = new A<void>(undefined)      // OK, undefined and void are the same type
-   let a2 = new A<undefined>(undefined) // OK
+   let a1 = new A<void>(undefined)      // OK, type name void used as type argument
+   let a2 = new A<undefined>(undefined) // OK, type name undefined used as type argument
 
    console.log (a1.f, a2.m()) // Output is "undefined" "undefined"
 
@@ -1320,13 +1314,12 @@ function, or method as follows:
    const f2: F1<void> = () => {}
    const f3: F1<void> = (): undefined => { return undefined }
 
-   // Array literals can be assigned to the array of void type in any form
+   // Array literals can be assigned to the array of void type name in any form
    type A1<T> = T[]
    type A2<T> = Array<T>
    const a1: A1<void> = [undefined]
    const a2: A2<void> = [undefined, undefined]
    const a3: void[] = [undefined]
-
 
 .. index::
    void type
@@ -1336,12 +1329,8 @@ function, or method as follows:
    generic type
    undefined type
 
-
-Using type ``undefined`` as type annotation is not recommended, except in
-nullish types (see :ref:`Nullish Types`).
-
-Type ``undefined`` can be used also as type argument to instantiate a generic
-type as follows:
+Type name ``undefined`` can be used also as type argument to instantiate a
+generic type as follows:
 
 .. code-block-meta:
 
@@ -2926,7 +2915,8 @@ NonNullable Utility Type
     frontend_status: None
 
 Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
-types. Formally it can be expressed like this (see :ref:`Difference Types`)
+types (see :ref:`Type null` and :ref:`Type void or undefined`). It can be
+expressed formally as follows (see :ref:`Difference Types`):
 
 ``NonNullable<T> = T - null - undefined``.
 

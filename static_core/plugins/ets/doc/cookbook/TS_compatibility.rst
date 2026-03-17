@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -41,8 +41,8 @@ value ``undefined`` is used in |TS|.
 
     let array = new Array<number>
     let x = array [1234]
-       // TypeScript: x will be assigned with value undefined!!!
-       // ArkTS: compile-time error if analysis may detect array out of bounds
+       // x is assigned with value undefined in TypeScript!!!
+       // compile-time error in ArkTS if analysis detects array out of bounds
        //        violation or runtime error ArrayOutOfBounds
     console.log(x)
 
@@ -73,12 +73,12 @@ on the context and can produce different results as follows:
    :linenos:
 
     let n = 1
-       // TypeScript: treats 'n' as having type number
-       // ArkTS: treats 'n' as having type int to reach max code performance
+       // TypeScript treats 'n' as having type number
+       // ArkTS treats 'n' as having type int to reach max code performance
 
     console.log(n / 2)
-       // TypeScript: will print 0.5 - floating-point division is used
-       // ArkTS: will print 0 - integer division is used
+       // TypeScript prints 0.5 as floating-point division is used
+       // ArkTS prints 0 as integer division is used
 
 .. index::
    numeric type
@@ -110,15 +110,15 @@ is prohibited:
     }
     class Derived extends Base {
        override foo (p: Derived)
-          // ArkTS will issue a compile-time error - incorrect overriding
+          // ArkTS issues a compile-time error due to incorrect overriding
        {
            console.log ("p.field unassigned = ", p.field)
-              // TypeScript will print 'p.field unassigned =  undefined'
+              // TypeScript  prints 'p.field unassigned =  undefined'
            p.field = 42 // Access the field
            console.log ("p.field assigned   = ", p.field)
-              // TypeScript will print 'p.field assigned   =  42'
+              // TypeScript prints 'p.field assigned   =  42'
            p.method() // Call the method
-              // TypeScript will generate runtime error: p.method is not a function
+              // TypeScript generates a runtime error: p.method is not a function
        }
        method () {}
        field: number = 0
@@ -215,7 +215,7 @@ valid in |TS| but causes a compile-time error in |LANG|:
 .. code-block:: typescript
    :linenos:
 
-    function foo(): void 
+    function foo(): void
     function foo(x: string): void
     function foo(x?: string): void {
         /*body*/
@@ -264,7 +264,7 @@ The two situations are represented by the following examples:
      field: number = 123
      foo () {
         console.log (this.field)
-     }     
+     }
    }
    class Derived extends Base {
      field: number = 456
@@ -276,13 +276,13 @@ The two situations are represented by the following examples:
    b.foo()  // 456 is printed
 
 
-   // That will be a compile-time error in ArkTS as type of 'field' in Child
+   // It causes a compile-time error in ArkTS as type of 'field' in Child
    // differs from 'field' type in Parent
    class Parent {
        field: Object
    }
    class Child extends Parent {
-       field: Number 
+       field: Number
    }
 
 .. index::
@@ -313,7 +313,7 @@ in union types. This situation is represented by the example below:
    :linenos:
 
    type UnionWithVoid = void | number
-     // Such type is OK for Typescript, but leads to a compile-time error for ArkTS
+     // Such type is OK in Typescript, but causes a compile-time error in ArkTS
 
 |
 
@@ -370,7 +370,7 @@ situation is represented by the following example:
 
    const tuple: [number, number, boolean] = [1, 3.14, true]
 
-   // Typescript accepts such assignment while ArkTS reports an error
+   // TypeScript accepts such assignment while ArkTS reports an error
    const array: (number|boolean) [] = tuple
 
 
@@ -391,7 +391,7 @@ listed explicitly in the ``extends`` clause of a class. |LANG| allows it because
 .. code-block:: typescript
    :linenos:
 
-    // Typescript reports an error while ArkTS compiles with no issues
+    // TypeScript reports an error while ArkTS compiles with no issues
     class A {
        override toString() {       // compile-time error
            return super.toString() // compile-time error
@@ -452,10 +452,10 @@ perform differently. The difference can be eliminated in the future versions of
    :linenos:
 
     function foo() {}
-    foo == foo  // true in Typescript while may be false in ArkTS
+    foo == foo  // true in TypeScript while may be false in ArkTS
     const f1 = foo
     const f2 = foo
-    f1 == f2 // true in Typescript while may be false in ArkTS
+    f1 == f2 // true in TypeScript while may be false in ArkTS
 
 
 .. index::
@@ -486,10 +486,10 @@ with a function object, while |LANG| does.
     }
     const a = new A
     const method = a.method
-    method() // Typescript output: undefined, while ArkTS output: object 'a' content
+    method() // output in TypeScript is undefined, while output in ArkTS is object 'a' content
 
     const aa = new A
-    a.method == aa.method // Typescript: true, while ArkTS: false
+    a.method == aa.method // true in TypeScript, while false in ArkTS
 
 
 .. index::
@@ -517,7 +517,7 @@ become non-distinguishable:
 .. code-block:: typescript
    :linenos:
 
-    // Typescript accepts such code, while ArkTS will report a compile-time error
+    // TypeScript accepts such code, while ArkTS reports a compile-time error
     // as signatures of foo() from the 1st namespace A is identical to the signature
     // of foo() from the 2nd namespace A
     namespace A {
@@ -628,8 +628,8 @@ in |LANG|:
     let some_condition = true
 
     class Derived extends Base {
-       // Next constructor body is OK in TS
-       // but causes compile_time error in ArkTS
+       // The following constructor body is OK in TypeScript
+       // but causes a compile_time error in ArkTS
        constructor (p: number) {
            if (some_condition) { super (1) }
            else { super (2) }
@@ -649,7 +649,7 @@ in some cases. The above chunk of code refactored for |LANG| is presented below:
     let some_condition = true
 
     class Derived extends Base {
-       // Next constructor body is OK in TS and ArkTS
+       // The following constructor body is OK in both TypeScript and ArkTS
        constructor (p: number) {
            super ( some_condition ? 1 : 2)
        }
@@ -733,7 +733,7 @@ use of a field.
         Base3 static field initialization
         777
     */
-    /* Typescript output:
+    /* TypeScript output:
         Base1 static field initialization
         Base2 static field initialization
         321
@@ -748,9 +748,9 @@ a static field is initialized.
    :linenos:
 
     class AClass {
-        static field: string // ArkTS will report a compile-time error
+        static field: string // ArkTS reports a compile-time error
     }
-    console.log (AClass.field) // Typescript will output 'undefined'
+    console.log (AClass.field) // TypeScript output is 'undefined'
 
 
 
@@ -775,10 +775,41 @@ the object model is different and allows such a mix.
         num: number
     }
     class D extends C implements I {
-        num: number = 2 // ArkTS compile-time error, conflict in overriding
-        // Typescript accepts such situation
+        num: number = 2 // compile-time error in ArkTS, conflict in overriding
+        // accepts such situation in TypeScript
     }
 
+
+|
+
+.. _Differences in Overriding Methods with Optional Parameters:
+
+Differences in Overriding Methods with Optional Parameters
+----------------------------------------------------------
+
+|TS| allows overriding a method of a superclass that has optional
+parameters with a method of a subclass that has a different number
+of parameters. The static compilation used in |LANG| allows
+overloading such methods with different signatures but forbids overriding.
+
+.. code-block:: typescript
+   :linenos:
+
+   class C {
+      foo(s?: string, n?: number) {}
+   }
+
+   class D1 extends C {
+      // OK in TypeScript, override
+      // compile-time error in ArkTS, incompatible foo() signature
+      override foo() {}
+   }
+
+
+   class D2 extends C {
+      // OK in TypeScript, override, OK in ArkTS, overload
+      foo() {}
+   }
 
 |
 
@@ -789,15 +820,25 @@ Differences in Export
 
 |LANG| enforces export consistency, i.e., all types used in the signature of
 an exported declaration, public class, or interface members are also exported.
-|TS| allows such declarations.
+|TS| allows such declarations. |LANG| also requires that all
+exported entities have a type (or return type) specified explicitly.
 
 .. code-block:: typescript
    :linenos:
 
-    class C {} // Not exported
-    export function foo (): C { return new C } // Exported function returns non-exported type
-    // ArkTS will produce compile-time error, enforcing C to be exported
-    // Typescript accepts such situation
+   // Exported variable has no explicit type
+   // OK in TypeScript, compile-time error in ArkTS
+   export let v = 1
+
+   // Exported function has no explicit return type
+   // OK in TypeScript, compile-time error in ArkTS
+   export function bar() {}
+
+   class C {} // Not exported
+
+   // compile-time error in ArkTS, enforcing C to be exported
+   // acceptable situation in TypeScript
+   export function foo (): C { return new C }
 
 
 |
@@ -815,9 +856,12 @@ non-exported in the case of aliasing. |TS| allows such declarations.
    :linenos:
 
     class B {}
-    export type A = B 
+    export type A = B
     // ArkTS will produce compile-time error, as B is not exported
     // Typescript accepts such situation
+    export type A = B
+    // compile-time error in ArkTS as B is not exported
+    // acceptable situation in TypeScript
 
 
 |
@@ -834,8 +878,8 @@ from a constant value as is allows in |TS|.
    :linenos:
 
     declare const a = 1
-    // ArkTS will produce compile-time error, as type is not specified
-    // Typescript accepts such declaration assuming 'a' is of type number
+    // compile-time error in ArkTS as type is not specified
+    // acceptable declaration in TypeScript assuming 'a' is of type number
 
 |
 
@@ -907,7 +951,7 @@ following example legal in |TS| causes a *compile-time error* in |LANG|:
    :linenos:
 
    type U = Array<number> | Array <string>
-   // next declaration causes compile time error - rest cannot have a union type
+   // the following declaration causes a compile time error, rest cannot have a union type
    function bar (...u: U) {
       console.log (u)
    }
@@ -961,7 +1005,7 @@ code sample legal in |TS| causes a compile-time error in |LANG|:
 
    enum Test { A = 'a', B = 'b' }
 
-   // r1, r2, r3 are OK in TS but cause  compile-time error in ArkTS
+   // r1, r2, r3 are OK in TypeScript but cause  compile-time error in ArkTS
    let r1: Record<Test, number> = { a: 0, b: 1 }
    let r2: Record<Test, number> = { 'a': 0, 'b': 1 }
    let r3: Record<Test, number> = { [Test.A] : 0, [Test.B]: 1 }
@@ -983,7 +1027,7 @@ is `false`:
    :linenos:
 
    let b = new Boolean({})
-   console.log(b) // true in TS, false in ArkTS
+   console.log(b) // true in TypeScript, false in ArkTS
 
 |
 
@@ -1008,10 +1052,34 @@ errors in |LANG|:
      private x: number = 1
    }
 
-   // In TS, next gives "Class 'Derived' incorrectly extends base class 'Base'"
+   /* In TypeScript, the code below leads to a compile-time error
+      "Class 'Derived' incorrectly extends base class 'Base'" */
    class Derived extends Base {
      x: number = 10
      foo() { console.log(this.x) }
+   }
+
+|
+
+.. Overriding Field Access Modifier
+
+Overriding Field Access Modifier
+--------------------------------
+
+.. meta:
+    frontend_status: None
+
+Access modifer of an overriding field can be changed in |TS|,
+but the same access modifer must be retained in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   class B {
+      protected f = 1
+   }
+   class D extends B {
+      public override f = 2  // OK in TypeScript, compile-time error in ArkTS
    }
 
 |

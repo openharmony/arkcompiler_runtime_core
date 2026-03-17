@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -267,7 +267,7 @@ and function names.
 
     // Collision between variable and type
     let DataProcessor: string;
-    class DataProcessor {} // Compile-time error
+    class DataProcessor {} // compile-time error
                            // Type alias name and variable name are the same
 
     // Namespace/type conflict
@@ -333,8 +333,8 @@ and function names.
         let scoped_let = 0 // really scoped
         upper_let = 5
     }
-    scoped_var = 5 // Visible
-    scoped_let = 5 // Compile-time error
+    scoped_var = 5 // visible
+    scoped_let = 5 // compile-time error
 
 |CB_OK|
 ~~~~~~~
@@ -359,7 +359,7 @@ and function names.
         upper_let = 5
     }
     scoped_var = 5
-    scoped_let = 5 // Compile-time error
+    scoped_let = 5 // compile-time error
 
 .. _R008:
 
@@ -407,8 +407,8 @@ usage of ``ESObject`` still produces a warning message.
 
 .. code-block:: typescript
 
-    let value_b: boolean = true // OR: let value_b = true
-    let value_n: number = 42 // OR: let value_n = 42
+    let value_b: boolean = true // or: let value_b = true
+    let value_n: number = 42 // or: let value_n = 42
     let value_o1: Object = true
     let value_o2: Object = 42
 
@@ -1015,8 +1015,8 @@ and enums.
     }
 
     let person = new Person("John", 30, "***@example.com", "18*********")
-    console.log(person["name"])         // Compile-time error
-    console.log(person.unknownProperty) // Compile-time error
+    console.log(person["name"])         // compile-time error
+    console.log(person.unknownProperty) // compile-time error
 
     let arr = new Int32Array(1)
     console.log(arr[0])
@@ -1104,7 +1104,7 @@ use other mechanisms (inheritance, interfaces, or type aliases) instead.
     let d = new D()
 
     console.log("Assign D to B")
-    b = d // ok, B is the superclass of D
+    b = d // OK, B is the superclass of D
 
     // An attempt to assign b to d results in a compile-time error:
     // d = b
@@ -1130,10 +1130,10 @@ use other mechanisms (inheritance, interfaces, or type aliases) instead.
     let y: Common = new Y()
 
     console.log("Assign X to Y")
-    y = x // ok, both are of the same type
+    y = x // OK, both are of the same type
 
     console.log("Assign Y to X")
-    x = y // ok, both are of the same type
+    x = y // OK, both are of the same type
 
     function foo(c: Common) {
         console.log(c.n, c.s)
@@ -1171,7 +1171,7 @@ based on function return types only is prohibited.
     }
 
     let x = choose(10, 20)   // OK, choose<number>(...) is inferred
-    let y = choose("10", 20) // Compile-time error
+    let y = choose("10", 20) // compile-time error
 
     function greet<T>(): T {
         return "Hello" as T
@@ -1188,7 +1188,7 @@ based on function return types only is prohibited.
     }
 
     let x = choose(10, 20)   // OK, choose<number>(...) is inferred
-    let y = choose("10", 20) // Compile-time error
+    let y = choose("10", 20) // compile-time error
 
     function greet<T>(): T {
         return "Hello" as T
@@ -1796,12 +1796,12 @@ for strings instead  in |LANG|.
 .. code-block:: typescript
 
     let a = +5        // 5 as number
-    let b = +"5"      // Compile-time error
+    let b = +"5"      // compile-time error
     let c = -5        // -5 as number
-    let d = -"5"      // Compile-time error
+    let d = -"5"      // compile-time error
     let e = ~5        // -6 as number
-    let f = ~"5"      // Compile-time error
-    let g = +"string" // Compile-time error
+    let f = ~"5"      // compile-time error
+    let g = +"string" // compile-time error
     let h:bigint = -5n // -5n as bigint
 
     function returnTen(): string {
@@ -1812,8 +1812,8 @@ for strings instead  in |LANG|.
         return "string"
     }
 
-    let x = +returnTen()    // Compile-time error
-    let y = +returnString() // Compile-time error
+    let x = +returnTen()    // compile-time error
+    let y = +returnString() // compile-time error
 
 .. _R059:
 
@@ -1977,8 +1977,8 @@ left operand cannot be a type. Otherwise, a compile-time error occurs.
     let a = (new X()) instanceof Object // true
     let b = (new X()) instanceof X      // true
 
-    let c = X instanceof Object // Compile-time error, left operand is a type
-    let d = X instanceof X      // Compile-time error, left operand is a type
+    let c = X instanceof Object // compile-time error, left operand is a type
+    let d = X instanceof X      // compile-time error, left operand is a type
 
 .. _R066:
 
@@ -2375,7 +2375,7 @@ classes to achieve that same behavior.
 
 .. code-block:: typescript
 
-    with (Math) { // Compile-time error, but JavaScript code still can be
+    with (Math) { // compile-time error, but JavaScript code still can be
                   // emitted (depends on TS strict type check settings)
         let r: number = 42
         console.log("Area: ", PI * r * r)
@@ -2448,7 +2448,7 @@ explicitly.
 
 .. code-block:: typescript
 
-    // Compile-time error with noImplicitAny
+    // compile-time error with noImplicitAny
     function f(x: number) {
         if (x <= 0) {
             return x
@@ -2456,7 +2456,7 @@ explicitly.
         return g(x)
     }
 
-    // Compile-time error with noImplicitAny
+    // compile-time error with noImplicitAny
     function g(x: number) {
         return f(x - 1)
     }
@@ -2486,7 +2486,7 @@ explicitly.
         return f(x - 1)
     }
 
-    // In this case, return type will be inferred
+    // In this case, return type is inferred
     function doOperation(x: number, y: number) {
         return x + y
     }
@@ -2627,7 +2627,7 @@ static methods. Use ``this`` in instance methods only.
 .. code-block:: typescript
 
     function foo(i: number) {
-        this.count = i // Compile-time error only with noImplicitThis
+        this.count = i // compile-time error only with noImplicitThis
     }
 
     class A {
@@ -2751,9 +2751,9 @@ appropriate type before use.
     function doStuff(arg: Foo | Bar) {
         if (isFoo(arg)) {
             console.log(arg.foo)    // OK
-            console.log(arg.bar)    // Compile-time error
+            console.log(arg.bar)    // compile-time error
         } else {
-            console.log(arg.foo)    // Compile-time error
+            console.log(arg.foo)    // compile-time error
             console.log(arg.bar)    // OK
         }
     }
@@ -2784,10 +2784,10 @@ appropriate type before use.
         if (isFoo(arg)) {
             let fooArg = arg as Foo
             console.log(fooArg.foo)     // OK
-            console.log(arg.bar)        // Compile-time error
+            console.log(arg.bar)        // compile-time error
         } else {
             let barArg = arg as Bar
-            console.log(arg.foo)        // Compile-time error
+            console.log(arg.foo)        // compile-time error
             console.log(barArg.bar)     // OK
         }
     }
@@ -2846,7 +2846,7 @@ unsupported scenarios must be reworked, e.g., by unpacking data manually.
     sum(...list2)
     sum(...list3)
 
-    // TS - OK, ArkTS - compile-time error - extend layout of class
+    // OK in TypeScript, compile-time error in ArkTS- extend layout of class
     let p2d = {x: 1, y: 2}
     let p3d = {...p2d, z: 3}
     console.log(p3d.x, p3d.y, p3d.z)
@@ -2883,12 +2883,12 @@ unsupported scenarios must be reworked, e.g., by unpacking data manually.
     sum(...list2)
     sum(...list3)
 
-    // TS - OK, ArkTS - compile-time error - extend layout of class
+    // OK in TypeScript, compile-time error in ArkTS - extend layout of class
     // let p2d = {x: 1, y: 2}
     // let p3d = {...p2d, z: 3}
     // console.log(p3d.x, p3d.y, p3d.z)
 
-    // TS - OK, ArkTS - OK: extending layout revised using inheritance
+    // OK in TypeScript, OK in ArkTS: extending layout revised using inheritance
     class Point2D {
         x: number = 0; y: number = 0
     }
@@ -3608,7 +3608,7 @@ Use declaration with initialization instead.
 
 .. code-block:: typescript
 
-    let x!: number // Hint: x will be initialized before usage
+    let x!: number // Hint: x is initialized before usage
 
     initialize()
 
@@ -3655,7 +3655,7 @@ mechanism instead to statically *combine* methods to data.
 .. code-block:: typescript
 
     var C = function(p: number) {
-        this.p = p // Compile-time error only with noImplicitThis
+        this.p = p // compile-time error only with noImplicitThis
     }
 
     C.prototype = {
@@ -3928,7 +3928,7 @@ is thus excessive.
         firstName: "Mary"
     }
 
-    // This will log "Mary":
+    // This logs "Mary":
     const boundFullName = person.fullName.bind(person1)
     console.log(boundFullName())
 
@@ -3951,7 +3951,7 @@ is thus excessive.
     let person = new Person("")
     let person1 = new Person("Mary")
 
-    // This will log "Mary":
+    // This logs "Mary":
     console.log(person1.fullName())
 
 |CB_SEE|
@@ -4040,7 +4040,7 @@ Use the ordinary ``import`` syntax instead.
 
 .. code-block:: typescript
 
-    // Correctness of importing T will be checked at compile-time:
+    // Correctness of importing T is checked at compile-time:
     import { something } from "module"
 
 |CB_SEE|
@@ -4132,11 +4132,11 @@ When porting from the standard |TS|, turn on the following flags:
 .. code-block:: typescript
 
     class C {
-        n: number // Compile-time error only with strictPropertyInitialization
-        s: string // Compile-time error only with strictPropertyInitialization
+        n: number // compile-time error only with strictPropertyInitialization
+        s: string // compile-time error only with strictPropertyInitialization
     }
 
-    // Compile-time error only with noImplicitReturns
+    // compile-time error only with noImplicitReturns
     function foo(s: string): string {
         if (s != "") {
             console.log(s)
@@ -4146,7 +4146,7 @@ When porting from the standard |TS|, turn on the following flags:
         }
     }
 
-    let n: number = undefined // Compile-time error only with strictNullChecks
+    let n: number = undefined // compile-time error only with strictNullChecks
 
 |CB_OK|
 ~~~~~~~
@@ -4200,20 +4200,20 @@ in place with special comments. |LANG| does not support ``@ts-ignore`` and
     // Some code with switched off type checker
     // ...
 
-    let s1: string = null // TS - no error, type checker suppressed
-                          // ArkTS - compile-time error
+    let s1: string = null // no error in TypeScript, type checker suppressed
+                          // compile-time error in ArkTS
 
     // @ts-ignore
-    let s2: string = null // TS - no error, type checker suppressed
-                          // ArkTS - compile-time error
+    let s2: string = null // no error in TypeScript, type checker suppressed
+                          // compile-time error in ArkTS
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    let s1: string | undefined = undefined // No error, properly typed
-    let s2: string = undefined // Compile-time error
+    let s1: string | undefined = undefined // no error, properly typed
+    let s2: string = undefined // compile-time error
 
 |CB_SEE|
 ~~~~~~~~
@@ -4304,7 +4304,7 @@ Any other decorator causes a compile-time error.
         //
     }
 
-    @classDecorator // compile-time error: unsupported decorator
+    @classDecorator // compile-time error, unsupported decorator
     class BugReport {
     }
 
@@ -4411,21 +4411,21 @@ to interop calls and assigned to other variables of type ``ESObject``.
     declare function bar(a: any): number
 
     // main.ets
-    let e0: ESObject = foo() // CTE - ``ESObject`` typed variable can only be local
+    let e0: ESObject = foo() // compile-time error, ``ESObject`` typed variable can only be local
 
     function f() {
-        let e1 = foo()        // CTE - type of e1 is `any`
-        let e2: ESObject = 1  // CTE - can't initialize ESObject with not dynamic values
-        let e3: ESObject = {} // CTE - can't initialize ESObject with not dynamic values
-        let e4: ESObject = [] // CTE - can't initialize ESObject with not dynamic values
-        let e5: ESObject = "" // CTE - can't initialize ESObject with not dynamic values
-        e5['prop'] // CTE - can't access dynamic properties of ESObject
-        e5[1]      // CTE - can't access dynamic properties of ESObject
-        e5.prop    // CTE - can't access dynamic properties of ESObject
+        let e1 = foo()        // compile-time error, type of e1 is `any`
+        let e2: ESObject = 1  // compile-time error, cannot initialize ESObject with not dynamic values
+        let e3: ESObject = {} // compile-time error, cannot initialize ESObject with not dynamic values
+        let e4: ESObject = [] // compile-time error, cannot initialize ESObject with not dynamic values
+        let e5: ESObject = "" // compile-time error, cannot initialize ESObject with not dynamic values
+        e5['prop'] // compile-time error, cannot access dynamic properties of ESObject
+        e5[1]      // compile-time error, cannot access dynamic properties of ESObject
+        e5.prop    // compile-time error, cannot access dynamic properties of ESObject
 
-        let e6: ESObject = foo() // OK - explicitly annotated as ESObject
-        let e7 = e6              // OK - initialize ESObject with ESObject
-        bar(e7)                  // OK - ESObject is passed to interop call
+        let e6: ESObject = foo() // OK, explicitly annotated as ESObject
+        let e7 = e6              // OK, initialize ESObject with ESObject
+        bar(e7)                  // OK, ESObject is passed to interop call
     }
 
 |CB_SEE|
@@ -4475,7 +4475,7 @@ These functions are thus excessive.
         firstName: "Mary"
     }
 
-    // This will log "Mary":
+    // This logs "Mary":
     console.log(person.fullName.apply(person1))
 
 |CB_OK|
@@ -4497,7 +4497,7 @@ These functions are thus excessive.
     let person = new Person("")
     let person1 = new Person("Mary")
 
-    // This will log "Mary":
+    // This logs "Mary":
     console.log(person1.fullName())
 
 |CB_SEE|

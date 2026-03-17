@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -124,7 +124,7 @@ Example
        all Point objects have the property x:
     */
     let p1 = new Point(1.0, 1.0)
-    delete p1.x           // Compile-time error in TypeScript and ArkTS
+    delete p1.x           // compile-time error in TypeScript and ArkTS
     delete (p1 as any).x  // OK in TypeScript, compile-time error in ArkTS
 
     /* Class Point does not define any property
@@ -132,7 +132,7 @@ Example
        it while the program runs.
     */
     let p2 = new Point(2.0, 2.0)
-    p2.z = "Label";         // Compile-time error in TypeScript and ArkTS
+    p2.z = "Label";         // compile-time error in TypeScript and ArkTS
     (p2 as any).z = "Label" // OK in TypeScript, compile-time error in ArkTS
 
     /* It is guaranteed that all Point objects
@@ -143,7 +143,7 @@ Example
     let p3 = new Point(3.0, 3.0)
     let prop = Symbol();     // OK in TypeScript, compile-time error in ArkTS
     (p3 as any)[prop] = p3.x // OK in TypeScript, compile-time error in ArkTS
-    p3[prop] = p3.x          // Compile-time error in TypeScript and ArkTS
+    p3[prop] = p3.x          // compile-time error in TypeScript and ArkTS
 
     /* It is guaranteed that all Point objects
        have properties x and y of type number,
@@ -151,7 +151,7 @@ Example
        is impossible:
     */
     let p4 = new Point(4.0, 4.0)
-    p4.x = "Hello!";         // Compile-time error in TypeScript and ArkTS
+    p4.x = "Hello!";         // compile-time error in TypeScript and ArkTS
     (p4 as any).x = "Hello!" // OK in TypeScript, compile-time error in ArkTS
 
     // Usage of Point objects which is compliant with the class definition:
@@ -199,7 +199,7 @@ Example
 
     // Unary `+` is defined only for numbers, but not for strings:
     console.log(+42) // OK
-    console.log(+"42") // Compile-time error
+    console.log(+"42") // compile-time error
 
 Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~

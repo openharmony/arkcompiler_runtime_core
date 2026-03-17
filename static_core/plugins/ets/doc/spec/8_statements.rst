@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -27,12 +27,12 @@ like :ref:`Block` or :ref:`if Statements`.
 .. code-block:: typescript
 
     ...
-    i++    // statement consists of single expression
+    i++    // Statement consists of single expression
     ...
     if (i > 100) // 'if' statement starts
     {          // 'block' statement starts, it is a part of 'if' statement
-        i %= 100        // statement belonging to 'block'
-        console.log(i)  // another statement belonging to 'block'
+        i %= 100        // Statement belonging to 'block'
+        console.log(i)  // Another statement belonging to 'block'
     }   //  'block' statement ends, 'if' statement end
 
 .. note::
@@ -66,10 +66,8 @@ The syntax of *statements* is presented below:
         | tryStatement
         ;
 
-|
 
-
-Here is the list of statements in |LANG|:
+The list of statements in |LANG| is as follows:
 
 .. list-table::
    :width: 100%
@@ -100,6 +98,8 @@ Here is the list of statements in |LANG|:
      - :ref:`throw Statements`
    * - try-catch-finally
      - :ref:`try Statements`
+
+|
 
 .. _Normal and Abrupt Statement Execution:
 
@@ -257,13 +257,13 @@ surrounding scope.
     let item: number = 123
     {
        const item: string = "123"
-       // Here 'item' is of type 'string'
+       // This 'item' is of type 'string'
     }
-    // Here 'item' is of type 'number'
+    // This 'item' is of type 'number'
 
     function foo (item: boolean) {
-       // Here 'item' is of type 'number'
-       let item: number[] = [] // Compile-time error as parameter 'item' and
+       // this 'item' is of type 'number'
+       let item: number[] = [] // compile-time error as parameter 'item' and
                                // local variable 'item' lead to duplication as
                                // they are in the same scope
     }
@@ -374,11 +374,11 @@ for such a statement.
       }
       else {
         let x: number = 20   // OK, no conflict, else-block scope
-        y = x;           // Compile-time error, no y in scope
+        y = x;           // compile-time error, no 'y' in scope
       }
 
       console.log(x)  // OK, prints 2
-      console.log(y)  // Compile-time error, y unknown
+      console.log(y)  // compile-time error, 'y' unknown
     }
 
 .. index::
@@ -436,12 +436,12 @@ within ``loopStatement``, or is used in lambda expressions (see
     label: for (i = 1; i < 10; i++) {
         const f1 = () => {
             while (true) {
-                continue label // Compile-time error
+                continue label // compile-time error
             }
         }
         const f2 = () => {
             do
-                break label // Compile-time error
+                break label // compile-time error
             while (true)
         }
     }
@@ -542,19 +542,19 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 .. code-block:: typescript
    :linenos:
 
-    // existing variable is used as a loop index variable
+    // The existing variable is used as a loop index variable
     let i: number
     for (i = 1; i < 10; i++) {
       console.log(i)
     }
 
-    // new variable is declared as a loop index variable with its type
+    // A new variable is declared as a loop index variable with its type
     // explicitly specified
     for (let i: int = 1; i < 10; i++) {
       console.log(i)
     }
 
-    // new variable is declared as loop index variable with its type
+    // A new variable is declared as a loop index variable with its type
     // inferred from its initialization part of the declaration
     for (let i = 1; i < 10; i++) {
       console.log(i)
@@ -571,7 +571,7 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
    initialization
 
 A variable declared in the *forInit*-part has the loop scope. It can be used
-in a *forContinue* expression, a *forUpdate* expression, a single-body
+in a ``forContinue`` expression, a ``forUpdate`` expression, a single-body
 statement, or in a body block:
 
 .. code-block:: typescript
@@ -582,7 +582,7 @@ statement, or in a body block:
     for (let i: int = 1; i < 10; i++)
       k += i
     console.log(k)
-    // i =  k  // Compile-time error if uncommented
+    // i =  k  // compile-time error if uncommented
     let i: int = k  // OK
 
 |
@@ -649,7 +649,7 @@ of the *iterated* elements, namely:
 
 -  ``T``, if ``Array<T>`` or ``FixedArray<T>`` instance is iterated;
 
--  ``string``, if ``string`` value is iterated;
+-  ``string``, if a ``string`` value is iterated;
 
 -  Type argument of the *iterator*, if an instance of the *iterable* type
    is iterated.
@@ -684,22 +684,22 @@ variable. Otherwise, a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-    // existing variable 's'
+    // The existing variable 's'
     let s : string
     for (s of "a string object") {
       console.log(s)
     }
 
-    // new variable 's', its type is inferred from expression after 'of'
+    // New variable 's', its type is inferred from the expression after 'of'
     for (let s of "a string object") {
       console.log(s)
     }
 
-    // new variable 'element', its type is inferred from expression after 'of'.
-    // as 'const' it cannot be assigned with a new value in the loop body
+    // New variable 'element', its type is inferred from the expression after 'of'
+    // as 'const' it cannot be assigned a new value in the loop body
     for (const element of [1, 2, 3]) {
       console.log(element)
-      element = 66 // Compile-time error as 'element' is 'const'
+      element = 66 // compile-time error as 'element' is 'const'
     }
 
 Explicit type annotation of *forVariable* is allowed as an experimental
@@ -759,9 +759,9 @@ Examples of ``break`` statements with and without a label are presented below:
 .. code-block:: typescript
    :linenos:
 
-    // Single iteration
+    // A single iteration
     while (true) {
-      console.log("iteration")  // get printed exactly once
+      console.log("iteration")  // Gets printed exactly once
       break;
     }
 
@@ -770,10 +770,10 @@ Examples of ``break`` statements with and without a label are presented below:
       do {
         for (a = 0; a < 10; a++) {
             if (a == 1) break outer
-            console.log("inner")    // get printed only once
+            console.log("inner")    // Gets printed once only
         }
         console.log(a) // Never reached
-      } while (true)   // condition never used
+      } while (true)   // Condition never used
 
 .. index::
    break statement
@@ -807,7 +807,7 @@ Examples of ``break`` statements with and without a label are presented below:
 
 A ``continue`` statement terminates the execution of a current loop
 iteration, and transfers control to the next iteration while keeping the
-appropriate checks of the loop exit conditions in place. 
+appropriate checks of the loop exit conditions in place.
 
 The syntax of *continue statement* is presented below:
 
@@ -865,10 +865,10 @@ Examples of ``continue`` statements with and without a label are presented below
 .. code-block:: typescript
    :linenos:
 
-    // continue     // would cause compile-time error if uncommented
+    // continue     // compile-time error if uncommented
 
-    // continue without label
-    // will print 0, 1, 2, 4 (3 skipped)
+    // Continue without label
+    // Prints 0, 1, 2, 4 (3 skipped)
     for (let a: int = 0; a < 5; a++){
       if (a == 3) continue
       console.log("a = " + a)
@@ -879,7 +879,7 @@ Examples of ``continue`` statements with and without a label are presented below
       do {
         for (a = 0; a < 10; a++) {
             if (a > 1) continue outer
-            console.log("inner")    // get printed only twice
+            console.log("inner")    // Gets printed twice only
         }
         console.log("Outer") // Never reached
       } while (false)
@@ -898,7 +898,7 @@ Examples of ``continue`` statements with and without a label are presented below
 
 A ``return`` statement terminates the execution of a current function, method,
 constructor, or lambda, and returns control to the caller. In case of a
-function, method, and lambda call, executing a ``return`` statement implies
+function, method, and lambda call executing a ``return`` statement implies
 that the call returns a value defined as a result of the *return expression*
 evaluation. 
 
@@ -911,11 +911,11 @@ The syntax of *return statement* is presented below:
         'return' expression?
         ;
 
-If *expression* is not provided then *return statement* is semantically
+If no *expression* is provided, then a *return statement* is semantically
 equivalent to the form ``return undefined``.
 
-A *return statement* in the plain form ``return`` (with no *expression*) can occur
-inside one of the following:
+A *return statement* in the plain form ``return`` (with no *expression*) can
+occur inside one of the following:
 
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` or ``undefined``
@@ -930,17 +930,17 @@ A :index:`compile-time error` also occurs if type of a return expression is not
 assignable (see :ref:`Assignability`) to the surrounding function, method, or
 lambda return type.
 
-The semantics is illustrated in the examples below:
+The semantics is represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-    return // compile-time error, top-level statements can not contain a return statement
+    return // compile-time error, top-level statements cannot contain a return statement
     namespace NS {
-       return // compile-time error, top-level statements can not contain a return statement
+       return // compile-time error, top-level statements cannot contain a return statement
     }
-    function f1 () {} // OK, no return statement is equal to 'return undefined' form
-    function f2 () { return } // OK. 'return' is equal to 'return undefined'
+    function f1 () {} // OK, no return statement equals the form 'return undefined'
+    function f2 () { return } // OK, 'return' equals the form 'return undefined'
     function f3 (): void { return undefined } // Full syntax form
 
     function f4(cond: boolean): Base {
@@ -1036,6 +1036,8 @@ The syntax of *switch statement* is presented below:
         : 'default' ':' statement*
         ;
 
+A ``switch`` expression can be of any type.
+
 If available, an optional identifier allows the ``break`` statement to transfer
 control out of a nested ``switch`` or ``loop`` statement (see
 :ref:`Break statements`).
@@ -1052,9 +1054,15 @@ control out of a nested ``switch`` or ``loop`` statement (see
    loop statement
    break statement
 
-A ``switch`` expression can be of a numeric type, type ``string``,
-type ``char``, or a ``const enum`` type (see :ref:`Constant Enumerations`).
-Otherwise, a :index:`compile-time error` occurs.
+A :index:`compile-time error` occurs if at least one of case expression types
+is not assignable (see :ref:`Assignability`) to the type of the ``switch``
+statement expression.
+
+.. index::
+   expression
+   expression type
+   switch statement
+   assignability
 
 .. code-block:: typescript
    :linenos:
@@ -1072,20 +1080,22 @@ Otherwise, a :index:`compile-time error` occurs.
         console.log('An unknown value')
     }
 
-A :index:`compile-time error` occurs, if:
-
-- A *case expression* is not a *constant expression*
-  (see :ref:`Constant Expressions`); or
-
-- A *case expression* type is not assignable (see :ref:`Assignability`)
-  to the type of the ``switch`` expression.
-
-.. index::
-   expression
-   expression type
-   case expression
-   switch statement
-   assignability
+    class A {}
+    let a: A| null = assignIt()
+    switch (a) {
+      case null:
+      case null: // One may have several case clauses with the same expression in
+        console.log ("a is null")
+        break
+      case new A:
+        console.log ("Never matches as new A is a new unique object")
+        break
+      default:
+        console.log ("a is A")
+    }
+    function assignIt () {
+        return new A
+    }
 
 
 The execution of a ``switch`` statement starts from the evaluation of the
@@ -1278,7 +1288,7 @@ The type of *catch identifier* inside the block is ``Error`` (see
       try {
         let res = divide(a, b)
 
-        // further processing ...
+        // Further processing ...
         return res
       }
       catch (e) {
@@ -1342,7 +1352,7 @@ can be performed while leaving the ``try-catch``:
 .. code-block:: typescript
 
     class SomeResource {
-      // some class members
+      // Some class members
       // ...
       close() {}
     }
@@ -1350,11 +1360,11 @@ can be performed while leaving the ``try-catch``:
     function ProcessFile(name: string) {
       let r = new SomeResource()
       try {
-        // some processing
+        // Some processing
       }
       finally {
-        // finally clause will be executed after try-catch is
-            executed normally or abruptly
+        // Finally clause is executed after try-catch
+            completes normally or abruptly
         r.close()
       }
     }

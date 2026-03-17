@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -864,14 +864,14 @@ A :index:`compile-time error` occurs if the name of an *overloaded function*
     function bar(n: number) {}
     function bar(s: string) {}
 
-    let b = bar // Compile-time error, overloaded function name
+    let b = bar // compile-time error, overloaded function name
 
     function foo1(n: number) {}
     function foo2(s: string) {}
     overload foo { foo1, foo2 }
 
     foo(1)          // OK, overload call
-    let x = foo     // Compile-time error, explicit overload name
+    let x = foo     // compile-time error, explicit overload name
     let y = foo2    // OK, ref to foo2
 
 |
@@ -1467,8 +1467,8 @@ An *object literal field* consists of an identifier and an expression as follows
       age: number = 0
     }
     let b: Person = {name: "Bob", age: 25}
-    let a: Person = {name: "Alice", age: 18, } //ok, trailing comma is ignored
-    let c: Person | number = {name: "Mary", age: 17} // literal will be of type Person
+    let a: Person = {name: "Alice", age: 18, } // OK, trailing comma is ignored
+    let c: Person | number = {name: "Mary", age: 17} // Literal is of type Person
 
 An *object literal method* is a complete declaration of a public method.
 Examples of object literals with methods are provided in
@@ -1594,7 +1594,7 @@ field type:
 .. code-block:: typescript
    :linenos:
 
-    let f: Friend = {name: 123} /* compile-time error - type of right hand-side
+    let f: Friend = {name: 123} /* compile-time error, type of right hand-side
     is not assignable to the type of the left hand-side */
 
 Only class fields that have default values (see :ref:`Default Values for Types`)
@@ -1650,7 +1650,7 @@ These situations are presented in the examples below:
       constructor (p: number) {}
     }
     // ...
-    let c: C = {} /* compile-time error - no parameterless
+    let c: C = {} /* compile-time error, no parameterless
            constructor */
 
 .. code-block:: typescript
@@ -1660,7 +1660,7 @@ These situations are presented in the examples below:
       private constructor () {}
     }
     // ...
-    let c: C = {} /* compile-time error - constructor is not
+    let c: C = {} /* compile-time error, constructor is not
         accessible */
 
 .. code-block:: typescript
@@ -1695,7 +1695,7 @@ readonly fields of a class:
         }
     }
 
-    // OK - type ``number`` has default value, field3 set in ctor
+    // OK, type ``number`` has default value, field3 set in ctor
     let c: C = { field1: 654 }
 
     // Error: field2 and field3 are readonly, cannot be set explicitly
@@ -1717,7 +1717,7 @@ object literal. Otherwise, a :index:`compile-time error` occurs:
     class Err {
         get attr (): number { return 42 }
     }
-    const b: Err = {attr: 42} // compile-time error - no setter for 'attr'
+    const b: Err = {attr: 42} // compile-time error, no setter for 'attr'
 
 .. index::
    accessor
@@ -1737,7 +1737,7 @@ If a class is an abstract one, it can be also used with *object literals*:
     const a1: A = { foo() {} } // OK, foo() is properly defined
     const a2: A = {} // compile-time error as foo() implementation is not defined
 
-*Object literal* may provide a method with override-compatible (see
+*Object literal* can provide a method with override-compatible (see
 :ref:`Override-Compatible Signatures`) signature:
 
 .. code-block:: typescript
@@ -1817,7 +1817,7 @@ The values of such optional properties are set to ``undefined`` as follows:
       sex?: "male"|"female"
     }
     let b: Person = {name: "Bob", age: 25}
-         // 'sex' field will have 'undefined' value
+         // 'sex' field has the value 'undefined'
 
 Properties that are non-optional cannot be skipped in an object literal,
 despite some property types having default values (see
@@ -1944,27 +1944,27 @@ The definition within the interface determines how the the property is used:
     interface I1 {
         set attr (attr: number)
     }
-    const i1: I1 = {attr: 42} // OK - 'attr' is writable property
+    const i1: I1 = {attr: 42} // OK, 'attr' is writable property
     console.log (i1.attr) // compile-time error as attr has no getter
 
     interface I2 {
         get attr (): number
     }
-    const i2: I2 = {attr: 42} /* OK - 'attr' is in fact a getter which always returns 42 */
+    const i2: I2 = {attr: 42} /* OK, 'attr' is in fact a getter which always returns 42 */
     i2.attr = 666 // compile-time error as attr is readonly
-    console.log (i2.attr) // OK - output is 42
+    console.log (i2.attr) // OK, output is 42
 
     interface I3 {
         readonly attr: number
     }
-    const i3: I3 = {attr: 42} /* OK - same as above */
+    const i3: I3 = {attr: 42} /* OK, same as above */
     i3.attr = 666 // compile-time error as attr is readonly
-    console.log (i3.attr) // OK - output is 42
+    console.log (i3.attr) // OK, output is 42
 
     interface I4 {
         attr: number
     }
-    const i4: I4 = {attr: 42} /* OK - getter and setter work with object literal field */
+    const i4: I4 = {attr: 42} /* OK, getter and setter work with object literal field */
     i4.attr = 666 // OK
     console.log (i4.attr) // OK
 
@@ -2241,7 +2241,7 @@ a function call as illustrated in the following example:
 
    function run_time_spread_application1 (a1: int[], a2: FixedArray<int>) {
       console.log ([...a1, 42, ...a2])
-      // array literal will be built at runtime
+      // Array literal is built at runtime
    }
    run_time_spread_application1 (array1, array2) // prints [1, 2, 3, 42, 4, 5]
 
@@ -2329,7 +2329,7 @@ A spread expression for tuples is represented in the example below:
 
     function run_time_spread_application2 (a1: [number, string, boolean], a2: [number, string]) {
       console.log ([...a1, 42, ...a2])
-        // such array literal will be built at runtime
+        // Such an array literal is built at runtime
     }
     run_time_spread_application2 (tuple1, tuple2) // prints [1, 2, true, 42, 4, "5"]
 
@@ -2602,8 +2602,8 @@ An object reference used to access a field must be a non-nullish reference
 type ``T``. Otherwise, a :index:`compile-time error` occurs.
 
 A field access expression is valid if the identifier refers to an accessible
-member field (see :ref:`Accessible`) in type ``T``. A :index:`compile-time error`
-occurs otherwise.
+member field (see :ref:`Accessible`) in type ``T``. Otherwise, a
+:index:`compile-time error` occurs.
 
 Type of a *field access expression* is the type of a member field.
 
@@ -2637,10 +2637,10 @@ Accessing Static Fields
 .. meta:
     frontend_status: Done
 
-The result of a field access expression is computed at runtime as described
-below: *objectReference* is evaluated in the form *typeReference*, and the
-evaluation of *typeReference* is performed. The result of a *field access
-expression* of a static field in a class is as follows:
+When accessing a static field, *objectReference* takes the form *typeReference*.
+
+The result of a *field access expression* of a static field in a class is 
+one of the following: 
 
 -  ``variable`` if the field is not ``readonly``. The resultant value can
    be changed later.
@@ -2673,23 +2673,29 @@ Accessing Current Object Fields
 .. meta:
     frontend_status: Done
 
-The result of a field access expression is computed at runtime as described
-below:
+When accessing a current object field, *objectReference* takes the form
+*primaryExpression*.
 
-- *objectReference* is evaluated in the form *primaryExpression*, and
-- *primaryExpression* is evaluated.
+The process of runtime evaluation of a field access expression starts from the
+evaluation of *primaryExpression*.
 
-The result of *field access expression* of an instance field in a class or
-interface is as follows:
+The result of this evaluation can be an instance field or an accessor of a
+class, or a property of an interface. It is one of the following:
 
--  ``variable`` if the field is not ``readonly``. The resultant value can
-   be changed later.
+-  ``variable`` if the field is not ``readonly``. The resultant value can be
+   changed later;
 
 -  ``value`` if the field is ``readonly``, except where *field access* occurs
-   in a constructor (see :ref:`Constructor Declaration`).
+   in a constructor (see :ref:`Constructor Declaration`);
+
+-  call to a proper getter if the *field access expression* is not assigned a
+   new expression; or
+
+-  call to a proper setter if the *field access expression* is in the 
+   left-hand-side of the assignment.
 
 Only the *primaryExpression* type (not class type of an actual object
-referred at runtime) is used to determine the field to be accessed.
+referred at runtime) is used to determine the field or property to be accessed.
 
 .. index::
    instance field
@@ -2718,8 +2724,9 @@ Accessing SuperClass Properties
 .. meta:
     frontend_status: Done
 
-The form ``super.identifier`` is valid when accessing the superclass property
-via accessor (see :ref:`Class Accessor Declarations`).
+The form ``super.identifier`` is valid to access a superclass accessor (see
+:ref:`Class Accessor Declarations`). 
+
 A :index:`compile-time error` occurs if identifier in 'super.identifier'
 denotes a field.
 
@@ -2733,9 +2740,9 @@ denotes a field.
     }
     class Derived extends Base {
        get property(): number { return super.property } // OK
-       set property(p: number) { super.property = 42 } // OK
+       set property(p: number) { super.property = 42 }  // OK
        foo () {
-          super.field = 42          // compile-time error
+          super.field = 42           // compile-time error
           console.log (super.field)  // compile-time error
        }
     }
@@ -3691,10 +3698,10 @@ value at runtime, then a :index:`compile-time warning` is issued:
     class C { f = 1}
 
     let c = new C()
-    c?.f // warning: expression is always non-nullish
+    c?.f // warning, expression is always non-nullish
 
     let d: C | undefined = undefined
-    d?.f // warning: expression is always evaluated as undefined
+    d?.f // warning, expression is always evaluated as undefined
 
 |
 
@@ -3786,15 +3793,15 @@ causes a :index:`compile-time error`.
 
     class A<T> {
        foo (element: T) {
-          const a1 = new Array<T> (5, element) // OK: array with 5 elements  
-                                               // will be created
-          const a2 = new FixedArray<T> (5, element) // Compile-time error, array
+          const a1 = new Array<T> (5, element) // OK, array with 5 elements
+                                               // is created
+          const a2 = new FixedArray<T> (5, element) // compile-time error, array
                              // with 5 elements of type T cannot be created
        }
     }
 
 
-It is discussed in detail in :ref:`Fixed-Size Array Creation`
+This situation is discussed in detail in :ref:`Fixed-Size Array Creation`
 and :ref:`Resizable Array Creation Expressions`.
 
 The execution of a class instance creation expression is performed as follows:
@@ -3895,7 +3902,7 @@ The approach is represented in the following example:
       console.log(x instanceof B)        // OK
       console.log(x instanceof B<T>)     // compile-time error, B<T> is not preserved up to undefined
 
-      if(a instanceof B) {  // OK, type of instanceof will be used for smart
+      if(a instanceof B) {  // OK, type of instanceof is used for smart
                             // cast in `if` clause
          let b = a as B<T>  // OK
       }
@@ -3916,8 +3923,8 @@ a :index:`compile-time warning` is issued:
     class E {}
 
     function foo(d: D) {
-        console.log(d instanceof C) // warning: expression is always true
-        console.log(d instanceof E) // warning: expression is always false
+        console.log(d instanceof C) // warning, expression is always true
+        console.log(d instanceof E) // warning, expression is always false
     }
 
 The ``type`` of an ``instanceof`` expression is used for *smart cast*
@@ -4191,8 +4198,8 @@ a :index:`compile-time warning` is issued:
     class E extends C {}
 
     let a: C = new D()
-    a as D // compile-time warning: cast always succeeds
-    a as E // compile-time warning: cast always throws ClassCastError
+    a as D // compile-time warning, cast always succeeds
+    a as E // compile-time warning, cast always throws ClassCastError
 
 |
 
@@ -4276,8 +4283,8 @@ is defined as follows:
 | interface or array              |                         |  let x: C | null = ...      |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
-| enumeration type,               | name of enumeration     | .. code-block:: typescript  |
-| const enumeration type          | base type               |                             |
+| enumeration type                | name of enumeration     | .. code-block:: typescript  |
+|                                 | base type               |                             |
 |                                 |                         |  enum C {R, G, B}           |
 |                                 |                         |  let c: C = ...             |
 |                                 |                         |  typeof c // "int"          |
@@ -4398,10 +4405,10 @@ case as represented below:
     class C { f = 1}
 
     let c = new C()
-    c!.f // compile-time warning: expression is always non-nullish, operator '!' is ignored
+    c!.f // compile-time warning, expression is always non-nullish, operator '!' is ignored
 
     let d: C | undefined = undefined
-    d!.f // compile-time warning: operator '!' always throws 'NullPointerError', as it is applied to nullish value
+    d!.f // compile-time warning, operator '!' always throws 'NullPointerError', as it is applied to nullish value
          // runtime: throws 'NullPointerError'
 
 |
@@ -4485,18 +4492,18 @@ or a conditional-or operator without parentheses, then a
    conditional-and operator
    conditional-or operator
 
-If an *nullish-coalescing expression* is known at compile time to always
-evaluate to the left-hand-side expression or to the right-hand-side
-expression at runtime, then a :index:`compile-time warning` is issued:
+If the result of a *nullish-coalescing expression* evaluation is known at
+compile time as a value of the left-hand-side or right-hand-side expression,
+then a :index:`compile-time warning` occurs:
 
 .. code-block:: typescript
    :linenos:
 
-    let a: number = 1
-    let b: number | undefined = undefined
+    let a = 1
+    let b = undefined
 
-    a ?? 2 // warning: left-hand-side expression is always used
-    b ?? 3 // warning: right-hand-side expression is always used
+    a ?? 2 // warning, left-hand-side expression is always used
+    b ?? 3 // warning, right-hand-side expression is always used
 
 
 |
@@ -4529,8 +4536,8 @@ decrement operators) group right-to-left for ``'~+x'`` to have the same meaning
 as ``'~(+x)'``.
 
 The type of *unaryExpression* is not necessarily the same as the type
-of the operand provided. The following table states explicitly the type of
-*unaryExpression* for each *unary operator*:
+of the operand provided. The type of *unaryExpression* for each *unary operator*
+is stated explicitly in the following table:
 
 +------------------------+-------------------------+---------------------------+
 | *unary operator*       | type of operand         | type of result            |
@@ -5140,16 +5147,16 @@ The syntax of *binary expression* is presented below:
         | conditionalOrExpression
         ;
 
-Every *binaryExpression* has a form *expression 1* ``op`` *expression 2*,
-where ``op`` is a binary operator (operator sign) and *expression 1* and
+Every *binaryExpression* has the form *expression 1* ``op`` *expression 2*,
+where ``op`` is a binary operator (operator sign), and *expression 1* and
 *expression 2* are its operands.
 
-The subgroups of binary expressions are described further in that chapter.
+The subgroups of binary expressions are described further in this chapter.
 
-The possible combinations of types of the *expression 1* and *expression 2*
-as well as the type of the resulting *binaryExpression*  is given in the
-following table. Type combinations not listed in the table issue either a
-:index:`compile-time error` when it is detected at compile time, or a
+Possible combinations of types of *expression 1* and *expression 2*,
+as well as the type of the resulting *binaryExpression* are presented in the
+table below. Type combinations not listed in the table cause a
+:index:`compile-time error` if a combination is detected at compile time, or a
 :index:`runtime error` otherwise.
 
 +----------------+--------------------------------+-------------------------------+-------------------------+
@@ -5231,22 +5238,23 @@ following table. Type combinations not listed in the table issue either a
 +----------------+--------------------------------+-------------------------------+-------------------------+
 
 .. note::
-   In the table above
+   The following applies to the table above.
 
-   -  For shift operators '<<', '>>', '>>>' with operands of numeric types, the
-      type of result depends on the type of the 1st (left) operand and does not
-      depend on the type of the second (right) operand. 
-   -  Equality operators '==', '===', '!=',  '!==' are defined for any types but
-      combinations explicitly listed in the table have specific behavior.
-   -  Equality operators for types containing ``null`` or ``undefined``, are
-      described in :ref:`Extended Equality with null or undefined`.
-   -  Extended semantics for logical operators '&&', '||' is described in
+   -  The type of result of shift operators '``<<``', '``>>``', '``>>>``' with
+      operands of numeric types depends on the type of the 1st (left-hand-side)
+      operand, and not on the type of the second (right-hand-side) operand.
+   -  Equality operators '``==``', '``===``', '``!=``', '``!==``' are defined
+      for any type, but the combinations listed explicitly in the table have
+      specific behaviors.
+   -  Equality operators for the types that contain ``null`` or ``undefined``
+      are described in :ref:`Extended Equality with null or undefined`.
+   -  Extended semantics of logical operators '``&&``', '``||``' is described in
       :ref:`Extended Conditional Expressions`.
-
 
 .. meta:
     frontend_status: Done
 
+|
 
 .. _Multiplicative Expressions:
 
@@ -5271,9 +5279,9 @@ The syntax of *multiplicative expression* is presented below:
 
 Multiplicative operators group left-to-right.
 
-Type of both operands in a multiplicative operator must be as follows:
+Type of both operands in a multiplicative operator must be one of the following:
 
-- Either ``bigint``; or
+- ``bigint``; or
 - Convertible (see :ref:`Numeric Operator Contexts`) to a numeric type
   (see :ref:`Numeric Types`).
 
@@ -5295,7 +5303,7 @@ This behavior is represented by the following example:
 
    // OK, the inferred type of 'i' is ``bigint``
    let i = 1n * 2n
-   // Compile-time error, one operand is not of 'bigint' type
+   // compile-time error, one operand is not of 'bigint' type
    let i = 1n * 2
 
 |
@@ -5626,18 +5634,19 @@ implied division.
 The remainder operator in |LANG| accepts floating-point operands (unlike in
 C and C++).
 
-The remainder operation on ``bigint`` operands produces a result value,
-i.e., :math:`(a/b)*b+(a\%b)` equals *a*. No implicit conversion is applied
-to an operand.
+A remainder operation :math:`(a\%b)` on ``bigint`` operands produces a result
+that makes :math:`(a/b)*b+(a\%b)` equal *a*. No implicit conversion is
+applied to an operand.
 
 If the divisor value of the ``bigint`` remainder operator is *0n*, then a
 :index:`runtime error` is thrown during execution.
 
-The remainder operation on integer operands produces a result value, i.e.,
-:math:`(a/b)*b+(a\%b)` equals *a*. Numeric type conversion on remainder
-operation is discussed in :ref:`Widening Numeric Conversions`. The result of
-remainder operation produces value of type ``int`` for byte, short or float, or
-``long`` for value of types `long` or `double`
+The remainder operation :math:`(a\%b)` on integer operands produces a result
+that makes :math:`(a/b)*b+(a\%b)` equal *a*. Numeric type conversion on remainder
+operation is discussed in :ref:`Widening Numeric Conversions`. A remainder
+operation produces a value of type ``int`` for ``byte``, ``short``, ``int``,
+and ``float`` operands, or a value of type ``long`` for ``long`` or ``double``
+operands.
 
 .. index::
    binary operator
@@ -5776,9 +5785,9 @@ Exponentiation Expression
 .. meta:
     frontend_status: Done
 
-Exponentiation expression uses the binary *exponentiation operator* ``'**'``.
+Exponentiation expression uses the binary *exponentiation operator* '``**``'.
 
-The binary operator ``'**'`` raises the first operand (base) to the power of
+The binary operator '``**``' raises the first operand (base) to the power of
 the second operand (exponent).
 
 The syntax of an *exponentiation expression* is presented below:
@@ -5789,7 +5798,7 @@ The syntax of an *exponentiation expression* is presented below:
         expression '**' expression
         ;
 
-The operator ``'**'`` has two variants distinguishable by operand types, i.e.,
+The operator '``**``' has two variants distinguishable by operand types, i.e.,
 both operands are as follows:
 
 - :ref:`Type bigint`; or
@@ -5798,13 +5807,14 @@ both operands are as follows:
 
 Any other combination of operand types causes a :index:`compile-time error`.
 
-The result of raising to power `0n`` is always `1n`, including case `0n**0n`.
+The result of raising to power *0n* is always *1n*, including the case
+*0n* ``**`` *0n*.
 
 If the second operand of type ``bigint`` is negative, then either a
 :index:`compile-time error` occurs if detected at compile time, or a
 :index:`runtime error` is thrown during execution.
 
-Both variants of the operator ``'**'`` are represented in example below:
+Both variants of the operator '``**``' are represented in example below:
 
 .. code-block:: typescript
    :linenos:
@@ -5823,15 +5833,15 @@ Both variants of the operator ``'**'`` are represented in example below:
    let z = c ** d // both 'c' and 'd' are converted to 'double'
 
 
-The binary operator ``'**'`` with *numeric operands* is equivalent to
+The binary operator '``**``' with *numeric operands* is equivalent to
 `Math.pow()`. It causes neither a :index:`compile-time error`, nor a
 :index:`runtime error`.
 
-Special cases of the binary operator ``'**'`` according to IEEE 754 are
+Special cases of the binary operator '``**``' according to IEEE 754 are
 represented below.
 
 .. note::
-   Since any numeric operand of ``'**'`` is implicitly converted to ``double``,
+   Since any numeric operand of '``**``' is implicitly converted to ``double``,
    the term ``integer`` effectively means ``double`` with zero in the fractional
    part (for example *-2.0*) as listed below:
 
@@ -6287,8 +6297,8 @@ Relational operators group left-to-right.
 
 A relational expression is always of type ``boolean``.
 
-The four kinds of relational expressions are described below. The kind of a
-relational expression depends on types of operands. It is a
+Relational expressions can be of the kinds described below.
+The kind of a relational expression depends on types of operands. It is a
 :index:`compile-time error` if at least one type of operands is different from
 types described below.
 
@@ -6301,21 +6311,6 @@ types described below.
    operand
    operand type
    type
-
-|
-
-.. _Character Relational Operators:
-
-Character Relational Operators
-==============================
-
-.. meta:
-    frontend_status: Done
-
-Attempting to use type ``char`` as one operand or both operands in a relational
-operator causes a :index:`compile-time error` if detected at compile time.
-A :index:`runtime error` occurs otherwise (see
-:ref:`Character Equality and Relational Operators`).
 
 |
 
@@ -6502,6 +6497,19 @@ Results of all boolean comparisons are defined as follows:
 
 |
 
+.. _Character Relational Operators:
+
+Character Relational Operators
+==============================
+
+.. meta:
+    frontend_status: Done
+
+A comparison of two operands of type ``char`` is performed
+as an integer comparison of two unsigned 16-bit values:
+
+|
+
 .. _Enumeration Relational Operators:
 
 Enumeration Relational Operators
@@ -6595,8 +6603,8 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
   :ref:`Numeric Conversions for Relational and Equality Operands`);
 
 - Both operands are of :ref:`Type char` and have the same value, i.e., both
-  operands represent the same Unicode code point
-  (see :ref:`Character Equality and Relational Operators`);
+  operands represent the same 16-bit code unit
+  (see :ref:`char Operations`);
 
 - Both operands are of the same enumeration (see :ref:`Enumerations`) type and
   have the same numeric value or the same string
@@ -6617,7 +6625,6 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
    NaN
    numeric equality operator
    enumeration type
-   const enumeration type
    numeric value
    string
    equality operator
@@ -6645,7 +6652,7 @@ is issued as follows:
 
     function bar(c: B) {
         if (c instanceof D) {
-            c.f() == undefined // warning: expression is always false
+            c.f() == undefined // warning, expression is always false
         }
     }
 
@@ -6696,7 +6703,7 @@ An equality with values of two union types is represented in the example below:
    :linenos:
 
     function f1(x: number | string, y: boolean | undefined): boolean {
-        return x == y // compile-time warning: always evaluates to false
+        return x == y // compile-time warning, always evaluates to false
     }
 
     function f2(x: number | string, y: boolean | "abc"): boolean {
@@ -7478,15 +7485,9 @@ Compound Assignment Operators
 .. meta:
     frontend_status: Done
 
-A compound assignment expression in the form:
-
-``lhsExpression op= rhsExpression``
-
-is equivalent to
-
-``lhsExpression = ((lhsExpression) op (rhsExpression)) as T``
-
-where ``T`` is type of *lhsExpression*, except that *lhsExpression*
+A compound assignment expression in the form ``lhsExpression op= rhsExpression``
+is equivalent to ``lhsExpression = ((lhsExpression) op (rhsExpression)) as T``,
+where ``T`` is the type of *lhsExpression*, except that *lhsExpression*
 is evaluated only once.
 
 While the nullish-coalescing assignment (``??=``) only evaluates the right
@@ -8297,8 +8298,6 @@ following:
 
 -  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
-
--  Const enumeration type values;
 
 -  Unary operators ``'+'``, ``'-'``, ``'~'``, and ``'!'``, but not ``'++'``
    or ``'--'`` (see :ref:`Unary Plus`, :ref:`Unary Minus`,

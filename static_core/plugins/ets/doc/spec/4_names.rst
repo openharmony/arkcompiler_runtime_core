@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -132,7 +132,7 @@ A declaration introduces a named entity in an appropriate *declaration scope*
 - :ref:`Classes`;
 - :ref:`Interfaces`;
 - :ref:`Enumerations`;
-- :ref:`Constant Or Variable Declarations`;
+- :ref:`Constant or Variable Declarations`;
 - :ref:`Top-Level Declarations`;
 - :ref:`Explicit Overload Declarations`;
 - :ref:`Annotations`;
@@ -503,8 +503,9 @@ of two names overlap, then:
 -  The innermost declaration takes precedence; and
 -  Access to the outer name is not possible.
 
-Class, interface, enum and const enum members can only be accessed by applying the dot
-operator ``'.'`` to an instance. Accessing them otherwise is not possible.
+Class, interface, and enumeration members can only be accessed by applying
+the dot operator ``'.'`` to an instance or to a type.
+Accessing them otherwise is not possible.
 
 .. index::
    name
@@ -517,7 +518,6 @@ operator ``'.'`` to an instance. Accessing them otherwise is not possible.
    class member
    interface member
    enum member
-   const enum member
    instance
    dot operator
 
@@ -974,7 +974,7 @@ Validity of Initializer
 .. meta:
     frontend_status: None
 
-If a variable or constant initializer expression refers to a variable or a
+If a variable or constant initializer expression refers to a variable or to a
 constant, and the declaration of that variable or constant is textually located
 after the current declaration, then a :index:`compile-time error` occurs.
 
@@ -1203,7 +1203,7 @@ Parameter List
     frontend_status: Partly
     todo: change parser as grammar rules, are changed - rest can be after optional, annotation for rest
 
-A signature may contain a *parameter list* that specifies an identifier of
+A signature can contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
 parameter must be defined explicitly. If the *parameter list* is omitted, then
 the function or the method has no parameters.
@@ -1514,8 +1514,8 @@ that are assignable (see :ref:`Assignability`) to the corresponding
 
 It is legal though meaningless to declare a function with an optional
 parameter followed by a *rest parameter* of a tuple type.
-However, use of such function without explicitly set optional and
-*rest parameters* will cause compile-time error,
+However, using such a function without explicitly set optional and
+*rest parameters* causes compile-time error:
 
 .. code-block:: typescript
    :linenos:
@@ -1525,8 +1525,8 @@ However, use of such function without explicitly set optional and
        // ...
     }
 
-    g() // Compile-time error, no rest tuple
-    g([1, "str"]) // Compile-time error, no rest tuple
+    g() // compile-time error, no rest tuple
+    g([1, "str"]) // compile-time error, no rest tuple
     g([ 1, "str"], 1, "str") // OK
 
 If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]

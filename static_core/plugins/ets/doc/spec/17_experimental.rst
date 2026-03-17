@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -125,7 +125,8 @@ Type ``char``
 .. meta:
     frontend_status: Partly
 
-Values of ``char`` type are Unicode code points.
+Values of ``char`` type are 16-bit Unicode code units.
+Any Unicode code point can be encoded with one or two ``char`` values.
 
 .. list-table::
    :width: 100%
@@ -134,14 +135,13 @@ Values of ``char`` type are Unicode code points.
 
    * - Type
      - Type's Set of Values
-   * - ``char`` (32-bits)
-     - Symbols with codes from \U+0000 to \U+10FFFF (maximum valid Unicode code
-       point) inclusive
+   * - ``char`` (16-bits)
+     - Symbols (code units) with codes from \U+0000 to \U+FFFF
 
 Predefined constructors, methods, and constants for ``char`` type are
 parts of the |LANG| :ref:`Standard Library`.
 
-Type ``char`` is a class type that has an appropriate class as a part of the
+Type ``char`` is a class type that is a part of the
 :ref:`Standard Library`. It means that type ``char`` is a subtype of
 ``Object``, and that it can be used at any place where a class name is
 expected.
@@ -149,11 +149,10 @@ expected.
 .. code-block:: typescript
    :linenos:
 
-    let a_char = new char
+    let a_char: char = c'a'
     console.log (a_char)
-    // Output is: <empty_char>
+    // Output is: a
     let o: Object = a_char // OK
-
 
 .. index::
    char type
@@ -166,19 +165,17 @@ expected.
 
 |
 
-.. _Character Literals:
+.. _char Literals:
 
-Character Literals
-==================
+``char`` Literals
+=================
 
 .. meta:
     frontend_status: Done
 
-*Character literal* represents the following:
-
--  Value consisting of a single character; or
--  Single escape sequence preceded by the characters *single quote* (U+0027)
-   and '*c*' (U+0063), and followed by a *single quote* U+0027).
+*Char literal* represents a 16-bit Unicode code unit that can be written as
+a single UTF-16 symbol or a single escape sequence preceded by the characters
+*single quote* (U+0027) and '*c*' (U+0063), and followed by a *single quote*.
 
 The syntax of *character literal* is represented below:
 
@@ -203,11 +200,19 @@ The examples are presented below:
       c'\x7F'
       c'\u0000'
 
-*Character literals* are of type ``char``.
+If a literal cannot be represented by an unsigned 16-bit value, then a
+:index:`compile-time` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+      c'\u{FFFFF}' // compile-time error
+
+
+*Char literals* are of type ``char``.
 
 .. index::
    char literal
-   character literal
    value
    character
    syntax
@@ -218,48 +223,34 @@ The examples are presented below:
 
 |
 
-.. _Character Equality and Relational Operators:
+.. _char Operations:
 
-Character Equality and Relational Operators
-===========================================
+``char`` Operations
+===================
 
 .. meta:
     frontend_status: Partly
-    todo: need to adapt the implementation to the latest specification
 
-*Value equality* is used for operands of type ``char``.
-
-If both operands represent the same Unicode code point,
-then the result of ':math:`==`' or ':math:`===`'
-is ``true``. Otherwise, the result is ``false``.
-The result of ':math:`!=`' and ':math:`!==`' is ``false`` when values are same.
-Otherwise, the result is ``true``.
+Equality and relational operators can be applied to ``char`` values (see
+:ref:`Character Relational Operators` and :ref:`Equality Expressions`).
 
 The *equality operator* checking a value of ``char`` type
 against a value of a non-``char`` type returns ``false``. If the result
-is known at compile time to always evaluate as ``false``, the compile-time
-warning is issued (see :ref:`Equality Expressions`).
-
-Attempting to use type ``char`` as an operand in a relational expression causes
-a :index:`compile-time error` if detected at compile time, or a
-:index:`runtime error` otherwise:
+is known at compile time to always evaluate as ``false``,
+a :index:`compile-time warning` is issued (see :ref:`Equality Expressions`):
 
 .. code-block:: typescript
    :linenos:
 
-   let a0 = new char
+   let a0: char = c'a'
    let a1 = new char
-   a0 = c'a'
    a1 = c'a'
 
-   // Both next lines print true
-   console.log(a0 == a1)
-   console.log(a0 === a1)
+   // The followihg lines both print true as values are equal
+   console.log(a0 == a1)  // true
+   console.log(a0 === a1) // true
 
    let x: number = 1
-   // Any relational operator with char causes compile-time error
-   a0 < a1 // compile-time error
-   a0 < x  // compile-time error
 
    // Equality where one operand is char and the other is non-char causes error
    a0 == x  // compile-time error
@@ -275,17 +266,32 @@ a :index:`compile-time error` if detected at compile time, or a
    u == a0  // 'false' for any  values of 'a' and any numbers in 'u'
             // because  types 'number' and 'char' do not overlap
 
+Attempting to mix ``char`` values and numeric values as an operand in
+a relational expression causes a :index:`compile-time error`:
+
+.. code-block:: typescript
+   :linenos:
+
+   let c1 = c'a'
+   let c2 = c'b'
+   c1 < c2    // true
+   c1 <= c'a' // true
+
+   c1 = c'\u7FFF'
+   c2 = c'\uFFFF'
+   c1 < c2 // true, comparison of unsigned integers
+
+   c1 < 50 // compile-time error
 
 .. index::
    character
    value
    char type
-   Unicode code point
    equality operator
    value equality operator
    value equality
    operand
-
+   
 |
 
 .. _Fixed-Size Array Types:
@@ -1084,8 +1090,8 @@ Callable Types
 A type is *callable* if the name of the type can be used in a call expression.
 A call expression that uses the name of a type is called a *type call
 expression*. Only class type can be callable. To make a type
-callable, a static method with the name ``$_invoke`` or ``$_instantiate`` must
-be defined or inherited:
+callable, a static method either with the name ``$_invoke`` or with the name
+``$_instantiate`` must be defined:
 
 .. code-block-meta:
 
@@ -1101,6 +1107,32 @@ be defined or inherited:
 In the above example, ``C()`` is a *type call expression*. It is the short
 form of the normal method call ``C.$_invoke()``. Using an explicit call is
 always valid for the methods ``$_invoke`` and ``$_instantiate``.
+
+A class can define either the method ``$_invoke()`` or the method ``$_instantiate``
+but not both. Otherwise, a :index:`compile-time error` occurs. However, a class
+can define several implementations of the methods ``$_invoke`` or ``$_instantiate``
+with different signatures:
+
+..  code-block:: typescript
+    :linenos:
+
+    // compile-time error, both $_invoke and $_instantiate defined
+    class A {
+        static $_invoke(i: int): int { return i; }
+        static $_instantiate(factory: () => A): A { return factory(); }
+    }
+
+    // OK, two $_invoke with different signatures
+    class B {
+        static $_invoke(p: int): int { return p; }
+        static $_invoke(): string { return "hello"; }
+    }
+
+Static methods have no access to type parameters of generic in |LANG|. It means
+that the method ``$_instantiate`` cannot be declared for a generic type. The
+method ``$_invoke`` can be declared, but the *type call expression* or explicit
+call of ``$_invoke()`` must not use a type parameter.
+
 
 .. index::
    callable type
@@ -1140,9 +1172,6 @@ always valid for the methods ``$_invoke`` and ``$_instantiate``.
 The methods ``$_invoke`` and ``$_instantiate`` are similar but have differences
 as discussed below.
 
-A :index:`compile-time error` occurs if a callable type contains both methods
-``invoke`` and ``$_instantiate``.
-
 .. index::
    constructor
    method
@@ -1163,8 +1192,9 @@ Callable Types with ``$_invoke`` Method
     frontend_status: Done
 
 The static method ``$_invoke`` can have an arbitrary signature. The method
-can be used in a *type call expression* in either case above. If the signature
-has parameters, then the call must contain corresponding arguments.
+is either called implicitly in a *type call expression*, or called explicitly.
+The class can have several ``$_invoke`` methods with different signatures. If
+the signature has parameters, then the call must contain corresponding arguments.
 
 .. code-block-meta:
 
@@ -1175,8 +1205,17 @@ has parameters, then the call must contain corresponding arguments.
         static $_invoke(a: number, b: number): number {
             return a + b
         }
+        static $_invoke(a: string, b: string): string {
+            return a + b
+        }
     }
     console.log(Add(2, 2)) // prints: 4
+    console.log(Add.$_invoke(2, 2)) // prints: 4
+    console.log(Add("Number ", "one")) // prints "Number one"
+
+
+A class can declare an instance method ``$_invoke``
+but the method does not make the class *callable*.
 
 .. index::
    static method
@@ -1191,9 +1230,6 @@ has parameters, then the call must contain corresponding arguments.
    instance method
    type
 
-That a type contains the instance method ``$_invoke`` does not make the type
-*callable*.
-
 |
 
 .. _Callable Types with $_instantiate Method:
@@ -1205,11 +1241,16 @@ Callable Types with ``$_instantiate`` Method
     frontend_status: Done
 
 The static method ``$_instantiate`` can have an arbitrary signature by itself.
-If it is to be used in a *type call expression*, then its first parameter
-must be a ``factory`` (i.e., it must be a *parameterless function type
-returning some class type*).
-The method can have or not have other parameters, and those parameters can
-be arbitrary.
+If it is to be used in a *type call expression*, then
+its first parameter must be a *factory* defined as
+a parameterless function type returning the class
+type in which the method ``$_instantiate`` is declared. The method can have or
+not have other parameters which can be arbitrary. The return type of the method
+``$_instantiate`` is typically the same as the return type of the factory,
+but can be arbitrary instead. A class can contain several static
+``$_instantiate`` methods with different sets of parameters. If a class declares
+two ``$_instantiate`` methods that have the same parameter set but different
+return types, then a :index:`compile-time error` occurs.
 
 In a *type call expression*, the argument corresponding to the ``factory``
 parameter is passed implicitly:
@@ -1218,14 +1259,30 @@ parameter is passed implicitly:
    :linenos:
 
     class C {
+        // #1, parameterless
         static $_instantiate(factory: () => C): C {
             return factory()
         }
-    }
-    let x = C() // factory is passed implicitly
 
-    // Explicit call of '$_instantiate' requires explicit 'factory':
+        // #2. As #1, but with another return type
+        // If uncommented, then a compile-time error occurs
+        // static $_instantiate(factory: () => C): int {
+        //     return 1
+        // }
+
+        // #3, with string parameter
+        static $_instantiate(factory: () => C, s: string): string {
+            return "hello " + s
+        }
+    }
+
+    let x = C() // #1 called, factory is passed implicitly
+
+    // Explicit call of #1 requires explicit 'factory':
     let y = C.$_instantiate(() => { return new C()})
+
+    let s: string = C("world") // #3 called, factory is passed implicitly
+
 
 .. index::
    static method
@@ -1278,8 +1335,75 @@ if:
     }
     let x = C() // compile-time error, wrong '$_instantiate' 1st parameter
 
-That a type contains the instance method ``$_instantiate`` does not make the
-type *callable*.
+Where the method ``$_instantiate`` is used implicitly
+in the *type call expression*:
+
+- If the method ``$_instantiate`` does not declare
+  ``factory`` as an *optional parameter*, then a ``factory``
+  implementation is generated automatically.
+
+- If the method ``$_instantiate`` declares ``factory``
+  as an *optional parameter* (see :ref:`Optional Parameters`), then the default
+  implementation is used for ``factory``.
+
+..  code-block:: typescript
+    :linenos:
+
+    class A {
+        static $_instantiate(
+            factory: () => A): A { return factory() }
+    }
+    class B {
+        static $_instantiate(
+            factory: () => B = () =>{
+                console.log("default factory");
+                return new B; } ): B
+            { return factory() }
+    }
+
+    A() // Automatically generated factory is used
+    B() // Default implementation is used for factory
+
+A *type call expression* passes no arguments
+to the ``factory`` function, and the latter uses
+a parameterless class constructor. If a class has
+no parameterless class constructor, then a
+:index:`compile-time error` occurs:
+
+..  code-block:: typescript
+    :linenos:
+
+    class A {
+        constructor(p: int) {}
+        static $_instantiate(factory: () => A): A { return factory() }
+    }
+
+    A() // compile-time error, no parameterless constructor
+
+
+..  note::
+    Calling the method ``$_instantiate`` explicitly
+    with such a class, or supplying the default
+    implementation for the factory that uses
+    a constructor with parameters, is still
+    possible though useless:
+
+    ..  code-block:: typescript
+        :linenos:
+
+        class A {
+            constructor(p: int) {}
+            static $_instantiate(
+                factory: () => A = () => { return new A(1); }
+                ): A { return factory() }
+        }
+
+        A() // OK, default is used for the optional factory
+        A.$_instantiate(() => { return new A(1); }) // OK, explicit call
+
+
+A class can declare an instance method ``$_instantiate``
+but the method does not make the class *callable*.
 
 .. index::
    method
@@ -2779,7 +2903,7 @@ All other arguments are handled in an ordinary manner.
 
 The keyword ``this`` must be used in the parameter list for the first parameter
 only. If it is used for other parameters, then a :index:`compile-time error`
-occurs. 
+occurs.
 
 The keyword ``this`` can be used inside a *function with receiver* where
 it corresponds to the first parameter. The type of parameter ``this`` is called

@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -2191,7 +2191,7 @@ At an **assignment to the variable** ``v``: ``v = e``:
    namely:
 
     - Larger numeric type if *x* is a numeric type;
-    - *Enumeration base type* if *x* is an enumeration or const enumeration type.
+    - *Enumeration base type* if *x* is an enumeration type.
 
 The following table summarizes the contexts for map evaluation at an
 *assumption node*:
@@ -2312,13 +2312,15 @@ The following table summarizes the contexts for map evaluation at an
       * - ``"boolean"``
         - ``boolean``
       * - ``"string"``
-        - ``string | char``
+        - ``string``
+      * - ``"char"``
+        - ``char``
       * - ``"undefined"``
         - ``undefined``
       * - A name of a numeric type
         - The same numeric type
       * - ``"object"``
-        - ``Object - boolean - string - all numeric types``
+        - ``Object - boolean - string - char - all numeric types``
 
 
    At a node that joins two CFG branches, namely
@@ -2664,16 +2666,10 @@ Overriding in Classes
    Only accessible (see :ref:`Accessible`) methods are subjected to overriding.
    The same rule applies to accessors in case of overriding.
 
-An overriding member can keep or extend an access modifier (see
-:ref:`Access Modifiers`) of a member that is inherited or implemented.
+An overriding method can retain access modifier of a method from a superclass
+or a superinterface, or change `protected` for `public`
+(see :ref:`Access Modifiers`).
 Otherwise, a :index:`compile-time error` occurs.
-
-A :index:`compile-time error` occurs if an attempt is made to do the following:
-
-- Override a private method of a superclass; or
-- Declare a method with the same name as that of a private method with default
-  implementation from any superinterface.
-
 
 .. index::
    overloading
@@ -2713,8 +2709,13 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
       public override protected_member() {}
          // Protected member can be overridden by the protected or public one
       override private_member() {}
-         // A compile-time error occurs if an attempt is made to override private member
-         // or implement the private methods with default implementation
+         // A compile-time error occurs as private methods of a superclass or
+         // a superinterface are not accessible in the derived class, and such
+         // a declaration attempt has nothing to override. 
+      private_member() {}
+         // Will be a correct method declaration which is nto related to 
+         // private methods with the same name and signature from a supoer class
+         // or superinterfaces
    }
 
 If an *instance method* is defined or inherited by a subclass with the same name as the
@@ -4227,8 +4228,6 @@ member is excluded in the right-hand-side column for brevity):
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
-   * - :ref:`Constant Enumerations`
-     - Enumeration base type
    * - Awaited<T>
      - - If ``T`` is neither a type parameter nor a subtype of ``Promise``, then
          the Effective type (Awaited<T>) is the Effective type (T);
@@ -4285,7 +4284,6 @@ Otherwise, the original type is *preserved*.
    string
    literal type
    enumeration base type
-   const enumeration type
    enumeration
    invariant type parameter
    parameter type

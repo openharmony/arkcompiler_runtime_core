@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -514,14 +514,13 @@ Literals
       | BooleanLiteral
       | StringLiteral
       | MultilineStringLiteral
-      | RegExpLiteral
       | NullLiteral
       | UndefinedLiteral
       | CharLiteral
       ;
 
 Each literal is described in detail below. The experimental ``char literal``
-is discussed in :ref:`Character Literals`.
+is discussed in :ref:`char Literals`.
 
 .. index::
    literal
@@ -806,7 +805,10 @@ A ``bigint`` literal is an *integer literal* followed by the symbol ``'n'``:
 
 .. code-block:: abnf
 
-    BigIntLiteral: IntegerLiteral 'n';
+    BigIntLiteral: DecimalIntegerLiteral 'n';
+
+    .. BigIntLiteral: IntegerLiteral 'n';
+
 
 The concept is represented by the examples below:
 
@@ -815,7 +817,8 @@ The concept is represented by the examples below:
     153n // bigint literal
     1_153n // bigint literal
     -153n // negative bigint literal
-    0xBAD_3n // bigint literal in hexadecimal notation
+
+    .. 0xBAD_3n // bigint literal in hexadecimal notation
 
 The underscore character ``'_'`` between successive digits can be used to
 improve readability. Underscore characters in such positions do not change
@@ -1095,88 +1098,6 @@ If an operator is applied to a literal, then the literal type is replaced for
    literal
    literal type
 
-|
-
-.. _Regex Literal:
-
-Regex Literal
-=============
-
-.. meta:
-    frontend_status: None
-
-*Regex literals* can contain the mandatory regex part and optional flags:
-
-.. index::
-   regex literal
-   optional flag
-
-.. code-block:: abnf
-
-    RegexLiteral:
-        '/' RegexCharSequence '$'? '/' RegExFlags?
-        ;
-
-    RegexCharSequence:
-        (
-            RegexCharacter
-            |RegexSpecialForms
-            |'(' RegexSpecialForms ')'
-            |'(' '?<' Identifier '>' RegexSpecialForms ')'
-            |'(' '?:' RegexSpecialForms ')'
-        )+
-        ;
-
-    RegexCharacter:
-        ~["'\\\r\n] 
-        ('*'|'+'|'?'|('{' DecimalIntegerLiteral (',' DecimalIntegerLiteral? )? '}'))?
-        ;
-
-    RegexSpecialForms:   
-        CharacterClass ('(' '?='|'?!' CharacterClass ')')? 
-        ('(' '?<='|'?<!' CharacterClass ')') CharacterClass
-        ;
-
-    CharacterClass: 
-        '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
-        | '.'
-        | '\'
-        ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' 
-         | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit 
-         | DecimalIntegerLiteral | 'k<' Identifier '>'
-        )
-        | 'u' HexDigit HexDigit HexDigit HexDigit 
-        | 'u{' HexDigit HexDigit HexDigit HexDigit HexDigit? '}'
-        | '[\b]' 
-        | (RegexCharacter '|' RegexCharacter)
-        ;
-
-    RegExFlags:
-        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
-        ;
-
-Regex flags can be put in any order. However, duplicating a regex flag
-causes a :index:`compile-time error`.
-
-*Regex literals* are represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    let regex1 = /abc/ 
-    let regex2 = /ab+c/gi
-
-*Regex literal* is semantically equivalent to the creation of an object of
-*RegExp* type that is a part of the :ref:`Standard Library`.
-
-.. code-block:: typescript
-   :linenos:
-
-    let regex1 = /abc/ 
-    let regex2 = new RegExp ("abc")
-
-The semantics of *regex literals* supported by |LANG| and of regular expressions
-in |JS| are the same.
 
 |
 

@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -18,15 +18,17 @@ Ambient Declarations
 .. meta:
     frontend_status: Done
 
-*Ambient declaration* specifies an entity that is declared elsewhere.
+*Ambient declaration* specifies an entity declared elsewhere but usable in the
+current context.
+
 Ambient declarations:
 
--  Provide type information for entities included into a program from external
-   sources.
+-  Provide type information for entities declared elsewhere.
 -  Introduce no new entities like regular declarations do.
--  Cannot include executable code, and thus have no initializers.
+-  Cannot include executable code, and thus 
 
-Ambient functions, methods, and constructors have no bodies.
+   - Ambient variables, constants, and enumerations have no initializers;
+   - Ambient functions, methods, and constructors have no bodies.
 
 .. index::
    ambient declaration
@@ -89,6 +91,10 @@ context that is already ambient:
    compatibility
    ambient
 
+*Ambient declaration* by itself does not guarantee that non-ambient declartion
+declared elsewhere for the same name entity is identical to the ambient one. 
+By its nature, any *ambient declaration* is a requirement only that the build
+system (see :ref:`Build System`) provides a proper non-ambient declaration.
 
 |
 
@@ -635,41 +641,32 @@ as follows:
 
 |
 
-.. _Ambient Enum Declarations:
+.. _Ambient Enumeration Declarations:
 
-Ambient Enum Declarations
-*************************
+Ambient Enumeration Declarations
+********************************
 
 .. meta:
     frontend_status: None
 
-The syntax of *ambient enum declaration* is presented below:
+The syntax of *ambient enumeration declaration* is presented below:
 
 .. code-block:: abnf
 
     ambientEnumDeclaration
-        : 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
-        | 'const' 'enum' identifier enumBaseType? '{' ambientConstEnumMemberList? '}'
+        : 'const'? 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
         ;
 
     ambientEnumMemberList:
         identifier (',' identifier)* ','?
         ;
 
-    ambientConstEnumMemberList:
-        ambientConstEnumMember (',' ambientConstEnumMember)* ','?
-        ;
+If an *enumeration declaration* is prefixed with the keyword
+``const``, then a :index:`compile-time error` occurs. This restriction
+is temporary, and the semantics of ``const enum`` is to be made
+available in the future versions of |LANG|.
 
-    ambientConstEnumMember:
-        identifier '=' constExpression
-        ;
-
-*Ambient enum declarations* must meet the following conditions:
-
-- Members of a non-constant enum declaration cannot have initializers;
-
-- Members of a constant enum declaration must have explicit initializers.
-
+No member of an enum declaration can have an initializer.
 Otherwise, a :index:`compile-time error` occurs as represented
 in the example below: 
 
@@ -677,10 +674,8 @@ in the example below:
    :linenos:
 
     declare enum RGB {Red, Green, Blue} // OK
-    declare const enum Color: byte {BLACK = 0, WHITE = 0xFF} // OK
     
     declare enum Err1 { A = 5 }      // compile-time error, initializer is present
-    declare const enum Err2 { A, B } // compile-time error, initializer is missing
 
 |
 

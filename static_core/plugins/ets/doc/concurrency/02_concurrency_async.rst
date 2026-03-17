@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2026 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -40,12 +40,13 @@ Asynchronous Functions
 .. meta:
     frontend_status: Done
 
-An asynchronous function is a function that can define suspension points inside
+An *asynchronous function* is a function that can define suspension points inside
 its body. A non-asynchronous function can not have suspension points.
 
 .. note::
   A *suspension point* is the point in the function code where function
-  execution can be *suspended* (paused) and, at some time in future, *resumed*.
+  execution can be paused (so the function becomes *suspended*) and, at some
+  time in future, *resumed*.
   The suspension implies that control is transferred elsewhere, but all the
   local function state (e.g. the argument and local variable values)
   is preserved until the resumption.
@@ -63,9 +64,9 @@ defined with the :ref:`await Expression`. If suspension happens, the ``async``
 function immediately returns a *pending* ``Promise`` instance. In case of the
 first (by the control flow) suspension point, the control is transferred to the
 caller of the asynchronous function, and the runtime environment creates a new
-|C_CORO| that corresponds to the paused function. Eventually, in accordance with
-the :ref:`Scheduling rules`, the ``async`` function resumes its execution from
-the suspension point where the execution was paused. In case of second and
+|C_CORO| that corresponds to the suspended function. Eventually, in accordance
+with the :ref:`Scheduling rules`, the ``async`` function resumes its execution
+from the suspension point where the execution was paused. In case of second and
 further suspension points, after the suspension happens, the runtime environment
 schedules another |C_JOB| for execution. The |C_JOB| to be scheduled is chosen
 in accordance with the :ref:`Scheduling rules`.
@@ -81,9 +82,9 @@ return a ``Promise<T>`` instance (in this case, the returned value  is returned
 instance of ``Promise<T>``. Both options are allowed to be the ``expression`` of
 the ``return`` statement inside the ``async`` function body (see :ref:`return
 Statements` and :ref:`Return Type Inference`). ``T`` here is a subtype of
-:ref:`Type Any`. If ``T`` has ``void`` or ``undefined`` type (see :ref:`Type
-void or undefined`) then, like in non-asynchronous functions, an argumentless
-``return`` statement is allowed.
+:ref:`Type Any`. If ``T`` has ``void`` or ``undefined`` type (see
+:ref:`Type void or undefined`) then, like in non-asynchronous functions, an
+argumentless ``return`` statement is allowed.
 
 .. note::
    Summarizing: an asynchronous function with one or more suspension points
@@ -169,8 +170,8 @@ follow the same rules as :ref:`Async Functions`.
 .. meta:
     frontend_status: Done
 
-An ``await`` expression defines a suspension point within the asynchronous
-function body. The syntax of the ``await`` expression is as follows:
+An *await expression* defines a suspension point within the asynchronous
+function body. The syntax of the *await expression* is as follows:
 
 .. code-block:: abnf
 
@@ -178,16 +179,33 @@ function body. The syntax of the ``await`` expression is as follows:
         'await' expression
         ;
 
-The ``expression`` here should be a subtype of :ref:`Type Any`. The semantics of
-``awaitExpression`` depends on the type of the ``expression``:
+The ``expression`` argument here can be of any type (:ref:`Type Any`). The type
+of an *await expression* is ``Awaited<type(expression)>`` (see :ref:`Awaited
+Utility Type`), but the value and the semantics of the *await expression*
+depend on the type of its ``expression`` argument.
 
-- If the ``expression`` type is a subtype of :ref:`Concurrency Promise Class`,
-  then ``await`` defines a suspension point.
-- Otherwise, the ``await`` does not define a suspension point and the type and
-  value of the ``awaitExpression`` match those of the ``expression``.
+If the type of an ``expression`` is a subtype of :ref:`Concurrency Promise
+Class`, then:
+
+- Execution of the enclosing asynchronous function is paused until the awaited
+  ``Promise`` instance is *resolved* or *rejected*;
+- If the awaited ``Promise`` instance is *resolved*, then the value with which
+  the ``Promise`` is resolved becomes the value of the *await expression*;
+- If the awaited ``Promise`` instance is *rejected*, then the
+  *await expression* throws the error with which the ``Promise`` instance is
+  rejected;
+
+If the ``expression`` type is not a subtype of :ref:`Concurrency Promise Class`,
+then the *await expression* returns the value of the ``expression`` argument,
+and the enclosing asynchronous function is not suspended:
 
 .. code-block:: typescript
    :linenos:
+
+   class SomeClass {
+     method(): SomeClass | undefined { /* body */ }
+     async asyncMethod(): Promise<string> { /* body */ }
+   }
 
    async function g(): Promise<Object> { /* returns Promise */ }
 
@@ -195,31 +213,20 @@ The ``expression`` here should be a subtype of :ref:`Type Any`. The semantics of
      // ...
 
      // v1 is Awaited<Promise<Object>>, which is effectively Object
-     // g returns Promise, hence await is a suspension point
+     // g returns Promise, hence f can be suspended potentially
      let v1 = await g()
 
-     // v2 is Int
-     // await returns an Int, hence no suspension point here
+     // v2 is Awaited<Int>, which is effectively Int
+     // await argument is an Int, hence no suspension occurs
      let v2 = await new Int(5)
 
-     // implying that anotherMethod returns a Promise:
-     //  - method returned an object: await can suspend; v3 is the await result
-     //  - method returned undefined: no suspension, v3 is undefined
-     // v3 is Awaited<ReturnType(anotherMethod)> | undefined
-     let v3 = await obj.method()?.anotherMethod()
+     // v3 is Awaited<Promise<string> | undefined>, which is (string | undefined)
+     // - if method() returned an object: suspension can occur, v3 is the await result
+     // - if method() returned undefined: no suspension, v3 is undefined
+     let v3 = await (new SomeClass).method()?.asyncMethod()
 
      // ...
    }
-
-If ``awaitExpression`` defines a suspension point, then:
-
-- its type is ``Awaited<type(expression)>``;
-- the execution of the enclosing asynchronous function will be paused until the
-  awaited ``Promise`` instance becomes *resolved* or *rejected*;
-- if the awaited ``Promise`` instance becomes *resolved* then the value of
-  ``awaitExpression`` is the value the ``Promise`` was resolved with;
-- if the awaited ``Promise`` instance becomes *rejected* then ``awaitExpression`` throws
-  the error the ``Promise`` instance was rejected with;
 
 Under certain circumstances, the |C_CORO| that has been suspended on ``await``
 can be moved to another |C_WORKER| upon resumption, i.e. rescheduled (see
