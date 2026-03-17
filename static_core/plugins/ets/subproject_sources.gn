@@ -189,6 +189,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_reflect_internals.cpp",
   "runtime/intrinsics/std_core_Value.cpp",
   "runtime/intrinsics/std_core_gc.cpp",
+  "runtime/intrinsics/std_core_weak_reference.cpp",
   "runtime/intrinsics/std_core_finalization_registry.cpp",
   "runtime/intrinsics/std_math.cpp",
   "runtime/intrinsics/unsafe_memory.cpp",
@@ -390,6 +391,7 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
 unittests_list = [
   "tests/runtime/types:ets_internal_objects_mock_tests",
   "tests/runtime/types:ets_internal_objects_tests",
+  "tests/runtime/:weak_ref_satb_lost_test",
 ]
 
 # pcre2 dependencies for different build modes

@@ -64,7 +64,7 @@ public:
     {
         auto *weakRef = GetHead();
         while (weakRef != nullptr) {
-            if (weakRef->GetReferent() == nullptr) {
+            if (weakRef->GetReferent<false>() == nullptr) {
                 // Finalizer of the cleared reference must be enqueued
                 ASSERT(weakRef->ReleaseFinalizer().IsEmpty());
                 Unlink(executionCtx, weakRef);
@@ -119,14 +119,14 @@ private:
     Node *GetHead() const
     {
         ASSERT(GetPrev() == nullptr);
-        ASSERT(GetReferent() == nullptr);
+        ASSERT((GetReferent<false>() == nullptr));
         return GetNext();
     }
 
     void SetHead(EtsExecutionContext *executionCtx, Node *weakRef)
     {
         ASSERT(GetPrev() == nullptr);
-        ASSERT(GetReferent() == nullptr);
+        ASSERT((GetReferent<false>() == nullptr));
         return SetNext(executionCtx, weakRef);
     }
 };

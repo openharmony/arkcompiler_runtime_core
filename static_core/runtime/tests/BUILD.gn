@@ -62,6 +62,16 @@ ark_runtime_unittest("arkruntime_memory_management_test") {
   module_out_path = runtime_test_module_out_path
 }
 
+ark_runtime_unittest("string_table_satb_lost_test") {
+  sources = [ "string_table_satb_lost_test.cpp" ]
+  module_out_path = runtime_test_module_out_path
+}
+
+ark_runtime_unittest("global_storage_satb_lost_test") {
+  sources = [ "global_storage_satb_lost_test.cpp" ]
+  module_out_path = runtime_test_module_out_path
+}
+
 ark_runtime_unittest("arkruntime_get_method_test") {
   sources = [ "getmethod_test.cpp" ]
   module_out_path = runtime_test_module_out_path
@@ -87,6 +97,8 @@ ark_unittest_group("runtime_tests") {
     ":arkruntime_pgo_class_context_utils_test",
     ":arkruntime_memory_management_test",
     ":arkruntime_stack_overflow_test",
+    ":string_table_satb_lost_test",
+    ":global_storage_satb_lost_test",
   ]
   if (!ark_use_common_runtime) {
     deps += [

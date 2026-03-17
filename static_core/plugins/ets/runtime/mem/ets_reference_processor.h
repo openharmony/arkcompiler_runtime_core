@@ -49,8 +49,6 @@ public:
 
     void EnqueueReference(const ObjectHeader *object);
 
-    void ClearDeadReferences(const mem::GC::ReferenceClearPredicateT &pred);
-
     void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;
     void ProcessReferencesAfterCompaction([[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred) final;
@@ -81,7 +79,7 @@ public:
     void ProcessReferencesAfterCopy();
 
 private:
-    template <bool NEED_BARRIER, typename Handler>
+    template <typename Handler>
     void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler);
 
     /// Add finalizer of dead referent of FinalizableWeakRef to the queue
@@ -98,7 +96,7 @@ private:
     PandaDeque<RefFinalizer> finalizerQueue_;
 };
 
-template <bool NEED_BARRIER, typename Handler>
+template <typename Handler>
 void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler)
 {
     weakReferences_.FlushSets();
@@ -106,7 +104,8 @@ void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredi
         auto *weakRefObj = weakReferences_.Extract();
         ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
-        auto *referent = weakRef->GetReferent<NEED_BARRIER>();
+
+        auto *referent = weakRef->GetReferent<false>();
         if (referent == nullptr || referent == nullValue_) {
             LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
                                  << " because referent is nullish";

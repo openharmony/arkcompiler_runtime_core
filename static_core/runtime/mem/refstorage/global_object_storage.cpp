@@ -147,4 +147,29 @@ void GlobalObjectStorage::Dump()
 {
     globalStorage_->DumpWithLock();
 }
+
+ObjectHeader *GlobalObjectStorage::GetWeakRef(const Reference *refWitNoType) const
+{
+    auto *object = weakStorage_->Get(refWitNoType);
+    // G1GC uses SATB approach. It requires to put WeakRef's target to SATB buffer on `deref` during concurrent mark
+    // because we can miss object like below:
+    //     1. GC thread in ConcurrentMarkPhase
+    //     2. Mutator gets the target object via weak reference and saves it to roots or marked object
+    //     3. If PREWRB was not applied in deref target would not be saved to SATB
+    //     4. GC thread goes to Remark: if object was not saved to SATB - it is marked as dead (even though it is
+    //     accessible from roots via not WeakRef)
+    //     5. GC thread removes dead objects, including target
+    //     6. We have the garbage accessible from roots
+    //  To resolve it we make GetWeakRef to add the target object to SATB if ConcurrentMarkPhase
+    if (object != nullptr) {
+        auto *mutator = Mutator::GetCurrent();
+        ASSERT(mutator != nullptr);
+        auto *preWrb = mutator->GetPreWrbEntrypoint();
+        if (preWrb != nullptr) {
+            reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(ToObjPtr(object));
+        }
+    }
+    return object;
+}
+
 }  // namespace ark::mem

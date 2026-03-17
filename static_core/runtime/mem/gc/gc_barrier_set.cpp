@@ -87,7 +87,7 @@ extern "C" void PreWrbFuncEntrypoint(ObjectPointerType oldval)
     ASSERT(IsAddressInObjectsHeap(reinterpret_cast<const ObjectHeader *>(oldval)->ClassAddr<BaseClass>()));
     LOG(DEBUG, GC) << "G1GC pre barrier val = " << oldval;
     ValidateObject(RootType::SATB_BUFFER, reinterpret_cast<const ObjectHeader *>(oldval));
-    auto *thread = ManagedThread::GetCurrent();
+    auto *thread = Mutator::GetCurrent();
     // thread can't be null here because pre-barrier is called only in concurrent-mark, but we don't process
     // weak-references in concurrent mark
     ASSERT(thread != nullptr);

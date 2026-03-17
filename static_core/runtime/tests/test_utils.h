@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,14 +64,15 @@ public:
         return coretypes::Array::Create(klass, length, spaceType, pinned);
     }
 
-    static coretypes::String *AllocString(size_t length, bool pinned = false)
+    static coretypes::String *AllocString(size_t length, bool pinned = false, bool movable = true)
     {
+        ASSERT(movable || !pinned);
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         PandaVector<uint8_t> data;
         data.resize(length);
-        return coretypes::String::CreateFromMUtf8(data.data(), length, length, true, ctx, runtime->GetPandaVM(), true,
-                                                  pinned);
+        return coretypes::String::CreateFromMUtf8(data.data(), length, length, true, ctx, runtime->GetPandaVM(),
+                                                  movable, pinned);
     }
 
     static ObjectHeader *AllocObjectInYoung()
@@ -81,6 +82,65 @@ public:
         return coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
     }
 };
+
+template <GCPhase PHASE>
+class OnGCPhaseStartListener : public GCListener {
+public:
+    explicit OnGCPhaseStartListener(std::function<void(void)> action) : fn_(std::move(action)) {}
+
+private:
+    void GCPhaseStarted(GCPhase phase) override
+    {
+        if (phase == PHASE) {
+            fn_();
+        }
+    }
+
+    std::function<void(void)> fn_;
+};
+
+template <GCPhase PHASE>
+class OnGCPhaseFinishListener : public GCListener {
+public:
+    explicit OnGCPhaseFinishListener(std::function<void(void)> action) : fn_(std::move(action)) {}
+
+private:
+    void GCPhaseFinished(GCPhase phase) override
+    {
+        if (phase == PHASE) {
+            fn_();
+        }
+    }
+
+    std::function<void(void)> fn_;
+};
+
+template <GCPhase PHASE>
+class OnGCPhaseSFListener : public GCListener {
+public:
+    explicit OnGCPhaseSFListener(std::function<void(void)> onStart, std::function<void(void)> onFinish)
+        : start_(std::move(onStart)), fin_(std::move(onFinish))
+    {
+    }
+
+private:
+    void GCPhaseStarted(GCPhase phase) override
+    {
+        if (phase == PHASE) {
+            start_();
+        }
+    }
+
+    void GCPhaseFinished(GCPhase phase) override
+    {
+        if (phase == PHASE) {
+            fin_();
+        }
+    }
+
+    std::function<void(void)> start_, fin_;
+};
+
 }  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_TEST_UTILS_H

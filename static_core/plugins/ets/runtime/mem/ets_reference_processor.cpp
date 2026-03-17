@@ -58,7 +58,7 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
 
     const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
 
-    auto *referent = etsRef->GetReferent();
+    auto *referent = etsRef->GetReferent<false>();
     if (referent == nullptr || referent == nullValue_) {
         LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
                              << " as normal object, because referent is nullish";
@@ -142,7 +142,7 @@ void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
                                               [[maybe_unused]] GCPhase gcPhase,
                                               const mem::GC::ReferenceClearPredicateT &pred)
 {
-    ProcessReferences<true>(pred, [this](auto *weakRefObj, auto *referentObj) {
+    ProcessReferences(pred, [this](auto *weakRefObj, auto *referentObj) {
         if (gc_->IsMarked(referentObj)) {
             LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
                                  << " because referent " << GetDebugInfoAboutObject(referentObj) << " is marked";
@@ -157,7 +157,7 @@ void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
 
 void EtsReferenceProcessor::ProcessReferencesAfterCompaction(const mem::GC::ReferenceClearPredicateT &pred)
 {
-    ProcessReferences<true>(pred, [this](auto *weakRefObj, auto *referentObj) {
+    ProcessReferences(pred, [this](auto *weakRefObj, auto *referentObj) {
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         auto markword = referentObj->AtomicGetMark(std::memory_order_relaxed);
         auto forwarded = markword.GetState() == MarkWord::ObjectState::STATE_GC;
@@ -170,17 +170,6 @@ void EtsReferenceProcessor::ProcessReferencesAfterCompaction(const mem::GC::Refe
         }
         LOG(DEBUG, REF_PROC) << "In " << GetDebugInfoAboutObject(weakRefObj) << " clear referent";
         weakRef->ClearReferent();
-        EnqueueFinalizer(weakRef);
-    });
-}
-
-void EtsReferenceProcessor::ClearDeadReferences(const mem::GC::ReferenceClearPredicateT &pred)
-{
-    ProcessReferences<false>(pred, [this](ObjectHeader *weakRefObj, [[maybe_unused]] ObjectHeader *referentObj) {
-        auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
-        LOG(DEBUG, REF_PROC) << "In " << GetDebugInfoAboutObject(weakRefObj) << " clear referent ("
-                             << GetDebugInfoAboutObject(referentObj) << ")";
-        weakRef->ClearReferent<false>();
         EnqueueFinalizer(weakRef);
     });
 }

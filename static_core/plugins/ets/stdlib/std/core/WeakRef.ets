@@ -41,9 +41,7 @@ class BaseWeakRef<T> {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public final deref(): T | undefined {
-        return this.referent;
-    }
+    public final native deref(): T | undefined;
 }
 
 /**

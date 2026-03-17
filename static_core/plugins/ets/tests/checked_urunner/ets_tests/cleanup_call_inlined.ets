@@ -27,11 +27,23 @@
 //! INST_NOT      /Inlined/
 //! METHOD        "cleanup_call_inlined.ETSGLOBAL::testAfterEscape"
 //! PASS_AFTER    "Inline"
-//! INST_COUNT    /Call.*Inlined/, 10
-//! INST_COUNT    /ReturnInlined/, 10
+//! INST_COUNT    /Call.*Inlined/, 9
+//! INST_COUNT    /ReturnInlined/, 9
 //! PASS_AFTER    "EscapeAnalysis"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT      /Inlined/
+
+class Ref<T> {
+    private referent: T | undefined;
+
+    public constructor(target: T) {
+        this.referent = target;
+    }
+
+    public deref(): T | undefined {
+		return this.referent;
+	}
+}
 
 function sum2(a: ValueArray<int>): int {
     return a[0] + a[1];
@@ -55,13 +67,13 @@ final class Counter {
     total: int = 0;
 }
 
-function add(c: WeakRef<Counter>, value: int) : int {
+function add(c: Ref<Counter>, value: int) : int {
     return c.deref()!.add(value);
 }
 
 function testAfterEscape(): int {
     let counter = new Counter();
-    let ref = new WeakRef<Counter>(counter);
+    let ref = new Ref<Counter>(counter);
     add(ref, 4);
     add(ref, 5);
     return ref.deref()!.total;

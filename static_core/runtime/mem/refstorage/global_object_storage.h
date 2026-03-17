@@ -66,7 +66,7 @@ public:
         if (type == Reference::ObjectType::GLOBAL) {
             result = globalStorage_->Get(reference);
         } else if (type == Reference::ObjectType::WEAK) {
-            result = weakStorage_->Get(reference);
+            result = GetWeakRef(reference);
         } else {
             result = globalFixedStorage_->Get(reference);
         }
@@ -127,6 +127,8 @@ private:
         ASSERT(type == Reference::ObjectType::GLOBAL || type == Reference::ObjectType::GLOBAL_FIXED ||
                type == Reference::ObjectType::WEAK);
     }
+
+    ObjectHeader *GetWeakRef(const Reference *refWitNoType) const;
 
     friend class ::ark::mem::test::ReferenceStorageTest;
 
