@@ -13,16 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in char_relational %}
-
 /*---
-desc: Char relational operator {{c.left}} {{c.op}} {{c.right}}
+desc: Ambient enum declaration must not have const prefix
+tags: [compile-only, negative]
+expected_out: "Const prefix is not allowed in ambient enum declaration."
 ---*/
 
-function main(): void {
-  let x: char = c'{{c.left}}'
-  let y: char = c'{{c.right}}'
-  let z: boolean = x {{c.op}} y
-}
-
-{% endfor %}
+declare const enum Err2 { A, B }
