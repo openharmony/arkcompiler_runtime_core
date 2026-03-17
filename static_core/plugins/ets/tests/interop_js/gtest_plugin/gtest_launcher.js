@@ -98,6 +98,7 @@ function main() {
 		'compiler-hotness-threshold': '0',
 		'interpreter-type': 'irtoc',
 		'taskpool-support-interop': 'true',
+		'interop-support-hybridstack': 'true',
 		'verification-mode': 'disabled',
 	};
 

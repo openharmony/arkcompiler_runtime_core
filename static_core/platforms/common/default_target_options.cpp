@@ -47,4 +47,9 @@ std::string GetDebuggerLibraryPath()
     return "";
 }
 
+bool GetInteropHybridStackEnable()
+{
+    return false;
+}
+
 }  // namespace ark::default_target_options

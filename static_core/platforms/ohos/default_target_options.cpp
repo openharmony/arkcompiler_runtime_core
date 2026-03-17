@@ -50,4 +50,8 @@ std::string GetDebuggerLibraryPath()
     return ark::ohos_device::GetDebuggerLibraryPath();
 }
 
+bool GetInteropHybridStackEnable()
+{
+    return ark::ohos_device::GetInteropHybridStackEnable();
+}
 }  // namespace ark::default_target_options

@@ -106,7 +106,9 @@ bool InteropCallStack::ForEachInteropFrame(const std::function<void(const void *
     void *dynamicFrameSP = GetDynamicTopFrameSP();
     void *toFrame = nullptr;
 
-    for (int fIdx = static_cast<int>(GetRecords().size()) - 1; fIdx >= 0; fIdx--) {
+    int frameSize = static_cast<int>(GetRecords().size());
+
+    for (int fIdx = frameSize - 1; fIdx >= 0; fIdx--) {
         toFrame = GetRecords()[fIdx].frame;
         bool nextIsStatic = GetRecords()[fIdx].isStaticFrame;
         if (nextIsStatic) {
@@ -123,7 +125,14 @@ bool InteropCallStack::ForEachInteropFrame(const std::function<void(const void *
             dynamicFrameSP = toFrame;
         }
     }
+
     // Parse all remaining static frames ans dynamic frames.
+    if (frameSize > 0 && GetRecords()[0U].isStaticFrame) {
+        return ForEachDynamicFrame(dynamicFrameSP, nullptr,
+                                   [&callback](const void *frame) { callback(frame, false); }) &&
+               ForEachStaticFrame(&staticStack, nullptr, [&callback](const void *frame) { callback(frame, true); });
+    }
+
     return ForEachStaticFrame(&staticStack, nullptr, [&callback](const void *frame) { callback(frame, true); }) &&
            ForEachDynamicFrame(dynamicFrameSP, nullptr, [&callback](const void *frame) { callback(frame, false); });
 }
