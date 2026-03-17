@@ -2154,28 +2154,8 @@
     - int32_t                  # begin index
     - int32_t                  # end index
 
-- name: SubStringFromStringTlabCompressed
-  entrypoint: SubStringFromStringTlabCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # src string
-    - int32_t                  # begin index
-    - int32_t                  # end index
-
 - name: SubStringFromStringTlabAllStrings
   entrypoint: SubStringFromStringTlabAllStrings
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # src string
-    - int32_t                  # begin index
-    - int32_t                  # end index
-
-- name: SubStringFromStringTlabAllStringsCompressed
-  entrypoint: SubStringFromStringTlabAllStringsCompressed
   bridge: none
   properties: [irtoc]
   signature:

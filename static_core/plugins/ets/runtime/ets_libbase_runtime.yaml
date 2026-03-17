@@ -1234,7 +1234,7 @@ intrinsics:
       ret: std.core.String
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::StdCoreStringSubstring
-    irtoc_impl: SubStringFromStringTlabCompressedNativePlus
+    irtoc_impl: SubStringFromStringTlabNativePlus
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStdStringSubstring
