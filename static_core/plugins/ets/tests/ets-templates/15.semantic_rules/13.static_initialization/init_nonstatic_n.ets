@@ -14,9 +14,17 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
+desc: >-
+    Static initialization is not working with non-static fields
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0145: Property 'v' must be accessed through 'this'
 ---*/
 
-static {
+class C {
+  v: int = 0
+
+  static {
+    v += 1
+  }
 }

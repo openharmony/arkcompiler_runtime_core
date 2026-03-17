@@ -15,14 +15,20 @@
 
 /*---
 desc: >-
-      Static initialization is not working with non-static fields
+    Static initialization is a routine performed once for each class (see Classes),
+    namespace (see Namespace Declarations), or module (see Modules).
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0297: Cannot reassign readonly i
 ---*/
 
-class C {
-  v: int = 0
+ class C {
+   static readonly i: int = 2
+   static {
+     C.i = 3
+   }
+ }
 
-  static {
-    v += 1
-  }
+function main() {
 }
+
