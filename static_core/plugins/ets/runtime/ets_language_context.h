@@ -185,7 +185,8 @@ public:
 
     const uint8_t *GetIOExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/IOError;");
+        UNREACHABLE();
+        return nullptr;
     }
 
     const uint8_t *GetIllegalArgumentExceptionClassDescriptor() const override
@@ -307,7 +308,8 @@ public:
 
     const uint8_t *GetIllegalMonitorStateExceptionDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/IllegalMonitorStateError;");
+        UNREACHABLE();
+        return nullptr;
     }
 
     void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const override;
