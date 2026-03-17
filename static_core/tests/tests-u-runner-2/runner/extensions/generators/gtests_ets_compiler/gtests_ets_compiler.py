@@ -173,32 +173,15 @@ class GTestEtsCompiler(IGenerator):
     def generate(self) -> list[str]:
         step = self._get_step_compiler_params()
 
-        ets_test_sources = self._get_ets_sources()
+        self._prepare_j2_sources()
 
-        ets_j2_sources = self._get_ets_j2_sources()
-        params_files: set[Path] = set()
-        for ets_j2_file in ets_j2_sources:
-            if (ets_j2_file.parent / "CMakeLists.txt").exists():
-                params_files.add(ets_j2_file.parent / "CMakeLists.txt")
+        to_compile = self._get_ets_sources() + list(self.gen.rglob(f"**/*.{self.extension}"))
+        failures = self._compile_all(step, to_compile)
 
-        j2_test_params = GTestEtsCompiler.collect_params_j2_files(params_files)
-        self._generate_ets_files(j2_test_params)
+        if failures:
+            _LOGGER.all(f"Compilation finished with failures: {len(failures)}/{len(to_compile)}")
 
-        configs_j2_tests = self._collect_arktsconfigs(j2_test_params)
-        self._copy_arktsconfigs(configs_j2_tests)
-
-        tmpl_tests_to_compile = list(self.gen.rglob(f"**/*.{self.extension}"))
-
-        max_workers = self.processes
-
-        with ThreadPoolExecutor(max_workers=max_workers) as ex:
-            futures = {ex.submit(self.compile_file, step, test): test
-                       for test in ets_test_sources + tmpl_tests_to_compile}
-
-            for fut in as_completed(futures):
-                fut.result()
-
-        return [str(file_path) for file_path in self.intermediate.rglob("**/*")]
+        return [str(p) for p in self.intermediate.rglob("**/*")]
 
     def compile_file(self, step: Step, test_id: Path) -> None:
         step_args = self.set_test_id(step.args, test_id)
@@ -236,6 +219,36 @@ class GTestEtsCompiler(IGenerator):
                 f"STDERR:\n{cp.stderr}\n"
                 f"STDOUT:\n{cp.stdout}"
             )
+
+    def _prepare_j2_sources(self) -> None:
+        params_files = {
+            (ets_j2.parent / "CMakeLists.txt")
+            for ets_j2 in self._get_ets_j2_sources()
+            if (ets_j2.parent / "CMakeLists.txt").exists()
+        }
+
+        j2_test_params = GTestEtsCompiler.collect_params_j2_files(params_files)
+        self._generate_ets_files(j2_test_params)
+
+        configs = self._collect_arktsconfigs(j2_test_params)
+        self._copy_arktsconfigs(configs)
+
+    def _compile_all(self, step: Step, tests: list[Path]) -> list[tuple[Path, str]]:
+        failed: list[tuple[Path, str]] = []
+
+        with ThreadPoolExecutor(max_workers=self.processes) as ex:
+            futures = {ex.submit(self.compile_file, step, test): test for test in tests}
+
+            for fut in as_completed(futures):
+                test = futures[fut]
+                try:
+                    fut.result()
+                except (CompileEtsTestPartTimeoutException, CompileEtsTestPartException) as e:
+                    msg = str(e)
+                    _LOGGER.all(msg)
+                    failed.append((test, msg))
+
+        return failed
 
     def _get_step_compiler_params(self) -> Step:
         for step in self.steps:
