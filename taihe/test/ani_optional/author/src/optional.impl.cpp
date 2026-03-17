@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,8 +83,6 @@ public:
 
     void FuncUnion(optional_view<::optional::Union> param1)
     {
-        std::cout << (*param1).get_sValue_ref() << std::endl;
-        std::cout << (*param1).get_iValue_ref() << std::endl;
     }
 
     void FuncMap(optional_view<map<string, int32_t>> param1)
