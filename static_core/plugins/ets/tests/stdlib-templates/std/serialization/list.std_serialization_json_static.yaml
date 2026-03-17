@@ -298,9 +298,9 @@
                              test2: {d: "[]"},
                              test3: {d: "[32]"}
                             },
-    method_expected_data: {test1: '"[1.1f,-1.1f,0f,0f,2.72182f,-2.72182f]"',
+    method_expected_data: {test1: '"[1.1,-1.1,0,0,2.72182,-2.72182]"',
                            test2:  '"[]"',
-                           test3:  '"[32f]"'
+                           test3:  '"[32]"'
                           }
   }
 - {

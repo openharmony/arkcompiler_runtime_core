@@ -82,10 +82,6 @@ std/core/std_core_BigInt_instance_BigInt_toString_011.ets
 # TypeError: Type '(resolve: () => void) => void' is not compatible with type '(resolve: (value: void|PromiseLike<void>) => void, reject: (error: Error) => void) => void'
 std/concurrency/AsyncLockTest.ets
 
-# 4.
-# runtime failures:
-std/serialization/std_serialization_json_stringify_float_array.ets
-
 # Deprecated operations on char #27402
 std/core/std_core_array_map_char_array_func_char.ets
 std/core/std_core_array_slice_char_array.ets

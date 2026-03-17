@@ -326,10 +326,6 @@ std/core/std_core_char_instance_Char_toUpperCase.ets
 # TypeError: Unresolved reference compareWrapperObjectValue
 # TypeError: This expression is not callable
 
-# 7.
-# runtime failures:
-std/serialization/std_serialization_json_stringify_float_array.ets
-
 # 9.
 # other fails
 std/core/std_core_BigInt_instance_BigInt_toString_011.ets
