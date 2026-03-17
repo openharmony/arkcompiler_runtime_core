@@ -1,0 +1,597 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access outside the class by simple name
+    decl_variants:
+      - |-
+        class A {
+          x: int = 5
+        }
+    logic: |-
+      x++
+    expected_out:
+      - |-
+        "Semantic error ESE0143: Unresolved reference x"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access outside the class by class name
+    decl_variants:
+      - |-
+        class A {
+          x: int = 5
+        }
+    logic: |-
+      A.x++
+    expected_out:
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class by simple name
+    decl_variants:
+      - |-
+        class A {
+          x: int = 5
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          constructor() {
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          y: int = x
+        }
+      - |-
+        class A {
+          x: int = 5
+          static y: int = x
+        }
+      - |-
+        class A {
+          x: int = 5
+          static foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          static get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          static set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class by class name
+    decl_variants:
+      - |-
+        class A {
+          x: int = 5
+          foo(): void {
+            A.x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          get field(): int {
+            return A.x
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          set field(a: int) {
+            A.x = a
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          constructor() {
+            A.x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          y: int = A.x
+        }
+      - |-
+        class A {
+          x: int = 5
+          static y: int = A.x
+        }
+      - |-
+        class A {
+          x: int = 5
+          static foo(): void {
+            A.x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          static get field(): int {
+            return A.x
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          static set field(a: int) {
+            A.x = a
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+          static {
+            A.x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single interface, access within interface by simple name
+    decl_variants:
+      - |-
+        interface I {
+          x: int
+          methI(): void {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single interface, access within interface by interface name
+    decl_variants:
+      - |-
+        interface I {
+          x: int
+          methI(): void {
+            I.x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0208: 'x' is an instance property of 'I'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      inherit field from superclass
+    decl_variants:
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          constructor() {
+            super()
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          y: int = x
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          static y: int = x
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          static foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          static get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          static set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        class B extends A {
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      implementing property from single interface
+    decl_variants:
+      - |-
+        interface I {
+          x: int
+        }
+        class A implements I {
+          x: int = 5
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        interface I {
+          x: int
+        }
+        class A implements I {
+          x: int = 5
+          constructor() {
+            x++
+          }
+        }
+      - |-
+        interface I {
+          x: int
+        }
+        class A implements I {
+          x: int = 5
+          y: int = x
+        }
+      - |-
+        interface I {
+          x: int
+        }
+        class A implements I {
+          x: int = 5
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Expected CTE output is unknown"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      two superinterfaces with same property
+    decl_variants:
+      - |-
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class A implements I1, I2 {
+          x: int = 5
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class A implements I1, I2 {
+          x: int = 5
+          constructor() {
+            x++
+          }
+        }
+      - |-
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class A implements I1, I2 {
+          x: int = 5
+          y: int = x
+        }
+      - |-
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class A implements I1, I2 {
+          x: int = 5
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Expected CTE output is unknown"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      two superinterfaces with same property, one superclass with same field name
+    decl_variants:
+      - |-
+        class A {
+          x: int = 5
+        }
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class B extends A implements I1, I2 {
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class B extends A implements I1, I2 {
+          constructor() {
+            super()
+            x++
+          }
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class B extends A implements I1, I2 {
+          y: int = x
+        }
+      - |-
+        class A {
+          x: int = 5
+        }
+        interface I1 {
+          x: int
+        }
+        interface I2 {
+          x: int
+        }
+        class B extends A implements I1, I2 {
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
+      - |-
+        "Expected CTE output is unknown"

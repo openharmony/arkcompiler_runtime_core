@@ -15,20 +15,15 @@ limitations under the License.
 
 {% for c in cases %}
 
-{% for decl in c.decl_variants %}
-{% set cv_id = loop.index0 %}
-
 /*---
 desc: {{c.desc}}
 params: {{c.params}}
-tags: [compile-only, negative]
-expected_out: {{c.expected_out[cv_id]}}
 ---*/
 
-{{decl}}
+{{c.decl}}
 
 function main(): void {
+  {{c.logic|indent(width=2)}}
 }
 
-{% endfor %}
 {% endfor %}
