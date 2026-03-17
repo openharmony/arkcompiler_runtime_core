@@ -178,6 +178,8 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
   of bench loop to prevent exceeding this limit
 * `-ct` (`--coroutines-threshold`) use it as ratio to limit amount of coroutines to prevent
   CoroutinesLimitExceedError
+* `-c` (`--concurrency-level`) reserved for some internal plugins related to concurrency lvl, e.g.
+  for jvm benches
 
 ## No run option
 `--no-run` (or `-N`) option disables all command's execution.

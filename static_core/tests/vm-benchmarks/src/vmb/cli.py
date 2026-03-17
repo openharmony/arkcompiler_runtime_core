@@ -74,6 +74,8 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
                         help="If <val> >= 0 check that concurrency limit not exceeded after each iteration")
     parser.add_argument("-ct", "--coroutines-threshold", default=None, type=float,
                         help="If <val> >= 0 check that used as ratio to prevent CoroutinesLimitExceedError")
+    parser.add_argument("-c", "--concurrency-level", default=None, type=str,
+                        help="Concurrency level, reserved for internal plugins e.g. jvm")
     parser.add_argument("-compiler-inlning", "--compiler-inlining",
                         default=None, type=str,
                         help="enable compiler inlining")
