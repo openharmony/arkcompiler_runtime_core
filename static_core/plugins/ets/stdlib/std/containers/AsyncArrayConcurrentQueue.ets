@@ -56,26 +56,26 @@ export namespace containers.stackless {
     }
 
     /**
-    * ArrayBlockingQueue is a bounded, thread-safe blocking queue backed by a fixed-size array;
-    * ArrayBlockingQueue supports both asynchronous and non-blocking
+    * ArrayConcurrentQueue is a bounded, thread-safe concurrent queue backed by a fixed-size array;
+    * ArrayConcurrentQueue supports both asynchronous and non-blocking
     * insertion and removal operations.
     *
-    * @class ArrayBlockingQueue
+    * @class ArrayConcurrentQueue
     * @syscap SystemCapability.Utils.Lang
     * @since 24
     */
-    export class ArrayBlockingQueue<T extends Object> implements BlockingQueue<T> {
+    export class ArrayConcurrentQueue<T extends Object> implements ConcurrentQueue<T> {
         /**
-        * Constructs a ArrayBlockingQueue with provided capacity.
+        * Constructs a ArrayConcurrentQueue with provided capacity.
         *
-        * @param { int } capacity the capacity of the ArrayBlockingQueue
+        * @param { int } capacity the capacity of the ArrayConcurrentQueue
         * @syscap SystemCapability.Utils.Lang
         * @since 24
         */
         constructor(capacity: int) {
             if (capacity <= 0) {
                 // NOTE(ypigunova): #33368 Add typed error
-                throw new RangeError("Invalid capacity for ArrayBlockingQueue's constructor.");
+                throw new RangeError("Invalid capacity for ArrayConcurrentQueue's constructor.");
             }
             this.capacitySize = capacity;
             this.array = Array.create<T|undefined>(this.capacitySize, undefined);
@@ -84,10 +84,10 @@ export namespace containers.stackless {
         }
 
         /**
-        * Constructs a ArrayBlockingQueue with provided capaity from iterable.
+        * Constructs a ArrayConcurrentQueue with provided capaity from iterable.
         *
-        * @param { int } capacity the capacity of the ArrayBlockingQueue
-        * @param { Iterable<T> } iterable the iterable instance to initialize ArrayBlockingQueue
+        * @param { int } capacity the capacity of the ArrayConcurrentQueue
+        * @param { Iterable<T> } iterable the iterable instance to initialize ArrayConcurrentQueue
         * @syscap SystemCapability.Utils.Lang
         * @since 24
         */
@@ -120,7 +120,7 @@ export namespace containers.stackless {
         }
 
         /**
-        * Removes and returns the first element in the BlockingQueue. If the queue is empty, waiting asynchronously.
+        * Removes and returns the first element in the ConcurrentQueue. If the queue is empty, waiting asynchronously.
         *
         * @returns { Promise<T> } A Promise that resolves when the element has been successfully removed from the queue.
         * @syscap SystemCapability.Utils.Lang
@@ -143,7 +143,7 @@ export namespace containers.stackless {
         /**
         * The insert operation. Returns true upon success and false if no space is currently available, non-blocking.
         *
-        * @param { T } element the element inserted to the BlockingQueue
+        * @param { T } element the element inserted to the ConcurrentQueue
         * @returns { boolean } True upon success and false if no space is currently available.
         * @syscap SystemCapability.Utils.Lang
         * @since 24
@@ -188,7 +188,7 @@ export namespace containers.stackless {
         }
 
         /**
-        * Returns the first element in a BlockingQueue.
+        * Returns the first element in a ConcurrentQueue.
         *
         * @returns { T | undefined } the first element or undefined when the queue is empty.
         * @syscap SystemCapability.Utils.Lang
@@ -208,7 +208,7 @@ export namespace containers.stackless {
         }
 
         /**
-        * Returns the end element in a ArrayBlockingQueue.
+        * Returns the end element in a ArrayConcurrentQueue.
         *
         * @returns { T | undefined } the end element or undefined when the queue is empty.
         * @syscap SystemCapability.Utils.Lang
@@ -232,7 +232,7 @@ export namespace containers.stackless {
         }
 
         /**
-        * Returns the size of an ArrayBlockingQueue.
+        * Returns the size of an ArrayConcurrentQueue.
         *
         * @returns { int } size
         * @syscap SystemCapability.Utils.Lang
@@ -254,9 +254,9 @@ export namespace containers.stackless {
         }
 
         /**
-        * Checks if the BlockingQueue is empty.
+        * Checks if the ConcurrentQueue is empty.
         *
-        * @returns { boolean } True if a BlockingQueue has no elements, otherwise false.
+        * @returns { boolean } True if a ConcurrentQueue has no elements, otherwise false.
         * @syscap SystemCapability.Utils.Lang
         * @since 24
         */
@@ -265,9 +265,9 @@ export namespace containers.stackless {
         }
 
         /**
-        * Returns the capacity of a BlockingQueue.
+        * Returns the capacity of a ConcurrentQueue.
         *
-        * @returns { int } the capacity of the BlockingQueue.
+        * @returns { int } the capacity of the ConcurrentQueue.
         * @syscap SystemCapability.Utils.Lang
         * @since 24
         */
@@ -278,7 +278,7 @@ export namespace containers.stackless {
         /**
         * Returns the number of additional elements that this queue can ideally accept without blocking.
         *
-        * @returns { int } the remaining capacity of the BlockingQueue.
+        * @returns { int } the remaining capacity of the ConcurrentQueue.
         * @syscap SystemCapability.Utils.Lang
         * @since 24
         */
@@ -289,7 +289,7 @@ export namespace containers.stackless {
         private async waitUntilQueueIsNotEmpty() {
             while (this.isQueueEmpty) {
                 // Currently, the queue is empty. Need to await.
-                // This method is used for waiting until the ArrayBlockingQueue
+                // This method is used for waiting until the ArrayConcurrentQueue
                 // has at least one element.
 
                 await this.condVar.wait(this.mutex);
@@ -299,7 +299,7 @@ export namespace containers.stackless {
         private async waitUntilQueueIsNotFull() {
             while (this.isQueueFull) {
                 // Currently, the queue is full. Need to await.
-                // This method is used for waiting until the ArrayBlockingQueue
+                // This method is used for waiting until the ArrayConcurrentQueue
                 // is not full.
                 await this.condVar.wait(this.mutex);
             }
@@ -327,9 +327,9 @@ export namespace containers.stackless {
             }
         }
 
-        private array: Array<T|undefined>;                     // Array, where all ArrayBlockingQueue elements will be located
-        private curHeadIdx: int = 0;                           // Index of the first element in a ArrayBlockingQueue
-        private curTailIdx: int = 0;                           // Index of the last element in a ArrayBlockingQueue
+        private array: Array<T|undefined>;                     // Array, where all ArrayConcurrentQueue elements will be located
+        private curHeadIdx: int = 0;                           // Index of the first element in a ArrayConcurrentQueue
+        private curTailIdx: int = 0;                           // Index of the last element in a ArrayConcurrentQueue
         private mutex: Object;                                 // push/pop Mutex
         private condVar: AsyncCondVarOSBasedMutex;             // push/pop CondVar
         private capacitySize: int = 0;

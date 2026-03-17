@@ -18,11 +18,11 @@ const testNum: int = 20;
 const stressNum: int = 100;
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueCapacityTest");
+    let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueCapacityTest');
 
-    ArrayBlockingQueueTestsuite.addTest("CapacityTest001", () =>
-    {
-        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(elementsNum);
+    arrayConcurrentQueueTestsuite.addTest('CapacityTest001', () => {
+        let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(elementsNum);
         for (let i = 0; i < 5; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -33,9 +33,10 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 6);
         arktest.assertEQ(queueInt.capacity, elementsNum);
     });
-    ArrayBlockingQueueTestsuite.addAsyncTest("CapacityTest007", async () =>
-    {
-        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(stressNum);
+
+    arrayConcurrentQueueTestsuite.addAsyncTest('CapacityTest007', async () => {
+        let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(stressNum);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.capacity, stressNum);
             arktest.assertTrue(queueInt.add(i));
@@ -45,9 +46,10 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.capacity, stressNum);
     });
-    ArrayBlockingQueueTestsuite.addTest("GetCapacityStressTest008", () =>
-    {
-        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(stressNum);
+
+    arrayConcurrentQueueTestsuite.addTest('GetCapacityStressTest008', () => {
+        let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             arktest.assertTrue(queueInt.add(i));
             arktest.assertEQ(queueInt.capacity, stressNum);
@@ -55,5 +57,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, stressNum);
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayConcurrentQueueTestsuite.run();
 }
