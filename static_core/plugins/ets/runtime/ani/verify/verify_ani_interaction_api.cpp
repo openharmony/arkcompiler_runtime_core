@@ -4039,147 +4039,289 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Ref(VEnv *venv, VObject *
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Boolean(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Boolean(VEnv *venv, VObject *vobject, const char *name,
                                                                   ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Boolean(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::BOOLEAN, AccessMode::READ),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Char(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Char(VEnv *venv, VObject *vobject, const char *name,
                                                                ani_char *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Char(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::CHAR, AccessMode::READ),
+        ANIArg::MakeForCharStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Char(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Byte(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Byte(VEnv *venv, VObject *vobject, const char *name,
                                                                ani_byte *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Byte(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::BYTE, AccessMode::READ),
+        ANIArg::MakeForByteStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Byte(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Short(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Short(VEnv *venv, VObject *vobject, const char *name,
                                                                 ani_short *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Short(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::SHORT, AccessMode::READ),
+        ANIArg::MakeForShortStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Short(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Int(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Int(VEnv *venv, VObject *vobject, const char *name,
                                                               ani_int *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Int(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::INT, AccessMode::READ),
+        ANIArg::MakeForIntStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Int(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Long(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Long(VEnv *venv, VObject *vobject, const char *name,
                                                                ani_long *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Long(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::LONG, AccessMode::READ),
+        ANIArg::MakeForLongStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Long(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Float(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Float(VEnv *venv, VObject *vobject, const char *name,
                                                                 ani_float *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Float(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::FLOAT, AccessMode::READ),
+        ANIArg::MakeForFloatStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Float(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Double(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Double(VEnv *venv, VObject *vobject, const char *name,
                                                                  ani_double *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Double(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::DOUBLE, AccessMode::READ),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Double(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Ref(VEnv *venv, ani_object object, const char *name,
-                                                              ani_ref *result)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Ref(VEnv *venv, VObject *vobject, const char *name,
+                                                              VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Ref(venv->GetEnv(), object, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::OBJECT, AccessMode::READ),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Object_GetPropertyByName_Ref(venv->GetEnv(), vobject->GetRef(), name, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Boolean(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Boolean(VEnv *venv, VObject *vobject, const char *name,
                                                                   ani_boolean value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Boolean(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::BOOLEAN, AccessMode::READWRITE),
+        ANIArg::MakeForBoolean(value, "value"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Char(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Char(VEnv *venv, VObject *vobject, const char *name,
                                                                ani_char value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Char(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::CHAR, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Char(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Byte(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Byte(VEnv *venv, VObject *vobject, const char *name,
                                                                ani_byte value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Byte(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::BYTE, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Byte(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Short(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Short(VEnv *venv, VObject *vobject, const char *name,
                                                                 ani_short value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Short(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::SHORT, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Short(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Int(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Int(VEnv *venv, VObject *vobject, const char *name,
                                                               ani_int value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Int(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::INT, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Int(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Long(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Long(VEnv *venv, VObject *vobject, const char *name,
                                                                ani_long value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Long(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::LONG, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Long(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Float(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Float(VEnv *venv, VObject *vobject, const char *name,
                                                                 ani_float value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Float(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::FLOAT, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Float(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Double(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Double(VEnv *venv, VObject *vobject, const char *name,
                                                                  ani_double value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Double(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::DOUBLE, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Double(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(VEnv *venv, ani_object object, const char *name,
-                                                              ani_ref value)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(VEnv *venv, VObject *vobject, const char *name,
+                                                              VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Ref(venv->GetEnv(), object, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForPropertyByName(name, "name", EtsType::OBJECT, AccessMode::READWRITE),
+        ANIArg::MakeForRef(vvalue, "value"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Ref(venv->GetEnv(), vobject->GetRef(), name,
+                                                                 vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

@@ -1,0 +1,558 @@
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License"
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "plugins/ets/tests/ani/ani_gtest/verify_ani_gtest.h"
+
+namespace ark::ets::ani::verify::testing {
+
+class ObjectSetPropertyByName{{ Type }}Test : public VerifyAniTest {
+public:
+    static void GetClassAndObject(ani_env *env, ani_class *cls, const char *className, ani_object *object)
+    {
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+        ASSERT_EQ(env->FindClass(className, cls), ANI_OK);
+        ASSERT_NE(*cls, nullptr);
+
+        ani_method ctor {};
+        ASSERT_EQ(env->Class_FindMethod(*cls, "<ctor>", ":", &ctor), ANI_OK);
+
+        ASSERT_EQ(env->Object_New(*cls, ctor, object), ANI_OK);
+        ASSERT_NE(*object, nullptr);
+        // NOLINTEND(cppcoreguidelines-pro-type-vararg)
+    }
+
+    void SetUp() override
+    {
+        VerifyAniTest::SetUp();
+    }
+
+protected:
+    ani_class class_ {};    // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_object object_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+class A {
+public:
+    static void NativeFoo(ani_env *env, ani_object)
+    {
+        ani_class cls {};
+        ani_object object {};
+        ObjectSetPropertyByName{{ Type }}Test::GetClassAndObject(
+            env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object);
+
+        {% if type == "ref" %}
+        ani_object valueObj {};
+        ObjectSetPropertyByName{{ Type }}Test::GetClassAndObject(
+            env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+        ASSERT_EQ(env->c_api->Object_SetPropertyByName_{{ Type }}(env, object, "{{ type }}Prop", valueObj), ANI_OK);
+        {% else %}
+        ASSERT_EQ(env->c_api->Object_SetPropertyByName_{{ Type }}(env, object, "{{ type }}Prop", {{ value }}), ANI_OK);
+        {% endif %}
+    }
+
+    static void NativeBaz(ani_env *env, ani_object)
+    {
+        ani_class cls {};
+        ani_object object {};
+        ObjectSetPropertyByName{{ Type }}Test::GetClassAndObject(
+            env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object);
+
+        {% if type == "ref" %}
+        ani_object valueObj {};
+        ObjectSetPropertyByName{{ Type }}Test::GetClassAndObject(
+            env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+        ASSERT_EQ(
+            env->c_api->Object_SetPropertyByName_{{ Type }}(env, object, "{{ type }}Property", valueObj), ANI_OK);
+        {% else %}
+        ASSERT_EQ(
+            env->c_api->Object_SetPropertyByName_{{ Type }}(env, object, "{{ type }}Property", {{ value }}),
+            ANI_OK);
+        {% endif %}
+    }
+};
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_env)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"object", "ani_object"},
+        {"name", "const char *"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_0)
+{
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object", "wrong reference"},
+        {"name", "const char *"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_1)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object", "wrong reference type: null"},
+        {"name", "const char *"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_name_0)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, nullptr, valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, nullptr, {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_name_1)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {"name", "const char *", "wrong property"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+{% if type == "boolean" %}
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_value)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", 2), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {"name", "const char *"},
+        {"value", "ani_{{ type }}", "wrong value for ani_boolean"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+{% endif %}
+
+{% if type == "ref" %}
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_ref)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", nullptr), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {"name", "const char *"},
+        {"value", "ani_{{ type }}", "wrong reference"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+{% endif %}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
+{
+    {% if type == "ref" %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"object", "ani_object", "wrong reference"},
+        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"value", "ani_{{ type }}", "wrong reference"},
+    };
+    // clang-format on
+    {% elif type == "boolean" %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, 2), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"object", "ani_object", "wrong reference"},
+        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"value", "ani_{{ type }}", "wrong value for ani_boolean"},
+    };
+    // clang-format on
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, {{ value }}), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"object", "ani_object", "wrong reference"},
+        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+    };
+    // clang-format on
+    {% endif %}
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_type)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Property", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Property", {{ value }}),
+        ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {% if type == "ref" %}
+        {"name", "const char *", "wrong property type: {{ wrong_ret }}, expected: object"},
+        {% else %}
+        {"name", "const char *", "wrong property type: {{ wrong_ret }}, expected: {{ type }}"},
+        {% endif %}
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_type)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Animal", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {"name", "const char *", "wrong property"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, readonly_property)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}ReadonlyProp", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}ReadonlyProp", {{ value }}),
+              ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object"},
+        {"name", "const char *", "property is read-only"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, object_from_local_scope)
+{
+    const int nr3 = 3;
+    ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Child", &object_);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    {% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"object", "ani_object", "wrong reference"},
+        {"name", "const char *"},
+        {% if type == "boolean" or type == "ref" %}
+        {"value", "ani_{{ type }}"},
+        {% endif %}
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, cross_thread_property_set_from_native_method)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+    std::array methods = {ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
+                          ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz)}};
+    ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
+
+    std::thread([this]() {
+        ani_env *env {};
+        ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
+
+        ani_class cls {};
+        ani_object object {};
+        GetClassAndObject(env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object);
+
+        ASSERT_EQ(env->Object_CallMethodByName_Void(object, "foo", ":"), ANI_OK);
+
+        ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
+    }).join();
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, property_set_from_native_method_1)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+    std::array methods = {ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
+                          ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz)}};
+    ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "foo", ":"), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, property_set_in_local_scope)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    const int nr3 = 3;
+    ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}),
+              ANI_OK);
+    {% endif %}
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, object_from_escape_local_scope)
+{
+    const int nr3 = 3;
+    ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
+    ani_object object {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Child", &object);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_OK);
+    {% endif %}
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, set_property_on_global_ref)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    ani_object gobject {};
+    ASSERT_EQ(env_->GlobalReference_Create(object_, reinterpret_cast<ani_ref *>(&gobject)), ANI_OK);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, gobject, "{{ type }}Prop", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, gobject, "{{ type }}Prop", {{ value }}), ANI_OK);
+    {% endif %}
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, cross_thread_property_set)
+{
+    std::thread([this]() {
+        ani_env *env {};
+        ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
+
+        ani_class cls {};
+        ani_object object {};
+        GetClassAndObject(env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object);
+
+        {% if type == "ref" %}
+        ani_object valueObj {};
+        GetClassAndObject(env, &cls, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+        ASSERT_EQ(env->c_api->Object_SetPropertyByName_{{ Type }}(env, object, "{{ type }}Prop", valueObj), ANI_OK);
+        {% else %}
+        ASSERT_EQ(env->c_api->Object_SetPropertyByName_{{ Type }}(env, object, "{{ type }}Prop", {{ value }}), ANI_OK);
+        {% endif %}
+
+        ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
+    }).join();
+
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_OK);
+    {% endif %}
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, set_parent_property)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Child", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_OK);
+    {% endif %}
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, set_accessor_property)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Property", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Property", {{ value }}),
+              ANI_OK);
+    {% endif %}
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, set_parent_accessor_property)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Child", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Property", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Property", {{ value }}),
+              ANI_OK);
+    {% endif %}
+}
+
+TEST_F(ObjectSetPropertyByName{{ Type }}Test, success)
+{
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
+
+    {% if type == "ref" %}
+    ani_object valueObj {};
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_OK);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_OK);
+    {% endif %}
+}
+
+}  // namespace ark::ets::ani::verify::testing

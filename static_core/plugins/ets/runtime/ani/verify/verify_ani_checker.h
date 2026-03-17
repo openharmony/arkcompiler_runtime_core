@@ -45,6 +45,8 @@
     X(VERIFY_WRITE_FIELD,                   VerifyWriteField)                     \
     X(VERIFY_WRITE_FIELD_BY_NAME,           VerifyWriteFieldByName)               \
     X(VERIFY_WRITE_STATIC_FIELD,            VerifyWriteStaticField)               \
+    X(VERIFY_READ_PROPERTY_BY_NAME,         VerifyReadPropertyByName)             \
+    X(VERIFY_WRITE_PROPERTY_BY_NAME,        VerifyWritePropertyByName)            \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
     X(VERIFY_FUNCTION,                      VerifyFunction)                       \
@@ -327,6 +329,15 @@ public:
     {
         return ANIArg(ArgValueBySize(static_cast<ani_size>(returnType)), name, Action::VERIFY_METHOD_RETURN_TYPE,
                       returnType);
+    }
+
+    static ANIArg MakeForPropertyByName(const char *name, std::string_view argName, EtsType propertyType,
+                                        AccessMode accessMode)
+    {
+        if (accessMode == AccessMode::READWRITE) {
+            return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_WRITE_PROPERTY_BY_NAME, propertyType);
+        }
+        return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_READ_PROPERTY_BY_NAME, propertyType);
     }
 
     static ANIArg MakeForUTF16Buffer(uint16_t *ptr, std::string_view name)

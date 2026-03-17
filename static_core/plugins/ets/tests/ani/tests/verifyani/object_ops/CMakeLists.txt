@@ -41,6 +41,34 @@ ani_verify_add_generated_tests(ani_verify_test_object_set_field
     PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,wrong_ret=int"
 )
 
+ani_verify_add_generated_tests(ani_verify_test_object_get_property_by_name
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_get_property_by_name_test.cpp.j2
+    J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_get_property_by_name_test.ets.j2
+    PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,wrong_ret=int"
+           "char: Type=Char,type=char,ret_type=char,wrong_ret=int"
+           "byte: Type=Byte,type=byte,ret_type=byte,wrong_ret=int"
+           "short: Type=Short,type=short,ret_type=short,wrong_ret=int"
+           "int: Type=Int,type=int,ret_type=int,wrong_ret=byte"
+           "long: Type=Long,type=long,ret_type=long,wrong_ret=int"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int"
+           "double: Type=Double,type=double,ret_type=double,wrong_ret=int"
+           "ref: Type=Ref,type=ref,ret_type=Object,wrong_ret=int"
+)
+
+ani_verify_add_generated_tests(ani_verify_test_object_set_property_by_name
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_set_property_by_name_test.cpp.j2
+    J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_set_property_by_name_test.ets.j2
+    PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,wrong_ret=int,value=ANI_TRUE"
+           "char: Type=Char,type=char,ret_type=char,wrong_ret=int,value='a'"
+           "byte: Type=Byte,type=byte,ret_type=byte,wrong_ret=int,value=0x12"
+           "short: Type=Short,type=short,ret_type=short,wrong_ret=int,value=0x1234"
+           "int: Type=Int,type=int,ret_type=int,wrong_ret=byte,value=0x123456"
+           "long: Type=Long,type=long,ret_type=long,wrong_ret=int,value=0x12345678"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.25F"
+           "double: Type=Double,type=double,ret_type=double,wrong_ret=int,value=2.5"
+           "ref: Type=Ref,type=ref,ret_type=Object,wrong_ret=int,value=nullptr"
+)
+
 ani_verify_add_generated_tests(ani_verify_test_object_call_method
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_call_method_test.cpp.j2
     J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_call_method_test.ets.j2
