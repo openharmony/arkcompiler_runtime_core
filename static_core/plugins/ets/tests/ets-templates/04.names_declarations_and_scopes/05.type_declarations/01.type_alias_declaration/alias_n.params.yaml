@@ -64,6 +64,7 @@ cases:
           type RU = number | string | RU // TypeError: Circular type alias reference
       use: |-
           let v1: RU = 1.0
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
           type RF = (p: RF) => RF
@@ -107,6 +108,7 @@ cases:
         type A<T, U> = T | A<U, T>[]
       use: |-
         let xx: A<Boolean, String> = new A<Boolean, String>()  //CTE: TypeError: The union type is not constructible.
+      expected_out: "Semantic error ESE0300: The union type is not constructible."
 
     - defs: |-
         final class FinitaLaComedia {}
@@ -153,18 +155,21 @@ cases:
         type TSStyleAlias<T> = { value: T } // SyntaxError: Using object literals to declare types in place is not supported
       use: |-
         let xx: TSStyleAlias<String>;
+      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
 
     - defs: |-
         class MC {}
         type TSStyleAlias = MC | { } // SyntaxError: Using object literals to declare types in place is not supported
       use: |-
         let xx: TSStyleAlias
+      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
 
     - defs: |-
         class MC {}
         type TSStyleAlias = MC | undefined | { } // SyntaxError: Using object literals to declare types in place is not supported
       use: |-
         let xx: TSStyleAlias
+      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
 
     - defs: |-
         type IsString<T> = T extends string ? true : false; // TypeError: Conditional type aliases are not supported.
@@ -172,6 +177,7 @@ cases:
         type B = IsString<number>; // false
       use: |-
         let xx: IsString<string>;
+      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
 
     - defs: |-
         interface Named { name: string; }        
@@ -179,26 +185,31 @@ cases:
         type Person = Named & Aged // SyntaxError: Intersection types are not supported
       use: |-
         let xx: Person;
+      expected_out: "Syntax error ESY145527: Intersection types are not supported, use inheritance instead!"
 
     - defs: |-
         type CustomReturnType<T> = T extends (...args: Any[]) => infer P ? P : Any // TypeError: Conditional type aliases are not supported
       use: |-
         let xx: CustomReturnType<Long>;
+      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
 
     - defs: |-
         type CArrayType<T> = T extends (infer Item)[] ? Item : T  // TypeError: Conditional type aliases are not supported
       use: |-
         let xx: CArrayType<Long>;
+      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
 
     - defs: |-
         type CCT = [string, string, string?]  // TypeError: Conditional type aliases are not supported
       use: |-
         let xx: CCT
+      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
 
     - defs: |-
         type Rec<T extends string | number> = T | Rec<T>  // TypeError: Circular type alias reference
       use: |-
         let xx: Rec<String>
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
         type NESA<X> = [X, ...X[]] // Syntax Error: Invalid Type
@@ -215,4 +226,7 @@ cases:
         type A = C<A>
       use: |-
         let aa: A  
-      
+
+    - defs: |-
+        class TLX<T extends {}> {}
+      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
