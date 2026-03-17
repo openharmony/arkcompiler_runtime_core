@@ -51,10 +51,6 @@ void StwGC<LanguageConfig>::InitializeImpl()
 template <class LanguageConfig>
 bool StwGC<LanguageConfig>::CheckGCCause(GCTaskCause cause) const
 {
-    // Causes for generational GC are unsuitable for STW (non-generational) GC
-    if (cause == GCTaskCause::YOUNG_GC_CAUSE || cause == GCTaskCause::MIXED) {
-        return false;
-    }
     return cause != GCTaskCause::CROSSREF_CAUSE && cause != GCTaskCause::INVALID_CAUSE;
 }
 
@@ -62,6 +58,10 @@ template <class LanguageConfig>
 void StwGC<LanguageConfig>::RunPhasesImpl(GCTask &task)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
+    // Set GC cause to default if STW run with generational GC causes
+    if (task.reason == GCTaskCause::YOUNG_GC_CAUSE || task.reason == GCTaskCause::MIXED) {
+        task.reason = GCTaskCause::EXPLICIT_CAUSE;
+    }
     auto memStats = this->GetPandaVm()->GetMemStats();
     GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), this->GetStats());
     [[maybe_unused]] size_t bytesInHeapBeforeGc = memStats->GetFootprintHeap();

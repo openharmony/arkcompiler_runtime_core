@@ -1,0 +1,2 @@
+ets-common-tests/gc/test_finreg_coros_g1.ets
+ets-common-tests/gc/weak_ref_test_g1.ets

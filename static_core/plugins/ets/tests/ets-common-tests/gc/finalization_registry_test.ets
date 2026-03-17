@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let removed_object_callbacks: boolean[] = new boolean[5](false);
+let removedObjectCallbacks: boolean[] = new boolean[5](false);
 // Make it global beacuse optimizer is free to kill local variables
 let object1: Object | null = null;
 let object2: Object | null = null;
@@ -27,49 +27,49 @@ function doFullGC() {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
-        arktest.assertTrue(false, "Unexpected error during GC");
+        arktest.assertTrue(false, 'Unexpected error during GC');
     }
 }
 
 function callback(string: String): void {
-    if (string.equals("First object removed")) {
-        removed_object_callbacks[0] = true;
-    } else if (string.equals("Third object removed")) {
-        removed_object_callbacks[2] = true;
-    } else if (string.equals("Fifth object removed")) {
-        removed_object_callbacks[4] = true;
+    if (string.equals('First object removed')) {
+        removedObjectCallbacks[0] = true;
+    } else if (string.equals('Third object removed')) {
+        removedObjectCallbacks[2] = true;
+    } else if (string.equals('Fifth object removed')) {
+        removedObjectCallbacks[4] = true;
     } else {
         // Must be unreachable
-        arktest.assertTrue(false, "Calling unexpected callback: " + string);
+        arktest.assertTrue(false, 'Calling unexpected callback: ' + string);
     }
 }
 
 function emptyArgCallback(): void {
-    removed_object_callbacks[3] = true;
+    removedObjectCallbacks[3] = true;
 }
 
 function registerTest(registry: FinalizationRegistry<String> | null): void {
-    object1 = new Object();
-    let object1_token = new Object();
-    let object1_callbackArg = new String("First object removed");
-    object2 = new Object();
-    let object2_token = new Object();
-    let object2_callbackArg = new String("Second object removed, it is an error");
-    object3 = new Object();
-    let object3_callbackArg = new String("Third object removed");
-    let unregistered_token = new Object();
-    registry!.register(object1!, object1_callbackArg, object1_token);
-    registry!.register(object2!, object2_callbackArg, object2_token);
-    registry!.register(object3!, object3_callbackArg);
+    object1 = {};
+    let objectToken1: Object = {};
+    let objectCallbackArg1 = 'First object removed';
+    object2 = {};
+    let objectToken2: Object = {};
+    let objectCallbackArg2 = 'Second object removed, it is an error';
+    object3 = {};
+    let objectCallbackArg3 = 'Third object removed';
+    let unregisteredToken: Object = {};
+    registry!.register(object1!, objectCallbackArg1, objectToken1);
+    registry!.register(object2!, objectCallbackArg2, objectToken2);
+    registry!.register(object3!, objectCallbackArg3);
 
     unusedRegistry = new FinalizationRegistry<String>(callback);
     emptyArgCallbackRegistry = new FinalizationRegistry<Int>(emptyArgCallback);
-    emptyArgCallbackRegistry!.register(object1!, 2, object1_token);
+    emptyArgCallbackRegistry!.register(object1!, 2, objectToken1);
 
     // Try to unregister unknown tokens:
-    registry!.unregister(unregistered_token);
+    registry!.unregister(unregisteredToken);
     unusedRegistry!.unregister(object1!);
-    unusedRegistry!.unregister(unregistered_token);
+    unusedRegistry!.unregister(unregisteredToken);
 
     // Check that we don't call any callbacks here
     doFullGC();
@@ -77,32 +77,32 @@ function registerTest(registry: FinalizationRegistry<String> | null): void {
     // Unregister object2, remove unusedRegistry
     // and check that we don't call object2 callback
     unusedRegistry = null;
-    registry!.unregister(object2_token);
-    arktest.assertNE(object2, null, "Object 2 is alive");
+    registry!.unregister(objectToken2);
+    arktest.assertNE(object2, null, 'Object 2 is alive');
     object2 = null;
     doFullGC();
 
     // Clear objects and check correct callback calls:
-    arktest.assertNE(object1, null, "Object 1 is alive");
-    arktest.assertNE(object3, null, "Object 3 is alive");
+    arktest.assertNE(object1, null, 'Object 1 is alive');
+    arktest.assertNE(object3, null, 'Object 3 is alive');
     object1 = null;
     object3 = null;
     doFullGC();
 
     // Test cleanup for deleted token
-    object4 = new Object();
-    let object4_callbackArg = new String("Fifth object removed");
+    object4 = {};
+    let objectCallbackArg4 = 'Fifth object removed';
     {
-        let object4_token = new Object();
-        registry!.register(object4!, object4_callbackArg, object4_token);
+        let objectToken4: Object = {};
+        registry!.register(object4!, objectCallbackArg4, objectToken4);
     }
     object4 = null;
     doFullGC();
 }
 
 
-let jobsNoToken = new Array<CompletableJob<void> | undefined>(undefined, undefined, undefined);
-let resultsNoToken = new Array<int>();
+let jobsNoToken: (CompletableJob<void> | undefined)[] = [undefined, undefined, undefined];
+let resultsNoToken: int[] = [];
 let finRegNoToken = new FinalizationRegistry<int>((i: int) => {
     resultsNoToken.push(i);
     jobsNoToken[i]!.finish();
@@ -114,7 +114,7 @@ function registerNoTokenTest() {
         arktest.assertEQ(resultsNoToken.length, 0);
 
         // Fill finReg
-        let objects = new Array<Object>({}, {}, {});
+        let objects: Object[] = [{}, {}, {}];
         finRegNoToken.register(objects[0], 0);
         finRegNoToken.register(objects[1], 1);
         finRegNoToken.register(objects[2], 2);
@@ -142,30 +142,30 @@ function registerNoTokenTest() {
 }
 
 //========================= CTOR tests ===========================================
-let is_empty = false;
-let is_param = false;
+let isEmpty = false;
+let isParam = false;
 
 let registryEmpty: FinalizationRegistry<String> | null = null;
 let registryParams: FinalizationRegistry<String> | null = null;
 
 function finalizationEmptyCtorTestHelper(): void {
     registryEmpty = new FinalizationRegistry<String>((): void => {
-        is_empty = true;
+        isEmpty = true;
     });
 
-    let o2 = new Object();
+    let o2: Object = {};
 
-    registryEmpty!.register(o2, "", o2);
+    registryEmpty!.register(o2, '', o2);
 
 }
 
-function finalizationRegistryConstructorTestParamsHelper(): void {  // void {
-    let o1 = new Object();
+function finalizationRegistryConstructorTestParamsHelper(): void { // void {
+    let o1: Object = {};
 
     registryParams = new FinalizationRegistry<String>((string: String) => {
-        is_param = true;
+        isParam = true;
     });
-    registryParams!.register(o1, "RegisterObject", o1);
+    registryParams!.register(o1, 'RegisterObject', o1);
 }
 
 function ctorTests() {
@@ -175,42 +175,42 @@ function ctorTests() {
     doFullGC();
     Coroutine.Schedule();
 
-    arktest.assertTrue(is_empty, "The callback with empty ctor was not called");
-    arktest.assertTrue(is_param, "The callback with parameters ctor was not called");
+    arktest.assertTrue(isEmpty, 'The callback with empty ctor was not called');
+    arktest.assertTrue(isParam, 'The callback with parameters ctor was not called');
 
 }
 //==================== GetSize Tests
 
 function getSizeTests(): void {
 
-    let finreg = new FinalizationRegistry<String>((string: String) => { console.log("Size callback"); });
-    arktest.assertEQ(0, finreg!.getSize(), "Start size of finreg is not empty");
+    let finreg = new FinalizationRegistry<String>((string: String): void => { });
+    arktest.assertEQ(0, finreg!.getSize(), 'Start size of finreg is not empty');
 
-    let o1 = new Object();
-    let o2 = new Object();
-    let rem_token = new Object();
+    let o1: Object = {};
+    let o2: Object = {};
+    let remToken: Object = {};
 
-    finreg!.register(o1!, "first_object", o1!);
-    finreg!.register(o2!, "second_object", o2!);
+    finreg!.register(o1!, 'first_object', o1!);
+    finreg!.register(o2!, 'second_object', o2!);
 
     //add two objects - size must be size == 2
-    arktest.assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
+    arktest.assertEQ(finreg!.getSize(), 2, 'finalizationGetSizeTest: size after register invalid');
     //add for  objects with same token - size must be size == 4 + 2
-    finreg!.register(new Object, "first_dummy", rem_token);
-    finreg!.register(new Object, "second_dummy", rem_token);
+    finreg!.register({}, 'first_dummy', remToken);
+    finreg!.register({}, 'second_dummy', remToken);
 
-    arktest.assertEQ(finreg!.getSize(), 2 + 2, "finalizationGetSizeTest: size is invalid");
+    arktest.assertEQ(finreg!.getSize(), 2 + 2, 'finalizationGetSizeTest: size is invalid');
 
-    finreg!.unregister(rem_token);
-    arktest.assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
+    finreg!.unregister(remToken);
+    arktest.assertEQ(finreg!.getSize(), 2, 'finalizationGetSizeTest: size after register invalid');
 
     finreg!.unregister(o2!);
     finreg!.unregister(o1!);
-    arktest.assertEQ(0, finreg.getSize(), "finalizationGetSizeTest: Size is invalid");
+    arktest.assertEQ(0, finreg.getSize(), 'finalizationGetSizeTest: Size is invalid');
 
 }
 //=========================== Unregister tests ====================================
-let done_callbacks: boolean[] = new boolean[2](false);
+let doneCallbacks: boolean[] = new boolean[2](false);
 let registryUnreg: FinalizationRegistry<String> | null = null;
 let tokenUse: Object | null = null;
 let tokenUnuse1: Object | null = null;
@@ -224,15 +224,15 @@ function callBackUnreg(string: String): void {
 
 function unregisterHelper(reg: FinalizationRegistry<string> | null) {
 
-    for (let i = 0; i < done_callbacks.length; i++) {
-        done_callbacks[i] = false;
+    for (let i = 0; i < doneCallbacks.length; i++) {
+        doneCallbacks[i] = false;
     }
 
-    let o1 = new Object();
-    let o2 = new Object();
+    let o1: Object = {};
+    let o2: Object = {};
 
-    reg!.register(o2, "second", o2);
-    reg!.register(o1, "first", o1);
+    reg!.register(o2, 'second', o2);
+    reg!.register(o1, 'first', o1);
 
     reg!.unregister(o2);
 
@@ -240,22 +240,22 @@ function unregisterHelper(reg: FinalizationRegistry<string> | null) {
 }
 
 function unregisterHelper1() {
-    registryUnreg!.register(new Object(), "First Unused_Object", tokenUnuse1!);
-    registryUnreg!.register(new Object(), "First_use_Object", tokenUse!);
+    registryUnreg!.register({}, 'First Unused_Object', tokenUnuse1!);
+    registryUnreg!.register({}, 'First_use_Object', tokenUse!);
 
-    registryUnreg!.register(new Object(), "Second_use_Object", tokenUse!);
-    registryUnreg!.register(new Object(), "Second Unused Object", tokenUnuse1!);
+    registryUnreg!.register({}, 'Second_use_Object', tokenUse!);
+    registryUnreg!.register({}, 'Second Unused Object', tokenUnuse1!);
 
     registryUnreg!.unregister(tokenUnuse1!);
 
 }
 
 function unregisterHelper2() {
-    registryUnreg!.register(new Object(), "Third_Use_Object", tokenUse!);
-    registryUnreg!.register(new Object(), "Fourth_Use_Object", tokenUse!);
+    registryUnreg!.register({}, 'Third_Use_Object', tokenUse!);
+    registryUnreg!.register({}, 'Fourth_Use_Object', tokenUse!);
 
-    registryUnreg!.register(new Object(), "Third_Unused_Object", tokenUnuse2!)
-    registryUnreg!.register(new Object(), "Fourth_Unused_Object", tokenUnuse2!);
+    registryUnreg!.register({}, 'Third_Unused_Object', tokenUnuse2!)
+    registryUnreg!.register({}, 'Fourth_Unused_Object', tokenUnuse2!);
 
     registryUnreg!.unregister(tokenUnuse2!);
 }
@@ -265,13 +265,12 @@ let regUnreg: FinalizationRegistry<string> | null = null;
 function unregisterTests() {
 
     regUnreg = new FinalizationRegistry<String>((string: String) => {
-        if (string.equals("first")) {
-            done_callbacks[0] = true;
-        } else if (string.equals("second")) {
-            done_callbacks[1] = true;
-        }
-        else {
-            arktest.assertTrue(false, "This code not must be called ");
+        if (string.equals('first')) {
+            doneCallbacks[0] = true;
+        } else if (string.equals('second')) {
+            doneCallbacks[1] = true;
+        } else {
+            arktest.assertTrue(false, 'This code not must be called ');
         }
     });
 
@@ -279,12 +278,12 @@ function unregisterTests() {
     doFullGC();
     Coroutine.Schedule();
 
-    arktest.assertTrue(done_callbacks[0], "Callback first must  called! ");
-    arktest.assertFalse(done_callbacks[1], "Callback second should not  be called! ");
+    arktest.assertTrue(doneCallbacks[0], 'Callback first must  called! ');
+    arktest.assertFalse(doneCallbacks[1], 'Callback second should not  be called! ');
 
-    tokenUse = new Object();
-    tokenUnuse1 = new Object();
-    tokenUnuse2 = new Object();
+    tokenUse = {};
+    tokenUnuse1 = {};
+    tokenUnuse2 = {};
 
     registryUnreg = new FinalizationRegistry<String>((string: String) => {
         counterUnreg++;
@@ -296,16 +295,20 @@ function unregisterTests() {
     doFullGC();
     Coroutine.Schedule();
 
-    arktest.assertEQ(4, counterUnreg, "Counter for calling of unregister is not valid");
+    arktest.assertEQ(4, counterUnreg, 'Counter for calling of unregister is not valid');
 
 }
+
+let finReg1: FinalizationRegistry<int> | null = null;
+let finReg2: FinalizationRegistry<int> | null = null;
 
 // If weak reference is dead, it's finalization registry will be placed to finalization queue
 // This test tests such case:
 // 1) Queue during first GC: finReg1->finReg2
 // 2) Queue during second GC: finReg2->finReg1
-function FinRegReenqueueTest(): void {
-    const registerGarbage = (finReg1: FinalizationRegistry<int>, finReg2: FinalizationRegistry<int>, count: int, tokens: Array<Object>) => {
+function finRegReenqueueTest(): void {
+    const registerGarbage = (finReg1: FinalizationRegistry<int>, finReg2: FinalizationRegistry<int>, 
+                            count: int, tokens: Array<Object>) => {
         for (let i = 1; i < count; i++) {
             finReg1.register({}, i, tokens[i]);
         }
@@ -313,16 +316,16 @@ function FinRegReenqueueTest(): void {
     }
 
     const COUNT: int = 1000;
-    let tokens = new Array<Object>();
+    let tokens: Object[] = [];
     for (let i = 0; i < COUNT; ++i) {
         tokens.push({});
     }
 
-    let jobs = new Array<CompletableJob<void>>();
-    let finReg1 = new FinalizationRegistry<int>((i: int) => {
+    let jobs: CompletableJob<void>[] = [];
+    finReg1 = new FinalizationRegistry<int>((i: int) => {
         jobs[i]!.finish();
     });
-    let finReg2 = new FinalizationRegistry<int>((i: int) => {
+    finReg2 = new FinalizationRegistry<int>((i: int) => {
         jobs[i]!.finish();
     });
 
@@ -331,7 +334,7 @@ function FinRegReenqueueTest(): void {
     }
 
     // Register a lot of garbage in finReg1 and one garbage in finReg2
-    registerGarbage(finReg1, finReg2, COUNT, tokens);
+    registerGarbage(finReg1!, finReg2!, COUNT, tokens);
     doFullGC();
     for (let i = 0; i < COUNT; ++i) {
         jobs[i]!.Await()
@@ -342,7 +345,7 @@ function FinRegReenqueueTest(): void {
     }
 
     // Register a lot of garbage in finReg2 and one garbage in finReg1
-    registerGarbage(finReg2, finReg1, COUNT, tokens);
+    registerGarbage(finReg2!, finReg1!, COUNT, tokens);
     doFullGC();
     for (let i = 0; i < COUNT; ++i) {
         jobs[i]!.Await()
@@ -350,8 +353,8 @@ function FinRegReenqueueTest(): void {
 }
 
 function main(): void {
-    for (let i = 0; i < removed_object_callbacks.length; i++) {
-        removed_object_callbacks[i] = false;
+    for (let i = 0; i < removedObjectCallbacks.length; i++) {
+        removedObjectCallbacks[i] = false;
     }
     registry = new FinalizationRegistry<String>(callback);
     registerTest(registry);
@@ -363,17 +366,17 @@ function main(): void {
     Coroutine.Schedule()
 
     // Check that all callbacks have been called correctly.
-    arktest.assertTrue(removed_object_callbacks[0], "First callback hasn't been called");
-    arktest.assertFalse(removed_object_callbacks[1], "Second callback has been called");
-    arktest.assertTrue(removed_object_callbacks[2], "Third callback hasn't been called");
-    arktest.assertTrue(removed_object_callbacks[3], "Forth callback hasn't been called");
-    arktest.assertTrue(removed_object_callbacks[4], "Fifth callback hasn't been called");
-    arktest.assertNE(registry, null, "Instance still alive");
+    arktest.assertTrue(removedObjectCallbacks[0], "First callback hasn't been called");
+    arktest.assertFalse(removedObjectCallbacks[1], 'Second callback has been called');
+    arktest.assertTrue(removedObjectCallbacks[2], "Third callback hasn't been called");
+    arktest.assertTrue(removedObjectCallbacks[3], "Forth callback hasn't been called");
+    arktest.assertTrue(removedObjectCallbacks[4], "Fifth callback hasn't been called");
+    arktest.assertNE(registry, null, 'Instance still alive');
 
     ctorTests();
     getSizeTests();
     unregisterTests();
 
     registerNoTokenTest();
-    FinRegReenqueueTest();
+    finRegReenqueueTest();
 }

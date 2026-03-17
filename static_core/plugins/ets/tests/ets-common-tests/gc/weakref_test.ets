@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let globalWr: WeakRef<Object>|undefined = undefined;
+let globalWr: WeakRef<Object> | undefined;
 
 function check() {
 }
@@ -24,7 +24,7 @@ class WeakRefTestSuite extends arktest.ArkTestsuite {
     }
 
     before() {
-        globalWr = new WeakRef<Object>(new Object());
+        globalWr = new WeakRef<Object>({});
     }
 
     after() {
@@ -35,7 +35,7 @@ function weakRefTest() {
     // Allocate some objects to make sure runtime pops the current region
     // from TLAB
     for (let i = 0; i < 200; ++i) {
-        new Object();
+        {};
     }
     GC.startGC(GC.Cause.FULL, true);
     arktest.assertEQ(globalWr!.deref(), undefined);

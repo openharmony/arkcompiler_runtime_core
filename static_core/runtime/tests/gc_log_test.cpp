@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,7 +123,7 @@ public:
         testing::internal::CaptureStderr();
         task.reason = GCTaskCause::YOUNG_GC_CAUSE;
         task.Run(*gc);
-        expectedLog_ = isStw ? "[FULL (Young)]" : "[YOUNG (Young)]";
+        expectedLog_ = isStw ? "[FULL (Explicit)]" : "[YOUNG (Young)]";
         log_ = testing::internal::GetCapturedStderr();
         ASSERT_NE(log_.find(expectedLog_), std::string::npos) << "Expected:\n" << expectedLog_ << "\nLog:\n" << log_;
 
