@@ -136,11 +136,18 @@ std::optional<AbcMetadataProvider::MethodInfo> AbcMetadataProvider::GetMethodInf
         return std::nullopt;
     }
     if (!ContainsMethod(*record->file, methodId)) {
-        // Allow methods that are missing from the index if we can still read their metadata.
+        // Method not in region index — may be valid (e.g. compiler-generated) or may indicate wrong ABC file.
+        // Continue with bounds checks below to catch the latter case safely.
     }
     panda_file::MethodDataAccessor mda(*record->file, methodId);
     MethodInfo info;
-    auto classDescriptor = GetClassDescriptorInternal(*record->file, mda.GetClassId());
+    auto classId = mda.GetClassId();
+    if (classId.GetOffset() >= record->file->GetHeader()->fileSize) {
+        LOG_APTOOL(WARNING) << "skip method @" << methodIdx << " in file '" << pandaFileName
+                            << "' (invalid class ID reference)";
+        return std::nullopt;
+    }
+    auto classDescriptor = GetClassDescriptorInternal(*record->file, classId);
     if (classDescriptor.has_value()) {
         info.classDescriptor = *classDescriptor;
     }
@@ -185,6 +192,19 @@ std::optional<std::string> AbcMetadataProvider::GetInstructionString(const Panda
     return oss.str();
 }
 
+void AbcMetadataProvider::BuildChecksumIndex(const PandaString &classCtxStr)
+{
+    for (const auto &rec : records_) {
+        recordsByChecksum_[rec->file->GetPaddedChecksum()] = rec.get();
+    }
+    if (!classCtxStr.empty()) {
+        auto entries = ParseClassContext(classCtxStr);
+        for (auto &entry : entries) {
+            contextChecksums_[entry.path] = entry.checksum;
+        }
+    }
+}
+
 bool AbcMetadataProvider::VerifyClassContext(const PandaString &classCtxStr, std::string &error) const
 {
     if (records_.empty() || classCtxStr.empty()) {
@@ -216,22 +236,57 @@ std::string AbcMetadataProvider::NormalizePath(const fs::path &path)
     return absolute.lexically_normal().generic_string();
 }
 
+const AbcMetadataProvider::FileRecord *AbcMetadataProvider::FindRecordByBaseName(const std::string &baseName,
+                                                                                 const std::string &checksum) const
+{
+    auto baseIt = recordsByBaseName_.find(baseName);
+    if (baseIt == recordsByBaseName_.end() || baseIt->second.empty()) {
+        return nullptr;
+    }
+    if (checksum.empty()) {
+        return baseIt->second.front();
+    }
+    for (auto *rec : baseIt->second) {
+        if (rec->file->GetPaddedChecksum() == checksum) {
+            return rec;
+        }
+    }
+    return nullptr;
+}
+
 const AbcMetadataProvider::FileRecord *AbcMetadataProvider::FindRecordByName(std::string_view name) const
 {
     if (name.empty()) {
         return nullptr;
     }
+    // 1. Try normalized path
     auto normalized = NormalizePath(fs::path(name));
     auto it = recordsByNormalized_.find(normalized);
     if (it != recordsByNormalized_.end()) {
         return it->second;
     }
-    auto baseName = fs::path(std::string(name)).filename().string();
-    auto baseIt = recordsByBaseName_.find(baseName);
-    if (baseIt == recordsByBaseName_.end()) {
-        return nullptr;
+    // Look up expected checksum from class context for this panda file
+    std::string nameStr(name);
+    auto ctxIt = contextChecksums_.find(nameStr);
+    std::string expectedChecksum = (ctxIt != contextChecksums_.end()) ? ctxIt->second : "";
+    // 2. Try basename match, with checksum verification when available
+    auto baseName = fs::path(nameStr).filename().string();
+    auto *record = FindRecordByBaseName(baseName, expectedChecksum);
+    if (record != nullptr) {
+        return record;
     }
-    return baseIt->second.empty() ? nullptr : baseIt->second.front();
+    // 3. Checksum-only match: path/basename differ but content is correct
+    if (!expectedChecksum.empty()) {
+        auto recIt = recordsByChecksum_.find(expectedChecksum);
+        if (recIt != recordsByChecksum_.end()) {
+            return recIt->second;
+        }
+    }
+    if (warnedNames_.insert(nameStr).second) {
+        LOG_APTOOL(WARNING) << "no loaded ABC file matches panda file '" << name
+                            << "', method details will not be available for this file";
+    }
+    return nullptr;
 }
 
 const AbcMetadataProvider::FileRecord *AbcMetadataProvider::FindRecordForContext(const ContextEntry &entry) const
@@ -274,11 +329,15 @@ const AbcMetadataProvider::MethodCodeView *AbcMetadataProvider::GetOrCreateMetho
         return &it.first->second;
     }
     if (!ContainsMethod(*record.file, methodId)) {
-        // Allow methods that are missing from the index if we can still read their metadata.
+        // Method not in region index — may still be valid. Continue with bounds checks below.
     }
     panda_file::MethodDataAccessor mda(*record.file, methodId);
     auto codeId = mda.GetCodeId();
     if (codeId.has_value()) {
+        if (codeId.value().GetOffset() >= record.file->GetHeader()->fileSize) {
+            auto it = codeCache_.emplace(key, view);
+            return &it.first->second;
+        }
         panda_file::CodeDataAccessor cda(*record.file, codeId.value());
         view.instructions = cda.GetInstructions();
         view.codeSize = cda.GetCodeSize();
@@ -354,12 +413,23 @@ std::optional<std::string> AbcMetadataProvider::GetClassDescriptorInternal(const
 std::string AbcMetadataProvider::BuildMethodSignature(const panda_file::File &file, panda_file::File::EntityId methodId)
 {
     panda_file::MethodDataAccessor mda(file, methodId);
+    auto nameId = mda.GetNameId();
+    if (nameId.GetOffset() >= file.GetHeader()->fileSize) {
+        return {};
+    }
     auto protoId = panda_file::MethodDataAccessor::GetProtoId(file, methodId);
+    if (protoId.GetOffset() >= file.GetHeader()->fileSize) {
+        return {};
+    }
     panda_file::ProtoDataAccessor pda(file, protoId);
     PandasmTypePrinter printer(file, pda);
     // Skip the return type to advance refIdx_ past its reference slot (if any)
     printer.Dump(pda.GetReturnType());
-    auto name = utf::Mutf8AsCString(file.GetStringData(mda.GetNameId()).data);
+    auto nameData = file.GetStringData(nameId).data;
+    if (nameData == nullptr) {
+        return {};
+    }
+    auto name = utf::Mutf8AsCString(nameData);
 
     // Build signature in pandasm style: methodName:(type1,type2,...)
     std::string signature(name);

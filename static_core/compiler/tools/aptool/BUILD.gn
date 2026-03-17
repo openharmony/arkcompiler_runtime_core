@@ -29,22 +29,32 @@ config("aptool_public_config") {
   ]
 }
 
-ark_gen_file("dump_options_h") {
-  template_file = "$ark_root/templates/options/options.h.erb"
-  data = [ "dump/dump_options.yaml" ]
-  api = [ "$ark_root/templates/common.rb" ]
-  output_file = "$target_gen_dir/generated/dump_options.h"
+# Include dump subcommand only for host debug builds
+_aptool_include_dump = current_toolchain == host_toolchain && is_debug
+
+if (_aptool_include_dump) {
+  ark_gen_file("dump_options_h") {
+    template_file = "$ark_root/templates/options/options.h.erb"
+    data = [ "dump/dump_options.yaml" ]
+    api = [ "$ark_root/templates/common.rb" ]
+    output_file = "$target_gen_dir/generated/dump_options.h"
+  }
 }
 
 _ark_aptool_sources = [
-  "main.cpp",
-  "common/utils.cpp",
-  "common/profile_loader.cpp",
   "common/abc_metadata.cpp",
-  "dump/filter.cpp",
-  "dump/yaml_writer.cpp",
-  "dump/dump_command.cpp",
+  "common/profile_loader.cpp",
+  "common/utils.cpp",
+  "main.cpp",
 ]
+
+if (_aptool_include_dump) {
+  _ark_aptool_sources += [
+    "dump/dump_command.cpp",
+    "dump/filter.cpp",
+    "dump/yaml_writer.cpp",
+  ]
+}
 
 _ark_aptool_configs = [
   ":aptool_public_config",
@@ -56,11 +66,14 @@ _ark_aptool_configs = [
 ]
 
 _ark_aptool_deps = [
-  ":dump_options_h",
+  "$ark_root/assembler:libarktsassembler",
   "$ark_root/libarkbase:libarktsbase",
   "$ark_root/libarkfile:libarktsfile",
-  "$ark_root/assembler:libarktsassembler",
 ]
+
+if (_aptool_include_dump) {
+  _ark_aptool_deps += [ ":dump_options_h" ]
+}
 
 _ark_aptool_external_deps = [ sdk_libc_secshared_dep ]
 
@@ -80,6 +93,10 @@ ohos_executable("ark_aptool") {
       "$ark_root/compiler:libarktscompiler",
       "$ark_root/runtime:libarkruntime",
     ]
+  }
+
+  if (_aptool_include_dump) {
+    defines = [ "APTOOL_INCLUDE_DUMP" ]
   }
 
   external_deps = _ark_aptool_external_deps

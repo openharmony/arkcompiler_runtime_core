@@ -27,6 +27,7 @@ namespace fs = std::experimental::filesystem;
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "compiler/tools/aptool/common/profile_loader.h"
@@ -53,6 +54,8 @@ public:
 
     std::optional<std::string> GetInstructionString(const PandaString &pandaFileName, uint32_t methodIdx,
                                                     uint32_t pc) const;
+
+    void BuildChecksumIndex(const PandaString &classCtxStr);
 
     bool VerifyClassContext(const PandaString &classCtxStr, std::string &error) const;
 
@@ -97,6 +100,8 @@ private:
 
     const FileRecord *FindRecordByName(std::string_view name) const;
 
+    const FileRecord *FindRecordByBaseName(const std::string &baseName, const std::string &checksum) const;
+
     const FileRecord *FindRecordForContext(const ContextEntry &entry) const;
 
     const MethodCodeView *GetOrCreateMethodCodeView(const FileRecord &record, uint32_t methodIdx) const;
@@ -121,6 +126,9 @@ private:
     std::unordered_map<std::string, FileRecord *> recordsByNormalized_;
     std::unordered_map<std::string, std::vector<FileRecord *>> recordsByBaseName_;
     mutable std::unordered_map<MethodKey, MethodCodeView, MethodKeyHash> codeCache_;
+    mutable std::unordered_set<std::string> warnedNames_;
+    std::unordered_map<std::string, std::string> contextChecksums_;    // context_path -> checksum
+    std::unordered_map<std::string, FileRecord *> recordsByChecksum_;  // checksum -> FileRecord
 };
 
 }  // namespace ark::aptool::common

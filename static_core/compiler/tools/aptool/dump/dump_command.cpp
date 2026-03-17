@@ -100,8 +100,9 @@ int DumpCommand::Run(int argc, const char **argv)
         return EXIT_FAILURE;
     }
 
-    // Verify class context checksums when metadata is available
+    // Build checksum index and verify class context when metadata is available
     if (hasMetadata) {
+        metadata.BuildChecksumIndex(profile.GetClassContext());
         std::string verifyError;
         if (!metadata.VerifyClassContext(profile.GetClassContext(), verifyError)) {
             LOG_APTOOL(ERROR) << "class context verification failed: " << verifyError;

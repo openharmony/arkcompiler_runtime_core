@@ -19,7 +19,9 @@
 #include <string_view>
 
 #include "compiler/tools/aptool/common/utils.h"
+#ifdef APTOOL_INCLUDE_DUMP
 #include "compiler/tools/aptool/dump/dump_command.h"
+#endif
 #include "libarkbase/utils/logger.h"
 #include "runtime/mem/internal_allocator-inl.h"
 #include "runtime/mem/internal_allocator.h"
@@ -48,7 +50,9 @@ void PrintGlobalUsage(std::ostream &out, const char *progName)
     out << "Ark Profile Tool (aptool) - A tool for managing and analyzing .ap profile files" << std::endl;
     out << std::endl;
     out << "Commands:" << std::endl;
+#ifdef APTOOL_INCLUDE_DUMP
     out << "  dump      Dump profile content to human-readable YAML format" << std::endl;
+#endif
     out << std::endl;
     out << "Global options:" << std::endl;
     out << "  --help     Show this help message" << std::endl;
@@ -64,7 +68,8 @@ void PrintVersion(std::ostream &out)
 
 int Main(int argc, const char **argv)
 {
-    if (argc < 2) {  // NOLINT
+    constexpr int minArgc = 2;
+    if (argc < minArgc) {
         PrintGlobalUsage(std::cout, argv[0]);
         return EXIT_FAILURE;
     }
@@ -83,10 +88,12 @@ int Main(int argc, const char **argv)
     }
 
     // Route to subcommands
+#ifdef APTOOL_INCLUDE_DUMP
     if (firstArg == "dump") {
         dump::DumpCommand cmd;
         return cmd.Run(argc - 1, argv + 1);
     }
+#endif
 
     // Unknown command or option
     LOG_APTOOL(ERROR) << "unknown command or option '" << firstArg << "'";
@@ -110,7 +117,7 @@ int main(int argc, const char **argv)
         static_cast<ark::mem::Allocator *>(internalAllocator));
 
     // Initialize logging
-    ark::Logger::InitializeStdLogging(ark::Logger::Level::ERROR,
+    ark::Logger::InitializeStdLogging(ark::Logger::Level::INFO,
                                       ark::Logger::ComponentMask().set(ark::Logger::Component::PROFILER));
 
     // Run main logic
