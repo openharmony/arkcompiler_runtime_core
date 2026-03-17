@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
     UErrorCode codeFlag = U_ZERO_ERROR;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     source += byteOffset;
+    const char *oldSource = source;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const char *sourceEnd = source + length;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -86,7 +87,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
     }
     pendingLen_ = ucnv_toUCountPending(conv_, &codeFlag);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    pend_ = source + length - pendingLen_;
+    pend_ = oldSource + length - pendingLen_;
     ani_string resultStr {};
     size_t resultLen = target - arr.data();
     ANI_FATAL_IF_ERROR(env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr.data()), resultLen, &resultStr));
