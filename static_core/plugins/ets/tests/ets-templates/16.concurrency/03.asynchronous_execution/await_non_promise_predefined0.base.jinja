@@ -18,12 +18,13 @@
 {% for type_name in [c.type, c.alias] | select %}
 
 /*---
-desc: Basic datatype {{type_name}} can not be awaited, it is not a Promise<{{type_name}}>.
-tags: [compile-only, negative]
+desc: Basic datatype {{type_name}} can be awaited.
 ---*/
 
 async function startTest() {
-    await {{c.value}}
+    const v0 = {{c.value}}
+    const v1 = await v0
+    arktest.assertEQ(v0, v1)
 }
 
 function main() {
