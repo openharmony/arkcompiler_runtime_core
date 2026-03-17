@@ -95,11 +95,18 @@ ohos_executable("ark_aot") {
   subsystem_name = "$ark_subsystem_name"
 }
 
+# NOTE(Zhu Heng): Issue 33553, temporary solution, need to remove hardcore in the gn file nextly
+config("ark_aot_host_config") {
+  defines = [ "PANDA_TARGET_HOST_AOT_TOOLS" ]
+}
+
 # OHOS build Host target
 ohos_executable("ark_aot_host") {
   sources = _ark_aot_sources
 
   configs = _ark_aot_configs
+  # NOTE(Zhu Heng): Issue 33553, temporary solution, need to remove hardcore in the gn file nextly
+  configs += [ ":ark_aot_host_config" ]
 
   deps = _ark_aot_deps
   deps += [
