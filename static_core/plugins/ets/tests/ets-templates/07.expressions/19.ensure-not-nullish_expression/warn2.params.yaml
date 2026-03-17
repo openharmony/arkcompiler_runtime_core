@@ -1,0 +1,274 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # variable as nullish expression
+    - decl: |-
+          let v: null|undefined  // top-level variable
+          let e: Any
+      main: |-
+          arktest.expectThrow(
+              () => { e = v! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          class A {
+              fld: string|int|boolean = 'a'
+          }
+      main: |-
+          let w: string|int|boolean = ''
+          arktest.expectThrow(
+              () => {
+                  let v: A|null|undefined = null   // local variable, smart-casting
+                  w = v!.fld
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          class A {
+              meth(): string|int|boolean {
+                  return 42
+              }
+          }
+      main: |-
+          let w: string|int|boolean = ''
+          arktest.expectThrow(
+              () => {
+                  let v: A|null|undefined = undefined   // local variable, smart-casting
+                  w = v!.meth()
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - main: |-
+          let w: string|int|null|undefined = ''
+          arktest.expectThrow(
+              () => {
+                  let v: Array<string|int|null|undefined>|null|undefined = undefined  // local variable, smart-casting
+                  w = v![0]
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - main: |-
+          let w: int = 0
+          arktest.expectThrow(
+              () => {
+                  let v: FixedArray<int>|null = null  // local variable, smart-casting
+                  w = v![0]
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - main: |-
+          let w: string = ''
+          arktest.expectThrow(
+              () => {
+                  let v: string[]|null|undefined = undefined  // local variable, smart-casting
+                  w = v![0]
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          let v: Array<null|undefined> = [null, undefined, null]
+      main: |-
+          let w: Any
+          arktest.expectThrow(
+              () => { w = v[0]! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - main: |-
+          let w: Any
+          arktest.expectThrow(
+              () => {
+                  let v: Record<int, string>|null|undefined = null  // local variable, smart-casting
+                  w = v![1]
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - main: |-
+          let w: Any
+          arktest.expectThrow(
+              () => {
+                  let v: ((p: int) => string)|null|undefined = null  // local variable, smart-casting
+                  w = v!(42)
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - main: |-
+          let w: Any
+          arktest.expectThrow(
+              () => {
+                  let v: [string, int]|null|undefined = undefined  // local variable, smart-casting
+                  w = v![0]
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    # generic type as nullish expression
+    - decl: |-
+          function foo<T extends null>(p: T): string {
+              return '' + p!  // nullish due to constraint
+          }
+      main: |-
+          let w: string = ''
+          arktest.expectThrow(
+              () => { w = foo(null) },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          function foo<T extends undefined>(p: T): string {
+              return '' + p!  // nullish due to constraint
+          }
+      main: |-
+          let w: string = ''
+          arktest.expectThrow(
+              () => { w = foo(undefined) },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          function foo<T extends null>(p: [T, T, T]): T {
+              return p[1]
+          }
+          let v: [null, null, null] = [null, null, null]
+          let w = null
+      main: |-
+          arktest.expectThrow(
+              () => { w = foo<null>(v)! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          function foo<T extends undefined>(p: [T, T, T]): T {
+              return p[1]
+          }
+          let v: [undefined, undefined, undefined] = [undefined, undefined, undefined]
+          let w = undefined
+      main: |-
+          arktest.expectThrow(
+              () => { w = foo<undefined>(v)! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    # call expression as nullish expression
+    - decl: |-
+          function foo(): undefined {
+              return undefined
+          }
+          let w: Any
+      main: |-
+          arktest.expectThrow(
+              () => { w = foo()! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          class A {
+              meth(): null|undefined {
+                  return null
+              }
+          }
+          let w: Any
+      main: |-
+          arktest.expectThrow(
+              () => { w = new A().meth()! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    # nullish function argument for non-nullish parameter
+    - decl: |-
+          function foo(p: string|int) {
+              return '' + p
+          }
+          let v: null = null
+          let w: Any
+      main: |-
+          arktest.expectThrow(
+              () => { w = foo(v!) },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    - decl: |-
+          function foo(p: string|int) {
+              return '' + p
+          }
+      main: |-
+          let w: Any
+          arktest.expectThrow(
+              () => {
+                  let v: string|int|null = null // local variable, smart-casting
+                  w = foo(v!)
+              },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+
+    # extra '!' in ensure-not-nullish expression
+    - decl: |-
+          class A {
+              static meth() {
+                  return undefined
+              }
+          }
+          let w: Any
+      main: |-
+          arktest.expectThrow(
+              () => { w = A.meth()!! },
+              (e: Error) => e instanceof NullPointerError
+          )
+      warning: |-
+          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.

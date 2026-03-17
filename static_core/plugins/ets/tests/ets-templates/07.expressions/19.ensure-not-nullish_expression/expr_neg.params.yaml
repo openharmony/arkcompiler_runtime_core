@@ -14,27 +14,46 @@
 ---
 cases:
   # type inference
-  - decl: |-
+  - expected_out: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Int'
+    decl: |-
       let v: int|null = 5
       let w = v!
     use: |-
       w = null
 
-  - decl: |-
+  - expected_out: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Int'
+    decl: |-
       let v: int|undefined = 5
       let w = v!
     use: |-
       w = undefined
 
-  - decl: |-
+  - expected_out: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Int'
+    decl: |-
       let v: int|null|undefined = 5
       let w = v!
     use: |-
       w = undefined
 
-  # assignment with type narrowing with unions
-  - decl: |-
+  # assignment with ensure-not-nullish expression with unions
+  - expected_out: |-
+      Semantic error ESE0318: Type 'String|Boolean|Double|null|undefined' cannot be assigned to type 'String|Boolean|Double'
+    decl: |-
       let v: string|boolean|number|null|undefined = 'a'
       let w: string|boolean|number = 1.0
     use: |-
       w = v
+
+  # non-nullish return type inference
+  - expected_out: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Boolean|String|Int'
+    decl: |-
+      function foo(p: boolean|string|null|int|undefined) {
+          return p!
+      }
+    use: |-
+      let w = foo(42)
+      w = undefined

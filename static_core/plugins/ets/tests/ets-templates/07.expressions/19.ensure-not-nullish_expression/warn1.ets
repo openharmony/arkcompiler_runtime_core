@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,15 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    if the expression 'e' is not a nullable type, then the operator '!' has no effect.
-    If the result of the evaluation of e is not equal to null or undefined, then the
-    result of e! is the outcome of the evaluation of e. If the result of the evaluation
-    of e is equal to null or undefined, then NullPointerError is thrown.
-tags: [compile-only, negative]
+    If an ensure-not-nullish expression is known at compile time to always
+    evaluate at runtime to a non-nullish or a nullish value (undefined or null),
+    then a compile-time warning is issued.
 expected_out: |-
-    {{c.expected_out}}
+    {{c.warning}}
 ---*/
 {{c.decl}}
 
 function main() {
-    {{c.use|indent}}
+    {{c.main|indent}}
 }
 {%- endfor %}
