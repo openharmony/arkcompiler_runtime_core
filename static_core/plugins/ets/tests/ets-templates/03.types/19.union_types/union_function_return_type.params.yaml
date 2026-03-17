@@ -38,7 +38,7 @@ cases2:
   - desc: Parse UT as a union of int, () => boolean | string
     tags: ''
     dec1: |-
-      type UT =  Int | () => boolean | String
+      type UT =  Int | (() => boolean | String)
       function foo(): boolean | String { return true }
     check: |-
       let value: UT = 7;
@@ -49,7 +49,7 @@ cases2:
   - desc: Parse UT as a union of int, () => boolean | string
     tags: ''
     dec1: |-
-      type UT =  Int | () => boolean | String
+      type UT =  Int | (() => boolean | String)
       function foo(): boolean { return true }
     check: |-
       let value: UT = foo;
@@ -58,7 +58,7 @@ cases2:
   - desc: Parse UT as a union of int, () => boolean | string
     tags: 'compile-only, negative'
     dec1: |-
-      type UT =  Int | () => boolean | String
+      type UT =  Int | (() => boolean | String)
     check: |-
       let value: UT = true; // CTE
       arktest.assertEQ(value, true);
