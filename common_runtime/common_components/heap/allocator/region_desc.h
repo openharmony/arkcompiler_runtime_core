@@ -38,6 +38,7 @@
 #include "common_components/heap/collector/region_bitmap.h"
 #include "common_components/heap/collector/region_rset.h"
 #include "common_components/log/log.h"
+#include "common_interfaces/mem/tlab.h"
 #include "common_components/platform/map.h"
 #include "securec.h"
 #ifdef COMMON_ASAN_SUPPORT
@@ -111,6 +112,7 @@ public:
         metadata.regionStart = reinterpret_cast<uintptr_t>(nullptr);
         metadata.regionEnd = reinterpret_cast<uintptr_t>(nullptr);
         metadata.regionRSet = nullptr;
+        metadata.tlab = nullptr;
     }
     static inline RegionDesc* NullRegion()
     {
@@ -940,6 +942,29 @@ public:
         metadata.nextRegionIdx = static_cast<uint32_t>(nextIdx);
     }
 
+    bool IsTLABAttached() const
+    {
+        return metadata.tlab != nullptr;
+    }
+
+    void DetachTLAB()
+    {
+        ASSERT_LOGF(metadata.tlab != nullptr, "TLAB in RegionDesc is already nullptr");
+        metadata.tlab->startAddr_ = 0;
+        metadata.tlab->allocPtr_ = 0;
+        metadata.tlab->endAddr_ = 0;
+        metadata.tlab = nullptr;
+    }
+
+    void AttachTLAB(TLAB *tlab)
+    {
+        ASSERT_LOGF(metadata.tlab == nullptr, "TLAB in RegionDesc is not nullptr, cannot attach");
+        metadata.tlab = tlab;
+        metadata.tlab->startAddr_ = metadata.regionStart;
+        metadata.tlab->allocPtr_ = metadata.allocPtr;
+        metadata.tlab->endAddr_ = metadata.regionEnd;
+    }
+
     bool IsFromRegion() const { return GetRegionType()  == RegionType::FROM_REGION; }
 
     bool IsAppSpawnRegion() const { return GetRegionType()  == RegionType::APPSPAWN_REGION; }
@@ -1087,6 +1112,7 @@ private:
 
             uint32_t liveByteCount;
             int32_t rawPointerObjectCount;
+            TLAB* tlab;
         };
 
         RegionLiveDesc liveInfo_ {};
@@ -1353,6 +1379,7 @@ private:
         metadata.nextRegionIdx = NULLPTR_IDX;
         metadata.liveByteCount = 0;
         metadata.freeSlot = nullptr;
+        metadata.tlab = nullptr;
         SetRegionType(RegionType::FREE_REGION);
         SetUnitRole(uClass);
         ClearMarkingCopyLine();

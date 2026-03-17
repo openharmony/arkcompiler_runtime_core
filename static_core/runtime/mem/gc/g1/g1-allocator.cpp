@@ -97,10 +97,14 @@ TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t tlabSize
     } else {
         newTlab = objectAllocator_->CreateTLAB(tlabSize);
     }
-    if (newTlab != nullptr && !newTlab->IsZeroed()) {
-        ASAN_UNPOISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
-        MemoryInitialize(newTlab->GetStartAddr(), newTlab->GetSize());
-        ASAN_POISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
+    if (newTlab != nullptr) {
+        auto region = AddrToRegion(newTlab->GetStartAddr());
+        ASSERT(region != nullptr);
+        if (!region->HasFlag(RegionFlag::IS_ZEROED)) {
+            ASAN_UNPOISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
+            MemoryInitialize(newTlab->GetStartAddr(), newTlab->GetSize());
+            ASAN_POISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
+        }
     }
     return newTlab;
 }

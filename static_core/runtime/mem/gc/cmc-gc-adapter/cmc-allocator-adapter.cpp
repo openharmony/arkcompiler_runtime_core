@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "runtime/include/runtime.h"
 #include "runtime/include/object_header.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
@@ -70,6 +71,26 @@ void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]]
     };
     common_vm::BaseRuntime::ForEachObj(visitor, true);
 #endif  // ARK_USE_COMMON_RUNTIME
+}
+
+template <MTModeT MT_MODE>
+TLAB *CMCObjectAllocatorAdapter<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t size)
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    return reinterpret_cast<TLAB *>(common_vm::HeapAllocator::CreateTLAB());
+#else
+    return nullptr;
+#endif
+}
+
+template <MTModeT MT_MODE>
+size_t CMCObjectAllocatorAdapter<MT_MODE>::GetTLABMaxAllocSize()
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    return common_vm::HeapAllocator::GetTLABMaxAllocSize();
+#else
+    return 0;
+#endif
 }
 
 template class CMCObjectAllocatorAdapter<MT_MODE_SINGLE>;

@@ -75,8 +75,8 @@ Address HeapAllocator::AllocateInReadOnly(size_t size, LanguageType language)
 
 uintptr_t HeapAllocator::AllocateLargeJitFortRegion(size_t size, LanguageType language)
 {
-    RegionalHeap& allocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
-    auto address =  allocator.AllocJitFortRegion(size);
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    auto address = allocator.AllocJitFortRegion(size);
     BaseObject::Cast(address)->SetLanguageType(language);
     return address;
 }
@@ -102,20 +102,31 @@ Address HeapAllocator::AllocateNonmoveNoGC(size_t size)
 
 Address HeapAllocator::AllocateOldRegion()
 {
-    RegionalHeap& allocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     return allocator.AllocOldRegion();
+}
+
+TLAB *HeapAllocator::CreateTLAB()
+{
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    return allocator.CreateTLAB();
 }
 
 Address HeapAllocator::AllocateNonMovableRegion()
 {
-    RegionalHeap& allocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     return allocator.AllocateNonMovableRegion();
 }
 
 Address HeapAllocator::AllocateLargeRegion(size_t size)
 {
-    RegionalHeap& allocator = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     return allocator.AllocLargeRegion(size);
+}
+
+size_t HeapAllocator::GetTLABMaxAllocSize()
+{
+    return RegionDesc::UNIT_AVAILABLE_SIZE;
 }
 
 }  // namespace common_vm
