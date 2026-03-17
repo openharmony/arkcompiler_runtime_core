@@ -24,11 +24,14 @@ let x: string = '';
 pass('H')
 
 {
-  pass("e");
+    pass("e");
 }
 const foo: String = 'Foo'
 {
-  pass('l');
+   //inner block
+    {
+        pass('l');
+    }
 }
 
 interface IMyInterface {
@@ -36,7 +39,7 @@ interface IMyInterface {
 }
 
 {
-  pass('l');
+    pass('l');
 }
 
 class SomeClass {
@@ -46,9 +49,9 @@ pass('o')
 pass(' '); pass('World');
 
 function main(): void {
-  arktest.assertEQ('Hello World', x)
-  let vi: IMyInterface = {name: 'Bob'}
-  arktest.assertEQ('final+final', last)
+    arktest.assertEQ('Hello World', x)
+    let vi: IMyInterface = {name: 'Bob'}
+    arktest.assertEQ('final+final', last)
 }
 
 let last: String = "final"
@@ -57,6 +60,6 @@ let last: String = "final"
 }
 
 function pass(cc: string): void {
-  x += cc;
-  arktest.assertTrue( true )
+    x += cc;
+    arktest.assertTrue( true )
 }

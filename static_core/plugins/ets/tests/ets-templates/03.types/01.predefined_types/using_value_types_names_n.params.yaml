@@ -1,0 +1,28 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # List of predefined types
+
+default_value:
+  - { type: byte, expected: "Syntax error ESY0295: byte is a predefined type, cannot be used as an identifier" }
+  - { type: short, expected: "Syntax error ESY0295: short is a predefined type, cannot be used as an identifier" }
+  - { type: int, expected: "Syntax error ESY0295: int is a predefined type, cannot be used as an identifier" }
+  - { type: long, expected: "Syntax error ESY0295: long is a predefined type, cannot be used as an identifier" }
+  - { type: float, expected: "Syntax error ESY0295: float is a predefined type, cannot be used as an identifier" }
+  - { type: double, expected: "Syntax error ESY0295: double is a predefined type, cannot be used as an identifier" }
+  - { type: char, expected: "Syntax error ESY0295: char is a predefined type, cannot be used as an identifier" }
+  - { type: boolean, expected: "Syntax error ESY0295: boolean is a predefined type, cannot be used as an identifier" }
+  - { type: "null", expected: "Syntax error ESY0224: Identifier expected, got 'null'." }
+  - { type: void, expected: "Syntax error ESY0295: void is a predefined type, cannot be used as an identifier" }
+  - { type: undefined, expected: "Syntax error ESY0316: Hard keyword 'undefined' cannot be used as identifier" }
+  - { type: bigint, expected: "Syntax error ESY0295: bigint is a predefined type, cannot be used as an identifier" }

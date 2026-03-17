@@ -26,3 +26,5 @@ topLevelDeclarations:
   - "const a: int = 1;"
   # Function declarations
   - "function Dist(x: int, y: int): void {}"
+  # Annotation
+  - "@interface Position {x: string}"

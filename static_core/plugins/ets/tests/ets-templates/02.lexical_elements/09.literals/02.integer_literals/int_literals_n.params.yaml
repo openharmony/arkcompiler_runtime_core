@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,32 +14,80 @@
 --- # List of invalid integer literals
 
 incorrect_int_literals:
-    - '0x'
-    - '0_xFFFF'
-    - '0x_FFFF'
-    - '0x10000000100000001'
+#0
+    - val: '0x'
+      expected: "Syntax error ESY0266: Invalid digit."
+#1
+    - val: '0_xFFFF'
+      expected: "Syntax error ESY0252: Numeric separator '_' is not allowed in numbers that start with '0'."
+#2
+    - val: '0x_FFFF'
+      expected: "Syntax error ESY0266: Invalid digit."
+#3
+    - val: '0x10000000100000001'
+      expected: "Syntax error ESY0262: Number is too large."
 
-    - '0o'
-    - '0_o777'
-    - '0o_777'
-    - '0o10000000000000000000007'
+#4
+    - val: '0o'
+      expected: "Syntax error ESY0266: Invalid digit."
+#5
+    - val: '0_o777'
+      expected: "Syntax error ESY0252: Numeric separator '_' is not allowed in numbers that start with '0'."
+#6
+    - val: '0o_777'
+      expected: "Syntax error ESY0266: Invalid digit."
+#7
+    - val: '0o10000000000000000000007'
+      expected: "Syntax error ESY0262: Number is too large."
 
-    - '0b'
-    - '0_b0111111111111'
-    - '0b_0111111111111'
-    - '0B11111111111111111111111111111111111111111111111111111111111111110'
-    - '0$'
+#8
+    - val: '0b'
+      expected: "Syntax error ESY0266: Invalid digit."
+#9
+    - val: '0_b0111111111111'
+      expected: "Syntax error ESY0252: Numeric separator '_' is not allowed in numbers that start with '0'."
+#10
+    - val: '0b_0111111111111'
+      expected: "Syntax error ESY0266: Invalid digit."
+#11
+    - val: '0B11111111111111111111111111111111111111111111111111111111111111110'
+      expected: "Syntax error ESY0262: Number is too large."
+#12
+    - val: '0$'
+      expected: "Syntax error ESY0227: Unexpected token '$'."
 
-    - '_567'
-    - '567_'
-    - '5___6___7'
-    - '9223372036854775808'
-    - '01'
-    - '00'
+#13
+    - val: '_567'
+      expected: "Semantic error ESE0143: Unresolved reference _567"
+#14
+    - val: '567_'
+      expected: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."
+#15
+    - val: '5___6___7'
+      expected: "Syntax error ESY0254: Invalid numeric separator."
+#16
+    - val: '9223372036854775808'
+      expected: "Syntax error ESY0249: Invalid number."
+#17
+    - val: '01'
+      expected: "Syntax error ESY0257: Implicit octal literal not allowed."
+#18
+    - val: '00'
+      expected: "Syntax error ESY0257: Implicit octal literal not allowed."
 
-    - '0xABCDEFGH'
-    - '0o0123456789'
-    - '0b0120120120'
+#19
+    - val: '0xABCDEFGH'
+      expected: "Syntax error ESY0227: Unexpected token 'GH'."
+#20
+    - val: '0o0123456789'
+      expected: "Syntax error ESY0251: Invalid numeric literal."
+#21
+    - val: '0b0120120120'
+      expected: "Syntax error ESY0251: Invalid numeric literal."
 
-    - '00xABCDEFGH'
-    - 'xABCDEFGH'
+#22
+    - val: '00xABCDEFGH'
+      expected: "Syntax error ESY0257: Implicit octal literal not allowed."
+#23
+    - val: 'xABCDEFGH'
+      expected: "Semantic error ESE0143: Unresolved reference xABCDEFGH"

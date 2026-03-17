@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: Incorrect long literals with bases 16, 10, 8 and 2
 tags: [negative, compile-only]
+expected_out: "{{c.expected}}"
 ---*/
 
-{% for c in cases %}
-let b{{loop.index}} = new Long({{c['lit']}})
-{% endfor %}
+let b = new Long({{c.lit}})
+{%- endfor %}

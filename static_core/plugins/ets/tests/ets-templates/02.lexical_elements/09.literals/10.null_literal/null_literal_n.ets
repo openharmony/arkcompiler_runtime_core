@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: The null literal denotes the null reference which represents an absence of a value and is a valid value only for types T | null, (see Nullish Types).
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'null' cannot be assigned to type 'Object'"
 ---*/
 
 function main() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-{% for p in primitives %}
 /*---
-desc: >-
-    The predefined value types are called primitive types. Primitive type names are reserved, i.e., they cannot be used for
-    user-defined type names.
-tags: [negative, compile-only]
+desc: Default exported final class.
+tags:
+- compile-only
+- not-a-test
 ---*/
 
-type {{p}} = Object;
-
-function main() {}
-{%- endfor %}
+export default final class A {
+    static boo(): int {
+        return 1
+    }
+}

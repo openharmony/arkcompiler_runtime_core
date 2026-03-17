@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,16 +15,13 @@ limitations under the License.
 
 /*---
 desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
+    A compile-time error occurs while trying to extend final class.
 tags: [compile-only, negative]
+files:
+- ./default_exported_declarations/default_export_final_class.ets
+expected_out: "Semantic error ESE0176: The super type of 'B' class is not extensible."
 ---*/
+//extend exported final class
 
-function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
-}
+import * from "./default_exported_declarations/default_export_final_class"
+class B extends A {}

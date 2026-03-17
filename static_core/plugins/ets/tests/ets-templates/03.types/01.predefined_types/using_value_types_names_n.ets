@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,14 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for lit in incorrect_long_literals %}
+{% for i in default_value %}
 
 /*---
-desc: Incorrect integer literals
+desc: Predefined type name {{i.type}} using in name of the field.
 tags: [negative, compile-only]
-expected_out: "{{lit.expected}}"
+expected_out: "{{i.expected}}"
 ---*/
 
-let x = new Long({{lit.val}})
+let {{i.type}}: {{i.type}};
+function main(): void {
+    let {{i.type}}: {{i.type}};
+}
 
 {%- endfor %}

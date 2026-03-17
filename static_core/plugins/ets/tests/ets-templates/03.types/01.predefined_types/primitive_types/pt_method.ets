@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
-{% for p in primitives %}
 /*---
 desc: >-
     Types number, byte, short, int, long, float, double, char, and boolean are primitive types.
 ---*/
 
-function main() {
-    let i: {{p.type}};
-    i.toString();
-}
+function main(): int {
 
-{%- endfor %}
+    let testSuite = new arktest.ArkTestsuite("Primitive_types_array_aliases");
+
+    {% for p in primitives %}
+        testSuite.addTest("alias_array_type_{{loop.index}}", () => {
+            let i{{loop.index}}: {{p.type}};
+            i{{loop.index}}.toString();
+        });
+    {%- endfor %}
+
+    return testSuite.run();
+}

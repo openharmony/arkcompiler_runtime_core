@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Incorrect int literals with bases 16, 10, 8 and 2
-tags: [negative, compile-only]
-expected_out: "{{c.expected}}"
+desc: Compile-time error occurs if top-level statements contain a return statement
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0163: return keyword should be used in function body."
 ---*/
 
-let b = new Int({{c.lit}})
-{%- endfor %}
-
+{
+    return 1
+}
