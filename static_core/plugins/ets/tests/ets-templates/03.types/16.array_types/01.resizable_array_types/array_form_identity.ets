@@ -13,16 +13,28 @@
  * limitations under the License.
  */
 
-
 /*---
-desc: Resizable array types
-tags: [compile-only, negative]
+desc: T[] and Array<T> specify identical types and are assignable to each other.
 ---*/
 
+function main(): int {
+  let suite = new arktest.ArkTestsuite("Array Form Assignment");
 
+  suite.addTest("Assign Array<T> to T[]", () => {
+    let form1: Array<String> = []
+    let form2: String[] = []
+    form2 = form1
+    arktest.assertEQ(form1.length, 0)
+    arktest.assertEQ(form2.length, 0)
+  });
 
-function main() {
-    let SyntaxFormOne: FixedArray<String> = ["Hello", "World", "Of", "ArkTS"];
-    SyntaxFormOne.length = 5; // CTE: Attempting to increase the length of the array by assignment to length => CTE
+  suite.addTest("Assign T[] to Array<T>", () => {
+    let form1: Array<String> = []
+    let form2: String[] = []
+    form1 = form2
+    arktest.assertEQ(form1.length, 0)
+    arktest.assertEQ(form2.length, 0)
+  });
 
+  return suite.run()
 }

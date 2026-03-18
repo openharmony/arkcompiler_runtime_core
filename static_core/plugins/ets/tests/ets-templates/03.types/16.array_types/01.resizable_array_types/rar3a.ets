@@ -15,19 +15,20 @@
 
 /*---
 desc: >-
-    Testing type erasure of Array<A> elements.
-    The same Array accepts objects of different types: A and B.
+    Testing type erasure of Array elements.
+    The same Array accepts and stores objects of different types via casting.
 ---*/
 
 class A {}
 class B {}
 
-let a = new A
-let b = new B
+function main(): int {
+  let suite = new arktest.ArkTestsuite("Array Type Erasure");
 
-let aa: A[] = []
-
-function main() {
+  suite.addTest("Push different types via cast alias", () => {
+    let a = new A
+    let b = new B
+    let aa: A[] = []
     let obj: Object = aa as Object
     let ab = obj as Array<B>
 
@@ -49,4 +50,24 @@ function main() {
 
     arktest.assertEQ(ab.pop(), b)
     arktest.assertEQ(aa.length, 0)
-  }
+  });
+
+  suite.addTest("Replace element via cast alias", () => {
+    let a = new A
+    let b = new B
+    let aa: A[] = [a, a]
+    let obj: Object = aa as Object
+    let ab = obj as Array<B>
+    arktest.assertEQ(aa[0], aa[1])
+
+    ab[0] = b
+    arktest.assertEQ(ab[0], b)
+    arktest.assertNE(ab[0], aa[1])
+
+    aa[0] = a
+    arktest.assertEQ(aa[0], a)
+    arktest.assertEQ(aa[0], aa[1])
+  });
+
+  return suite.run();
+}

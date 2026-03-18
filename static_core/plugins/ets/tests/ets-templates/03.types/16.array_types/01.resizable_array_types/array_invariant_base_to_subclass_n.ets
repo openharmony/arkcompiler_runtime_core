@@ -16,6 +16,7 @@
 /*---
 desc: Arrays are invariant
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Array<A>' cannot be assigned to type 'Array<B>'"
 ---*/
 
 class A {}

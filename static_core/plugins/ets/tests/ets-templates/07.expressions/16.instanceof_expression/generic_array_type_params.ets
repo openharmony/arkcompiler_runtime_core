@@ -18,8 +18,7 @@
 /*---
 desc: |-
     T[] and Array<T> specify identical, i.e., indistinguishable types... Generic type in the form of type name can be
-    used as T operand of an instanceof expression. In this case, the check is performed against the type name, and
-    type parameters are ignored.
+    used as the operand T of an instanceof expression. In this case, the check is performed against the erased type.
 ---*/
 
 {{c.top_decl}}

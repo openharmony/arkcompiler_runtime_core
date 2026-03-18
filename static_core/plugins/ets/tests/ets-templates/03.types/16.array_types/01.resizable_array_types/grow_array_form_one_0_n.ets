@@ -16,15 +16,11 @@
 
 /*---
 desc: Resizable array types
-
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0024: Setting the length of an array is not permitted"
 ---*/
 
-function grow(seed: int): int {
-    return 5 + seed;
-}
-
 function main() {
-    let SyntaxFormOne: String[] = ["Hello", "World", "Of", "ArkTS"];
-    let expectedException = (e: Error): boolean => { return (e instanceof RangeError) }
-    arktest.expectThrow(() => { SyntaxFormOne.length = grow(0); }, expectedException) // Attempting to incr. the length of the array by assignment to length => CTE or RTE
+    let SyntaxFormOne: FixedArray<String> = ["Hello", "World", "Of", "ArkTS"];
+    SyntaxFormOne.length = 5;
 }

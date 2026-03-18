@@ -16,8 +16,9 @@
 {% for c in cases %}
 /*---
 desc: |-
-    A compile-time error occurs if type T is not retained by Type Erasure... Instantiated generic types
-    cannot be used because the T operand of an instanceof must be retained by Type Erasure.
+    If type T is not preserved up to undefined by Type Erasure, then a compile-time error occurs.
+    Generic type in the form of type name can be used as the operand T of an instanceof expression.
+    In this case, the check is performed against the erased type.
 tags: [compile-only, negative]
 ---*/
 

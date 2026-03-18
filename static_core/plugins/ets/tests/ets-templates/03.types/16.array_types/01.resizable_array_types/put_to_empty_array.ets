@@ -13,19 +13,28 @@
  * limitations under the License.
  */
 
-
 /*---
-desc: Resizable array types
-
+desc: Push and assign to empty array for both T[] and Array<T> forms.
 ---*/
 
-function grow(seed: int): int {
-    return 5 + seed;
-}
+function main(): int {
+  let suite = new arktest.ArkTestsuite("Put To Empty Array");
 
-function main() {
-    let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
-    let expectedException = (e: Error): boolean => { return (e instanceof RangeError) }
-    arktest.expectThrow(() => { SyntaxFormTwo.length = grow(0) }, expectedException) // CTE: Attempting to increase the length of the array by assignment to length => CTE
+  suite.addTest("Push and assign to empty T[] form", () => {
+    let arr: String[] = []
+    arr.push("")
+    arr[0] = "Hello"
+    arktest.assertEQ(arr.length, 1)
+    arktest.assertEQ(arr[0], "Hello")
+  });
 
+  suite.addTest("Push and assign to empty Array<T> form", () => {
+    let arr: Array<String> = []
+    arr.push("")
+    arr[0] = "Hello"
+    arktest.assertEQ(arr.length, 1)
+    arktest.assertEQ(arr[0], "Hello")
+  });
+
+  return suite.run()
 }

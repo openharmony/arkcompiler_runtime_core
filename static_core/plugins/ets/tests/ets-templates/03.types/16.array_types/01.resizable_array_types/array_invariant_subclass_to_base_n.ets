@@ -14,12 +14,17 @@
  */
 
 /*---
-desc: Test creating an empty array.
+desc: Arrays are invariant
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Array<B>' cannot be assigned to type 'Array<A>'"
 ---*/
 
-function main(): void {
-  let array: number[] = [];
-  let a: number = array.length;
-    
-  arktest.assertEQ(a, 0);
+class A {}
+class B extends A {}
+
+let arrA: A[] = [new B, new B]
+let arrB: B[] = [new B, new B]
+
+function main() {
+    arrA = arrB
 }
