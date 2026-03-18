@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@ function main(): int {
     suite.addTest("test RegExp.exec6", testRegExpExec6);
     suite.addTest("test RegExp.exec7", testRegExpExec7);
     suite.addTest("test RegExp.exec8", testRegExpExec8);
+    suite.addTest("test RegExp.exec9", testRegExpExec9);
+    suite.addTest("test RegExp.exec10", testRegExpExec10);
 
     return suite.run();
 }
@@ -87,5 +89,28 @@ function testRegExpExec8(): void {
     if (arr != null) {
         arktest.assertEQ(arr[0]!, "b", "testRegExpExec8");
         arktest.assertEQ(arr[1]!, "", "testRegExpExec8");
+    }
+}
+
+function testRegExpExec9(): void {
+    // In unicode mode, a lone trailing surrogate (\udf06) as pattern is compiled by PCRE2
+    // and matches the surrogate code unit 0xDF06 present in the surrogate pair \ud834\udf06.
+    // The matched substring is one code unit long with codePointAt(0) == 0xDF06 (57094).
+    let arr = new RegExp("\udf06", "u").exec("\ud834\udf06");
+    arktest.assertNE(arr, null);
+    if (arr != null) {
+        arktest.assertEQ(arr[0]!.length, 1, "testRegExpExec9");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 0xDF06, "testRegExpExec9");
+    }
+}
+
+function testRegExpExec10(): void {
+    // In unicode mode, a lone leading surrogate (\ud834) as pattern is compiled by PCRE2
+    // and matches the surrogate code unit 0xD834 at position 0 of the surrogate pair input.
+    let arr = new RegExp("\ud834", "u").exec("\ud834\udf06");
+    arktest.assertNE(arr, null);
+    if (arr != null) {
+        arktest.assertEQ(arr[0]!.length, 1, "testRegExpExec10");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 0xD834, "testRegExpExec10");
     }
 }

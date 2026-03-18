@@ -18,6 +18,12 @@ limitations under the License.
 desc: >-
     A namespace declaration introduces the qualified name to be used as a qualifier for access to each exported entity of a namespace.
     Next cases tests basic top-level declarations.
+{%- if c.files %}
+files:
+{%- for f in c.files %}
+- {{f}}
+{%- endfor %}
+{%- endif %}
 ---*/
 
 {{c.decl}}
