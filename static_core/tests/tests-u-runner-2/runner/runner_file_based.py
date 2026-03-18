@@ -30,6 +30,7 @@ from runner.options.config import Config
 from runner.reports.detailed_report import DetailedReport
 from runner.reports.html_view import HtmlView
 from runner.reports.report_format import ReportFormat
+from runner.reports.spec_report import SpecReport
 from runner.reports.standard_view import StandardView
 from runner.reports.summary import Summary
 from runner.reports.xml_view import XmlView
@@ -111,6 +112,7 @@ class RunnerFileBased(Runner):
             xml_view.create_xml_report(results, execution_time)
             xml_view.create_ignore_list(set(results))
             self.__generate_detailed_report(results)
+            self.__generate_spec_report(results)
 
         if self.test_env is None:
             raise common_exceptions.UnknownException("It seems no one test has been launched.")
@@ -182,10 +184,22 @@ class RunnerFileBased(Runner):
             self.cmd_env[san] = ":exitcode=255"
 
     def __generate_detailed_report(self, results: list[Test]) -> None:
-        if self.config.general.detailed_report:
+        if self.config.general.report.detailed_report:
             detailed_report = DetailedReport(
                 results,
                 self.name,
                 self.work_dir.report,
-                self.config.general.detailed_report_file)
+                self.config.general.report.detailed_report_file)
             detailed_report.populate_report()
+
+    def __generate_spec_report(self, results: list[Test]) -> None:
+        """Generates spec coverage report if --spec-report and --spec-file options are set."""
+        if self.config.general.report.spec_report and self.config.general.report.spec_file:
+            spec_report = SpecReport(
+                results,
+                self.name,
+                self.work_dir.report,
+                self.config.general.report.spec_report_file,
+                self.config.general.report.spec_report_yaml,
+                self.config.general.report.spec_file)
+            spec_report.populate_report()

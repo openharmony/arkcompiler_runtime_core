@@ -28,7 +28,6 @@ from runner.options.options import IOptions
 from runner.options.options_coverage import CoverageOptions
 from runner.options.options_report import ReportOptions
 from runner.options.options_time_report import TimeReportOptions
-from runner.reports.report_format import ReportFormat
 from runner.utils import convert_underscore
 
 
@@ -38,14 +37,10 @@ class GeneralOptions(IOptions):
     __DEFAULT_GC_TYPE = "g1-gc"
     __DEFAULT_GC_BOMBING_FREQUENCY = 0
     __DEFAULT_HEAP_VERIFIER = "fail_on_verification"
-    __DEFAULT_REPORT_FORMAT = ReportFormat.LOG
-    __DEFAULT_DETAILED_REPORT_FILE = "detailed-report-file"
     __DEFAULT_VERBOSE = VerboseKind.SILENT
     __DEFAULT_VERBOSE_FILTER = VerboseFilter.NEW_FAILURES
     __DEFAULT_QEMU = QemuKind.NONE
     __DEFAULT_SHOW_PROGRESS = False
-    __DEFAULT_DETAILED_REPORT = False
-    __DEFAULT_REPORT_DIR = "report"
     __CFG_RUNNER = "runner"
     __DEFAULT_GN_BUILD = False
     __DEFAULT_RETRIEVE_LOG_TIMEOUT = 20
@@ -55,11 +50,8 @@ class GeneralOptions(IOptions):
     __VERBOSE_FILTER = "verbose-filter"
     __PROCESSES = "processes"
     __CHUNKSIZE = "chunksize"
-    __DETAILED_REPORT = "detailed-report"
-    __DETAILED_REPORT_FILE = "detailed-report-file"
     __SHOW_PROGRESS = "show-progress"
     __QEMU = "qemu"
-    __REPORT_DIR = "report-dir"
     __GN_BUILD = "gn-build"
     __RETRIEVE_LOG_TIMEOUT = "retrieve-log-timeout"
     __CONTINUE_IF_FAILED = "continue-if-failed"
@@ -72,6 +64,7 @@ class GeneralOptions(IOptions):
             if param_name.startswith(self.__CFG_RUNNER):
                 param_name = convert_underscore(param_name.replace(f"{self.__CFG_RUNNER}.", ""))
                 self.__parameters[param_name] = param_value
+        self.report = ReportOptions(self.__parameters)
         self.time_report = TimeReportOptions(self.__parameters)
         self.coverage = CoverageOptions(self.__parameters)
 
@@ -135,7 +128,7 @@ class GeneralOptions(IOptions):
             dest=f"{dest}{GeneralOptions.__RETRIEVE_LOG_TIMEOUT}",
             help='Timeout for retrieving output of a step that failed by the step timeout')
 
-        ReportOptions.add_report_cli(parser, dest)
+        ReportOptions.add_cli_args(parser, dest)
         TimeReportOptions.add_cli_args(parser, dest)
         CoverageOptions.add_cli_args(parser, dest)
 
@@ -170,25 +163,6 @@ class GeneralOptions(IOptions):
     @cached_property
     def continue_if_failed(self) -> bool:
         return cast(bool, self.__parameters.get(self.__CONTINUE_IF_FAILED, self.__DEFAULT_CONTINUE_IF_FAILED))
-
-    @cached_property
-    def report_format(self) -> ReportFormat:
-        return GeneralOptions.__DEFAULT_REPORT_FORMAT
-
-    @cached_property
-    def detailed_report(self) -> bool:
-        return cast(bool, self.__parameters.get(self.__DETAILED_REPORT, self.__DEFAULT_DETAILED_REPORT))
-
-    @cached_property
-    def detailed_report_file(self) -> Path | None:
-        path_str = self.__parameters.get(self.__DETAILED_REPORT_FILE, self.__DEFAULT_DETAILED_REPORT_FILE)
-        if path_str:
-            return Path(cast(str, path_str))
-        return None
-
-    @cached_property
-    def report_dir_name(self) -> str:
-        return cast(str, self.__parameters.get(self.__REPORT_DIR, self.__DEFAULT_REPORT_DIR))
 
     @cached_property
     def verbose(self) -> VerboseKind:

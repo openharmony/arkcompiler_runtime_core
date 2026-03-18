@@ -71,7 +71,7 @@ class OptionsTest(TestCase):
             cmd_prefix=[],
             cmd_env={},
             timestamp=timestamp,
-            report_formats={config.general.report_format},
+            report_formats={config.general.report.report_format},
             work_dir=work_dir,
             coverage=CoverageManager(Path().cwd(), work_dir.coverage_dir, config.general.coverage),
             test_flow_registry=TestFlowRegistry()
