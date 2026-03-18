@@ -49,7 +49,7 @@
     fldai.64 0x0
     sta.64 v3
     lda.str "test"
-    any.stbyidx v2, v3
+    any.stbyidx v2, v3, 0x0
     movi v0, 0x0
     call.short std.core.Array.$_get:(std.core.Array,i32), v2, v0
     sta.obj v4
@@ -65,7 +65,7 @@
     fldai.64 0x0
     sta.64 v2
     lda.64 v2
-    any.ldbyidx v1
+    any.ldbyidx v1, 0x0
     sta.obj v3
     lda.str "test"
     sta.obj v4

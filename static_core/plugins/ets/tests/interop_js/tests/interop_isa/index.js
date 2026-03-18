@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,8 @@ let doTestEquals = etsVm.getFunction('Ltest-static/ETSGLOBAL;', 'doTestEquals');
 let doTestStrictEquals = etsVm.getFunction('Ltest-static/ETSGLOBAL;', 'doTestStrictEquals');
 
 let doTestCallStatic = etsVm.getFunction('Ltest-static/ETSGLOBAL;', 'doTestCallStatic');
+let doTestSequenceIntegrity = etsVm.getFunction('Ltest-static/ETSGLOBAL;', 'doTestSequenceIntegrity');
+let doTestZeroICSlot = etsVm.getFunction('Ltest-static/ETSGLOBAL;', 'doTestZeroICSlot');
 
 function anyInstanceOfTest() {
     ASSERT_TRUE(testInstanceOf(new C(), C));
@@ -188,6 +190,15 @@ function anyStByIdxTest() {
     let o = {1:0};
     doTestStValIdx(o, 1);
     ASSERT_EQ(o[1], 1);
+}
+
+function anySequenceIntegrityTest() {
+    ASSERT_EQ(doTestSequenceIntegrity({a: 1}), 1);
+}
+
+function anyZeroICSlotTest() {
+    let obj = {a: function() { return 777; }};
+    ASSERT_EQ(doTestZeroICSlot(obj), 777);
 }
 
 // Enable once FE create any bytecode for pure static code
@@ -278,6 +289,8 @@ anyStByValTest();
 anyStByNameTest();
 anyStByNameVTest();
 anyStByIdxTest();
+anySequenceIntegrityTest();
+anyZeroICSlotTest();
 
 etsIsTrueTest();
 etsTypeOfTest();

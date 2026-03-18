@@ -152,6 +152,9 @@ properties:
     description: May initialize type instance during execution.
   - tag: init_obj
     description: Calls the object initialization function.
+  - tag: ic_slot
+    description: Use the immediate number after opcode of length 8-bit as ic slot, and two slots are used.
+
 exceptions:
   - tag: x_none
     description: Bytecode doesn't throw exceptions.
@@ -2996,22 +2999,23 @@ groups:
       - v1_object
     properties:
       - string_id
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if vs == null then
         throw NullPointerException
       end
-      field = resolve_field_by_name(vs, string_id)
+      field = resolve_field_by_name(vs, string_id, ic_slot)
       if op == any.ldbyname and size(field) < 32 then
         acc = extendto32(vs.get(field))
       else
         acc = vs.get(field)
       end
     instructions:
-      - sig: any.ldbyname v:in:ref, string_id
+      - sig: any.ldbyname v:in:ref, string_id, imm:u8
         acc: out:ref
-        format: [pref_op_v_8_id_32]
+        format: [pref_op_v_8_id_32_imm_8]
         prefix: any
         opcode_idx: [0x0]
 
@@ -3023,22 +3027,23 @@ groups:
       - v2_object
     properties:
       - string_id
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if v2 == null then
         throw NullPointerException
       end
-      field = resolve_field_by_name(v2, string_id)
+      field = resolve_field_by_name(v2, string_id, ic_slot)
       if op == any.ldbyname.v and size(field) < 32 then
         v1 = extendto32(v2.get(field))
       else
         v1 = v2.get(field)
       end
     instructions:
-      - sig: any.ldbyname.v v1:out:ref, v2:in:ref, string_id
+      - sig: any.ldbyname.v v1:out:ref, v2:in:ref, string_id, imm:u8
         acc: none
-        format: [pref_op_v1_8_v2_8_id_32]
+        format: [pref_op_v1_8_v2_8_id_32_imm_8]
         prefix: any
         opcode_idx: [0x1]
 
@@ -3050,22 +3055,23 @@ groups:
       - v1_object
     properties:
       - string_id
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if vs == null then
         throw NullPointerException
       end
-      field = resolve_field_by_name(vs, string_id)
+      field = resolve_field_by_name(vs, string_id, ic_slot)
       if op == any.stbyname and size(field) < 32 then
         vs.set(field, truncate(field, acc))
       else
         vs.set(field, acc)
       end
     instructions:
-      - sig: any.stbyname v:in:ref, string_id
+      - sig: any.stbyname v:in:ref, string_id, imm:u8
         acc: in:ref
-        format: [pref_op_v_8_id_32]
+        format: [pref_op_v_8_id_32_imm_8]
         prefix: any
         opcode_idx: [0x2]
 
@@ -3077,22 +3083,23 @@ groups:
       - v2_object
     properties:
       - string_id
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if v2 == null then
         throw NullPointerException
       end
-      field = resolve_field_by_name(v2, string_id)
+      field = resolve_field_by_name(v2, string_id, ic_slot)
       if op == any.stbyname.v and size(field) < 32 then
         v2.set(field, truncate(field, v1))
       else
         v2.set(field, v1)
       end
     instructions:
-      - sig: any.stbyname.v v1:in:ref, v2:in:ref, string_id
+      - sig: any.stbyname.v v1:in:ref, v2:in:ref, string_id, imm:u8
         acc: none
-        format: [pref_op_v1_8_v2_8_id_32]
+        format: [pref_op_v1_8_v2_8_id_32_imm_8]
         prefix: any
         opcode_idx: [0x3]
 
@@ -3102,19 +3109,21 @@ groups:
     verification:
       - v1_object
       - acc_f64
+    properties:
+      - float
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if vs == null then
         throw NullPointerException
       end
-      acc = vs[acc]
+      acc = vs[acc, ic_slot]
     instructions:
-      - sig: any.ldbyidx v:in:ref
+      - sig: any.ldbyidx v:in:ref, imm:u8
         acc: inout:f64->ref
-        format: [pref_op_v_8]
+        format: [pref_op_v_8_imm_8]
         prefix: any
-        properties: [float]
         opcode_idx: [0x4]
 
   - title: Store value from accumulator in reference of any type by index
@@ -3124,17 +3133,19 @@ groups:
       - acc_obj_or_null
       - v1_object
       - v2_f64
+    properties:
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      v1[v2] = acc
+      v1[v2, ic_slot] = acc
     instructions:
-      - sig: any.stbyidx v1:in:ref, v2:in:f64
+      - sig: any.stbyidx v1:in:ref, v2:in:f64, imm:u8
         acc: in:ref
-        format: [pref_op_v1_8_v2_8]
+        format: [pref_op_v1_8_v2_8_imm_8]
         prefix: any
         properties: [ float ]
         opcode_idx: [0x5]
@@ -3145,17 +3156,19 @@ groups:
     verification:
       - v1_object
       - v2_object
+    properties:
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if v1 == null || v2 == null then
         throw NullPointerException
       end
-      acc = v1[v2]
+      acc = v1[v2, ic_slot]
     instructions:
-      - sig: any.ldbyval v1:in:ref, v2:in:ref
+      - sig: any.ldbyval v1:in:ref, v2:in:ref, imm:u8
         acc: out:ref
-        format: [pref_op_v1_8_v2_8]
+        format: [pref_op_v1_8_v2_8_imm_8]
         prefix: any
         opcode_idx: [0x6]
 
@@ -3166,17 +3179,19 @@ groups:
       - acc_obj_or_null
       - v1_object
       - v2_object
+    properties:
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if v1 == null || v2 == null then
         throw NullPointerException
       end
-      v1[v2] = acc
+      v1[v2, ic_slot] = acc
     instructions:
-      - sig: any.stbyval v1:in:ref, v2:in:ref
+      - sig: any.stbyval v1:in:ref, v2:in:ref, imm:u8
         acc: in:ref
-        format: [pref_op_v1_8_v2_8]
+        format: [pref_op_v1_8_v2_8_imm_8]
         prefix: any
         opcode_idx: [0x7]
 
@@ -3187,18 +3202,19 @@ groups:
       - compatible_arguments
     properties:
       - any_call
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = v1()
+      acc = v1(ic_slot: imm)
     instructions:
-      - sig: any.call.0 v1:in:ref
+      - sig: any.call.0 v1:in:ref, imm:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_8]
+        format: [pref_op_v1_8_imm_8]
         opcode_idx: [0x8]
 
   - title: Any call range
@@ -3208,18 +3224,19 @@ groups:
       - compatible_arguments
     properties:
       - any_call
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = v1(v2, v2 + 1, ..., v2 + imm - 1)
+      acc = v1(v2, v2 + 1, ..., v2 + imm1 - 1, ic_slot: imm2)
     instructions:
-      - sig: any.call.range v1:in:ref, v2:in:ref, imm:u8
+      - sig: any.call.range v1:in:ref, v2:in:ref, imm1:u8, imm2:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_8_v2_8_imm_8]
+        format: [pref_op_v1_8_v2_8_imm1_8_imm2_8]
         opcode_idx: [0x9]
 
   - title: Any call short
@@ -3229,18 +3246,19 @@ groups:
       - compatible_arguments
     properties:
       - any_call
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = v1(v2)
+      acc = v1(v2, ic_slot: imm)
     instructions:
-      - sig: any.call.short v1:in:ref, v2:in:ref
+      - sig: any.call.short v1:in:ref, v2:in:ref, imm:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_4_v2_4]
+        format: [pref_op_v1_4_v2_4_imm_8]
         opcode_idx: [0xa]
 
   - title: Any call this 0
@@ -3252,18 +3270,19 @@ groups:
       - any_call
       - string_id
       - id_shift
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = v1.string_id()
+      acc = v1.string_id(ic_slot: imm)
     instructions:
-      - sig: any.call.this.0 string_id, v1:in:ref
+      - sig: any.call.this.0 string_id, v1:in:ref, imm:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_8_id_32]
+        format: [pref_op_v1_8_imm_8_id_32]
         opcode_idx: [0xb]
 
   - title: Any call this range
@@ -3275,18 +3294,19 @@ groups:
       - any_call
       - string_id
       - id_shift
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = v1.string_id(v2, v2 + 1, ..., v2 + imm - 1)
+      acc = v1.string_id(v2, v2 + 1, ..., v2 + imm1 - 1, ic_slot: imm2)
     instructions:
-      - sig: any.call.this.range string_id, v1:in:ref, v2:in:ref, imm:u8
+      - sig: any.call.this.range string_id, v1:in:ref, v2:in:ref, imm1:u8, imm2:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_8_v2_8_imm_8_id_32]
+        format: [pref_op_v1_8_v2_8_imm1_8_imm2_8_id_32]
         opcode_idx: [0xc]
 
   - title: Any call this short
@@ -3298,18 +3318,19 @@ groups:
       - any_call
       - string_id
       - id_shift
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = v1.string_id(v2)
+      acc = v1.string_id(v2, ic_slot: imm)
     instructions:
-      - sig: any.call.this.short string_id, v1:in:ref, v2:in:ref
+      - sig: any.call.this.short string_id, v1:in:ref, v2:in:ref, imm:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_4_v2_4_id_32]
+        format: [pref_op_v1_4_v2_4_imm_8_id_32]
         opcode_idx: [0xd]
 
   - title: Any call new 0
@@ -3319,18 +3340,19 @@ groups:
       - compatible_arguments
     properties:
       - any_call
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = new v1()
+      acc = new v1(ic_slot: imm)
     instructions:
-      - sig: any.call.new.0 v1:in:ref
+      - sig: any.call.new.0 v1:in:ref, imm:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_8]
+        format: [pref_op_v1_8_imm_8]
         opcode_idx: [0xe]
 
   - title: Any call new range
@@ -3340,18 +3362,19 @@ groups:
       - compatible_arguments
     properties:
       - any_call
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = new v1(v2, v2 + 1, ..., v2 + imm - 1)
+      acc = new v1(v2, v2 + 1, ..., v2 + imm1 - 1, ic_slot: imm2)
     instructions:
-      - sig: any.call.new.range v1:in:ref, v2:in:ref, imm:u8
+      - sig: any.call.new.range v1:in:ref, v2:in:ref, imm1:u8, imm2:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_8_v2_8_imm_8]
+        format: [pref_op_v1_8_v2_8_imm1_8_imm2_8]
         opcode_idx: [0xf]
 
   - title: Any call new short
@@ -3361,18 +3384,19 @@ groups:
       - compatible_arguments
     properties:
       - any_call
+      - ic_slot
     exceptions:
       - x_call
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = new v1(v2)
+      acc = new v1(v2, ic_slot: imm)
     instructions:
-      - sig: any.call.new.short v1:in:ref, v2:in:ref
+      - sig: any.call.new.short v1:in:ref, v2:in:ref, imm:u8
         acc: out:ref
         prefix: any
-        format: [pref_op_v1_4_v2_4]
+        format: [pref_op_v1_4_v2_4_imm_8]
         opcode_idx: [0x10]
 
   - title: Any instanceof check
@@ -3380,16 +3404,18 @@ groups:
       check whether an object belongs to a class
     verification:
       - v1_object
+    properties:
+      - ic_slot
     exceptions:
       - x_null
     pseudo: |
       if v1 == null then
         throw NullPointerException
       end
-      acc = acc instanceof v1
+      acc = acc instanceof v1 (ic_slot: imm)
     instructions:
-      - sig: any.isinstance v1:in:ref
+      - sig: any.isinstance v1:in:ref, imm:u8
         acc: inout:ref->i32
         prefix: any
-        format: [pref_op_v1_8]
+        format: [pref_op_v1_8_imm_8]
         opcode_idx: [0x11]

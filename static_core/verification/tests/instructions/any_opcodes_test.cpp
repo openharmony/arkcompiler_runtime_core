@@ -13,17 +13,73 @@
  * limitations under the License.
  */
 
-#include "opcode_test.h"
+#include <gtest/gtest.h>
+#include <string>
+
+#include "assembly-emitter.h"
+#include "assembly-parser.h"
+#include "include/class_linker_extension.h"
+#include "include/language_context.h"
+#include "include/method.h"
+#include "public.h"
+#include "libarkbase/utils/utf.h"
+#include "util/tests/verifier_test.h"
+#include "include/runtime.h"
 
 namespace ark::verifier::test {
 
-TEST_F(VerifyOpcodeTest, AnyIsInstance)
+class VerifyAnyOpcodes : public VerifierTest {
+public:
+    VerifyAnyOpcodes()
+    {
+        config_ = verifier::NewConfig();
+        service_ = CreateService(config_, Runtime::GetCurrent()->GetInternalAllocator(),
+                                 ark::Runtime::GetCurrent()->GetClassLinker(), "");
+    }
+
+    ~VerifyAnyOpcodes() override
+    {
+        DestroyService(service_, false);
+        DestroyConfig(config_);
+    }
+
+    NO_COPY_SEMANTIC(VerifyAnyOpcodes);
+    NO_MOVE_SEMANTIC(VerifyAnyOpcodes);
+
+    std::unique_ptr<const panda_file::File> EmitPandasm(const char *source)
+    {
+        pandasm::Parser p;
+        auto res = p.Parse(source);
+        return pandasm::AsmEmitter::Emit(res.Value());
+    }
+
+    ClassLinkerExtension *GetLinkerExtention(std::unique_ptr<const panda_file::File> pf)
+    {
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        classLinker->AddPandaFile(std::move(pf));
+        return classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    }
+
+    Method *GetDirectMethodFromClass(ClassLinkerExtension *ext, const std::string &className,
+                                     const std::string &methodName)
+    {
+        PandaString descriptor;
+        Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor));
+        return klass->GetDirectMethod(utf::CStringAsMutf8(methodName.c_str()));
+    }
+
+private:
+    verifier::Config *config_;
+    verifier::Service *service_;
+};
+
+TEST_F(VerifyAnyOpcodes, AnyIsInstance)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1) <static, access.function=public> {
             lda.obj a0
-            any.isinstance a1
+            any.isinstance a1, 0x0
             return.void
         }
     )";
@@ -37,14 +93,14 @@ TEST_F(VerifyOpcodeTest, AnyIsInstance)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyCallShort)
+TEST_F(VerifyAnyOpcodes, AnyCallShort)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1) <static, access.function=public> {
             lda.obj a1
             sta.obj v1
-            any.call.short a0, v1
+            any.call.short a0, v1, 0x0
             return.void
         }
     )";
@@ -58,14 +114,14 @@ TEST_F(VerifyOpcodeTest, AnyCallShort)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, NegAnyCallShort)
+TEST_F(VerifyAnyOpcodes, NegAnyCallShort)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1) <static, access.function=public> {
             ldai 1
             sta v1
-            any.call.short a0, v1
+            any.call.short a0, v1, 0x0
             return.void
         }
     )";
@@ -79,7 +135,7 @@ TEST_F(VerifyOpcodeTest, NegAnyCallShort)
     ASSERT_TRUE(!result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyCallRange)
+TEST_F(VerifyAnyOpcodes, AnyCallRange)
 {
     auto source = R"(
         .record R {}
@@ -88,7 +144,7 @@ TEST_F(VerifyOpcodeTest, AnyCallRange)
             sta.obj v1
             lda.obj a2
             sta.obj v2
-            any.call.range a0, v1, 0x2
+            any.call.range a0, v1, 0x2, 0x0
             return.void
         }
     )";
@@ -102,14 +158,14 @@ TEST_F(VerifyOpcodeTest, AnyCallRange)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyCallThisShort)
+TEST_F(VerifyAnyOpcodes, AnyCallThisShort)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
             lda.obj a1
             sta.obj v1
-            any.call.this.short "bar", a0, v1
+            any.call.this.short "bar", a0, v1, 0x0
             return.void
         }
     )";
@@ -123,7 +179,7 @@ TEST_F(VerifyOpcodeTest, AnyCallThisShort)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyCallThisRange)
+TEST_F(VerifyAnyOpcodes, AnyCallThisRange)
 {
     auto source = R"(
         .record R {}
@@ -132,7 +188,7 @@ TEST_F(VerifyOpcodeTest, AnyCallThisRange)
             sta.obj v1
             lda.obj a2
             sta.obj v2
-            any.call.this.range "foo", a0, v1, 0x2
+            any.call.this.range "foo", a0, v1, 0x2, 0x0
             return.void
         }
     )";
@@ -146,12 +202,12 @@ TEST_F(VerifyOpcodeTest, AnyCallThisRange)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyCall0)
+TEST_F(VerifyAnyOpcodes, AnyCall0)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0) <static, access.function=public> {
-            any.call.0 a0
+            any.call.0 a0, 0x0
             return.void
         }
     )";
@@ -165,12 +221,12 @@ TEST_F(VerifyOpcodeTest, AnyCall0)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyNew0)
+TEST_F(VerifyAnyOpcodes, AnyNew0)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0) <static, access.function=public> {
-            any.call.new.0 a0
+            any.call.new.0 a0, 0x0
             return.void
         }
     )";
@@ -184,7 +240,7 @@ TEST_F(VerifyOpcodeTest, AnyNew0)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyNewRange)
+TEST_F(VerifyAnyOpcodes, AnyNewRange)
 {
     auto source = R"(
         .record R {}
@@ -193,7 +249,7 @@ TEST_F(VerifyOpcodeTest, AnyNewRange)
             sta.obj v1
             lda.obj a2
             sta.obj v2
-            any.call.new.range a0, v1, 0x2
+            any.call.new.range a0, v1, 0x2, 0x0
             return.void
         }
     )";
@@ -207,14 +263,14 @@ TEST_F(VerifyOpcodeTest, AnyNewRange)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyNewShort)
+TEST_F(VerifyAnyOpcodes, AnyNewShort)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1) <static, access.function=public> {
             lda.obj a1
             sta.obj v1
-            any.call.new.short a0, v1
+            any.call.new.short a0, v1, 0x0
             return.void
         }
     )";
@@ -228,12 +284,12 @@ TEST_F(VerifyOpcodeTest, AnyNewShort)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyCallThis0)
+TEST_F(VerifyAnyOpcodes, AnyCallThis0)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0) <static, access.function=public> {
-            any.call.this.0 "baz", a0
+            any.call.this.0 "baz", a0, 0x0
             return.void
         }
     )";
@@ -247,12 +303,12 @@ TEST_F(VerifyOpcodeTest, AnyCallThis0)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyLdbyval)
+TEST_F(VerifyAnyOpcodes, AnyLdbyval)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
-            any.ldbyval a0, a1
+            any.ldbyval a0, a1, 0x0
             return.void
         }
     )";
@@ -266,12 +322,12 @@ TEST_F(VerifyOpcodeTest, AnyLdbyval)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyLdbyname)
+TEST_F(VerifyAnyOpcodes, AnyLdbyname)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
-            any.ldbyname a0, "a"
+            any.ldbyname a0, "a", 0x0
             return.void
         }
     )";
@@ -285,12 +341,12 @@ TEST_F(VerifyOpcodeTest, AnyLdbyname)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyLdbynamev)
+TEST_F(VerifyAnyOpcodes, AnyLdbynamev)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
-            any.ldbyname.v v1, a0, "a"
+            any.ldbyname.v v1, a0, "a", 0x0
             return.void
         }
     )";
@@ -304,13 +360,13 @@ TEST_F(VerifyOpcodeTest, AnyLdbynamev)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyLdbyidx)
+TEST_F(VerifyAnyOpcodes, AnyLdbyidx)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
             fldai.64 0x3ff0000000000000
-            any.ldbyidx a0
+            any.ldbyidx a0, 0x0
             return.void
         }
     )";
@@ -324,13 +380,13 @@ TEST_F(VerifyOpcodeTest, AnyLdbyidx)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStbyval)
+TEST_F(VerifyAnyOpcodes, AnyStbyval)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
             lda.obj a2
-            any.stbyval a0, a1
+            any.stbyval a0, a1, 0x0
             return.void
         }
     )";
@@ -344,13 +400,13 @@ TEST_F(VerifyOpcodeTest, AnyStbyval)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStbyvalWithNull)
+TEST_F(VerifyAnyOpcodes, AnyStbyvalWithNull)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1) <static, access.function=public> {
             lda.null
-            any.stbyval a0, a1
+            any.stbyval a0, a1, 0x0
             return.void
         }
     )";
@@ -364,13 +420,13 @@ TEST_F(VerifyOpcodeTest, AnyStbyvalWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStbyname)
+TEST_F(VerifyAnyOpcodes, AnyStbyname)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
             lda.obj a1
-            any.stbyname a0, "a"
+            any.stbyname a0, "a", 0x0
             return.void
         }
     )";
@@ -384,14 +440,14 @@ TEST_F(VerifyOpcodeTest, AnyStbyname)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStbynameWithNull)
+TEST_F(VerifyAnyOpcodes, AnyStbynameWithNull)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
             lda.null
             sta.obj v1
-            any.stbyname v1, "a"
+            any.stbyname v1, "a", 0
             return.void
         }
     )";
@@ -405,12 +461,12 @@ TEST_F(VerifyOpcodeTest, AnyStbynameWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStbynamev)
+TEST_F(VerifyAnyOpcodes, AnyStbynamev)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0, R a1, R a2) <static, access.function=public> {
-            any.stbyname.v a1, a0, "a"
+            any.stbyname.v a1, a0, "a", 0x0
             return.void
         }
     )";
@@ -424,14 +480,14 @@ TEST_F(VerifyOpcodeTest, AnyStbynamev)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStbynamevWithNull)
+TEST_F(VerifyAnyOpcodes, AnyStbynamevWithNull)
 {
     auto source = R"(
         .record R {}
         .function void test(R a0) <static, access.function=public> {
             lda.null
             sta.obj v1
-            any.stbyname.v v1, a0, "a"
+            any.stbyname.v v1, a0, "a", 0x0
             return.void
         }
     )";
@@ -445,7 +501,7 @@ TEST_F(VerifyOpcodeTest, AnyStbynamevWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStvalidx)
+TEST_F(VerifyAnyOpcodes, AnyStvalidx)
 {
     auto source = R"(
         .record R {}
@@ -453,7 +509,7 @@ TEST_F(VerifyOpcodeTest, AnyStvalidx)
             fldai.64 0x3ff0000000000000
             sta.64 v0
             lda.obj a1
-            any.stbyidx a0, v0
+            any.stbyidx a0, v0, 0x0
             return.void
         }
     )";
@@ -467,7 +523,7 @@ TEST_F(VerifyOpcodeTest, AnyStvalidx)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, AnyStvalidxWithNull)
+TEST_F(VerifyAnyOpcodes, AnyStvalidxWithNull)
 {
     auto source = R"(
         .record R {}
@@ -475,7 +531,7 @@ TEST_F(VerifyOpcodeTest, AnyStvalidxWithNull)
             fldai.64 0x3ff0000000000000
             sta.64 v0
             lda.null
-            any.stbyidx a0, v0
+            any.stbyidx a0, v0, 0x0
             return.void
         }
     )";
@@ -489,7 +545,7 @@ TEST_F(VerifyOpcodeTest, AnyStvalidxWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyOpcodeTest, NegAnyStvalidx)
+TEST_F(VerifyAnyOpcodes, NegAnyStvalidx)
 {
     auto source = R"(
         .record R {}
@@ -497,7 +553,7 @@ TEST_F(VerifyOpcodeTest, NegAnyStvalidx)
             fldai 0x3ff0000000000000
             sta v0
             lda.obj a1
-            any.stbyidx a0, v0
+            any.stbyidx a0, v0, 0x0
             return.void
         }
     )";
@@ -509,6 +565,338 @@ TEST_F(VerifyOpcodeTest, NegAnyStvalidx)
     Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
     auto result = test->Verify();
     ASSERT_TRUE(!result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyLdbynameICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            any.ldbyname a0, "a", 0x7f
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCallRangeICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            lda.obj a2
+            sta.obj v2
+            any.call.range a0, v1, 0x2, 0x1
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyIsInstanceMaxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1) <static, access.function=public> {
+            lda.obj a0
+            any.isinstance a1, 0xff
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCallThisRangeMaxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            lda.obj a2
+            sta.obj v2
+            any.call.this.range "foo", a0, v1, 0x2, 0xff
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, NegAnyLdbynameWrongVRegType)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            ldai 1
+            sta v0
+            any.ldbyname v0, "a", 0x0
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(!result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCallNewRangeICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            lda.obj a2
+            sta.obj v2
+            any.call.new.range a0, v1, 0x2, 0x80
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyStbynamevICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            any.stbyname.v a1, a0, "a", 0xfe
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyLdbynamevICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            any.ldbyname.v v1, a0, "a", 0x12
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyStbynameICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            lda.obj a1
+            any.stbyname a0, "a", 0x34
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyLdbyidxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            fldai.64 0x3ff0000000000000
+            any.ldbyidx a0, 0x56
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyStbyidxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            fldai.64 0x3ff0000000000000
+            sta.64 v0
+            lda.obj a1
+            any.stbyidx a0, v0, 0x78
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCall0ICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0) <static, access.function=public> {
+            any.call.0 a0, 0x9a
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyNew0ICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0) <static, access.function=public> {
+            any.call.new.0 a0, 0xbc
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCallRangeMaxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1, R a2) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            lda.obj a2
+            sta.obj v2
+            any.call.range a0, v1, 0x2, 0xff
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCallShortMaxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            any.call.short a0, v1, 0xff
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
+}
+
+TEST_F(VerifyAnyOpcodes, AnyCallNewShortMaxICSlot)
+{
+    auto source = R"(
+        .record R {}
+        .function void test(R a0, R a1) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            any.call.new.short a0, v1, 0xff
+            return.void
+        }
+    )";
+
+    auto pf = EmitPandasm(source);
+    ASSERT_NE(pf, nullptr);
+
+    auto *ext = GetLinkerExtention(std::move(pf));
+    Method *test = GetDirectMethodFromClass(ext, "_GLOBAL", "test");
+    auto result = test->Verify();
+    ASSERT_TRUE(result);
 }
 
 }  // namespace ark::verifier::test

@@ -51,7 +51,7 @@
     sta.obj v3
     lda.str "uuu"
     sta.obj v4
-    any.stbyval v2, v3
+    any.stbyval v2, v3, 0x0
     ldobj.obj v2, X.prop
     sta.obj v5
     ets.equals v4, v5
@@ -63,7 +63,7 @@
     sta.obj v2
     lda.str "prop"
     sta.obj v3
-    any.ldbyval v2, v3
+    any.ldbyval v2, v3, 0x0
     sta.obj v4
     lda.str "uuu"
     sta.obj v5

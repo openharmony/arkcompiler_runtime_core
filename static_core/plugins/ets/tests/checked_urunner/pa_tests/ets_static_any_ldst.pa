@@ -65,7 +65,7 @@
 .function i32 testLdbyname() {
     initobj.short R._ctor_:(R)
     sta.obj v0
-    any.ldbyname v0, "a"
+    any.ldbyname v0, "a", 0x0
     sta.obj v2
     movi v1, 42
     initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
@@ -79,7 +79,7 @@
     sta.obj v0
     movi v1, 64
     initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
-    any.stbyname v0, "a"
+    any.stbyname v0, "a", 0x0
     ldobj v0, R.a
     ucmp v1
     return
@@ -88,7 +88,7 @@
 .function i32 testLdbynameV() {
     initobj.short R._ctor_:(R)
     sta.obj v0
-    any.ldbyname.v v2, v0, "a"
+    any.ldbyname.v v2, v0, "a", 0x0
     movi v1, 42
     initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
     sta.obj v1
@@ -102,7 +102,7 @@
     movi v3, 64
     initobj.short std.core.Int._ctor_:(std.core.Int,i32), v3
     sta.obj v1
-    any.stbyname.v v1, v0, "a"
+    any.stbyname.v v1, v0, "a", 0x0
     ldobj v0, R.a
     ucmp v3
     return
