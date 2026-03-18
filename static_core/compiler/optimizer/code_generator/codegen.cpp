@@ -25,6 +25,7 @@ Codegen Hi-Level implementation
 #include "relocations.h"
 #include "include/compiler_interface.h"
 #include "irtoc/backend/compiler/constants.h"
+#include "cross_values.h"
 #include "ir-dyn-base-types.h"
 #include "runtime/include/coretypes/string.h"
 #include "compiler/optimizer/ir/analysis.h"
@@ -1438,6 +1439,29 @@ void Codegen::LoadClassFromObject(Reg classReg, Reg objReg)
     // The high 16 bits are used as marking flags in Ark Hybrid mode. We take the lower 48 bits as object address.
     GetEncoder()->EncodeAnd(reg, reg, Imm(0x0000'ffff'ffff'ffffULL));
 #endif
+}
+
+void Codegen::LoadFromExecutionContext(Reg dst, uintptr_t offset)
+{
+    auto enc = GetEncoder();
+    ScopedTmpReg tmp(enc);
+    ScopedTmpReg execCtx(enc);
+    // Load thread type
+    enc->EncodeLdr(tmp, false, MemRef(ThreadReg(), GetRuntime()->GetManagedThreadTypeOffset(GetArch())));
+    // Compare with worker thread constant and branch if equal
+    LabelHolder::LabelId workerLabel = enc->CreateLabel();
+    LabelHolder::LabelId doneLabel = enc->CreateLabel();
+    enc->EncodeJump(workerLabel, tmp,
+                    Imm(static_cast<int64_t>(GetRuntime()->GetManagedThreadTypeWorkerThread(GetArch()))),
+                    Condition::EQ);
+    // Coroutine path
+    enc->EncodeLdr(dst, false,
+                   MemRef(ThreadReg(), GetRuntime()->GetCoroutineExecutionContextOffset(GetArch()) + offset));
+    enc->EncodeJump(doneLabel);
+    enc->BindLabel(workerLabel);
+    // Worker thread path
+    enc->EncodeLdr(dst, false, MemRef(ThreadReg(), GetRuntime()->GetExecutionContextWrapperOffset(GetArch()) + offset));
+    enc->BindLabel(doneLabel);
 }
 
 void Codegen::CreateMultiArrayCall(CallInst *callInst)

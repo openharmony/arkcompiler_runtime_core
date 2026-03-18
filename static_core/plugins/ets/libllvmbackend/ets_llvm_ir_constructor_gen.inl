@@ -502,14 +502,15 @@ bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
 
 bool LLVMIrConstructor::EmitStringFromCharCodeSingle(Inst *inst)
 {
-    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
-    ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
-    constexpr auto EID = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
-    auto cache = GetInputValue(inst, 0);
-    auto number = GetInputValue(inst, 1);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto eid = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+    if (!GetGraph()->GetRuntime()->IsStringCachesUsed()) {
+        eid = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
+    }
+    auto number = GetInputValue(inst, 0);
     auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
-    auto call = CreateFastPathCall(inst, EID, {cache, number, klass});
+    auto call = CreateFastPathCall(inst, eid, {number, klass});
     MarkAsAllocation(call);
     ValueMapAdd(inst, call);
     return true;

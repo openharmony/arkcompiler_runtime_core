@@ -1325,7 +1325,7 @@ public:
 
     int64_t GetThrowCounter(const BasicBlock *block);
 
-    uint32_t GetMaxPrimCountAtSuspend()
+    uint32_t GetMaxPrimCountAtSuspend() const
     {
         return maxPrimCountAtSuspend_;
     }
@@ -1335,7 +1335,7 @@ public:
         maxPrimCountAtSuspend_ = count;
     }
 
-    uint32_t GetMaxRefCountAtSuspend()
+    uint32_t GetMaxRefCountAtSuspend() const
     {
         return maxRefCountAtSuspend_;
     }

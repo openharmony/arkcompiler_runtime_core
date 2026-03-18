@@ -1209,8 +1209,7 @@ Label(:SlowPathEntrypoint)
 
 def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
   nocache = (cache_flag ? "" : "NoCache")
-  param_tuple = (cache_flag ? {cache: 'ref', char_code: 'i32', string_klass: 'ref'}
-                            : {char_code: 'i32', string_klass: 'ref'})
+  param_tuple = {char_code: 'i32', string_klass: 'ref'}
   available_regs = $panda_mask
   function("CreateStringFromCharCodeSingle#{nocache}Tlab".to_sym,
             params: param_tuple,
@@ -1229,6 +1228,9 @@ def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
     # Try to read from the one-byte char cache
     if cache_flag
       IfImm(Compare(char, Constants::ASCII_CHAR_CACHE_SIZE).B.b).Imm(0).NE.b {
+        cache := get_platform_type_ref(Constants::ASCII_CHAR_CACHE_OFFSET)
+        # We came here only if IsStringCachesUsed() == true (checked in codegen),
+        # so no cache check for nullptr needed
         Return(read_from_cache(cache, char)).ptr
       }
     end
