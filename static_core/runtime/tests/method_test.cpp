@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -599,7 +599,7 @@ TEST_F(MethodTest, GetFullName)
     Method *method3 = klass->GetDirectMethod(utf::CStringAsMutf8("multiple_args"));
     ASSERT_NE(method3, nullptr);
     ASSERT_EQ(PandaStringToStd(method3->GetFullName()), "R::multiple_args");
-    ASSERT_EQ(PandaStringToStd(method3->GetFullName(true)), "Foo R::multiple_args(R, i32, Foo, [J, [LFoo;)");
+    ASSERT_EQ(PandaStringToStd(method3->GetFullName(true)), "Foo R::multiple_args(R, i32, Foo, i64[], Foo[])");
 }
 
 static auto g_testSource = R"(

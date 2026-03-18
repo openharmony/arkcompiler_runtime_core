@@ -288,13 +288,4 @@ bool GetExportedClassDescriptorsFromModule(ark::ets::EtsClass *etsGlobalClass, s
     return found;
 }
 
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-const std::map<PandaString, char> ClassPublicNameParser::PRIMITIVE_NAME_MAPPING = {
-    {"u16", 'C'}, {"i8", 'B'}, {"i16", 'S'}, {"i32", 'I'}, {"i64", 'J'}, {"f32", 'F'}, {"f64", 'D'}, {"u1", 'Z'}};
-
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-const std::map<char, PandaString> RuntimeDescriptorParser::PRIMITIVE_NAME_MAPPING = {
-    {'C', "u16"}, {'B', "i8"},  {'S', "i16"}, {'I', "i32"}, {'J', "i64"},
-    {'F', "f32"}, {'D', "f64"}, {'Z', "u1"},  {'V', "void"}};
-
 }  // namespace ark::ets

@@ -628,7 +628,7 @@ function __noinline__BigInt64ArrayFromArrayCheckException(obj: Object, factType:
 function __noinline__BigInt64ArrayFromFixedArrayCheckException(obj: Object, factType: string): void
 {
     arktest.expectThrow(() => { let arr: FixedArray<bigint> = obj as FixedArray<bigint> }, (e: Error) => {
-        return e instanceof ClassCastError && e.message == factType + ' cannot be cast to [Lstd/core/BigInt;';
+        return e instanceof ClassCastError && e.message == factType + ' cannot be cast to std.core.BigInt[]';
     });
 }
 
@@ -638,7 +638,7 @@ function testIU64FromArrayWrongType() {
     let ints: Object = Array.of(1, 2, 3);
     __noinline__BigInt64ArrayFromArrayCheckException(ints, 'std.core.Int');
     let fixstrings: FixedArray<string> = [new string("hi"), new string("hello"), new string("new")];
-    __noinline__BigInt64ArrayFromFixedArrayCheckException(fixstrings, '[Lstd/core/String;');
+    __noinline__BigInt64ArrayFromFixedArrayCheckException(fixstrings, 'std.core.String[]');
 }
 
 function testIU64FromArrayBigInt() {

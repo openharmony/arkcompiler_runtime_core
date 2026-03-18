@@ -348,23 +348,6 @@ EtsMethod *EtsClass::ResolveVirtualMethod(const EtsMethod *method) const
     return reinterpret_cast<EtsMethod *>(GetRuntimeClass()->ResolveVirtualMethod(method->GetPandaMethod()));
 }
 
-EtsString *EtsClass::CreateEtsClassName([[maybe_unused]] const char *descriptor)
-{
-    ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-
-    if (*descriptor == 'L') {
-        std::string_view tmpName(descriptor);
-        tmpName.remove_prefix(1);
-        tmpName.remove_suffix(1);
-        PandaString etsName(tmpName);
-        std::replace(etsName.begin(), etsName.end(), '/', '.');
-        return EtsString::CreateFromMUtf8(etsName.data(), etsName.length());
-    }
-
-    ark::ets::RuntimeDescriptorParser nameParser(descriptor);
-    return EtsString::CreateFromMUtf8(nameParser.Resolve().c_str());
-}
-
 EtsString *EtsClass::GetName()
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
@@ -376,7 +359,7 @@ EtsString *EtsClass::GetName()
         return name;
     }
 
-    name = CreateEtsClassName(GetDescriptor());
+    name = EtsString::CreateFromMUtf8(GetRuntimeClass()->GetName().c_str());
     if (name == nullptr) {
         ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
         return nullptr;

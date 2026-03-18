@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "context.h"
 
+#include "include/mem/panda_string.h"
 #include "runtime/include/mem/allocator.h"
 
 #include <unordered_map>
@@ -28,7 +29,7 @@ void DebugContext::AddMethod(const Method &method, bool isDebug)
     if (config->whitelistNotEmpty || isDebug) {
         auto id = method.GetUniqId();
         // this is calculated repeatedly for each class, but caching was tried and didn't improve performance
-        auto name {ClassHelper::GetName<PandaString>(method.GetClassName().data)};
+        PandaString name {ClassHelper::GetName(method.GetClassName().data)};
         if (config->whitelistNotEmpty) {
             InsertIntoWhitelist(name, true, id);
         }

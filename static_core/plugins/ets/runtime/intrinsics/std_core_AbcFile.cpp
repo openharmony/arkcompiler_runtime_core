@@ -26,11 +26,11 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "runtime/include/signature_utils.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/signature_utils.h"
 #include "runtime/mem/local_object_handle.h"
 
 namespace ark::ets::intrinsics {
@@ -164,7 +164,7 @@ EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLink
 
     PandaString descriptor;
     const auto *classDescriptor =
-        ClassHelper::GetDescriptor(utf::CStringAsMutf8(normNameOpt.value().c_str()), &descriptor, true);
+        ClassHelper::GetDescriptor(utf::CStringAsMutf8(normNameOpt.value().c_str()), &descriptor);
     if (classDescriptor == nullptr) {
         return nullptr;
     }

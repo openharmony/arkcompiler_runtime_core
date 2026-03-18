@@ -146,17 +146,6 @@ export final class Class {
 
     static {
         initializePrimitivesInClass()
-
-        Class.PRIMITIVE_BOOLEAN.name = 'u1'
-        Class.PRIMITIVE_BYTE.name = 'i8'
-        Class.PRIMITIVE_SHORT.name = 'i16'
-        Class.PRIMITIVE_CHAR.name = 'u16'
-        Class.PRIMITIVE_INT.name = 'i32'
-        Class.PRIMITIVE_LONG.name = 'i64'
-        Class.PRIMITIVE_FLOAT.name = 'f32'
-        Class.PRIMITIVE_DOUBLE.name = 'f64'
-        Class.PRIMITIVE_NUMBER.name = 'f64'
-        Class.PRIMITIVE_VOID.name = 'void'
     }
 
     private constructor() { throw new Error("Class constructor called") }

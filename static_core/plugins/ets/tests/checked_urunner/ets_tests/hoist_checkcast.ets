@@ -111,7 +111,7 @@ function test2(arr: FixedArray<Object>, value: A | B) : int {
     } catch (e) {
         if (e instanceof ArrayStoreError) {
             // NOTE: line number is invalid in interpreter, see #17098
-            arktest.assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type \\[Lhoist_checkcast/A;'), null);
+            arktest.assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type hoist_checkcast.A\\[\\]'), null);
             return -iters;
         }
     }

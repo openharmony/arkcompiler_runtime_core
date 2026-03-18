@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_method_signature.h"
 #include "plugins/ets/runtime/types/ets_type.h"
-#include "plugins/ets/runtime/signature_utils.h"
+#include "runtime/include/signature_utils.h"
 
 namespace ark::ets::ani {
 

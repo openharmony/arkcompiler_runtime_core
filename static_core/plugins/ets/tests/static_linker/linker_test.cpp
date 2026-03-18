@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,7 +161,7 @@ struct StripOptions {
 };
 
 struct TestStsConfig {
-    std::string entryPoint = "1/ETSGLOBAL::main";
+    std::string entryPoint = "1.ETSGLOBAL::main";
     std::string outputFileName = "out.gold";
     std::string verificationMode = "ahead-of-time";
     TestStsConfig() = default;
@@ -340,7 +340,7 @@ TEST(linkertests, Mix)
 TEST(linkertests, ClassCallNoDeleteDependency)
 {
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, {}, config);
 }
 
@@ -349,7 +349,7 @@ TEST(linkertests, ClassCallDeleteDependency)
     StripOptions opts;
     opts.stripUnused = true;
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {
         "Ldependency/ETSGLOBAL;",        "Lbedependent/ETSGLOBAL;",    "Ldependency/AnotherClass;", "Ldependency/User;",
@@ -364,7 +364,7 @@ TEST(linkertests, ClassCallDeleteDependencyFromEntry)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"dependency/ETSGLOBAL\"";
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
     std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
@@ -387,7 +387,7 @@ TEST(linkertests, ClassCallDeleteDependencyFromConfig)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "@data/ets/classcall_doublefile/configfile.txt";
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
     std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "bedependent/UnusedClass1;",
@@ -402,7 +402,7 @@ TEST(linkertests, MethodCallDeleteDependencyFromEntry)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"dependency/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
     std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
@@ -425,7 +425,7 @@ TEST(linkertests, MethodCallDeleteDependencyFromConfig)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "@data/ets/classcall_doublefile/methodconfig.txt";
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
     std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
@@ -448,7 +448,7 @@ TEST(linkertests, CallDeleteDependencyFromEntryFile)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"dependency.ets\"";
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/AnotherClass;",
                                                       "Lbedependent/DependencyClass;", "Ldependency/User;"};
@@ -472,7 +472,7 @@ TEST(linkertests, MethodAnnotationDeleteDependency)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"method/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "method/ETSGLOBAL::main";
+    config.entryPoint = "method.ETSGLOBAL::main";
     TestSts("annotation", {"method.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Lmethod/ETSGLOBAL;", "Lmethod/ClassAuthor;"};
     std::unordered_set<std::string> notAllowedClasses = {"Lmethod/C3;", "Lmethod/ClassPreamble;"};
@@ -486,7 +486,7 @@ TEST(linkertests, FieldAnnotationDeleteDependency)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"field/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "field/ETSGLOBAL::main";
+    config.entryPoint = "field.ETSGLOBAL::main";
     TestSts("annotation", {"field.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Lfield/ETSGLOBAL;", "Lfield/PropertyAuthor;"};
     std::unordered_set<std::string> notAllowedClasses = {"Lfield/C3;", "Lfield/ClassPreamble;",
@@ -501,7 +501,7 @@ TEST(linkertests, ClassExtensionDeleteDependency)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"classExtension/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "classExtension/ETSGLOBAL::main";
+    config.entryPoint = "classExtension.ETSGLOBAL::main";
     config.outputFileName = "classExtension.gold";
     TestSts("singlefile", {"classExtension.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"LclassExtension/ETSGLOBAL;", "LclassExtension/Animal;",
@@ -516,7 +516,7 @@ TEST(linkertests, InterImplDeleteDependency)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"interImpl/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "interImpl/ETSGLOBAL::main";
+    config.entryPoint = "interImpl.ETSGLOBAL::main";
     config.outputFileName = "interImpl.gold";
     TestSts("singlefile", {"interImpl.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"LinterImpl/ETSGLOBAL;", "LinterImpl/Circle;",
@@ -531,7 +531,7 @@ TEST(linkertests, ObjectLiteralDeleteDependency)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"ObjectLiteral/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "ObjectLiteral/ETSGLOBAL::main";
+    config.entryPoint = "ObjectLiteral.ETSGLOBAL::main";
     config.outputFileName = "ObjectLiteral.gold";
     TestSts("singlefile", {"ObjectLiteral.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"LObjectLiteral/ETSGLOBAL;", "LObjectLiteral/Person;"};
@@ -539,13 +539,13 @@ TEST(linkertests, ObjectLiteralDeleteDependency)
     VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
 }
 
-TEST(linkertests, TesErrorDeleteDependency)
+TEST(linkertests, TestErrorDeleteDependency)
 {
     StripOptions opts;
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"teserror/ETSGLOBAL/main\"";
     TestStsConfig config;
-    config.entryPoint = "teserror/ETSGLOBAL::main";
+    config.entryPoint = "teserror.ETSGLOBAL::main";
     config.outputFileName = "teserror.gold";
     TestSts("singlefile", {"teserror.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Lteserror/ETSGLOBAL;", "Lteserror/TestA;"};
@@ -559,7 +559,7 @@ TEST(linkertests, DebugInfoClassCallDeleteDependency)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "dependency_debug/ETSGLOBAL/main";
     TestStsConfig config;
-    config.entryPoint = "dependency_debug/ETSGLOBAL::main";
+    config.entryPoint = "dependency_debug.ETSGLOBAL::main";
     config.outputFileName = "outDebug.gold";
     TestSts("classcall_doublefile", {"dependency_debug.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {"Ldependency_debug/ETSGLOBAL;",
@@ -572,7 +572,7 @@ TEST(linkertests, DebugInfoClassCallDeleteDependency)
 TEST(linkertests, MultiClassCallNoDeleteDependency)
 {
     TestStsConfig config;
-    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    config.entryPoint = "main_dependencyUser.ETSGLOBAL::main";
     TestSts("classcall_multifile",
             {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
             true, {}, config);
@@ -583,7 +583,7 @@ TEST(linkertests, MultiClassCallDeleteDependency)
     StripOptions opts;
     opts.stripUnused = true;
     TestStsConfig config;
-    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    config.entryPoint = "main_dependencyUser.ETSGLOBAL::main";
     TestSts("classcall_multifile",
             {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
             true, opts, config);
@@ -607,7 +607,7 @@ TEST(linkertests, MultiClassCallDeleteDependencyFromEntry)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"main_dependencyUser/ETSGLOBAL\"";
     TestStsConfig config;
-    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    config.entryPoint = "main_dependencyUser.ETSGLOBAL::main";
     TestSts("classcall_multifile",
             {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
             true, opts, config);
@@ -627,7 +627,7 @@ TEST(linkertests, MultiClassCallDeleteDependencyFromConfig)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "@data/ets/classcall_multifile/configfile.txt";
     TestStsConfig config;
-    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    config.entryPoint = "main_dependencyUser.ETSGLOBAL::main";
     TestSts("classcall_multifile",
             {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
             true, opts, config);
@@ -646,7 +646,7 @@ TEST(linkertests, ClassCallDeleteDependencyAll)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "*";
     TestStsConfig config;
-    config.entryPoint = "dependency/ETSGLOBAL::main";
+    config.entryPoint = "dependency.ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
     std::unordered_set<std::string> allowedClasses = {
         "Ldependency/ETSGLOBAL;",        "Lbedependent/ETSGLOBAL;",    "Ldependency/AnotherClass;", "Ldependency/User;",

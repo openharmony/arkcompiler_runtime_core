@@ -353,7 +353,7 @@ function testInconsistentInput() {
     let interfaces1: FixedArray<Class> = [ Class.from<AIface | BIface>() ]
     const errorcheck1 = (e: Error) => {
         arktest.assertTrue(e instanceof TypeError)
-        return e.message === "All given to Proxy classes must be an interface. But given class 'ULProxyBasicTests.AIface;LProxyBasicTests.BIface; is not an interface"
+        return e.message === "All given to Proxy classes must be an interface. But given class '{UProxyBasicTests.AIface,ProxyBasicTests.BIface} is not an interface"
     }
     arktest.expectThrow((): void => { let proxyInstance = reflect.Proxy.create(linker, interfaces1, handler) }, errorcheck1)
 

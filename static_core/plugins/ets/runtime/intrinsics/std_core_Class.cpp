@@ -15,7 +15,6 @@
 
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -31,14 +30,9 @@
 #include "include/mem/panda_containers.h"
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
-#include "plugins/ets/runtime/types/ets_typeapi.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_panda_file_items.h"
-#include "plugins/ets/runtime/signature_utils.h"
-#include "runtime/handle_scope-inl.h"
 #include "libarkbase/utils/utf.h"
 
 #include <optional>
@@ -144,12 +138,13 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
         return nullptr;
     }
 
-    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
-    auto nameOpt = parser.Resolve();
-    if (UNLIKELY(!nameOpt.has_value())) {
+    auto runtimeName = clsName->GetMutf8();
+    PandaString descriptor;
+    auto classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(runtimeName.c_str()), &descriptor);
+    if (UNLIKELY(classDescriptor == nullptr)) {
         return nullptr;
     }
-    const auto *classDescriptor = utf::CStringAsMutf8(nameOpt.value().c_str());
+
     return runtimeLinker->FindLoadedClass(classDescriptor);
 }
 
@@ -180,14 +175,18 @@ void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 
 EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
 {
-    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
-    auto nameOpt = parser.Resolve();
-    if (UNLIKELY(!nameOpt.has_value())) {
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto runtimeName = clsName->GetMutf8();
+
+    PandaString descriptor;
+    auto classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(runtimeName.c_str()), &descriptor);
+    if (UNLIKELY(classDescriptor == nullptr)) {
+        PandaString msg = "Cannot find class ";
+        msg.append(runtimeName);
+        ThrowEtsException(coro, PlatformTypes(coro)->coreLinkerClassNotFoundError, msg);
         return nullptr;
     }
-    auto *classDescriptor = utf::CStringAsMutf8(nameOpt.value().c_str());
 
-    auto *coro = EtsCoroutine::GetCurrent();
     // Use core ClassLinker in order to pass nullptr as error handler,
     // as exception is thrown in managed RuntimeLinker.loadClass
     auto *linker = Runtime::GetCurrent()->GetClassLinker();

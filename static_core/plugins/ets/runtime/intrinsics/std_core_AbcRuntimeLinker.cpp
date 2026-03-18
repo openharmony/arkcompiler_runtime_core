@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ets_platform_types.h"
 #include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
@@ -22,6 +21,8 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
@@ -59,14 +60,14 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
 EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, EtsString *clsName,
                                                    EtsBoolean init)
 {
-    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
-    auto nameOpt = parser.Resolve();
-    if (UNLIKELY(!nameOpt.has_value())) {
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto clsNameUtf8 = clsName->GetMutf8();
+    PandaString descriptor;
+    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(clsNameUtf8.c_str()), &descriptor);
+    if (UNLIKELY(classDescriptor == nullptr)) {
         return nullptr;
     }
-    const auto *classDescriptor = utf::CStringAsMutf8(nameOpt.value().c_str());
 
-    auto *coro = EtsCoroutine::GetCurrent();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto *errorHandler = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension()->GetErrorHandler();
     auto *ctx = reinterpret_cast<EtsClassLinkerContext *>(runtimeLinker->GetClassLinkerContext());

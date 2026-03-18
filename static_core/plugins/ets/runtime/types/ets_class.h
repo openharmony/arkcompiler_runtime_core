@@ -485,7 +485,6 @@ public:
     bool CompareAndSetName(EtsString *oldName, EtsString *newName);
 
     EtsString *GetName();
-    static EtsString *CreateEtsClassName([[maybe_unused]] const char *descriptor);
 
     void SetSuperClass(EtsClass *superClass)
     {

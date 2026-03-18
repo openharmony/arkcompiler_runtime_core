@@ -20,7 +20,6 @@
 
 #include "types/ets_class.h"
 #include "types/ets_method.h"
-#include "ets_utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -953,42 +952,6 @@ TEST_F(EtsClassTest, EnumerateVTable)
     for (std::size_t i = 0; i < methodsVectorSize; ++i) {
         ASSERT_EQ(methods[i], enumerateMethods[i]);
     }
-}
-
-TEST_F(EtsClassTest, NameFromDescriptor)
-{
-    ark::ets::RuntimeDescriptorParser nameParser("[Lstd/core/Object;");
-    ASSERT_EQ(nameParser.Resolve(), "std.core.Object[]");
-
-    nameParser = RuntimeDescriptorParser("{U[I[J[Lstd/core/String;}");
-    ASSERT_EQ(nameParser.Resolve(), "{Ui32[],i64[],std.core.String[]}");
-
-    nameParser = RuntimeDescriptorParser("{ULLLL/L;LLLL/N;}");
-    ASSERT_EQ(nameParser.Resolve(), "{ULLL.L,LLL.N}");
-
-    nameParser = RuntimeDescriptorParser("[[{U[I[J[Lstd/core/String;}");
-    ASSERT_EQ(nameParser.Resolve(), "{Ui32[],i64[],std.core.String[]}[][]");
-
-    nameParser = RuntimeDescriptorParser("{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
-    ASSERT_EQ(nameParser.Resolve(), "{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
-}
-
-TEST_F(EtsClassTest, NameToDescriptor)
-{
-    ark::ets::ClassPublicNameParser tdParser("std.core.Object[]");
-    ASSERT_EQ(tdParser.Resolve().value(), "[Lstd/core/Object;");
-
-    tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}");
-    ASSERT_EQ(tdParser.Resolve().value(), "{U[I[J[Lstd/core/String;}");
-
-    tdParser = ClassPublicNameParser("{ULLL.L,LLL.N}");
-    ASSERT_EQ(tdParser.Resolve().value(), "{ULLLL/L;LLLL/N;}");
-
-    tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}[][]");
-    ASSERT_EQ(tdParser.Resolve().value(), "[[{U[I[J[Lstd/core/String;}");
-
-    tdParser = ClassPublicNameParser("{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
-    ASSERT_EQ(tdParser.Resolve().value(), "{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
 }
 
 }  // namespace ark::ets::test
