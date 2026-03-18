@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,13 @@
 
 {% for case in cases %}
 /*---
-desc: Incorrect char literals
+desc: Invalid char literals
 tags: [negative, compile-only]
+expected_out: "{{case.exp_out}}"
 ---*/
 
 function main(): void {
     let c: char;
-    c = {{case}};
+    c = {{case.value}};
 }
 {% endfor %}

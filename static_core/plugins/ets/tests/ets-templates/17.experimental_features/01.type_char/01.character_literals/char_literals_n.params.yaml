@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,24 +13,28 @@
 
 ---
 cases:
-    - "C'A'"
-    - "c''"
-    - "'AB'"
-    - "null"
-    - "undefined"
-    - "c\"A\""
-    - "c'"
-    - "c'A"
-    - "c'AB'"
-    - "c'\\x0000'"
-    - "c'\\x001'"
-    - "c'\\xAB"
-    - "c'\\X56'"
-    - "c'\\u0'"
-    - "c'\\u01111'"
-    - "c'\\u1234"
-    - "c\\u1234'"
-    - "c'\\U4567'"
-    - "c'\\u1ffff'"
-    - "c'\\u00000'"
-    - "c'\\u00'"
+    - { value: "C'A'", exp_out: "Semantic error ESE0143: Unresolved reference C" }
+    - { value: "c''", exp_out: "Syntax error ESY0077: Invalid character." }
+    - value: "'AB'"
+      exp_out: |-
+        Semantic error ESE0318: Type '\"AB\"' cannot be assigned to type 'Char'
+    - { value: "null", exp_out: "Semantic error ESE0318: Type 'null' cannot be assigned to type 'Char'" }
+    - { value: "undefined", exp_out: "Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Char'" }
+    - { value: "c\"A\"", exp_out: "Syntax error ESY0227: Unexpected token 'A'." }
+    - { value: "c'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'A", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'AB'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\x0000'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\x001'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\xAB", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\X56'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u0'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u01111'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u1234", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c\\u1234'", exp_out: "Semantic error ESE0143: Unresolved reference cሴ" }
+    - { value: "c'\\U4567'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u1ffff'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u00000'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u00'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\u10000'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
+    - { value: "c'\\uFFFFF'", exp_out: "Syntax error ESY0261: Unsupported character literal." }
