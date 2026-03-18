@@ -28,10 +28,11 @@ tags:
 class A {
   c: int
   constructor(c: int) {
-    this.c = c
+      this.c = c
   }
   foo () {
-    return this.c
+      return this.c
   }
 }
+//Semantic error ESE1236581: Type 'A' used in export declaration(s) is not exported.
 export default new A(7)

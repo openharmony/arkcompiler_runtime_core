@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,10 +19,13 @@ desc: >-
     are called Template literals.
     A template literal with embedded expression is a template string.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0143: Unresolved reference a"
 ---*/
 
 function main() {
-  let a = "A"
-  // syntax error
-  let t1 = `template ${a example`
+  // expression cannot be evaluated
+  let t1 = `template ${a}
+      literal
+      example
+      `
 }

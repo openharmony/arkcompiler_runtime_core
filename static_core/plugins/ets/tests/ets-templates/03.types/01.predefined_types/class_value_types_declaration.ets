@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for i in default_value %}
-
 /*---
-desc: Predefined type {{i}} declaration.
-params: {{i}}
+desc: Predefined types declarations.
 ---*/
 
-let x: {{i}};
-function main(): void {
-  let y: {{i}};
-}
+{% for i in default_value %}
+let x{{loop.index}}: {{i}};
+{%- endfor %}
 
-{% endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Predefined_class_types_declarations");
+
+    {% for i in default_value %}
+        testSuite.addTest("type_{{loop.index}}", () => {
+            let y{{loop.index}}: {{i}};
+        });
+    {%- endfor %}
+
+    return testSuite.run();
+}

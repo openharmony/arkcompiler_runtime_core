@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: >-
     Type double is an alias to number.
 ---*/
 
-function main() {
-    let i: number = {{c.i}};
-    let j: double = {{c.j}};
-    arktest.assertTrue( i == j );
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Primitive_types");
+
+    {% for c in cases %}
+        testSuite.addTest("type_{{loop.index}}", () => {
+            let i{{loop.index}}: number = {{c.i}};
+            let j{{loop.index}}: double = {{c.j}};
+            arktest.assertEQ( i{{loop.index}} , j{{loop.index}} );
+        });
+    {%- endfor %}
+
+    return testSuite.run();
+}

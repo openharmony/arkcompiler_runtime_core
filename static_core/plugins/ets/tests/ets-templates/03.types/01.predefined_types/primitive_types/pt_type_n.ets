@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for p in primitives %}
 /*---
-desc: Incorrect int literals with bases 16, 10, 8 and 2
+desc: >-
+    The predefined value types are called primitive types. Primitive type names are reserved, i.e., they cannot be used for
+    user-defined type names.
 tags: [negative, compile-only]
-expected_out: "{{c.expected}}"
+expected_out: "{{p.expected}}"
 ---*/
 
-let b = new Int({{c.lit}})
-{%- endfor %}
+type {{p.type}} = Object;
 
+function main() {}
+{%- endfor %}

@@ -22,6 +22,7 @@ desc: >-
 files:
 - ./default_export_target_custom_constructor.ets
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE1236581: Type 'A' used in export declaration(s) is not exported."
 ---*/
 
 import * as a from "./default_export_target_custom_constructor"
