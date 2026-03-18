@@ -25,6 +25,8 @@ class Er2 extends Er {}
 let t1 = 1
 let t2 = 2
 let ret: int = 0
+let rftA1 = 0, rftA2 = 0, rftA3 = 0
+let rntA1 = 0, rntA2 = 0, rntA3 = 0, rntA4 = 0
 
 function fooNoSuitableCatch(): int {
     try {
@@ -61,7 +63,37 @@ function fooRethrowFromCatch(): int {
     return ret;
 }
 
-function fooRethrowFromFinally(): int {
+function fooReturnFromTry(): void {
+    rftA1 = 0; rftA2 = 0; rftA3 = 0;
+    try {
+        rftA1 = 1;
+        if (t1 != t2) {
+            return;
+        }
+        rftA2 = 1;
+    } finally {
+        rftA3 = 1;
+    }
+}
+
+function fooReturnFromNestedTry(): void {
+    rntA1 = 0; rntA2 = 0; rntA3 = 0; rntA4 = 0;
+    try {
+        try {
+            rntA1 = 1;
+            if (t1 != t2) {
+                return;
+            }
+            rntA2 = 1;
+        } finally {
+            rntA3 = 1;
+        }
+    } finally {
+        rntA4 = rntA3 + 1;
+    }
+}
+
+function fooRethrowFromFinally(): void {
     let er: Error|null = null;
     try {
         if (t1 != t2) throw new Er()
@@ -94,7 +126,6 @@ function main(): int {
             if (t1 == t2) throw new Er()
             r = 1
         } catch (e) {
-            r = 1
         } finally {
             r = 0
         }
@@ -126,65 +157,49 @@ function main(): int {
 
     suite.addTest("Error thrown, no suitable catch, propagates; finally runs", () => {
         ret = 0;
-        let ok = false;
-        let t1_orig = t1;
         try {
             fooNoSuitableCatch()
         } catch (e) {
             ret += 1000;
-        } finally {
-            ok = ret == 1100 && t1 == t1_orig;
         }
-        arktest.assertFalse(!ok)
+        arktest.assertEQ(ret, 1100)
     })
 
     suite.addTest("Error thrown, with suitable catch, no propagation outside", () => {
         ret = 0;
-        let ok = false;
-        let t1_orig = t1;
         try {
             fooWithSuitableCatch()
         } catch (e) {
             ret += 10000;
-        } finally {
-            ok = ret == 1010 && t1 == t1_orig;
         }
-        arktest.assertFalse(!ok)
+        arktest.assertEQ(ret, 1010)
     })
 
     suite.addTest("Error thrown, with suitable catch, re-thrown from catch", () => {
         ret = 0;
-        let ok = false;
-        let t1_orig = t1;
         try {
             fooRethrowFromCatch()
         } catch (e) {
             ret += 10000;
-        } finally {
-            ok = ret == 11010 && t1 == t1_orig;
         }
-        arktest.assertFalse(!ok)
+        arktest.assertEQ(ret, 11010)
     })
 
     suite.addTest("Error thrown, with suitable catch, re-thrown from finally", () => {
         ret = 0;
-        let ok = false;
-        let t1_orig = t1;
         try {
             fooRethrowFromFinally()
         } catch (e) {
             ret += 10000;
-        } finally {
-            ok = ret == 11010 && t1 == t1_orig;
         }
-        arktest.assertFalse(!ok)
+        arktest.assertEQ(ret, 11010)
     })
 
     suite.addTest("Throw from finally overrides throw from catch", () => {
         let caughtType = ""
         try {
             try {
-                throw new Error
+                throw new Error()
             } catch(e) {
                 throw new Er()
             } finally {
@@ -212,6 +227,21 @@ function main(): int {
         arktest.assertEQ(result, "inner-catch-outer")
     })
 
+    suite.addTest("Finally executes on return from try block, remaining try body is skipped", () => {
+        fooReturnFromTry();
+        arktest.assertEQ(rftA1, 1)   // set before return
+        arktest.assertEQ(rftA2, 0)   // skipped due to return
+        arktest.assertEQ(rftA3, 1)   // set in finally
+    })
+
+    suite.addTest("Return from nested try executes all enclosing finally blocks", () => {
+        fooReturnFromNestedTry();
+        arktest.assertEQ(rntA1, 1)   // set before return
+        arktest.assertEQ(rntA2, 0)   // skipped due to return
+        arktest.assertEQ(rntA3, 1)   // set in inner finally
+        arktest.assertEQ(rntA4, 2)   // set in outer finally: rntA3 + 1
+    })
+
     suite.addTest("Finally executes even when catch re-throws", () => {
         let result = ""
         try {
@@ -227,6 +257,47 @@ function main(): int {
             result += "-outer"
         }
         arktest.assertEQ(result, "catch-finally-outer")
+    })
+
+    suite.addTest("Finally executes on break from try block inside loop", () => {
+        let result = ""
+        for (let i = 0; i < 3; i++) {
+            try {
+                if (i == 1) break
+                result += i.toString()
+            } finally {
+                result += "f"
+            }
+        }
+        arktest.assertEQ(result, "0ff")
+    })
+
+    suite.addTest("Finally executes on continue from try block inside loop", () => {
+        let result = ""
+        for (let i = 0; i < 3; i++) {
+            try {
+                if (i == 1) continue
+                result += i.toString()
+            } finally {
+                result += "f"
+            }
+        }
+        arktest.assertEQ(result, "0ff2f")
+    })
+
+    suite.addTest("Exception thrown in finally when try completes normally propagates", () => {
+        let result = ""
+        try {
+            try {
+                result += "try"
+            } finally {
+                result += "-finally"
+                throw new Er()
+            }
+        } catch (e) {
+            result += "-caught"
+        }
+        arktest.assertEQ(result, "try-finally-caught")
     })
 
     return suite.run()
