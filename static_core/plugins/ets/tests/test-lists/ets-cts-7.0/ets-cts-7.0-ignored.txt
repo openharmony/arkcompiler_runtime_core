@@ -2,10 +2,6 @@
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
 
-#30677
-03.types/18.function_types/01.type_function/optional_type_params_0.ets
-03.types/18.function_types/01.type_function/optional_type_params_2.ets
-
 #33270
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_0.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_1.ets
