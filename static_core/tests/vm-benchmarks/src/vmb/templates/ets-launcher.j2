@@ -57,10 +57,10 @@ class VmbLauncher {
     static coroutinesTeardown(): long {
         let start = Chrono.nanoNow();
         VmbLauncher.log("Force Coroutines Teardown");
-        let current_coroutines_pool_size: double = VmbLauncher.CL * VmbLauncher.CT;
-        while (current_coroutines_pool_size > 0) {
-            // request count of current coroutines when method provided -- now just stub cycle
-            current_coroutines_pool_size -= 0.0000001;
+        let current_coroutines_pool_size = CoroutineExtras.getCoroutineCount();
+        let finish_coroutines_pool_size = round((1 - VmbLauncher.CT) * current_coroutines_pool_size);
+        while (current_coroutines_pool_size > finish_coroutines_pool_size) {
+            current_coroutines_pool_size = CoroutineExtras.getCoroutineCount();
         }
         return Chrono.nanoNow() - start;
     }
