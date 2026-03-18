@@ -17,6 +17,7 @@ if(PANDA_COMPILER_ENABLE)
         NAME ets_tests_compiler_optimizer
         SOURCES
             ${PANDA_ROOT}/compiler/tests/unit_test.cpp
+            ets_async_ir_builder_test.cpp
             ets_loop_idioms_test.cpp
             string_flat_check_test.cpp
         LIBRARIES

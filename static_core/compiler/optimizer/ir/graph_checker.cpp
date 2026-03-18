@@ -2425,16 +2425,23 @@ void GraphChecker::VisitSaveStateOsr([[maybe_unused]] GraphVisitor *v, [[maybe_u
 
 void GraphChecker::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->Verify(),
+    [[maybe_unused]] auto ss = static_cast<SaveStateInst *>(inst);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ss->Verify(),
                                         std::cerr << "Inconsistent SaveStateSuspend instruction:\n"
                                                   << *inst << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->GetUsers().Empty(),
-                                        std::cerr << "SaveStateSuspend can't have users");
-    [[maybe_unused]] auto ss = inst->CastToSaveStateSuspend();
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ss->GetUsers().Empty(), std::cerr << "SaveStateSuspend can't have users");
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !ss->GetInputsWereDeleted(),
                                         std::cerr << "Some inputs from SaveStateSuspend were deleted." << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ss->RequireRegMap(),
                                         std::cerr << "SaveStateSuspend must require RegMap." << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ss->GetInputsCount() > ss->GetAsyncContextIndex(),
+                                        std::cerr << "SaveStateSuspend must have AsyncContext input:\n"
+                                                  << *inst << std::endl);
+    [[maybe_unused]] auto asyncContext = ss->GetAsyncContext();
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, asyncContext->GetType() == DataType::REFERENCE,
+                                        std::cerr << "SaveStateSuspend AsyncContext input must be a reference:\n"
+                                                  << *inst << std::endl
+                                                  << *asyncContext << std::endl);
 }
 
 void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)

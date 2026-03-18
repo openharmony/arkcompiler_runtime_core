@@ -4237,6 +4237,18 @@ public:
         return GetDynamicOperands()->GetUser(index)->GetVirtualRegister();
     }
 
+    size_t GetAsyncContextIndex() const
+    {
+        ASSERT(GetOpcode() == Opcode::SaveStateSuspend);
+        return ASYNC_CONTEXT_INPUT_IDX;
+    }
+
+    Inst *GetAsyncContext() const
+    {
+        ASSERT(GetOpcode() == Opcode::SaveStateSuspend);
+        return GetInput(GetAsyncContextIndex()).GetInst();
+    }
+
     bool Verify() const
     {
         for (size_t i {0}; i < GetInputsCount(); ++i) {
@@ -4414,6 +4426,8 @@ protected:
 #endif
 
 private:
+    static constexpr size_t ASYNC_CONTEXT_INPUT_IDX = 0U;
+
     ArenaVector<SaveStateImm> *immediates_ {nullptr};
     void *method_ {nullptr};
     // If instruction is in the inlined graph, this variable points to the inliner's call instruction.

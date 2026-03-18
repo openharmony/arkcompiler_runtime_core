@@ -390,6 +390,12 @@ void IrBuilder::BuildBasicBlocks(const BytecodeInstructions &instructions)
             CreateBlock(pc);
             fallthrough = false;
         }
+        // Create a new basic block for continuing normal execution after the async-context check.
+        if (inst.HasFlag(BytecodeInstruction::DISPATCH)) {
+            auto nextPc = instructions.GetPc(inst.GetNext());
+            ASSERT(nextPc < instructions.GetSize());
+            CreateBlock(nextPc);
+        }
         auto offset = InstBuilder::GetInstructionJumpOffset(&inst);
         if (offset != INVALID_OFFSET) {
             auto targetPc = static_cast<uint64_t>(static_cast<int64_t>(pc) + offset);
@@ -501,6 +507,12 @@ void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
         } else if (info.deadInstructions) {
             // We are processing dead instructions now, skipping them until we meet the next block.
             continue;
+        }
+        // Create separate block for Dispatch instruction and connect it with end block, since dispatch is terminator.
+        if (inst.HasFlag(BytecodeInstruction::DISPATCH)) {
+            auto dispatchBlock = GetGraph()->CreateEmptyBlock(currBb);
+            dispatchBlock->AddSucc(GetGraph()->GetEndBlock());
+            currBb->AddSucc(dispatchBlock);
         }
         if (auto jmpTargetBlock = GetBlockToJump(&inst, pc); jmpTargetBlock != nullptr) {
             currBb->AddSucc(jmpTargetBlock);
