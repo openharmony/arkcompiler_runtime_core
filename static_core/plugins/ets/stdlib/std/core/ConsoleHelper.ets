@@ -40,7 +40,7 @@ export class Formatter {
         return obj instanceof Array
     }
 
-    private stringifySubObject(delimiter: string, subObj: Any, subObjName: string, depth: number, full: boolean = false): string {
+    private stringifySubObject(delimiter: string, subObj: Any, subObjName: string, depth: int, full: boolean = false): string {
 
         if (Formatter.isNullObject(subObj)) {
             return Formatter.nullObjectDescription(subObjName) + ',' + delimiter
@@ -64,7 +64,7 @@ export class Formatter {
         return strB.toString()
     }
 
-    private objectDescription(obj: Object, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+    private objectDescription(obj: Object, delimiter: string = '\n', depth: int = 1, full: boolean = false): string {
         let fields = reflect.getInstanceFieldsRecursive(Class.of(obj))
         if (fields.length == 0) {
             return JSON.stringify(obj)
@@ -76,7 +76,7 @@ export class Formatter {
         return strB.toString().slice(0, - delimiter.length - 1) + ' }'
     }
 
-    private subObjectDescription(obj: Object, objName: string, isCircular: boolean, delimiter: string, depth: number): string {
+    private subObjectDescription(obj: Object, objName: string, isCircular: boolean, delimiter: string, depth: int): string {
         if (isCircular) {
             return objName + ': [Circular]' + delimiter
         }
@@ -102,7 +102,7 @@ export class Formatter {
         return (isSub ? objName + ': ' : '') + quotesStr + obj + quotesStr
     }
 
-    private stringifyObject(obj: Any, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+    private stringifyObject(obj: Any, delimiter: string = '\n', depth: int = 1, full: boolean = false): string {
 
         if (Formatter.isNullObject(obj)) {
             return Formatter.nullObjectDescription()
@@ -126,7 +126,7 @@ export class Formatter {
         return strB.toString()
     }
 
-    private static arrayToString(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
+    private static arrayToString(delimiter: string, arr: Array<Object>, depth: int, full: boolean = false): string {
         let stringifiedArray = Formatter.arrayToStringImpl(delimiter, arr, depth, full);
         let postfix = '';
         if (full) {
@@ -160,7 +160,7 @@ export class Formatter {
         return strB.toString()
     }
 
-    private static arrayToStringImpl(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
+    private static arrayToStringImpl(delimiter: string, arr: Array<Object>, depth: int, full: boolean = false): string {
         if (!arr.length) {
             return ''
         }
