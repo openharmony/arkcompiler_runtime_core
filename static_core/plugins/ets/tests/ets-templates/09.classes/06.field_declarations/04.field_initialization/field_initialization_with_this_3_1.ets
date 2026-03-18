@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,26 +13,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for timing in ["compile", "runtime"] %}
+
 /*---
 desc: Non-static field initialization with keyword 'this'.
 assert: >-
-    The instance field initializer expression cannot use
-    this or super directly in any form.
-tags: [compile-only, negative]
+    If the instance field initializer expression uses
+    this or super directly in any form,then a compile-time warning occurs.
+{% if 'compile' in timing %}
+tags: [compile-only]
+expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
+{% endif %}
 ---*/
+
+// #2345 after runner is made to support this properly, remove compile-only tag and "timing" loop
 
 function gr(this: A): int {
     return this.y
 }
 
 class A {
-  public y: int = 5;
+  public y: int = 5
   public x: int = gr(this)
 
 }
 
 function main(): void {
-    let instance: A = new A();
+    let instance: A = new A()
 
-    arktest.assertEQ(instance.x, 5);
+    arktest.assertEQ(instance.x, 5)
 }
+
+{% endfor %}

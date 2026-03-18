@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,11 +16,12 @@ limitations under the License.
 /*---
 desc: Non-static field 'f' have reference to itself.
 assert: >-
-    The instance field initializer expression cannot use
-    this or super directly in any form.
-tags: [compile-only, negative]
+    If the instance field initializer expression uses
+    this or super directly in any form,then a compile-time warning occurs.
+tags: [compile-only]
+expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
 ---*/
 
 class C {
-  public f: int = this.f + 5;
+  public f: int = this.f + 5
 }
