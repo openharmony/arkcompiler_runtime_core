@@ -1609,6 +1609,8 @@
 13.modules_and_namespaces/04.top-level_declarations/top_level_declarations_negative_7.ets
 13.modules_and_namespaces/04.top-level_declarations/top_level_declarations_negative_9.ets
 13.modules_and_namespaces/04.import_directives/02.default_import_binding/default_import_abstract_class.ets
+13.modules_and_namespaces/04.import_directives/circular_reference/circular_reference_1.ets
+13.modules_and_namespaces/04.import_directives/circular_reference/circular_reference_2.ets
 13.modules_and_namespaces/05.export_directives/01.selective_export_directive/t04/b.ets
 13.modules_and_namespaces/05.export_directives/01.selective_export_directive/t04/c.ets
 13.modules_and_namespaces/05.export_directives/01.selective_export_directive/t05/b.ets
