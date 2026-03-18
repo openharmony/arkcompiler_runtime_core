@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,26 @@
  */
 
 /*---
-desc: Extend class.
-assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
+desc: Subclasses not override superclass methods with union type arguments.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0136: Method foo(a: Base1): Int in Test not overriding any method"
 ---*/
 
-class A {}
-
-final class C extends A {}
+class Base1 {}
+class Base2 {}
+class Child extends Base2 {}
+class Child2 extends Base2 {}
+class TestBase {
+    foo(a: Base1 | Base2) {
+        return 1;
+    }
+}
+class Test extends TestBase {
+    override foo(a: Base1) {
+        return 5;
+    }
+}
 
 function main(): void {
-    let c = new C;
-    arktest.assertTrue(c instanceof A);
+    let test = new Test();
 }

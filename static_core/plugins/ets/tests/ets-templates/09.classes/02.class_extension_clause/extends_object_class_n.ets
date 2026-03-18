@@ -14,20 +14,17 @@
  */
 
 /*---
-desc: Declare two class with same parameters, A - superclass of B, B - subclass of A.
+desc: Extend Object class.
 assert: >-
-    Given a generic class declaration C<F1,...,Fn> (n > 0), the direct superclass of the parameterized
-    class type C<T1,...,Tn>, where Ti (1 ≤ i ≤ n) is a type, is D<U1 θ,...,Uk θ>, where D<U1,...,Uk> i
-    s the direct superclass of C<F1,...,Fn> and θ is the substitution [F1:=T1,...,Fn:=Tn].
+    The extends clause must not appear in the definition of the class Object, or a compile-time error occurs,
+    because it is the primordial class and has no direct superclass.
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0295: Object is a predefined type, cannot be used as an identifier"
 ---*/
 
-class C {}
+class A {
 
-class A<T extends Object, G extends C> {}
+}
 
-final class B<T extends Object, G extends C> extends A<T, G> {}
-
-function main(): void {
-    let b = new B<int, C>;
-    arktest.assertTrue(b instanceof A);
+final class Object extends A {
 }

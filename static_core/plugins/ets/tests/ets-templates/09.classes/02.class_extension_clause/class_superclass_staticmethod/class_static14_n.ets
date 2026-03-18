@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,24 @@
  */
 
 /*---
-desc: Extend class.
-assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
+desc: Calling a static method through an instance.
+tags: [compile-only, negative]
+expected_out: " Semantic error ESE0087: Property 'staticMethod' does not exist on type 'Parent'"
 ---*/
 
-class A {}
+class Parent {
+  static check(): string {
+    return "Static called";
+  }
+}
 
-final class C extends A {}
+class Child extends Parent {
+  static staticMethod(): string {
+    return Parent.staticMethod();
+  }
+}
 
 function main(): void {
-    let c = new C;
-    arktest.assertTrue(c instanceof A);
+  const obj = new Child();
+  arktest.assertEQ(obj.check(), "static method");
 }

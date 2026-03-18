@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,29 @@
  */
 
 /*---
-desc: Extend class.
-assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
+desc: Subclasses accessing the initialization string of parent class members.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0293: Property value is not visible here."
 ---*/
 
-class A {}
+class Base {
+  private value: string;
+  constructor() {
+    this.value = "hello,world";
+  }
+}
 
-final class C extends A {}
+class Sub extends Base {
+  constructor() {
+    super();
+  }
+
+  public checkAccess(): void {
+    let test_value = this.value;
+  }
+}
 
 function main(): void {
-    let c = new C;
-    arktest.assertTrue(c instanceof A);
+  const instanceB = new Sub();
+  instanceB.checkAccess();
 }

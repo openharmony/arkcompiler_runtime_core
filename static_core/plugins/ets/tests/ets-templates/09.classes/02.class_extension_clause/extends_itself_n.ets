@@ -14,20 +14,12 @@
  */
 
 /*---
-desc: Declare two class with same parameters, A - superclass of B, B - subclass of A.
-assert: >-
-    Given a generic class declaration C<F1,...,Fn> (n > 0), the direct superclass of the parameterized
-    class type C<T1,...,Tn>, where Ti (1 ≤ i ≤ n) is a type, is D<U1 θ,...,Uk θ>, where D<U1,...,Uk> i
-    s the direct superclass of C<F1,...,Fn> and θ is the substitution [F1:=T1,...,Fn:=Tn].
+desc: Class extends itself.
+assert: It is a compile-time error if a class depends on itself.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0310: Cyclic inheritance involving A."
 ---*/
 
-class C {}
+class A extends A {
 
-class A<T extends Object, G extends C> {}
-
-final class B<T extends Object, G extends C> extends A<T, G> {}
-
-function main(): void {
-    let b = new B<int, C>;
-    arktest.assertTrue(b instanceof A);
 }
