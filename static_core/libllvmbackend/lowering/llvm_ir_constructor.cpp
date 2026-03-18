@@ -18,7 +18,6 @@
 #include "intrinsic_string_flat_check.inl"
 #include "irtoc/backend/compiler/constants.h"
 #include "runtime/include/coretypes/string.h"
-
 #include "llvm_ir_constructor.h"
 
 #include "gc_barriers.h"
@@ -5382,23 +5381,74 @@ void LLVMIrConstructor::VisitCatchPhi([[maybe_unused]] GraphVisitor *v, Inst *in
     UnexpectedLowering(inst);
 }
 
+llvm::Value *LLVMIrConstructor::LoadFromExecutionContext(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface,
+                                                         Arch arch, uintptr_t offset, llvm::Type *type)
+{
+    auto threadRegValue = llvmbackend::runtime_calls::GetThreadRegValue(builder, arkInterface);
+    auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
+
+    // Load thread type
+    auto threadTypeAddr = builder->CreateConstInBoundsGEP1_64(
+        builder->getInt8Ty(), threadRegPtr, arkInterface->GetRuntime()->GetManagedThreadTypeOffset(arch));
+    auto threadType = builder->CreateLoad(builder->getInt32Ty(), threadTypeAddr);
+
+    // Compare with worker thread constant
+    auto workerThreadConst = builder->getInt32(arkInterface->GetRuntime()->GetManagedThreadTypeWorkerThread(arch));
+    auto isWorker = builder->CreateICmpEQ(threadType, workerThreadConst);
+
+    // Create basic blocks for branching
+    auto currentBlock = builder->GetInsertBlock();
+    auto func = currentBlock->getParent();
+    auto workerBlock = llvm::BasicBlock::Create(func->getContext(), "worker", func);
+    auto coroutineBlock = llvm::BasicBlock::Create(func->getContext(), "coroutine", func);
+    auto mergeBlock = llvm::BasicBlock::Create(func->getContext(), "merge", func);
+
+    builder->CreateCondBr(isWorker, workerBlock, coroutineBlock);
+
+    // Worker thread path
+    builder->SetInsertPoint(workerBlock);
+    auto workerCtxAddr = builder->CreateConstInBoundsGEP1_64(
+        builder->getInt8Ty(), threadRegPtr,
+        arkInterface->GetRuntime()->GetExecutionContextWrapperOffset(arch) + offset);
+    auto workerCtx = builder->CreateBitCast(workerCtxAddr, builder->getPtrTy());
+    builder->CreateBr(mergeBlock);
+
+    // Coroutine path
+    builder->SetInsertPoint(coroutineBlock);
+    auto coroCtxAddr = builder->CreateConstInBoundsGEP1_64(
+        builder->getInt8Ty(), threadRegPtr,
+        arkInterface->GetRuntime()->GetCoroutineExecutionContextOffset(arch) + offset);
+    auto coroCtx = builder->CreateBitCast(coroCtxAddr, builder->getPtrTy());
+    builder->CreateBr(mergeBlock);
+
+    // Merge point
+    builder->SetInsertPoint(mergeBlock);
+    auto execCtxPhi = builder->CreatePHI(builder->getPtrTy(), 2);
+    execCtxPhi->addIncoming(workerCtx, workerBlock);
+    execCtxPhi->addIncoming(coroCtx, coroutineBlock);
+
+    // Load value from execution context
+    auto loadType = (type != nullptr) ? type : builder->getPtrTy();
+    return builder->CreateLoad(loadType, execCtxPhi);
+}
+
 void LLVMIrConstructor::VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
-
-    auto offset = ctor->GetGraph()->GetRuntime()->GetTlsPromiseClassPointerOffset(ctor->GetGraph()->GetArch());
-    auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
-                                                           ctor->builder_.getPtrTy());
+    auto arch = ctor->GetGraph()->GetArch();
+    auto result =
+        LoadFromExecutionContext(&ctor->builder_, ctor->arkInterface_, arch,
+                                 ctor->arkInterface_->GetRuntime()->GetExecutionContextPromiseClassOffset(arch));
     ctor->ValueMapAdd(inst, result);
 }
 
 void LLVMIrConstructor::VisitLoadUniqueObject(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
-
-    auto offset = ctor->GetGraph()->GetRuntime()->GetTlsUniqueObjectOffset(ctor->GetGraph()->GetArch());
-    auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
-                                                           ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+    auto arch = ctor->GetGraph()->GetArch();
+    auto result = LoadFromExecutionContext(&ctor->builder_, ctor->arkInterface_, arch,
+                                           ctor->arkInterface_->GetRuntime()->GetExecutionContextNullValueOffset(arch),
+                                           ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
     ctor->ValueMapAdd(inst, result);
 }
 

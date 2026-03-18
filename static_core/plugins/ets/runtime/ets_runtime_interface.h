@@ -34,6 +34,35 @@ public:
     {
         return ark::cross_values::GetEtsCoroutineNullValueOffset(arch);
     }
+    // ETS execution context offsets
+    size_t GetManagedThreadTypeOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetManagedThreadTypeOffset(arch);
+    }
+    uintptr_t GetManagedThreadTypeWorkerThread(Arch arch) const override
+    {
+        return ark::cross_values::GetManagedThreadTypeWorkerThread(arch);
+    }
+    size_t GetCoroutineExecutionContextOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetEtsCoroutineExecutionContextOffset(arch);
+    }
+    size_t GetExecutionContextWrapperOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetEtsExecutionContextWrapperOffset(arch);
+    }
+    size_t GetExecutionContextAniEnvOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetEtsExecutionContextAniEnvOffset(arch);
+    }
+    size_t GetExecutionContextPromiseClassOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetEtsExecutionContextPromiseClassOffset(arch);
+    }
+    size_t GetExecutionContextNullValueOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetEtsExecutionContextNullValueOffset(arch);
+    }
     uint64_t GetUniqueObject() const override;
     InteropCallKind GetInteropCallKind(MethodPtr methodPtr) const override;
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;

@@ -932,6 +932,35 @@ public:
         return 0;
     }
 
+    virtual size_t GetManagedThreadTypeOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual uintptr_t GetManagedThreadTypeWorkerThread([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual size_t GetCoroutineExecutionContextOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual size_t GetExecutionContextWrapperOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual size_t GetExecutionContextAniEnvOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual size_t GetExecutionContextPromiseClassOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual size_t GetExecutionContextNullValueOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+
     virtual uintptr_t GetGlobalVarAddress([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t id)
     {
         return 0;

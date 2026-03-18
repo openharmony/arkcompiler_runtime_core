@@ -352,6 +352,7 @@ public:
     RegMask GetLiveOut(const BasicBlock *bb) const;
 
     Reg ThreadReg() const;
+    void LoadFromExecutionContext(Reg dst, uintptr_t offset);
     static bool InstEncodedWithLibCall(const Inst *inst, Arch arch);
 
     void EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src);

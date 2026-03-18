@@ -15,6 +15,9 @@
 
 #include "compiler/optimizer/code_generator/codegen.h"
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
+#include "optimizer/ir/datatype.h"
+#include "optimizer/ir/inst.h"
+#include "cross_values.h"
 
 namespace ark::compiler {
 // SaveState keeps the input itself, but after regalloc its real location may change.
@@ -112,7 +115,7 @@ void Codegen::EtsGetMethodNativePointer(IntrinsicInst *inst, Reg dst, SRCREGS &s
 
 void Codegen::EtsGetNativeApiEnv([[maybe_unused]] IntrinsicInst *inst, Reg dst, [[maybe_unused]] SRCREGS &src)
 {
-    GetEncoder()->EncodeLdr(dst, false, MemRef(ThreadReg(), GetRuntime()->GetTlsNativeApiOffset(GetArch())));
+    LoadFromExecutionContext(dst, GetRuntime()->GetExecutionContextAniEnvOffset(GetArch()));
 }
 
 void Codegen::EtsBeginNativeMethod(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS &src)
