@@ -15,7 +15,7 @@
 cases:
   - {type: "number", value: "number.MAX_VALUE", checkVal: "i, number.MAX_VALUE", checkType: "i instanceof number"}
   - {type: "Array<number>", value: "Array.create<number>(3, 1);", checkVal: "i.at(0), 1", checkType: "i instanceof Array"}
-  - {type: "number[]", value: "new number[3]", checkVal: "i[0], 0", checkType: "i instanceof Array"}
+  - {type: "number[]", value: "new number[3](0)", checkVal: "i[0], 0", checkType: "i instanceof Array"}
   - {type: "number[]", value: "[1.0, 2.0]", checkVal: "i[0], 1.0", checkType: "i instanceof Array"}
   - {type: "I", value: "{a: 3, b: \"str\"}", checkVal: "i.b, \"str\"", checkType: "i instanceof I"}
   - {type: "ENM", value: "ENM.Red", checkVal: "i, ENM.Red", checkType: "i instanceof ENM"}

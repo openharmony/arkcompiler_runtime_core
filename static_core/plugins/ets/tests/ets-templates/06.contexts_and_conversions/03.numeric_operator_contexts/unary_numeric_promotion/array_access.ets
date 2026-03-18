@@ -30,7 +30,7 @@ function main(): int {
     {% for c in cases %} 
         testSuite.addTest("promotion_{{loop.index}}", () => {
             let v: {{c.type}} = {{c.val}};
-            let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
+            let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1]({{c.val}});
             arr[v.toInt()] = v;
             arktest.assertEQ(arr[v.toInt()], {{c.len}})
         }); 

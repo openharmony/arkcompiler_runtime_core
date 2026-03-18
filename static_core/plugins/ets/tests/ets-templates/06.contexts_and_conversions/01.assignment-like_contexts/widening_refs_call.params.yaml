@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,9 +22,9 @@ cases:
     - { totype: I, fromtype: B, fromval: new B() }
     - { totype: I, fromtype: C, fromval: new C() }
 
-    - { totype: "Object", fromtype: "C[]", fromval: "new C[0]" }
-    - { totype: "Object", fromtype: "B[]", fromval: "new B[0]" }
-    - { totype: "Object", fromtype: "A[]", fromval: "new A[0]" }
+    - { totype: "Object", fromtype: "C[]", fromval: "new C[0](new C())" }
+    - { totype: "Object", fromtype: "B[]", fromval: "new B[0](new B())" }
+    - { totype: "Object", fromtype: "A[]", fromval: "new A[0](new A())" }
 
     - { totype: "Object", fromtype: "C[][][]", fromval: "new C[1][2][3]" }
     - { totype: "Object", fromtype: "Object[][][]", fromval: "new Object[1][2][3]" }

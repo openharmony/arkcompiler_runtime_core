@@ -56,10 +56,10 @@ cases:
 
 # Array
   # 15-18 override (alias)
-  - { base: "i: number[]", derived: "i: double[]", call: "new number[1]", res: 2 }
-  - { base: "i: number[]", derived: "i: double[]", call: "new double[2]", res: 2 }
-  - { base: "i: string[]", derived: "i: String[]", call: "new string[2]", res: 2 }
-  - { base: "i: string[]", derived: "i: String[]", call: "new String[1]", res: 2 }
+  - { base: "i: number[]", derived: "i: double[]", call: "new number[1](0)", res: 2 }
+  - { base: "i: number[]", derived: "i: double[]", call: "new double[2](0)", res: 2 }
+  - { base: "i: string[]", derived: "i: String[]", call: "new string[2](\"\")", res: 2 }
+  - { base: "i: string[]", derived: "i: String[]", call: "new String[1](\"\")", res: 2 }
 
   #19
   - base: "i: A[]"

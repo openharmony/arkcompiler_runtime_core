@@ -40,7 +40,7 @@ cases:
     res: 7
 
   - defs: |-
-      let k = new Long[3];
+      let k = new Long[3](0);
     exp: '14 + (k[2] = 2 as long) + k[2] * (k[1] = 1 as long)'
     res: 5
 

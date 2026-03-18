@@ -50,7 +50,7 @@ function testObjectType(): int {
     let ot = Type.of(new Object())
     let at = Type.of(new A())
     let it = (Type.of(new AI()) as ClassType).getInterface(0)
-    let arrt = Type.of(new Double[3])
+    let arrt = Type.of(new Double[3](0))
     let st = Type.of("str")
     let f : () => void = () : void => {
         return
@@ -96,11 +96,11 @@ function testInterfaceType(): int {
 }
 
 function testArrayType(): int {
-    let rat = Type.of(new double[1])
-    let pat = Type.of(new Double[1])
-    let arrat = Type.of(new A[1])
-    let arrbt = Type.of(new B[1])
-    let arrct = Type.of(new C[1])
+    let rat = Type.of(new double[1](0))
+    let pat = Type.of(new Double[1](0))
+    let arrat = Type.of(new A[1](new A()))
+    let arrbt = Type.of(new B[1](new B()))
+    let arrct = Type.of(new C[1](new C()))
     return test(!rat.assignableFrom(pat), "double[] <- Double[]") +
             test(!pat.assignableFrom(rat), "Double[] <- double[]") +
             test(arrat.assignableFrom(arrbt), "A[] <- B[]") +

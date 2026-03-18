@@ -70,7 +70,7 @@ cases:
     - 42 - 21 - 20
     - 42 * (21 - 10 - 10)
 
-    - 'new number[0]'
+    - 'new number[0](0)'
     - 'new boolean[0][0]'
     - 'new Object()'
     - 'new Error()'

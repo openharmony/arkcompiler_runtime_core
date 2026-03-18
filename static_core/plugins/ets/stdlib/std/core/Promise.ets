@@ -400,7 +400,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         return new Promise<PromiseSettledResult<Awaited<U>>[]>(
             (resolve: (value: PromiseSettledResult<Awaited<U>>[]) => void, _reject: (error: Error) => void): void => {
                 let settledCnt = 0;
-                const results: PromiseSettledResultBase[] = new PromiseSettledResultBase[promises.length];
+                const results: PromiseSettledResultBase[] = new PromiseSettledResultBase[promises.length](new PromiseSettledResultBase());
 
                 const getResults = (): PromiseSettledResult<Awaited<U>>[] => {
                     return (results as Object) as PromiseSettledResult<Awaited<U>>[];
@@ -473,7 +473,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         return new Promise<Awaited<U>>((resolve: (value: Awaited<U>) => void, reject: (error: Error) => void): void => {
             let resolvedCnt = 0;
             let rejectedCnt = 0;
-            const errors: Error[] = new Error[promises.length];
+            const errors: Error[] = new Error[promises.length](new Error());
 
             if (promises.length === 0) {
                 reject(new AggregateError(errors, "All promises are rejected"));
@@ -680,7 +680,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     private static STATE_LINKED = 1;
     private static STATE_RESOLVED = 2;
     private static STATE_REJECTED = 3;
-    private static EMPTY_QUEUE = new Object[0];
+    private static EMPTY_QUEUE = new Object[0](new Object());
 
     // Order of fields should be the following
     // 1. Reference fields

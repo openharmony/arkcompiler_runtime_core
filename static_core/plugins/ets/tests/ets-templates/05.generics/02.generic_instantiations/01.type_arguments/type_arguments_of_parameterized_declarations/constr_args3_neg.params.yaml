@@ -54,12 +54,12 @@ cases:
 
   # arrays
   - use: |-
-      let v: A<int[],X[]> = new A<int[],X[]>(new int[1], new int[1])  // int[] is not X[]
+      let v: A<int[],X[]> = new A<int[],X[]>(new int[1](0), new int[1](0))  // int[] is not X[]
     stdout: |-
       "Semantic error ESE0046: Type 'Array<Int>' is not compatible with type 'Array<X>' at index 2"
 
   - use: |-
-      let v: A<int[]|null,X[]|null> = new A<int[]|null,X[]|null>(null, new Object[0])  // Object[] is not X[]
+      let v: A<int[]|null,X[]|null> = new A<int[]|null,X[]|null>(null, new Object[0](new Object()))  // Object[] is not X[]
     stdout: |-
       "Semantic error ESE0046: Type 'Array<Object>' is not compatible with type 'Array<X>|null' at index 2"
 
@@ -71,20 +71,20 @@ cases:
       "Semantic error ESE0046: Type 'Color' is not compatible with type 'Array<Color>' at index 2"
 
   - use: |-
-      let v: A<B,B> = new A<B,B>(null, new X[0])  // X[] is not X[][]
+      let v: A<B,B> = new A<B,B>(null, new X[0](new X()))  // X[] is not X[][]
     decl: type B = X[][]|null
     stdout: |-
       "Semantic error ESE0046: Type 'Array<X>' is not compatible with type 'Array<Array<X>>|null' at index 2"
 
   - use: |-
-      let v: A<Y,B> = new A<Y,B>(new Y(), new Y[0])  // out of bound
+      let v: A<Y,B> = new A<Y,B>(new Y(), new Y[0](new Y()))  // out of bound
     bound: ' extends Y[]'
     decl: type B = X[]
     stdout: |-
       "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
 
   - use: |-
-      let v: A<C|null,B|null> = new A<C|null,B|null>(new Color[0], new X[0])  // X[] is not Y[]
+      let v: A<C|null,B|null> = new A<C|null,B|null>(new Color[0](new Color()), new X[0](new X()))  // X[] is not Y[]
     bound: ' extends X[]|null'
     decl: |-
       type B = Y[]

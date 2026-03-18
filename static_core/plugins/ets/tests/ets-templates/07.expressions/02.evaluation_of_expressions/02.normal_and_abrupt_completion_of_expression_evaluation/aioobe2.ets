@@ -22,7 +22,7 @@ tags:
 
 function main() {
 
-  let v = new int[256];
+  let v = new int[256](0);
   let a = 1;
   let b = 1;
 

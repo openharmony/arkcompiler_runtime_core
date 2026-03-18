@@ -208,7 +208,7 @@ cases:
           }
       use: |-
           // new expression in expression
-          arktest.assertEQ((new A).foo(...(new number[256])), 0)
+          arktest.assertEQ((new A).foo(...(new number[256](0))), 0)
 
     - decl: |-
           class A {

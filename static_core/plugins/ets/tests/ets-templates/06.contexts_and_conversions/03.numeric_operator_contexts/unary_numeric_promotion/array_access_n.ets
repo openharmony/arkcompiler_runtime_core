@@ -26,7 +26,7 @@ expected_out: "{{c.expected}}"
 function main() {
 
   let v: {{c.type}} = {{c.val}};
-  let arr: FixedArray<{{c.type}}> = new {{c.type}}[{{c.len}} + 1];
+  let arr: FixedArray<{{c.type}}> = new {{c.type}}[{{c.len}} + 1]({{c.val}});
   arr[v] = v;
   
 }

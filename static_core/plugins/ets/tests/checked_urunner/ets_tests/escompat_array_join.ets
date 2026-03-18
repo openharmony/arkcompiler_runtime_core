@@ -206,7 +206,7 @@ function testArrayStringJoin() {
 
 
 function testArrayJoinOom(): string {
-    let c: char[] = new char[10000];
+    let c: char[] = new char[10000]((0).toChar());
     let sb: StringBuilder = new StringBuilder();
     for (let i = 0; i < 10000000; ++i) {
         let n: int = foo(i);

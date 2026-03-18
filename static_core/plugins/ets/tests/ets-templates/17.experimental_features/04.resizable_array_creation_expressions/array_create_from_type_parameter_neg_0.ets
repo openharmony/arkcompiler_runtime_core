@@ -20,6 +20,6 @@ expected_out: "Semantic error ESE0007: Cannot use array creation expression with
 ---*/
 
 function instantiateArray<T>(): T[] {
-    return new T[0]
+    return new T[0](new T())
 }
 

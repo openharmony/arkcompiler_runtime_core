@@ -3243,22 +3243,22 @@ export final class InterfaceType extends Type {
 export final class ArrayType extends Type {
     private elemTD: RuntimeTypeDescriptor
 
-    public static readonly BOOLEAN_VAL: ArrayType   = new ArrayType(Class.of(new boolean[0]), ValueTypeDesc.BOOLEAN)
-    public static readonly BOOLEAN_REF: ArrayType   = new ArrayType(Class.of(new Boolean[0]), TypeAPI.getTypeDescriptor(new Boolean()))
-    public static readonly CHAR_VAL: ArrayType      = new ArrayType(Class.of(new char[0]), ValueTypeDesc.CHAR)
-    public static readonly CHAR_REF: ArrayType      = new ArrayType(Class.of(new Char[0]), TypeAPI.getTypeDescriptor(new Char()))
-    public static readonly BYTE_VAL: ArrayType      = new ArrayType(Class.of(new byte[0]), ValueTypeDesc.BYTE)
-    public static readonly BYTE_REF: ArrayType      = new ArrayType(Class.of(new Byte[0]), TypeAPI.getTypeDescriptor(new Byte()))
-    public static readonly SHORT_VAL: ArrayType     = new ArrayType(Class.of(new short[0]), ValueTypeDesc.SHORT)
-    public static readonly SHORT_REF: ArrayType     = new ArrayType(Class.of(new Short[0]), TypeAPI.getTypeDescriptor(new Short()))
-    public static readonly INT_VAL: ArrayType       = new ArrayType(Class.of(new int[0]), ValueTypeDesc.INT)
-    public static readonly INT_REF: ArrayType       = new ArrayType(Class.of(new Int[0]), TypeAPI.getTypeDescriptor(new Int()))
-    public static readonly LONG_VAL: ArrayType      = new ArrayType(Class.of(new long[0]), ValueTypeDesc.LONG)
-    public static readonly LONG_REF: ArrayType      = new ArrayType(Class.of(new Long[0]), TypeAPI.getTypeDescriptor(new Long()))
-    public static readonly FLOAT_VAL: ArrayType     = new ArrayType(Class.of(new float[0]), ValueTypeDesc.FLOAT)
-    public static readonly FLOAT_REF: ArrayType     = new ArrayType(Class.of(new Float[0]), TypeAPI.getTypeDescriptor(new Float()))
-    public static readonly DOUBLE_VAL: ArrayType    = new ArrayType(Class.of(new double[0]), ValueTypeDesc.DOUBLE)
-    public static readonly DOUBLE_REF: ArrayType    = new ArrayType(Class.of(new Double[0]), TypeAPI.getTypeDescriptor(new Double()))
+    public static readonly BOOLEAN_VAL: ArrayType   = new ArrayType(Class.of(new boolean[0](false)), ValueTypeDesc.BOOLEAN)
+    public static readonly BOOLEAN_REF: ArrayType   = new ArrayType(Class.of(new Boolean[0](false)), TypeAPI.getTypeDescriptor(new Boolean()))
+    public static readonly CHAR_VAL: ArrayType      = new ArrayType(Class.of(new char[0](c'\0')), ValueTypeDesc.CHAR)
+    public static readonly CHAR_REF: ArrayType      = new ArrayType(Class.of(new Char[0](c'\0')), TypeAPI.getTypeDescriptor(new Char()))
+    public static readonly BYTE_VAL: ArrayType      = new ArrayType(Class.of(new byte[0](0)), ValueTypeDesc.BYTE)
+    public static readonly BYTE_REF: ArrayType      = new ArrayType(Class.of(new Byte[0](0)), TypeAPI.getTypeDescriptor(new Byte()))
+    public static readonly SHORT_VAL: ArrayType     = new ArrayType(Class.of(new short[0](0)), ValueTypeDesc.SHORT)
+    public static readonly SHORT_REF: ArrayType     = new ArrayType(Class.of(new Short[0](0)), TypeAPI.getTypeDescriptor(new Short()))
+    public static readonly INT_VAL: ArrayType       = new ArrayType(Class.of(new int[0](0)), ValueTypeDesc.INT)
+    public static readonly INT_REF: ArrayType       = new ArrayType(Class.of(new Int[0](0)), TypeAPI.getTypeDescriptor(new Int()))
+    public static readonly LONG_VAL: ArrayType      = new ArrayType(Class.of(new long[0](0)), ValueTypeDesc.LONG)
+    public static readonly LONG_REF: ArrayType      = new ArrayType(Class.of(new Long[0](0)), TypeAPI.getTypeDescriptor(new Long()))
+    public static readonly FLOAT_VAL: ArrayType     = new ArrayType(Class.of(new float[0](0)), ValueTypeDesc.FLOAT)
+    public static readonly FLOAT_REF: ArrayType     = new ArrayType(Class.of(new Float[0](0)), TypeAPI.getTypeDescriptor(new Float()))
+    public static readonly DOUBLE_VAL: ArrayType    = new ArrayType(Class.of(new double[0](0)), ValueTypeDesc.DOUBLE)
+    public static readonly DOUBLE_REF: ArrayType    = new ArrayType(Class.of(new Double[0](0)), TypeAPI.getTypeDescriptor(new Double()))
 
     /**
      * Private constructor for ArrayType

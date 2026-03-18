@@ -19,6 +19,6 @@ tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let i: int[] = new int[2]
+  let i: int[] = new int[2](0)
   i[0] = undefined;
 }

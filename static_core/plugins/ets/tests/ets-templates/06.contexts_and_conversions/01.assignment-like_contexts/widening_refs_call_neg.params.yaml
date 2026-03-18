@@ -14,37 +14,37 @@
 ---
 cases:
 #0
-    - { totype: "B[]", fromtype: "C[]", fromval: "new C[1]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_0.Clazz(Array<C>)" }
+    - { totype: "B[]", fromtype: "C[]", fromval: "new C[1](new C())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_0.Clazz(Array<C>)" }
 #1
-    - { totype: "A[]", fromtype: "B[]", fromval: "new B[2]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_1.Clazz(Array<B>)" }
+    - { totype: "A[]", fromtype: "B[]", fromval: "new B[2](new B())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_1.Clazz(Array<B>)" }
 #2
     - { totype: "A[][]", fromtype: "C[][]", fromval: "new C[3][3]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_2.Clazz(Array<Array<C>>)" }
 #3
-    - { totype: "J[]", fromtype: "B[]", fromval: "new B[4]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_3.Clazz(Array<B>)" }
+    - { totype: "J[]", fromtype: "B[]", fromval: "new B[4](new B())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_3.Clazz(Array<B>)" }
 #4
     - { totype: "J[][][][]", fromtype: "C[][][][]", fromval: "new C[5][5][5][5]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_4.Clazz(Array<Array<Array<Array<C>>>>)" }
 #5
-    - { totype: "I[]", fromtype: "A[]", fromval: "new A[6]", expected: "Semantic error ESE0046: Type 'Array<A>' is not compatible with type 'Array<I>' at index 1" }
+    - { totype: "I[]", fromtype: "A[]", fromval: "new A[6](new A())", expected: "Semantic error ESE0046: Type 'Array<A>' is not compatible with type 'Array<I>' at index 1" }
 #6
-    - { totype: "I[]", fromtype: "B[]", fromval: "new B[7]", expected: "Semantic error ESE0046: Type 'Array<B>' is not compatible with type 'Array<I>' at index 1" }
+    - { totype: "I[]", fromtype: "B[]", fromval: "new B[7](new B())", expected: "Semantic error ESE0046: Type 'Array<B>' is not compatible with type 'Array<I>' at index 1" }
 #7
-    - { totype: "I[]", fromtype: "C[]", fromval: "new C[8]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_7.Clazz(Array<C>)" }
+    - { totype: "I[]", fromtype: "C[]", fromval: "new C[8](new C())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_7.Clazz(Array<C>)" }
 
 #8
-    - { totype: "Object[]", fromtype: "C[]", fromval: "new C[0]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_8.Clazz(Array<C>)" }
+    - { totype: "Object[]", fromtype: "C[]", fromval: "new C[0](new C())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_8.Clazz(Array<C>)" }
 #9
-    - { totype: "Object[]", fromtype: "B[]", fromval: "new B[0]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_9.Clazz(Array<B>)" }
+    - { totype: "Object[]", fromtype: "B[]", fromval: "new B[0](new B())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_9.Clazz(Array<B>)" }
 #10
-    - { totype: "Object[]", fromtype: "A[]", fromval: "new A[0]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_10.Clazz(Array<A>)" }
+    - { totype: "Object[]", fromtype: "A[]", fromval: "new A[0](new A())", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_10.Clazz(Array<A>)" }
 #11
-    - { totype: "Object[]", fromtype: "J[]", fromval: "new B[0]", expected: "Semantic error ESE0318: Type 'Array<B>' cannot be assigned to type 'Array<J>'" }
+    - { totype: "Object[]", fromtype: "J[]", fromval: "new B[0](new B())", expected: "Semantic error ESE0318: Type 'Array<B>' cannot be assigned to type 'Array<J>'" }
 #12
-    - { totype: "Object[]", fromtype: "I[]", fromval: "new C[0]", expected: "Semantic error ESE0318: Type 'Array<C>' cannot be assigned to type 'Array<I>'" }
+    - { totype: "Object[]", fromtype: "I[]", fromval: "new C[0](new C())", expected: "Semantic error ESE0318: Type 'Array<C>' cannot be assigned to type 'Array<I>'" }
 
 #13
-    - { totype: "Object", fromtype: "I[]", fromval: "new B[0]", expected: "Semantic error ESE0318: Type 'Array<B>' cannot be assigned to type 'Array<I>'" }
+    - { totype: "Object", fromtype: "I[]", fromval: "new B[0](new B())", expected: "Semantic error ESE0318: Type 'Array<B>' cannot be assigned to type 'Array<I>'" }
 #14
-    - { totype: "Object", fromtype: "J[]", fromval: "new C[0]", expected: "Semantic error ESE0318: Type 'Array<C>' cannot be assigned to type 'Array<J>'" }
+    - { totype: "Object", fromtype: "J[]", fromval: "new C[0](new C())", expected: "Semantic error ESE0318: Type 'Array<C>' cannot be assigned to type 'Array<J>'" }
 
 #15
     - { totype: "Object[]", fromtype: "B[][][]", fromval: "new B[1][2][3]", expected: "Semantic error ESE0127: No matching construct signature for widening_refs_call_neg_15.Clazz(Array<Array<Array<B>>>)" }

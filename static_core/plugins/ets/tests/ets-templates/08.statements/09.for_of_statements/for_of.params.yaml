@@ -14,17 +14,17 @@
 ---
 cases:
     - use: |-
-          let arr: int[] = new int[0]
+          let arr: int[] = new int[0](0)
           for (let v of arr) res += v
           arktest.assertEQ( res, "" )
 
     - use: |-
-          let arr: int[]|null = new int[0]
+          let arr: int[]|null = new int[0](0)
           for (let v of arr) res += v
           arktest.assertEQ( res, "" )
 
     - use: |-
-          let arr: int[]|null = (): int[]|null => { return new int[0]; }()
+          let arr: int[]|null = (): int[]|null => { return new int[0](0); }()
           for (let v of arr!) res += v
           arktest.assertEQ( res, "" )
 
@@ -100,7 +100,7 @@ cases:
           arktest.assertEQ( res, "A B C D " )
 
     - use: |-
-          let arr: Long[] = new Long[3]
+          let arr: Long[] = new Long[3](0)
           for (let i: int = 0; i < 3; i++) arr[i] = new Long(i.toLong())
           for (let i of arr) res += i
           arktest.assertEQ( res, "012" )
@@ -154,7 +154,7 @@ cases:
           }
       use: |-
           i = 0;
-          let array: A[] = new A[10];
+          let array: A[] = new A[10](new A());
           let c = 0;
           for (let x of array) c += x.i;
           arktest.assertEQ( c, 45)

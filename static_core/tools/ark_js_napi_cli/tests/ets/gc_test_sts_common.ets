@@ -30,7 +30,7 @@ function GetSTSObject(): Object {
 }
 
 function GetSTSArrayOfObjects(): Object[] {
-    let arr = new Object[8];
+    let arr = new Object[8] (new Object());
     return arr;
 }
 
@@ -46,7 +46,7 @@ function GetSTSObjectWithWeakRef(): Object {
 }
 
 function GetSTSStringArrayAsObject(): Object {
-    let a = new String[1];
+    let a = new String[1] ("");
     a[0] = "abc";
     for(let i = 0; i < 15; i++) {
         a[0] += a[0];

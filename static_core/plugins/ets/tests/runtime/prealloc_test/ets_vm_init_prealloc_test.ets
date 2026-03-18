@@ -19,12 +19,12 @@ function fillHeap(arr: Object[], numberOfIter: number): void
     const objectSize = GC.getObjectSize(new Object());
     const count = Math.pow(2, 20) / (objectSize / 8);
 
-    arr[globalIdx++] = new Object[count.toInt()];
-    arr[globalIdx++] = new Object[(count / 2).toInt()];
-    arr[globalIdx++] = new Object[(count / 32).toInt()];
-    arr[globalIdx++] = new Object[(count / 64).toInt()];
-    arr[globalIdx++] = new Object[(count / 128).toInt()];
-    arr[globalIdx++] = new Object[(count / 256).toInt()];
+    arr[globalIdx++] = new Object[count.toInt()](new Object());
+    arr[globalIdx++] = new Object[(count / 2).toInt()](new Object());
+    arr[globalIdx++] = new Object[(count / 32).toInt()](new Object());
+    arr[globalIdx++] = new Object[(count / 64).toInt()](new Object());
+    arr[globalIdx++] = new Object[(count / 128).toInt()](new Object());
+    arr[globalIdx++] = new Object[(count / 256).toInt()](new Object());
 
     let newIterNmb = numberOfIter - globalIdx;
     for (let idx = 0; idx < newIterNmb; ++idx) {
@@ -68,7 +68,7 @@ function compareErrorObjects(
 function testThrowingPreallocOOMObjectSuite(): Error
 {
     let numberOfIter = 900000;
-    let arr = new Object[numberOfIter];
+    let arr = new Object[numberOfIter](new Object());
 
     let error: Error;
     try {
@@ -98,7 +98,7 @@ function testThrowingPreallocOOMObject(
 function testThrowingPreallocOOMObjectTwiceSuite(): Error
 {
     let numberOfIter = 900000;
-    let arr = new Object[numberOfIter];
+    let arr = new Object[numberOfIter](new Object());
     let arr2: Object;
 
     let error: Error = new Error("testThrowingPreallocOOMObjectTwiceSuite failed");
@@ -112,7 +112,7 @@ function testThrowingPreallocOOMObjectTwiceSuite(): Error
 
     try {
         // Try to allocate more memory to get one more OOM
-        arr2 = new Object[numberOfIter];
+        arr2 = new Object[numberOfIter](new Object());
         fillHeap(arr2, numberOfIter);
     } catch(e) {
         if (e instanceof OutOfMemoryError){

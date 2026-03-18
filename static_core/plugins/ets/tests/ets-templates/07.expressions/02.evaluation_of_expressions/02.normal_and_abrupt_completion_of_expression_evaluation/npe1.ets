@@ -21,7 +21,7 @@ desc: NullPointerError is thrown by an array access expression
 function main() {
   let a = 1;
   let b = 1;
-  let foo = (i: int): byte[]|null => { return i <= 0 ? null : new byte[i] };
+  let foo = (i: int): byte[]|null => { return i <= 0 ? null : new byte[i](0) };
   let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
   arktest.expectThrow(() => { let v: String = "X" + (a = 2) + foo(-1)![0] + (b = 2); }, expectedException)
   arktest.assertFalse(a != 2 || b != 1)

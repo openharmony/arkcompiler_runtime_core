@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -38,6 +38,6 @@ function foo(x: string): int {
 function main() {
     arktest.assertEQ(foo(), 1)
     arktest.assertEQ(foo(1), 2)
-    arktest.assertEQ(foo(new int[0]), 3)
+    arktest.assertEQ(foo(new int[0](0)), 3)
     arktest.assertEQ(foo(""), 4)
 }

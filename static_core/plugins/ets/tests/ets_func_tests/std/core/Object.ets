@@ -237,7 +237,7 @@ function objectEntries(): int {
         return a + 1
     }
 
-    let emptyTuple: NullishTuple[] = new NullishTuple[0]
+    let emptyTuple: NullishTuple[] = new NullishTuple[0](undefined)
 
     result += tupleAreEqual(Object.entries(c) as Object as NullishTuple[], emptyTuple) ? 0 : 1
     result += tupleAreEqual(Object.entries(bo) as Object as NullishTuple[], emptyTuple) ? 0 : 1
@@ -248,25 +248,25 @@ function objectEntries(): int {
     result += tupleAreEqual(Object.entries(fl) as Object as NullishTuple[], emptyTuple) ? 0 : 1
     result += tupleAreEqual(Object.entries(dou) as Object as NullishTuple[], emptyTuple) ? 0 : 1
 
-    let arrVal: NullishTuple[] = new NullishTuple[3]
+    let arrVal: NullishTuple[] = new NullishTuple[3](undefined)
     arrVal[0] = ["0", new Number(10)] as TupleT
     arrVal[1] = ["1", new Number(20)] as TupleT
     arrVal[2] = ["2", new Number(30)] as TupleT
     result += tupleAreEqual(Object.entries(arr) as Object as NullishTuple[], arrVal) ? 0 : 1
 
-    let arr2Val: NullishTuple[] = new NullishTuple[3]
+    let arr2Val: NullishTuple[] = new NullishTuple[3](undefined)
     arr2Val[0] = ["0", "a"] as TupleT
     arr2Val[1] = ["1", "b"] as TupleT
     arr2Val[2] = ["2", "c"] as TupleT
     result += tupleAreEqual(Object.entries(arr2) as Object as NullishTuple[], arr2Val) ? 0 : 1
 
-    let strVal: NullishTuple[] = new NullishTuple[3]
+    let strVal: NullishTuple[] = new NullishTuple[3](undefined)
     strVal[0] = ["0", "a"] as TupleT
     strVal[1] = ["1", "b"] as TupleT
     strVal[2] = ["2", "c"] as TupleT
     result += tupleAreEqual(Object.entries(str) as Object as NullishTuple[], strVal) ? 0 : 1
 
-    let clVal: NullishTuple[] = new NullishTuple[3]
+    let clVal: NullishTuple[] = new NullishTuple[3](undefined)
     clVal[0] = ["x", new Number(10)] as TupleT
     clVal[1] = ["y", null] as TupleT
     clVal[2] = ["z", new Number(30)] as TupleT

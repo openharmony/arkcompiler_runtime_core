@@ -17,7 +17,7 @@ cases:
       type funcA = (a: int) => int;
       type funcB = (a: int, b: int) => int;
     stype: funcA[]
-    sval: new funcA[10]
+    sval: new funcA[10]()
     dtype: funcB[]
     expected: |-
       Semantic error ESE0051: Cannot use array creation expression with non-constructable element type which is non-assignable from undefined.

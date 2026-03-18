@@ -113,7 +113,7 @@ export namespace containers {
          * @since 24
          */
         public toArray(): String[] {
-            let newData = new (String)[this.curSize]
+            let newData = new (String)[this.curSize]("")
             for (let i = 0; i < this.curSize; ++i) {
                 if (this.data[i] == null) {
                     continue;
@@ -145,7 +145,7 @@ export namespace containers {
          * @since 24
          */
         public toUndefinableArray(): (String | undefined)[] {
-            let newData = new (String | undefined)[this.curSize]
+            let newData = new (String | undefined)[this.curSize](undefined)
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
             }

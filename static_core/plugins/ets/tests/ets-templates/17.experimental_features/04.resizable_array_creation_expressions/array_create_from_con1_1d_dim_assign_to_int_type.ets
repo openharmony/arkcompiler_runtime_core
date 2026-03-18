@@ -27,7 +27,7 @@ enum ExpShortEnum: short { V1 = 1, V2 = 30 }
 
 function runTest{{c_id}}(): boolean {
   let size: {{c.check_type}} = {{c.set_size_value}}
-  let a: number[] = new number[size]
+  let a: number[] = new number[size](0)
   arktest.assertEQ(a.length, 30)
   arktest.assertTrue(a[0] instanceof number)
   for (let i = 0; i < 30; i++) {

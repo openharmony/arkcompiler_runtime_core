@@ -118,7 +118,7 @@ export namespace containers {
          * @since 24
          */
         public toArray(): Object[] {
-            let newData = new (Object)[this.curSize]
+            let newData = new (Object)[this.curSize](new Object())
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]!
             }

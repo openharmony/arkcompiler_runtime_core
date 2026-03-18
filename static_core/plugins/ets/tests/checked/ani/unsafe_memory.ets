@@ -214,7 +214,7 @@ function testFloat64() : int {
 function testString() : int {
     let vals: String[] = ["a", "ФФ", "ccc", "ЯЯЯЯ", "12345", "ЯФ2233"];
     let size: int  = 0;
-    let sizes: int[] = new int[vals.length]
+    let sizes: int[] = new int[vals.length](0)
     for (let i: int = 0; i < vals.length; ++i) {
         sizes[i] = unsafeMemory.getStringSizeInBytes(vals[i]);
         size += sizes[i];

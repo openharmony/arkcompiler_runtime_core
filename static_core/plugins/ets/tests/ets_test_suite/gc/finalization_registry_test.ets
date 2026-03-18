@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let removed_object_callbacks: boolean[] = new boolean[5];
+let removed_object_callbacks: boolean[] = new boolean[5](false);
 // Make it global beacuse optimizer is free to kill local variables
 let object1: Object | null = null;
 let object2: Object | null = null;
@@ -210,7 +210,7 @@ function getSizeTests(): void {
 
 }
 //=========================== Unregister tests ====================================
-let done_callbacks: boolean[] = new boolean[2];
+let done_callbacks: boolean[] = new boolean[2](false);
 let registryUnreg: FinalizationRegistry<String> | null = null;
 let tokenUse: Object | null = null;
 let tokenUnuse1: Object | null = null;

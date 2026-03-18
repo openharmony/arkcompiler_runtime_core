@@ -22,7 +22,7 @@ desc: >-
 const size: int = {{c.expr}}
 
 function main() {
-    const data = new int[size]
+    const data = new int[size](0)
     arktest.assertEQ(data.length, {{c.expected}})
 }
 

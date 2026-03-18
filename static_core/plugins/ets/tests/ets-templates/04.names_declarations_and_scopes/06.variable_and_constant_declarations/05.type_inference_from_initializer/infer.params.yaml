@@ -13,11 +13,11 @@
 
 ---
 cases:
-  - decl: "let arr = new Object[1];  // inferred array of Objects"
+  - decl: "let arr = new Object[1](new Object());  // inferred array of Objects"
     use: " arr[0] = new Object();"
     assert: arr[0] instanceof Object
 
-  - decl: "let arr = new (Error|undefined)[1];  // inferred array of Error|undefined"
+  - decl: "let arr = new (Error|undefined)[1](undefined);  // inferred array of Error|undefined"
     assert: arr[0] == undefined
 
   - decl: "let arr:FixedArray<FixedArray<FixedArray<byte>>> = new byte[1][2][3];  // inferred three-dimensional array of bytes"

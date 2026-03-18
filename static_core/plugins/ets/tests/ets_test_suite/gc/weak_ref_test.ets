@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ function CreateWeakRefObject(): WeakRef<Object>
 function CreateWeakRefForConcurrent(): WeakRef<Object>
 {
     let huge_array_size: int = 100000;
-    let obj = new long[huge_array_size];
+    let obj = new long[huge_array_size](0);
     return new WeakRef<Object>(obj);
 }
 

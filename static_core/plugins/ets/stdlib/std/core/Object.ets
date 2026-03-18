@@ -154,7 +154,7 @@ export class Object {
      * @returns an array of strings representing the given record's property names
      */
     public static keys(rec: Record<PropertyKey, Any>): string[] {
-        const keys: string[] = new string[rec.size.toInt()]
+        const keys: string[] = new string[rec.size.toInt()]("")
 
         let i = 0
         for (const key of rec.keys()) {
@@ -174,9 +174,9 @@ export class Object {
     private static generateKeyArray(length: Number): string[] {
         const len = length.toInt();
         if (len == 0) {
-            return new string[0]
+            return new string[0]("")
         }
-        let res: string[] = new string[len]
+        let res: string[] = new string[len]("")
         for (let i = 0; i < len; i++) {
             res[i] = i.toString()
         }
@@ -200,7 +200,7 @@ export class Object {
             o instanceof Long ||
             o instanceof Float ||
             o instanceof Double) {
-            return new string[0]
+            return new string[0]("")
         }
         // "Keys" for the string type is enumeration from 0 to str.length - 1
         if (o instanceof String) {
@@ -213,7 +213,7 @@ export class Object {
             const ct = t as ClassType
             const fnum = ct.getFieldsNum()
             if (fnum == 0) {
-                return new string[0]
+                return new string[0]("")
             }
             let n: int = 0
             for (let i = 0; i < fnum; i++) {
@@ -221,7 +221,7 @@ export class Object {
                     n++
                 }
             }
-            let res: string[] = new string[n]
+            let res: string[] = new string[n]("")
             let j: int = 0
             for (let i = 0; i < fnum; i++) {
                 let f = ct.getField(i)
@@ -235,7 +235,7 @@ export class Object {
             const av = reflect.Value.of(o) as ArrayValue
             return Object.generateKeyArray(av.getLength())
         } else if (t instanceof LambdaType) {
-            return new string[0]
+            return new string[0]("")
         } else if (t instanceof EnumType) {
             throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
@@ -248,7 +248,7 @@ export class Object {
     }
 
     public static values(rec: Record<PropertyKey, Any>): Any[] {
-        const vals: Any[] = new Any[rec.size.toInt()]
+        const vals: Any[] = new Any[rec.size.toInt()](undefined)
 
         let i = 0
         for (let val of rec.values()) {
@@ -275,15 +275,15 @@ export class Object {
             o instanceof Long ||
             o instanceof Float ||
             o instanceof Double) {
-            return new Any[0]
+            return new Any[0](undefined)
         }
         if (o instanceof String) {
             const sv = o as string
             const len = sv.getLength()
             if (len == 0) {
-                return new Any[0]
+                return new Any[0](undefined)
             }
-            let res: Any[] = new Any[len]
+            let res: Any[] = new Any[len](undefined)
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
                 res[i] = new Char(sv.charAt(i)).toString()
@@ -295,7 +295,7 @@ export class Object {
             if (Class.of(o) === Class.of(new Array<Any>)) {
                 let arr = o as Array<Any>
                 let len = arr.length
-                let res: Any[] = new Any[len]
+                let res: Any[] = new Any[len](undefined)
                 for (let i = 0;i < len; i++) {
                     res[i] = arr[i]
                 }
@@ -303,11 +303,11 @@ export class Object {
             }
             const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
-                return new Any[0]
+                return new Any[0](undefined)
             }
             const keys = Object.keys(o)
             const len = keys.length
-            let res: Any[] = new Any[len]
+            let res: Any[] = new Any[len](undefined)
             for (let i = 0; i < len; i++) {
                 res[i] = cv.getFieldByName(keys[i]).getData()
             }
@@ -316,15 +316,15 @@ export class Object {
             const av = reflect.Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
-                return new Any[0]
+                return new Any[0](undefined)
             }
-            let res: Any[] = new Any[len.toInt()]
+            let res: Any[] = new Any[len.toInt()](undefined)
             for (let i = 0; i < len; i++) {
                 res[i] = av.getElement(i).getData()
             }
             return res
         } else if (t instanceof LambdaType) {
-            return new Any[0]
+            return new Any[0](undefined)
         } else if (t instanceof EnumType) {
             throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
@@ -344,7 +344,7 @@ export class Object {
     * @returns array representation of key/value
     */
     public static entries(rec: Record<PropertyKey, Any>): NullishEntryType[] {
-        const entries: NullishEntryType[] = new NullishEntryType[rec.size.toInt()]
+        const entries: NullishEntryType[] = new NullishEntryType[rec.size.toInt()](undefined)
 
         let i = 0
         for (const entry of rec.entries()) {
@@ -371,15 +371,15 @@ export class Object {
             o instanceof Long ||
             o instanceof Float ||
             o instanceof Double) {
-            return new NullishEntryType[0]
+            return new NullishEntryType[0](undefined)
         }
         if (o instanceof String) {
             const sv = o as string
             const len = sv.getLength()
             if (len == 0) {
-                return new NullishEntryType[0]
+                return new NullishEntryType[0](undefined)
             }
-            let res: NullishEntryType[] = new NullishEntryType[len]
+            let res: NullishEntryType[] = new NullishEntryType[len](undefined)
             for (let i = 0; i < len; i++) {
                 res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()] as EntryType
             }
@@ -390,7 +390,7 @@ export class Object {
             if (Class.of(o) === Class.of(new Array<Any>)) {
                 let arr = o as Array<Any>
                 let len = arr.length
-                let res: NullishEntryType[] = new NullishEntryType[len]
+                let res: NullishEntryType[] = new NullishEntryType[len](undefined)
                 for (let i = 0;i < len; i++) {
                     res[i] = [new Int(i).toString(), arr[i]] as EntryType
                 }
@@ -398,11 +398,11 @@ export class Object {
             }
             const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
-                return new NullishEntryType[0]
+                return new NullishEntryType[0](undefined)
             }
             const keys = Object.keys(o)
             const len = keys.length
-            let res: NullishEntryType[] = new NullishEntryType[len]
+            let res: NullishEntryType[] = new NullishEntryType[len](undefined)
             for (let i = 0; i < len; i++) {
                 res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()] as EntryType
             }
@@ -411,15 +411,15 @@ export class Object {
             const av = reflect.Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
-                return new NullishEntryType[0]
+                return new NullishEntryType[0](undefined)
             }
-            let res: NullishEntryType[] = new NullishEntryType[len.toInt()]
+            let res: NullishEntryType[] = new NullishEntryType[len.toInt()](undefined)
             for (let i = 0; i < len; i++) {
                 res[i] = [new Int(i).toString(), av.getElement(i).getData()] as EntryType
             }
             return res
         } else if (t instanceof LambdaType) {
-            return new NullishEntryType[0]
+            return new NullishEntryType[0](undefined)
         } else if (t instanceof EnumType) {
             throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
@@ -451,13 +451,13 @@ export class Object {
             o instanceof Long ||
             o instanceof Float ||
             o instanceof Double) {
-            return new string[0]
+            return new string[0]("")
         }
         const t = Type.of(o)
         if (t instanceof StringType || t instanceof ArrayType || o instanceof Array) {
             const keys = Object.keys(o)
             const len = keys.length
-            let res: string[] = new string[len + 1]
+            let res: string[] = new string[len + 1]("")
             for (let i = 0; i < len; i++) {
                 res[i] = keys[i]
             }

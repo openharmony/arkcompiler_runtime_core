@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -83,7 +83,7 @@ function_decls:
           arktest.assertTrue(v[2] instanceof number)
 
     - decl: |-
-          let s: Boolean[] = new Boolean[0]
+          let s: Boolean[] = new Boolean[0](false)
           function foo() {  // infer Boolean[]
               return s;
           }
@@ -124,7 +124,7 @@ function_decls:
               if (s == null)
                   return s;
               else
-                  return new Error[1];
+                  return new Error[1](new Error());
           }
       call: |-
           let v: Error[] = foo() as Error[];
@@ -174,7 +174,7 @@ function_decls:
                   return new D();
           }
       call: |-
-          let v: B[] = new B[1]
+          let v: B[] = new B[1](new B())
           v[0] = foo();
           arktest.assertTrue(foo() instanceof D)
 

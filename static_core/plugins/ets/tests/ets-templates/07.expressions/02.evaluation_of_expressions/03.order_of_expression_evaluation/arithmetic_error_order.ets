@@ -22,7 +22,7 @@ desc: >-
 
 function main() {
 
-    let a = new int[2];
+    let a = new int[2](0);
     let x: int = 42;
     let exceptions: int = 0;
 

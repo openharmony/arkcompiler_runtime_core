@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ class AA {
 function main()
 {
     bench_body()
-    let a : Number[] = new Number[10]
+    let a : Number[] = new Number[10](0)
     let x : Number = 5.0
     for (let x : Number of a) {
     }

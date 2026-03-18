@@ -21,7 +21,7 @@ expected_out: "Semantic error ESE0007: Cannot use array creation expression with
 
 class ArrayBuilder<T> {
 
-    af: T[] = new T[0]
+    af: T[] = new T[0](new T())
 
 }
 

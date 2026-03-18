@@ -23,7 +23,7 @@ cases:
           }
       use: |-
           cntr = 0
-          let v: A[] = new A[100]
+          let v: A[] = new A[100](new A())
           return 1
       expected_out: "Semantic error ESE0139: Signature constructor(): void is not visible here."
 
@@ -35,7 +35,7 @@ cases:
               }
           }
       use: |-
-          let v: A[] = new A[100]
+          let v: A[] = new A[100](new A())
           return 1
       expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
 
@@ -50,6 +50,6 @@ cases:
               }
           }
       use: |-
-          let v: A[] = new A[100]
+          let v: A[] = new A[100](new A())
           return 1
       expected_out: "Semantic error ESE0139: Signature constructor(): void is not visible here."

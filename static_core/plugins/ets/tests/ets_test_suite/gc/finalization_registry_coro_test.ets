@@ -19,7 +19,7 @@ const promise_count = 30;
 let token = new Object();
 let registry: FinalizationRegistry<String> | null = null;
 
-let obj_array: Object[] = new Object[object_count];
+let obj_array: Object[] = new Object[object_count](new Object());
 
 
 function doFullGC() {

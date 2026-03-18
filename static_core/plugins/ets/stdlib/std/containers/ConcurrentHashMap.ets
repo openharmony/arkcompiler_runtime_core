@@ -217,14 +217,14 @@ export namespace containers {
             while (this.setVal.get() != 0) {
                 Coroutine.Schedule();
             }
-            this.buckets = new ConcurrentHashMapBucket<K, V>[newSize];
+            this.buckets = new ConcurrentHashMapBucket<K, V>[newSize](undefined);
             const entriesIter = this.mappedIterator<MapNode<K, V>>((e: MapNode<K, V>): MapNode<K, V> => e)
             iteratorForEach<MapNode<K, V>>(entriesIter, (e: MapNode<K, V>): void => {
                 this.getOrCreateBucket(e.key).push(e)
             })
             ConcurrencyHelpers.mutexLock(this.recreateMutex);
             const oldBucketMutex = this.bucketMutex;
-            this.bucketMutex = new (Object | undefined)[newSize];
+            this.bucketMutex = new (Object | undefined)[newSize](undefined);
             for (let i = 0; i < oldBucketMutex.length; ++i) {
                 this.bucketMutex[i] = oldBucketMutex[i];
             }
@@ -269,8 +269,8 @@ export namespace containers {
         * Construct a ConcurrentHashMap without parameters.
         */
         constructor() {
-            this.buckets = new ConcurrentHashMapBucket < K, V > [ConcurrentHashMap.MIN_BUCKETS_COUNT];
-            this.bucketMutex = new (Object | undefined)[ConcurrentHashMap.MIN_BUCKETS_COUNT];
+            this.buckets = new ConcurrentHashMapBucket < K, V > [ConcurrentHashMap.MIN_BUCKETS_COUNT](undefined);
+            this.bucketMutex = new (Object | undefined)[ConcurrentHashMap.MIN_BUCKETS_COUNT](undefined);
         }
 
         /**
@@ -279,8 +279,8 @@ export namespace containers {
         */
         constructor(entries: ArrayLike<[K, V]>) {
             const bucketsCount = this.getInitialBucketsCount(Double.toInt(entries.length));
-            this.buckets = new ConcurrentHashMapBucket < K, V > [bucketsCount];
-            this.bucketMutex = new (Object | undefined)[bucketsCount];
+            this.buckets = new ConcurrentHashMapBucket < K, V > [bucketsCount](undefined);
+            this.bucketMutex = new (Object | undefined)[bucketsCount](undefined);
             for (let i = 0; i < entries.length; ++i) {
                 this.set(entries[i][ConcurrentHashMap.ENTRY_KEY], entries[i][ConcurrentHashMap.ENTRY_VAL]);
             }
@@ -300,8 +300,8 @@ export namespace containers {
                 }
             }
             const bucketsCount = this.getInitialBucketsCount(entriesBuf.length);
-            this.buckets = new ConcurrentHashMapBucket<K, V>[bucketsCount];
-            this.bucketMutex = new (Object | undefined)[bucketsCount];
+            this.buckets = new ConcurrentHashMapBucket<K, V>[bucketsCount](undefined);
+            this.bucketMutex = new (Object | undefined)[bucketsCount](undefined);
 
             entriesBuf.forEach((e: [K, V]) => {
                 this.set(e[ConcurrentHashMap.ENTRY_KEY], e[ConcurrentHashMap.ENTRY_VAL]);
@@ -314,8 +314,8 @@ export namespace containers {
         */
         constructor(map: Map<K, V>) {
             const bucketsCount = this.getInitialBucketsCount(Double.toInt(map.size));
-            this.buckets = new ConcurrentHashMapBucket<K, V>[bucketsCount];
-            this.bucketMutex = new (Object | undefined)[bucketsCount];
+            this.buckets = new ConcurrentHashMapBucket<K, V>[bucketsCount](undefined);
+            this.bucketMutex = new (Object | undefined)[bucketsCount](undefined);
 
             map.forEach((v: V, k: K) => {
                 this.set(k, v);
@@ -565,9 +565,9 @@ export namespace containers {
                 while (this.setVal.get() != 0) {
                     Coroutine.Schedule();
                 }
-                this.buckets = new ConcurrentHashMapBucket<K, V>[ConcurrentHashMap.MIN_BUCKETS_COUNT];
+                this.buckets = new ConcurrentHashMapBucket<K, V>[ConcurrentHashMap.MIN_BUCKETS_COUNT](undefined);
                 ConcurrencyHelpers.mutexLock(this.recreateMutex);
-                this.bucketMutex = new (Object | undefined)[ConcurrentHashMap.MIN_BUCKETS_COUNT];
+                this.bucketMutex = new (Object | undefined)[ConcurrentHashMap.MIN_BUCKETS_COUNT](undefined);
                 ConcurrencyHelpers.mutexUnlock(this.recreateMutex);
                 ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
                 ConcurrencyHelpers.mutexLock(this.mutex);

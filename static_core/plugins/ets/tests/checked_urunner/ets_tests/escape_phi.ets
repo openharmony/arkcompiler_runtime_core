@@ -188,14 +188,14 @@ function __noinline__getLength(flag: boolean): int {
 //! METHOD        "ETSGLOBAL::testTempArraysDiffLength2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 20
-//! INST_COUNT    /LoadArray/, 4
-//! INST_COUNT    /ref.*Phi/, 5
+//! INST_COUNT    /StoreArray/, 0
+//! INST_COUNT    /LoadArray/, 0
+//! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 20
-//! INST_COUNT    /LoadArray/, 4
-//! INST_COUNT    /ref.*Phi/, 5
+//! INST_COUNT    /StoreArray/, 0
+//! INST_COUNT    /LoadArray/, 0
+//! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::testArraysMaterialize"
 //! PASS_BEFORE   "Escape"
@@ -362,13 +362,13 @@ function __noinline__getLength(flag: boolean): int {
 //! METHOD        "ETSGLOBAL::testTempArraysDiffLength2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 24
-//! INST_COUNT    /LoadArray/, 4
+//! INST_COUNT    /StoreArray/, 18
+//! INST_COUNT    /LoadArray/, 0
 //! INST_COUNT    /ref.*Phi/, 5
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 24
-//! INST_COUNT    /LoadArray/, 4
+//! INST_COUNT    /StoreArray/, 18
+//! INST_COUNT    /LoadArray/, 0
 //! INST_COUNT    /ref.*Phi/, 5
 //!
 //! METHOD        "ETSGLOBAL::testArraysMaterialize"
@@ -539,12 +539,12 @@ function testTempArraysDiffLength2(flag: boolean): int {
     let length = __noinline__getLength(flag);
     let arr: int[];
     if (flag) {
-        arr = new int[length];
+        arr = new int[length](0);
         for (let i: int = 0; i < length; ++i) {
             arr[i] = i +(flag ? 1 : 0);
         }
     } else {
-        arr = new int[length];
+        arr = new int[length](0);
         for (let i: int = 0; i < length; ++i) {
             arr[i] = i;
         }

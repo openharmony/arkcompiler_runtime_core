@@ -23,6 +23,6 @@ function main() {
   let a: int = 1;
   let b: int = 1;
   let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }
-  arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[sz].length + (b = 2); }, expectedException)
+  arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[sz](0).length + (b = 2); }, expectedException)
   arktest.assertEQ(a != 2 || b != 1, false)
 }

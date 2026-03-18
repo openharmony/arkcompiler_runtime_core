@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,10 +44,10 @@ cases:
 
   # type argument is array of classes, interfaces, enums
   - use: |-
-      let v: A<X[]> = new A<X[]>(new X[0])
+      let v: A<X[]> = new A<X[]>(new X[0](new X()))
 
   - use: |-
-      let v: A<X[]> = new A<X[]>(new X[0])
+      let v: A<X[]> = new A<X[]>(new X[0](new X()))
 
   - use: |-
       let v: A<X[]|null> = new A<X[]|null>(null)
@@ -60,7 +60,7 @@ cases:
       let v: A<A<X>[]> = new A<A<X>[]>([new A<X>(new X())])
 
   - use: |-
-      let v: A<A<X[]>[]> = new A<A<X[]>[]>([new A<X[]>(new X[1])])
+      let v: A<A<X[]>[]> = new A<A<X[]>[]>([new A<X[]>(new X[1](new X()))])
 
   - use: |-
       let v: A<A<I>[]> = new A<A<I>[]>([new A<I>(new X())])
@@ -91,7 +91,7 @@ cases:
       type B = A<X>
 
   - use: |-
-      let v: A<B> = new A<B>(new X[0])
+      let v: A<B> = new A<B>(new X[0](new X()))
     decl: |-
       type B = X[]
 
@@ -107,7 +107,7 @@ cases:
     bound: ' extends Object|null'
 
   - use: |-
-      let v: A<B> = new A<B>([new A<X[]>(new X[1])])
+      let v: A<B> = new A<B>([new A<X[]>(new X[1](new X()))])
     decl: |-
       type B = A<X[]>[]
 

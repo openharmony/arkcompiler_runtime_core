@@ -71,15 +71,15 @@ cases:
       use: |-
           arktest.assertEQ(typeof myV, "object")
 
-    - decl: let myV = new (Object|undefined)[1]
+    - decl: let myV = new (Object|undefined)[1](undefined)
       use: |-
           arktest.assertTrue(myV instanceof Object)
 
-    - decl: let myV = new (null|undefined)[1]
+    - decl: let myV = new (null|undefined)[1](undefined)
       use: |-
           arktest.assertEQ(typeof myV, "object")
 
-    - decl: let myV = new (null|undefined)[1]
+    - decl: let myV = new (null|undefined)[1](undefined)
       use: |-
-          let myVloc = new (null|undefined)[1]
+          let myVloc = new (null|undefined)[1](undefined)
           arktest.assertTrue(myVloc instanceof Object)

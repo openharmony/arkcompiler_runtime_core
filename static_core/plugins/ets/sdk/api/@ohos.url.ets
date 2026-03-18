@@ -449,7 +449,7 @@ export namespace url {
     * @class InnerURL
     */
     class InnerURL {
-        flags: boolean[] = new boolean[12];
+        flags: boolean[] = new boolean[12](false);
         cScheme: string = "";
         cFragment: string = "";
         cQuery: string = "";

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,16 +59,16 @@ cases:
 
   # arrays
   - use: |-
-      let v: A<X[]> = new A<X[]> (new X[0])
+      let v: A<X[]> = new A<X[]> (new X[0](new X()))
 
   - use: |-
-      let v: A<X[]|null> = new A<X[]|null> (new X[0])
+      let v: A<X[]|null> = new A<X[]|null> (new X[0](new X()))
 
   - use: |-
       let v: A<X[]|null> = new A<X[]|null> (null)
 
   - use: |-
-      let v: A<X[]|null> = new A<X[]|null> (new X[0])
+      let v: A<X[]|null> = new A<X[]|null> (new X[0](new X()))
     bound: ' extends X[]|null'
 
   - use: |-
@@ -76,7 +76,7 @@ cases:
     bound: ' extends Object|null'
 
   - use: |-
-      let v: A<X[]> = new A<X[]> (new X[0])
+      let v: A<X[]> = new A<X[]> (new X[0](new X()))
 
 # aliases
   - use: |-
@@ -88,7 +88,7 @@ cases:
     decl: type B = I[]|null
 
   - use: |-
-      let v: A<B> = new A<B> (new Y[0])
+      let v: A<B> = new A<B> (new Y[0](new Y()))
     decl: type B = Y[]
 
   # tuples

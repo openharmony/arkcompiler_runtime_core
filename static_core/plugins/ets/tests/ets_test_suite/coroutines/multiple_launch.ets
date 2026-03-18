@@ -23,7 +23,7 @@ function returnValue(i: int): String {
 }
 
 function launchCoroutines(n_cor: int): int {
-    let p: (Job<String> | undefined)[] = new (Job<String> | undefined)[n_cor];
+    let p: (Job<String> | undefined)[] = new (Job<String> | undefined)[n_cor](undefined);
     for (let i = 0; i < n_cor; ++i) {
         p[i] = launch<String>() {
             return returnValue(i)
@@ -44,7 +44,7 @@ function throwError(): Object {
 }
 
 function launchCoroutinesWithError(n_cor: int): int { 
-    let p: (Job<Object> | undefined)[] = new (Job<Object> | undefined)[n_cor];
+    let p: (Job<Object> | undefined)[] = new (Job<Object> | undefined)[n_cor](undefined);
     for (let i = 0; i < n_cor; ++i) {
         p[i] = launch(throwError);
     }

@@ -24,7 +24,7 @@ package escompat;
 const hexChars: char[];
 
 function fillInCommonURI(): boolean[] {
-    const arr = new boolean[128]
+    const arr = new boolean[128](false)
     for (let i = Char.toInt(c'a'); i <= Char.toInt(c'z'); i++) {
         arr[i] = true
     }
@@ -64,7 +64,7 @@ function fillInURISpecial(arr: boolean[]) {
 }
 
 function createAndFillInURISpecial(): boolean[] {
-    const arr = new boolean[128]
+    const arr = new boolean[128](false)
     fillInURISpecial(arr)
     return arr
 }

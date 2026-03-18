@@ -55,12 +55,12 @@ cases:
 
   # arrays
   - use: |-
-      let v: A<X[]> = new A<X[]> (new Object[0])  // wrong array type
+      let v: A<X[]> = new A<X[]> (new Object[0](new Object()))  // wrong array type
     stdout: |-
       "Semantic error ESE0046: Type 'Array<Object>' is not compatible with type 'Array<X>' at index 1"
 
   - use: |-
-      let v: A<X[]> = new A<X[]> (new X[0])  // wrong bound
+      let v: A<X[]> = new A<X[]> (new X[0](new X()))  // wrong bound
     bound: ' extends Y[]'
     stdout: |-
       "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
@@ -79,26 +79,26 @@ cases:
 
   # aliases
   - use: |-
-      let v: A<B> = new A<B> (new Color[0])  // X is not Color
+      let v: A<B> = new A<B> (new Color[0](new Color()))  // X is not Color
     decl: type B = X[]
     stdout: |-
       "Semantic error ESE0046: Type 'Array<Color>' is not compatible with type 'Array<X>' at index 1"
 
   - use: |-
-      let v: A<B> = new A<B> (new X[1])
+      let v: A<B> = new A<B> (new X[1](new X()))
     decl: type B = null|X[][]
     stdout: |-
       "Semantic error ESE0046: Type 'Array<X>' is not compatible with type 'null|Array<Array<X>>' at index 1"
 
   - use: |-
-      let v: A<B> = new A<B> (new X[0])  // wrong bound
+      let v: A<B> = new A<B> (new X[0](new X()))  // wrong bound
     bound: ' extends Y[]'
     decl: type B = X[]
     stdout: |-
       "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
 
   - use: |-
-      let v: A<B|null> = new A<B|null> (new X[0])  // out of bound
+      let v: A<B|null> = new A<B|null> (new X[0](new X()))  // out of bound
     bound: ' extends X[]'
     decl: type B = X[]
     stdout: |-

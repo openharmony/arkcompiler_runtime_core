@@ -1794,10 +1794,10 @@ export namespace taskpool {
      */
     export class TaskPoolInfo {
         /// Array of threads information with taskpool tasks
-        threadInfos: ThreadInfo[] = new ThreadInfo[0];
+        threadInfos: ThreadInfo[] = new ThreadInfo[0](new ThreadInfo());
 
         /// Array of taskpool tasks information
-        taskInfos: TaskInfo[] = new TaskInfo[0];
+        taskInfos: TaskInfo[] = new TaskInfo[0](new TaskInfo());
     }
 
     /**
@@ -2345,7 +2345,7 @@ export namespace taskpool {
                     if (tasksCount == 0) {
                         return;
                     }
-                    const taskIds: int[] = new int[tasksCount];
+                    const taskIds: int[] = new int[tasksCount](0);
                     let currentIndex: int = 0;
                     worker.currentTasks.forEach((_count: int, task: Task) => {
                         taskIds[currentIndex] = task.taskId;
@@ -2358,8 +2358,8 @@ export namespace taskpool {
         }
         ConcurrencyHelpers.mutexUnlock(mutex);
         const Info: TaskPoolInfo = new TaskPoolInfo();
-        const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length];
-        const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length];
+        const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length](new TaskInfo());
+        const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length](new ThreadInfo());
         taskInfos.forEach((taskInfo: TaskInfo, index: int) => {
             taskInfosRes[index.toInt()] = taskInfo;
         });

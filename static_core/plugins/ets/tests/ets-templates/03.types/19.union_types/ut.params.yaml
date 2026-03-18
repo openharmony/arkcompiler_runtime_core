@@ -17,7 +17,7 @@ cases:
     - decl: |-
           type UT = number | undefined | string
       use: |-
-          let u: UT[] = new UT[2]
+          let u: UT[] = new UT[2](undefined)
           arktest.assertTrue(u[0] === undefined && u[1] === undefined)
           u[1] = 'abc'
           arktest.assertTrue(u[0] === undefined && u[1] == 'abc')
@@ -43,7 +43,7 @@ cases:
           v = undefined
           arktest.assertTrue(v === undefined)
 
-          let va: UT[] = new UT[2]
+          let va: UT[] = new UT[2](undefined)
           arktest.assertTrue(va[0] === undefined && va[1] === undefined)
           va[1] = 'F'
           arktest.assertTrue(va[0] === undefined && va[1] === 'F')
@@ -56,7 +56,7 @@ cases:
           v = undefined
           arktest.assertTrue(v === undefined)
 
-          let va: UT[] = new UT[2]
+          let va: UT[] = new UT[2](undefined)
           arktest.assertTrue(va[0] === undefined && va[1] === undefined)
           va[1] = 'F'
           arktest.assertTrue(va[0] === undefined && va[1] === 'F')
@@ -72,7 +72,7 @@ cases:
           v = null
           arktest.assertTrue(v === null)
 
-          let va: UT[] = new UT[2]
+          let va: UT[] = new UT[2](undefined)
           arktest.assertTrue(va[0] === undefined && va[1] === undefined)
           va[0] = null
           va[1] = 'F'
@@ -124,7 +124,7 @@ cases:
 
               def\u0000` | undefined
       use: |-
-          let v: UT[] = new UT[1]
+          let v: UT[] = new UT[1](undefined)
           arktest.assertTrue(v[0] === undefined)
           v[0] = `abc
 
@@ -158,22 +158,22 @@ cases:
     - decl: |-
           type UT = int[] | short[] | byte[] | Int[] | Short[] | Byte[]
       use: |-
-          let v: UT = new int[2]
+          let v: UT = new int[2](0)
           v[0] = Int.MAX_VALUE
           arktest.assertEQ(v[0], Int.MAX_VALUE)
-          v = new short[2]
+          v = new short[2](0)
           v[0] = Short.MAX_VALUE
           arktest.assertEQ(v[0], Short.MAX_VALUE)
-          v = new byte[2]
+          v = new byte[2](0)
           v[0] = Byte.MAX_VALUE
           arktest.assertEQ(v[0], Byte.MAX_VALUE)
-          v = new Byte[2]
+          v = new Byte[2](0)
           v[0] = new Byte(1 as byte)
           arktest.assertEQ(v[0], 1)
-          v = new Short[2]
+          v = new Short[2](0)
           v[0] = new Short(2 as short)
           arktest.assertEQ(v[0], 2)
-          v = new Int[2]
+          v = new Int[2](0)
           v[0] = new Int(3)
           arktest.assertEQ(v[0], 3)
 
@@ -253,9 +253,9 @@ cases:
           class C {}
           type UT = B[] | C[]
       use: |-
-          let v: UT = new B[1]
+          let v: UT = new B[1](new B())
           arktest.assertTrue(v instanceof Array)
-          v = new C[1]
+          v = new C[1](new C())
           arktest.assertTrue(v instanceof Array)
 
     - decl: |-

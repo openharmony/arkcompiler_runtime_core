@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ class Arr<T> {
 }
 
 function main(): void {
-    let a : Arr<Int> = new Arr<Int>(new Int[1])
+    let a : Arr<Int> = new Arr<Int>(new Int[1](0))
     arktest.assertNE(a, null, 'Generics allocating error #1!')
     let b : Arr<Int> = a.mg<Int>()
     arktest.assertNE(b, null, 'Generics allocating error #2!')
