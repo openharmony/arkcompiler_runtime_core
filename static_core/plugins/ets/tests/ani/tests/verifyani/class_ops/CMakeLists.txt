@@ -18,7 +18,6 @@ ani_verify_add_gtest(ani_verify_test_class_call_static_method_boolean
 
 # Generated tests for Class_GetStaticField APIs
 ani_verify_add_generated_tests(ani_verify_test_class_static_field_get
-    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_static_field_get_test.cpp.j2
     J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_static_field_get_test.ets.j2
     PARAMS "boolean: Type=Boolean,type=boolean,field=booleanField,wrong_field=staticIntField,ets_type=boolean,wrong_ets_type=int"
@@ -34,7 +33,6 @@ ani_verify_add_generated_tests(ani_verify_test_class_static_field_get
 
 # Generated tests for Class_SetStaticField APIs
 ani_verify_add_generated_tests(ani_verify_test_class_static_field_set
-    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_static_field_set_test.cpp.j2
     J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_static_field_set_test.ets.j2
     PARAMS "boolean: Type=Boolean,type=boolean,field=booleanField,wrong_field=staticIntField,ets_type=boolean,wrong_ets_type=int,test_value=ANI_TRUE"

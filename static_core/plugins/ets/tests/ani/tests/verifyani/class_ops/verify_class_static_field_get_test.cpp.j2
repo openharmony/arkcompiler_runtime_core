@@ -22,7 +22,7 @@ public:
     void SetUp() override
     {
         VerifyAniTest::SetUp();
-        ASSERT_EQ(env_->FindClass("@functionModule.ani_verify_test_class_static_field_get_{{ type }}.TestParent", &class_), ANI_OK);
+        ASSERT_EQ(env_->FindClass("ani_verify_test_class_static_field_get_{{ type }}.TestParent", &class_), ANI_OK);
     }
 
 protected:
