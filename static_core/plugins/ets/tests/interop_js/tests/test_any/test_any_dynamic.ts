@@ -33,6 +33,14 @@ export let numberMapInstance = new NumberMap();
 numberMapInstance[0] = 0xcafe;
 numberMapInstance[1] = 0xbabe;
 
+export class StringMap {
+    [key: string]: number;
+};
+
+export let stringMapInstance = new StringMap();
+stringMapInstance['one'] = 0xcafe;
+stringMapInstance['two'] = 0xbabe;
+
 export function functionArg0(): number {
     return 0xcafe;
 }

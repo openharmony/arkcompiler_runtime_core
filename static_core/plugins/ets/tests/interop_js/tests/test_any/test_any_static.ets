@@ -15,6 +15,7 @@
 
 import { Foo, fooInstance } from "testDecl";
 import { NumberMap, numberMapInstance } from "testDecl";
+import { StringMap, stringMapInstance } from "testDecl";
 import { functionArg0, functionArg1, functionArg2 } from "testDecl";
 import { Qux, quxInstance } from "testDecl";
 import { TestNew0, TestNew1, TestNew2 } from "testDecl";
@@ -50,11 +51,23 @@ function testLdByIdx(): void {
     arktest.assertEQ(babe, 0xbabe);
 }
 
+function testLdByVal(): void {
+    let cafe = stringMapInstance['one'];
+    arktest.assertEQ(cafe, 0xcafe);
+}
+
 function testStByIdx(): void {
     numberMapInstance[1] = 0xabcd;
 
     let babe = numberMapInstance[1];
     arktest.assertEQ(babe, 0xabcd);
+}
+
+function testStByVal(): void {
+    stringMapInstance['one'] = 0xabcd;
+
+    let cafe = stringMapInstance['one'];
+    arktest.assertEQ(cafe, 0xabcd);
 }
 
 function testStByName(): void {
@@ -227,8 +240,10 @@ function testAll(): void {
     compileMethod("test_any_static.ETSGLOBAL::testIsInstance");
     compileMethod("test_any_static.ETSGLOBAL::testLdByName");
     compileMethod("test_any_static.ETSGLOBAL::testLdByIdx");
+    compileMethod("test_any_static.ETSGLOBAL::testLdByVal");
     compileMethod("test_any_static.ETSGLOBAL::testStByName");
     compileMethod("test_any_static.ETSGLOBAL::testStByIdx");
+    compileMethod("test_any_static.ETSGLOBAL::testStByVal");
     compileMethod("test_any_static.ETSGLOBAL::testCall0");
     compileMethod("test_any_static.ETSGLOBAL::testCallShort");
     compileMethod("test_any_static.ETSGLOBAL::testCallRange");
@@ -256,8 +271,10 @@ function testAll(): void {
     testIsInstance();
     testLdByName();
     testLdByIdx();
+    testLdByVal();
     testStByName();
     testStByIdx();
+    testStByVal();
     testCall0();
     testCallShort();
     testCallRange();
