@@ -1057,22 +1057,6 @@
 09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_8.ets
 09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_9.ets
 
-#32623
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_0.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_1.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_2.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_3.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_4.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_5.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_6.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_7.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_8.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_9.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_10.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_11.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_extend_am_12.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_pos_gc_extend_am.ets
-
 #32624
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_gc_obcf.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_0.ets

@@ -17,13 +17,13 @@ limitations under the License.
 
 /*---
 desc: >-
-    An overriding member can keep or extend an access modifier
+    An overriding member can keep an access modifier
     of a member that is inherited or implemented.
     Otherwise, a compile-time error occurs.
 ---*/
 
 class Base {
-  protected field: {{c.check_type}} = {{c.base_value}}
+  field: {{c.check_type}} = {{c.base_value}}
   get_field() {
     return this.field
   }

@@ -19,12 +19,12 @@ desc: >-
     of a field in a derived class must be the same as in the base
     class instantiated with a parameter of the same type as the type
     of the field in the derived class.
-params: generic class, extend access modifier
+params: generic class
 ---*/
 
 class B<T> {
-  protected f1: T
-  protected f2: T
+  f1: T
+  f2: T
   constructor(v: T) {
     this.f1 = v
     this.f2 = v
