@@ -413,6 +413,10 @@ cases:
           let arr: number[] = [0.0, 1.0, 2.0]
       use: |-
           let a = new A(...arr)
+          arktest.assertEQ(a.p.length, 3)
+          arktest.assertEQ(a.p[0], 0.0)
+          arktest.assertEQ(a.p[1], 1.0)
+          arktest.assertEQ(a.p[2], 2.0)
 
     # Array spread to rest
     - decl: |-
@@ -504,9 +508,13 @@ cases:
                 this.p = obj
             }
         }
-        let arr: number[] = [0.0, 1.0, 2.0]
+        let tup: [number, number, number] = [0.0, 1.0, 2.0]
       use: |-
-        let a = new A(...arr)
+        let a = new A(...tup)
+        arktest.assertEQ(a.p.length, 3)
+        arktest.assertEQ(a.p[0], 0.0)
+        arktest.assertEQ(a.p[1], 1.0)
+        arktest.assertEQ(a.p[2], 2.0)
 
     # FixedArray spread to rest
     - decl: |-

@@ -28,7 +28,7 @@ cases:
           }
 
     - expected_out: |-
-          Semantic error ESE0139: Signature constructor(): void is not visible here.
+          Semantic error ESE201875: Cannot extend the superclass 'A' as it has no accessible constructor which can be called without arguments.
       decl: |-
           class A {
               private constructor() {}
@@ -43,7 +43,7 @@ cases:
           }
 
     - expected_out: |-
-          TBD: explicit constructor call cannot be used as expression
+          Semantic error ESE2077: 'this' call must be a root-level statement in constructor
       decl: |-
           class A {
               ref: A|undefined
@@ -58,7 +58,7 @@ cases:
           }
 
     - expected_out: |-
-          TBD: explicit constructor call cannot be used as expression
+          Semantic error ESE2077: 'super' call must be a root-level statement in constructor
       decl: |-
           class A {
               p: int
@@ -71,5 +71,25 @@ cases:
               ref: A|undefined
               constructor() {
                   this.ref = super(0)  // CTE, cannot use super as expression
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE2077: 'this' call must be a root-level statement in constructor
+      decl: |-
+          let ref: A|undefined
+
+          class A {
+              s: string
+
+              constructor() {
+                  this.s = ''
+              }
+              constructor(p: int) {
+                  this()
+                  this.s = '' + p
+              }
+              constructor(p: string) {
+                  ref = p == '' ? this() : this(42)
               }
           }

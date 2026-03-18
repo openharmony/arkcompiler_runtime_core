@@ -231,3 +231,157 @@ cases:
                   super(this) // CTE, cannot use this in args
               }
           }
+
+    - expected_out: |-
+          Semantic error ESE0679: 'this' cannot be referenced before super() call or this() call.
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to a field
+          class A {
+              s: string
+              fld: string = 'hello'
+              constructor(p: string) {
+                  this.s = p
+              }
+              constructor() {
+                  let v = this.fld  // CTE, cannot use this.fld before this()
+                  this(v)
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0679: 'this' cannot be referenced before super() call or this() call.
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to an instance method
+          class A {
+              s: string
+              constructor(p: string) {
+                  this.s = p
+              }
+              constructor() {
+                  let v = this.meth()  // CTE, cannot use this.meth() before this()
+                  this(v)
+              }
+              meth(): string {
+                  return 'hello'
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0679: 'this' cannot be referenced before super() call or this() call.
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to an instance method
+          class A {
+              s: string
+              constructor(p: () => string) {
+                  this.s = p()
+              }
+              constructor() {
+                  let v = this.meth  // CTE, cannot use this.meth before this()
+                  this(v)
+              }
+              meth(): string {
+                  return 'hello'
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0679: 'this' cannot be referenced before super() call or this() call.
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to this
+          class A {
+              s: string|undefined
+              constructor(p: A) {
+                  this.s = p.s ?? 'hello'
+              }
+              constructor() {
+                  let v = this  // CTE, cannot use this before this()
+                  this(v)
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0377: Class field 'fld' defined by the parent class is not accessible in the child class via super.
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to a super field
+          class A {
+              s: string
+              readonly fld: string = 'hello'
+              constructor(p: string) {
+                  this.s = p
+              }
+          }
+          class B extends A {
+              constructor(p: string) {
+                  super(p)
+              }
+              constructor() {
+                  let v = super.fld  // CTE, cannot use super field before this()
+                  this(v)
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0235: Using super is not allowed in constructor
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to a super method
+          class A {
+              s: string
+              constructor(p: string) {
+                  this.s = p
+              }
+              meth(): string {
+                  return 'hello'
+              }
+          }
+          class B extends A {
+              constructor(p: string) {
+                  super(p)
+              }
+              constructor() {
+                  let v = super.meth()  // CTE, cannot use super method before this()
+                  this(v)
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0235: Using super is not allowed in constructor
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to a super method
+          class A {
+              s: string
+              constructor(p: () => string) {
+                  this.s = p()
+              }
+              meth(): string {
+                  return 'hello'
+              }
+          }
+          class B extends A {
+              constructor(p: () => string) {
+                  super(p)
+              }
+              constructor() {
+                  let v = super.meth  // CTE, cannot use super method before this()
+                  this(v)
+              }
+          }
+
+    - expected_out: |-
+          Semantic error ESE0679: 'this' cannot be referenced before super() call or this() call.
+      decl: |-
+          // CTE if arguments of an explicit constructor call refer to this
+          class A {
+              s: string|undefined
+              constructor(p: A) {
+                  this.s = p.s ?? 'hello'
+              }
+          }
+          class B extends A {
+              constructor(p: A) {
+                  super(p)
+              }
+              constructor() {
+                  let v = this  // CTE, cannot use this before super()
+                  super(v)
+              }
+          }

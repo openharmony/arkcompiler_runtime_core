@@ -409,6 +409,21 @@ cases:
           arktest.assertEQ(a.tup[1](), 'abc')
           arktest.assertEQ(a.tup[2](), 42.0)
 
+    - decl: |-
+          class A<T> {
+              p: T[]
+              constructor(...any: T[]) {
+                  this.p = any
+              }
+          }
+          let tup: [int, int, int] = [0, 10, 20]
+      use: |-
+          let a = new A<int>(...tup)
+          arktest.assertEQ(a.p.length, 3)
+          arktest.assertEQ(a.p[0], 0)
+          arktest.assertEQ(a.p[1], 10)
+          arktest.assertEQ(a.p[2], 20)
+
     # FixedArray spread to rest
     - decl: |-
           class A<T> {
