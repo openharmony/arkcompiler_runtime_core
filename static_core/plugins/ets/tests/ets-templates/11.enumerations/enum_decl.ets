@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -22,6 +22,7 @@ limitations under the License.
 {% endif %}
 
 {% for cv in check_variants %}
+{% set cv_id = loop.index0 %}
 
 {% if 'sub_cases_logic' in c %}
   {% set sub_cases_logic=c.sub_cases_logic %}
@@ -30,6 +31,7 @@ limitations under the License.
 {% endif %}
 
 {% for scl in sub_cases_logic %}
+{% set scl_id = loop.index0 %}
 
 {% set logic_data -%}
 {% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
@@ -53,6 +55,9 @@ limitations under the License.
 /*---
 desc: {{c.desc}}
 ---*/
+
+//#4097 (urunner2) note: use this after declgen run support
+//test suffix: "{{c.test_suffix}}_{{cv_id}}_{{scl_id}}"
 
 {{decl}}
 

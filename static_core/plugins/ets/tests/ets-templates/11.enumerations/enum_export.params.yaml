@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,13 +14,38 @@
 cases:
   - desc: |-
       >-
-        If enumeration type is exported, then all enumeration constants
-        are exported along with the mandatory qualification
+        If enumeration type is exported, then all enumeration members
+        are exported along with the mandatory qualification.
     check_variants:
-      - enum_name: ColorsInt
-      - enum_name: ConstColorsInt
+      - {enum_name: "ImpColorsInt", enum_type: "imp", enum_base_type: "int",
+        red_value: "1", green_value: "2", blue_value: "4",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ImpColorsStr", enum_type: "imp", enum_base_type: "string",
+        red_value: "\"One\"", green_value: "\"Two\"", blue_value: "\"Three\"",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsLong", enum_type: "exp", enum_base_type: "long",
+        red_value: "0x7FFF_FFFF_1", green_value: "0x7FFF_FFFF_2",
+        blue_value: "0x7FFF_FFFF_4", imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsInt", enum_type: "exp", enum_base_type: "int",
+        red_value: "1", green_value: "2", blue_value: "4",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsShort", enum_type: "exp", enum_base_type: "short",
+        red_value: "1", green_value: "2", blue_value: "4",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsByte", enum_type: "exp", enum_base_type: "byte",
+        red_value: "1", green_value: "2", blue_value: "4",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsDouble", enum_type: "exp", enum_base_type: "double",
+        red_value: "1.0", green_value: "2.5", blue_value: "5.0",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsFloat", enum_type: "exp", enum_base_type: "float",
+        red_value: "1.0f", green_value: "2.5f", blue_value: "5.0f",
+        imported_module: "./to_export.ets"}
+      - {enum_name: "ExpColorsStr", enum_type: "exp", enum_base_type: "string",
+        red_value: "\"One\"", green_value: "\"Two\"", blue_value: "\"Three\"",
+        imported_module: "./to_export_exp_str.ets"}
     decl: |-
-      import { [enum_name] } from "./to_export.ets"
+      import { [enum_name] } from "[imported_module]"
     logic: |-
       let r: [enum_name] = [enum_name].Red
       let g: [enum_name] = [enum_name].Green
@@ -31,97 +56,21 @@ cases:
       arktest.assertTrue(r instanceof [enum_name])
       arktest.assertTrue(g instanceof [enum_name])
       arktest.assertTrue(b instanceof [enum_name])
-      arktest.assertEQ(r, 1)
-      arktest.assertEQ(g, 2)
-      arktest.assertEQ(b, 4)
+      arktest.assertEQ(r, [red_value])
+      arktest.assertEQ(g, [green_value])
+      arktest.assertEQ(b, [blue_value])
       arktest.assertTrue(r2 instanceof [enum_name])
       arktest.assertTrue(g2 instanceof [enum_name])
       arktest.assertTrue(b2 instanceof [enum_name])
-      arktest.assertEQ(r2, 1)
-      arktest.assertEQ(g2, 2)
-      arktest.assertEQ(b2, 4)
+      arktest.assertEQ(r2, [red_value])
+      arktest.assertEQ(g2, [green_value])
+      arktest.assertEQ(b2, [blue_value])
       arktest.assertTrue([enum_name].Red instanceof [enum_name])
       arktest.assertTrue([enum_name].Green instanceof [enum_name])
       arktest.assertTrue([enum_name].Blue instanceof [enum_name])
-      arktest.assertTrue([enum_name].Red.valueOf() instanceof int)
-      arktest.assertTrue([enum_name].Green.valueOf() instanceof int)
-      arktest.assertTrue([enum_name].Blue.valueOf() instanceof int)
-      arktest.assertEQ([enum_name].Red, 1)
-      arktest.assertEQ([enum_name].Green, 2)
-      arktest.assertEQ([enum_name].Blue, 4)
-
-  - desc: |-
-      >-
-        If enumeration type is exported, then all enumeration constants
-        are exported along with the mandatory qualification
-    check_variants:
-      - enum_name: ColorsLong
-      - enum_name: ConstColorsLong
-    decl: |-
-      import { [enum_name] } from "./to_export.ets"
-    logic: |-
-      let r: [enum_name] = [enum_name].Red
-      let g: [enum_name] = [enum_name].Green
-      let b: [enum_name] = [enum_name].Blue
-      let r2 = [enum_name].Red
-      let g2 = [enum_name].Green
-      let b2 = [enum_name].Blue
-      arktest.assertTrue(r instanceof [enum_name])
-      arktest.assertTrue(g instanceof [enum_name])
-      arktest.assertTrue(b instanceof [enum_name])
-      arktest.assertEQ(r, 0x7FFF_FFFF_1)
-      arktest.assertEQ(g, 0x7FFF_FFFF_2)
-      arktest.assertEQ(b, 0x7FFF_FFFF_4)
-      arktest.assertTrue(r2 instanceof [enum_name])
-      arktest.assertTrue(g2 instanceof [enum_name])
-      arktest.assertTrue(b2 instanceof [enum_name])
-      arktest.assertEQ(r2, 0x7FFF_FFFF_1)
-      arktest.assertEQ(g2, 0x7FFF_FFFF_2)
-      arktest.assertEQ(b2, 0x7FFF_FFFF_4)
-      arktest.assertTrue([enum_name].Red instanceof [enum_name])
-      arktest.assertTrue([enum_name].Green instanceof [enum_name])
-      arktest.assertTrue([enum_name].Blue instanceof [enum_name])
-      arktest.assertTrue([enum_name].Red.valueOf() instanceof long)
-      arktest.assertTrue([enum_name].Green.valueOf() instanceof long)
-      arktest.assertTrue([enum_name].Blue.valueOf() instanceof long)
-      arktest.assertEQ([enum_name].Red, 0x7FFF_FFFF_1)
-      arktest.assertEQ([enum_name].Green, 0x7FFF_FFFF_2)
-      arktest.assertEQ([enum_name].Blue, 0x7FFF_FFFF_4)
-
-  - desc: |-
-      >-
-        If enumeration type is exported, then all enumeration constants
-        are exported along with the mandatory qualification
-    check_variants:
-      - enum_name: ColorsStr
-      - enum_name: ConstColorsStr
-    decl: |-
-      import { [enum_name] } from "./to_export.ets"
-    logic: |-
-      let r: [enum_name] = [enum_name].Red
-      let g: [enum_name] = [enum_name].Green
-      let b: [enum_name] = [enum_name].Blue
-      let r2 = [enum_name].Red
-      let g2 = [enum_name].Green
-      let b2 = [enum_name].Blue
-      arktest.assertTrue(r instanceof [enum_name])
-      arktest.assertTrue(g instanceof [enum_name])
-      arktest.assertTrue(b instanceof [enum_name])
-      arktest.assertEQ(r, "One")
-      arktest.assertEQ(g, "Two")
-      arktest.assertEQ(b, "Three")
-      arktest.assertTrue(r2 instanceof [enum_name])
-      arktest.assertTrue(g2 instanceof [enum_name])
-      arktest.assertTrue(b2 instanceof [enum_name])
-      arktest.assertEQ(r2, "One")
-      arktest.assertEQ(g2, "Two")
-      arktest.assertEQ(b2, "Three")
-      arktest.assertTrue([enum_name].Red instanceof [enum_name])
-      arktest.assertTrue([enum_name].Green instanceof [enum_name])
-      arktest.assertTrue([enum_name].Blue instanceof [enum_name])
-      arktest.assertTrue([enum_name].Red.valueOf() instanceof string)
-      arktest.assertTrue([enum_name].Green.valueOf() instanceof string)
-      arktest.assertTrue([enum_name].Blue.valueOf() instanceof string)
-      arktest.assertEQ([enum_name].Red, "One")
-      arktest.assertEQ([enum_name].Green, "Two")
-      arktest.assertEQ([enum_name].Blue, "Three")
+      arktest.assertTrue([enum_name].Red.valueOf() instanceof [enum_base_type])
+      arktest.assertTrue([enum_name].Green.valueOf() instanceof [enum_base_type])
+      arktest.assertTrue([enum_name].Blue.valueOf() instanceof [enum_base_type])
+      arktest.assertEQ([enum_name].Red, [red_value])
+      arktest.assertEQ([enum_name].Green, [green_value])
+      arktest.assertEQ([enum_name].Blue, [blue_value])

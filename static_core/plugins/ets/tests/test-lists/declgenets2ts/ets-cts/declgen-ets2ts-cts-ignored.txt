@@ -1515,7 +1515,6 @@
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_11.ets
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_8.ets
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_9.ets
-11.enumerations/enum_cte_n_36.ets
 11.enumerations/enumeration_numeric_values/enum_numeric_n_0.ets
 11.enumerations/repeating_constants.ets
 13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_n_3.ets
