@@ -102,7 +102,7 @@ class Test262Generator(IGenerator):
         }
 
     @staticmethod
-    def validate_parse_result(return_code: int, _: str, desc: dict[str, Any],   # type: ignore[explicit-any]
+    def validate_parse_result(return_code: int, _: str, desc: dict[str, Any],  # type: ignore[explicit-any]
                               out: str) -> tuple[bool, bool]:
         is_negative = desc['negative_phase'] == 'parse'
 
@@ -150,7 +150,7 @@ class Test262Generator(IGenerator):
             makedirs(path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file, harness, test262_path)
 
-    def validate_runtime_result(self, return_code: int, std_err: str,   # type: ignore[explicit-any]
+    def validate_runtime_result(self, return_code: int, std_err: str,  # type: ignore[explicit-any]
                                 desc: dict[str, Any], out: str) -> bool:
         is_negative = (desc['negative_phase'] == 'runtime') or \
                       (desc['negative_phase'] == 'resolution')

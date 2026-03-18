@@ -32,6 +32,7 @@ from runner.options.step_reqs import ReqKind, StepRequirements
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
+from runner.test.test_steps_test.test_steps_test import TestStep
 from runner.test.test_utils import compare_dicts, compare_lists, test_cmake_build
 
 
@@ -40,6 +41,28 @@ class TestStepsTest2(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TEST_STEPS_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+
+    @staticmethod
+    def prepare() -> list[TestStandardFlow]:
+        args = get_args()
+        runner = RunnerStandardFlow(Config(args))
+        return [cast(TestStandardFlow, test.do_run()) for test in runner.tests]
+
+    @staticmethod
+    def get_steps(reproduce: str) -> list[TestStep]:
+        lines_per_step = 5
+        result: list[TestStep] = []
+        lines = [line for line in reproduce.split('\n') if line]
+        for i in range(len(lines) // lines_per_step):
+            line = lines[i * lines_per_step]
+            pos = line.find(":")
+            step_name = line[0:pos]
+            type_name = step_name.split('-')[-1]
+            cli = line[pos + 1:].strip().split(' ')
+            test_name = cli[-1]
+            args = cli[1:]
+            result.append(TestStep(name=test_name, args=args, type=type_name))
+        return result
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -173,6 +196,7 @@ class TestStepsTest2(TestCase):
             args = get_args()
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
+            self.assertFalse(result.passed, "Test with failed requirement check 'FileExist' should fail")
             report_error = result.report.error if result.report is not None else ""
             try:
                 self.assertFalse(result.passed, "Test with failed pre/post requirement check 'FileExist' should fail")

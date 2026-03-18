@@ -136,7 +136,7 @@ class Test:
                 f"- {round(self.time, 2)} sec - {self.status_as_cstring()}")
         self.reproduce += f"\nTo reproduce with URunner run:\n{self.get_command_line()}"
         self.reproduce += f"\nProvide following environment variables: {LocalEnv.get().list()}"
-        if self.is_output_log():
+        if self.is_output_log() and not self.excluded:
             _LOGGER.default(f"{self.test_id}: steps: {self.reproduce}")
             if not self.report:
                 _LOGGER.default(f"{self.test_id}: no information about test running neither output nor error")

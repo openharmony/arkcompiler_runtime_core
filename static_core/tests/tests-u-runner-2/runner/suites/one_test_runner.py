@@ -25,7 +25,7 @@ from subprocess import CompletedProcess
 from typing import cast
 
 from runner.common_exceptions import InvalidConfiguration
-from runner.enum_types.fail_kind import FailureReturnCode
+from runner.enum_types.fail_kind import FailKind, FailureReturnCode
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.logger import Log
 from runner.options.options_step import Step, StepKind
@@ -48,44 +48,16 @@ class OneTestRunner:
         self.coverage_manager = test_env.coverage
 
     @staticmethod
-    def __fail_kind_fail(name: str) -> str:
-        return f"{name.upper()}_FAIL"
-
-    @staticmethod
-    def __fail_kind_neg_fail(name: str) -> str:
-        return f"{name.upper()}_NEG_FAIL"
-
-    @staticmethod
-    def __fail_kind_segfault(name: str) -> str:
-        return f"{name.upper()}_SEGFAULT_FAIL"
-
-    @staticmethod
-    def __fail_kind_abort_fail(name: str) -> str:
-        return f"{name.upper()}_ABORT_FAIL"
-
-    @staticmethod
-    def __fail_kind_irtoc_assert_fail(name: str) -> str:
-        return f"{name.upper()}_IRTOC_ASSERT_FAIL"
-
-    @staticmethod
-    def __fail_kind_other(name: str) -> str:
-        return f"{name.upper()}_OTHER"
-
-    @staticmethod
-    def __fail_kind_subprocess(name: str) -> str:
-        return f"{name.upper()}_SUBPROCESS"
-
-    @staticmethod
-    def __fail_kind_timeout(name: str) -> str:
-        return f"{name.upper()}_TIMEOUT"
-
-    @staticmethod
-    def __failed_kind_special(name: str, kind: str) -> str:
-        return f"{name.upper()}_{kind.upper()}"
-
-    @staticmethod
-    def __fail_kind_passed(name: str) -> str:
-        return f"{name.upper()}_PASSED"
+    def _detect_fail_kind(name: str, return_code: int) -> str:
+        if return_code in FailureReturnCode.SEGFAULT_RETURN_CODE.value:
+            return FailKind.SEGFAULT.make_fail_kind(name)
+        if return_code in FailureReturnCode.ABORT_RETURN_CODE.value:
+            return FailKind.ABORT.make_fail_kind(name)
+        if return_code in FailureReturnCode.IRTOC_ASSERT_RETURN_CODE.value:
+            return FailKind.IRTOC_ASSERT.make_fail_kind(name)
+        if return_code == 0:
+            return FailKind.NEG_FAIL.make_fail_kind(name)
+        return FailKind.FAIL.make_fail_kind(name)
 
     def run_with_coverage(self, step: Step,
                           result_validator: CommonResultValidator,
@@ -128,14 +100,14 @@ class OneTestRunner:
                                                                            cast(ResultValidator, result_validator),
                                                                            return_code_interpreter)
         except subprocess.SubprocessError as ex:
-            fail_kind = self.__fail_kind_subprocess(name)
+            fail_kind = FailKind.SUBPROCESS.make_fail_kind(name)
             fail_kind_msg = f"{name}: Failed with {str(ex).strip()}"
             error = f"{error}\n{fail_kind_msg}" if error else fail_kind_msg
             return_code = -1
         self.__log_cmd(f"{name}: Actual error: {error.strip()}")
         self.__log_cmd(f"{name}: Actual return code: {return_code}\n")
         if fail_kind is None:
-            fail_kind = self.__fail_kind_passed(name) if passed else self.__fail_kind_other(name)
+            fail_kind = FailKind.PASSED.make_fail_kind(name) if passed else FailKind.OTHER.make_fail_kind(name)
 
         report = TestReport(
             output=output,
@@ -144,17 +116,6 @@ class OneTestRunner:
         )
 
         return passed, report, fail_kind.upper() if fail_kind else fail_kind
-
-    def _detect_fail_kind(self, name: str, return_code: int) -> str:
-        if return_code in FailureReturnCode.SEGFAULT_RETURN_CODE.value:
-            return self.__fail_kind_segfault(name)
-        if return_code in FailureReturnCode.ABORT_RETURN_CODE.value:
-            return self.__fail_kind_abort_fail(name)
-        if return_code in FailureReturnCode.IRTOC_ASSERT_RETURN_CODE.value:
-            return self.__fail_kind_irtoc_assert_fail(name)
-        if return_code == 0:
-            return self.__fail_kind_neg_fail(name)
-        return self.__fail_kind_fail(name)
 
     def _terminate_timed_out_process(self, process: subprocess.Popen, name: str) -> tuple[str, str]:
         timeout = self.test_env.config.general.retrieve_log_timeout
@@ -210,15 +171,14 @@ class OneTestRunner:
                     if validation_result.kind in [ValidatorFailKind.COMPARE_OUTPUT,
                                                   ValidatorFailKind.STDERR_NOT_EMPTY,
                                                   ValidatorFailKind.POST_REQ_FAILED]:
-                        kind = validation_result.kind.value
-                        fail_kind = self.__failed_kind_special(name, kind)
+                        fail_kind = validation_result.kind.make_fail_kind(name)
                         error += validation_result.description
                     else:
                         fail_kind = self._detect_fail_kind(name, return_code)
 
             except subprocess.TimeoutExpired:
                 self.__log_cmd(f"{name}: Failed by timeout after {step.timeout} sec")
-                fail_kind = self.__fail_kind_timeout(name)
+                fail_kind = FailKind.TIMEOUT.make_fail_kind(name)
                 return_code = process.returncode
                 output, error = self._terminate_timed_out_process(process, name)
         return passed, fail_kind, output, error, return_code
@@ -258,7 +218,7 @@ class OneTestRunner:
                 self.__log_cmd(f"{name}: Actual output: {output.strip()}")
             except subprocess.TimeoutExpired as pt:
                 self.__log_cmd(f"{name}: Failed by timeout after {step.timeout} sec")
-                fail_kind = self.__fail_kind_timeout(name)
+                fail_kind = FailKind.TIMEOUT.make_fail_kind(name)
                 error = pt.stderr.decode() if pt.stderr else ""
                 output = pt.stdout.decode() if pt.stdout else ""
                 return_code = -1

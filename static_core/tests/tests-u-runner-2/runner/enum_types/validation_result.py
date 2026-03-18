@@ -17,6 +17,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from runner.enum_types import fail_kind
+
 
 class ValidatorFailKind(Enum):
     NONE = "none"
@@ -26,6 +28,9 @@ class ValidatorFailKind(Enum):
     POST_REQ_FAILED = "post_req_failed"
     STEP_FAILED = "step_failed"
     OTHER = "other"
+
+    def make_fail_kind(self, name: str) -> str:
+        return fail_kind.make_fail_kind(name, self.value)
 
 
 @dataclass
