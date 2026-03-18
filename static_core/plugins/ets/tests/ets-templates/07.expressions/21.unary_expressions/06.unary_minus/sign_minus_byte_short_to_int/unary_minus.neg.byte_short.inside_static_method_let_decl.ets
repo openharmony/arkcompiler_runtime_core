@@ -16,7 +16,8 @@
 {% yaml "unary_minus.byte_short.test_data.yaml" as td%}
 {% for c in td.testData2 %}
 /*---
-desc: {{c.desc}} Negative test (inside the static method, let). 
+desc: >-
+    {{c.desc}} Negative test (inside the static method, let). 
     When using the unary minus operator for operations on short and byte types, conversion to the int type occurs. 
     Attempting to assign this converted value to a variable of the original type (byte or short) results in a compile-time error.
 expected_out: >-

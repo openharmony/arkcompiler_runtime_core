@@ -43,11 +43,11 @@ testData2:
   - {type: "Byte", value: "-0b0_0_0_11", format: "-(+%s)", result: "0B11", resultType: "int",  desc: "3 (19). Negative binary Byte (alias) value with minus sign, parentheses and plus sign"}
   
   - {type: "short", value: "-0o0_1", format: "-(%s)", result: "1", resultType: "int",  desc: "4 (20). Negative octal short value with minus sign and parentheses."}
-  - {type: "Short", value: "0b0_0_0_10", format: "-(-(-%s))", result: "-2", resultType: "int",  desc: 5 (21). Binary Short (alias) value with minus sign in parentheses."}
+  - {type: "Short", value: "0b0_0_0_10", format: "-(-(-%s))", result: "-2", resultType: "int",  desc: "5 (21). Binary Short (alias) value with minus sign in parentheses."}
   - {type: "short", value: "0O03_36", format: "-(%s)", result: "-0b11011110", resultType: "int",  desc: "6 (22). Octal short value with multi minus sign and parentheses."}
   - {type: "short", value: "-0X01_Ad", format: "-(+%s)", result: "0o655", resultType: "int",  desc: "7 (23). Negative hex short value with minus sign, parentheses and plus sign"}
 
   - {type: "byte", value: "7", format: "-(%s + 2)", result: "-0b1001", resultType: "int",  desc: "8 (24). Decimal byte value with minus sign and sum expression."}
   - {type: "short", value: "0X3", format: "-(%s*0x2)", result: "-6", resultType: "int",  desc: "9 (25). Hex short value with minus sign and multiplication expression."}
-  - {type: "byte", value: "0o4", format: "-(%s - 0o7)", result: "0x3", resultType: "int",  desc: "8 (26). Octal byte value with minus sign and minus expression."}
-  - {type: "short", value: "0B110", format: "-(%s*(0b1-0B11))", result: "0xC", resultType: "int",  desc: "9 (27). Binary short value with minus sign, multiplication and minus expression."}
+  - {type: "byte", value: "0o4", format: "-(%s - 0o7)", result: "0x3", resultType: "int",  desc: "10 (26). Octal byte value with minus sign and minus expression."}
+  - {type: "short", value: "0B110", format: "-(%s*(0b1-0B11))", result: "0xC", resultType: "int",  desc: "11 (27). Binary short value with minus sign, multiplication and minus expression."}
