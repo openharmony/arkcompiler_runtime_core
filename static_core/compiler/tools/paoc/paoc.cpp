@@ -50,6 +50,24 @@ Paoc::CompilingContext::CompilingContext(Method *methodPtr, size_t methodIndex, 
 {
 }
 
+bool Paoc::IsCompileTimeLimitExceeded()
+{
+    if (paocCompilationLimit_ == 0) {
+        return false;
+    }
+    if (timeLimitExceeded_ || compilationStartTime_ == std::chrono::steady_clock::time_point::max()) {
+        return true;
+    }
+    auto elapsed = std::chrono::steady_clock::now() - compilationStartTime_;
+    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+    timeLimitExceeded_ = static_cast<uint64_t>(elapsedMs) >= paocCompilationLimit_;
+    if (timeLimitExceeded_) {
+        EVENT_PAOC("Compilation time limit (" + std::to_string(paocCompilationLimit_) +
+                   "ms) exceeded, stopping compilation");
+    }
+    return timeLimitExceeded_;
+}
+
 Paoc::CompilingContext::~CompilingContext()
 {
     if (graph != nullptr) {
@@ -124,6 +142,7 @@ public:
         if (paoc_->IsLLVMAotMode()) {
             paoc_->PrepareLLVM(args);
         }
+        paoc_->paocCompilationLimit_ = paoc_->paocOptions_->GetPaocCompilationLimit();
 
         return 0;
     }
@@ -332,6 +351,7 @@ private:
 
 int Paoc::Run(const ark::Span<const char *> &args)
 {
+    StartCompilationTimer();
     if (PaocInitializer(this).Init(args) != 0) {
         return -1;
     }
@@ -357,7 +377,7 @@ int Paoc::Run(const ark::Span<const char *> &args)
     }
     bool errorOccurred = !CompileFiles();
     bool attemptedToCompile = (compilationIndex_ != 0);
-    errorOccurred |= !attemptedToCompile;
+    errorOccurred |= !attemptedToCompile && !IsCompileTimeLimitExceeded();
     if (IsAotMode()) {
         if (aotBuilder_->GetCurrentCodeAddress() != 0 || !aotBuilder_->GetClassHashTableSize()->empty() ||
             IsLLVMAotMode()) {
@@ -811,7 +831,7 @@ bool Paoc::Compile(Class *klass, const panda_file::File &pfileRef)
         auto methodName = runtime_->GetMethodFullName(&method, g_options.WasSetCompilerRegexWithSignature());
         if (method.GetPandaFile()->GetFilename() == pfileRef.GetFilename() && !Skip(&method) &&
             IsMethodShouldBeCompiled(methodName) && g_options.MatchesRegex(methodName) &&
-            !Compile(&method, methodIndex)) {
+            !IsCompileTimeLimitExceeded() && !Compile(&method, methodIndex)) {
             errorOccurred = true;
         }
         methodIndex++;

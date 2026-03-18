@@ -1189,6 +1189,200 @@ TEST_P(BootContextSplitTest, BootContextNotSplitWithoutLoadInBoot)
 
 INSTANTIATE_TEST_SUITE_P(LoadInBootGuard, BootContextSplitTest, ::testing::Values(false, true));
 
+// Many classes and methods to ensure compilation takes measurable time
+static constexpr auto MULTI_METHODS_SOURCE = R"(
+    .record A {}
+    .record B {}
+    .record C {}
+    .record D {}
+
+    .function i32 A.method1() {
+        ldai 1
+        return
+    }
+    .function i32 A.method2() {
+        ldai 2
+        return
+    }
+    .function i32 A.method3() {
+        ldai 3
+        return
+    }
+    .function i32 B.method1() {
+        ldai 4
+        return
+    }
+    .function i32 B.method2() {
+        ldai 5
+        return
+    }
+    .function i32 B.method3() {
+        ldai 6
+        return
+    }
+    .function i32 C.method1() {
+        ldai 7
+        return
+    }
+    .function i32 C.method2() {
+        ldai 8
+        return
+    }
+    .function i32 C.method3() {
+        ldai 9
+        return
+    }
+    .function i32 D.method1() {
+        ldai 10
+        return
+    }
+    .function i32 D.method2() {
+        ldai 11
+        return
+    }
+    .function i32 D.method3() {
+        ldai 12
+        return
+    }
+)";
+
+static void PaocCompilationLimitEmit(const TmpFile &pandaFname)
+{
+    pandasm::Parser parser;
+    auto res = parser.Parse(MULTI_METHODS_SOURCE);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
+static size_t CountCompiledMethodsInEvents(const char *eventsFile)
+{
+    std::ifstream infile(eventsFile);
+    std::regex rgx("Compilation,.*,COMPILED");
+    size_t count = 0;
+    for (std::string line; std::getline(infile, line);) {
+        if (std::regex_match(line, rgx)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+TEST_F(AotTest, PaocCompilationLimitNoLimit)
+{
+#ifndef PANDA_EVENTS_ENABLED
+    GTEST_SKIP();
+#endif
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+
+    TmpFile pandaFname("compilation_limit_test.abc");
+    TmpFile aotFname("./compilation_limit_test.an");
+    TmpFile eventsFile("compilation_limit_events.csv");
+
+    PaocCompilationLimitEmit(pandaFname);
+
+    // With no time limit (default 0), all methods should be compiled
+    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                              aotFname.GetFileName(), "--paoc-compilation-limit=0", "--events-output=csv",
+                              "--events-file", eventsFile.GetFileName());
+    ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+    ASSERT_EQ(res.Value(), 0U);
+
+    constexpr size_t totalMethods = 12;
+    size_t compiled = CountCompiledMethodsInEvents(eventsFile.GetFileName());
+    ASSERT_EQ(compiled, totalMethods) << "All methods should be compiled when no time limit is set";
+
+    RunAotdump(aotFname.GetFileName());
+}
+
+TEST_F(AotTest, PaocCompilationLimitWithTimeout)
+{
+#ifndef PANDA_EVENTS_ENABLED
+    GTEST_SKIP();
+#endif
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+
+    TmpFile pandaFname("compilation_limit_timeout_test.abc");
+    TmpFile aotFname("./compilation_limit_timeout_test.an");
+    TmpFile eventsFile("compilation_limit_events.csv");
+
+    PaocCompilationLimitEmit(pandaFname);
+
+    // With 1ms time limit, compilation should stop early (or at least succeed without error)
+    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                              aotFname.GetFileName(), "--paoc-compilation-limit=1", "--events-output=csv",
+                              "--events-file", eventsFile.GetFileName(), "--compiler-ignore-failures=false");
+    ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+    // Time-limited compilation should return success (0)
+    ASSERT_EQ(res.Value(), 0U) << "Time-limited compilation should not return an error";
+
+    // Check that compilation stopped due to set time limit
+    std::ifstream infile(eventsFile.GetFileName());
+    size_t count = 0;
+    for (std::string line; std::getline(infile, line);) {
+        if (line.find("Compilation time limit (1ms) exceeded, stopping compilation") != std::string::npos) {
+            count++;
+        }
+    }
+    ASSERT_EQ(count, 1U);
+}
+
+TEST_F(AotTest, PaocCompilationLimitPartialAotValid)
+{
+#ifndef PANDA_EVENTS_ENABLED
+    GTEST_SKIP();
+#endif
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+
+    TmpFile pandaFname("compilation_limit_partial_test.abc");
+    TmpFile aotFname("./compilation_limit_partial_test.an");
+    TmpFile eventsFile("compilation_limit_partial_events.csv");
+
+    PaocCompilationLimitEmit(pandaFname);
+
+    // Use enough time limit that allows some but potentially not all methods to compile.
+    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                              aotFname.GetFileName(), "--paoc-compilation-limit=1000", "--events-output=csv",
+                              "--events-file", eventsFile.GetFileName());
+    ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+    ASSERT_EQ(res.Value(), 0U);
+
+    size_t compiled = CountCompiledMethodsInEvents(eventsFile.GetFileName());
+    ASSERT_GT(compiled, 0U) << "At least some methods should be compiled within 1000ms";
+}
+
+TEST_F(AotTest, PaocCompilationLimitLargeTimeout)
+{
+#ifndef PANDA_EVENTS_ENABLED
+    GTEST_SKIP();
+#endif
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+
+    TmpFile pandaFname("compilation_limit_large_test.abc");
+    TmpFile aotFname("./compilation_limit_large_test.an");
+    TmpFile eventsFile("compilation_limit_large_events.csv");
+
+    PaocCompilationLimitEmit(pandaFname);
+
+    // With a very large time limit, all methods should compile (same as no limit)
+    auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                              aotFname.GetFileName(), "--paoc-compilation-limit=60000", "--events-output=csv",
+                              "--events-file", eventsFile.GetFileName(), "--compiler-ignore-failures=false");
+    ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+    ASSERT_EQ(res.Value(), 0U);
+
+    constexpr size_t totalMethods = 12;
+    size_t compiled = CountCompiledMethodsInEvents(eventsFile.GetFileName());
+    ASSERT_EQ(compiled, totalMethods) << "All methods should be compiled with a large time limit";
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler

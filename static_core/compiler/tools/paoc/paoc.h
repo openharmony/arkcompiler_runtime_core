@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "runtime/jit/profiling_loader.h"
 #include "libarkbase/utils/expected.h"
 #include "libarkbase/utils/span.h"
+#include <chrono>
 
 namespace ark::compiler {
 class Graph;
@@ -110,6 +111,12 @@ private:
         return mode_ == PaocMode::AOT || mode_ == PaocMode::LLVM;
     }
 
+    bool IsCompileTimeLimitExceeded();
+    void StartCompilationTimer()
+    {
+        compilationStartTime_ = std::chrono::steady_clock::now();
+    }
+
     class ErrorHandler : public ClassLinkerErrorHandler {
         void OnError([[maybe_unused]] ClassLinker::Error error, [[maybe_unused]] const PandaString &message) override {}
     };
@@ -180,6 +187,9 @@ private:
     unsigned failedMethods_ {0};
 
     std::ofstream statisticsDump_;
+    std::chrono::steady_clock::time_point compilationStartTime_ {std::chrono::steady_clock::time_point::max()};
+    bool timeLimitExceeded_ {false};
+    uint64_t paocCompilationLimit_ {0};
 };
 
 }  // namespace ark::paoc
