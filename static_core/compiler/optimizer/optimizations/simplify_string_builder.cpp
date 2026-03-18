@@ -88,12 +88,12 @@ bool SimplifyStringBuilder::RunImpl()
 
     if (isApplied_) {
         // Cleanup should be done before block optimizations, to erase instruction marked as dead
-        GetGraph()->RunPass<compiler::Cleanup>();
+        GetGraph()->RunPass<compiler::Cleanup>(true, true);
     }
 
     if (OptimizeStringBuilderChain()) {
         // Cleanup should be done before block optimizations, to erase instruction marked as dead
-        GetGraph()->RunPass<compiler::Cleanup>();
+        GetGraph()->RunPass<compiler::Cleanup>(true, true);
     }
 
     bool isAppliedLocal = false;
@@ -107,8 +107,6 @@ bool SimplifyStringBuilder::RunImpl()
         isAppliedLocal |= OptimizeStringBuilderStringLength(block);
     }
 
-    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
-
     if (!GetGraph()->IsBytecodeOptimizer()) {
         /// NOTE: (mivanov) The function below will be removed after #30940 is implemented
         isAppliedLocal |= CleanupSaveStateInstructions();
@@ -118,6 +116,8 @@ bool SimplifyStringBuilder::RunImpl()
         // Cleanup should be done inside pass, to satisfy GraphChecker
         GetGraph()->RunPass<compiler::Cleanup>();
     }
+
+    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
 
     return isApplied_;
 }
@@ -2016,7 +2016,7 @@ bool SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
 
     // Process inner loops first
     for (auto innerLoop : loop->GetInnerLoops()) {
-        OptimizeStringConcatenation(innerLoop);
+        isAppliedLocal |= OptimizeStringConcatenation(innerLoop);
     }
 
     // Check if basic block for instructions to hoist exist

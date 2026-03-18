@@ -22,7 +22,7 @@
 namespace ark::compiler {
 class PANDA_PUBLIC_API Cleanup final : public Optimization {
 public:
-    explicit Cleanup(Graph *graph, bool lightMode = true)
+    explicit Cleanup(Graph *graph, bool lightMode = true, bool onlyDCE = false)
         : Optimization(graph),
           empty1_(graph->GetLocalAllocator()->Adapter()),
           empty2_(graph->GetLocalAllocator()->Adapter()),
@@ -38,6 +38,7 @@ public:
           vertices_(graph->GetLocalAllocator()->Adapter()),
           map_(graph->GetLocalAllocator()->Adapter()),
           isInliningComplete_(graph->IsInliningComplete()),
+          onlyDCE_(onlyDCE),
           lightMode_(lightMode)
     {
     }
@@ -112,6 +113,7 @@ private:
     int32_t dfsNum_ {DEFAULT_DFS_VAL};
 
     bool isInliningComplete_;
+    bool onlyDCE_ {false};
     bool lightMode_ {true};
 
     inline uint32_t GetInstId(Inst *inst) const

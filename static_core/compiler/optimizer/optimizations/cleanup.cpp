@@ -40,8 +40,17 @@ bool Cleanup::RunImpl()
 {
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
-    // Two vectors to store basic blocks lists
+    // First vector to store basic blocks lists
     auto emptyBlocks = &empty1_;
+
+    if (onlyDCE_) {
+        auto markerHolder = MarkerHolder(GetGraph());
+        bool modified = Dce<true>(markerHolder.GetMarker(), emptyBlocks);
+        empty1_.clear();
+        return modified;
+    }
+
+    // Second vector to store basic blocks lists
     auto newEmptyBlocks = &empty2_;
 
     bool modified = (lightMode_ ? PhiCheckerLight() : PhiChecker());
