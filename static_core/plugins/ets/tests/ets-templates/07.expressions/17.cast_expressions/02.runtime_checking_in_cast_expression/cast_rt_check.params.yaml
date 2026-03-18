@@ -13,148 +13,472 @@
 
 ---
 cases:
+  # actual = new A() — satisfies A, I only
+
   - init: 'let v: A = new A()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: A = new A()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 1
 
   - init: 'let v: A = new A()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: A = new A()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 1
 
   - init: 'let v: A = new A()'
     expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: A = new A()'
+    expr: 'let x: C = v as C'
+    target: 'C'
     fail: 1
 
 
   - init: 'let v: Object = new A()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: Object = new A()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 1
 
   - init: 'let v: Object = new A()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: Object = new A()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 1
 
   - init: 'let v: Object = new A()'
     expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: Object = new A()'
+    expr: 'let x: C = v as C'
+    target: 'C'
     fail: 1
 
 
   - init: 'let v: I = new A()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: I = new A()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 1
 
   - init: 'let v: I = new A()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: I = new A()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 1
 
   - init: 'let v: I = new A()'
     expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: I = new A()'
+    expr: 'let x: C = v as C'
+    target: 'C'
     fail: 1
 
 
+  # actual = new B() — satisfies A, B, I, J
+
   - init: 'let v: B = new B()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: B = new B()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 0
 
   - init: 'let v: B = new B()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: B = new B()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 0
 
   - init: 'let v: B = new B()'
     expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: B = new B()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 1
+
+
+  - init: 'let v: Object = new B()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: Object = new B()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: Object = new B()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: Object = new B()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: Object = new B()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: Object = new B()'
+    expr: 'let x: C = v as C'
+    target: 'C'
     fail: 1
 
 
   - init: 'let v: A = new B()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: A = new B()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 0
 
   - init: 'let v: A = new B()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: A = new B()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 0
 
   - init: 'let v: A = new B()'
     expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: A = new B()'
+    expr: 'let x: C = v as C'
+    target: 'C'
     fail: 1
 
 
   - init: 'let v: I = new B()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: I = new B()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 0
 
   - init: 'let v: I = new B()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: I = new B()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 0
 
   - init: 'let v: I = new B()'
     expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 1
+
+  - init: 'let v: I = new B()'
+    expr: 'let x: C = v as C'
+    target: 'C'
     fail: 1
 
 
   - init: 'let v: J = new B()'
     expr: 'let x: A = v as A'
+    target: 'A'
     fail: 0
 
   - init: 'let v: J = new B()'
     expr: 'let x: B = v as B'
+    target: 'B'
     fail: 0
 
   - init: 'let v: J = new B()'
     expr: 'let x: I = v as I'
+    target: 'I'
     fail: 0
 
   - init: 'let v: J = new B()'
     expr: 'let x: J = v as J'
+    target: 'J'
     fail: 0
 
   - init: 'let v: J = new B()'
     expr: 'let x: K = v as K'
+    target: 'K'
     fail: 1
+
+  - init: 'let v: J = new B()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 1
+
+
+  # actual = new C() — satisfies A, B, C, I, J, K (all targets)
+
+  - init: 'let v: C = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: C = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: C = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: C = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: C = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: C = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
+
+
+  - init: 'let v: Object = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: Object = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: Object = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: Object = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: Object = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: Object = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
+
+
+  - init: 'let v: A = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: A = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: A = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: A = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: A = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: A = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
+
+
+  - init: 'let v: I = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: I = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: I = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: I = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: I = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: I = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
+
+
+  - init: 'let v: K = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: K = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: K = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: K = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: K = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: K = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
+
+
+  - init: 'let v: B = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: B = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: B = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: B = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: B = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: B = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
+
+
+  - init: 'let v: J = new C()'
+    expr: 'let x: A = v as A'
+    target: 'A'
+    fail: 0
+
+  - init: 'let v: J = new C()'
+    expr: 'let x: B = v as B'
+    target: 'B'
+    fail: 0
+
+  - init: 'let v: J = new C()'
+    expr: 'let x: I = v as I'
+    target: 'I'
+    fail: 0
+
+  - init: 'let v: J = new C()'
+    expr: 'let x: J = v as J'
+    target: 'J'
+    fail: 0
+
+  - init: 'let v: J = new C()'
+    expr: 'let x: K = v as K'
+    target: 'K'
+    fail: 0
+
+  - init: 'let v: J = new C()'
+    expr: 'let x: C = v as C'
+    target: 'C'
+    fail: 0
