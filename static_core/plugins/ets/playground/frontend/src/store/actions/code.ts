@@ -21,6 +21,7 @@ import { RootState } from '..';
 import { clearErrLogs, clearOutLogs } from './logs';
 import { setOptionsPicked } from '../slices/options';
 import { setClearHighLightErrs } from '../slices/logs';
+import { setActiveLogTab } from '../slices/appState';
 import { encodeShareData, copyToClipboard, buildShareUrl } from '../../utils/shareUtils';
 import { showMessage } from './notification';
 
@@ -113,6 +114,16 @@ export const fetchRunCode = createAsyncThunk(
             return;
         }
         thunkAPI.dispatch(handleResponseLogs(response));
+
+        const hasCompileError = response.data.compile?.exit_code !== undefined
+            && response.data.compile.exit_code !== 0;
+        const hasAotCompileError = response.data.aot_compile?.exit_code !== undefined
+            && response.data.aot_compile.exit_code !== 0;
+
+        if (hasCompileError || hasAotCompileError) {
+            thunkAPI.dispatch(setActiveLogTab('compilation'));
+        }
+
         thunkAPI.dispatch(setRunRes(response.data));
         thunkAPI.dispatch(setRunLoading(false));
     },
