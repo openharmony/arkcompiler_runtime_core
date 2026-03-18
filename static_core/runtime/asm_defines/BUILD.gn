@@ -31,6 +31,11 @@ config("asmdefines_public_config") {
   }
 }
 
+config("no_lto_config") {
+  cflags_c = ["-fno-lto"]
+  cflags_cc = ["-fno-lto"]
+}
+
 ohos_static_library("asm_defines") {
   sources = [ "defines.cpp" ]
   configs = [
@@ -38,11 +43,11 @@ ohos_static_library("asm_defines") {
     "$ark_root/runtime:arkruntime_public_config",
     "$ark_root/libarkbase:arkbase_public_config",
     "$ark_root/libarkfile:arkfile_public_config",
+    ":no_lto_config"
   ]
   cflags_cc = [
     "-Wno-invalid-offsetof",
     "-S",
-    "-fno-lto",
   ]
   output_dir = "$target_gen_dir/generated"
   output_extension = "S"
