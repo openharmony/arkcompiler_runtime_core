@@ -1119,7 +1119,7 @@
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_17.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_18.ets
 
-#30451 cannot spread arguments for tuple
+#33189 Spread argument cannot be passed to ordinary parameter
 09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_3.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_4.ets
 
