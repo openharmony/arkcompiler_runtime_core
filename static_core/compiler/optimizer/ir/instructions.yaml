@@ -539,7 +539,7 @@ instructions:
   - opcode: CheckCast
     base: CheckCastInst
     signature: [ref, ref, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, require_state, runtime_call, acc_read]
+    flags: [can_throw, no_dce, no_hoist, no_cse, require_state, runtime_call, acc_read, barrier]
     description: >-
       If an object in the first input can't be cast to the type in the second input ClassCastException is thrown.
       'null' object reference can be cast to every type.
