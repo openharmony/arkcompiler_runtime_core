@@ -14,18 +14,11 @@
  */
 
 /*---
-desc: >-
-      Only one static block is allowed in a single namespace
+desc: Static block cannot be used out of the class or namespace
 tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0227: Unexpected token 'static'.
 ---*/
 
-namespace ns1 {
-  export let i: string
-  static {
-    i = "ns1 initialized"
-  }
-  export let j: int
-  static {
-    j = 2
-  }
+static {
 }

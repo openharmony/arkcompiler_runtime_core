@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in [2, 10] %}
-
 /*---
 desc: >-
-      Only single static initializer is available per class
+    Only one static block is allowed in a single namespace
 tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0034: Only one static block is allowed in one namespace or class.
 ---*/
 
-class C {
-{% for i in range(c) %}
-  static v{{i}}: int = 0
+namespace ns1 {
+  export let i: string
   static {
-    C.v{{i}} += 1
+    i = "ns1 initialized"
   }
-{% endfor %}
+  export let j: int
+  static {
+    j = 2
+  }
 }
-{% endfor %}

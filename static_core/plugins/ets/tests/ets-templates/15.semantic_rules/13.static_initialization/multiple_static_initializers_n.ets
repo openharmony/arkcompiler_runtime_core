@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
+{% for c in [2, 10] %}
+
 /*---
 desc: >-
-      Static initialization is a routine performed once for each class (see Classes),
-      namespace (see Namespace Declarations), or module (see Modules).
+    Only single static initializer is available per class
 tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0034: Only one static block is allowed in one namespace or class.
 ---*/
 
- class C {
-   static readonly i: int = 2
-   static {
-     C.i = 3
-   }
- }
-
-function main() {
+class C {
+{% for i in range(c) %}
+  static v{{i}}: int = 0
+  static {
+    C.v{{i}} += 1
+  }
+{% endfor %}
 }
-
+{% endfor %}

@@ -15,8 +15,10 @@
 
 /*---
 desc: >-
-      Only one static block is allowed in a single namespace
+    Only one static block is allowed in a single namespace
 tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0034: Only one static block is allowed in one namespace or class.
 ---*/
 
 namespace ns1 {
