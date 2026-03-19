@@ -91,6 +91,7 @@ class Doclet(StringEnum):
     INCLUDE = "Include"
     TAGS = "Tags"
     BUGS = "Bugs"
+    SEAMLESS = "Seamless"
     GENERATOR = "Generator"  # Legacy code generation
 
     @staticmethod
@@ -118,6 +119,7 @@ class BenchClass:
     includes: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
     bugs: List[str] = field(default_factory=list)
+    seamless: List[str] = field(default_factory=list)
     generator: Optional[str] = None
 
 
@@ -139,6 +141,7 @@ class DocletParser(LineParser):
         self.__pending_bugs: List[str] = []
         self.__pending_imports: List[str] = []
         self.__pending_includes: List[str] = []
+        self.__pending_seamless: List[str] = []
 
     @staticmethod
     def validate_comment(doclets: List[NameVal]) -> None:
@@ -199,9 +202,11 @@ class DocletParser(LineParser):
             raise ValueError('Bench class declaration not found!')
         self.state = BenchClass(name=class_name,
                                 tags=self.__pending_tags, bugs=self.__pending_bugs,
-                                imports=self.__pending_imports, includes=self.__pending_includes)
+                                imports=self.__pending_imports, includes=self.__pending_includes,
+                                seamless=self.__pending_seamless)
         self.__pending_tags, self.__pending_bugs = [], []
         self.__pending_imports, self.__pending_includes = [], []
+        self.__pending_seamless = []
         # check if there are overrides for whole class
         for _, value in benchmarks:
             self.state.bench_args = self.parse_bench_overrides(value)
@@ -284,6 +289,11 @@ class DocletParser(LineParser):
                 self.state.includes.append(value)
             else:
                 self.__pending_includes.append(value)
+        for _, value in filter_doclets(Doclet.SEAMLESS):
+            if self.state:
+                self.state.seamless.append(value)
+            else:
+                self.__pending_seamless.append(value)
         for _ in states:
             self.process_state(benchmarks, generators)
             return
@@ -358,6 +368,7 @@ class TemplateVars:  # pylint: disable=invalid-name
     bugs: Any = None
     imports: Any = None
     includes: Any = None
+    seamless: Any = None
     generator: str = ''
     config: Dict[str, Any] = field(default_factory=dict)
     aot_opts: str = ''
@@ -440,6 +451,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                 tp.set_measure_overrides(args, parsed.bench_args, b.args)
                 tp.imports = parsed.imports
                 tp.includes = parsed.includes
+                tp.seamless = parsed.seamless
                 yield tp
                 fix_id += 1
 

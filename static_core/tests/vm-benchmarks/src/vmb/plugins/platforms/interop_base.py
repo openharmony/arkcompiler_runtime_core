@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,7 @@ import json
 from vmb.platform import PlatformBase
 from vmb.unit import BenchUnit
 from vmb.cli import Args
-from vmb.tool import ToolBase
+from vmb.tool import ToolBase, OptFlags
 from vmb.helpers import force_link
 
 log = logging.getLogger('vmb')
@@ -39,7 +39,12 @@ class InteropPlatformBase(PlatformBase, ABC):
         self.arkjs_interop = self.tools_get('arkjs_interop')
         self.ark = self.tools_get('ark')
         # transfer serialized ark vm custom options for using as env var
-        self.arkjs_interop.ets_vm_opts = json.dumps(self.ark.custom_opts_obj())
+        opts_obj = self.ark.custom_opts_obj()
+        if OptFlags.INT in self.flags:
+            opts_obj["compiler-enable-jit"] = "false"
+        elif OptFlags.JIT in self.flags:
+            opts_obj["compiler-enable-jit"] = "true"
+        self.arkjs_interop.ets_vm_opts = json.dumps(opts_obj)
 
     @property
     def required_tools(self) -> List[str]:

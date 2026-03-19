@@ -391,6 +391,7 @@ Supported doclets are:
 * `@Import {x, y...} from ./libX.ext` produces import statement and compile `libX.ext` if needed.
 * `@Include ./f.ext` paste contents of `f.ext` into generated source.
   [See Sample.ts](./examples/benchmarks/ts/Sample.ts)
+* `@Seamless ./libX.ext` Declares a dependency for cross-language interoperability.
 * `@Tags t1 [, t2...]` on a root class or method. List of benchmark tags.
 * `@Bugs b1 [, b2...]` on a root class or method. List of associated issues.
 
