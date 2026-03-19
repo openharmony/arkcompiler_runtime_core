@@ -20,20 +20,12 @@ desc: >-
 ---*/
 
 @interface MyAnno {
-    id: boolean
-    idN: boolean
+    id: boolean = {{c.left}} {{c.op}} {{c.right}}
 }
 
-const a: {{c.type}} = {{c.left}}
-const b: {{c.type}} = {{c.right}}
-const myId: boolean = a {{c.op}} b
-const myIdN: boolean = {{c.expected}}
+@MyAnno({{c.left}} {{c.op}} {{c.right}})
+class Class1 {}
 
-@MyAnno({id: myId, idN: myIdN})
-class NewClass{}
-
-function main() {
-    arktest.assertEQ(myId, myIdN)
-}
-
-{% endfor %}
+@MyAnno({ id: {{c.left}} {{c.op}} {{c.right}} })
+class Class2 {}
+{%- endfor %}

@@ -20,14 +20,12 @@ desc: >-
 ---*/
 
 @interface MyAnno {
-    id: {{c.type}}
-    idN: number
+    id: {{c.type}} = {{c.value}} {{c.operation}}
 }
 
-const value: {{c.type}} = {{c.value}}
-const myId: {{c.type}} = value {{c.operation}}
+@MyAnno({{c.value}} {{c.operation}})
+class Class1 {}
 
-@MyAnno({id: myId, idN: myId})
-class NewClass{}
-
-{% endfor %}
+@MyAnno({ id: {{c.value}} {{c.operation}} })
+class Class2 {}
+{%- endfor %}

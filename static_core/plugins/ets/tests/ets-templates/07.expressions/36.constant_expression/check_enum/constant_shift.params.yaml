@@ -12,40 +12,28 @@
 # limitations under the License.
 ---
 cases:
-  - { type: byte, value: 3,   sign: '<<',  expected: 24  }
-  - { type: byte, value: 26,  sign: '>>',  expected: 3   }
-  - { type: byte, value: 26,  sign: '>>>', expected: 3   }
-  - { type: byte, value: -3,  sign: '<<',  expected: -24 }
-  - { type: byte, value: -26, sign: '>>',  expected: -4  }
-  - { type: byte, value: -26, sign: '>>>', expected: 536870908 }
+    - { type: byte, value: 3, sign: '<<', expected: 25 }
+    - { type: byte, value: 26, sign: '>>', expected: 4 }
+    - { type: byte, value: 26, sign: '>>>', expected: 4 }
+    - { type: byte, value: -3, sign: '<<', expected: -23 }
+    - { type: byte, value: -26, sign: '>>', expected: -3 }
+    - { type: long, value: -26, sign: '>>>', expected: 536870909 }
 
-  - { type: short, value: 8,    sign: '<<',  expected: 64  }
-  - { type: short, value: 260,  sign: '>>',  expected: 32  }
-  - { type: short, value: 260,  sign: '>>>', expected: 32  }
-  - { type: short, value: -8,   sign: '<<',  expected: -64 }
-  - { type: short, value: -256, sign: '>>',  expected: -32 }
-  - { type: short, value: -260, sign: '>>>', expected: 536870879 }
+    - { type: short, value: 8, sign: '<<', expected: 65 }
+    - { type: short, value: 260, sign: '>>', expected: 33 }
+    - { type: short, value: 260, sign: '>>>', expected: 33 }
+    - { type: short, value: -8, sign: '<<', expected: -63 }
+    - { type: short, value: -256, sign: '>>', expected: -31 }
+    - { type: long, value: -260, sign: '>>>', expected: 536870880 }
 
-  - { type: int, value: 308,   sign: '<<',  expected: 2464  }
-  - { type: int, value: 3008,  sign: '>>',  expected: 376   }
-  - { type: int, value: 3008,  sign: '>>>', expected: 376   }
-  - { type: int, value: -308,  sign: '<<',  expected: -2464 }
-  - { type: int, value: -3008, sign: '>>',  expected: -376  }
+    - { type: int, value: 308, sign: '<<', expected: 2465 }
+    - { type: int, value: 3008, sign: '>>', expected: 377 }
+    - { type: int, value: 3008, sign: '>>>', expected: 377 }
+    - { type: int, value: -308, sign: '<<', expected: -2463 }
+    - { type: int, value: -3008, sign: '>>', expected: -375 }
 
-  - { type: long, value: 5006,   sign: '<<',  expected: 40048  }
-  - { type: long, value: 50006,  sign: '>>',  expected: 6250   }
-  - { type: long, value: 50006,  sign: '>>>', expected: 6250   }
-  - { type: long, value: -5006,  sign: '<<',  expected: -40048 }
-  - { type: long, value: -50006, sign: '>>',  expected: -6251  }
-
-  - { type: float, value: 123.2f,  sign: '<<',  expected: 984  }
-  - { type: float, value: 123.2f,  sign: '>>',  expected: 15   }
-  - { type: float, value: 123.2f,  sign: '>>>', expected: 15   }
-  - { type: float, value: -123.2f, sign: '<<',  expected: -984 }
-  - { type: float, value: -123.2f, sign: '>>',  expected: -16  }
-
-  - { type: number, value: 5051.9,  sign: '<<',  expected: 40408   }
-  - { type: number, value: 5051.9,  sign: '>>',  expected: 631     }
-  - { type: number, value: 5051.9,  sign: '>>>', expected: 631     }
-  - { type: number, value: -5051.9, sign: '<<',  expected: -40408  }
-  - { type: number, value: -5051.9, sign: '>>',  expected: -632    }
+    - { type: long, value: 5006, sign: '<<', expected: 40049 }
+    - { type: long, value: 50006, sign: '>>', expected: 6251 }
+    - { type: long, value: 50006, sign: '>>>', expected: 6251 }
+    - { type: long, value: -5006, sign: '<<', expected: -40047 }
+    - { type: long, value: -50006, sign: '>>', expected: -6250 }

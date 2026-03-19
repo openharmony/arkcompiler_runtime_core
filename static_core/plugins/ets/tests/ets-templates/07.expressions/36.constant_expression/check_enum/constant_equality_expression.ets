@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    Constant expression with equality/relational operators as enum initializer.
+    If initializers for all members are omitted, then the first member is assigned the value zero.
+    The other member is assigned the value of the immediately preceding member plus one.
+    If an initializer is not a constant expression (see Constant Expressions),
+    all subsequent members must be explicitly initialized.
+    Otherwise, a compile-time error occurs.
 ---*/
 
-const a: {{c.type}} = {{c.left}}
-const b: {{c.type}} = {{c.right}}
-const result: int = (a {{c.op}} b) ? 1 : 0
-
-enum TestEnum { One = result }
+{% for c in cases %}
+enum TestEnum{{loop.index}} { One = ({{c.left}} {{c.op}} {{c.right}}) ? 1 : 0, Two }
+{%- endfor %}
 
 function main() {
-    arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
+{% for c in cases %}
+    arktest.assertEQ(TestEnum{{loop.index}}.Two.valueOf(), {{c.expected}})
+{%- endfor %}
 }
-
-{% endfor %}

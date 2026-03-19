@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc:
-    Constant bitwise expression as enum initializer.
+desc: >-
+    If initializers for all members are omitted, then the first member is assigned the value zero.
+    The other member is assigned the value of the immediately preceding member plus one.
+    If an initializer is not a constant expression (see Constant Expressions),
+    all subsequent members must be explicitly initialized.
+    Otherwise, a compile-time error occurs.
 ---*/
 
-const value1: {{c.type}} = {{c.value}}
-const testStr: string = "value: " + (value1 {{c.expression}})
-
-enum TestEnum { One = testStr }
+{% for c in cases %}
+enum TestEnum{{loop.index}}: {{c.type}} { One = {{c.value}} {{c.expression}}, Two }
+{%- endfor %}
 
 function main() {
-    arktest.assertEQ(TestEnum.One.valueOf(), "value: {{c.expected}}")
-}
+{% for c in cases %}
+    arktest.assertEQ(TestEnum{{loop.index}}.Two.valueOf(), {{c.expected}})
+{%- endfor %}
 
-{% endfor %}
+}

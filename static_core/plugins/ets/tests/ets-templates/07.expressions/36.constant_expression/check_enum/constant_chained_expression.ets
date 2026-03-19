@@ -13,16 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    Constant expression with chained/nested operations as enum initializer.
+    If initializers for all members are omitted, then the first member is assigned the value zero.
+    The other member is assigned the value of the immediately preceding member plus one.
+    If an initializer is not a constant expression (see Constant Expressions),
+    all subsequent members must be explicitly initialized.
+    Otherwise, a compile-time error occurs.
 ---*/
 
-enum TestEnum { One = {{c.expression}} }
+{% for c in cases %}
+enum TestEnum{{loop.index}} { One = {{c.expression}}, Two }
+{%- endfor %}
 
 function main() {
-    arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
+{% for c in cases %}
+    arktest.assertEQ(TestEnum{{loop.index}}.Two.valueOf(), {{c.expected}})
+{%- endfor %}
 }
-
-{% endfor %}
