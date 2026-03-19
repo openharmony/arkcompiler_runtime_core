@@ -27,7 +27,7 @@ function getOperand(): number {
 }
 
 function main(): void {
-    let actual_outcome: boolean = (b {{c.op}} getOperand());
+    let actual_outcome: boolean = (b.doubleValue() {{c.op}} getOperand());
     arktest.assertEQ(actual_outcome, {{c.expected_bool}})
 }
 {%- endfor %} 
