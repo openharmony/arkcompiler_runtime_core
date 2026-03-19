@@ -6,3 +6,6 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
 #29146
 algorithms/SortingTest.ets
+
+#33140
+std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets

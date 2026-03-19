@@ -1,9 +1,6 @@
 #24352
 algorithms/SampleAppTest.ets
 
-#33473
-ets_func_tests/std/concurrency/AsyncMutexTest.ets
-
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
@@ -266,9 +263,6 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 #28321
 std/concurrency/eaworker_message_ignored.ets
 
-#30642 
-std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
-
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
@@ -341,6 +335,3 @@ escompat/DateTest.ets
 std/core/IntlPluralRulesSupportedLocalesOfTest.ets
 std/concurrency/message_basic_interface.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets
-
-#33140
-std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets
