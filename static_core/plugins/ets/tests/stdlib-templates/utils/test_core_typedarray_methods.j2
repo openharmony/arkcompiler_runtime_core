@@ -732,10 +732,10 @@ const testTypedArraySortWithNaNReversed = parametrize<ObjectTypeAndExpectations<
 {%- endif %}
 
 type ApplyFunction<T> =
-    (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => T
-    | (element: {{.item.type}}, index: number) => T
-    | (element: {{.item.type}}) => T
-    | () => T
+    ((element: {{.item.type}}, index: number, array: {{.item.objectType}}) => T)
+    | ((element: {{.item.type}}, index: number) => T)
+    | ((element: {{.item.type}}) => T)
+    | (() => T)
 type FindCallable = ApplyFunction<boolean>
 
 type ExpectationsOptIN = [{{.item.type}} | undefined, number | undefined]
