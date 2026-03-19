@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,8 +87,11 @@ public:
     /// @brief Compute new size of heap space
     virtual void ComputeNewSize();
 
+    /// @brief Get maximum heap size
+    virtual size_t GetMaxHeapSize() const;
+
     /// @brief Get current used heap size
-    virtual size_t GetHeapSize() const;
+    virtual size_t GetCurrentHeapSize() const;
 
     /// @brief Try to allocate pool via PoolManager
     [[nodiscard]] virtual Pool TryAllocPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
@@ -310,7 +313,9 @@ public:
 
     void UpdateSize(size_t desiredYoungSize);
 
-    size_t GetHeapSize() const override;
+    size_t GetMaxHeapSize() const override;
+
+    size_t GetCurrentHeapSize() const override;
 
     size_t UpdateYoungSpaceMaxSize(size_t size);
     // Use for CanAllocInSpace

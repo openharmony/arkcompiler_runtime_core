@@ -133,10 +133,11 @@ public:
     }
 
     // Returns approximate amount of memory currently consumed by an application.
-    PANDA_PUBLIC_API size_t GetTotalMemory() const;
-
-    // Returns how much free memory we have until we need to grow the heap to perform an allocation.
+    PANDA_PUBLIC_API size_t GetConsumedHeapMemory() const;
+    // Returns how much free memory we have before heap is full.
     PANDA_PUBLIC_API size_t GetFreeMemory() const;
+    // Returns how much free memory we have until we need to grow the heap to perform an allocation.
+    PANDA_PUBLIC_API size_t GetFreeMemoryBeforeHeapGrow() const;
 
     /// Clamp current accessable heap size as maximum heap size
     void ClampNewMaxHeapSize();
