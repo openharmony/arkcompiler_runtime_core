@@ -758,7 +758,7 @@ bool Paoc::CompilePandaFile(const panda_file::File &pfileRef)
 ark::Class *Paoc::ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId)
 {
     ErrorHandler handler;
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     if (pfileRef.IsExternal(classId)) {
         return nullptr;
     }

@@ -150,7 +150,7 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
         ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
         auto linkerCtx = method->GetClass()->GetLoadContext();
         uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
-        ScopedMutatorLock lock;
+        ScopedManagedHeapAccess scope;
         auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
         ASSERT(cls != nullptr);
         if (!cls->IsStringClass()) {

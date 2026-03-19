@@ -43,16 +43,16 @@ class Graph;
 class BackgroundCompilerContext {
 public:
     using CompilerTask = std::unique_ptr<ark::CompilerTask, std::function<void(ark::CompilerTask *)>>;
-    using CompilerThread = std::unique_ptr<ark::Mutator, std::function<void(ark::Mutator *)>>;
+    using CompilerMutator = std::unique_ptr<ark::Mutator, std::function<void(ark::Mutator *)>>;
 
     void SetCompilerTask(CompilerTask compilerTask)
     {
         compilerTask_ = std::move(compilerTask);
     }
 
-    void SetCompilerThread(CompilerThread compilerThread)
+    void SetCompilerMutator(CompilerMutator compilerMutator)
     {
-        compilerThread_ = std::move(compilerThread);
+        compilerMutator_ = std::move(compilerMutator);
     }
 
     void SetAllocator(std::unique_ptr<ArenaAllocator> allocator)
@@ -132,7 +132,7 @@ public:
 
 private:
     CompilerTask compilerTask_;
-    CompilerThread compilerThread_;
+    CompilerMutator compilerMutator_;
     std::unique_ptr<ArenaAllocator> allocator_;
     std::unique_ptr<ArenaAllocator> localAllocator_;
     std::string methodName_;
@@ -193,9 +193,9 @@ FakeCopyable<T> MakeFakeCopyable(T &&t)
 
 class BackgroundCompilerTaskRunner : public ark::TaskRunner<BackgroundCompilerTaskRunner, BackgroundCompilerContext> {
 public:
-    BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compilerQueue, Mutator *compilerThread,
+    BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compilerQueue, Mutator *compilerMutator,
                                  RuntimeInterface *runtimeIface)
-        : compilerQueue_(compilerQueue), compilerThread_(compilerThread), runtimeIface_(runtimeIface)
+        : compilerQueue_(compilerQueue), compilerMutator_(compilerMutator), runtimeIface_(runtimeIface)
     {
     }
 
@@ -206,15 +206,15 @@ public:
 
     /**
      * @brief Adds a task to the TaskManager queue. This task will run in the background
-     * @param task_runner - Current TaskRunner containing context and callbacks
-     * @param task_func - task which will be executed with @param task_runner
+     * @param taskRunner - Current TaskRunner containing context and callbacks
+     * @param taskFunc - task which will be executed with @param taskRunner
      */
     static void StartTask(BackgroundCompilerTaskRunner taskRunner, TaskRunner::TaskFunc taskFunc)
     {
         auto *compilerQueue = taskRunner.compilerQueue_;
         auto callback = [nextTask = std::move(taskFunc), nextRunner = std::move(taskRunner)]() mutable {
             auto *runtimeIface = nextRunner.runtimeIface_;
-            runtimeIface->SetCurrentThread(nextRunner.compilerThread_);
+            runtimeIface->SetCurrentThread(nextRunner.compilerMutator_);
             nextTask(std::move(nextRunner));
             runtimeIface->SetCurrentThread(nullptr);
         };
@@ -223,7 +223,7 @@ public:
 
 private:
     taskmanager::TaskQueueInterface *compilerQueue_ {nullptr};
-    Mutator *compilerThread_ {nullptr};
+    Mutator *compilerMutator_ {nullptr};
     RuntimeInterface *runtimeIface_;
     BackgroundCompilerContext taskCtx_;
 };

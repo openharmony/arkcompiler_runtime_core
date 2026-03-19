@@ -64,9 +64,6 @@ public:
 
     virtual void WaitForDeregistration() = 0;
 
-    virtual void SuspendAllThreads() = 0;
-    virtual void ResumeAllThreads() = 0;
-
     virtual bool IsRunningThreadExist() = 0;
 
     ManagedThread *GetMainThread() const
@@ -143,7 +140,7 @@ public:
                                       unsigned int incMask = static_cast<unsigned int>(EnumerationFlag::ALL),
                                       unsigned int xorMask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
     // REQUIRES(*GetThreadsLock())
-    // Cannot enable the annotation, as the function is also called with thread_lock directly
+    // Cannot enable the annotation, as the function is also called with threadLock_ directly
     {
         for (auto t : GetThreadsList()) {
             if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
@@ -153,43 +150,7 @@ public:
         return true;
     }
 
-    template <class Callback>
-    void EnumerateThreadsForDump(const Callback &cb, std::ostream &os)
-    {
-        // NOTE(00510180 & 00537420) can not get WriteLock() when other thread run code "while {}"
-        // issue #3085
-        SuspendAllThreads();
-        MTManagedThread *self = MTManagedThread::GetCurrent();
-        ASSERT(self != nullptr);
-        self->GetMutatorLock()->WriteLock();
-        {
-            os << "ARK THREADS (" << threadsCount_ << "):\n";
-        }
-        os::memory::LockHolder lock(threadLock_);
-        int64_t start = ark::os::time::GetClockTimeInThreadCpuTime();
-        int64_t end;
-        int64_t lastTime = start;
-        cb(self, os);
-        for (const auto &thread : threads_) {
-            if (thread == self) {
-                continue;
-            }
-            cb(thread, os);
-            end = ark::os::time::GetClockTimeInThreadCpuTime();
-            if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
-                LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
-                                    << "timeout : " << (end - lastTime);
-            }
-            lastTime = end;
-            if ((end - start) > K_MAX_DUMP_TIME_NS) {
-                LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
-                break;
-            }
-        }
-        DumpUnattachedThreads(os);
-        self->GetMutatorLock()->Unlock();
-        ResumeAllThreads();
-    }
+    void EnumerateThreadsForDump(const std::function<bool(ManagedThread *, std::ostream &)> &cb, std::ostream &os);
 
     void DumpUnattachedThreads(std::ostream &os);
 
@@ -219,9 +180,6 @@ public:
 #endif  // NDEBUG
 
     void WaitForDeregistration() override;
-
-    void SuspendAllThreads() override;
-    void ResumeAllThreads() override;
 
     uint32_t GetInternalThreadId();
 
@@ -298,8 +256,6 @@ private:
     }
 
     mutable os::memory::Mutex threadLock_;
-    // Counter used to suspend newly created threads after SuspendAllThreads/SuspendDaemonThreads
-    uint32_t suspendNewCount_ GUARDED_BY(threadLock_) = 0;
     // We should delete only finished thread structures, so call delete explicitly on finished threads
     // and don't touch other pointers
     PandaList<MTManagedThread *> threads_ GUARDED_BY(threadLock_);

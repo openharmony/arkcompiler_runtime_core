@@ -414,7 +414,7 @@ Monitor::State Monitor::WaitWithHeavyLockedState(MTManagedThread *thread, VMHand
         thread->GetWaitingMutex()->Unlock();
         // Calling Safepoing to let GC start if needed
         // in the else branch GC can start during Wait
-        ark::interpreter::RuntimeInterface::Safepoint();
+        ManagedThread::GetCurrent()->Safepoint();
     } else {
         TraceMonitorLock(objHandle.GetPtr(), true);
         isTimeout = DoWaitInternal(thread, status, timeout, nanos);

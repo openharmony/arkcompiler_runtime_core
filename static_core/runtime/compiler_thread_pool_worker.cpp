@@ -80,10 +80,14 @@ void CompilerProcessor::InPlaceCompileMethod(CompilerTask &&ctx)
     // Set current thread to have access to vm during compilation
     Mutator compilerThread(ctx.GetVM(), Mutator::MutatorType::COMPILER);
     ScopedCurrentMutator sct(&compilerThread);
+    compilerThread.UpdateStatus(MutatorStatus::NATIVE);
+    compilerThread.GetVM()->GetGC()->OnMutatorCreate(&compilerThread);
 
     if (compilerCtx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
         compiler_->CompileMethodLocked<compiler::INPLACE_MODE>(std::move(taskRunner));
     }
+    compilerThread.GetVM()->GetGC()->OnMutatorTerminate(&compilerThread, mem::MutatorUnregistrationMode::UNREGISTER,
+                                                        mem::BuffersKeepingFlag::DELETE);
 }
 
 }  // namespace ark

@@ -57,20 +57,33 @@ void CompilerTaskManagerWorker::AddTask(CompilerTask &&task)
     BackgroundCompileMethod(std::move(task));
 }
 
+compiler::BackgroundCompilerContext::CompilerMutator CompilerTaskManagerWorker::CreateCompilerMutator(PandaVM *vm)
+{
+    auto mutatorDeleter = [this](Mutator *mutator) {
+        mutator->GetVM()->GetGC()->OnMutatorTerminate(mutator, mem::MutatorUnregistrationMode::UNREGISTER,
+                                                      mem::BuffersKeepingFlag::DELETE);
+        internalAllocator_->Delete(mutator);
+    };
+    compiler::BackgroundCompilerContext::CompilerMutator compilerMutator(
+        internalAllocator_->New<Mutator>(vm, Mutator::MutatorType::COMPILER), std::move(mutatorDeleter));
+    // Compiler mutator works in native state
+    compilerMutator->UpdateStatus(MutatorStatus::NATIVE);
+    // Register compiler mutator for GC
+    vm->GetGC()->OnMutatorCreate(compilerMutator.get());
+    return compilerMutator;
+}
+
 void CompilerTaskManagerWorker::BackgroundCompileMethod(CompilerTask &&ctx)
 {
-    auto threadDeleter = [this](Mutator *thread) { internalAllocator_->Delete(thread); };
-    compiler::BackgroundCompilerContext::CompilerThread compilerThread(
-        internalAllocator_->New<Mutator>(ctx.GetVM(), Mutator::MutatorType::COMPILER), std::move(threadDeleter));
-
+    auto compilerMutator = CreateCompilerMutator(ctx.GetVM());
     auto taskDeleter = [this](CompilerTask *task) { internalAllocator_->Delete(task); };
     compiler::BackgroundCompilerContext::CompilerTask compilerTask(
         internalAllocator_->New<CompilerTask>(std::move(ctx)), std::move(taskDeleter));
 
-    compiler::BackgroundCompilerTaskRunner taskRunner(compilerTaskManagerQueue_, compilerThread.get(),
+    compiler::BackgroundCompilerTaskRunner taskRunner(compilerTaskManagerQueue_, compilerMutator.get(),
                                                       compiler_->GetRuntimeInterface());
     auto &compilerCtx = taskRunner.GetContext();
-    compilerCtx.SetCompilerThread(std::move(compilerThread));
+    compilerCtx.SetCompilerMutator(std::move(compilerMutator));
     compilerCtx.SetCompilerTask(std::move(compilerTask));
 
     // Callback to compile next method from compiler_task_deque_

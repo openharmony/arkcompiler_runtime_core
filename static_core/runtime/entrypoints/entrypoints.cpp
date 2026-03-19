@@ -529,7 +529,7 @@ extern "C" uint8_t IsInstanceEntrypoint(ObjectHeader *obj, Class *klass)
 extern "C" void SafepointEntrypoint()
 {
     BEGIN_ENTRYPOINT();
-    interpreter::RuntimeInterface::Safepoint();
+    ManagedThread::GetCurrent()->Safepoint();
 }
 
 static std::tuple<const panda_file::File *, panda_file::File::EntityId> GetPandaFileByIndex(
@@ -1359,7 +1359,7 @@ extern "C" Frame *InitializeFrame(void *mem, Method *method, Frame *prev, size_t
 extern "C" void SafepointEntrypointInterp(ManagedThread *thread)
 {
     BEGIN_ENTRYPOINT();
-    interpreter::RuntimeInterface::Safepoint(thread);
+    thread->Safepoint();
 }
 
 extern "C" void RegisterSafepointTimerEntrypoint(uint32_t entryId)

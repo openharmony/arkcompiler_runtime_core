@@ -1826,6 +1826,16 @@ public:
         UNREACHABLE();
     }
 
+    virtual void RegisterMutator([[maybe_unused]] ThreadPtr mutator) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual void UnregisterMutator([[maybe_unused]] ThreadPtr mutator) const
+    {
+        UNREACHABLE();
+    }
+
     virtual void *GetAsciiCharCache() const
     {
         return nullptr;

@@ -63,8 +63,6 @@ public:
     /// @brief method eraces provided worker from manager and deletes pointer
     void OnWorkerShutdown(JobWorkerThread *worker) override;
 
-    void SuspendAllThreads() override;
-    void ResumeAllThreads() override;
     bool IsRunningThreadExist() override;
 
     size_t GetExistingWorkersCount() const;

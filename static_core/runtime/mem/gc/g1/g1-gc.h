@@ -115,8 +115,9 @@ public:
 
     bool InGCSweepRange(const ObjectHeader *object) const override;
 
-    void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
-    void OnThreadCreate(ManagedThread *thread) override;
+    void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
+                            mem::BuffersKeepingFlag keepBuffers) override;
+    void OnMutatorCreate(Mutator *mutator) override;
 
     void PreZygoteFork() override;
     void PostZygoteFork() override;

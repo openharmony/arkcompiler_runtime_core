@@ -71,8 +71,6 @@ public:
 
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;
-    void SuspendAllThreads() override;
-    void ResumeAllThreads() override;
     bool IsRunningThreadExist() override;
 
     /**

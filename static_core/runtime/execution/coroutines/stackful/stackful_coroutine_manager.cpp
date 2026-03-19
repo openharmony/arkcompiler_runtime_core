@@ -266,7 +266,7 @@ void StackfulCoroutineManager::Finalize()
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     allocator->Delete(programCompletionEvent_);
     for (auto *co : coroutinePool_) {
-        co->DestroyInternalResources();
+        co->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
         CoroutineManager::DestroyEntrypointfulCoroutine(co);
     }
     coroutinePool_.clear();
@@ -275,7 +275,7 @@ void StackfulCoroutineManager::Finalize()
 
 void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
 {
-    co->GetVM()->GetGC()->OnThreadCreate(co);
+    co->GetVM()->GetGC()->OnMutatorCreate(co);
     coroutines_.insert(co);
     coroutineCount_++;
 
@@ -308,25 +308,6 @@ void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
 #endif
     os::memory::LockHolder lock(coroListLock_);
     AddToRegistry(co);
-    // Propagate SUSPEND_REQUEST flag to the new coroutine to avoid the following situation:
-    // * Main coro holds read lock of the MutatorLock.
-    // * GC thread calls SuspendAll nad set SUSPEND_REQUEST flag to the main coro and
-    //   tries to acquire write lock of the MutatorLock.
-    // * Main coro creates a new coro and adds it to the coroutines_ list.
-    // * SUSPEND_REQUEST is not set in the new coroutine
-    // * New coro starts execution, acquires read lock of the MutatorLock and enters a long loop
-    // * Main coro checks SUSPEND_REQUEST flag and blocks
-    // * GC will not start becuase the new coro has no SUSPEND_REQUEST flag and it will never release the MutatorLock
-    //
-    // We need to propagate SUSPEND_REQUEST under the coroListLock_.
-    // It guarantees that the flag is already set for the current coro and we need to propagate it
-    // or GC will see the new coro in EnumerateAllThreads.
-#if !defined(ARK_USE_COMMON_RUNTIME)
-    if (Mutator::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
-        Coroutine::GetCurrent()->IsSuspended() && !co->IsSuspended()) {
-        co->SuspendImpl(true);
-    }
-#endif  // !ARK_USE_COMMON_RUNTIME
 }
 
 bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
@@ -366,7 +347,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         if (Runtime::GetOptions().IsUseCoroutinePool() && co->GetJob()->HasManagedEntrypoint()) {
             co->CleanupInternalResources();
         } else {
-            co->DestroyInternalResources();
+            co->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
         }
         co->UpdateStatus(MutatorStatus::FINISHED);
     }
@@ -512,24 +493,6 @@ bool StackfulCoroutineManager::EnumerateJobsImpl(const EnumerateJobsCallback &cb
         }
     }
     return true;
-}
-
-void StackfulCoroutineManager::SuspendAllThreads()
-{
-    os::memory::LockHolder lock(coroListLock_);
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::SuspendAllThreads started";
-    for (auto *t : coroutines_) {
-        t->SuspendImpl(true);
-    }
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::SuspendAllThreads finished";
-}
-
-void StackfulCoroutineManager::ResumeAllThreads()
-{
-    os::memory::LockHolder lock(coroListLock_);
-    for (auto *t : coroutines_) {
-        t->ResumeImpl(true);
-    }
 }
 
 bool StackfulCoroutineManager::IsRunningThreadExist()

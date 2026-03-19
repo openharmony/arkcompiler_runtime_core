@@ -91,6 +91,7 @@ public:
         runtimeInterface->SetCurrentThread(parent);
         compiler_ = runtimeInterface->CreateCompilerThread();
         runtimeInterface->SetCurrentThread(compiler_);
+        runtimeInterface_->RegisterMutator(compiler_);
     }
 
     ScopedCompilerThread(ScopedCompilerThread &) = delete;
@@ -101,6 +102,7 @@ public:
     ~ScopedCompilerThread()
     {
         ASSERT(runtimeInterface_->GetCurrentThread() == compiler_);
+        runtimeInterface_->UnregisterMutator(compiler_);
         runtimeInterface_->DestroyCompilerThread(compiler_);
         runtimeInterface_->SetCurrentThread(old_);
     }

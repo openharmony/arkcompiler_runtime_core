@@ -3563,7 +3563,7 @@ public:
         SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(this->GetThread()->GetInternalId(), true));
         if (this->GetThread()->TestAllFlags()) {
             this->GetFrame()->SetAcc(this->GetAcc());
-            RuntimeIfaceT::Safepoint();
+            this->GetThread()->Safepoint();
             this->GetAcc() = this->GetFrame()->GetAcc();
         }
         if (!method->HasCompiledCode()) {

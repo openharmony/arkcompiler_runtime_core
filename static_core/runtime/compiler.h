@@ -49,9 +49,13 @@ inline ark::Method *MethodCast(RuntimeInterface::MethodPtr method)
     return static_cast<ark::Method *>(method);
 }
 
-struct ScopedMutatorLock : public os::memory::ReadLockHolder<MutatorLock> {
-    ScopedMutatorLock() : os::memory::ReadLockHolder<MutatorLock>(*PandaVM::GetCurrent()->GetMutatorLock()) {}
-};
+struct ScopedManagedHeapAccess : public ScopedChangeMutatorStatus {
+    ScopedManagedHeapAccess() : ScopedChangeMutatorStatus(Mutator::GetCurrent(), MutatorStatus::RUNNING) {}
+    ~ScopedManagedHeapAccess() = default;
+
+    NO_COPY_SEMANTIC(ScopedManagedHeapAccess);
+    NO_MOVE_SEMANTIC(ScopedManagedHeapAccess);
+};  // class ScopedManagedHeapAccess
 
 class PANDA_PUBLIC_API ClassHierarchyAnalysisWrapper : public compiler::IClassHierarchyAnalysis {
 public:
@@ -205,7 +209,7 @@ public:
     }
     bool TrySetOsrCode(MethodPtr method, void *ep) override
     {
-        ScopedMutatorLock lock;
+        ScopedManagedHeapAccess scope;
         // Ignore OSR code if method was deoptimized during OSR compilation
         if (!static_cast<const Method *>(method)->HasCompiledCode()) {
             return false;
@@ -342,13 +346,13 @@ public:
 
     std::string GetClassNameFromMethod(MethodPtr method) const override
     {
-        ScopedMutatorLock lock;
+        ScopedManagedHeapAccess scope;
         return MethodCast(method)->GetClass()->GetName();
     }
 
     std::string GetClassName(ClassPtr cls) const override
     {
-        ScopedMutatorLock lock;
+        ScopedManagedHeapAccess scope;
         return ClassCast(cls)->GetName();
     }
 
@@ -384,7 +388,7 @@ public:
 
     ClassPtr GetClass(MethodPtr method) const override
     {
-        ScopedMutatorLock lock;
+        ScopedManagedHeapAccess scope;
         return reinterpret_cast<ClassPtr>(MethodCast(method)->GetClass());
     }
 
@@ -451,7 +455,7 @@ public:
 
     std::string GetStringValue(MethodPtr method, size_t id) const override
     {
-        ScopedMutatorLock lock;
+        ScopedManagedHeapAccess scope;
         panda_file::File::EntityId cid(id);
         auto *pf = MethodCast(method)->GetPandaFile();
         return utf::Mutf8AsCString(pf->GetStringData(cid).data);
@@ -656,6 +660,10 @@ public:
     {
         return Mutator::GetCurrent();
     }
+
+    void RegisterMutator(ThreadPtr mutator) const override;
+
+    void UnregisterMutator(ThreadPtr mutator) const override;
 
     bool CanUseStringFlatCheck() const override;
 

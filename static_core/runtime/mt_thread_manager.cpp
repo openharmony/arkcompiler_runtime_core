@@ -99,8 +99,7 @@ bool MTThreadManager::DeregisterSuspendedThreads()
             isNonblockedThreadPresent = true;
         }
         LOG(DEBUG, RUNTIME) << "Daemon thread " << thread->GetId()
-                            << " remains in DeregisterSuspendedThreads, status = "
-                            << ManagedThread::ThreadStatusAsString(status);
+                            << " remains in DeregisterSuspendedThreads, status = " << status;
         i++;
     }
     if (isPotentiallyBlockedThreadPresent && !isNonblockedThreadPresent) {
@@ -171,9 +170,10 @@ void MTThreadManager::WaitForDeregistration()
             }
             stopVar_.TimedWait(&threadLock_, WAIT_INTERVAL);
         }
-    }
-    for (const auto &thread : daemonThreads_) {
-        thread->FreeInternalMemory();
+        // FreeInternalMemory under threadLock_ to unregister daemon mutators
+        for (const auto &thread : daemonThreads_) {
+            thread->FreeInternalMemory();
+        }
     }
     auto threshold = Runtime::GetOptions().GetIgnoreDaemonMemoryLeaksThreshold();
     Runtime::GetCurrent()->SetDaemonMemoryLeakThreshold(daemonThreads_.size() * threshold);
@@ -194,7 +194,7 @@ void MTThreadManager::StopDaemonThreads() REQUIRES(threadLock_)
         }
     }
     // Suspend any future new threads
-    suspendNewCount_++;
+    Runtime::GetCurrent()->GetPandaVM()->GetMutatorManager()->NotifyToSuspendDaemonMutators();
 }
 
 int MTThreadManager::GetThreadsCount()
@@ -208,20 +208,6 @@ uint32_t MTThreadManager::GetAllRegisteredThreadsCount()
     return registeredThreadsCount_;
 }
 #endif  // NDEBUG
-
-void MTThreadManager::SuspendAllThreads()
-{
-    trace::ScopedTrace scopedTrace("Suspending mutator threads");
-    auto curThread = MTManagedThread::GetCurrent();
-    os::memory::LockHolder lock(threadLock_);
-    EnumerateThreadsWithLockheld([curThread](ManagedThread *thread) {
-        if (thread != curThread) {
-            thread->SuspendImpl(true);
-        }
-        return true;
-    });
-    suspendNewCount_++;
-}
 
 bool MTThreadManager::IsRunningThreadExist()
 {
@@ -240,34 +226,15 @@ bool MTThreadManager::IsRunningThreadExist()
     return isExists;
 }
 
-void MTThreadManager::ResumeAllThreads()
-{
-    trace::ScopedTrace scopedTrace("Resuming mutator threads");
-    auto curThread = MTManagedThread::GetCurrent();
-    os::memory::LockHolder lock(threadLock_);
-    if (suspendNewCount_ > 0) {
-        suspendNewCount_--;
-    }
-    EnumerateThreadsWithLockheld([curThread](ManagedThread *thread) {
-        if (thread != curThread) {
-            thread->ResumeImpl(true);
-        }
-        return true;
-    });
-}
-
 void MTThreadManager::RegisterThread(MTManagedThread *thread)
 {
     os::memory::LockHolder lock(threadLock_);
-    thread->GetVM()->GetGC()->OnThreadCreate(thread);
+    thread->GetVM()->GetGC()->OnMutatorCreate(thread);
     threadsCount_++;
 #ifndef NDEBUG
     registeredThreadsCount_++;
 #endif  // NDEBUG
     threads_.emplace_back(thread);
-    for (uint32_t i = suspendNewCount_; i > 0; i--) {
-        thread->SuspendImpl(true);
-    }
 }
 
 bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
@@ -278,7 +245,7 @@ bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
 
         os::memory::LockHolder lock(threadLock_);
         // While this thread is suspended, do not delete it as other thread can be accessing it.
-        // TestAllFlags is required because termination request can be sent while thread_lock_ is unlocked
+        // TestAllFlags is required because termination request can be sent while threadLock_ is unlocked
         while (thread->TestAllFlags()) {
             threadLock_.Unlock();
             thread->SafepointPoll();
@@ -287,17 +254,22 @@ bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
 
         thread->CollectTLABMetrics();
         thread->ClearTLAB();
-        thread->DestroyInternalResources();
+        bool isCurrentThreadMain = (thread == GetMainThread());
+        if (isCurrentThreadMain) {
+            thread->DestroyInternalResources(mem::MutatorUnregistrationMode::KEEP);
+        } else {
+            thread->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
+        }
 
         LOG(DEBUG, RUNTIME) << "Stopping thread " << thread->GetId();
         thread->UpdateStatus(MutatorStatus::FINISHED);
         // Do not delete main thread, Runtime::GetMainThread is expected to always return valid object
-        if (thread == GetMainThread()) {
+        if (isCurrentThreadMain) {
             return false;
         }
 
         // This code should happen after thread has been resumed: Both WaitSuspension and ResumeImps requires locking
-        // suspend_lock_, so it acts as a memory barrier; flag clean should be visible in this thread after exit from
+        // suspendLock_, so it acts as a memory barrier; flag clean should be visible in this thread after exit from
         // WaitSuspenion
         thread->MakeTSANHappyForThreadState();
 
@@ -328,6 +300,44 @@ void MTThreadManager::DumpUnattachedThreads(std::ostream &os)
         dump.AddTid(static_cast<pid_t>(thread->GetId()));
     }
     dump.Dump(os, Runtime::GetCurrent()->IsDumpNativeCrash(), Runtime::GetCurrent()->GetUnwindStackFn());
+}
+
+void MTThreadManager::EnumerateThreadsForDump(const std::function<bool(ManagedThread *, std::ostream &)> &cb,
+                                              std::ostream &os)
+{
+    // NOTE(00510180 & 00537420) can not get WriteLock() when other thread run code "while {}"
+    // issue #3085
+    MTManagedThread *self = MTManagedThread::GetCurrent();
+    ASSERT(self != nullptr);
+    self->GetVM()->GetMutatorManager()->SuspendAllMutators();
+    self->GetMutatorLock()->WriteLock();
+    {
+        os << "ARK THREADS (" << threadsCount_ << "):\n";
+    }
+    os::memory::LockHolder lock(threadLock_);
+    int64_t start = ark::os::time::GetClockTimeInThreadCpuTime();
+    int64_t end;
+    int64_t lastTime = start;
+    cb(self, os);
+    for (const auto &thread : threads_) {
+        if (thread == self) {
+            continue;
+        }
+        cb(thread, os);
+        end = ark::os::time::GetClockTimeInThreadCpuTime();
+        if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
+            LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
+                                << "timeout : " << (end - lastTime);
+        }
+        lastTime = end;
+        if ((end - start) > K_MAX_DUMP_TIME_NS) {
+            LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
+            break;
+        }
+    }
+    DumpUnattachedThreads(os);
+    self->GetMutatorLock()->Unlock();
+    self->GetVM()->GetMutatorManager()->ResumeAllMutators();
 }
 
 MTManagedThread *MTThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_t threadId)

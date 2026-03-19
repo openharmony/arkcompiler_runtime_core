@@ -23,6 +23,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/method.h"
 #include "runtime/include/mutator.h"
+#include "runtime/include/mutator_manager.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/gc_phase.h"
 
@@ -53,9 +54,9 @@ class PandaVM {
 public:
     static PandaVM *Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtimeType);
 
-    explicit PandaVM() : mutatorLock_(Locks::NewMutatorLock()) {};
+    PandaVM();
 
-    virtual ~PandaVM() = default;
+    virtual ~PandaVM();
 
     static PandaVM *GetCurrent()
     {
@@ -113,6 +114,10 @@ public:
     virtual mem::GlobalObjectStorage *GetGlobalObjectStorage() const = 0;
     virtual MonitorPool *GetMonitorPool() const = 0;
     virtual ThreadManager *GetThreadManager() const = 0;
+    MutatorManager *GetMutatorManager() const
+    {
+        return mutatorManager_;
+    }
     virtual coretypes::String *CreateString([[maybe_unused]] Method *ctor, [[maybe_unused]] ObjectHeader *obj)
     {
         UNREACHABLE();
@@ -269,6 +274,7 @@ protected:
 private:
     /// Lock used for preventing object heap modifications (for example at GC<->JIT,ManagedCode interaction during STW)
     MutatorLock *mutatorLock_;
+    MutatorManager *mutatorManager_ {nullptr};
     uint32_t frameExtSize_ {EMPTY_EXT_FRAME_DATA_SIZE};
     LoadableAgentHandle debuggerAgent_;
 };

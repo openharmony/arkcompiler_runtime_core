@@ -17,6 +17,7 @@
 #define PANDA_RUNTIME_THREAD_STATUS_H_
 
 #include <cstdint>
+#include <ostream>
 
 namespace ark {
 
@@ -36,7 +37,9 @@ enum class MutatorStatus : uint16_t {
     FINISHED,
 };
 
-enum MutatorFlag { NO_FLAGS = 0, SUSPEND_REQUEST = 2, RUNTIME_TERMINATION_REQUEST = 4, SAFEPOINT_REQUEST = 8 };
+enum MutatorFlag { NO_FLAGS = 0, SUSPEND_REQUEST = 2, RUNTIME_TERMINATION_REQUEST = 4, GC_ON_SAFEPOINT_REQUEST = 8 };
+
+std::ostream &operator<<(std::ostream &stream, MutatorStatus status);
 
 }  // namespace ark
 

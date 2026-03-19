@@ -1020,24 +1020,25 @@ void G1GC<LanguageConfig>::UpdatePreWrbEntrypointInThreads()
                                                              "STORE_IN_BUFF_TO_MARK_FUNC");
         entrypointFunc = std::get<ObjRefProcessFunc>(addr.GetValue());
     }
-    auto setEntrypoint = [this, &entrypointFunc](ManagedThread *thread) {
+    auto setEntrypoint = [this, &entrypointFunc](Mutator *mutator) {
         void *entrypointFuncUntyped = reinterpret_cast<void *>(entrypointFunc);
-        ASSERT(thread->GetPreWrbEntrypoint() != entrypointFuncUntyped);
-        thread->SetPreWrbEntrypoint(entrypointFuncUntyped);
+        ASSERT_PRINT(mutator->GetPreWrbEntrypoint() != entrypointFuncUntyped,
+                     entrypointFuncUntyped << ", mutator: " << mutator << ", type: " << mutator->GetMutatorType());
+        mutator->SetPreWrbEntrypoint(entrypointFuncUntyped);
 
         // currentPreWrbEntrypoint_ is not required to be set multiple times, but this has to be done under the
-        // EnumerateThreads()'s lock, hence the repetition
+        // MutatorManager's lock, hence the repetition
         currentPreWrbEntrypoint_ = entrypointFunc;
         return true;
     };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(setEntrypoint);
+    this->GetPandaVm()->GetMutatorManager()->ForEachMutator(setEntrypoint);
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::EnsurePreWrbDisabledInThreads()
 {
-    [[maybe_unused]] auto callback = [](ManagedThread *thread) { return thread->GetPreWrbEntrypoint() == nullptr; };
-    ASSERT(this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback));
+    [[maybe_unused]] auto callback = [](Mutator *thread) { return thread->GetPreWrbEntrypoint() == nullptr; };
+    ASSERT(this->GetPandaVm()->GetMutatorManager()->ForEachMutator(callback));
 }
 
 template <class LanguageConfig>
@@ -2406,11 +2407,17 @@ bool G1GC<LanguageConfig>::HaveEnoughRegionsToMove(size_t num)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers)
+void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
+                                              mem::BuffersKeepingFlag keepBuffers)
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     // The method must be called while the lock which guards thread/coroutine list is hold
-    LOG(DEBUG, GC) << "Call OnThreadTerminate";
+    LOG(DEBUG, GC) << "Call OnMutatorTerminate";
+    GC::OnMutatorTerminate(mutator, mode, keepBuffers);
+    if (mutator->GetMutatorType() != Mutator::MutatorType::MANAGED) {
+        return;
+    }
+    auto *thread = static_cast<ManagedThread *>(mutator);
     PandaVector<ObjectHeader *> *preBuff = nullptr;
     if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
         preBuff = allocator->New<PandaVector<ObjectHeader *>>(*thread->GetPreBuff());
@@ -2439,16 +2446,18 @@ void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::Buffers
             allocator->Delete(localBuffer);
         }
     }
-    GC::OnThreadTerminate(thread, keepBuffers);
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::OnThreadCreate(ManagedThread *thread)
+void G1GC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
 {
-    GC::OnThreadCreate(thread);
-    // Any access to other threads' data (including MAIN's) might cause a race here
-    // so don't do this please.
-    thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(currentPreWrbEntrypoint_));
+    this->GetPandaVm()->GetMutatorManager()->RegisterMutator(mutator, [this](Mutator *mutator) {
+        // Any access to other threads' data (including MAIN's) might cause a race here
+        // so it sets barriers to mutator under MutatorManager lock
+        mutator->SetPreWrbEntrypoint(reinterpret_cast<void *>(currentPreWrbEntrypoint_));
+        LOG(DEBUG, GC) << "Set prewrb " << currentPreWrbEntrypoint_ << " to mutator " << mutator;
+        return true;
+    });
 }
 
 template <class LanguageConfig>
