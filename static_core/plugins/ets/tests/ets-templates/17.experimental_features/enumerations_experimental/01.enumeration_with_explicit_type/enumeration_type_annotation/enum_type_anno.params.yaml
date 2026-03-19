@@ -28,7 +28,7 @@ cases:
     - decl: |-
           const a: short = 1
           const b: short = 1
-          enum Enum: short { first = a, second = b, third = b - 1 }
+          enum Enum: short { first = 1, second = 1, third = 1 - 1 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
@@ -37,7 +37,7 @@ cases:
     - decl: |-
           const a: int = 1
           const b: int = 2
-          enum Enum: byte { first = a, second = b, third = b - 1 }
+          enum Enum: byte { first = 1, second = 2, third = 2 - 1 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
@@ -46,7 +46,7 @@ cases:
     - decl: |-
           const a: byte = 1
           const b: byte = 2
-          enum Enum: int { first = a, second = b, third = b - 1 }
+          enum Enum: int { first = 1, second = 2, third = 2 - 1 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
@@ -63,13 +63,11 @@ cases:
           arktest.assertEQ( Enum.first.valueOf() instanceof double, true )
 
     - decl: |-
-          const c: byte = 126;
-          enum Enum { a=c, b = c+1 }
+          enum Enum { a=126, b = 126+1 }
       use: |-
           arktest.assertEQ(Enum.a.valueOf() instanceof int, true)
 
     - decl: |-
-          const c: byte = 126;
-          enum Enum: byte { a=c, b = c+1 }
+          enum Enum: byte { a=126, b = 126+1 }
       use: |-
           arktest.assertEQ(Enum.a.valueOf() instanceof byte, true)

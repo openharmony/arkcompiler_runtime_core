@@ -78,11 +78,11 @@ cases:
       - |-
         const a: float = 1.23f
         const b: float = 1.234f
-        enum Enum: float { first = a, second = b, third = b - 1.1f }
+        enum Enum: float { first = 1.23f, second = 1.234f, third = 1.234f - 1.1f }
       - |-
         const a: float = 1.23f
         const b: float = 1.234f
-        const enum Enum: float { first = a, second = b, third = b - 1.1f }
+        const enum Enum: float { first = 1.23f, second = 1.234f, third = 1.234f - 1.1f }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)

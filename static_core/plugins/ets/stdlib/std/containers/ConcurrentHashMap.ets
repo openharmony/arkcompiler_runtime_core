@@ -140,8 +140,9 @@ export namespace containers {
         private sizeVal: AtomicsCounter = new AtomicsCounter(0);
         private setVal: AtomicsCounter = new AtomicsCounter(0);
 
-        private static readonly ENTRY_KEY = 0;
-        private static readonly ENTRY_VAL = 1;
+        // TODO #33602: replace with const enum
+        //private static readonly ENTRY_KEY = 0;
+        //private static readonly ENTRY_VAL = 1;
 
         private static readonly MIN_BUCKETS_COUNT = 8;
 
@@ -282,7 +283,8 @@ export namespace containers {
             this.buckets = new ConcurrentHashMapBucket < K, V > [bucketsCount](undefined);
             this.bucketMutex = new (Object | undefined)[bucketsCount](undefined);
             for (let i = 0; i < entries.length; ++i) {
-                this.set(entries[i][ConcurrentHashMap.ENTRY_KEY], entries[i][ConcurrentHashMap.ENTRY_VAL]);
+                // TODO #33602: replace with const enum
+                this.set(entries[i][/*ConcurrentHashMap.ENTRY_KEY*/0], entries[i][/*ConcurrentHashMap.ENTRY_VAL*/1]);
             }
         }
 
@@ -304,7 +306,8 @@ export namespace containers {
             this.bucketMutex = new (Object | undefined)[bucketsCount](undefined);
 
             entriesBuf.forEach((e: [K, V]) => {
-                this.set(e[ConcurrentHashMap.ENTRY_KEY], e[ConcurrentHashMap.ENTRY_VAL]);
+                // TODO #33602: replace with const enum
+                this.set(e[/*ConcurrentHashMap.ENTRY_KEY*/0], e[/*ConcurrentHashMap.ENTRY_VAL*/1]);
             });
         }
 

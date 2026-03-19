@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,6 @@ function main(): int {
 
 class TestData {
     static readonly testNumber1: int = 1;
-    static readonly testInt1: int = 1;
     static readonly testNumber6: int = 6;
     static readonly testString1: string = "0:0,2:2,4:4,5:5,8:8";
     static readonly forNumber1: Int[] = [0, 2, 4, 5, 8];
@@ -137,14 +136,14 @@ function testIteratorWithNonEmpty() {
     }
     let elem1: int = 0;
     for (let item of plainArray) {
-        arktest.assertEQ(item[TestData.testInt1], plainArray.getValueAt(elem1), "The value should be same");
+        arktest.assertEQ(item[1], plainArray.getValueAt(elem1), "The value should be same");
         arktest.assertEQ(item[0], plainArray.getKeyAt(elem1++), "The key should be same");
     }
     let iter = plainArray.$_iterator();
     let temp: IteratorResult<[Int, string]> = iter.next();
     let elem2: int = 0;
     while (!temp.done) {
-        arktest.assertEQ(temp.value![TestData.testInt1], plainArray.getValueAt(elem2), "The value should be same");
+        arktest.assertEQ(temp.value![1], plainArray.getValueAt(elem2), "The value should be same");
         arktest.assertEQ(temp.value![0], plainArray.getKeyAt(elem2++), "The key should be same");
         temp = iter.next();
     }

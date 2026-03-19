@@ -34,7 +34,7 @@ cases:
     - decl: |-
           const a: double = 1.23
           const b: double = 1.234
-          enum Enum { first = a, second = b, third = b - 1.1 }
+          enum Enum { first = 1.23, second = 1.234, third = 1.234 - 1.1 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
@@ -72,9 +72,7 @@ cases:
           arktest.assertEQ( "" + Enum.fourth, "300" )
 
     - decl: |-
-          const a: byte = 0
-          const b: short = 200
-          enum Enum: int { first = a, second = b }
+          enum Enum: int { first = 0, second = 200 }
       use: |-
           arktest.assertEQ( "" + Enum.first, "0" )
           arktest.assertEQ( "" + Enum.second, "200" )

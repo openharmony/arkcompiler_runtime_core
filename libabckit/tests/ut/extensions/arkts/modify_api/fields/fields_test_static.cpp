@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -301,7 +301,7 @@ static void TransformMethodModuleFieldSetValue(AbckitFile *file, AbckitCoreFunct
     ASSERT_EQ(ret, true);
     ASSERT_STREQ(g_implI->abckitStringToString(g_implI->valueGetString(g_implI->moduleFieldGetValue(cmf))), "hello");
 
-    auto *callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING);
+    auto *callOp = helpers::FindLastInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTATIC);
     ASSERT_NE(callOp, nullptr);
     auto *str = g_implM->createString(file, "hello", strlen("hello"));
     ASSERT_NE(str, nullptr);

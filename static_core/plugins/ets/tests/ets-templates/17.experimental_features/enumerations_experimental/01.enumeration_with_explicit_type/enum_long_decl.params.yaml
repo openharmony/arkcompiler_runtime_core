@@ -57,12 +57,6 @@ cases:
         enum Enum: long { first = 0x7fffffff - 1, second, third }
       - |-
         const enum Enum: long { first = 0x7fffffff - 1, second, third }
-      - |-
-        const a: long = 0x7fffffff - 1
-        enum Enum: long { first = a, second, third }
-      - |-
-        const a: long = 0x7fffffff - 1
-        const enum Enum: long { first = a, second, third }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -82,17 +76,7 @@ cases:
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        enum Enum: long { first = a, second = b, third = first + second }
-      - |-
-        const a: long = 0x7fffffff - 10
-        const b: long = 1010
-        const v: long = a + b
         enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = first + second }
-      - |-
-        const a: long = 0x7fffffff - 10
-        const b: long = 1010
-        const v: long = a + b
-        const enum Enum: long { first = a, second = b, third = first + second }
       - |-
         const a: long = 0x7fffffff - 10
         const b: long = 1010
@@ -117,12 +101,12 @@ cases:
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        enum Enum: long { first = a, second = b, third = a + b }
+        enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = 0x7fffffff - 10 + 1010 }
       - |-
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        const enum Enum: long { first = a, second = b, third = a + b }
+        const enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = 0x7fffffff - 10 + 1010 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -139,11 +123,9 @@ cases:
       Checking int overflow on Int.MAX_VALUE in enum
     decl_variants:
       - |-
-        const a: long = 5
-        enum Enum: long { A = a << 32 }
+        enum Enum: long { A = 5 << 32 }
       - |-
-        const a: long = 5
-        const enum Enum: long { A = a << 32 }
+        const enum Enum: long { A = 5 << 32 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.A instanceof Enum)
