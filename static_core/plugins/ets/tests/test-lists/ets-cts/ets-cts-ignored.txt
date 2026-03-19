@@ -240,6 +240,9 @@
 07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_cast.ets
 07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_decl.ets
 
+#33015
+07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_interface_context_n.ets
+
 #31022 Method in object literal rejected
 07.expressions/06.object_literal/spec_ex1.ets
 07.expressions/06.object_literal/spec_ex3.ets

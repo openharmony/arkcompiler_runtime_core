@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,22 @@
 
 /*---
 desc: >-
-  The type of an array literal can be inferred from the context
-  that can be specified as one of the following: explicit type annotation
-  of a variable declaration, left-hand part type of an assignment,
-  explicit return type of a function, a method, or a lambda in a return
-  statement, parameter type in a call, target type of a cast expression,
-  or type of an array element or a class field.
+  If type used in a context is a resizable array type, and type of each
+  expression is assignable to an array element type, then an array literal
+  is of the specified type.
 ---*/
 
 function main() {
-    let tuple: [number, string] = [1, "hello"] // ok
-    arktest.assertTrue( tuple[0] == 1 && tuple[1] == "hello" )
+    let a: Array<string> = ["aa", "bb"]
+    arktest.assertEQ(a[0], "aa")
+
+    let b: string[] = ["aa", "bb"]
+    arktest.assertEQ(b[1], "bb")
+
+    let c: readonly string[] = ["aa", "bb"]
+    arktest.assertEQ(c[0], "aa")
+
+    let e: Object[] = ["aa", 2]
+    arktest.assertEQ(e[0], "aa")
+    arktest.assertEQ(e[1], 2)
 }

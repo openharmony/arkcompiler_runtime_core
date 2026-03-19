@@ -16,10 +16,12 @@
 {% for c in cases %}
 /*---
 desc: >-
-  The type of an array literal can be inferred from the context,
-  including explicit type annotation of a variable declaration,
-  left-hand part type of an assignment, call parameter type, or
-  type of a cast expression
+  The type of an array literal can be inferred from the context
+  that can be specified as one of the following: explicit type annotation
+  of a variable declaration, left-hand part type of an assignment,
+  explicit return type of a function, a method, or a lambda in a return
+  statement, parameter type in a call, target type of a cast expression,
+  or type of an array element or a class field.
 tags: [compile-only, negative]
 ---*/
 
