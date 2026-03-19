@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of char relational operator tests (all should fail at compile time)
+--- # List of char relational operator tests
 char_relational:
   # Less than operator
   - {left: 'a', right: 'b', op: "<"}
