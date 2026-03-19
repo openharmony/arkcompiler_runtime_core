@@ -1,0 +1,158 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: all string enum members values should be set explicitly
+    decl_variants:
+      - |-
+        enum Enum { first = "a", second }
+      - |-
+        enum Enum { first, second = "b" }
+    stdout:
+      - |-
+        "Syntax error ESY0276: All items of non-Integer enumeration should be explicitly initialized."
+      - |-
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+    test_suffix: "asemvsbse"
+    ids: "0-1"
+
+  - desc: |-
+      >-
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: mixing of types
+    decl_variants:
+      - |-
+        enum Enum { first = 11, second = "12", third = "13" }
+      - |-
+        enum Enum { first = "11", second = 12, third = "13" }
+      - |-
+        enum Enum { first = "11", second = null, third = "13" }
+      - |-
+        enum Enum { first = "11", second = undefined, third = "13" }
+    stdout:
+      - |-
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+      - |-
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+      - |-
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+      - |-
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+    test_suffix: "mot"
+    ids: "2-5"
+
+  - desc: |-
+      Wrong type
+    decl_variants:
+      - |-
+        enum Enum1 { first = "11", second = "12" }
+        enum Enum2 { first = "11", second = "12" }
+    logic: |-
+      let v: Enum2 = Enum1.first
+    stdout:
+      - |-
+        "Semantic error ESE0318: Type 'Enum1' cannot be assigned to type 'Enum2'"
+    test_suffix: "wt"
+    ids: "6"
+
+  - desc: |-
+      Not allowed conversion
+    decl_variants:
+      - |-
+        enum Enum1 { first = "11", second = "12", third = "13" }
+        enum Enum2 { first = "11", second = "12", third = "13" }
+    logic: |-
+      let v: Enum1 = Enum1.first
+      let q: Enum2 = v as Enum2
+    stdout:
+      - |-
+        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
+    test_suffix: "nac"
+    ids: "7"
+
+  - desc: |-
+      Modifying const variable of enum type
+    decl_variants:
+      - |-
+        enum Enum { first = "11", second = "12", third = "13" }
+        const e: Enum = Enum.first
+      - |-
+        enum Enum { first = "11", second = "12", third = "13" }
+        const e = Enum.first
+    logic: |-
+      e = Enum.second
+    stdout:
+      - |-
+        "Semantic error ESE4001: Cannot assign to a constant variable e"
+      - |-
+        "Semantic error ESE4001: Cannot assign to a constant variable e"
+    test_suffix: "mcvoet"
+    ids: "8-9"
+
+  - desc: |-
+      >-
+        If a variable has no default value, then its value must be set
+        by the Simple Assignment Operator before any use of the variable.
+        params: using variable of enum type before it is initialized
+    decl_variants:
+      - |-
+        enum Color { Red = "700", Green = "500", Blue = "400" }
+    logic: |-
+      let v: Color
+      arktest.assertTrue(v instanceof Color)
+    stdout:
+      - |-
+        "Semantic error ESE0375: Variable 'v' is used before being assigned."
+    test_suffix: "uvoet"
+    ids: "10"
+
+  - desc: |-
+      >-
+        A constant declaration introduces a named variable with a mandatory
+        explicit value.
+        params: const enum variable without initializer
+    decl_variants:
+      - |-
+        enum Color { Red = "700", Green = "500", Blue = "400" }
+    logic: |-
+      const v: Color
+    stdout:
+      - |-
+        "Semantic error ESE0363: Missing initializer in const declaration"
+    test_suffix: "cevwi"
+    ids: "11"
