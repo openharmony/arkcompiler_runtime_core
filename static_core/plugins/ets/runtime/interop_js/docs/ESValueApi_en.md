@@ -1389,6 +1389,15 @@ let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
 ### toPromise
 `public toPromise(): Promise<ESValue>`  
 Determine whether the object stored in the ESValue is of Promise type. If so, return it as a Promise<ESValue>; otherwise, throw an exception.
+Currently supported dynamic Promise operations for toPromise include:
+
+| Type | Syntax Example | Behavior Description |
+| :--- | :--- | :--- |
+| Constructor | `new Promise((res, rej) => {})` | Execute asynchronous logic such as timers and network requests on the dynamic side. `toPromise` maintains a Pending state on the ArkTS side until the dynamic side triggers the resolution. |
+| resolve | `Promise.resolve(value)` | Return an asynchronous success result. Awaiting this `toPromise` will directly obtain an ESValue object wrapping `value`. |
+| reject | `Promise.reject(reason)` | Map the rejection reason from the dynamic side operation to an exception, which needs to be caught via `try-catch`. |
+| allSettled | `Promise.allSettled([p1, p2])` | Wait for all tasks to complete. Awaiting this `toPromise` will obtain an ESValue array. |
+| then | `Promise.then(val => {})` | Convert the new Promise instance returned by the dynamic side `.then()`. `toPromise` will obtain the final result of this chain call. |
 
 Return Value:
 
@@ -1397,17 +1406,21 @@ Return Value:
 |  Promise\<ESValue\> | An asynchronous result that will be completed in the future and return an ESValue. |
 
 Example:
+
 ```typescript
 // file1.ts
-export async function sleepRetNumber(ms: number): Promise<number> {
-    await sleep(ms);
-    return 0xcafe;
+export async function chainPromise(): Promise<number> {
+    return Promise.resolve(1)
+        .then(x => x + 1)
+        .then(x => x * 2)
+        .then(x => x);
 }
 // file2.ets
 let module = ESValue.load('file1');
-let sleepRetNumber = module.getProperty('sleepRetNumber');
-let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
-await res;
+let chainFunc = module.getProperty('chainPromise');
+let p = chainFunc.invoke().toPromise();
+let resESValue = await p;
+let res = resESValue.toNumber(); // 4
 ```
 
 ---

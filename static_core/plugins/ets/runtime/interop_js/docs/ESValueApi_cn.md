@@ -1286,6 +1286,15 @@ let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
 ### toPromise
 `public toPromise(): Promise<ESValue>`  
 判断ESValue对象中保存的对象是否是为Promise类型，若是则将其以Promise<ESValue>对象返回，否则抛出异常。
+当前支持toPromise的动态Promise操作有：
+
+| 类型 | 语法示例 | 行为描述 |
+| :--- | :--- | :--- |
+| Constructor | `new Promise((res, rej) => {})` | 在动态侧执行定时器、网络请求等异步逻辑。`toPromise` 会在 ArkTS 侧维持 Pending 状态直至动态侧触发开关。 |
+| resolve | `Promise.resolve(value)` | 返回异步成功结果。`await` 该 `toPromise` 将直接获得包装了 `value` 的 `ESValue` 对象。 |
+| reject | `Promise.reject(reason)` | 将动态侧的操作拒绝原因映射为异常，需通过 `try-catch` 捕获。 |
+| allSettled | `Promise.allSettled([p1, p2])` | 等待所有任务结束。`await` 该 `toPromise` 将获取一个 `ESValue` 数组。|
+| then | `Promise.then(val => {})` |  转换动态侧 `.then()` 返回的新 Promise 实例，`toPromise` 将获取该链式调用最终产生的结果。 |
 
 返回值：
 
@@ -1294,17 +1303,22 @@ let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
 |  Promise\<ESValue\> | 一个将来会完成、并返回 ESValue 的异步结果 |
 
 示例代码：
+
+
 ```typescript
 // file1.ts
-export async function sleepRetNumber(ms: number): Promise<number> {
-    await sleep(ms);
-    return 0xcafe;
+export async function chainPromise(): Promise<number> {
+    return Promise.resolve(1)
+        .then(x => x + 1)
+        .then(x => x * 2)
+        .then(x => x);
 }
 // file2.ets
 let module = ESValue.load('file1');
-let sleepRetNumber = module.getProperty('sleepRetNumber');
-let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
-await res;
+let chainFunc = module.getProperty('chainPromise');
+let p = chainFunc.invoke().toPromise();
+let resESValue = await p; 
+let res = resESValue.toNumber(); // 4
 ```
 ---
 ### $_iterator
