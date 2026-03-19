@@ -1,0 +1,29 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # cases covered in details in 15.14.1 Extended Conditional Expressions for runtime
+cases:
+  - { type: "boolean", init_t: "true", init_f: "false" }
+  - { type: "byte", init_t: "1", init_f: "0" }
+  - { type: "short", init_t: "1", init_f: "0" }
+  - { type: "int", init_t: "1", init_f: "0" }
+  - { type: "long", init_t: "1", init_f: "0" }
+  - { type: "float", init_t: "1", init_f: "0" }
+  - { type: "double", init_t: "1", init_f: "0" }
+  - { type: "bigint", init_t: "1n", init_f: "0n" }
+  - { type: "string", init_t: "'s'", init_f: "''" }
+  - { type: "char", init_t: "c'\u0001'", init_f: "c'\u0000'" }
+  - { type: "EAB", init_t: "EAB.B", init_f: "EAB.A" }
+  - { type: "EN", init_t: "EN.b", init_f: "EN.a" }
+  - { type: "ES", init_t: "ES.b", init_f: "ES.a" }
+  - { type: "union_example", init_t: "true", init_f: "''" }

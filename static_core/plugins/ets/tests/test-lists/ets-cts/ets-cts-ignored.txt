@@ -653,6 +653,9 @@
 07.expressions/21.unary_expressions/05.unary_plus/sign_plus_byte_short_to_int/unary_plus.neg.byte_short.inside_static_method_let_22.ets
 07.expressions/21.unary_expressions/05.unary_plus/sign_plus_byte_short_to_int/unary_plus.neg.byte_short.inside_static_method_let_23.ets
 
+#33627
+07.expressions/22.binary_operations_overview/numeric_type_15.ets
+
 #33613
 07.expressions/21.unary_expressions/06.unary_minus/sign_minus_byte_short_to_int/unary_minus.neg.byte_short.constructor_0.ets
 07.expressions/21.unary_expressions/06.unary_minus/sign_minus_byte_short_to_int/unary_minus.neg.byte_short.constructor_1.ets
