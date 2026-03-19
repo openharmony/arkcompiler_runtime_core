@@ -35,7 +35,7 @@ cases:
           let f: (...p: Base[]) => void = foo // Compile-time error: subtype parameter isn't rest
       compileonly: |-
           negative, compile-only
-    - decl: |-  
+    - decl: |-
           let fn = (n: number) : number => { return n }
           let f = fn as ((n: Object) => number)
       check: |-
@@ -44,7 +44,7 @@ cases:
           let fn = (n: number) : number => { return n }
           let f = fn as ((...n: number[]) => number)
       compileonly: |-
-          negative, compile-only
+          compile-only
     - decl: |-
           let fn = (d: Derived) : Base => { return d }
       check: |-
@@ -58,6 +58,6 @@ cases:
           arktest.expectThrow(() => { f(new Base()); }, exceptionCheck);
     - decl: |-
           let fn = (d: Derived) : Base => { return d }
-          let f = fn as ((b: Base) => Derived) 
+          let f = fn as ((b: Base) => Derived)
       check: |-
           arktest.expectThrow(() => { f(new Base()); }, exceptionCheck);

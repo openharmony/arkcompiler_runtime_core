@@ -20,9 +20,9 @@ class SomeType {}
 let var1: BaseType | SomeType = new BaseType();
 let var2: (BaseType | SomeType)[] = [new BaseType()]
 // CC-OFFNXT(G.AOD.03) for test purposes
-console.log('H', `${var1 instanceof BaseType|SomeType}`);
+console.log('H', `${var1 instanceof (BaseType | SomeType)}`);
 // CC-OFFNXT(G.AOD.03) for test purposes
-console.log('H', `${var2 instanceof (BaseType|SomeType)[]}`);
+console.log('H', `${var2 instanceof Array}`);
 
 class ExCls extends Array<BaseType | SomeType> {
 }

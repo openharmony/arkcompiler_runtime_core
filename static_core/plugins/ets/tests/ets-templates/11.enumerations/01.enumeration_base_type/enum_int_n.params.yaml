@@ -115,21 +115,6 @@ cases:
     ids: "12"
 
   - desc: |-
-      Not allowed conversion
-    decl_variants:
-      - |-
-        enum Enum1 { first = -1, second, third = -42 }
-        enum Enum2 { first = -1, second, third = -42 }
-    logic: |-
-      let v: Enum1 = Enum1.first
-      let q: Enum2 = v as Enum2
-    stdout:
-      - |-
-        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
-    test_suffix: "nac"
-    ids: "13"
-
-  - desc: |-
       Modifying const variable of enum type
     decl_variants:
       - |-
@@ -146,7 +131,7 @@ cases:
       - |-
         "Semantic error ESE4001: Cannot assign to a constant variable e"
     test_suffix: "mcvoet"
-    ids: "14-15"
+    ids: "13-14"
 
   - desc: |-
       >-
@@ -163,7 +148,7 @@ cases:
       - |-
         "Semantic error ESE0375: Variable 'v' is used before being assigned."
     test_suffix: "uvoet"
-    ids: "16"
+    ids: "15"
 
   - desc: |-
       >-
@@ -179,4 +164,4 @@ cases:
       - |-
         "Semantic error ESE0363: Missing initializer in const declaration"
     test_suffix: "cevwi"
-    ids: "17"
+    ids: "16"

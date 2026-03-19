@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,16 @@
  */
 
 {% for c in cases %}
+
 /*---
-desc: >-
-    Any conversion that is not explicitly allowed is forbidden.
-tags: {{c.tags}}
-expected_out: "{{c.expected}}"
+desc: {{c.desc}}
+tags: [compile-only, negative]
 ---*/
 
-{{c.defs}}
+{{c.decl}}
 
 function main(): void {
-    let src: {{c.stype}} = {{c.sval|safe}};
-    let dst = src {{c.dtype if c.dtype else c.dtype2}};
+  {{c.logic}}
 }
+
 {% endfor %}

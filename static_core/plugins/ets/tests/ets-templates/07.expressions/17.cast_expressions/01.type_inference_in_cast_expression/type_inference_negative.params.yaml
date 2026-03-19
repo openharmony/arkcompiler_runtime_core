@@ -21,15 +21,9 @@ cases:
     val: 2147483648
   - type: long
     val: 9223372036854775808
-  - type: bigint
-    val: 1
   - type: void
     val: 1
   - type: never
-    val: 1
-  - type: "null"
-    val: 1
-  - type: undefined
     val: 1
   - type: byte
     val: "[1, 2]"

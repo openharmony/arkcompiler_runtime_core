@@ -120,7 +120,7 @@ cases:
     positive:  |-
     stdout:
       - |-
-        "Attempt to cast the type 'Enum1' to 'Enum2' can throw 'CastClassError' exception at runtime."
+        "Warning W0326: Attempting to cast type 'Enum1' to 'Enum2' can throw 'CastClassError' exception at runtime"
     test_suffix: "nac"
 
   - desc: |-

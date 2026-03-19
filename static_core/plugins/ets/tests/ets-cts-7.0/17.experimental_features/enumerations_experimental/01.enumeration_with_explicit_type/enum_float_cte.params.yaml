@@ -90,16 +90,3 @@ cases:
         const enum Enum2: float { first = 42.32f, second = 3.4f }
     logic: |-
       let v: Enum2 = Enum1.first
-
-  - desc: |-
-      Not allowed conversion
-    decl_variants:
-      - |-
-        enum Enum1: float { first = -1.4f, second = -42.32f }
-        enum Enum2: float { first = -1.4f, second = -42.32f }
-      - |-
-        const enum Enum1: float { first = -1.4f, second = -42.32f }
-        const enum Enum2: float { first = -1.4f, second = -42.32f }
-    logic: |-
-      let v: Enum1 = Enum1.first
-      let q: Enum2 = v as Enum2
