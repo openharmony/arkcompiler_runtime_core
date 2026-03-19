@@ -201,13 +201,13 @@ function testInterfaces() {
     check(int2, new Set<String>([]))
 
     let impl1 = Class.from<Impl1>()
-    check(impl1, new Set<String>(["c"]))
+    check(impl1, new Set<String>(["a", "c"]))
 
     let impl2 = Class.from<Impl2>()
-    check(impl2, new Set<String>(["c"]))
+    check(impl2, new Set<String>(["b", "c"]))
 
     let impl12 = Class.from<Impl12>()
-    check(impl12, new Set<String>(["c"]))
+    check(impl12, new Set<String>(["a", "b", "c"]))
 }
 
 function main(): int {

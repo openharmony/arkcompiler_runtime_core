@@ -100,9 +100,7 @@ AbckitWrapperErrorCode abckit_wrapper::Field::Init()
 AbckitWrapperErrorCode abckit_wrapper::Field::InitSignature()
 {
     const auto cachedName = this->GetName();
-    const size_t pos = cachedName.find("%%property-");
-    // 11 is length of "%%property-"
-    this->rawName_ = (pos != std::string::npos) ? cachedName.substr(0, pos) + cachedName.substr(pos + 11) : cachedName;
+    this->rawName_ = cachedName;
     this->descriptor_ = "";
     this->cachedName_ = cachedName;
     return ERR_SUCCESS;

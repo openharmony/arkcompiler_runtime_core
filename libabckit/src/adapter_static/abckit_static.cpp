@@ -54,7 +54,6 @@ constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view OBJECT_CLASS = "std.core.Object";
 constexpr std::string_view ANY_CLASS = "Y";
 constexpr std::string_view OBJECT_LITERAL_NAME = "$ObjectLiteral";
-constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
 constexpr std::string_view ASYNC_ORIGINAL_RETURN = "std.core.Promise;";
 constexpr std::string_view PARTIAL_PREFIX = "%%partial-";
 constexpr std::string_view LAZY_IMPORT = "%%lazyImport";
@@ -823,8 +822,7 @@ static bool ExtractInterfaceFieldName(const std::string &functionName, std::stri
     }
     const size_t start = pos + marker.size();
     const size_t end = functionName.find(':', start);
-    outName = std::string(INTERFACE_FIELD_PREFIX) +
-              functionName.substr(start, end != std::string::npos ? end - start : std::string::npos);
+    outName = functionName.substr(start, end != std::string::npos ? end - start : std::string::npos);
     return true;
 }
 

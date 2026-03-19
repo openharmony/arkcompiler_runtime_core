@@ -38,7 +38,6 @@ constexpr std::string_view ETS_IMPLEMENTS = "ets.implements";
 constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
 constexpr std::string_view NAME_DELIMITER = ".";
 constexpr std::string_view FUNCTION_DELIMITER = ":";
-constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view GETTER_PREFIX = "%%get-";
 constexpr std::string_view SETTER_PREFIX = "%%set-";
@@ -1245,15 +1244,7 @@ bool libabckit::ModifyNameHelper::FieldRefreshName(
             if (oldName == newName) {
                 return true;
             }
-            std::string processNewName;
-            // if oldName is <property>xxx and newName does not
-            // contain '<property>' prefix, add '<property>' to the
-            // beginning of newName
-            if (oldName.find(INTERFACE_FIELD_PREFIX) == 0 && newName.find(INTERFACE_FIELD_PREFIX) != 0) {
-                processNewName.append(INTERFACE_FIELD_PREFIX).append(newName);
-            } else {
-                processNewName = newName;
-            }
+            const std::string processNewName = newName;
 
             LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "fieldName refreshed: " << oldName << " --> " << processNewName
                                          << std::endl;
@@ -1273,9 +1264,7 @@ bool libabckit::ModifyNameHelper::InterfaceFieldRefreshName(AbckitCoreInterfaceF
     }
 
     std::string oldName = ifaceField->name->impl.data();
-    std::string newFieldName = std::string(INTERFACE_FIELD_PREFIX) + newName;
-    ifaceField->name =
-        CreateStringStatic(ifaceField->owner->owningModule->file, newFieldName.data(), newFieldName.size());
+    ifaceField->name = CreateStringStatic(ifaceField->owner->owningModule->file, newName.data(), newName.size());
 
     // Refresh main interface's get/set methods
     GetSetMethodRefreshName(ifaceField->owner, oldName, newName);
@@ -1814,10 +1803,7 @@ bool libabckit::ModifyNameHelper::GetSetMethodRefreshName(
     const std::string &newName)
 {
     LIBABCKIT_LOG_FUNC;
-    std::string fieldName = oldName;
-    if (fieldName.find(INTERFACE_FIELD_PREFIX) != std::string::npos) {
-        fieldName = fieldName.substr(INTERFACE_FIELD_PREFIX.size());
-    }
+    const std::string &fieldName = oldName;
 
     const auto funcName = StringUtil::GetFuncNameWithSquareBrackets(__func__);
     return std::visit(

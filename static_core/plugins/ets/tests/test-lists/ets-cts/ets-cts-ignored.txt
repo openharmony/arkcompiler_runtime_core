@@ -402,22 +402,6 @@
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n2_1.ets
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n2_2.ets
 
-#32355
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_gc_oicfwok.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_0.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_1.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_2.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_3.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_4.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_5.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_6.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_7.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_8.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_9.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_10.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_11.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_12.ets
-
 #32612
 09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_0.ets
 09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_1.ets
