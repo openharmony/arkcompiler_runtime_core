@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,12 @@
  */
 
 /*---
-desc: Abstract method declaration with simply semicolon.
-assert: The body of a method must be a semicolon if the method is abstract or native.
+desc: >-
+    Abstract method declaration with simply semicolon.
+    The body of a method must be a semicolon if the method is abstract or native.
 tags: [compile-only]
 ---*/
 
 abstract class A {
-  abstract run(): void;
+    abstract run(): void;
 }

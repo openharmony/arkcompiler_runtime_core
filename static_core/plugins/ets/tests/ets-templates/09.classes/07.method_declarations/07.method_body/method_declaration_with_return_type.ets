@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: Method declaration with return type.
-assert: >-
+desc: >-
+    Method declaration with return type.
     If a method is declared to have a return type, then a compile-time error occurs if the body of the method
     can complete normally.
 tags: [compile-only]
 ---*/
 
 class A {
-  run(): int {
-    return 5;
-  }
+    run(): int {
+        return 5;
+    }
 }

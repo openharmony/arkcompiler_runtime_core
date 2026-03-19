@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,25 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Method declaration with existed name and with override-equivalent signatures in class body declaration.
-assert: >-
+desc: >-
+    Method declaration with existed name and with override-equivalent signatures in class body declaration.
     It is a compile-time error for the body of a class declaration to declare as members two methods with the
     same name and with override-equivalent signatures.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0130: Function run is already declared."
 ---*/
 
 class A {
-  public run(): void {
-
-  }
+    public run(): void {
+    }
 }
 
 class B extends A {
-  public override run(): void {
+    public override run(): void {
+    }
 
-  }
-
-  public override run(): void {
-
-  }
+    public override run(): void {
+    }
 }

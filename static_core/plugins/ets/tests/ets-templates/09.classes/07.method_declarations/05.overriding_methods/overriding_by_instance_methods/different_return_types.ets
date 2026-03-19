@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,31 +14,34 @@
  */
 
 /*---
-desc: Different return type in mA and mC.
-assert: >-
+desc: >-
+    Different return type in mA and mC.
     Return types may vary among methods that override each other if the return types are reference types.
     The notion of return-type-substitutability supports covariant returns,
     that is the specialization of the return type to a subtype.
-tags: [compile-only]
 ---*/
 
 class A {
-  public m(): B {
-    return new B;
-  }
+    public m(): B {
+        return new B;
+    }
 }
 
 class B {
-
 }
 
-final class D extends B{
-
+final class D extends B {
 }
 
 final class C extends A {
-  override m(): D {
-    return new D();
-  }
+    override m(): D {
+        return new D();
+    }
+}
 
+function main() {
+    let b: B = new C().m()
+    let a: B = new A().m()
+    arktest.assertTrue( b instanceof D );
+    arktest.assertFalse( a instanceof D );
 }

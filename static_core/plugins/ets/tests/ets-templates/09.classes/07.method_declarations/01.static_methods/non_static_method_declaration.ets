@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,17 +14,25 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static method declaration.
-assert: A method that is not declared static called an instance method, and sometimes called a non-static method.
+desc: >-
+    Non-static and static method declaration.
+    A method that is not declared static called an instance method, and sometimes called a non-static method.
 tags: [compile-only]
 ---*/
 
 class A {
-  run(): void {
-    
-  }
+    run(): void {
+        A.foo()
+        A.foo2()
+        A.foo3()
+        A.foo4()
+        A.foo5()
+    }
 
-  static foo(): void {
-
-  }
+    static foo(): void {}
+    private static foo2() {}
+    public static foo3() {}
+    protected static foo4() {}
+    public static async foo5() {}
+    public native static foo6(): int
 }

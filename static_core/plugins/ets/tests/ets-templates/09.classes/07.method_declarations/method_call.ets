@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,22 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Method call by his name.
-assert: The identifier in a classMethodDeclaration is the name of the method which may be used to refer to the method.
+desc: >-
+    Method call by his name.
+    The identifier in a classMethodDeclaration is the name of the method which may be used to refer to the method.
 ---*/
 
 class A {
-  public run(): int {
-    return 5;
-  }
+    public run(): int {
+        return 5;
+    }
 
-  public stop(): int {
-    return 0;
-  }
+    public stop(): int {
+        return 0;
+    }
 }
 
 function main(): void {
-  let instance: A = new A();
+    let instance: A = new A();
 
-  arktest.assertEQ( instance.run(), 5 );
+    arktest.assertEQ( instance.run(), 5 );
 }

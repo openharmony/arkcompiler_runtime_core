@@ -19,6 +19,7 @@ desc: >-
     The declaration of an abstract method m must appear directly within an abstract class;
     otherwise a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0019: Non abstract class has abstract method."
 ---*/
 
 class A {

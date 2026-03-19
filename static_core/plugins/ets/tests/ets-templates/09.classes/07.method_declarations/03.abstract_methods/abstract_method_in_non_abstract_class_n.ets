@@ -18,6 +18,7 @@ desc: >-
     Abstract method defined in non-abstract class.
     A compile-time error must be thrown when a class contains an abstract method but is not marked abstract.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0019: Non abstract class has abstract method."
 ---*/
 
 class B {
@@ -27,4 +28,3 @@ class B {
 class A extends B {
     abstract foo(): void;
 }
-

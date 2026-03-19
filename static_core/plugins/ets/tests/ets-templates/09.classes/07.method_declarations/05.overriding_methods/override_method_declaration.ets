@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,30 +14,30 @@
  */
 
 /*---
-desc: Override method declaration.
-assert: >-
+desc: >-
+    Override method declaration.
     The usage of the modifier override is optional but strongly recommended
     as it makes the overriding explicit
 ---*/
 
 class A {
-  foo(): int {
-    return 1;
-  }
+    foo(): int {
+        return 1;
+    }
 }
 
 final class B extends A {
-  override foo(): int {
-    return 5;
-  }
+    override foo(): int {
+        return 5;
+    }
 }
 
 function getB(): B {
-  return new B
+    return new B
 }
 
 function main(): void {
-  let instance: A = getB();
+    let instance: A = getB();
 
-  arktest.assertEQ(instance.foo(), 5);
+    arktest.assertEQ(instance.foo(), 5);
 }

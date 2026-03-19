@@ -23,9 +23,16 @@ class A {
     public foo(): int {
         return 5;
     }
+
+    public foo2() {
+        return 10;
+    }
+
+    private native foo3(): int|string
 }
 
 function main(): void {
     let instance: A = new A();
     arktest.assertEQ( instance.foo(), 5 );
+    arktest.assertEQ( instance.foo2(), 10 );
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% for mod in modifiers %}
+{% for m in modifiers %}
 
 /*---
 desc: >-
@@ -23,10 +23,11 @@ desc: >-
     - The method declaration contains another modifier (static, final, native, or async) along
     with the modifier abstract.
 tags: [compile-only, negative]
+expected_out: "{{m.expected}}"
 ---*/
 
 abstract class A {
-    {{mod}} abstract run(): void;
+    {{m.mod}} abstract run(): {% if m.mod != "async" %}void{% else %}Promise{%endif %};
 }
 
-{% endfor %}
+{%- endfor %}

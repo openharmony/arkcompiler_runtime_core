@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,16 +19,16 @@ desc: >-
     or derived one represented as parameters or local variables
     Access inherited private method
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0127: No matching call signature for count()"
 ---*/
 
 class B {
-  private count(): number {
-    return 1
-  }
+    private count(): number {
+        return 1
+    }
 }
 class C extends B {
-  static getCount(c: C): number {
-    return c.count()
-  }
+    static getCount(c: C): number {
+        return c.count()
+    }
 }
-

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,14 +15,12 @@ limitations under the License.
 
 /*---
 desc: Method declaration with existed name in class body declaration.
-assert: >-
-    It is a compile-time error for the body of a class declaration to declare a method with the name
-    that is already used for field or a member type in this declaration.
 ---*/
 
 class Base {
-  private static run: int;
+    private static run: int;
 }
+
 final class Derive extends Base {
-  public static run(): void {}
+    public static run(): void {}
 }
