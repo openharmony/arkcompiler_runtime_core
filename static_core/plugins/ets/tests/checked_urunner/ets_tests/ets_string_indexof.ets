@@ -19,7 +19,7 @@
 //! METHOD        "ets_string_indexof.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Intrinsic\.StdCoreStringIndexOf\s/,1
-//! INST_COUNT    /Intrinsic\.StdCoreStringIndexOfAfter/,1
+//! INST_COUNT    /Intrinsic\.StdCoreStringIndexOfAfter/,2
 //! ASM_METHOD     "ets_string_indexof.ETSGLOBAL::main"
 //! ASM_INST      /Intrinsic\.StdCoreStringIndexOf/
 //! ASM_INST      /Intrinsic\.StdCoreStringIndexOfAfter/
@@ -29,4 +29,10 @@ let u8Line = new string('abcdefghijklmnopqrstuvwxyz');
 function main() {
     arktest.assertEQ(u8Line.indexOf(c'a'), 0);
     arktest.assertEQ(u8Line.indexOf(c'a', 5), -1);
+    // Irtoc 'String.indexOfAfter' may call C++ slow path if its argument is a SlicedString.
+    // The fast path of 'IndexOfAfter' relies on Irtoc 'IndexOf' thus 'startIndex' is added
+    // to the result of 'IndexOf' (see Codegen::CreateStringIndexOfAfter).
+    // It must be taken into account in the corresponding C++ implementation of 'String.IndexOfAfter'.
+    let u8Sliced = u8Line.slice(2);
+    arktest.assertEQ(u8Sliced.indexOf(c'z', 2), 23);
 }

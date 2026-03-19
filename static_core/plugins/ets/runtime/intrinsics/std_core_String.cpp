@@ -333,9 +333,13 @@ EtsInt StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, EtsInt fromIndex)
     return ark::intrinsics::StringIndexOfU16(s, ch, fromIndex, ctx);
 }
 
+// This is a slow path for Irtoc 'String.indexOfAfter'.
 extern "C" EtsInt StdCoreStringIndexOfAfterSubtracted(EtsString *s, uint16_t ch, EtsInt fromIndex)
 {
     auto res = StdCoreStringIndexOfAfter(s, ch, fromIndex);
+    // The fast path of 'IndexOfAfter' calls Irtoc 'IndexOf' and adds 'fromIndex'
+    // to the result (see Codegen::CreateStringIndexOfAfter). That is why here we
+    // subtract 'fromIndex' from the result returned by 'StdCoreStringIndexOfAfter'.
     return res < 0 ? res : res - fromIndex;
 }
 
