@@ -1,6 +1,6 @@
 'use static'
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,4 +46,8 @@ export declare interface Transformer1 {
 }
 export declare interface Formatter3 {
     format1(param0: string | number | Date, param1?: number | string): Any | string;
+}
+
+export declare interface WrapperTypes {
+  foo(param0: number, param1?: number): string;
 }

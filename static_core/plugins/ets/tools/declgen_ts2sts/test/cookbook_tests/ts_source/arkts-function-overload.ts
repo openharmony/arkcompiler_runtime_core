@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,4 +75,11 @@ export interface Formatter3 {
 export class Calculator3 {
   add3(a: number, b: number): number { return 0; }
   subtract3(a: number, b: number): number { return 0; }
+}
+
+export interface WrapperTypes {
+  foo(p: Number): string;
+  foo(p: Number, q?: number): string {
+    return "";
+  }
 }
