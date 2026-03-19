@@ -141,6 +141,17 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_11.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_12.ets
 
+#33769 no CTE on interface method return type never with normal execution
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_16.ets
+
+#33488 CTE on plain form of return
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_3.ets
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_8.ets
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_12.ets
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_1.ets
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_5.ets
+04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_8.ets
+
 #32423
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_18.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_19.ets
