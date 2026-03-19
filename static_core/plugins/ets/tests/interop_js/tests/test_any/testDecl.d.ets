@@ -26,6 +26,10 @@ export declare class NumberMap {
     [key: number]: number
 }
 export declare let numberMapInstance: NumberMap;
+export declare class StringMap {
+    [key: string]: number
+}
+export declare let stringMapInstance: StringMap;
 export declare function functionArg0(): number;
 export declare function functionArg1(arg1: number): number;
 export declare function functionArg2(arg1: number, arg2: number): number;
