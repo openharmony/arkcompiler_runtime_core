@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,19 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
 
+#include "libarkbase/utils/small_vector.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
-#include "libarkbase/utils/small_vector.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 #include <node_api.h>
 
 #include <functional>
+#include <string>
 #include <string_view>
+#include <variant>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
 #include "interfaces/inner_api/napi/native_node_hybrid_api.h"
@@ -43,6 +46,9 @@ napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi_ref *result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
+// Convert JS string to C++ string, selecting std::string or std::u16string based on internal storage
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_get_value_string_utf8_hybrid(napi_env env, napi_value value, void *string_object);
 // NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 
@@ -284,6 +290,13 @@ inline std::string GetString(napi_env env, napi_value jsVal)
     value.resize(length);
     // +1 for NULL terminated string!!!
     NAPI_CHECK_FATAL(napi_get_value_string_utf8(env, jsVal, value.data(), value.size() + 1, &length));
+    return value;
+}
+
+inline std::variant<std::string, std::u16string> GetStringHybrid(napi_env env, napi_value jsVal)
+{
+    std::variant<std::string, std::u16string> value;
+    NAPI_CHECK_FATAL(napi_get_value_string_utf8_hybrid(env, jsVal, static_cast<void *>(&value)));
     return value;
 }
 

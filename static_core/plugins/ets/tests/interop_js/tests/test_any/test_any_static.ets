@@ -42,7 +42,21 @@ function testLdByName(): void {
     arktest.assertEQ(bar, 0xcafe);
 
     let baz = fooInstance.baz;
+    let zhcn = fooInstance.zhcn;
+
     arktest.assertEQ(baz, 'hello world');
+
+    arktest.assertEQ(zhcn, '中國');
+    arktest.assertEQ(baz.substring(0,5), 'hello');
+    arktest.assertEQ(zhcn.substring(0,1), '中');
+    arktest.assertEQ(baz.charAt(0).toString(), 'h');
+    arktest.assertEQ(zhcn.charAt(0).toString(), '中');
+    arktest.assertEQ(baz.indexOf('w'), 6);
+    arktest.assertEQ(zhcn.indexOf('中'), 0);
+    arktest.assertEQ(baz.concat(' ','123'), 'hello world 123');
+    arktest.assertEQ(zhcn.concat(' ','123'), '中國 123');
+    arktest.assertEQ(baz.length, 11);
+    arktest.assertEQ(zhcn.length, 2);
 }
 
 function testLdByIdx(): void {

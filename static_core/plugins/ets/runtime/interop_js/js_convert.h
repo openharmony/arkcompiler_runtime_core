@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
+#include <variant>
 #include "plugins/ets/runtime/interop_js/js_convert_base.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert_stdlib.h"
@@ -186,7 +187,7 @@ JSCONVERT_WRAP(String)
 }
 JSCONVERT_UNWRAP(String)
 {
-    std::string value;
+    std::variant<std::string, std::u16string> value;
     {
         ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         napi_value result = jsVal;
@@ -199,9 +200,21 @@ JSCONVERT_UNWRAP(String)
             TypeCheckFailed();
             return {};
         }
-        value = GetString(env, result);
+        value = GetStringHybrid(env, result);
     }
-    return EtsString::CreateFromUtf8(value.data(), value.length());
+    EtsString *resultEtsString = nullptr;
+    if (std::holds_alternative<std::string>(value)) {
+        const auto &str = std::get<std::string>(value);
+        auto utf8Data = reinterpret_cast<const uint8_t *>(str.data());
+        auto utf8Length = static_cast<uint32_t>(str.length());
+        resultEtsString = EtsString::CreateFromOneByte(utf8Data, utf8Length);
+    } else {
+        const auto &str = std::get<std::u16string>(value);
+        auto utf16Data = reinterpret_cast<const uint16_t *>(str.data());
+        auto utf16Length = static_cast<uint32_t>(str.length());
+        resultEtsString = EtsString::CreateFromUtf16UnCompressed(utf16Data, utf16Length);
+    }
+    return resultEtsString;
 }
 
 JSCONVERT_DEFINE_TYPE(BigInt, EtsBigInt *);

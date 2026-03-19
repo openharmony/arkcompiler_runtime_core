@@ -17,6 +17,7 @@ export declare class Foo
 {
     bar: number;
     baz: string;
+    public zhcn: string;
 }
 
 export declare let fooInstance: Foo;
