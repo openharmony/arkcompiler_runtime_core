@@ -19,7 +19,10 @@ import unittest
 from pathlib import Path
 from typing import cast
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.suites.test_metadata import TestMetadata
+from runner.test import test_utils
+from runner.utils import ExpectedField
 
 
 class MetadataTest(unittest.TestCase):
@@ -114,13 +117,6 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(len(cast(list[str], metadata.files)), 2)
         self.assertListEqual(cast(list[str], metadata.files), ['test1.sts', 'test2.sts'])
 
-    def test_extra_key(self) -> None:
-        with self.assertRaises(TypeError):
-            metadata = TestMetadata.create_filled_metadata({
-                'abc': 'def',
-            }, Path(__file__))
-            self.assertIsNone(metadata)
-
     def test_non_existing_path(self) -> None:
         with self.assertRaises(FileNotFoundError):
             metadata = TestMetadata.create_filled_metadata({}, Path("path"))
@@ -151,3 +147,39 @@ class MetadataTest(unittest.TestCase):
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
         self.assertEqual(len(metadata.tags.invalid_tags), 0)
+
+    @test_utils.parametrized_test_cases([
+        ("ark-timeout=60", ["ark-timeout=60"]),
+        (["ark-timeout=60"], ["ark-timeout=60"]),
+    ])
+    def test_ark_options_validator(self, test_param: str | list[str], expected_res: list[str]) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'ark_options': test_param
+        }, Path(__file__))
+
+        self.assertEqual(metadata.ark_options, expected_res)
+
+    @test_utils.parametrized_test_cases([
+        ("ark_options", {},),
+        ("test_cli", "abc",),
+        ("files", "abc",),
+        ("es2panda_options", "abc",),
+    ])
+    def test_invalid_vals(self, field_name: str, field_val: str | dict) -> None:
+        with self.assertRaises(InvalidConfiguration):
+            _ = TestMetadata.create_filled_metadata({
+                field_name: field_val
+            }, Path(__file__))
+
+    @test_utils.parametrized_test_cases([
+        ("test", {'compiler': ['test']}),
+        (["test1"], {'compiler': ['test1']}),
+        (["test1", "test2"], {'compiler': ['test1', 'test2']}),
+        ({"runtime": ["test1", "test2"]}, {'runtime': ['test1', 'test2']}),
+    ])
+    def test_expected_output_validator(self, test_param: str | list[str] | dict, expected_res: ExpectedField) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': test_param
+        }, Path(__file__))
+
+        self.assertEqual(metadata.expected_out, expected_res)
