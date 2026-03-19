@@ -30,10 +30,14 @@ function foo3(p: boolean): int {
     return 3;
 }
 
-function foo4(p: number, q: boolean): int {
+function foo4(p: string, q: boolean): int {
     return 4;
 }
 
 {{c.export}} overload foo { {{c.list}} }
+
+function main(): void {
+    {{c.assert}}
+}
 
 {% endfor %}

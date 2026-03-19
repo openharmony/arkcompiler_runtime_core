@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,29 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method."
+desc: Explicit overload for constructors is used in the same manner as a normal constructor is.
 ---*/
 
-class A {
-  foo1 (i: int): string {
-    return 'foo1';
-  }
+let f = 0
 
-  foo2 (n: number): string {
-    return 'foo2';
-  }
+class BigFloat {
+    constructor fromNumber(n: number) { f = 1 }
+    constructor fromString(s: string) { f = 2 }
 
-  overload foo { foo1, foo2 }
-  overload test { {{c.list}} }
+    overload constructor { fromNumber, fromString }
 }
 
-function main(): void {
-  let a: A = new A();
-  a.test(1);
-}
+function main() {
+    new BigFloat(1)
+    arktest.assertEQ(f, 1, "first constructor is called")
 
-{% endfor %}
+    new BigFloat("3.14")
+    arktest.assertEQ(f, 2, "second constructor is called")
+}

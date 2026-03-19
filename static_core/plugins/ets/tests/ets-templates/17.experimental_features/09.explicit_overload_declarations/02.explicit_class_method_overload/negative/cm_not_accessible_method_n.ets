@@ -17,6 +17,7 @@ limitations under the License.
 /*---
 desc: A compile-time error occurs, if a qualified name does not refer to an accessible function.
 tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
 class A {

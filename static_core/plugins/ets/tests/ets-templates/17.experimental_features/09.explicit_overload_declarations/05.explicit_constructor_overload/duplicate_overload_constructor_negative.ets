@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,30 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
+desc: Only a single explicit constructor overload is allowed in a class. 
+      Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0389: The overloaded name 'bar' can't refer to a function with overload signatures."
+expected_out: "Semantic error ESE0351: Variable 'constructor' has already been declared."
 ---*/
 
-class A {
-  bar (i: int): string
-  bar (n: number): string
-  bar(...a: Any[]): Any {
-    return 'bar';
-  }
+class C {
+    constructor fromNumber(n: number) {}
+    constructor fromString(s: string) {}
+    constructor fromBoolean(b: boolean) {}
+    constructor fromObject(obj: Object) {}
 
-  foo1 (i: int): string {
-    return 'foo1';
-  }
-
-  overload test { {{c.list}} }
+    overload constructor { fromNumber, fromString }
+    overload constructor { fromBoolean, fromObject }
 }
-
-function main(): void {
-  let a: A = new A();
-  a.test(1);
-}
-
-{% endfor %}

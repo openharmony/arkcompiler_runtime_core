@@ -13,11 +13,58 @@
 
 ---
 cases:
-  - { export: '',       list: 'foo1' }
-  - { export: '',       list: 'foo1, foo2' }
-  - { export: '',       list: 'foo3' }
-  - { export: '',       list: 'foo1, foo4' }
-  - { export: '',       list: 'foo3, foo2' }
-  - { export: '',       list: 'foo3, foo4' }
-  - { export: 'export', list: 'foo1' }
-  - { export: 'export', list: 'foo1, foo2' }
+  - export: ''
+    list: 'foo1'
+    assert: |-
+        arktest.assertEQ(foo('s'), 1, 'foo1 call expected');
+         
+  - export: ''
+    list: 'foo1, foo2'
+    assert: |-
+        arktest.assertEQ(foo('s'), 1, 'foo1 call expected');
+        arktest.assertEQ(foo(1), 2, 'foo2 call expected');
+
+  - export: ''
+    list: 'foo3'
+    assert: |-
+        arktest.assertEQ(foo(true), 3, 'foo3 call expected');
+         
+  - export: ''
+    list: 'foo1, foo4'
+    assert: |-
+        arktest.assertEQ(foo('s'), 1, 'foo1 call expected');
+        arktest.assertEQ(foo('s', false), 4, 'foo4 call expected');
+
+  - export: ''
+    list: 'foo3, foo2'
+    assert: |-
+        arktest.assertEQ(foo(1), 2, 'foo2 call expected');
+        arktest.assertEQ(foo(false), 3, 'foo3 call expected');
+
+  - export: ''
+    list: 'foo3, foo4'
+    assert: |-
+        arktest.assertEQ(foo(false), 3, 'foo3 call expected');
+        arktest.assertEQ(foo('s', false), 4, 'foo4 call expected');
+
+  - export: 'export'
+    list: 'foo1'
+    assert: |-
+        arktest.assertEQ(foo('s'), 1, 'foo1 call expected');
+
+  - export: 'export'
+    list: 'foo1, foo2'
+    assert: |-
+        arktest.assertEQ(foo('s'), 1, 'foo1 call expected');
+        arktest.assertEQ(foo(1), 2, 'foo2 call expected');
+
+  - export: 'export'
+    list: 'foo2'
+    assert: |-
+        arktest.assertEQ(foo(1), 2, 'foo2 call expected');
+
+  - export: 'export'
+    list: 'foo2, foo1'
+    assert: |-
+        arktest.assertEQ(foo('s'), 1, 'foo1 call expected');
+        arktest.assertEQ(foo(1), 2, 'foo2 call expected');

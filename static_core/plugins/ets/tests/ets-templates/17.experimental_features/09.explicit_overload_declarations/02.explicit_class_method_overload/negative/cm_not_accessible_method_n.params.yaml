@@ -13,15 +13,15 @@
 
 ---
 cases:
-  - list: 'fooA'
-  - list: 'NS1.bar'
-  - list: 'NS1.foo'
-  - list: 'noName'
-  - list: 'fooC, fooA'
-  - list: 'fooC, NS1.bar'
-  - list: 'fooC, NS1.foo'
-  - list: 'fooC, noName'
-  - list: 'fooA, fooC'
-  - list: 'NS1.bar, fooC'
-  - list: 'NS1.foo, fooC'
-  - list: 'noName, fooC'
+  - { list: 'fooA', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'NS1.bar', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'NS1.foo', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'noName', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'fooC, fooA', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'fooC, NS1.bar', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'fooC, NS1.foo', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'fooC, noName', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'fooA, fooC', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'NS1.bar, fooC', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'NS1.foo, fooC', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'noName, fooC', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
