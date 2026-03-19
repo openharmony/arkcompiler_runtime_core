@@ -14,12 +14,36 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The first element of the array is stored at the 0th index, 2nd element is stored on 1st index and so on
+desc: >-
+    Array element is accessed by its index. The index is an integer number
+    in the range from 0 to array length minus 1.
 ---*/
 
-function main(): void {
-    let x: int[] = [1, 2, 3];
-    arktest.assertTrue(x[0 as byte] == 1);
-    arktest.assertTrue(x[1 as short] == 2);
-    arktest.assertTrue(x[0 as int] == 1);
+function main(): int {
+  let suite = new arktest.ArkTestsuite("Array Index and Data Types")
+
+  suite.addTest("Access by byte index", () => {
+    let x: int[] = [1, 2, 3]
+    let i: byte = 0
+    arktest.assertEQ(x[i], 1)
+  })
+
+  suite.addTest("Access by short index", () => {
+    let x: int[] = [1, 2, 3]
+    let i: short = 1
+    arktest.assertEQ(x[i], 2)
+  })
+
+  suite.addTest("Access by int index", () => {
+    let x: int[] = [1, 2, 3]
+    let i: int = 0
+    arktest.assertEQ(x[i], 1)
+  })
+
+  suite.addTest("Array with union type elements", () => {
+    let x: (int | string)[] = [4, "abc", 5]
+    arktest.assertEQ(x.length, 3)
+  })
+
+  return suite.run()
 }
