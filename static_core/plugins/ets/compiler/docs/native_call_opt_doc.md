@@ -54,7 +54,20 @@ CompilerCheckNativeException
 
 ## Examples
 
-To be added
+Typical IR shapes after `NativeCallOptimization`:
+
+- `@ani.unsafe.Direct`: `CompilerGetNativeMethod -> CompilerGetMethodNativePointer -> CallNative`
+- `@ani.unsafe.Quick`: adds `CompilerGetNativeMethodManagedClass`, `CompilerGetNativeApiEnv`,
+  `CompilerBeginNativeMethod`, `WrapObjectNative*`, `CompilerEndNativeMethod*`, `CompilerCheckNativeException`
+- default ANI mode: same overall shape as `Quick`, but the entrypoint path performs the managed/native coroutine-state
+  transition
+
+## Validation
+
+- `plugins/ets/tests/checked/ani/direct_native.ets`
+- `plugins/ets/tests/checked/ani/quick_native.ets`
+- `plugins/ets/tests/checked/ani/unsafe_memory.ets`
+- use compiler IR/disasm dumps to verify `CallNative`, `WrapObjectNative`, and begin/end-native entrypoints
 
 ## Links
 
@@ -63,10 +76,14 @@ Compiler part (IR):
 - [inst.h](../../../../compiler/optimizer/ir/inst.h)
 - [native_call_optimization.h](../../../../compiler/optimizer/optimizations/native_call_optimization.h)
 - [native_call_optimization.cpp](../../../../compiler/optimizer/optimizations/native_call_optimization.cpp)
+- [locations_builder.cpp](../../../../compiler/optimizer/optimizations/locations_builder.cpp)
+- [graph_checker.cpp](../../../../compiler/optimizer/ir/graph_checker.cpp)
 
 Codegen part (asm):
 - [ets_codegen_extensions.h](../optimizer/ets_codegen_extensions.h)
 - [ets_codegen_extensions.cpp](../optimizer/ets_codegen_extensions.cpp)
+- [codegen.cpp](../../../../compiler/optimizer/code_generator/codegen.cpp)
+- [encode_visitor.cpp](../../../../compiler/optimizer/code_generator/encode_visitor.cpp)
 
 Runtime part (intrinsics/entrypoints):
 - [compiler.cpp](../../../../runtime/compiler.cpp)

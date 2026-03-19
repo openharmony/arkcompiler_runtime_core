@@ -1,133 +1,159 @@
 # Paoc
-## Overview
-  `Paoc` is an application to launch compiler on [panda binary files](../../docs/file_format.md).  
-  There are four [modes](#--paoc-mode) of `paoc`:
-  1. `AOT-mode` (default) - compile the files using Ark AOT Compiler and produce an executable;
-  1. `LLVM-mode` - compile the files using LLVM AOT Compiler and produce an executable;
-  1. `JIT-mode` - only run compiler (IR builder, optimizations) without generating an executable. This may be usefull, for example, to get `--compiler-dump` or to ensure that all of the compiler passes are applied correctly;
-  1. `OSR-mode` - similiar to `JIT-mode`. Takes into account differences of [OSR](../../docs/on-stack-replacement.md#Compilation) compilation.
 
-## Paoc options
+`ark_aot` is the offline compiler driver built from the paoc toolchain. It compiles [panda binary
+files](../../docs/file_format.md) and can run the compiler pipeline in four current modes:
 
-All compiler options are applicable, e. g. `--compiler-regex`, `--compiler-non-optimizing` or `--compiler-cross-arch`. Run `paoc` without any arguments to see full list of available options.
+1. `aot` - normal AOT compilation that writes `.an` output
+2. `llvm` - LLVM-backed AOT compilation when the build enables it
+3. `jit` - offline validation of the normal JIT-shaped pipeline without writing the usual `.an` output
+4. `osr` - offline validation of the OSR-specific pipeline shape without writing the usual `.an` output
 
-### Common options
+Use `compiler/tools/paoc/paoc.yaml` as the option source of truth and `compiler/tools/paoc/paoc.cpp` for current
+behavior. This note is the compact workflow map.
+
+## Current Option Groups
+
+All regular compiler options are also applicable, for example `--compiler-regex`, `--compiler-non-optimizing`, and
+`--compiler-cross-arch`.
+
+### Mandatory Input
 
 #### `--paoc-panda-files`
 
-- Comma-separated list of panda files to compile.  
-  This is a mandatory option.
+- Comma-separated list of panda files to compile
+- This option is mandatory
 
-#### `--compiler-ignore-failures`
-
-- A boolean option that allows to continue the compilation if some of the methods are failed to compile.  
-Default is `true`.
+### Mode Selection
 
 #### `--paoc-mode`
 
-- A string that specifies paoc's mode.  
-Possible values:
-  - `aot` (default)
-  - `llvm`
-  - `jit`
-  - `osr`
+- Compiler mode: `aot`, `llvm`, `jit`, or `osr`
+- Default: `aot`
 
-### AOT-specific options
+### Output and Location Metadata
 
 #### `--paoc-output`
 
-- Output file path.  
-Default is `out.an`.
+- Output `.an` file path
+- Default: `out.an`
+
+#### `--paoc-boot-output`
+
+- Output boot `.an` file path
+- Incompatible with `--paoc-output`
 
 #### `--paoc-location`
 
-- Location path of the input panda file, that will be written into the AOT file.
+- Location path of the input panda file written into the AOT file
+- Use it when compile-time host paths and runtime-visible target paths differ
+- The recorded location participates in AOT class-context verification, so runtime-visible file names must match this
+  path layout
+
+#### `--paoc-boot-location`
+
+- Location path of boot panda files written into the AOT file
+
+#### `--paoc-boot-panda-locations`
+
+- Per-file location paths for boot panda files, including file names
 
 #### `--paoc-generate-symbols`
 
-- Generate symbols for compiled methods (always true in debug builds).  
-Default is `false`.
+- Generate symbols for compiled methods
+- Always enabled in debug builds
 
-### Selection options
+### Method Selection
 
-The following options allow to specify methods to compile.  
-If none of them are specified, `paoc` will compile every method from [--paoc-panda-files](#`--paoc-panda-files`).
+If no method filter is provided, paoc compiles every method from `--paoc-panda-files`.
 
-#### `--paoc-methods-from-file`
+#### `--paoc-methods-from-file:path=<file>[,iswhite=true|false]`
 
-- Path to a file which contains full names of methods to compile.  
+- Load a white-list or black-list of full method names from a file
 
 #### `--paoc-skip-until`
 
-- Set first method to complie and skip all previous.
+- Set the first method to compile and skip all previous methods
 
 #### `--paoc-compile-until`
 
-- Set last method to complie and skip all following.
+- Set the last method to compile and skip all following methods
 
-### Cluster compiler options
+### PGO and Statistics
 
-`paoc` has an option to apply clusters of special compiler options (different from default and passed via command line) to specified methods:
+#### `--paoc-use-profile:path=<profile.ap>[,force]`
+
+- Load runtime profile data from a `.ap` file for AOT PGO
+- `force` makes paoc fail if the profile is missing or invalid
+- Mirror the application files from `--paoc-panda-files` through `--panda-files` before the profile is applied; for
+  multiple inputs, pass the same file set with `:` separators
+
+#### `--paoc-dump-stats-csv`
+
+- Dump allocator usage statistics in a smaller CSV form than `--compiler-dump-stats-csv`
+
+### Clustered Compiler Options
 
 #### `--paoc-clusters`
 
-- A path to `.json` config file of the following format:
+- Path to a JSON config that applies clusters of compiler options to selected methods
 
-```bash
+Format summary:
+
+```json
 {
-    # The file should contain two objects: "clusters_map", which describes `function-clusters` relations,
-    # and "compiler_options", which defines clusters themselves (`option:argument` pairs).
-
-    "clusters_map" :
-    # Keys are functions' full names (i.e. `class::method`).
-    # Values are arrays whose elements should be a name of a cluster or it's index (starting from 0).
-    # If some of the options are intersecting, the last (in the array) would be applied.
-    {
-        "class::function_1" : [1],
-        "class::function_2" : [0, "cluster_1", 2],
-        "class::function_3" : ["cluster_0", 1, 2],     # same as previous
-        "class::function_4" : ["cluster_0", 2, 3]      # "cluster_3" overlaps "cluster_2" by "compiler_option_2".
+  "clusters_map": {
+    "Class::method1": [1],
+    "Class::method2": [0, "cluster_1", 2]
+  },
+  "compiler_options": {
+    "cluster_0": {
+      "compiler_option_1": "arg",
+      "compiler_option_2": "arg"
     },
-
-
-    "compiler_options" :
-    # Keys are clusters' names.
-    # Values are objects with `"option": argument` elements.
-    {
-        # [0]
-        "cluster_0" :
-        {
-            "compiler_option_1" : "arg",
-            "compiler_option_2" : "arg",
-            "compiler_option_3" : "arg"
-        },
-        
-        # [1]
-        "cluster_1" :
-        {
-            "compiler_option_1" : "arg"
-        },
-        
-        # [2]
-        "cluster_2" :
-        {
-            "compiler_option_1" : "arg",
-            "compiler_option_2" : "arg"
-        },
-
-        # [3]
-        "cluster_3" :
-        {
-            "compiler_option_2" : "arg"
-        }
+    "cluster_1": {
+      "compiler_option_3": "arg"
     }
+  }
 }
 ```
 
-## Links
+## Typical Commands
 
-### Source code
+Compile one application in normal AOT mode:
 
-[paoc.cpp](../tools/paoc/paoc.cpp)  
-[paoc.yaml](../tools/paoc/paoc.yaml)  
-[paoc_clusters.h](../tools/paoc/paoc_clusters.h)  
+```bash
+./out/bin/ark_aot \
+  --load-runtimes=ets \
+  --boot-panda-files=./out/plugins/ets/etsstdlib.abc \
+  --paoc-panda-files=app.abc \
+  --paoc-output=app.an
+```
+
+Validate one method in OSR shape without a normal `.an` output:
+
+```bash
+./out/bin/ark_aot \
+  --load-runtimes=ets \
+  --boot-panda-files=./out/plugins/ets/etsstdlib.abc \
+  --paoc-panda-files=app.abc \
+  --paoc-mode=osr \
+  --compiler-regex='App::hotLoop'
+```
+
+Compile with a saved profile:
+
+```bash
+./out/bin/ark_aot \
+  --load-runtimes=ets \
+  --boot-panda-files=./out/plugins/ets/etsstdlib.abc \
+  --paoc-panda-files=app.abc \
+  --panda-files=app.abc \
+  --paoc-output=app.an \
+  --paoc-use-profile:path=workload.ap
+```
+
+## Source Files
+
+- `../tools/paoc/paoc.cpp`
+- `../tools/paoc/paoc.yaml`
+- `../tools/paoc/paoc_clusters.h`

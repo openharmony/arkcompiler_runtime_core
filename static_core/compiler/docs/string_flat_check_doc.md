@@ -7,7 +7,7 @@ If several intrinsics use the same argument, moves corresponding StringFlatCheck
 dominating basic block if it has SaveState.
 
 ## Rationality
-Avoid going to slowpath if flattening is performed in IRTOC implementation.
+Avoid going to slowpath if flattening is performed in irtoc implementation.
 
 ## Dependence
 * Loop Analysis;

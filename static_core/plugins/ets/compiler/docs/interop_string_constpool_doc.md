@@ -21,6 +21,9 @@ There's a performance problem that we split string in runtime and create `napi_s
 ## Solution
 
 ### ArkTS frontend part
+Frontend pieces for this optimization live outside `static_core`, in the sibling `ets_frontend` checkout typically
+configured through `ARKCOMPILER_ETS_FRONTEND_PATH`.
+
  - enumerate all qualified names in the current file (see `ETSChecker::ResolveDynamicCallExpression` in [dynamic.cpp](../../../../../../ets_frontend/ets2panda/checker/ets/dynamic.cpp): `DynamicCallNames(isConstruct)->try_emplace(callNames.name, 0)`)
  - consider these qualified names as arrays of strings
  - concatenate the arrays into a single array and write it to the annotation of `jscall` class corresponding to the file (see `ETSEmitter::GenAnnotationDynamicCall` in [ETSemitter.cpp](../../../../../../ets_frontend/ets2panda/compiler/core/ETSemitter.cpp))

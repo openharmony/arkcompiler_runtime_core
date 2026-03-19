@@ -87,3 +87,12 @@ For each tuple `(intrinsic id, intrinsic input, scope start)` (where `scope star
 * hoist instruction to some position if it is fully anticipated there and there is a path to end block where it occurs more than once
 
 To reduce number of processed blocks, we traverse only the blocks where `v` is partially anticipated, and `boundary` is available.
+
+## Validation
+
+- compiler gtests:
+  - [interop_intrinsics_opt_test.cpp](../../../tests/interop_js/tests/compiler/interop_intrinsics_opt_test.cpp)
+  - [interop_peepholes_test.cpp](../../../tests/interop_js/tests/compiler/interop_peepholes_test.cpp)
+- interop end-to-end suites:
+  - `plugins/ets/tests/interop_js/README.MD`
+  - target `ets_interop_tests`

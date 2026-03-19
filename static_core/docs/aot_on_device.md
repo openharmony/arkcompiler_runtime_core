@@ -2,20 +2,27 @@
 
 ## Framework AOT
 
-Frameworks include ABCs for all APP using. Now we pass them to Appspawn then used by all apps by --boot-panda-files.
-We have two strategies to enable Framework AOT on device. 
+Frameworks include ABCs shared by many apps. These files are typically provided through `--boot-panda-files`.
+There are two strategies to enable framework AOT on device.
 
-1. Integrate to device image, and will appear in /system/framework 
+1. Integrate into the device image so the files live under `/system/framework`
 
-2. Compilation during device is inactive. Will appear in /data/service/el1/public/framework_ark_cache/ after device running a few days later.
+2. Compile later on device while it is idle so the generated `.an` files appear under
+   `/data/service/el1/public/for-all-app/framework_ark_cache`
 
-And AOT files under /data is newer than files under /system, consider that we can use pgo file to recompile these system abcs on device and save to /data/xxx. But this only happend after first compilation on device, before that, we still need to load from /system.
+AOT files under `/data` are usually newer than those from `/system`, because device-side recompilation can use PGO and
+store refreshed artifacts in the runtime cache. Before the first device-side compilation finishes, the runtime still
+needs to fall back to the `.an` file next to the original `.abc` under `/system/framework`.
 
-Otherwise, we have several abc files in boot-panda-files. On device, some of these files maybe in boot an location, some of them maybe in abc location.
+In practice, `--boot-panda-files` may contain several boot ABCs. Some of their matching `.an` files may be present in
+the boot AOT cache, while others may only exist next to the ABC itself.
 
-Therefore, we need to support try load AOT files from both /data/xxx and /system/framework/ (path of abc). We have `--enable-an` option to support try load AOT files from abc file location. To support load from /data/xxx, we add an new option `--boot-an-location`. On device, this option will be always setted to /data/xxx, because we cannot dynamicly custom arguments on device. We first try to load AOT files from path of boot-an-location, because files here is latest. If no latest AOT files, we try to load from panda files location (old, from image).
+Therefore, runtime supports loading AOT files from both locations. `--enable-an` enables the lookup, and
+`--boot-an-location` provides the preferred boot-cache directory. On device, `--boot-an-location` is normally set to
+`/data/service/el1/public/for-all-app/framework_ark_cache`, because that cache is expected to contain the newest
+artifacts. If no cached `.an` file is found there, runtime falls back to the directory of the corresponding `.abc`.
 
-The logic of loading an files for boot panda files will change to follows:
+The current lookup order for boot panda files is:
 
 ```
 bool FileManager::TryLoadAnFileForLocation(std::string_view abcPath)

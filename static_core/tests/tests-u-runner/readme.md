@@ -119,6 +119,9 @@ For example, to run the test262 test suite with AOT FULL INLINE the build option
 
 `$PROJECT/tests/tests-u-runner/runner.sh --test262 --gc-type=g1-gc --aot --aot-args='--compiler-inline-full-intrinsics=true' --aot-args='--compiler-memory-size-limit=4294967296' --build-dir $BUILD`
 
+For debugging repros, `--verbose all` is the supported way to surface the underlying step commands. If you also need
+timeout thread dumps, rerun with `--handle-timeout` under `sudo`.
+
 ## Yaml configuration files
 
 Any option can be set through yaml configuration file as `--config $YAML_CONFIG_FILE`. It can be mentioned several times

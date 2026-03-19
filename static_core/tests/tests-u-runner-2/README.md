@@ -63,11 +63,12 @@ In case of fail on CI there would be message in log how to rerun affected test l
 
 ```
 To reproduce with URunner run:
-(min parameters set): ${runner_path}/runner.sh panda-int-2 ets-cts --processes all --force-generate --show-progress --filter=07.expressions/25.equality_expressions/bigint_equality_operators/ne1*  --test-file 07.expressions/25.equality_expressions/bigint_equality_operators/ne1_0.ets
-(full parameters set): ${runner_path}/runner.sh panda-int-2 ets-cts --extension ets --load-runtimes ets --work-dir ${path to workflow folder} --build ${build path} --opt-level 2 --es2panda-timeout 30 --verifier-timeout 30 --enable-es2panda True --enable-verifier True --ark-timeout 180 --gc-type g1-gc --full-gc-bombing-frequency 0 --heap-verifier fail_on_verification --is-panda True --processes all --show-progress True --force-generate True --test-file 07.expressions/25.equality_expressions/bigint_equality_operators/ne1_0.ets
+(min parameters set): ${runner_path}/runner.sh panda-int ets-cts --processes all --force-generate --show-progress --filter=07.expressions/25.equality_expressions/bigint_equality_operators/ne1*  --test-file 07.expressions/25.equality_expressions/bigint_equality_operators/ne1_0.ets
+(full parameters set): ${runner_path}/runner.sh panda-int ets-cts --extension ets --load-runtimes ets --work-dir ${path to workflow folder} --build ${build path} --opt-level 2 --es2panda-timeout 30 --verifier-timeout 30 --enable-es2panda True --enable-verifier True --ark-timeout 180 --gc-type g1-gc --full-gc-bombing-frequency 0 --heap-verifier fail_on_verification --is-panda True --processes all --show-progress True --force-generate True --test-file 07.expressions/25.equality_expressions/bigint_equality_operators/ne1_0.ets
 ```
 
-To reproduce this run just copy runner parameters from it and run locally.
+To reproduce this run just copy runner parameters from it and run locally. Current failure output also includes the
+required environment variables and the exact per-step commands executed by the runner.
 
 ## Test lists
 
@@ -137,7 +138,7 @@ Example:
 
 Detailed report shows test statistics for every folder
 - `--detailed-report` - if it's specified the report is generated
-- `--general.detailed-report-file` - specifies file/path where the report should be saved to
+- `--detailed-report-file` - specifies file/path where the report should be saved to
 
 ## ArkTS Specification coverage report
 
@@ -152,7 +153,7 @@ ArkTS Specification coverage report shows test statistics for every specificatio
 -  `--verbose`, `-v` - Enable verbose output. Possible values one of:
    - `all` - the most detailed output,
    - `short` - test status and output.
-   - if none specified (by default): only test status for new failed tests
+   - `silent` - only test status for new failed tests (by default)
    - in config file use `general.verbose` property with the save values.
 -  `--verbose-filter` - Filter for what kind of tests to output stdout and stderr.
    Supported values:

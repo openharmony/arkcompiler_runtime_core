@@ -2,12 +2,13 @@
 
 ## Overview
 
-Metainfo is an information that aims to provide reg-to-stack mapping for virtual registers. It is needed for stack
-unwinding process to restore CFrame at specific PC.
+Metainfo is the compiler-generated information that lets runtime recover virtual registers and frame state for a given
+native PC. It is needed for stack unwinding, deoptimization, exception handling, and GC-safe stack walking.
 
-When native code calls runtime or another code that can call runtime, we must provide approach to restore virtual
-registers which are live during this call instruction. Since all virtual regisetrs should be saved on the stack before
-we call the runtime, we can save information in which stack slot specific vreg is live.
+When native code calls runtime or another code that can call runtime, the runtime must be able to recover every live
+virtual register. In current CodeInfo, a vreg may live in a stack slot, a CPU register, an FP register, or a constant.
+GC roots are tracked separately through roots-register and roots-stack masks, and the vreg maps are derived from
+compiler save-state information.
 
 Metainfo is placed together with compiled code:
 ```

@@ -11,6 +11,9 @@ command token at the zero position.
 
 Each command is a valid code in the `ruby` language.
 
+For local repro, prefer `ninja -v <name>.checked` so the exact `checker.rb` invocation is visible. The checker recreates
+its per-test working directory, so stale artifacts should not be treated as expected checked-test behavior.
+
 ## List of commands
 
 * **CHECKER** (description: string) begin new Checker with specified description

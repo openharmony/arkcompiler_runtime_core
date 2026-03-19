@@ -1,114 +1,102 @@
-# How to start compilation
+# How Compilation Starts
 
-At the moment we have two compilation modes (in-place and in the background):
-- in-place mode starts compilation in the same thread
-- background mode starts compilation in worker thread of `taskmanager::TaskScheduler` (asynchronously) and the compilation process is divided into parts to make `taskmanager::Task` shorter
+The current tree has two task-runner shapes:
 
+- in-place compilation, where the compile step runs immediately in the current thread
+- background compilation, where the compile step is queued through `taskmanager::TaskQueueInterface`
 
-On successful completion of compilation, `ark::TaskRunner` calls callbacks on successful completion, otherwise, callbacks on failure. It also calls finalize functions in both cases (see details in `libarkbase/task_runner.h`)
+Both are implemented on top of `ark::TaskRunner` from `libarkbase/task_runner.h`. The important current callback rule
+is that callbacks and finalizers receive `ContextT &`, not a zero-argument lambda.
 
-Since we have a background (asynchronous) mode, we cannot get the compilation result directly (by the return value). Therefore, if we want to know the result of compilation or get a modified graph, we create a callback.
+## In-Place Flow
 
-Examples:
+Current in-place entry points include:
+
+- `compiler/tools/paoc/paoc.cpp` for offline `ark_aot --paoc-mode=jit|osr`
+- `runtime/compiler_thread_pool_worker.cpp` for synchronous JIT compilation in the current thread
+
+The in-place runner type is `compiler::InPlaceCompilerTaskRunner` from `compiler/inplace_task_runner.h`.
+
+Current context fields are:
+
+- `Method *`
+- OSR flag
+- `PandaVM *` when runtime-side compilation needs it
+- arena allocator and local allocator
+- method name
+
+Typical current pattern:
+
+```cpp
+compiler::InPlaceCompilerTaskRunner taskRunner;
+auto &taskCtx = taskRunner.GetContext();
+taskCtx.SetMethod(method);
+taskCtx.SetOsr(isOsr);
+taskCtx.SetAllocator(&allocator);
+taskCtx.SetLocalAllocator(&graphLocalAllocator);
+taskCtx.SetMethodName(methodName);
+
+taskRunner.AddFinalize(
+    [&graph](compiler::InPlaceCompilerContext &compilerCtx) { graph = compilerCtx.GetGraph(); });
+taskRunner.AddCallbackOnFail(
+    [&success]([[maybe_unused]] compiler::InPlaceCompilerContext &compilerCtx) { success = false; });
+
+compiler::CompileInGraph<compiler::INPLACE_MODE>(runtimeIface, isDynamic, arch, std::move(taskRunner));
 ```
-bool success = true;
-task_runner.AddCallbackOnFail([&success](CompilerContext<RUNNER_MODE> &compiler_ctx) { 
-    success = false;
+
+`InPlaceCompilerTaskRunner::StartTask(...)` still exists, but current in-tree call sites usually call
+`CompileInGraph<compiler::INPLACE_MODE>(...)` or `CompileMethodLocked<compiler::INPLACE_MODE>(...)` directly.
+
+## Background Flow
+
+Current background orchestration lives in `runtime/compiler_task_manager_worker.cpp`.
+
+The runner type is `compiler::BackgroundCompilerTaskRunner` from `compiler/background_task_runner.h`. It is constructed
+with:
+
+- `taskmanager::TaskQueueInterface *`
+- the current compiler `Mutator *`
+- `RuntimeInterface *`
+
+The background context stores owned wrappers around:
+
+- `CompilerTask`
+- compiler thread (`Mutator`)
+- arena allocators
+- graph / pipeline state
+
+Typical current pattern:
+
+```cpp
+compiler::BackgroundCompilerTaskRunner taskRunner(queue, compilerThread.get(), runtimeIface);
+auto &taskCtx = taskRunner.GetContext();
+taskCtx.SetCompilerThread(std::move(compilerThread));
+taskCtx.SetCompilerTask(std::move(compilerTask));
+
+taskRunner.AddFinalize([this]([[maybe_unused]] compiler::BackgroundCompilerContext &taskContext) {
+    // In runtime/compiler_task_manager_worker.cpp this finalize callback pops the
+    // finished task from the deque and schedules the next queued compilation, if any.
 });
 
-compiler::Graph *graph = nullptr;
-task_runner.AddFinalize([&graph](CompilerContext<RUNNER_MODE> &compiler_ctx) {
-    graph = compiler_ctx.GetGraph();
-});
-```
-
-How to start compilation in-place:
-```
-compiler::InPlaceCompilerTaskRunner task_runner;
-
-Method *method = ...;
-bool is_osr = ...;
-ark::ArenaAllocator allocator;
-ark::ArenaAllocator graph_local_allocator;
-std::string method_name = ...;
-
-auto &task_ctx = task_runner.GetContext();
-task_ctx.SetMethod(method);
-task_ctx.SetOsr(is_osr);
-task_ctx.SetAllocator(&allocator);
-task_ctx.SetLocalAllocator(&graph_local_allocator);
-task_ctx.SetMethodName(method_name);
-
-bool compilation_result = true;
-task_runner.AddCallbackOnFail([&compilation_result] { compilation_result = false; });
-
-compiler::RuntimeInterface *runtime = ...;
-bool is_dynamic = ...;
-compiler::Arch arch = ...;
-
-auto inplace_task = [runtime, is_dynamic, arch](compiler::InPlaceTaskRunner runner) {
-    compiler::CompileInGraph<compiler::INPLACE_MODE>(runtime, is_dynamic, arch, std::move(runner));
+auto backgroundTask = [this](compiler::BackgroundCompilerTaskRunner runner) {
+    if (runner.GetContext().GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
+        compiler_->StartCompileMethod<compiler::BACKGROUND_MODE>(std::move(runner));
+        return;
+    }
+    compiler::BackgroundCompilerTaskRunner::EndTask(std::move(runner), false);
 };
-compiler::InPlaceTaskRunner::StartTask(std::move(task_runner), inplace_task);
 
-...
-
-if (compilation_result == true) {
-    ...
-} else {
-    ...
-}
+compiler::BackgroundCompilerTaskRunner::StartTask(std::move(taskRunner), std::move(backgroundTask));
 ```
 
-Note: the method `compiler::InPlaceTaskRunner::StartTask` has no effect and is used for compatibility with the background mode, so you can just call
-`compiler::CompileInGraph<compiler::INPLACE_MODE>;` instead of `compiler::InPlaceTaskRunner::StartTask`.
+`StartTask(...)` now queues work by wrapping the callback and setting the compiler thread on the runtime interface
+around task execution.
 
-The similar way for background mode:
-```
-taskmanager::TaskQueue task_manager_queue = ...;
-compiler::BackgroundCompilerContext::CompilerThread compiler_thread = ...;
-compiler::RuntimeInterface *runtime = ...;
+## What To Read Next
 
-compiler::BackgroundCompilerTaskRunner task_runner(task_manager_queue, compiler_thread.get(), runtime);
-
-compiler::BackgroundCompilerContext::CompilerTask compiler_task = ...;
-std::unique_ptr<ark::ArenaAllocator> allocator = ...;
-std::unique_ptr<ark::ArenaAllocator> graph_local_allocator = ...;
-std::string method_name = ...;
-
-auto &task_ctx = task_runner.GetContext();
-task_ctx.SetCompilerThread(std::move(compiler_thread));
-task_ctx.SetCompilerTask(std::move(compiler_task));
-task_ctx.SetAllocator(std::move(allocator));
-task_ctx.SetLocalAllocator(std::move(graph_local_allocator));
-task_ctx.SetMethodName(method_name);
-
-std::promise<bool> *compilation_result_promise = ...;
-std::future<bool> compilation_result_future = compilation_result_promise->get_future();
-
-task_runner.AddCallbackOnSuccess([compilation_result_promise] {
-    compilation_result_promise->set_value(true);
-});
-
-task_runner.AddCallbackOnFail([compilation_result_promise] {
-    compilation_result_promise->set_value(false);
-});
-
-bool is_dynamic = ...;
-compiler::Arch arch = ...;
-
-auto background_task = [runtime, is_dynamic, arch](compiler::BackgroundCompilerTaskRunner runner) {
-    compiler::CompileInGraph<compiler::BACKGROUND_MODE>(runtime, is_dynamic, arch, std::move(runner));
-};
-compiler::BackgroundCompilerTaskRunner::StartTask(std::move(task_runner), background_task);
-
-...
-
-compilation_result_future.wait();
-
-if (compilation_result_future.get() == true) {
-    ...
-} else {
-    ...
-}
-```
+- `compiler/inplace_task_runner.h` - current in-place context and `StartTask(...)`
+- `compiler/background_task_runner.h` - current background context, ownership model, and queue integration
+- `libarkbase/task_runner.h` - callback, finalize, and success/fail chaining semantics
+- `compiler/tools/paoc/paoc.cpp` - current offline in-place call site
+- `runtime/compiler_thread_pool_worker.cpp` - current synchronous runtime call site
+- `runtime/compiler_task_manager_worker.cpp` - current queued background call site

@@ -48,7 +48,9 @@ There are three main phases:
 **Building the Data Flow Graph**
 
 1. Get next basic block from the graph.
-2. If basic block is a loop header, create SafePoint and OsrSaveState instructions.
+2. If basic block is a loop header, create OSR-specific state only in OSR mode. `SaveStateOsr` is emitted for loop
+   headers that are valid OSR entries; `SafePoint` insertion depends on compiler options, and non-OSR paths may use
+   regular `SaveState` in preheaders/post-exits instead.
 3. Create phi instructions for the live registers.
 4. Get next bytecode instruction from the current basic block.
 5. Build the Panda IR instruction from the bytecode instruction:

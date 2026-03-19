@@ -217,6 +217,14 @@ function main(): int {
 - ANI (Ark Native Interface) native interface for FFI
 - Native layer provides: Intl (ICU4C integration), RegExp engine, Process management and other things like Reflect
 
+## Managed-First Performance Rule
+
+- Keep stdlib behavior in ETS by default; do not escalate an API to a C++ intrinsic or `irtoc` only because it is frequently called
+- Before proposing a native or `irtoc` implementation, check whether the ETS version is small enough to inline or whether a compiler or runtime fix would remove the need
+- `irtoc` is usually appropriate only for tiny hot constructors or helpers, or very small low-level sequences with measured benefits that ETS or C++ cannot lower well
+- If a large stdlib rewrite seems to need `irtoc` to be fast, escalate that as a compiler or runtime investigation rather than moving the logic blindly
+- For intrinsic or fastpath work that escapes stdlib code, follow `../compiler/AGENTS.md`, `../runtime/AGENTS.md`, and `../../../irtoc/AGENTS.md`
+
 ## Module-Specific Notes
 
 ### Concurrency (`std/concurrency/`)

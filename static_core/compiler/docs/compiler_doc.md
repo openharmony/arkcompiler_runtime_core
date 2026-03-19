@@ -1,9 +1,12 @@
 # Intro
 
-The ArkCompiler is used to compile methods into native code for faster execution.  
-At the input, the ArkCompiler receives the Ark Bytecode of a method, and at the output generates executable code for the target architecture.  
+The ArkCompiler is used to compile methods into native code for faster execution.
+At the input, the ArkCompiler receives the Ark Bytecode of a method, and at the output generates executable code for the
+target architecture.
 
-There are two main ArkCompiler modes: Just In Time(JIT) and Ahead Of Time(AOT).  
+Main production modes are Just In Time (JIT), On-Stack Replacement (OSR), and Ahead Of Time (AOT). Offline
+`ark_aot`-driven validation/build flows also support `--paoc-mode=jit`, `--paoc-mode=osr`, and optional LLVM AOT
+(`--paoc-mode=llvm`).
 
 ## Terminology
 
@@ -34,27 +37,47 @@ The main ArkCompiler options for the configuration of the compiler in JIT mode:
 | --no-async-jit | bool | false |  Perform compilation in the main thread or in parallel worker |
 
 The combination of options "--compiler-hotness-threshold=0 --no-async-jit=true" (named also force jit) allows you to compile all methods before calling them and execute the compiled code.  
-The --no-async-jit=true is testing option and it forcibly sets the type of GC STW, because the force jit incorrect works if an object can be moved.  
+The `--no-async-jit=true` path is a testing option. Runtime forces STW GC unless epsilon, because force-jit can trigger
+compilation from the c2i bridge and moving objects there is unsafe. Runtime also rejects `--no-async-jit=true` when AOT
+files are loaded.
+
+# OSR
+
+OSR (On-Stack Replacement) is loop-entry compilation for already running methods. The runtime may start in the
+interpreter and transfer control into compiled code at a loop header once the method becomes hot.
+
+Useful entry points and references:
+
+- runtime option `--compiler-enable-osr`
+- runtime logic in `runtime/osr.cpp`
+- interpreter trigger points in `runtime/interpreter/instruction_handler_base.h`
+- design note in `../../docs/on-stack-replacement.md`
+
+For offline validation without producing a normal `.an` file, `ark_aot --paoc-mode=osr` runs graph building,
+optimization, and OSR codegen checks.
 
 # AOT
 
-`ark_aot` tool aims to compile input panda files into the single AOT file that can be consumed by ArkRuntime.
+`ark_aot` compiles input panda files into AOT output that can be consumed by ArkRuntime.
 
-ark_aot has following options:
+This document is not the owner of `ark_aot` CLI coverage. For current paoc modes and option names, use:
 
-- `--panda-files` - list of input panda(.abc) files to be compiled
-- `--output` - path to the output AOT file (default is `out.an`)
-- `--location` - path where panda files are actually stored in the device
-- `--compiler-cross-arch` - target architecture: arm, arm64, x86, x86_64 (If the option is not set, then the architecture on which ark_aot is launched is taken.). Compiler option
+- `paoc.md`
+- `compiler/tools/paoc/paoc.yaml`
 
-ark_aot uses ArkRuntime inside, thus, runtime's options are also may be specified. 
-For example ark_aot uses the option `--boot-panda-files`  to specify the standard library(s)
+For runtime-visible `.an` loading behavior, use:
 
-To use the compiled file(.an), you need to pass the option `--aot-file=file.an` or/and `-aot-files=file1.an:file2.an:..:fileN.an` to `ark` cmdline.  
+- `../../docs/aot.md`
+- `runtime/options.yaml` for `--aot-file`, `--aot-files`, and `--enable-an`
 
-Also there is the option `--enable-an` - Try to load ARK .an file based on abc file location, include boot files.  
+# LLVM AOT and Offline Compiler Validation
 
-[full AOT documentation](../../doc/aot.md)  
+`ark_aot --paoc-mode=llvm` routes compatible graphs through the LLVM backend when the build enables it.
+
+`ark_aot --paoc-mode=jit` and `ark_aot --paoc-mode=osr` are useful when you need compiler pipeline validation without
+writing the usual `.an` output. They exercise graph building, optimization, and backend code generation for the offline
+JIT or OSR pipelines. Switch to `--paoc-mode=aot` or `--paoc-mode=llvm` when you need backend-specific AOT output
+instead of a dry-run validation pass.
 
 # Compiler options and hints
 
@@ -155,40 +178,13 @@ The option is used for compile one(or several) method(s), instead of all methods
 1. `--compiler-regex` - selects methods with fully-matched qualified name (i.e. 'Class::Method').
 2. `--compiler-regex-with-signature` - selects methods with fully-matched qualified name with signature (i.e. 'void Class::Method(f64)'). Useful for overloaded method.
 
-**How to add black method list on the device**
+For offline `ark_aot` method filtering, prefer the current paoc option:
 
-The list of functions on the device is stored in a JSON file, with the corresponding path: runtime_core/static_core/compiler/tools/paoc/static_aot_methods_black_list.json
+```bash
+--paoc-methods-from-file:path=<methods.txt>[,iswhite=true|false]
+```
 
-example:
-```
-{
-    "blackMethodList": [
-        {
-            "bundleName":"/system/framework/xxx.abc",
-            "type": "framework",
-            "methodLists": [
-                "Test:f1",
-                "Test:f2"
-            ],
-            "issue":"https://issue"
-        },
-        {
-            "bundleName":"bundlename1",
-            "type": "application",
-            "moduleLists": [
-                {
-                  "name": "moduleName1",
-                  "methodLists": [
-                    "Test:f1",
-                    "Test:f2"
-                  ]
-                }
-            ]
-            "issue":"https://issue"
-        }
-    ]
-}
-```
+Where `methods.txt` contains one fully qualified method name per line. Use `iswhite=false` for a blacklist.
 
 ## compiler-check-final
 
@@ -200,7 +196,7 @@ Also, if you add a test in AOT or force jit mode, and it takes a long time to ex
 
 ## compiler-log
 
-- `--compiler-log=OPT1:OPT2:..:OPTN` - print log for optimizations from the list, for enabling all logs set `all` : `--compiler-log=all`
+- `--compiler-log=OPT1,OPT2,..,OPTN` - print log for optimizations from the list, for enabling all logs set `all`: `--compiler-log=all`
 
 !NOTE compiler logs are enabled with runtime logs, so the options `--log-components=compiler --log-level=LEVEL` are necessary
 
@@ -229,10 +225,11 @@ examples:
 
 ## log-components
 
-The option `--log-components=COMPONENT1:COMPONENT2...COMPONENT_N` enables logging of various components. [full list of the runtime components](../../libarkbase/templates/logger.yaml)
+The option `--log-components=COMPONENT1:COMPONENT2...COMPONENT_N` enables logging of various components. The current
+option source of truth is [logger_options.yaml](../../libarkbase/utils/logger_options.yaml).
 
 - `compiler` - displays information about which methods are compiled and the result of compilation
-- `AOT` - displays information about which AOT files were found and for which methods the compiled code was found in the AOT files
+- `aot` - displays information about which AOT files were found and for which methods the compiled code was found in the AOT files
 - `interop` - shows information about the interaction of the compiler and runtime(exceptions in compiled code, deoptimizations from compiled code, e.t.c.)
 
 ## StackWalker
@@ -318,15 +315,18 @@ roots: REGISTER[11]=0x4432c0
 
 - [Documentation about compiler IR and optimizations](../../docs/ir_format.md)
 - [Documentation about AOT](../../docs/aot.md)
-- [Documentation about ark_aot tool](aot.md)
+- [Documentation about ark_aot tool](paoc.md)
 - [Documentation saving code information in comped code](../../docs/code_metainfo.md)
 - [Documentation about Cross-values](../../docs/cross-values.md)
 - [Documentation about Deoptimization](../../docs/deoptimization.md)
-- [Documentation about IrToc](../../docs/irtoc.md)
+- [Documentation about irtoc](../../docs/irtoc.md)
 - [Documentation about OSR](../../docs/on-stack-replacement.md)
 - [Documentation about FillSaveStateSuspendInputs pass](fill_savestate_suspend_inputs_doc.md)
 - [Documentation about Interaction of compiled code and the runtime](../../docs/runtime-compiled_code-interaction.md)
+- [Compiler documentation map](README.md)
+- [Compilation start](compilation_start.md)
 - [Codegen documentation](codegen_doc.md)
-- [Encoder documentation](.../optimizer/code_generator/encoder.md)
+- [SaveState Bridges optimization](bridges.md)
+- [Encoder documentation](../optimizer/code_generator/encoder.md)
 - [List of instructions with description](../optimizer/ir/instructions.yaml)  
 - [Compiler options](../compiler.yaml)

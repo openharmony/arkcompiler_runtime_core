@@ -108,6 +108,13 @@ See `ani/docs/ani.md` for ANI documentation.
 
 Weak reference and finalization support for ETS objects.
 
+## Compiler and irtoc Boundary
+
+- `ets_compiler_intrinsics.yaml` defines compiler-visible ETS intrinsic metadata, while `ets_entrypoints.yaml` and `entrypoints/` define the runtime-facing call surface
+- ETS fastpath bodies may live in `plugins/ets/irtoc_scripts/`; keep the metadata, runtime entrypoint, compiler lowering, and `irtoc` implementation aligned
+- Prefer ETS or C++ runtime implementations by default; use `irtoc` mainly for tiny hot constructors or helpers, or very small low-level sequences that need tighter ABI or instruction control
+- If an `irtoc` implementation grows large or carries substantial business logic, reconsider whether the logic belongs in ETS stdlib or C++ runtime code and treat the win as a sign of a compiler or runtime gap to investigate
+
 ## Build Commands
 
 See @../../../AGENTS.md
