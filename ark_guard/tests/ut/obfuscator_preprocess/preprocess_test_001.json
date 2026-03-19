@@ -7,7 +7,7 @@
     },
     "ClassA": {
       "#obfName": "c",
-      "%%property-field1": "a",
+      "field1": "a",
       "%%get-field1:preprocess_test_001.ClassA;i32;": "a",
       "%%set-field1:preprocess_test_001.ClassA;i32;void;": "a",
       "foo1:preprocess_test_001.ClassA;void;": "a"
@@ -18,7 +18,7 @@
     },
     "Interface1": {
       "#obfName": "a",
-      "%%property-field1": "a",
+      "field1": "a",
       "%%get-field1:preprocess_test_001.Interface1;i32;": "a",
       "%%set-field1:preprocess_test_001.Interface1;i32;void;": "a",
       "foo1:preprocess_test_001.Interface1;void;": "a"

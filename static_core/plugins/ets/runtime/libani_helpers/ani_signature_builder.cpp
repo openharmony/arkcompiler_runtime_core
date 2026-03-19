@@ -373,7 +373,7 @@ std::string Builder::BuildGetterName(std::string_view name)
 
 std::string Builder::BuildPropertyName(std::string_view name)
 {
-    return GetPropertyNamePrefix() + std::string(name);
+    return std::string(name);
 }
 
 std::string Builder::Builder::BuildPartialName(std::string_view name)
@@ -394,11 +394,6 @@ std::string Builder::GetSetterNamePrefix()
 std::string Builder::GetGetterNamePrefix()
 {
     return "%%get-";
-}
-
-std::string Builder::GetPropertyNamePrefix()
-{
-    return "%%property-";
 }
 
 std::string Builder::GetPartialNamePrefix()

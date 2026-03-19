@@ -560,11 +560,11 @@ HWTEST_F(TestSetName, interface_set_name_001, TestSize.Level0)
  */
 HWTEST_F(TestSetName, interface_field_set_name_001, TestSize.Level0)
 {
-    const auto field = fileView.Get<abckit_wrapper::Field>("set_name_test.Interface4.%%property-field1");
+    const auto field = fileView.Get<abckit_wrapper::Field>("set_name_test.Interface4.field1");
     ASSERT_TRUE(field.has_value());
 
     ASSERT_TRUE(field.value()->SetName("a"));
-    ASSERT_EQ(field.value()->GetName(), "%%property-a");
+    ASSERT_EQ(field.value()->GetName(), "a");
 }
 
 /**
@@ -690,23 +690,18 @@ HWTEST_F(TestSetName, field_set_name_with_signature_001, TestSize.Level0)
  */
 HWTEST_F(TestSetName, field_set_name_with_signature_002, TestSize.Level0)
 {
-    // Get field object containing %%property- prefix
-    auto field = fileView.Get<abckit_wrapper::Field>("set_name_test.Interface4.%%property-field1");
+    auto field = fileView.Get<abckit_wrapper::Field>("set_name_test.Interface4.field1");
     ASSERT_TRUE(field.has_value());
 
-    // Verify initial state (contains %%property- prefix)
-    EXPECT_EQ(field.value()->GetName(), "%%property-field1");
+    EXPECT_EQ(field.value()->GetName(), "field1");
     EXPECT_EQ(field.value()->GetRawName(), "field1");
 
-    // Set new name and verify InitSignature() prefix handling logic
     ASSERT_TRUE(field.value()->SetName("updatedPropertyField"));
 
-    // Verify name update (InitSignature() should correctly handle prefix)
-    EXPECT_EQ(field.value()->GetName(), "%%property-updatedPropertyField");
+    EXPECT_EQ(field.value()->GetName(), "updatedPropertyField");
     EXPECT_EQ(field.value()->GetRawName(), "updatedPropertyField");
 
-    // Verify FQN also correctly updated
-    EXPECT_EQ(field.value()->GetFullyQualifiedName(), "set_name_test.Interface4.%%property-updatedPropertyField");
+    EXPECT_EQ(field.value()->GetFullyQualifiedName(), "set_name_test.Interface4.updatedPropertyField");
 }
 
 /**

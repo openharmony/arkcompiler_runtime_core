@@ -120,7 +120,6 @@ public:
     static std::string BuildAsyncName(std::string_view name);
     static std::string GetSetterNamePrefix();
     static std::string GetGetterNamePrefix();
-    static std::string GetPropertyNamePrefix();
     static std::string GetPartialNamePrefix();
     static std::string GetAsyncNamePrefix();
     static std::string GetLambdaPrefix();

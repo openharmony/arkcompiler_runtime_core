@@ -539,7 +539,7 @@ static void TransformMethodClassFieldCtorModify(AbckitFile *file, AbckitCoreFunc
 
     std::string moduleName = "fields_static";
     std::string className("C5");
-    std::string paramName("%%property-i2F1");
+    std::string paramName("i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
     callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER);
@@ -561,7 +561,7 @@ static void TransformMethodClassFieldGetModify(AbckitFile *file, AbckitCoreFunct
 
     std::string moduleName = "fields_static";
     std::string className("C5");
-    std::string paramName("%%property-i2F1");
+    std::string paramName("i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
     auto *newLdOwn = g_statG->iCreateLoadObject(graph, param, newKeyString, ABCKIT_TYPE_ID_REFERENCE);
@@ -596,7 +596,7 @@ static void TransformMethodClassFieldSetModify(AbckitFile *file, AbckitCoreFunct
 
     std::string moduleName = "fields_static";
     std::string className("C5");
-    std::string paramName("%%property-i2F1");
+    std::string paramName("i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
 
@@ -644,13 +644,14 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetType)
 
     std::string moduleName = "fields_static";
     std::string interfaceNames("I2");
-    std::string paramNames("%%property-i2F1");
+    std::string paramNames("i2F1");
     auto cif = GetAbckitCoreInterfaceField(file, moduleName, interfaceNames, paramNames);
     ASSERT_NE(cif, nullptr);
     ASSERT_EQ(g_implI->typeGetTypeId(g_implI->interfaceFieldGetType(cif)), AbckitTypeId::ABCKIT_TYPE_ID_F64);
 
     std::string className("C5");  // implement class
-    auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramNames);
+    std::string classFieldName("i2F1");
+    auto ccf = GetAbckitCoreClassField(file, moduleName, className, classFieldName);
     ASSERT_NE(ccf, nullptr);
 
     InterfaceFieldSetTypeForClassModify(file, g_implI->classFieldGetClass(ccf));
@@ -736,12 +737,12 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetName)
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
     std::string moduleName = "fields_static";
     std::string interfaceNames("I1");
-    std::string paramNames("%%property-i1F1");
+    std::string paramNames("i1F1");
     auto cif = GetAbckitCoreInterfaceField(file, moduleName, interfaceNames, paramNames);
     ASSERT_NE(cif, nullptr);
     ASSERT_STREQ(g_implI->abckitStringToString(g_implI->interfaceFieldGetName(cif)), paramNames.c_str());
 
-    std::string newParamNames("%%property-i1NewField");
+    std::string newParamNames("i1NewField");
     std::string cropNewParamNames("i1NewField");
     auto arkInterfaceField = g_implArkI->coreInterfaceFieldToArktsInterfaceField(cif);
     bool ret = g_implArkM->interfaceFieldSetName(arkInterfaceField, cropNewParamNames.c_str());
@@ -749,15 +750,16 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetName)
     ASSERT_EQ(helpers::AbckitStringToString(g_implI->interfaceFieldGetName(cif)), newParamNames.c_str());
 
     std::string implementClassName("C4");
-    auto ccf = GetAbckitCoreClassField(file, moduleName, implementClassName, paramNames);
+    std::string classFieldOldName("i1F1");
+    auto ccf = GetAbckitCoreClassField(file, moduleName, implementClassName, classFieldOldName);
     ASSERT_NE(ccf, nullptr);
     ASSERT_NE(g_implI->classFieldGetName(ccf), nullptr);
-    ASSERT_STREQ(g_implI->abckitStringToString(g_implI->classFieldGetName(ccf)), paramNames.c_str());
+    ASSERT_STREQ(g_implI->abckitStringToString(g_implI->classFieldGetName(ccf)), classFieldOldName.c_str());
 
     auto arkClassField = g_implArkI->coreClassFieldToArktsClassField(ccf);
-    bool ret2 = g_implArkM->classFieldSetName(arkClassField, newParamNames.c_str());
+    bool ret2 = g_implArkM->classFieldSetName(arkClassField, cropNewParamNames.c_str());
     ASSERT_EQ(ret2, true);
-    ASSERT_EQ(helpers::AbckitStringToString(g_implI->classFieldGetName(ccf)), newParamNames.c_str());
+    ASSERT_EQ(helpers::AbckitStringToString(g_implI->classFieldGetName(ccf)), cropNewParamNames.c_str());
 
     std::string outputPath = MODIFY_TEST_ABC_PATH;
     // Write output

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,7 +119,7 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceAddFieldTest0)
             (*ctx).emplace_back(filedName);
             return true;
         });
-    std::vector<std::string> testFileds = {"%%property-newInterfaceField", "%%property-key"};
+    std::vector<std::string> testFileds = {"newInterfaceField", "key"};
     ASSERT_EQ(FieldNames, testFileds);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

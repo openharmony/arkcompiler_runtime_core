@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,11 +169,11 @@ HWTEST_F(TestFileView, fileView_class_003, TestSize.Level0)
 {
     ValidateModuleObject<abckit_wrapper::Field>("ClassA.sField1");
     ValidateModuleObject<abckit_wrapper::Field>("ClassA.field1");
-    ValidateModuleObject<abckit_wrapper::Field>("ClassA.%%property-iField1");
+    ValidateModuleObject<abckit_wrapper::Field>("ClassA.iField1");
 
     ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.sField2");
     ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.field2");
-    ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.%%property-iField2");
+    ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.iField2");
 }
 
 /**
@@ -208,11 +208,11 @@ HWTEST_F(TestFileView, fileView_class_005, TestSize.Level0)
 {
     AssertSignatureEqual<abckit_wrapper::Field>("ClassA.sField1", "sField1", "");
     AssertSignatureEqual<abckit_wrapper::Field>("ClassA.field1", "field1", "");
-    AssertSignatureEqual<abckit_wrapper::Field>("ClassA.%%property-iField1", "iField1", "");
+    AssertSignatureEqual<abckit_wrapper::Field>("ClassA.iField1", "iField1", "");
 
     AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.sField2", "sField2", "");
     AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.field2", "field2", "");
-    AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.%%property-iField2", "iField2", "");
+    AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.iField2", "iField2", "");
 }
 
 /**
@@ -247,8 +247,8 @@ HWTEST_F(TestFileView, fileView_interface_002, TestSize.Level0)
  */
 HWTEST_F(TestFileView, fileView_interface_003, TestSize.Level0)
 {
-    ValidateModuleObject<abckit_wrapper::Field>("Interface1.%%property-iField1");
-    ValidateModuleObject<abckit_wrapper::Field>("Ns1.Interface2.%%property-iField2");
+    ValidateModuleObject<abckit_wrapper::Field>("Interface1.iField1");
+    ValidateModuleObject<abckit_wrapper::Field>("Ns1.Interface2.iField2");
 }
 
 /**

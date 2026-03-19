@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFieldsStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"f1", "f2", "%%property-i1F1"};
+    std::set<std::string> expectFieldNames = {"f1", "f2", "i1F1"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
