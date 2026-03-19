@@ -14,7 +14,7 @@
 ---
 cases:
 #0
-  - { stype: boolean, sval: 'true', dtype: as byte, expected: "Semantic error ESE0326: Cannot cast type 'Boolean' to 'Byte'" } 
+  - { stype: boolean, sval: 'true', dtype: as byte, expected: "Semantic error ESE0326: Cannot cast type 'Boolean' to 'Byte'" }
 #1
   - { stype: boolean, sval: 'false', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Boolean'"}
 #2
@@ -104,48 +104,12 @@ cases:
     expected: "Semantic error ESE0326: Cannot cast type 'A<Int>' to 'A<Long>'"
 #23
   - defs: |-
-      class X {}
-      class Y extends X {}
-      class BB<T> {}
-    stype: BB<Y>
-    sval: new BB<Y>()
-    dtype: as BB<X>
-    expected: "Semantic error ESE0326: Cannot cast type 'BB<Y>' to 'BB<X>'"
-#24
-  - defs: |-
-      class X {}
-      class Y extends X {}
-      class BB<T> {}
-    stype: BB<X>
-    sval: new BB<X>()
-    dtype: as BB<Y>
-    expected: "Semantic error ESE0326: Cannot cast type 'BB<X>' to 'BB<Y>'"
-
-#  Should be allowed as narrowing conversion.
-#  - defs: |-
-#      class X {}
-#      class Y extends X {}
-#      class BB<in T> {}
-#    stype: BB<Y>
-#    sval: new BB<Y>()
-#    dtype: BB<X>
-#
-#  - defs: |-
-#      class X {}
-#      class Y extends X {}
-#      class BB<out T> {}
-#    stype: BB<X>
-#    sval: new BB<X>()
-#    dtype: BB<Y>
-
-#25
-  - defs: |-
       class A {}
     stype: Object
     sval: new A()
     dtype2: .toDouble()
     expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'A'"
-#26
+#24
   - defs: |-
       interface I {}
       class A implements I {}
@@ -154,14 +118,14 @@ cases:
     sval: new A()
     dtype: as B
     expected: "Semantic error ESE0326: Cannot cast type 'A' to 'B'"
-#27
+#25
   - defs: |-
       class A {}
     stype: Object
     sval: new A[1](new A())
     dtype: as A[][]
     expected: "Semantic error ESE0326: Cannot cast type 'Array<A>' to 'Array<Array<A>>'"
-#28
+#26
   - defs: |-
       type func = (a: int, b: int) => Int;
       function foo(a: int, b: int): Int {

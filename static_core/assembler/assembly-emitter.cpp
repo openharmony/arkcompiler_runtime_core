@@ -1308,7 +1308,7 @@ bool AsmEmitter::HandleFunctionLocalVariables(ItemContainer *items, const Functi
             return false;
         }
         if (v.signature.empty()) {
-            SetLastError("Function '" + name + "' has an empty local variable signature");
+            SetLastError("Function '" + name + "' has an empty local variable '" + v.name + "' signature");
             return false;
         }
         items->GetOrCreateStringItem(v.name);

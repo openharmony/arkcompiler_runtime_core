@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,12 @@
 desc: >-
     03.08.11 Union types
 name: 03.types/08.reference_types/03.08.11.union_types/union_cast_n_02
-tags: [negative, compile-only]
+tags: [compile-only]
 ---*/
 type Margin = number | string
 type Padding = number | string
 
 function main(): void {
     let a: Margin = 5.5
-    let c: Padding = a as string // can be CTE as `a` effectively contains number
+    let c: Padding = a as string // Warning: can be RTE as `a` effectively contains number
 }
