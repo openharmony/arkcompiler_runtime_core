@@ -1152,8 +1152,8 @@ extern "C" NO_ADDRESS_SANITIZE void ClassCastExceptionEntrypoint(Class *instClas
     BEGIN_ENTRYPOINT();
     LOG(DEBUG, INTEROP) << "ClassCastExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-    ASSERT(srcObj != nullptr);
-    ThrowClassCastException(instClass, srcObj->ClassAddr<Class>());
+    Class *objKlass = srcObj == nullptr ? nullptr : srcObj->ClassAddr<Class>();
+    ThrowClassCastException(instClass, objKlass);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -1713,6 +1713,13 @@ extern "C" void ThrowNullPointerExceptionFromInterpreter()
     CHECK_STACK_WALKER;
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     interpreter::RuntimeInterface::ThrowNullPointerException();
+}
+
+extern "C" void ThrowClassCastExceptionFromInterpreter(Class *klass)
+{
+    CHECK_STACK_WALKER;
+    ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
+    interpreter::RuntimeInterface::ThrowClassCastException(klass, nullptr);
 }
 
 extern "C" void ThrowNegativeArraySizeExceptionFromInterpreter(int32_t size)

@@ -357,6 +357,7 @@ private:
     Inst *BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, uint32_t typeId,
                                Inst *storeInput, Inst *saveState);
     virtual void BuildCheckCast(const BytecodeInstruction *bcInst);
+    virtual void BuildCheckCastNonnull(const BytecodeInstruction *bcInst);
     virtual void BuildIsInstance(const BytecodeInstruction *bcInst);
     Inst *BuildLoadClass(RuntimeInterface::IdType typeId, size_t pc, Inst *saveState);
     virtual void BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Type type);

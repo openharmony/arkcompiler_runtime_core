@@ -145,6 +145,7 @@ AbckitInst *IcreateLenArrayStatic(AbckitGraph *graph, AbckitInst *arr);
 AbckitInst *IcreateLoadConstArrayStatic(AbckitGraph *graph, AbckitLiteralArray *literalArray);
 
 AbckitInst *IcreateCheckCastStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType);
+AbckitInst *IcreateCheckCastNonnullStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType);
 AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType);
 AbckitInst *IcreateLoadNullValueStatic(AbckitGraph *graph);
 AbckitInst *IcreateCastStatic(AbckitGraph *graph, AbckitInst *input0, AbckitTypeId targetTypeId);

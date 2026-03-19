@@ -44,6 +44,11 @@ If an object in input can't be cast to the resolved type `CheckCast` is replaced
     lda.obj v0
     checkcast A // will removed
     checkcast C // will replaced by deoptimze
+...
+    newobj v0, B
+    lda.obj v0
+    checkcast.nonnull A // will be removed
+    checkcast.nonnull C // will be replaced by deoptimization
 ```
 
 ## Links
@@ -54,3 +59,4 @@ Source code:
 Tests:
 [isinstance_elimination_test.cpp](../../tests/checked/isinstance_elimination_test.pa)
 [checkcast_elimination_test.cpp](../../tests/checked/checkcast_elimination_test.pa)
+[checkcast_nonnull_elimination_test.cpp](../../tests/checked/checkcast_nonnull_elimination_test.pa)

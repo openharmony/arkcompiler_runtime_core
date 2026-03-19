@@ -2206,6 +2206,26 @@ AbckitInst *IcreateCheckCastStatic(AbckitGraph *graph, AbckitInst *inputObj, Abc
     return CreateInstFromImpl(graph, intrImpl);
 }
 
+AbckitInst *IcreateCheckCastNonnullStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (targetType->id != AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE || targetType->GetClass() == nullptr) {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    auto intrinsicId = compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_CHECK_CAST_NONNULL;
+    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::REFERENCE, 0, intrinsicId);
+    size_t argsCount {1U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(inputObj->impl, inputObj->impl->GetType());
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetClassOffset(graph, targetType->GetClass()));
+
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
 AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
 {
     LIBABCKIT_LOG_FUNC;

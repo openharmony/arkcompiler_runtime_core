@@ -366,6 +366,11 @@ public:
     {
         return true;
     }
+
+    const char *GetNullPtrName() const override
+    {
+        return "undefined";
+    }
 };
 
 }  // namespace ark::ets

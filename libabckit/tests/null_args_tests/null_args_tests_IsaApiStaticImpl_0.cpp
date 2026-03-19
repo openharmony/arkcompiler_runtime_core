@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,6 +109,13 @@ TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateCast)
 TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateCheckCast)
 {
     helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateCheckCast);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCheckCastNonnull,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateCheckCastNonnull)
+{
+    helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateCheckCastNonnull);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp,

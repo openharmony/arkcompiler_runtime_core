@@ -521,6 +521,7 @@ test_ets_files = [
   "ut/isa/isa_static/arrays/len_array",
   "ut/isa/isa_static/cast/cast_static",
   "ut/isa/isa_static/cast/checkcast_static",
+  "ut/isa/isa_static/cast/checkcast_nonnull_static",
   "ut/isa/isa_static/cast/target_type_static",
   "ut/isa/isa_static/call/call_static_static",
   "ut/isa/isa_static/call/call_virtual_static",

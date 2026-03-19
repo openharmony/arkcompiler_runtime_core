@@ -3790,6 +3790,55 @@ TEST(parsertests, type_id_tests_checkcast)
     }
 }
 
+TEST(parsertests, type_id_tests_checkcast_nonnull)
+{
+    {
+        Parser p;
+        std::string source = R"(
+            .function void f() {
+                checkcast.nonnull a
+            }
+        )";
+
+        auto res = p.Parse(source);
+
+        Error e = p.ShowError();
+
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
+    }
+
+    {
+        Parser p;
+        std::string source = R"(
+            .function void f() {
+                checkcast.nonnull a[]
+            }
+        )";
+
+        auto res = p.Parse(source);
+
+        Error e = p.ShowError();
+
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
+    }
+
+    {
+        Parser p;
+        std::string source = R"(
+            .record a {}
+            .function void f() {
+                checkcast.nonnull a
+            }
+        )";
+
+        auto res = p.Parse(source);
+
+        Error e = p.ShowError();
+
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
+    }
+}
+
 TEST(parsertests, type_id_tests_isinstance)
 {
     {

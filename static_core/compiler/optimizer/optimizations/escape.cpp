@@ -579,7 +579,8 @@ static DeoptimizeType GetDeoptType(Inst *deopt)
     DeoptimizeType deoptType;
     switch (deopt->GetOpcode()) {
         case Opcode::NullCheck:
-            deoptType = DeoptimizeType::NULL_CHECK;
+            deoptType = deopt->CastToNullCheck()->GetIsClassCastCheck() ? DeoptimizeType::CHECK_CAST
+                                                                        : DeoptimizeType::NULL_CHECK;
             break;
         case Opcode::DeoptimizeIf:
             deoptType = deopt->CastToDeoptimizeIf()->GetDeoptimizeType();

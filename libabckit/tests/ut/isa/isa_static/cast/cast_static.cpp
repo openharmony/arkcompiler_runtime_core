@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,24 @@ void TransformCheckCastIr(AbckitGraph *graph, AbckitFile *file, AbckitCoreClass 
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *checkCast = g_statG->iCreateCheckCast(graph, initObj, type);
+    ASSERT_NE(checkCast, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(checkCast, initObj);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+void TransformCheckCastNonnullIr(AbckitGraph *graph, AbckitFile *file, AbckitCoreClass *classA)
+{
+    AbckitInst *initObj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT);
+    ASSERT_NE(initObj, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto *type = g_implM->createReferenceType(file, classA);
+    ASSERT_NE(type, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    AbckitInst *checkCast = g_statG->iCreateCheckCastNonnull(graph, initObj, type);
     ASSERT_NE(checkCast, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -125,6 +143,38 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCheckCast)
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cast/checkcast_static_modified.abc",
                                             "checkcast_static", "main");
+    EXPECT_TRUE(helpers::Match(output, ""));
+}
+
+TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCheckCastNonnull)
+{
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/cast/checkcast_nonnull_static.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/cast/checkcast_nonnull_static_modified.abc", "main",
+        []([[maybe_unused]] AbckitFile *file, [[maybe_unused]] AbckitCoreFunction *method,
+           [[maybe_unused]] AbckitGraph *graph) {
+            auto *module = g_implI->functionGetModule(method);
+            helpers::ClassByNameContext classCtxFinder = {nullptr, "A"};
+            g_implI->moduleEnumerateClasses(module, &classCtxFinder, helpers::ClassByNameFinder);
+            ASSERT_NE(classCtxFinder.klass, nullptr);
+            TransformCheckCastNonnullIr(graph, file, classCtxFinder.klass);
+        },
+        [](AbckitGraph *graph) {
+            helpers::BBSchema<AbckitIsaApiStaticOpcode> bb1({{}, {1}, {{}}});
+            std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts({
+                {0, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {}},
+                {2, ABCKIT_ISA_API_STATIC_OPCODE_CHECKCASTNONNULL, {0}},
+                {1, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID, {}},
+            });
+            helpers::BBSchema<AbckitIsaApiStaticOpcode> bb2({{0}, {2}, insts});
+            helpers::BBSchema<AbckitIsaApiStaticOpcode> bb3({{1}, {}, {}});
+            std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> bbSchemas({bb1, bb2, bb3});
+            helpers::VerifyGraph(graph, bbSchemas);
+        });
+
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cast/checkcast_nonnull_static_modified.abc",
+                                  "checkcast_nonnull_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 }
 

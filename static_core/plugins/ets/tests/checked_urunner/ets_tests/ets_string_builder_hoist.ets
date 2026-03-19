@@ -23,9 +23,9 @@
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
-//! INST        /Load.*std\.core\.StringBuilder/
-//! INST_NEXT   /NewObject/
-//! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
+//! INST_NOT    /Load.*std\.core\.StringBuilder/
+//! INST_NOT    /NewObject/
+//! INST_NOT    /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 
@@ -37,9 +37,9 @@
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
-//! INST        /LoadImmediate/
-//! INST_NEXT   /NewObject/
-//! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
+//! INST_NOT    /LoadImmediate/
+//! INST_NOT    /NewObject/
+//! INST_NOT    /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 function willHoist1() {

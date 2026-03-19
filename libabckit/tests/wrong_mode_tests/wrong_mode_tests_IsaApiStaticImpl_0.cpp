@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,13 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateCast)
 TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateCheckCast)
 {
     helpers_mode::TestMode(g_isaApiStaticImp->iCreateCheckCast, false);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCheckCastNonnull,
+// abc-kind=NoABC, category=negative-mode, extension=c
+TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateCheckCastNonnull)
+{
+    helpers_mode::TestMode(g_isaApiStaticImp->iCreateCheckCastNonnull, false);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp,

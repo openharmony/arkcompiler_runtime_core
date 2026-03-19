@@ -295,7 +295,11 @@ templates:
   lenarr: |-
     BuildLenArray(instruction);
   checkcast: |-
-    BuildCheckCast(instruction);
+    % if inst.mnemonic.include? "nonnull"
+      BuildCheckCastNonnull(instruction);
+    % else
+      BuildCheckCast(instruction);
+    % end
   isinstance: |-
     BuildIsInstance(instruction);
   throw: |-

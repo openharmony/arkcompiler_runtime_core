@@ -120,6 +120,7 @@ static int GetLiteralArrayIdOperandIndexStatic(AbckitIsaApiStaticOpcode opcode)
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY:
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWOBJECT:
         case ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST:
+        case ABCKIT_ISA_API_STATIC_OPCODE_CHECKCASTNONNULL:
         case ABCKIT_ISA_API_STATIC_OPCODE_ISINSTANCE:
             return true;
         default:
@@ -134,6 +135,7 @@ static int GetLiteralArrayIdOperandIndexStatic(AbckitIsaApiStaticOpcode opcode)
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY:
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWOBJECT:
         case ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST:
+        case ABCKIT_ISA_API_STATIC_OPCODE_CHECKCASTNONNULL:
         case ABCKIT_ISA_API_STATIC_OPCODE_ISINSTANCE:
             return 0;
         default:

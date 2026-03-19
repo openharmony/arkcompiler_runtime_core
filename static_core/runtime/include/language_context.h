@@ -308,6 +308,11 @@ public:
     {
         return false;
     }
+
+    virtual const char *GetNullPtrName() const
+    {
+        return "null";
+    }
 };
 
 class LanguageContext {
@@ -706,6 +711,11 @@ public:
     bool HasValueEqualitySemantic() const
     {
         return base_->HasValueEqualitySemantic();
+    }
+
+    const char *GetNullPtrName() const
+    {
+        return base_->GetNullPtrName();
     }
 
 private:

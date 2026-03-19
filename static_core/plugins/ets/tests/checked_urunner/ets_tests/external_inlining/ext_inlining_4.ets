@@ -121,7 +121,6 @@ function main3(): int {
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main4,ext_funcs_3.ETSGLOBAL::sumArray,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
 //!            entry: "ext_inlining_4.ETSGLOBAL::main4"
-//! EVENT      /DeoptimizationReason,ext_funcs_3.ETSGLOBAL::sumArray,BOUNDS_CHECK_WITH_DEOPT/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main4,.*,IFRAME/
 //! METHOD     "ext_inlining_4.ETSGLOBAL::main4"
 //! PASS_BEFORE "Inline"

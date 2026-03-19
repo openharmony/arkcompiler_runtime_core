@@ -2639,6 +2639,31 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleCheckcastNonnull()
+    {
+        auto typeId = this->GetInst().template GetId<FORMAT>();
+
+        LOG_INST() << "checkcast.nonnull " << std::hex << "0x" << typeId;
+
+        Class *type = ResolveType(typeId);
+        if (LIKELY(type != nullptr)) {
+            ObjectHeader *obj = this->GetAcc().GetReference();
+
+            if (UNLIKELY(obj == nullptr)) {
+                RuntimeIfaceT::ThrowClassCastException(type, nullptr);
+                this->MoveToExceptionHandler();
+            } else if (UNLIKELY(!type->IsAssignableFrom(obj->ClassAddr<Class>()))) {
+                RuntimeIfaceT::ThrowClassCastException(type, obj->ClassAddr<Class>());
+                this->MoveToExceptionHandler();
+            } else {
+                this->template MoveToNextInst<FORMAT, true>();
+            }
+        } else {
+            this->MoveToExceptionHandler();
+        }
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleIsinstance()
     {
         auto typeId = this->GetInst().template GetId<FORMAT>();

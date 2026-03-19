@@ -2173,6 +2173,64 @@ TEST_F(InterpreterTest, TestCheckCast)
 }  // namespace
 
 namespace {
+std::unique_ptr<BytecodeEmitter> EmitterFactoryCastNonnull()
+{
+    auto emitter = std::make_unique<BytecodeEmitter>();
+    emitter->CheckcastNonnull(RuntimeInterface::TYPE_ID.AsIndex());
+    emitter->ReturnVoid();
+    return emitter;
+}
+
+TEST_F(InterpreterTest, TestCheckCastNonnull)
+{
+    auto emitter = EmitterFactoryCastNonnull();
+    auto source = R"(
+        .record A {}
+        .record B <extends=A> {}
+        .record C <extends=B> {}
+    )";
+    std::vector<uint8_t> bytecode;
+    ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
+
+    auto f = CreateFrame(16U, nullptr, nullptr);
+    InitializeFrame(f.get());
+    auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto methodData = CreateMethod(cls, f.get(), bytecode);
+    auto method = std::move(methodData.first);
+    f->SetMethod(method.get());
+
+    bool failed = false;
+    auto classLinker = AddProgramToClassLinker(source, failed);
+    ASSERT_FALSE(failed);
+
+    {
+        auto objectClass = InitObjectClass(classLinker.get(), GetClassDescriptor("C"), failed);
+        ASSERT_FALSE(failed);
+
+        auto *obj = AllocObject(objectClass);
+        f->GetAccAsVReg().SetReference(obj);
+
+        auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetClassDescriptor("A")));
+        Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
+        RuntimeInterface::SetupResolvedClass(nullptr);
+    }
+    {
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("C", 2_I), failed);
+        ASSERT_FALSE(failed);
+
+        auto *obj = AllocArray(objectClass, sizeof(uint8_t), 0);
+        f->GetAccAsVReg().SetReference(obj);
+
+        auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("A", 2_I)));
+        Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
+        RuntimeInterface::SetupResolvedClass(nullptr);
+    }
+}
+}  // namespace
+
+namespace {
 
 std::unique_ptr<BytecodeEmitter> EmitterFactoryIsInstance()
 {

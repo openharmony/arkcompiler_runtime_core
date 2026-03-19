@@ -45,18 +45,18 @@
 //! INST_COUNT  /LenArray/,4
 //! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /StringBuilder::<ctor>/,1
-//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
-//! INST_COUNT  /LenArray/,2
-//! INST        /LoadObject \d+ std.core.StringBuilder.length/
+//! INST_COUNT  /StringBuilder::<ctor>/,2
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT  /LenArray/,4
+//! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation01"
 //! PASS_AFTER  "OptimizeStringConcat"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /StringBuilder::<ctor>/,1
-//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT  /StringBuilder::<ctor>/,2
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,2
 //!
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 

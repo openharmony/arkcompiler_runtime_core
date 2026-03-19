@@ -3092,6 +3092,67 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleCheckcastNonnull()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        Type cachedType = GetCachedType();
+        if (!CheckCastArrayObjectRegDef(cachedType)) {
+            return false;
+        }
+        auto accType = GetAccType();
+        if (!CheckCastRefArrayType(accType)) {
+            return false;
+        }
+
+        if (IsSubtype(accType, nullRefType_, GetTypeSystem())) {
+            LOG_VERIFIER_ACCUMULATOR_ALWAYS_NULL();
+            SET_STATUS_FOR_MSG(AccumulatorAlwaysNull, OK);
+            // null is not accepted by checkcast.nonnull
+            status_ = VerificationStatus::WARNING;
+            MoveToNextInst<FORMAT>();
+            return true;
+        }
+
+        if (IsSubtype(accType, cachedType, GetTypeSystem())) {
+            LOG_VERIFIER_REDUNDANT_CHECK_CAST(ToString(accType), ToString(cachedType));
+            SET_STATUS_FOR_MSG(RedundantCheckCast, OK);
+            // Do not update register type to parent type as we loose details and can get errors on further flow
+            MoveToNextInst<FORMAT>();
+            return true;
+        }
+
+        if (IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+            auto eltType = cachedType.GetArrayElementType(GetTypeSystem());
+            if (!IsSubtype(accType, arrayType_, GetTypeSystem()) && !IsSubtype(cachedType, accType, GetTypeSystem())) {
+                LOG_VERIFIER_IMPOSSIBLE_CHECK_CAST(ToString(accType));
+                status_ = VerificationStatus::WARNING;
+            } else if (IsSubtype(accType, arrayType_, GetTypeSystem())) {
+                auto accEltType = accType.GetArrayElementType(GetTypeSystem());
+                if (accEltType.IsConsistent() && !IsSubtype(accEltType, eltType, GetTypeSystem()) &&
+                    !IsSubtype(eltType, accEltType, GetTypeSystem())) {
+                    LOG_VERIFIER_IMPOSSIBLE_ARRAY_CHECK_CAST(ToString(accEltType));
+                    SET_STATUS_FOR_MSG(ImpossibleArrayCheckCast, OK);
+                }
+            }
+        } else if (TpIntersection(cachedType, accType, GetTypeSystem()) == bot_) {
+            LOG_VERIFIER_INCOMPATIBLE_ACCUMULATOR_TYPE(ToString(accType));
+            SET_STATUS_FOR_MSG(IncompatibleAccumulatorType, OK);
+        }
+
+        if (status_ == VerificationStatus::ERROR) {
+            SetAcc(top_);
+            return false;
+        }
+
+        SetAccAndOthersOfSameOrigin(TpIntersection(cachedType, accType, GetTypeSystem()));
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleIsinstance()
     {
         LOG_INST();

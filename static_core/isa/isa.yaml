@@ -2991,6 +2991,34 @@ groups:
         opcode_idx: [0xa5]
         properties: [float, dynamic]
 
+  - title: Check cast non-null
+    description: >
+      Resolve object type by specified id; if an object in accumulator can be
+      cast to the resolved type, then the accumulator content remains unchanged.
+      Otherwise, ClassCastException is thrown.
+      Object of type O can be cast to type T if O is the same as T or is a
+      subtype of T. For arrays, O can be cast to T if T is a root type in type
+      hierarchy, or array elements of T and O are the same, or O is a subtype
+      of a T array element.
+      'null' object reference is always rejected.
+    verification:
+      - type_id_any_object
+      - acc_obj_or_null
+    exceptions:
+      - x_cast
+    properties:
+      - type_id
+    pseudo: |
+      type = resolve(type_id)
+      if acc == null or !has_type(acc, type) then
+        throw ClassCastException
+      end
+    instructions:
+      - sig: checkcast.nonnull type_id
+        acc: in:ref
+        format: [op_id_16]
+        opcode_idx: [0xaa]
+
   - title: Get field from reference of any type by name
     description: >
       Get field value from reference of any type by field name string_id and put it into

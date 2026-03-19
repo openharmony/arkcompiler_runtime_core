@@ -256,7 +256,6 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
-        "std.core.Runtime.failedTypeCastExclUndefinedStub:std.core.Object;std.core.Class;std.core.ClassCastError;",
         "std.core.StringBuilder._ctor_:std.core.StringBuilder;std.core.String;void;",
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
@@ -292,7 +291,6 @@ TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
         prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
-        "std.core.Runtime.failedTypeCastExclUndefinedStub:std.core.Object;std.core.Class;std.core.ClassCastError;",
         "std.core.StringBuilder.concatStrings:std.core.String;std.core.String;std.core.String;",
         "std.core.StringBuilder.toString:f64;std.core.String;",
     };

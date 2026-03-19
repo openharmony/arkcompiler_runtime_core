@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -528,7 +528,10 @@ def call_me_from_template
   end
 
   visit('CheckCast') do
-    plain('checkcast', type_id)
+    switch(cast_to_int('inst->GetIsNotNullCheck()'),
+      [case_true('checkcast.nonnull', type_id),
+       case_false('checkcast', type_id)]
+    )
   end
 
   visit('IsInstance') do
