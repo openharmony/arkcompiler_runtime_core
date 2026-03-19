@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ protected:
         ASSERT_NE(md, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Module_FindFunction(md, fnName, ":C{std.core.Array}", &fn), ANI_OK);
+        ASSERT_EQ(env_->Module_FindFunction(md, fnName, ":C{std:core.Array}", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *mdResult = md;
@@ -82,7 +82,7 @@ TEST_F(AnySetPropertyTest, AnySetByIndex_Valid)
 
     ani_class intCls {};
     ani_method intCtor {};
-    ASSERT_EQ(env_->FindClass("std.core.Int", &intCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Int", &intCls), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor), ANI_OK);
     ani_object intObj {};
     ani_int intValue = 100U;
@@ -149,7 +149,7 @@ TEST_F(AnySetPropertyTest, AnySetByIndex_Invalid)
 
     ani_class intCls {};
     ani_method intCtor {};
-    ASSERT_EQ(env_->FindClass("std.core.Int", &intCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Int", &intCls), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor), ANI_OK);
 
     ani_object intObj {};
@@ -178,7 +178,7 @@ TEST_F(AnySetPropertyTest, AnySetByValue_InvalidKey)
     ani_object res {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &res, ani_int(3U), nameRef), ANI_OK);
 
-    const char *objClsName = "std.core.Object";
+    const char *objClsName = "std:core.Object";
     ani_class keyCls {};
     ASSERT_EQ(env_->FindClass(objClsName, &keyCls), ANI_OK);
     ani_method objCtor {};

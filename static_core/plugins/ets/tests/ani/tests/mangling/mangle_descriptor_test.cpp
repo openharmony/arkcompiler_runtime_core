@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ namespace ark::ets::ani::testing {
 
 class MangleDescriptorTest : public AniTest {};
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 TEST_F(MangleDescriptorTest, Format_NewToOld)
 {
     std::optional<PandaString> desc;
@@ -33,6 +34,18 @@ TEST_F(MangleDescriptorTest, Format_NewToOld)
     EXPECT_STREQ(desc.value().c_str(), "La/b;");
 
     desc = Mangle::ConvertDescriptor("a.b.c");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), "La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("a:b");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), "La/b;");
+
+    desc = Mangle::ConvertDescriptor("a:b.c");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), "La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("a.b:c");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "La/b/c;");
 
@@ -105,6 +118,12 @@ TEST_F(MangleDescriptorTest, Format_Wrong)
     ASSERT_FALSE(desc.has_value());
 
     desc = Mangle::ConvertDescriptor("a/b/c");
+    ASSERT_FALSE(desc.has_value());
+
+    desc = Mangle::ConvertDescriptor("a:b:c");
+    ASSERT_FALSE(desc.has_value());
+
+    desc = Mangle::ConvertDescriptor("a/b:c");
     ASSERT_FALSE(desc.has_value());
 }
 

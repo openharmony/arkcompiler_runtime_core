@@ -41,7 +41,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_V(cls, "method", "C{std.core.String}:s", value, args),
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_V(cls, "method", "C{std:core.String}:s", value, args),
                   ANI_OK);
         va_end(args);
     }
@@ -450,14 +450,14 @@ TEST_F(ClassCallStaticMethodByNameShortTest, check_wrong_signature)
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
     ani_short value {};
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(env_, cls, "method", "C{std.core.String}:s", &value, str),
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(env_, cls, "method", "C{std:core.String}:s", &value, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(env_, cls, "method", "C{std/core/String}:s", &value, str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "method", "C{std.core.String}:s", &value, &arg), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "method", "C{std:core.String}:s", &value, &arg), ANI_OK);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "method", "C{std/core/String}:s", &value, &arg),
               ANI_INVALID_DESCRIPTOR);
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void AniModuleFindClassFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class cls {};
-    std::string clsName = "std.core." + std::string(data, size);
+    std::string clsName = "std:core." + std::string(data, size);
     env->FindClass(clsName.c_str(), &cls);
 }
 }  // namespace OHOS

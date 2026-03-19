@@ -99,7 +99,7 @@ TEST_F(MangleSignatureToProtoTest, PrimitiveSignature)
 
 TEST_F(MangleSignatureToProtoTest, ObjectsSignature)
 {
-    CheckSignatureParsing("C{std.core.String}i:C{T}", Method::Proto(
+    CheckSignatureParsing("C{std:core.String}i:C{T}", Method::Proto(
                                                           Method::Proto::ShortyVector {
                                                               panda_file::Type {panda_file::Type::TypeId::REFERENCE},
                                                               panda_file::Type {panda_file::Type::TypeId::REFERENCE},
@@ -110,7 +110,7 @@ TEST_F(MangleSignatureToProtoTest, ObjectsSignature)
                                                               std::string_view {"Lstd/core/String;"},
                                                           }));
 
-    CheckSignatureParsing("sbA{l}A{C{std.core.String}}i:C{T}",
+    CheckSignatureParsing("sbA{l}A{C{std:core.String}}i:C{T}",
                           Method::Proto(
                               Method::Proto::ShortyVector {
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
@@ -130,7 +130,7 @@ TEST_F(MangleSignatureToProtoTest, ObjectsSignature)
 TEST_F(MangleSignatureToProtoTest, UnionsSignature)
 {
     CheckSignatureParsing(
-        "X{C{std.core.String}C{std.core.Number}C{Fun}}:",
+        "X{C{std:core.String}C{std:core.Number}C{Fun}}:",
         Method::Proto(
             Method::Proto::ShortyVector {
                 panda_file::Type {panda_file::Type::TypeId::VOID},
@@ -138,7 +138,7 @@ TEST_F(MangleSignatureToProtoTest, UnionsSignature)
             },
             Method::Proto::RefTypeVector {std::string_view {"{ULFun;Lstd/core/Number;Lstd/core/String;}"}}));
 
-    CheckSignatureParsing(":X{C{Sun}C{std.core.Boolean}C{Fun}}",
+    CheckSignatureParsing(":X{C{Sun}C{std:core.Boolean}C{Fun}}",
                           Method::Proto(
                               Method::Proto::ShortyVector {
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
@@ -226,7 +226,7 @@ TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators)
                               },
                               Method::Proto::RefTypeVector {std::string_view {"Lstd/core/String;"}}));
 
-    CheckSignatureParsing("C{std.core.Object}:",
+    CheckSignatureParsing("C{std:core.Object}:",
                           Method::Proto(
                               Method::Proto::ShortyVector {
                                   panda_file::Type {panda_file::Type::TypeId::VOID},

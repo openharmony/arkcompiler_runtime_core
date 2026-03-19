@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,7 +108,7 @@ TEST_F(VariableSetValueRefTest, composite_case_1)
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":C{std.core.String}", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":C{std:core.String}", &method), ANI_OK);
 
     ani_ref sum = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &sum), ANI_OK);

@@ -85,8 +85,8 @@ static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
     return result;
 }
 
-static const char *CONCAT_SIGNATURE = "C{std.core.String}C{std.core.String}:C{std.core.String}";
-static const char *CONCAT_SIGNATURE_A = "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.String}";
+static const char *CONCAT_SIGNATURE = "C{std:core.String}C{std:core.String}:C{std:core.String}";
+static const char *CONCAT_SIGNATURE_A = "C{std:core.String}C{std:core.String}C{std:core.String}:C{std:core.String}";
 static const char *MODULE_NAME = "@defModule.module_bind_native_functions_test";
 static const ani_native_function NATIVE_FUNC_SUM = {"sum", "ii:i", reinterpret_cast<void *>(Sum)};
 static const ani_native_function NATIVE_FUNC_SUM_A = {"sum", "iii:i", reinterpret_cast<void *>(SumA)};
@@ -306,7 +306,7 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
 TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("std.math", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("std:math", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     std::array functions = {
@@ -323,7 +323,7 @@ TEST_F(ModuleBindNativeFunctionsTest, bind_wrong_signature)
     ASSERT_NE(module, nullptr);
 
     std::array functions = {
-        ani_native_function {"checkSignature", "C{std.core.String}:", reinterpret_cast<void *>(Abs)},
+        ani_native_function {"checkSignature", "C{std:core.String}:", reinterpret_cast<void *>(Abs)},
     };
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);

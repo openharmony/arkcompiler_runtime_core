@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Object_CallMethodByName_Short_V(obj, "method", "C{std.core.String}:s", value, args), ANI_OK);
+        ASSERT_EQ(env_->Object_CallMethodByName_Short_V(obj, "method", "C{std:core.String}:s", value, args), ANI_OK);
         va_end(args);
     }
 
@@ -524,14 +524,14 @@ TEST_F(CallObjectMethodShortByNameTest, check_wrong_signature)
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
     ani_short res;
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, obj, "method", "C{std.core.String}:s", &res, str),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, obj, "method", "C{std:core.String}:s", &res, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, obj, "method", "C{std/core/String}:s", &res, str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "method", "C{std.core.String}:s", &res, &arg), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "method", "C{std:core.String}:s", &res, &arg), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "method", "C{std/core/String}:s", &res, &arg),
               ANI_INVALID_DESCRIPTOR);
 

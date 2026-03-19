@@ -28,7 +28,7 @@ protected:
 static void AssertIsChar(ani_env *env, ani_object boxed)
 {
     ani_class typeClass = nullptr;
-    ASSERT_EQ(env->FindClass("std.core.Char", &typeClass), ANI_OK);
+    ASSERT_EQ(env->FindClass("std:core.Char", &typeClass), ANI_OK);
 
     ani_boolean isExpectedType = ANI_FALSE;
     ASSERT_EQ(env->Object_InstanceOf(boxed, typeClass, &isExpectedType), ANI_OK);
@@ -139,9 +139,9 @@ TEST_F(BoxUnboxCharTest, post_array)
     ani_module module = nullptr;
     ASSERT_EQ(env_->FindModule("box_unbox_char_test", &module), ANI_OK);
     ani_function etsFunc = nullptr;
-    ASSERT_EQ(env_->Module_FindFunction(module, "testPostArray", "C{std.core.Array}:", &etsFunc), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "testPostArray", "C{std:core.Array}:", &etsFunc), ANI_OK);
 
-    ani_native_function fn {"testPostArrayNative", "C{std.core.Array}:", reinterpret_cast<void *>(TestPostArrayNative)};
+    ani_native_function fn {"testPostArrayNative", "C{std:core.Array}:", reinterpret_cast<void *>(TestPostArrayNative)};
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &fn, 1), ANI_OK);
 
     ani_array arr;
@@ -162,9 +162,9 @@ TEST_F(BoxUnboxCharTest, boxed_post_args)
     ani_module module = nullptr;
     ASSERT_EQ(env_->FindModule("box_unbox_char_test", &module), ANI_OK);
     ani_function etsFunc = nullptr;
-    ASSERT_EQ(env_->Module_FindFunction(module, "testWithArgs", "c:C{std.core.Object}", &etsFunc), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "testWithArgs", "c:C{std:core.Object}", &etsFunc), ANI_OK);
 
-    ani_native_function fn {"testWithArgsNative", "c:C{std.core.Object}", reinterpret_cast<void *>(TestWithArgsNative)};
+    ani_native_function fn {"testWithArgsNative", "c:C{std:core.Object}", reinterpret_cast<void *>(TestWithArgsNative)};
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &fn, 1), ANI_OK);
 
     ani_ref res = nullptr;

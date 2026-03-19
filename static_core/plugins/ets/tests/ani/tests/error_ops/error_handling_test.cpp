@@ -458,7 +458,7 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
     ASSERT_NE(errorClass, nullptr);
 
     ani_method constructor {};
-    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &constructor),
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std:core.String}C{escompat.ErrorOptions}:", &constructor),
               ANI_OK);
     ASSERT_NE(constructor, nullptr);
 

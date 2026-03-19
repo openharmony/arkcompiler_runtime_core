@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ TEST_F(ExampleTest, CallNativeQuickFunction)
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *METHOD_NAME = "quickMethod";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *SIGNATURE = "C{std.core.String}l:C{std.core.String}";
+    static constexpr const char *SIGNATURE = "C{std:core.String}l:C{std:core.String}";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr std::string_view SAMPLE_STRING = "abcd";
 

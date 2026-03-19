@@ -59,7 +59,8 @@ std::optional<PandaString> Mangle::ConvertDescriptor(const std::string_view desc
     }
     str.push_back(';');
 
-    return str;
+    return signature::NormalizePackageSeparators<PandaString, '/'>(str, 0, str.size());
+    ;
 }
 
 static constexpr size_t MIN_BODY_SIZE = sizeof('{') + 1 + sizeof('}');

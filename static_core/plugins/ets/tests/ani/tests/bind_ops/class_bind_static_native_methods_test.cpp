@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,7 +153,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, method_bind_bad_signature)
               ANI_INVALID_DESCRIPTOR);
 
     m = {
-        ani_native_function {"method", "C{std.core.String}:", reinterpret_cast<void *>(CheckSignature)},
+        ani_native_function {"method", "C{std:core.String}:", reinterpret_cast<void *>(CheckSignature)},
     };
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, checkSignCls_, m.data(), m.size()), ANI_OK);
 }

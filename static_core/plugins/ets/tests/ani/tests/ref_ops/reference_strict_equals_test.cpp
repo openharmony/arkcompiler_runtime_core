@@ -117,7 +117,7 @@ TEST_F(ReferenceStrictEqualsTest, CheckStrictEqualityWithNullishValues)
     ani_module mod {};
     ASSERT_EQ(env_->FindModule(MODULE_NAME, &mod), ANI_OK);
     ani_native_function fn {"areReferencesStrictEqual",
-                            "X{C{std.core.Object}C{std.core.Null}}X{C{std.core.Object}C{std.core.Null}}:z",
+                            "X{C{std:core.Object}C{std:core.Null}}X{C{std:core.Object}C{std:core.Null}}:z",
                             reinterpret_cast<void *>(AreReferencesStrictEqualImpl)};
     ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &fn, 1), ANI_OK);
 

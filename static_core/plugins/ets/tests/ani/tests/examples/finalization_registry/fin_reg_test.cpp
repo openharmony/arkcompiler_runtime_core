@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,11 +35,11 @@ public:
         ASSERT_NE(registerMethod, nullptr);
 
         ani_class finRegClass = nullptr;
-        ASSERT_EQ(env_->FindClass("std.core.FinalizationRegistry", &finRegClass), ANI_OK);
-        std::string_view registerSignature = "C{std.core.Object}C{std.core.Object}C{std.core.Object}:";
+        ASSERT_EQ(env_->FindClass("std:core.FinalizationRegistry", &finRegClass), ANI_OK);
+        std::string_view registerSignature = "C{std:core.Object}C{std:core.Object}C{std:core.Object}:";
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "register", registerSignature.data(), registerMethod), ANI_OK);
 
-        std::string_view ctorSignature = "C{std.core.Function1}:";
+        std::string_view ctorSignature = "C{std:core.Function1}:";
         ani_method ctor = nullptr;
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "<ctor>", ctorSignature.data(), &ctor), ANI_OK);
 
@@ -69,7 +69,7 @@ protected:
         callbackClassName_ = "fin_reg_test." + GetModulePrefix() + "CallbackHolder";
         ASSERT_EQ(env_->FindClass(callbackClassName_.c_str(), &nativeCallbackClass_), ANI_OK);
 
-        ani_native_function fn {"invoke", "C{std.core.Object}:", reinterpret_cast<void *>(NativeCallbackInvoke)};
+        ani_native_function fn {"invoke", "C{std:core.Object}:", reinterpret_cast<void *>(NativeCallbackInvoke)};
         ASSERT_EQ(env_->Class_BindNativeMethods(nativeCallbackClass_, &fn, 1), ANI_OK);
 
         ASSERT_EQ(env_->Class_FindStaticMethod(nativeCallbackClass_, "doFullGC", ":", &doFullGcMethod_), ANI_OK);
@@ -109,7 +109,7 @@ private:
             env_->Object_New(nativeCallbackClass_, nativeCallbackCtor_, &nativeCb, reinterpret_cast<ani_long>(cb)),
             ANI_OK);
 
-        std::string factorySignature = "C{" + callbackClassName_ + "}:C{std.core.Function1}";
+        std::string factorySignature = "C{" + callbackClassName_ + "}:C{std:core.Function1}";
         std::string_view creatorName = "createCallbackWithArg";
 
         ani_ref createdManagedCb = nullptr;

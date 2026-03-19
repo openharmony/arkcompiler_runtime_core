@@ -27,7 +27,7 @@ public:
 static void CreateInt(ani_env *env, ani_int val, ani_object *intObj)
 {
     ani_class intClass;
-    ASSERT_EQ(env->FindClass("std.core.Int", &intClass), ANI_OK);
+    ASSERT_EQ(env->FindClass("std:core.Int", &intClass), ANI_OK);
     ani_method intCtor;
     ASSERT_EQ(env->Class_FindMethod(intClass, "<ctor>", "i:", &intCtor), ANI_OK);
     ASSERT_EQ(env->Object_New(intClass, intCtor, intObj, val), ANI_OK);
@@ -113,7 +113,7 @@ TEST_F(ArrayPushTest, err_input_array)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std:core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
     ani_ref undefinedArgument {};
     ASSERT_EQ(env_->GetUndefined(&undefinedArgument), ANI_OK);
     ani_object errObj {};
@@ -133,7 +133,7 @@ TEST_F(ArrayPushTest, err_input_array)
 TEST_F(ArrayPushTest, obj_input_array)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Object", &cls), ANI_OK);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
     ani_object obj {};

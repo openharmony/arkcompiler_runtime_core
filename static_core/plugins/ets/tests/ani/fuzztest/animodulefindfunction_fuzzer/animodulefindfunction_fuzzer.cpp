@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void AniModuleFindFunctionFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_module md {};
-    env->FindModule("std.core", &md);
+    env->FindModule("std:core", &md);
     ani_function fn {};
     std::string funcName(data, size);
     env->Module_FindFunction(md, funcName.c_str(), nullptr, &fn);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
         ASSERT_EQ(env_->FindClass("object_new_test.MobilePhone", &cls), ANI_OK);
 
         ani_method ctor {};
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}i:", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std:core.String}i:", &ctor), ANI_OK);
 
         ani_string model {};
         ASSERT_EQ(env_->String_NewUTF8(m, strlen(m), &model), ANI_OK);
@@ -313,7 +313,7 @@ TEST_F(ObjectNewTest, object_new_v_invalid_args3)
 TEST_F(ObjectNewTest, DISABLED_object_new_string)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.String", &cls), ANI_OK);
 
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
@@ -411,7 +411,7 @@ TEST_F(ObjectNewTest, object_new_a_combination_objcet)
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std.core.String}C{object_new_test.Animal}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std:core.String}C{object_new_test.Animal}:", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_value args[3U];
@@ -435,7 +435,7 @@ TEST_F(ObjectNewTest, object_new_a_combination_objcet)
     args[0U].i = value1;
     ani_method newTestMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
-                                     "iC{std.core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
+                                     "iC{std:core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
                                      &newTestMethod),
               ANI_OK);
     ASSERT_NE(newTestMethod, nullptr);
@@ -477,7 +477,7 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
     ASSERT_EQ(env_->FindClass("object_new_test.Mixture", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     const char *name =
-        "C{std.core.Null}C{std.core.Array}C{std.core.Array}ifdzlsC{std.core.String}C{object_new_test.Animal}:C{"
+        "C{std:core.Null}C{std:core.Array}C{std:core.Array}ifdzlsC{std:core.String}C{object_new_test.Animal}:C{"
         "object_new_test.Mixture}";
     ani_method newMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newMixtureObject", name, &newMethod), ANI_OK);
@@ -525,7 +525,7 @@ TEST_F(ObjectNewTest, object_new_v_invalid_args)
 
     ani_method newTestMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
-                                     "iC{std.core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
+                                     "iC{std:core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
                                      &newTestMethod),
               ANI_OK);
     ASSERT_NE(newTestMethod, nullptr);
@@ -558,7 +558,7 @@ TEST_F(ObjectNewTest, object_new_v_ctor)
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std.core.String}C{object_new_test.Animal}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std:core.String}C{object_new_test.Animal}:", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_string tag {};
@@ -576,7 +576,7 @@ TEST_F(ObjectNewTest, object_new_v_normal_method_loop)
 
     ani_method newTestMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
-                                     "iC{std.core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
+                                     "iC{std:core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
                                      &newTestMethod),
               ANI_OK);
     ASSERT_NE(newTestMethod, nullptr);

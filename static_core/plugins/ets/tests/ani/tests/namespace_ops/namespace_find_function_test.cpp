@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ class NamespaceFindFunctionTest : public AniTest {};
 TEST_F(NamespaceFindFunctionTest, find_function01)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:Fnns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -32,7 +32,7 @@ TEST_F(NamespaceFindFunctionTest, find_function01)
         ASSERT_NE(fn, nullptr);
     }
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std.core.String}", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std:core.String}", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialDoubleValue", ":d", &fn), ANI_OK);
@@ -45,7 +45,7 @@ TEST_F(NamespaceFindFunctionTest, find_function01)
 TEST_F(NamespaceFindFunctionTest, find_function02)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:Fnns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn1 {};
@@ -53,7 +53,7 @@ TEST_F(NamespaceFindFunctionTest, find_function02)
     ASSERT_NE(fn1, nullptr);
 
     ani_function fn2 {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std.core.String}", &fn2), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std:core.String}", &fn2), ANI_OK);
     ASSERT_NE(fn2, nullptr);
 
     ani_function fn3 {};
@@ -64,11 +64,11 @@ TEST_F(NamespaceFindFunctionTest, find_function02)
 TEST_F(NamespaceFindFunctionTest, find_function03)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:Fnns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("namespace_find_function_test.Fnns.A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("namespace_find_function_test:Fnns.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method result {};
@@ -76,14 +76,14 @@ TEST_F(NamespaceFindFunctionTest, find_function03)
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "c", "i:C{std.core.Promise}", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "c", "i:C{std:core.Promise}", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
 
 TEST_F(NamespaceFindFunctionTest, find_function04)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.TestA.A", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:TestA.A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -95,7 +95,7 @@ TEST_F(NamespaceFindFunctionTest, find_function05)
 {
     ani_namespace ns {};
 
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.TestA.A", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:TestA.A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -121,7 +121,7 @@ TEST_F(NamespaceFindFunctionTest, find_function05)
 TEST_F(NamespaceFindFunctionTest, duplicate_no_signature)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:Fnns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -131,18 +131,18 @@ TEST_F(NamespaceFindFunctionTest, duplicate_no_signature)
 TEST_F(NamespaceFindFunctionTest, check_initialization)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:Fnns", &ns), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test.Fnns"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test:Fnns"));
     ani_function fn {};
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialIntValue", ":i", &fn), ANI_OK);
-    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test.Fnns"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test:Fnns"));
 }
 
 TEST_F(NamespaceFindFunctionTest, wrong_signature)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test:Fnns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn2 {};

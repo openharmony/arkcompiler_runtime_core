@@ -309,7 +309,7 @@ TEST_F(ClassBindNativeMethodsTest, method_bind_bad_signature)
     ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, m.data(), m.size()), ANI_INVALID_DESCRIPTOR);
 
     m = {
-        ani_native_function {"method", "C{std.core.String}:", reinterpret_cast<void *>(CheckSignature)},
+        ani_native_function {"method", "C{std:core.String}:", reinterpret_cast<void *>(CheckSignature)},
     };
     ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, m.data(), m.size()), ANI_OK);
 }

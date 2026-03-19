@@ -41,7 +41,7 @@ public:
     {
         va_list args {};
         va_start(args, cls);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_V(cls, "method", "C{std.core.String}:", args), ANI_OK);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_V(cls, "method", "C{std:core.String}:", args), ANI_OK);
         va_end(args);
     }
     void TestFuncVWrongSignature(ani_class cls, ...)
@@ -399,13 +399,13 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, check_wrong_signature)
     ani_string str;
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void(env_, cls, "method", "C{std.core.String}:", str), ANI_OK);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void(env_, cls, "method", "C{std:core.String}:", str), ANI_OK);
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void(env_, cls, "method", "C{std/core/String}:", str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "method", "C{std.core.String}:", &arg), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "method", "C{std:core.String}:", &arg), ANI_OK);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "method", "C{std/core/String}:", &arg),
               ANI_INVALID_DESCRIPTOR);
 
