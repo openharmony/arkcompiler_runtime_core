@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -88,7 +88,7 @@ standard library (see :ref:`Standard Library Usage`).
 
 If a module has at least one top-level ambient declaration (see
 :ref:`Ambient Declarations`), then all other declarations must be ambient,
-while there must be no top-level statement (see :ref:`Top-Level Statements`).
+and no top-level statement must be present (see :ref:`Top-Level Statements`).
 Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -125,7 +125,7 @@ Module Header
 .. meta:
     frontend_status: Done
 
-*Module header* defines optional ``export`` modifier and a *module name*.
+*Module header* defines the optional modifier ``export`` and a *module name*.
 
 The syntax of *module header* is presented below:
 
@@ -1236,7 +1236,7 @@ Exported Declarations
 .. meta:
     frontend_status: Done
 
-Top-level declarations can use ``export`` modifier that make the declarations
+Top-level declarations can use modifier ``export`` that make the declarations
 accessible (see :ref:`Accessible`) in other modules by using import
 (see :ref:`Import Directives`). The same result can be achieved by using an
 export directive (see :ref:`Export Directives`) for a top-level declaration.
@@ -1264,12 +1264,13 @@ inside the module they are declared in.
    import directive
    import
 
-A :index:`compile-time error` occurs if a declaration is exported 
-with the name of another exported declaration.
+If a declaration is exported with the name of another exported declaration,
+then a :index:`compile-time error` occurs.
 
-The example below represents the situation where an *export directive* uses
-*selectiveBindings* or *bindingAlias* to give a new name to the declaration,
-and such a new name clashes with the name of another exported declaration:
+The situation where an *export directive* uses *selectiveBindings* or
+*bindingAlias* to give a new name to a declaration, and the new name clashes
+with the name of another exported declaration is represented in the example
+below:
 
 .. code-block:: typescript
    :linenos:
@@ -1278,7 +1279,7 @@ and such a new name clashes with the name of another exported declaration:
     function bar(): void {}
     export {bar as foo} // compile-time error, entity named 'foo' is already exported
 
-The same error can occurs using :ref:`Re-Export Directive` as represented
+The same error occurs when :ref:`Re-Export Directive` is used as represented
 in the example below:
 
 .. code-block:: typescript
@@ -1347,7 +1348,16 @@ imported into a code, causes a module to access an unexported entity.
 It applies to both global and namespace declarations.
 Types of exported functions, variables, constants, public and protected members
 of classes, default interface methods, interface getters and setters must be
-set explicitly where applicable.  Any entity declared in
+set explicitly where applicable.
+
+.. note:: The statement *types of exported functions, ..., methods, ...* above
+   means not only the return type but the entire signature
+   of an entity, including, where applicable,
+   types of parameters. E.g., a *setter* has no return type
+   (not even ``void``), but the type of its parameter must be
+   exported explicitly.
+
+Any entity declared in
 the current module and used in an accessible part of an exported declaration must be
 either directly available in |LANG| (e.g., built-in type), or also be exported.
 Otherwise, a :index:`compile-time error` occurs.
@@ -1408,7 +1418,7 @@ Here is the series of examples representing that cases:
 
       export function foo(): void {} // OK
 
-      function bar() {}  // compile-time error, no return type
+      export function bar() {}  // compile-time error, no return type
 
       // // Fields and methods
       export class C {

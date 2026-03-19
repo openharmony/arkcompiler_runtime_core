@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -75,8 +75,7 @@ In certain cases, a call to an ``async`` function requires awaiting its result,
 but the call site resides in the non-async function. In such cases, the caller
 function should be converted to an asynchronous one, and in some cases this
 chain of conversions has to be continued up to the program entry point. For this
-case, |LANG| supports the ``async`` entry point function (see :ref:`Program
-Entry Point`).
+case, |LANG| supports the ``async`` entry point function (see :ref:`Program Entry Point`).
 
 .. note::
    Maybe, this section should be moved to the handbook.

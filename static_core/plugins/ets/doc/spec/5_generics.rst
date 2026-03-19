@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -294,21 +294,21 @@ in the examples below:
     class Derived2 extends Base<SomeType> implements Interface<SomeType> { }
 
     function foo<T = number>(input: T): T { return input}
-    foo(1) // this call is semantically equivalent to next one
+    foo(1) // This call is semantically equivalent to next one
     foo<number>(1)
 
     class C1 <T1, T2 = number, T3> {}
     // That is a compile-time error, as T2 has default but T3 does not
 
     class C2 <T1, T2 = number, T3 = string> {}
-    let c1 = new C2<number>          // equal to C2<number, number, string>
-    let c2 = new C2<number, string>  // equal to C2<number, string, string>
-    let c3 = new C2<number, Object, number> // all 3 type arguments provided
+    let c1 = new C2<number>          // Equal to C2<number, number, string>
+    let c2 = new C2<number, string>  // Equal to C2<number, string, string>
+    let c3 = new C2<number, Object, number> // All 3 type arguments provided
 
     function foo <T1 = T2, T2 = T1> () {}
-    // That is a compile-time error,
-    // as T1's default refers to T2, which is defined after the T1
-    // T2's default is valid as it refers to already defined type parameter T1
+    // Compile-time error,
+    // as T1's default refers to T2, which is defined after T1
+    // T2's default is valid as it refers to type parameter T1 already defined
 
 |
 
@@ -345,8 +345,8 @@ type parameter (see :ref:`Invariance, Covariance and Contravariance`).
 Type parameters with the keyword ``out`` are *covariant*. Covariant type
 parameters can be used in the out-position only as follows:
 
-   - Constructors can have ``out`` type parameters as parameters;
-   - Methods can have ``out`` type parameters as return types;
+   - Constructors can have ``out`` type parameters as parameters.
+   - Methods can have ``out`` type parameters as return types.
    - Fields that have ``out`` type parameters as type must be ``readonly``.
    - Otherwise, a :index:`compile-time error` occurs.
 
@@ -439,24 +439,25 @@ Wildcard Type
 .. meta:
     frontend_status: Done
 
-*Wildcard Type* is a type that can be used as a *type argument* when
-:ref:`Generic Instantiations` occur to denote an unknown instantiation of a *invariant*
-(see :ref:`Type Parameter Variance`) *Type Parameter*. *Wildcard Type* is a semantic
-notion that may appear during the Type Inference, it can not be represented with
-|LANG| syntax.
+*Wildcard type* is a type that can be used as *type argument* when
+:ref:`Generic Instantiations` denote an unknown instantiation of a
+*invariant* (see :ref:`Type Parameter Variance`) *Type Parameter*.
+*Wildcard type* is a semantic notion that can occur during type inference.
+*Wildcard type* cannot be represented with the |LANG| syntax.
 
-The notation * is used to o refer to the *Wildcard Type* in example descriptions.
+The notation '``*``' is used to o refer to *wildcard type* in example
+descriptions.
 
-Type inference for Instanceof Expression with the actual *type argument*
-of some generic type is unknown is the case where the *Wildcard Type* occurs.
-The only known fact for such case is that the *type argument* is certainly
-a subtype of a corresponding constraint (see :ref:`Type Parameter Constraint`).
+*Wildcard type* occurs during type inference of an ``instanceOf`` expression
+if the actual *type argument* of a generic type is unknown. The only fact known
+for such a case is that *type argument* is certainly a subtype of a
+corresponding constraint (see :ref:`Type Parameter Constraint`).
 
-Subtyping and instantiation rules of the *Wildcard Type* provide a notion
-of a generic type instantiated with some *type arguments*. The domain
-of operations applicable to the resultant type, and the corresponding type
-inference rules ensure that the program operates on the *arbitrary*
-generic type in a type-safe manner:
+Subtyping and instantiation rules of *wildcard type* provide a notion of a
+generic type instantiated with some *type arguments*. The domain of operations
+applicable to the resultant type and the corresponding type inference rules
+ensure that a program operates on the *arbitrary* generic type in a type-safe
+manner:
 
 .. code-block:: typescript
    :linenos:
@@ -470,7 +471,7 @@ generic type in a type-safe manner:
 
     function foo(obj: object): void {
         if (obj instanceof X) {
-            let x = obj // instanceof guarantees that the type is *some* X
+            let x = obj // Instanceof guarantees that the type is *some* X
                         // yet the type parameter is unknown
                         // The inferred type of obj is X<*>
 
@@ -479,34 +480,34 @@ generic type in a type-safe manner:
                         // T is invariant, thus an arbitrary instantiation of
                         // X is not strictly an X<Any>.
 
-            let e = obj.p // the type of expression is the constraint
+            let e = obj.p // The type of expression is the constraint
                           // of the corresponding type parameter, which
                           // is Any
         }
     }
 
-The *Wildcard Type* is determined as follows:
+*Wildcard type* is determined as follows:
 
-- *Wildcard Type* is associated with a particular *invariant* *Type Parameter*.
+- *Wildcard type* is associated with a particular *invariant* *type parameter*.
 
-- *Wildcard Type* is a subtype of the *constraint* of the corresponding *Type Parameter*.
+- *Wildcard type* is a subtype of the *constraint* of the corresponding
+  *type parameter*.
 
-- When a generic type is instantiated with a *Wildcard Type*,
-  the corresponding *Type Parameter*:
+- Where a *wildcard type* instantiates a generic type, the corresponding
+  *type parameter*:
 
-- If in the *out-* position, then substituted for the *Type Parameter Constraint*;
+  - If in the *out-* position, then substituted for *type parameter constraint*.
+  - If in the *in-* position, then substituted for the type *never*.
+  - Otherwise, type is in the *invariant* position, and reads or writes to
+    the corresponding property or field following the logic of the
+    *out-* and *in-* position access (see :ref:`Type Parameter Variance`).
 
-- If in the *in-* position, then substituted for the type *never*.
-
-- Otherwise, the type is in the *invariant* position, and reads or writes to
-  the corresponding property or field follow the logic of the *out-* and *in-*
-  position access accordingly (see :ref:`Type Parameter Variance`).
-
-**Note**: The *Wildcard Type* certainly satisfies the constraint
-because any possible *type argument* must satisfy the corresponding
-*constraint*. This logic also applies in the *out-* position.
-Similarly, only type ``never`` guarantees type-safety in the *in-* position
-(see :ref:`Type Parameter Variance`):
+.. note::
+   *Wildcard type* certainly satisfies the constraint because any possible
+   *type argument* must satisfy the corresponding *constraint*. This logic
+   also applies in the *out-* position. Similarly, type ``never`` only
+   guarantees type-safety in the *in-* position (see
+   :ref:`Type Parameter Variance`):
 
 .. code-block:: typescript
    :linenos:
@@ -530,15 +531,17 @@ Similarly, only type ``never`` guarantees type-safety in the *in-* position
         }
     }
 
-*Wildcard Type* never refers to *Type Parameters* of *out-variance* or
-*in-variance*because the notion of an *arbitrary* instantiation is
+*Wildcard type* never refers to *type parameters* of *out-variance* or
+*in-variance* because the notion of an *arbitrary* instantiation is
 effectively represented by one of the following:
 
- - Instantiation with the corresponding *constraint* for *out-* variant *Type Parameter*; or
+ - Instantiation with the corresponding *constraint* for *out-* variant
+   *type parameter*; or
 
- - Instantiation with type ``never`` for *in-* variant *Type Parameter*.
+ - Instantiation with type ``never`` for *in-* variant *type parameter*.
 
-For *out-* variance of a *Type Parameter*:
+
+For *out-* variance of a *type parameter*:
 
 .. code-block:: typescript
    :linenos:
@@ -550,7 +553,7 @@ For *out-* variance of a *Type Parameter*:
     }
 
     function foo(o: Object) {
-        if (o instanceof X) {     // type of o is X<C>
+        if (o instanceof X) {     // Type of o is X<C>
             let o1: X<C> = o      // OK, X<C> is a subtype of X<C>
             let o2: X<never> = o  // compile-time error, X<C> is not a subtype of X<never>
 
@@ -558,7 +561,7 @@ For *out-* variance of a *Type Parameter*:
         }
     }
 
-For *in-* variance of a *Type Parameter*:
+For *in-* variance of a *type parameter*:
 
 .. code-block:: typescript
    :linenos:
@@ -570,7 +573,7 @@ For *in-* variance of a *Type Parameter*:
     }
 
     function foo(o: Object) {
-        if (o instanceof X) {     // type of o is X<never>
+        if (o instanceof X) {     // Type of o is X<never>
             let o1: X<C> = o      // compile-time error, X<never> is not a subtype of X<C>
             let o2: X<never> = o  // OK, X<never> is a subtype of X<never>
 
@@ -578,31 +581,33 @@ For *in-* variance of a *Type Parameter*:
         }
     }
 
-Note: As required by :ref:`Subtyping`, a *Wildcard Type* for a certain
-*Type Parameter* is identical to itself:
+.. note::
+   *Wildcard type* for a certain *type parameter* is identical to itself
+   as required by :ref:`Subtyping`:
 
-.. code-block:: typescript
-   :linenos:
+   .. code-block:: typescript
+      :linenos:
 
-    class X<T> {
-        p: T
-        constructor(p: T) { this.p = p }
-    }
+       class X<T> {
+           p: T
+           constructor(p: T) { this.p = p }
+       }
 
-    function foo(a: Any, b: Any) {
-        if (a instanceof X && b instanceof X) {
-            let a1 = a // X<*>
-            let a2 = b // X<*>
-            a1 = a2    // OK, inferred X<*> and X<*> types are identical
-                       // Despite concrete type arguments are not known,
-                       // the code is type-safe
+       function foo(a: Any, b: Any) {
+           if (a instanceof X && b instanceof X) {
+               let a1 = a // X<*>
+               let a2 = b // X<*>
+               a1 = a2    // OK, inferred X<*> and X<*> types are identical
+                          // Despite concrete type arguments are not known,
+                          // the code is type-safe
 
-            a.p = b.p  // compile-time error defined by invariance
-        }
-    }
+               a.p = b.p  // compile-time error defined by invariance
+           }
+       }
 
-    foo(new X<string>("a"), new X<number>(1))
+       foo(new X<string>("a"), new X<number>(1))
 
+|
 
 .. _Generic Instantiations:
 
@@ -627,9 +632,9 @@ method, or function is created.
    :linenos:
 
     class A <T> {}
-    class B <U, V> extends A<U> { // Here A<U> is a new generic type
-        field: A<V>               // Here A<V> is a new generic type
-        method (p: A<Object>) {}  // Here A<Object> is a new non-generic type
+    class B <U, V> extends A<U> { // A<U> is a new generic type here
+        field: A<V>               // A<V> is a new generic type here
+        method (p: A<Object>) {}  // A<Object> is a new non-generic type here
     }
 
 .. index::
@@ -675,11 +680,11 @@ arguments:
 .. code-block:: typescript
    :linenos:
 
-    Array<number>                     // instantiated with type number
-    Array<number|string>              // instantiated with union type
-    Array<number[]>                   // instantiated with array type
-    Array<[number, string, boolean]>  // instantiated with tuple type
-    Array<()=>void>                   // instantiated with function type
+    Array<number>                     // Instantiated with type number
+    Array<number|string>              // Instantiated with union type
+    Array<number[]>                   // Instantiated with array type
+    Array<[number, string, boolean]>  // Instantiated with tuple type
+    Array<()=>void>                   // Instantiated with function type
 
 .. index::
    type argument
@@ -846,7 +851,7 @@ Different cases of type argument inference are represented in the examples below
       // based on argument types: the type argument is inferred
 
     function process <P, R> (arg: P, cb?: (p: P) => R): P | R {
-       // return the data itself or if the processing function provided the
+       // Return the data itself or if the processing function provided the
        // result of processing
        return cb != undefined ? cb (arg): arg
     }
@@ -878,12 +883,12 @@ This situation is represented in the example below:
     let a = new A<X1>
 
     // implicit instantiation:
-    a.foo(new X2) // type argument is inferred from ``new X2``
-    a.bar()       // class type argument X1 is used as no other information is provided
+    a.foo(new X2) // Type argument is inferred from ``new X2``
+    a.bar()       // Class type argument X1 is used as no other information is provided
 
     // explicit instantiation:
-    a.foo<X2> (new X2) // explicit type argument is used
-    a.bar<X2> ()       // explicit type argument is used
+    a.foo<X2> (new X2) // Explicit type argument is used
+    a.bar<X2> ()       // Explicit type argument is used
 
 .. index::
    instantiation

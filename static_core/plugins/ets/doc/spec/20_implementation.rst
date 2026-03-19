@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -145,11 +145,12 @@ Ensuring Module Initialization
     frontend_status: None
 
 The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
-function ``initModule()`` with one parameter of ``string`` type. A call to this
-function ensures that the module referred by the argument is available, and
-that its initialization (see :ref:`Static Initialization`) is performed. An
-argument must be a string literal. Otherwise, a :index:`compile-time error`
-occurs.
+function ``initModule()`` with a single parameter of type ``string``. Its value
+is resolved at compile time according to the rules of import path resolution
+(see :ref:`ImportPath Resolution Rules`). A call to this function ensures that
+the module referred by the argument is available, and that its initialization
+(see :ref:`Static Initialization`) is performed. An argument must be a string
+literal. Otherwise, a :index:`compile-time error` occurs.
 
 The current module has no access to the exported declarations of the module
 referred by the argument. If such module is not available or any other runtime

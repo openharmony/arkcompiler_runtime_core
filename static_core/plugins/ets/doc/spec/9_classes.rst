@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -1820,9 +1820,9 @@ Fields with Late Initialization
 .. meta:
     frontend_status: Done
 
-*Field with late initialization* ``f!: T = expr`` effectively means that the type
-of the field ``f``is ``T | undefined``, however for any form of an access the
-field behaves as a field of type ``T``.
+*Field with late initialization* ``f!: T = expr`` effectively means that the
+type of the field ``f`` is ``T | undefined``. However, the field behaves as a
+field of type ``T`` with any form of access.
 
 *Field with late initialization* must be an *instance field*. If it is defined
 as ``static``, then a :index:`compile-time error` occurs.
@@ -1927,6 +1927,8 @@ A :index:`compile-time error` occurs if:
 -  Field declaration contains the modifier ``static`` along with the modifier
    ``override``.
 -  Types of the overriding field and of the overridden field are different.
+-  :ref:`Access Modifiers` of the overriding field and of the overridden field are
+   different.
 
 .. index::
    overriding field
@@ -1948,16 +1950,17 @@ A :index:`compile-time error` occurs if:
 
     class C {
         field: number = 1
+        protected ff = 25
     }
     class D extends C {
         field: string = "aa"     // compile-time error, type is not the same
         override no_field = 1224 // compile-time error, no overridden field in the base class
         static override field: string = "aa" // compile-time error, static cannot override
+        ff = 66                  // compile-time error, as access modifers are different 
     }
 
-An overridden field must be initialized explicitly, either
-by using an initializer or in a constructor.
-Otherwise, :index:`compile-time error` occurs.
+An overridden field must be initialized explicitly either by using an
+initializer or in a constructor. Otherwise, :index:`compile-time error` occurs.
 Implicit initialization is not used, even though the type of the field has
 a default value (see :ref:`Default Values for Types`):
 
@@ -2983,20 +2986,19 @@ the following:
    if a class has an extension clause (see :ref:`Class Extension Clause`).
    A :index:`compile-time error` occurs if:
 
-   - The call is not a root-level statement within a constructor;
+   - Call is not a root-level statement within a constructor;
 
-   - An argument of the call uses ``this`` or ``super``.
+   - Call argument uses ``this`` or ``super``.
 
 
-3. Implicit addition by the compiler: field initializers
-   (if any) are to be executed in the order they appear
-   in a class body.
+3. Implicit addition by the compiler of field initializers (if any)
+   to be executed in the order they appear in a class body.
 
-4. Code that either does not use ``this`` or accesses fields through ``this``
-   so the fields that are not expliclity initialized in the body of
-   body of *primiary constructor* or during the step 3 are not read.
+4. Code that neither uses ``this`` nor accesses fields through ``this``,
+   i.e., fields not expliclity initialized in the body of a
+   *primiary constructor* or during the step 3, are not read.
 
-5. Arbitrary code after all the fields are initialized as defined in **item 4**.
+5. Arbitrary code after all fields are initialized as defined in **item 4**.
 
 If the body has no call to a superconstructor (i.e., **item 2** above
 is omitted), then the compiler implicitly adds a superconstructor call

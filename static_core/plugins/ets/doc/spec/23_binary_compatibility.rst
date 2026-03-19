@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2026 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -191,26 +191,13 @@ Some of the changes that can make some compiled code not *loadable*:
 - Adding a *final* modifier to an existing *exported* class.
 
 
-For *regular enumeration declarations*:
+For *enumeration declarations*:
 
 Changes that do not affect binary compatibility:
 
 - Adding new enum constants.
 
 - Changing the value of enum constants while preserving its type.
-
-
-For *constant enumeration declarations*:
-
-Changes that do not affect binary compatibility:
-
-- Adding new enumeration members.
-
-Changes that break the binary compatibility:
-
-- Changing a value of an enumeration members.
-
-- Changing enumeration base type.
 
 .. raw:: pdf
 

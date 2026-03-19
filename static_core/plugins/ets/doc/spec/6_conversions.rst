@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -205,7 +205,6 @@ The target type in this context is always ``string``:
    floating-point type
    loss of information
    enumeration type
-   const enumeration type
    string type
    nullish type
    boolean
@@ -522,7 +521,6 @@ This conversion never causes a :index:`runtime error`.
 
 .. index::
    enumeration type
-   const enumeration type
    numeric base type
    base type
    conversion
@@ -555,7 +553,6 @@ This conversion never causes a :index:`runtime error`.
 
 .. index::
    enumeration type
-   const enumeration type
    string type
    conversion
    constant

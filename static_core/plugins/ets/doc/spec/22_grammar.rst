@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -36,11 +36,7 @@ Grammar Summary
         ;
 
     typeReference:
-        typeReferencePart ('.' typeReferencePart)*
-        ;
-
-    typeReferencePart:
-        identifier typeArguments?
+        qualifiedName typeArguments?
         ;
 
     arrayType:
@@ -1155,7 +1151,6 @@ Grammar Summary
       | BooleanLiteral
       | StringLiteral
       | MultilineStringLiteral
-      | RegExpLiteral
       | NullLiteral
       | UndefinedLiteral
       | CharLiteral
@@ -1228,7 +1223,9 @@ Grammar Summary
         'f'
         ;
 
-    BigIntLiteral: IntegerLiteral 'n';
+    BigIntLiteral: DecimalIntegerLiteral 'n';
+
+    .. BigIntLiteral: IntegerLiteral 'n';
 
     BooleanLiteral:
         'true' | 'false'
@@ -1281,43 +1278,6 @@ Grammar Summary
 
     CharLiteral:
         'c\'' SingleQuoteCharacter '\''
-        ;
-
-    RegexLiteral:
-        '/' RegexCharSequence '$'? '/' RegExFlags?
-        ;
-
-    RegexCharSequence:
-        (
-            RegexCharacter
-            |RegexSpecialForms
-            |'(' RegexSpecialForms ')'
-            |'(' '?<' Identifier '>' RegexSpecialForms ')'
-            |'(' '?:' RegexSpecialForms ')'
-        )+
-        ;
-
-    RegexCharacter:
-        ~["'\\\r\n] ('*'|'+'|'?'|('{' DecimalIntegerLiteral (',' DecimalIntegerLiteral? )? '}'))?
-        ;
-
-    RegexSpecialForms:
-        CharacterClass ('(' '?='|'?!' CharacterClass ')')?
-        ('(' '?<='|'?<!' CharacterClass ')') CharacterClass
-        ;
-
-    CharacterClass:
-        '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
-        | '.'
-        | '\' ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit | DecimalIntegerLiteral | 'k<' Identifier '>')
-        | 'u' HexDigit HexDigit HexDigit HexDigit
-        | 'u{' HexDigit HexDigit HexDigit HexDigit HexDigit? '}'
-        | '[\b]'
-        | (RegexCharacter '|' RegexCharacter)
-        ;
-
-    RegExFlags:
-        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'?
         ;
 
 
