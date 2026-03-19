@@ -742,7 +742,8 @@ export namespace taskpool {
 
                     // Check if task timed out during execution
                     // If timed out, skip normal completion logic (promise already rejected)
-                    if (this.state.load() == InternalState.TIMEOUT.valueOf()) {
+                    if (this.isTimeout.load()) {
+                        this.state.store(InternalState.FINISHED.valueOf());
                         this.tryTriggerRunner();
                         return;
                     }
@@ -965,8 +966,8 @@ export namespace taskpool {
         hasTimeout: boolean = false;
         /// timeout duration in milliseconds
         timeoutMs: number = 0;
-        /// timer ID for timeout
-        timeoutTimerId: int = -1;
+        /// an instance of task has been timeout
+        isTimeout: AtomicBoolean = new AtomicBoolean(false);
 
         // NOTE(ipetrov, #19949): Change to private when bug in frontend will be fixed
         taskMutex: Object;
@@ -1233,11 +1234,11 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
             }
             const task: Task = item;
-            if (InternalTask.of(task).state.load() == InternalState.TIMEOUT.valueOf()) {
-                throw new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout");
-            }
             if (InternalTask.of(task).onReceiveCallback === undefined) {
                 throw new Error(TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED, "taskpool:: The callback is not registered on the host side");
+            }
+            if (InternalTask.of(task).state.load() == InternalState.TIMEOUT.valueOf()) {
+                return;
             }
             task.createPromise(InternalTask.of(task).onReceiveCallback!, ...args);
         }
@@ -1920,7 +1921,8 @@ export namespace taskpool {
         let timeoutTimerId: int = -1;
         const timeoutPromise = new Promise<Any>((resolve, reject) => {
             timeoutTimerId = setTimeout(() => {
-                if (internalTask.tryTransitionToTimeout()) {
+                if (internalTask.tryTransitionToTimeout() || (internalTask.state.load() == InternalState.CANCELED.valueOf() && internalTask.isRunning)) {
+                    internalTask.isTimeout.store(true);
                     reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout"));
                 }
             }, internalTask.timeoutMs.toInt());
@@ -2039,9 +2041,14 @@ export namespace taskpool {
         let timeoutTimerId: int = -1;
         const timeoutPromise = new Promise<Array<Any>>((resolve, reject) => {
             timeoutTimerId = setTimeout(() => {
-                if (timeoutTimerId === -1 ||
-                    GroupState.of(group).state_.load() === InternalState.CANCELED.valueOf() ||
-                    GroupState.of(group).state_.load() === InternalState.FINISHED.valueOf()) {
+                if (timeoutTimerId === -1 || GroupState.of(group).state_.load() === InternalState.FINISHED.valueOf()) {
+                    return;
+                }
+                if (GroupState.of(group).state_.load() === InternalState.CANCELED.valueOf()) {
+                    let hasRunningTask = GroupState.of(group).tasks.some((task: Task) => InternalTask.of(task).isRunning);
+                    if (hasRunningTask) {
+                        reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task group has been timeout"));
+                    }
                     return;
                 }
                 GroupState.of(group).state_.store(InternalState.TIMEOUT.valueOf());

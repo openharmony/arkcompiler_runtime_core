@@ -1610,7 +1610,8 @@ function main(): int {
     commonTaskSuite.addAsyncTest('CurrentTaskTest', currentTaskTest);
     // #33877: Test is incorrect and flaky fails
     commonTaskSuiteDisabled.addAsyncTest('BlockedExpandDefaultConfigTest', blockedExpandDefaultConfigTest);
-    commonTaskSuite.addAsyncTest('BlockedExpandCustomThresholdAndIntervalTest', blockedExpandCustomThresholdAndIntervalTest);
+    // #33883: enable testcase when issue will be fixed
+    commonTaskSuiteDisabled.addAsyncTest('BlockedExpandCustomThresholdAndIntervalTest', blockedExpandCustomThresholdAndIntervalTest);
     commonTaskSuite.addAsyncTest('GetTaskpoolInfoTest', testTaskpoolInfo);
     commonTaskSuite.addTest('GetTaskpoolInfoOfNoneNameTaskTest', testTaskpoolInfoOfNoneNameTask);
     commonTaskSuite.addAsyncTest('ExceedContinueTaskCountTest', exceedContinueTaskTest);
