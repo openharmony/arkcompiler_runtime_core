@@ -266,6 +266,8 @@ class Checker
     @events_compiler_scope = nil
     # IR scope for IR dumps files 'ir_dump/*.ir'
     @ir_scope = nil
+    # Events scope for 'events_compiler.csv'
+    @log_compiler_scope = nil
 
     # Disassembly file lines, that were read from 'disasm.txt'
     @disasm_lines = nil
@@ -342,6 +344,12 @@ class Checker
         @args << "--profilesaver-enabled=true --profile-output=#{@profdata_file}"
       when :options
         @args << value
+      when :log_file
+        next unless value
+        @args << '--log-file=./log_compiler.csv --log-stream=file'
+      when :compiler_enable_events
+        next unless value
+        @args << '--compiler-enable-events --compiler-events-path=./events_compiler.csv'
       when :entry
         entry = value
       when :result
@@ -389,7 +397,8 @@ class Checker
     File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
 
     @events_scope = SearchScope.from_file("#{@cwd}/events.csv", 'Events')
-    @events_compiler_scope = SearchScope.from_file("#{@cwd}/events_compiler.csv", 'Events') if File.exist?("#{@cwd}/events_compiler.csv")
+    @events_compiler_scope = SearchScope.from_file("#{@cwd}/events_compiler.csv", 'Events compiler') if File.exist?("#{@cwd}/events_compiler.csv")
+    @log_compiler_scope = SearchScope.from_file("#{@cwd}/log_compiler.csv", 'Log') if File.exist?("#{@cwd}/log_compiler.csv")
   end
 
   def WRITE_FILE(**args)
@@ -433,6 +442,12 @@ class Checker
         raise "call RUN with `pgo_emit_profdata: true` (or RUN_PGO_PROF) before :pgo_use_profdata" unless @profdata_file
         options << "--paoc-use-profile:path=#{@profdata_file},force"
         options << "--panda-files=#{@options.test_file}"  # NOTE (urandon): this is required for compiler's runtime now
+      when :log_file
+        next unless value
+       options << '--log-file=./log_compiler.csv --log-stream=file'
+      when :compiler_enable_events
+        next unless value
+        options << '--compiler-enable-events --compiler-events-path=./events_compiler.csv'
       when :env
         env = value
       when :inputs
@@ -481,7 +496,8 @@ class Checker
     File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
 
     @events_scope = SearchScope.from_file("#{@cwd}/events.csv", 'Events')
-    @events_compiler_scope = SearchScope.from_file("#{@cwd}/events_compiler.csv", 'Events') if File.exist?("#{@cwd}/events_compiler.csv")
+    @events_compiler_scope = SearchScope.from_file("#{@cwd}/events_compiler.csv", 'Events compiler') if File.exist?("#{@cwd}/events_compiler.csv")
+    @log_compiler_scope = SearchScope.from_file("#{@cwd}/log_compiler.csv", 'Log') if File.exist?("#{@cwd}/log_compiler.csv")
   end
 
   def RUN_AOT(**args)
@@ -605,78 +621,113 @@ class Checker
     RUN_PAOC(**args)
   end
 
-  def EVENT(match)
+  def _SEARCH(content, match)
     return if @options.release
 
-    @events_scope.find(match)
+    content.find(match)
+  end
+
+  def _SEARCH_NEXT(content, match)
+    return if @options.release
+
+    content.find_next(match)
+  end
+
+  def _SEARCH_COUNT(content, match)
+    return 0 if @options.release
+
+    content.lines.count { |event| contains?(event, match) }
+  end
+
+  def _SEARCH_NOT(content, match)
+    return if @options.release
+
+    content.find_not(match)
+  end
+
+  def _SEARCH_NEXT_NOT(content, match)
+    return if @options.release
+
+    content.find_next_not(match)
+  end
+
+  def _SEARCHES_COUNT(content, match, count, component)
+    return if @options.release
+
+    res = content.lines.count { |event| contains?(event, match) }
+    raise_error "#{component} count missmatch for #{match}, expected: #{count}, real: #{res}" unless res == count
+  end
+
+  def EVENT(match)
+    _SEARCH(@events_scope, match)
   end
 
   def EVENT_COMPILER(match)
-    return if @options.release
+    _SEARCH(@events_compiler_scope, match)
+  end
 
-    @events_compiler_scope.find(match)
+  def LOG_COMPILER(match)
+    _SEARCH(@log_compiler_scope, match)
   end
 
   def EVENT_NEXT(match)
-    return if @options.release
-
-    @events_scope.find_next(match)
+    _SEARCH_NEXT(@events_scope, match)
   end
 
   def EVENT_COMPILER_NEXT(match)
-    return if @options.release
+    _SEARCH_NEXT(@events_compiler_scope, match)
+  end
 
-    @events_compiler_scope.find_next(match)
+  def LOG_COMPILER_NEXT(match)
+    _SEARCH_NEXT(@log_compiler_scope, match)
   end
 
   def EVENT_COUNT(match)
-    return 0 if @options.release
-
-    @events_scope.lines.count { |event| contains?(event, match) }
+    _SEARCH_COUNT(@events_scope, match)
   end
 
   def EVENT_COMPILER_COUNT(match)
-    return 0 if @options.release
+    _SEARCH_COUNT(@events_compiler_scope, match)
+  end
 
-    @events_compiler_scope.lines.count { |event| contains?(event, match) }
+  def LOG_COMPILER_COUNT(match)
+    _SEARCH_COUNT(@log_compiler_scope, match)
   end
 
   def EVENT_NOT(match)
-    return if @options.release
-
-    @events_scope.find_not(match)
+    _SEARCH_NOT(@events_scope, match)
   end
 
   def EVENT_COMPILER_NOT(match)
-    return if @options.release
+    _SEARCH_NOT(@events_compiler_scope, match)
+  end
 
-    @events_compiler_scope.find_not(match)
+  def LOG_COMPILER_NOT(match)
+    _SEARCH_NOT(@log_compiler_scope, match)
   end
 
   def EVENT_NEXT_NOT(match)
-    return if @options.release
-
-    @events_scope.find_next_not(match)
+    _SEARCH_NEXT_NOT(@events_scope, match)
   end
 
   def EVENT_COMPILER_NEXT_NOT(match)
-    return if @options.release
+    _SEARCH_NEXT_NOT(@events_compiler_scope, match)
+  end
 
-    @events_compiler_scope.find_next_not(match)
+  def LOG_COMPILER_NEXT_NOT(match)
+    _SEARCH_NEXT_NOT(@log_compiler_scope, match)
   end
 
   def EVENTS_COUNT(match, count)
-    return if @options.release
-
-    res = @events_scope.lines.count { |event| contains?(event, match) }
-    raise_error "Events count missmatch for #{match}, expected: #{count}, real: #{res}" unless res == count
+    _SEARCHES_COUNT(@events_scope, match, count, "Events")
   end
 
   def EVENTS_COMPILER_COUNT(match, count)
-    return if @options.release
+    _SEARCHES_COUNT(@events_compiler_scope, match, count, "Events compiler")
+  end
 
-    res = @events_compiler_scope.lines.count { |event| contains?(event, match) }
-    raise_error "Events compiler count missmatch for #{match}, expected: #{count}, real: #{res}" unless res == count
+  def LOGS_COMPILER_COUNT(match, count)
+    _SEARCHES_COUNT(@log_compiler_scope, match, count, "Log")
   end
 
   def TRUE(condition)
@@ -702,26 +753,19 @@ class Checker
   end
 
   def INST(match)
-    return if @options.release
-
-    @ir_scope.find(match)
+    _SEARCH(@ir_scope, match)
   end
 
   def INST_NEXT(match)
-    return if @options.release
-
-    @ir_scope.find_next(match)
+    _SEARCH_NEXT(@ir_scope, match)
   end
 
   def INST_NOT(match)
-    return if @options.release
-    @ir_scope.find_not(match)
+    _SEARCH_NOT(@ir_scope, match)
   end
 
   def INST_NEXT_NOT(match)
-    return if @options.release
-
-    @ir_scope.find_next_not(match)
+    _SEARCH_NEXT_NOT(@ir_scope, match)
   end
 
   def INST_COUNT(match, count)
@@ -975,17 +1019,17 @@ class Checker
   def clear_data
    $current_method = nil
    $current_pass = nil
+   artefact_list = ["events.csv", "events_compiler.csv", "disasm.txt", "console.out", "log_compiler.csv"]
    if !@options.keep_data
-      FileUtils.rm_rf("#{@cwd}/events.csv")
-      FileUtils.rm_rf("#{@cwd}/events_compiler.csv")
-      FileUtils.rm_rf("#{@cwd}/disasm.txt")
-      FileUtils.rm_rf("#{@cwd}/console.out")
+      artefact_list.each do |artefact|
+        FileUtils.rm_rf("#{@cwd}/#{artefact}")
+      end
    else
       @run_idx += 1
-      FileUtils.mv "#{@cwd}/events.csv", "#{@cwd}/events-#{@run_idx}.csv", force: true
-      FileUtils.mv "#{@cwd}/events_compiler.csv", "#{@cwd}/events_compiler-#{@run_idx}.csv", force: true
-      FileUtils.mv "#{@cwd}/disasm.txt", "#{@cwd}/disasm-#{@run_idx}.txt", force: true
-      FileUtils.mv "#{@cwd}/console.out", "#{@cwd}/console-#{@run_idx}.out", force: true
+      artefact_list.each do |artefact|
+        name, separator, extension = artefact.rpartition('.')
+        FileUtils.mv "#{@cwd}/#{artefact}", "#{@cwd}/#{name}-#{@run_idx}#{separator}#{extension}", force: true
+      end
    end
   end
 end

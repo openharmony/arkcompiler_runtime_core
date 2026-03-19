@@ -15,16 +15,15 @@
 
 //! CHECKER      Inlining cache emits PUT then GET for reusable callee
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainPositive'"
+//! RUN_PAOC     options: "--compiler-regex='inlining_cache_events\.ETSGLOBAL::mainPositive'",
+//!              compiler_enable_events: true
 //! EVENT_COMPILER        /inlining_cache_events.*,operation:PUT,.*,inline_state:UNKNOWN/
 //! EVENT_COMPILER_NEXT   /inlining_cache_events.*,operation:GET,.*,inline_state:OK/
 //! EVENT       /Inline,inlining_cache_events.ETSGLOBAL::mainPositive,.*inlineReusable,.*,STATIC,SUCCESS/
 
 //! CHECKER      Inlining cache reuses negative simple-only result
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                --compiler-inline-simple-only=true \
+//! RUN_PAOC     compiler_enable_events: true, options: "--compiler-inline-simple-only=true \
 //!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainNegative'"
 //! EVENT_COMPILER        /inlining_cache_events.*,operation:PUT,.*,inline_state:UNKNOWN/
 //! EVENT_COMPILER_NEXT   /inlining_cache_events.*,operation:GET,.*,inline_state:FAIL/
@@ -33,8 +32,7 @@
 //! CHECKER      Inlining cache tracks external state in AOT PGO
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF entry: "inlining_cache_events.ETSGLOBAL::mainExternal"
-//! RUN_PGO_PAOC options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                --compiler-inline-external-methods-aot=true \
+//! RUN_PGO_PAOC compiler_enable_events: true, options: "--compiler-inline-external-methods-aot=true \
 //!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainExternal'"
 //! EVENT_COMPILER        /inlining_cache_events.*,operation:PUT,.*,external_state:UNKNOWN,inline_state:UNKNOWN/
 //! EVENT_COMPILER_NEXT   /inlining_cache_events.*,operation:GET,.*,external_state:OK,inline_state:OK/
@@ -42,8 +40,7 @@
 
 //! CHECKER      Inlining cache events are AOT-only and absent in JIT
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                --coroutine-workers-count=0 \
+//! RUN          force_jit: true, compiler_enable_events: true, options: "--coroutine-workers-count=0 \
 //!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainPositive'", \
 //!              entry: "inlining_cache_events.ETSGLOBAL::mainPositive"
 //! EVENT_COMPILER_NOT    /inlining_cache_events.ETSGLOBAL::mainPositive,inlining-cache.*/
@@ -51,8 +48,7 @@
 
 //! CHECKER      Inlining cache events are absent in JIT for negative case
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                --coroutine-workers-count=0 \
+//! RUN          force_jit: true, compiler_enable_events: true, options: "--coroutine-workers-count=0 \
 //!                --compiler-inline-simple-only=true \
 //!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainNegative'", \
 //!              entry: "inlining_cache_events.ETSGLOBAL::mainNegative"
@@ -61,8 +57,7 @@
 
 //! CHECKER      Inlining cache events are absent in JIT for external case
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                --coroutine-workers-count=0 \
+//! RUN          force_jit: true, compiler_enable_events: true, options: "--coroutine-workers-count=0 \
 //!                --compiler-inline-external-methods-aot=true \
 //!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainExternal'", \
 //!              entry: "inlining_cache_events.ETSGLOBAL::mainExternal"

@@ -15,8 +15,7 @@
 
 //! CHECKER         Check preheader's `Compare` isn't squashed by VN.
 //! RUN             force_jit: true, entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main",
-//!                 options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
-//!                  --compiler-regex='.*::main'"
+//!                 options: "--compiler-regex='.*::main'", compiler_enable_events: true
 //!
 //! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! PASS_AFTER      "LoopPeeling"

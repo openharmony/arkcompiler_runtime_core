@@ -1007,14 +1007,12 @@ function bugfixChainConcat20(): void {
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='ets_string_builder_merge.ETSGLOBAL::main' \
-//!                         --compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events \
-//!                         --compiler-events-path=./events_compiler.csv",
+//!                         --compiler-enable-jit=false --interpreter-type=irtoc", compiler_enable_events: true,
 //!               entry: "ets_string_builder_merge.ETSGLOBAL::main"
 
 //! CHECKER       INTERP-CPP, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='ets_string_builder_merge.ETSGLOBAL::main' \
-//!                         --compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events \
-//!                         --compiler-events-path=./events_compiler.csv",
+//!                         --compiler-enable-jit=false --interpreter-type=cpp", compiler_enable_events: true,
 //!               entry: "ets_string_builder_merge.ETSGLOBAL::main"

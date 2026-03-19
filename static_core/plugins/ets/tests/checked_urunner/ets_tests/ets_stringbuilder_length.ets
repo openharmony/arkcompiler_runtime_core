@@ -94,16 +94,14 @@
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false \
-//!                         --interpreter-type=irtoc --compiler-enable-events \
-//!                         --compiler-events-path=./events_compiler.csv",
+//!                         --interpreter-type=irtoc", compiler_enable_events: true,
 //!               entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 //! CHECKER       INTERP-CPP, StringBuilder length field access BCO optimized
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false \
-//!                         --interpreter-type=cpp --compiler-enable-events \
-//!                         --compiler-events-path=./events_compiler.csv",
+//!                         --interpreter-type=cpp ", compiler_enable_events: true,
 //!               entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 function generateFakeRandomInteger(): Int32Array {
