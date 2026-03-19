@@ -915,7 +915,7 @@
 09.classes/06.field_declarations/access_field_neg_41.ets
 09.classes/06.field_declarations/access_field_neg_45.ets
 
-#33239
+#33804
 09.classes/06.field_declarations/access_static_field_neg_23.ets
 09.classes/06.field_declarations/access_static_field_neg_24.ets
 09.classes/06.field_declarations/access_static_field_neg_25.ets
@@ -1159,12 +1159,10 @@
 #16840
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 
-#32429
+#32430
 11.enumerations/enum_cte_n_74.ets
 11.enumerations/enum_cte_n_75.ets
 11.enumerations/enum_cte_n_87.ets
-
-#32430
 11.enumerations/enum_cte_n_76.ets
 11.enumerations/enum_cte_n_77.ets
 11.enumerations/enum_cte_n_78.ets
@@ -1207,6 +1205,38 @@
 11.enumerations/enum_cte_n_99.ets
 11.enumerations/enum_cte_n_100.ets
 
+#33640
+11.enumerations/01.enumeration_base_type/enum_int_n_2.ets
+
+#33639
+11.enumerations/01.enumeration_base_type/enum_int_3.ets
+11.enumerations/01.enumeration_base_type/enum_int_4.ets
+11.enumerations/01.enumeration_base_type/enum_int_5.ets
+
+#33805
+11.enumerations/01.enumeration_base_type/enum_int_n_17.ets
+
+#33639
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_4.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_5.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_6.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_13.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_14.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_16.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_18.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_19.ets
+
+#33806
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_0.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_1.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_2.ets
+
+#33807
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_3.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_4.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_5.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_6.ets
+
 #33476
 13.modules_and_namespaces/02.module_header/module_header.ets
 13.modules_and_namespaces/02.module_header/module_header_export.ets
@@ -1222,18 +1252,6 @@
 
 #33476
 13.modules_and_namespaces/09.multifile_module/multifile_module_mismatched_export_n.ets
-
-#33334
-11.enumerations/01.enumeration_integer_values/enum_long_12.ets
-11.enumerations/01.enumeration_integer_values/enum_long_13.ets
-11.enumerations/01.enumeration_integer_values/enum_long_14.ets
-11.enumerations/01.enumeration_integer_values/enum_long_15.ets
-11.enumerations/01.enumeration_integer_values/enum_long_16.ets
-11.enumerations/01.enumeration_integer_values/enum_long_17.ets
-
-#33351
-11.enumerations/01.enumeration_integer_values/enum_long_18.ets
-11.enumerations/01.enumeration_integer_values/enum_long_19.ets
 
 #26714
 13.modules_and_namespaces/04.import_directives/test.ets
