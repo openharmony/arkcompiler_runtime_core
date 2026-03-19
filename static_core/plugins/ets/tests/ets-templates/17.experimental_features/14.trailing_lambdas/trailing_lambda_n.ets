@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,12 @@
  */
 
 {%- for c in cases %}
+
 /*---
 desc: >-
-    The trailing lambda mechanism allows using a special form of function
-    or method call when the last parameter of a function or a method is
-    of function type, and the argument is passed as a lambda using the {} notation.
+    The trailing lambda usage that occurs to error
+tags: [negative, compile-only]
+expected_out: "{{c.exp_out}}"
 ---*/
 
 {{c.decl}}
@@ -26,5 +27,4 @@ desc: >-
 function main() {
     {{c.use|indent}}
 }
-
 {%- endfor %}

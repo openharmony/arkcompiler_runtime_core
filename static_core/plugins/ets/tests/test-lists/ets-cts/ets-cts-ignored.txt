@@ -2469,8 +2469,7 @@
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/overriding1c_3.ets
 
 #28235 Constructor Names not yet work
-17.experimental_features/11.classes_experimental/03.named_constructors/ConstructorNameOverload.ets
-17.experimental_features/11.classes_experimental/03.named_constructors/ShortFormCall_0.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/ConstructorNameOverload_n.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/ShortFormCall_1.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/ShortFormCall_2.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/SpecExample0.ets
@@ -2577,6 +2576,9 @@
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_24.ets
 
+#33621
+17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_n_10.ets
+
 #31311
 17.experimental_features/13.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_8.ets
 
@@ -2591,6 +2593,9 @@
 17.experimental_features/13.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.ets
 17.experimental_features/14.trailing_lambdas/trlambda_met_13.ets
 17.experimental_features/14.trailing_lambdas/trlambda_met_14.ets
+
+#33744
+17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
 
 #31097
 18.annotations/base_annotation_syntax_n_2.ets

@@ -78,7 +78,6 @@ cases:
       bb.foo()
     expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"
 
-  #31498
   - decl: |
       class A {
         foo() {}
@@ -90,3 +89,11 @@ cases:
       let x: A|B = new B
       x.foo()
     expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"
+
+  # CTE occurs if the name of generic function with reciver and the name of an accesible instance method or field of the receiver type are the same
+  - decl: |
+      class A {
+        bar(): A { return this; }
+      }
+      function bar<T extends Object>(this: T): T { return this; }
+    expected_out: "Semantic error ESE0081: The extension function 'bar' has the same name with public method in class A"
