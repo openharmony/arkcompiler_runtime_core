@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <unordered_set>
+
 #include "runtime/mem/heap_manager.h"
 #include "runtime/runtime_helpers.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -98,6 +101,84 @@ extern "C" void StdCorePrintStackTrace()
     ark::PrintStackTrace();
 }
 
+#ifdef PANDA_BUILD_LINUX_PANDA_RUNTIME
+static PandaString NormalizeLibraryName(const PandaString &name)
+{
+#if !defined(PANDA_TARGET_OHOS)
+    constexpr PandaString::size_type Z_SUFFIX_LEN = 2;
+    if (name.size() > Z_SUFFIX_LEN && name.compare(name.size() - Z_SUFFIX_LEN, Z_SUFFIX_LEN, ".z") == 0) {
+        return name.substr(0, name.size() - Z_SUFFIX_LEN);
+    }
+#endif
+    return name;
+}
+
+static constexpr const char *PANDA_SHARED_LIBRARY_PREFIX = "lib";
+
+static constexpr const char *GetLibraryExtension()
+{
+#if defined(PANDA_TARGET_WINDOWS)
+    return ".dll";
+#elif defined(PANDA_TARGET_MACOS)
+    return ".dylib";
+#elif defined(PANDA_TARGET_UNIX)
+    return ".so";
+#else
+    UNREACHABLE();
+#endif
+}
+
+static PandaString ComposeLibraryName(const PandaString &name)
+{
+    return PandaString(PANDA_SHARED_LIBRARY_PREFIX) + name + GetLibraryExtension();
+}
+
+static PandaString ResolveLibraryName(const PandaString &name)
+{
+    return ComposeLibraryName(NormalizeLibraryName(name));
+}
+
+static bool EndsWith(const PandaString &value, const char *suffix)
+{
+    PandaString suffixStr(suffix);
+    if (value.size() < suffixStr.size()) {
+        return false;
+    }
+    return value.compare(value.size() - suffixStr.size(), suffixStr.size(), suffixStr) == 0;
+}
+
+static void AddUniqueLibraryName(std::unordered_set<PandaString> *candidates, const PandaString &libraryName)
+{
+    ASSERT(candidates != nullptr);
+    candidates->insert(libraryName);
+}
+
+static std::unordered_set<PandaString> GetLibraryLoadCandidates(const PandaString &name)
+{
+    std::unordered_set<PandaString> candidatesSet;
+    AddUniqueLibraryName(&candidatesSet, ResolveLibraryName(name));
+
+#if !defined(PANDA_TARGET_OHOS)
+    // Keep compatibility with runtime names that still carry the legacy ".z" suffix.
+    if (EndsWith(name, ".z")) {
+        AddUniqueLibraryName(&candidatesSet, ComposeLibraryName(name));
+    }
+
+    // Previewer packages context ANI kits as simulator_context_ani_kit.<ext>.
+    if (name.find("context_ani_kit") != PandaString::npos) {
+        AddUniqueLibraryName(&candidatesSet, ComposeLibraryName("simulator_context_ani_kit"));
+    }
+
+    // Previewer uses previewer_window_napi.<ext> instead of windowstageani_module.<ext>.
+    if (name.find("windowstageani_module") != PandaString::npos ||
+        name.find("embeddablewindowstageani_module") != PandaString::npos) {
+        AddUniqueLibraryName(&candidatesSet, ComposeLibraryName("previewer_window_napi"));
+    }
+#endif
+
+    return candidatesSet;
+}
+#else
 static PandaString ResolveLibraryName(const PandaString &name)
 {
 #ifdef PANDA_TARGET_UNIX
@@ -107,6 +188,7 @@ static PandaString ResolveLibraryName(const PandaString &name)
     UNREACHABLE();
 #endif  // PANDA_TARGET_UNIX
 }
+#endif
 
 void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermission,
                               ark::ets::EtsString *fileName = nullptr)
@@ -135,8 +217,20 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
                        << "; fileName: " << fileNameStr.c_str();
     ScopedNativeCodeThread snct(coroutine);
     auto env = coroutine->GetPandaAniEnv();
-    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr), shouldVerifyPermission,
-                                                    fileNameStr)) {
+#ifdef PANDA_BUILD_LINUX_PANDA_RUNTIME
+    bool loadSuccess = false;
+    for (const auto &libraryName : GetLibraryLoadCandidates(nameStr)) {
+        LOG(INFO, RUNTIME) << "try load library candidate " << libraryName.c_str();
+        if (coroutine->GetPandaVM()->LoadNativeLibrary(env, libraryName, shouldVerifyPermission, fileNameStr)) {
+            loadSuccess = true;
+            break;
+        }
+    }
+#else
+    bool loadSuccess = coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr),
+                                                                  shouldVerifyPermission, fileNameStr);
+#endif
+    if (!loadSuccess) {
         ScopedManagedCodeThread smct(coroutine);
 
         PandaStringStream ss;

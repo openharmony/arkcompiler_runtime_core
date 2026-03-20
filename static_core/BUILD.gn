@@ -65,7 +65,7 @@ group("ark_host_linux_tools_packages") {
     "$ark_root/panda:arkts_bin(${host_toolchain})",
     "$ark_root/runtime:libarkruntime(${host_toolchain})",
   ]
-  if (enable_codegen && host_os != "mac") {
+  if (enable_codegen && !panda_runtime_sdk_build && host_os != "mac") {
     deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})" ]
   }
 
@@ -73,8 +73,11 @@ group("ark_host_linux_tools_packages") {
 
   # TODO: don't exclude these targets from OHOS build
   if (ark_static_standalone_build) {
+    if (enable_codegen && !panda_runtime_sdk_build) {
+      deps += [ "$ark_root/compiler/tools/aotdump:ark_aotdump(${host_toolchain})" ]
+    }
+
     deps += [
-      "$ark_root/compiler/tools/aotdump:ark_aotdump(${host_toolchain})",
       "$ark_root/compiler/tools/paoc:ark_aot(${host_toolchain})",
       "$ark_root/disassembler:arkts_disasm(${host_toolchain})",
       "$ark_root/static_linker:ark_link(${host_toolchain})",
@@ -186,6 +189,15 @@ config("ark_common_config") {
   # panda build in full ohos tree
   if (!ark_static_standalone_build && !ark_standalone_build) {
     defines += [ "PANDA_BUILD_IN_OHOS_TREE" ]
+  }
+
+  if (panda_runtime_sdk_build &&
+      (current_cpu == "amd64" || current_cpu == "x64" ||
+       current_cpu == "x86_64")) {
+    defines += [
+      "PANDA_SDK_LINUX_X64_FORCE_CPP_INTERPRETER",
+      "PANDA_BUILD_LINUX_PANDA_RUNTIME",
+    ]
   }
 
   cflags_cc = []

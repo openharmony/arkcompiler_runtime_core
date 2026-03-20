@@ -623,9 +623,14 @@ ohos_source_set("libarkruntime_set_static_host") {
   subsystem_name = ark_subsystem_name
 }
 
+runtime_static_target = ":libarkruntime_set_static"
+if (panda_runtime_sdk_build && current_toolchain == host_toolchain) {
+  runtime_static_target = ":libarkruntime_set_static_host"
+}
+
 ohos_static_library("libarkruntime_static") {
   deps = []
-  deps += [ ":libarkruntime_set_static" ]
+  deps += [ runtime_static_target ]
   output_extension = "a"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
@@ -650,7 +655,7 @@ ohos_shared_library("libarkruntime") {
   }
 
   deps = []
-  deps += [ ":libarkruntime_set_static" ]
+  deps += [ runtime_static_target ]
 
   external_deps = []
   cflags = []
