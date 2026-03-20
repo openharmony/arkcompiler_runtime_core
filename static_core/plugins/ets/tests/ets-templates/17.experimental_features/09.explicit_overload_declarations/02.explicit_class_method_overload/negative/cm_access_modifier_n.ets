@@ -20,6 +20,7 @@ desc: >-
         public but at least one overloaded method is not public
         protected but at least one overloaded method is private.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0386: Access modifier mismatch: a 'public' overload requires all methods to be 'public'; a 'protected' overload cannot have 'private' methods."
 ---*/
 
 class A {

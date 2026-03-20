@@ -17,6 +17,7 @@
 /*---
 desc: A compile-time error occurs if method modifiers are different for ovarload alias and overload method.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0387: Overload alias and overloaded method name must have exactly the same modifiers (static, async)."
 ---*/
 
 class A {

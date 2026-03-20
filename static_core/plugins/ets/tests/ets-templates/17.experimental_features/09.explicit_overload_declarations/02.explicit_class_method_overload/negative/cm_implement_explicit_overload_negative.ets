@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,28 +15,26 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
+desc: If a class implements some interfaces with an explicit overload of the same name,
+      then a new explicit overload must include all overloaded methods
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0389: The overloaded name 'bar' can't refer to a function with overload signatures."
+expected_out: "TODO: Expected output unknown"
 ---*/
 
-class A {
-  bar (i: int): string
-  bar (n: number): string
-  bar(...a: Any[]): Any {
-    return 'bar';
-  }
-
-  foo1 (i: int): string {
-    return 'foo1';
-  }
-
-  overload test { {{c.list}} }
+interface I1 {
+    f1() {}
+    f2() {}
+    overload foo {f1, f2}
 }
 
-function main(): void {
-  let a: A = new A();
-  a.test(1);
+interface I2 {
+    f3() {}
+    f4() {}
+    overload foo {f3, f4}
+}
+
+class C implements I1, I2 {
+    {{c.expl_over}}
 }
 
 {% endfor %}

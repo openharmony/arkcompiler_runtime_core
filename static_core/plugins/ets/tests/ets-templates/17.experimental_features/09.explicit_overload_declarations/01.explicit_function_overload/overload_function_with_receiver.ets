@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,30 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0389: The overloaded name 'bar' can't refer to a function with overload signatures."
+desc: An explicit overload can be called like a regular function
 ---*/
 
-class A {
-  bar (i: int): string
-  bar (n: number): string
-  bar(...a: Any[]): Any {
-    return 'bar';
-  }
+function bar1(this: string): string { return "1" }
 
-  foo1 (i: int): string {
-    return 'foo1';
-  }
+function bar2(this: number): string { return "2" }
 
-  overload test { {{c.list}} }
-}
+overload bar { bar1, bar2 }
+
+let s: string = "1";
+let n: number = 1;
 
 function main(): void {
-  let a: A = new A();
-  a.test(1);
+    arktest.assertEQ(bar(s), "1", "bar1 call expected");
+    arktest.assertEQ(bar(n), "2", "bar2 call expected");
 }
-
-{% endfor %}

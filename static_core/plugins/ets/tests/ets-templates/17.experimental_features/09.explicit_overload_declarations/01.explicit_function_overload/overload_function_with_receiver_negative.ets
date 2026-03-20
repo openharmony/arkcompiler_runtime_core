@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,28 +15,18 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
+desc: If an explicit overload is called like a function with receiver, i.e.,
+      syntax of method call is used then a compile-time error occurs
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0389: The overloaded name 'bar' can't refer to a function with overload signatures."
+expected_out: "{{c.expected_out}}"
 ---*/
 
-class A {
-  bar (i: int): string
-  bar (n: number): string
-  bar(...a: Any[]): Any {
-    return 'bar';
-  }
+function bar1(this: string) {}
 
-  foo1 (i: int): string {
-    return 'foo1';
-  }
+function bar2(this: number) {}
 
-  overload test { {{c.list}} }
-}
+overload bar { bar1, bar2 }
 
-function main(): void {
-  let a: A = new A();
-  a.test(1);
-}
+{{c.call}}
 
 {% endfor %}

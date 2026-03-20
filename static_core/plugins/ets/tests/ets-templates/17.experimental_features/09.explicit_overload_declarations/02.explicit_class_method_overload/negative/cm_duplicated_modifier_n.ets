@@ -17,6 +17,7 @@
 /*---
 desc: A compile-time error occurs if method modifier is used more than once in an method overload declaration.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0115: Duplicated modifier is not allowed."
 ---*/
 
 class A {

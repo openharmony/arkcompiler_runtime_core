@@ -13,11 +13,6 @@
 
 ---
 cases:
-  - { mod1: protected, mod2: '',        modB: ''        }
-  - { mod1: protected, mod2: public,    modB: ''        }
-  - { mod1: protected, mod2: '',        modB: public    }
-  - { mod1: protected, mod2: public,    modB: public    }
-  
   - { mod1: private,   mod2: '',        modB: ''        }
   - { mod1: private,   mod2: public,    modB: ''        }
   - { mod1: private,   mod2: protected, modB: ''        }
@@ -34,4 +29,3 @@ cases:
   - { mod1: private,   mod2: public,    modB: private   }
   - { mod1: private,   mod2: protected, modB: private   }
   - { mod1: private,   mod2: private,   modB: private   }
-
