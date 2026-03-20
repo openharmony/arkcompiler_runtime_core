@@ -34,7 +34,7 @@ cases:
           // covariance in return type
           let sub1: (p: B) => A|B|null = (p: B): A|B|null => a
           let sub2: (p: B) => string|Array<B>|B|undefined = (p: B): string|Array<B>|B|undefined => b
-          let sub3: (p: B) => number|int|long|double|float = (p: B): number|int|long|double|float => 3
+          let sub3: (p: B) => number|int|long|double|float = (p: B): number|int|long|double|float => (3).toInt()
       use: |-
           let superFoo: (p: B) => Any = (p: B): Any => 0
           arktest.assertEQ(superFoo(new B), 0)
@@ -62,7 +62,7 @@ cases:
           // covariance in return type
           let sub1: (p: B) => A|B|null = (p: B): A|B|null => a
           let sub2: (p: B) => string|Array<B>|B|undefined = (p: B): string|Array<B>|B|undefined => b
-          let sub3: (p: B) => number|int|long|double|float = (p: B): number|int|long|double|float => 3
+          let sub3: (p: B) => number|int|long|double|float = (p: B): number|int|long|double|float => (3).toInt()
       use: |-
           // supertype is (p: B) => Any
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), a) })(sub1);
