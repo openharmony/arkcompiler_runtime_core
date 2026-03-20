@@ -2,6 +2,8 @@
 std/core/ProcessTest.ets
 std/concurrency/AsyncMutexTest.ets
 std/concurrency/AsyncCondVarTest.ets
+# Note: 33638 is tracking this problem
+std/concurrency/AsyncRWLockTest.ets
 # End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/I9W32L
 
 # 24811 thread-safe containers tests may cause failure on timeout or CoroutineLimitExceedError in JIT_REPEARS - see issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
