@@ -169,13 +169,16 @@ function testBigIntFromDoubleFloat32Underflow(): void {
     let arr1 = new Float32Array([MIN_VAL]);
     let bval = BigInt(arr1[0]);
     let arr = new BigInt64Array([bval]);
-    arktest.assertTrue(arr[0] == 0);
+    arktest.assertTrue(arr[0] != 0);
+    arktest.assertTrue(arr[0] == 0n);
+    arktest.assertTrue(arr[0].doubleValue() == 0);
     arktest.assertEQ(arr[0], BigInt(0));
 }
 
 function testBigIntNumberMax(): void {
   let bi1 = 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368n;
-  arktest.assertTrue(bi1 == Number.MAX_VALUE);
+  arktest.assertTrue(bi1 != Number.MAX_VALUE);
+  arktest.assertTrue(bi1.doubleValue() == Number.MAX_VALUE);
   arktest.assertFalse(bi1 >  Number.MAX_VALUE);
 }
 
