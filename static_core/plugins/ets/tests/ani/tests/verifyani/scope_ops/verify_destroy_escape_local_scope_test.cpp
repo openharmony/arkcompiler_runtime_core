@@ -137,7 +137,7 @@ TEST_F(DestroyEscapeLocalScopeTest, invalid_ref_after_destroy_scope)
     ASSERT_EQ(env_->CreateEscapeLocalScope(1), ANI_OK);
     ani_ref ref {};
     ani_class cls {};
-    GetClassAndObject(env_, &cls, "std.core.Int", reinterpret_cast<ani_object *>(&ref));
+    GetClassAndObject(env_, &cls, "std:core.Int", reinterpret_cast<ani_object *>(&ref));
     ani_ref escapeRef {};
     ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(env_, ref, &escapeRef), ANI_OK);
     ani_boolean isUndefined = ANI_FALSE;

@@ -365,14 +365,14 @@ TEST_F(ObjectGetField{{ Type }}Test, DISABLED_field_get_from_native_method)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_{{ type }}.Parent", &object_);
 
-    std::array methods = {ani_native_function {"bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar)}};
+    std::array methods = {ani_native_function {"bar", "C{std:core.Object}l:", reinterpret_cast<void *>(A::NativeBar)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     ani_field field;
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
 
     // In the native "bar" method, the "{{ type }}Field" field is called
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object_, "bar", "C{std.core.Object}l:", object_, field),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object_, "bar", "C{std:core.Object}l:", object_, field),
               ANI_OK);
 }
 

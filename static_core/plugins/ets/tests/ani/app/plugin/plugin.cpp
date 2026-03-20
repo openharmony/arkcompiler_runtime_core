@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,8 +106,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methods = {
-        ani_native_function {"BuildData", ":C{std.core.Array}", reinterpret_cast<void *>(BuildData)},
-        ani_native_function {"Apply", "C{std.core.Array}C{std.core.Function1}:", reinterpret_cast<void *>(Apply)},
+        ani_native_function {"BuildData", ":C{std:core.Array}", reinterpret_cast<void *>(BuildData)},
+        ani_native_function {"Apply", "C{std:core.Array}C{std:core.Function1}:", reinterpret_cast<void *>(Apply)},
     };
 
     ani_status status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

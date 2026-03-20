@@ -30,12 +30,12 @@ public:
         ASSERT_EQ(env_->FindModule("ani_verify_test_reference_{{ suff }}", &module_), ANI_OK);
         std::array functions = {
             ani_native_function {"stackRefWithLocal",
-                                 "X{C{std.core.Null}C{std.core.String}}:", reinterpret_cast<void *>(StackRefWithLocal)},
-            ani_native_function {"stackRefWithGlobal", "X{C{std.core.Null}C{std.core.String}}:",
+                                 "X{C{std:core.Null}C{std:core.String}}:", reinterpret_cast<void *>(StackRefWithLocal)},
+            ani_native_function {"stackRefWithGlobal", "X{C{std:core.Null}C{std:core.String}}:",
                                  reinterpret_cast<void *>(StackRefWithGlobal)},
-            ani_native_function {"anotherFrame", "C{std.core.String}:l", reinterpret_cast<void *>(AnotherFrame)},
+            ani_native_function {"anotherFrame", "C{std:core.String}:l", reinterpret_cast<void *>(AnotherFrame)},
             ani_native_function {"checkRefFromAnotherFrame", ":l", reinterpret_cast<void *>(CheckRefFromAnotherFrame)},
-            ani_native_function {"funcAddress", "C{std.core.String}:l", reinterpret_cast<void *>(FuncAddress)},
+            ani_native_function {"funcAddress", "C{std:core.String}:l", reinterpret_cast<void *>(FuncAddress)},
             ani_native_function {"badStackRef", ":l", reinterpret_cast<void *>(BadStackRef)},
         };
         ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);

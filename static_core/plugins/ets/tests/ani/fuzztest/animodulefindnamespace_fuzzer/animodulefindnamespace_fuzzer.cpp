@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void AniModuleFindNamespaceFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_namespace ns {};
-    std::string nsName = "std.core." + std::string(data, size);
+    std::string nsName = "std:core." + std::string(data, size);
     env->FindNamespace(nsName.c_str(), &ns);
 }
 }  // namespace OHOS

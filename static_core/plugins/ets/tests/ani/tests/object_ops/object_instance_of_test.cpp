@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,11 +145,11 @@ TEST_F(ObjectInstanceOfTest, object_instance_of_array)
 {
     ani_object objectArr;
     ani_class classA;
-    GetMethodData(&objectArr, &classA, "object_instance_of_test.A", "new_A_array", ":C{std.core.Array}");
+    GetMethodData(&objectArr, &classA, "object_instance_of_test.A", "new_A_array", ":C{std:core.Array}");
 
     ani_boolean res;
     ani_class arrayCls;
-    ASSERT_EQ(env_->FindClass("std.core.Array", &arrayCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Array", &arrayCls), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectArr, arrayCls, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
@@ -203,13 +203,13 @@ TEST_F(ObjectInstanceOfTest, pure_object_instance_of)
     ani_object objectD;
     ani_class classF;
     ani_class classD;
-    GetMethodData(&object, &classF, "object_instance_of_test.F", "new_Object", ":C{std.core.Object}");
+    GetMethodData(&object, &classF, "object_instance_of_test.F", "new_Object", ":C{std:core.Object}");
     GetMethodData(&objectD, &classD, "object_instance_of_test.D", "new_D", ":C{object_instance_of_test.D}");
 
     ani_class classObject;
     ani_class interfaceI;
     ani_class classA;
-    ASSERT_EQ(env_->FindClass("std.core.Object", &classObject), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Object", &classObject), ANI_OK);
     ASSERT_EQ(env_->FindClass("object_instance_of_test.I", &interfaceI), ANI_OK);
     ASSERT_EQ(env_->FindClass("object_instance_of_test.A", &classA), ANI_OK);
 
@@ -233,13 +233,13 @@ TEST_F(ObjectInstanceOfTest, object_boxed_primitive_instance_of)
     ani_object objectInt;
     ani_class classF;
     GetMethodData(&objectInt, &classF, "object_instance_of_test.F", "new_Boxed_Primitive",
-                  ":X{C{std.core.Int}C{std.core.String}}");
+                  ":X{C{std:core.Int}C{std:core.String}}");
 
     ani_boolean res;
     ani_class classInt;
     ani_class classObject;
-    ASSERT_EQ(env_->FindClass("std.core.Int", &classInt), ANI_OK);
-    ASSERT_EQ(env_->FindClass("std.core.Object", &classObject), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Int", &classInt), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Object", &classObject), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectInt, classInt, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
     ASSERT_EQ(env_->Object_InstanceOf(objectInt, classObject, &res), ANI_OK);

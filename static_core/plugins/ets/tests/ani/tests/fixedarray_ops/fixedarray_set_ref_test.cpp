@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ TEST_F(FixedArraySetRefTest, SetRefErrorTests)
 {
     ani_fixedarray_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     std::string_view rawString {"1234"};
     ani_string str {};
@@ -61,7 +61,7 @@ TEST_F(FixedArraySetRefTest, SetRefErrorValueToArrayTest)
 {
     ani_fixedarray_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     std::string_view rawString {"1234"};
     ani_string str {};
@@ -76,7 +76,7 @@ TEST_F(FixedArraySetRefTest, SetGetUnionToArrayTest)
 {
     ani_fixedarray_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.String", &cls), ANI_OK);
     std::string_view rawString {"1234"};
     ani_string str {};
     ASSERT_EQ(env_->String_NewUTF8(rawString.data(), rawString.length(), &str), ANI_OK);
@@ -128,7 +128,7 @@ TEST_F(FixedArraySetRefTest, SetGetStabilityToArrayTest)
 {
     ani_fixedarray_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.String", &cls), ANI_OK);
     std::string_view rawString {"1234"};
     ani_string str {};
     ASSERT_EQ(env_->String_NewUTF8(rawString.data(), rawString.length(), &str), ANI_OK);

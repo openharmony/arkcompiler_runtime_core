@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ void AniClassSetStaticFieldByNameShortFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class cls {};
-    env->FindClass("std.core.String", &cls);
+    env->FindClass("std:core.String", &cls);
     ani_short value {};
     std::string input(data, size);
     env->Class_SetStaticFieldByName_Short(cls, input.c_str(), value);

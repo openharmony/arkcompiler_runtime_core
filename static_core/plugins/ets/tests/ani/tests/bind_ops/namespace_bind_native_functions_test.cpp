@@ -50,8 +50,8 @@ static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
 }
 
 static const char *MODULE_NAME = "@defModule.namespace_bind_native_functions_test";
-static const char *CONCAT_SIGNATURE = "C{std.core.String}C{std.core.String}:C{std.core.String}";
-static const char *CONCAT_WRONG_SIGNATURE = "C{std.core.String}C{std/core/String}:C{std.core.String}";
+static const char *CONCAT_SIGNATURE = "C{std:core.String}C{std:core.String}:C{std:core.String}";
+static const char *CONCAT_WRONG_SIGNATURE = "C{std:core.String}C{std/core/String}:C{std:core.String}";
 static const ani_native_function NATIVE_FUNC_SUM = {"sum", "ii:i", reinterpret_cast<void *>(Sum)};
 static const ani_native_function NATIVE_FUNC_SUM_A = {"sum", "iii:i", reinterpret_cast<void *>(SumA)};
 static const ani_native_function NATIVE_FUNC_CONCAT = {"concat", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)};
@@ -95,7 +95,7 @@ TEST_F(NamespaceBindNativeFunctionsTest, already_binded_function)
 
 TEST_F(NamespaceBindNativeFunctionsTest, invalid_ns)
 {
-    const char *concatSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
+    const char *concatSignature = "C{std:core.String}C{std:core.String}:C{std:core.String}";
     std::array functions = {
         ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
         ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
@@ -105,7 +105,7 @@ TEST_F(NamespaceBindNativeFunctionsTest, invalid_ns)
 
 TEST_F(NamespaceBindNativeFunctionsTest, invalid_functions)
 {
-    const char *concatSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
+    const char *concatSignature = "C{std:core.String}C{std:core.String}:C{std:core.String}";
     std::array functions = {
         ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
         ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
@@ -120,7 +120,7 @@ TEST_F(NamespaceBindNativeFunctionsTest, function_not_found)
     ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    const char *concatSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
+    const char *concatSignature = "C{std:core.String}C{std:core.String}:C{std:core.String}";
     std::array functions = {
         ani_native_function {"sumX", "ii:i", reinterpret_cast<void *>(Sum)},
         ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},

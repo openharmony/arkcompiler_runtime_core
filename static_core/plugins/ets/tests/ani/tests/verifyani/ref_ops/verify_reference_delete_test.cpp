@@ -104,7 +104,7 @@ TEST_F(ReferenceDeleteTest, wrong_ref_stack)
 
     // Call native method.
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(m, "foo", "C{std.core.Object}:l", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(m, "foo", "C{std:core.Object}:l", &fn), ANI_OK);
     ani_long ret {};
     // NOTE(ypigunova): remove cast when #26993 will be solved
     ani_ref realRef = reinterpret_cast<VRef *>(ref)->GetRef();

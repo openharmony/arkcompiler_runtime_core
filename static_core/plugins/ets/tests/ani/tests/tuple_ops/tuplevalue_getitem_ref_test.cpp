@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@ protected:
     void CheckDoubleValue(ani_tuple_value tupleValue, const ani_size index, const std::array<double, 5U> &array)
     {
         ani_class doubleClass;
-        ASSERT_EQ(env_->FindClass("std.core.Double", &doubleClass), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std:core.Double", &doubleClass), ANI_OK);
         ASSERT(doubleClass != nullptr);
         ani_method doubleUnbox;
         env_->Class_FindMethod(doubleClass, "toDouble", ":d", &doubleUnbox);
@@ -146,7 +146,7 @@ TEST_F(TupleValueGetItemRefTest, tupleValueGetItemIntCompositeScene)
     CompareStringWithRef("Hello", result);
 
     ani_class doubleClass;
-    ASSERT_EQ(env_->FindClass("std.core.Double", &doubleClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Double", &doubleClass), ANI_OK);
     ASSERT(doubleClass != nullptr);
     ani_method doubleUnbox;
     env_->Class_FindMethod(doubleClass, "toDouble", ":d", &doubleUnbox);

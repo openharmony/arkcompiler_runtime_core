@@ -138,7 +138,7 @@ public:
 
     void RecordCreator(ani_class *cls, ani_object *result)
     {
-        ASSERT_EQ(env_->FindClass("std.core.Record", cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std:core.Record", cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
@@ -149,7 +149,7 @@ public:
 
     void BigintCreator(ani_class *cls, ani_object *result)
     {
-        ASSERT_EQ(env_->FindClass("std.core.BigInt", cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std:core.BigInt", cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
@@ -170,7 +170,7 @@ public:
     void Int(ani_object *obj, ani_int value)
     {
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("std.core.Int", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std:core.Int", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
@@ -216,7 +216,7 @@ TEST_F(ClassFindMethodTest, has_method_C)
     ASSERT_EQ(env_->String_NewUTF8(ARG_STRING.data(), ARG_STRING.size(), &string), ANI_OK);
     arg.r = string;
 
-    CheckClassFindMethod<true>("C", "imethod", "C{std.core.String}:i", &arg, TEST_EXPECTED_VALUE2);
+    CheckClassFindMethod<true>("C", "imethod", "C{std:core.String}:i", &arg, TEST_EXPECTED_VALUE2);
 }
 
 TEST_F(ClassFindMethodTest, has_method_C_unusual_types)
@@ -404,7 +404,7 @@ TEST_F(ClassFindMethodTest, FindOverloadedConstructor)
     ASSERT_EQ(env_->FindClass("class_find_method_test.FindConstructorWithDefaultParams", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Int}C{std.core.Int}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std:core.Int}C{std:core.Int}:", &ctor), ANI_OK);
 }
 
 TEST_F(ClassFindMethodTest, FindCtor_NumberDefaultParam_BoxedDoubleSignature)
@@ -413,9 +413,9 @@ TEST_F(ClassFindMethodTest, FindCtor_NumberDefaultParam_BoxedDoubleSignature)
     ASSERT_EQ(env_->FindClass("class_find_method_test.FindCtorNumberDefaultParam", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    // Expect boxed std.core.Double constructor signature.
+    // Expect boxed std:core.Double constructor signature.
     ani_method ctorBoxed {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Double}:", &ctorBoxed), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std:core.Double}:", &ctorBoxed), ANI_OK);
     ASSERT_NE(ctorBoxed, nullptr);
 
     // Must NOT be primitive double in signature.
@@ -440,9 +440,9 @@ TEST_F(ClassFindMethodTest, FindCtor_NumberDefaultParam_BoxedDoubleSignature)
     ASSERT_EQ(env_->Object_CallMethod_Double(o1, getP, &p1), ANI_OK);
     ASSERT_EQ(p1, 1.0);
 
-    // Call with actual std.core.Double instance.
+    // Call with actual std:core.Double instance.
     ani_class doubleCls {};
-    ASSERT_EQ(env_->FindClass("std.core.Double", &doubleCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std:core.Double", &doubleCls), ANI_OK);
     ASSERT_NE(doubleCls, nullptr);
     ani_method doubleCtor {};
     ASSERT_EQ(env_->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor), ANI_OK);
@@ -465,28 +465,28 @@ TEST_F(ClassFindMethodTest, FindCtor_NumberDefaultParam_BoxedDoubleSignature)
 TEST_F(ClassFindMethodTest, find_intrinsics)
 {
     {
-        const char *moduleName = "std.core";
+        const char *moduleName = "std:core";
         const char *className = "String";
 
-        CheckIntrinsicsFindMethod(moduleName, className, "compareTo", "C{std.core.String}:i");
-        CheckIntrinsicsFindMethod(moduleName, className, "repeat", "i:C{std.core.String}");
+        CheckIntrinsicsFindMethod(moduleName, className, "compareTo", "C{std:core.String}:i");
+        CheckIntrinsicsFindMethod(moduleName, className, "repeat", "i:C{std:core.String}");
     }
     {
-        const char *moduleName = "std.core";
+        const char *moduleName = "std:core";
         const char *className = "ArrayBuffer";
 
         CheckIntrinsicsFindMethod(moduleName, className, "set", "ib:");
-        CheckIntrinsicsFindMethod(moduleName, className, "setValues", "C{std.core.ArrayBuffer}i:");
+        CheckIntrinsicsFindMethod(moduleName, className, "setValues", "C{std:core.ArrayBuffer}i:");
     }
     {
-        const char *moduleName = "std.core";
+        const char *moduleName = "std:core";
         const char *className = "Class";
 
-        CheckIntrinsicsFindMethod(moduleName, className, "createInstance", ":C{std.core.Object}");
-        CheckIntrinsicsFindMethod(moduleName, className, "getDescriptor", ":C{std.core.String}");
+        CheckIntrinsicsFindMethod(moduleName, className, "createInstance", ":C{std:core.Object}");
+        CheckIntrinsicsFindMethod(moduleName, className, "getDescriptor", ":C{std:core.String}");
     }
     {
-        const char *moduleName = "std.core";
+        const char *moduleName = "std:core";
         const char *className = "ArrayBuffer";
 
         CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "iii:l");
@@ -499,7 +499,7 @@ TEST_F(ClassFindMethodTest, method_not_found)
     CheckClassFindMethod<false>("A", "bla_bla_bla", nullptr);
     CheckClassFindMethod<false, true>("A", "int_method", "bla_bla_bla");
     CheckClassFindMethod<false>("Overload", "method", "dd:i");
-    CheckClassFindMethod<false>("Overload", "method", "iC{std.core.String}:i");
+    CheckClassFindMethod<false>("Overload", "method", "iC{std:core.String}:i");
 }
 
 TEST_F(ClassFindMethodTest, invalid_argument_name)
@@ -542,7 +542,7 @@ TEST_F(ClassFindMethodTest, has_static_method_1)
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":C{std.core.Array}", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":C{std:core.Array}", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
@@ -604,8 +604,8 @@ TEST_F(ClassFindMethodTest, static_method_invalid_arguments)
 
     ASSERT_EQ(env_->c_api->Class_FindStaticMethod(nullptr, cls, "get_button_names", nullptr, &method),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "", ":A{C{std.core.String}}", &method), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "\t", ":A{C{std.core.String}}", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "", ":A{C{std:core.String}}", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "\t", ":A{C{std:core.String}}", &method), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "", &method), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "\t", &method), ANI_INVALID_DESCRIPTOR);
 }
@@ -1213,12 +1213,12 @@ TEST_F(ClassFindMethodTest, wrong_signature)
     ani_method m {};
     ASSERT_EQ(env_->FindClass("class_find_method_test.C", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std/core/String}:i", &m), ANI_INVALID_DESCRIPTOR);
-    ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std.core.String}:i", &m), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std:core.String}:i", &m), ANI_OK);
 
     ani_static_method sm {};
     ASSERT_EQ(env_->FindClass("class_find_method_test.CheckWrongSignature", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std/core/String}:", &sm), ANI_INVALID_DESCRIPTOR);
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std.core.String}:", &sm), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std:core.String}:", &sm), ANI_OK);
 }
 
 TEST_F(ClassFindMethodTest, check_hierarchy)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ public:
         ani_class intCls {};
         ani_method intCtorMethod {};
         ani_object intObj {};
-        env_->FindClass("std.core.Int", &intCls);
+        env_->FindClass("std:core.Int", &intCls);
         env_->Class_FindMethod(intCls, "<ctor>", "i:", &intCtorMethod);
         env_->Object_New(intCls, intCtorMethod, &intObj, 1U);
         *obj = intObj;
@@ -111,7 +111,7 @@ public:
         ani_class tupleCls {};
         ani_method tupleCtorMethod {};
         ani_object tupleObj {};
-        env_->FindClass("std.core.Tuple3", &tupleCls);
+        env_->FindClass("std:core.Tuple3", &tupleCls);
         env_->Class_FindMethod(tupleCls, "<ctor>", nullptr, &tupleCtorMethod);
         env_->Object_New(tupleCls, tupleCtorMethod, &tupleObj, intObj, intObj, intObj);
         *tuple = static_cast<ani_tuple_value>(tupleObj);

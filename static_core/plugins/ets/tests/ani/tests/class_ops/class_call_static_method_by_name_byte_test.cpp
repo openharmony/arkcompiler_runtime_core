@@ -41,7 +41,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_V(cls, "method", "C{std.core.String}:b", value, args),
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_V(cls, "method", "C{std:core.String}:b", value, args),
                   ANI_OK);
         va_end(args);
     }
@@ -433,14 +433,14 @@ TEST_F(ClassCallStaticMethodByNameTest, check_wrong_signature)
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
     ani_byte value {};
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Byte(env_, cls, "method", "C{std.core.String}:b", &value, str),
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Byte(env_, cls, "method", "C{std:core.String}:b", &value, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Byte(env_, cls, "method", "C{std/core/String}:b", &value, str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "method", "C{std.core.String}:b", &value, &arg), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "method", "C{std:core.String}:b", &value, &arg), ANI_OK);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "method", "C{std/core/String}:b", &value, &arg),
               ANI_INVALID_DESCRIPTOR);
 

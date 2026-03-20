@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ TEST_F(GetSuperClassTest, get_super_class_C)
 
 TEST_F(GetSuperClassTest, try_get_object_superclass)
 {
-    CheckGetSuperClass<false>("std.core.Object");
+    CheckGetSuperClass<false>("std:core.Object");
 }
 
 TEST_F(GetSuperClassTest, ani_invalid_args)

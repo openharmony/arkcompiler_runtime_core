@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
         ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Namespace_FindFunction(ns, "concat", "ii:C{std.core.String}", &fn), ANI_OK);
+        ASSERT_EQ(env_->Namespace_FindFunction(ns, "concat", "ii:C{std:core.String}", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *nsResult = ns;
@@ -163,7 +163,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_001)
     ani_function fA {};
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "ii:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "ii:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -189,7 +189,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_002)
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nB, "refFunctionB", "ii:C{std.core.String}", &fB), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nB, "refFunctionB", "ii:C{std:core.String}", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_ref value {};
@@ -212,7 +212,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_003)
     ani_function fA {};
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "iii:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "iii:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -237,7 +237,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_004)
     ASSERT_NE(module, nullptr);
 
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "ii:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "ii:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -263,7 +263,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_005)
     ani_ref value {};
     std::string result {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "iii:C{std.core.String}", &fB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "iii:C{std:core.String}", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_value argsB[3U];
@@ -284,7 +284,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_006)
     ani_function fA {};
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "ii:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "ii:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -307,7 +307,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_007)
     ani_function fA {};
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -330,7 +330,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_008)
     ani_function fA {};
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "iidi:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "iidi:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -363,7 +363,7 @@ TEST_F(FunctionCallRefTest, function_call_ref_009)
     ani_function fA {};
     ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_ref_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "ii:C{std.core.String}", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "ii:C{std:core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};

@@ -25,18 +25,18 @@ class MangleSignatureTest : public AniTest {};
 
 // type F = (u: number | string | FixedArray<char>) => (E | B) | Partial<A>
 static constexpr std::string_view FOO_UNION_SIGNATURE =
-    "X{A{c}C{std.core.Double}C{std.core.String}}:"
+    "X{A{c}C{std:core.Double}C{std:core.String}}:"
     "X{C{mangle_signature_test.B}E{mangle_signature_test.E}P{mangle_signature_test.A}}";
 static constexpr std::string_view NAMESPACE_FOO_UNION_SIGNATURE =
-    "X{A{c}C{std.core.Double}C{std.core.String}}:"
+    "X{A{c}C{std:core.Double}C{std:core.String}}:"
     "X{C{mangle_signature_test.rls.B}E{mangle_signature_test.rls.E}P{mangle_signature_test.A}}";
 // type F = <T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V
 static constexpr std::string_view FOO1_UNION_SIGNATURE =
-    "X{C{mangle_signature_test.A}C{std.core.String}C{std.core.Double}}:"
-    "X{A{C{mangle_signature_test.A}}C{mangle_signature_test.A}C{std.core.String}C{std.core.Null}}";
+    "X{C{mangle_signature_test.A}C{std:core.String}C{std:core.Double}}:"
+    "X{A{C{mangle_signature_test.A}}C{mangle_signature_test.A}C{std:core.String}C{std:core.Null}}";
 static constexpr std::string_view NAMESPACE_FOO1_UNION_SIGNATURE =
-    "X{C{mangle_signature_test.rls.A}C{std.core.String}C{std.core.Double}}:"
-    "X{A{C{mangle_signature_test.rls.A}}C{mangle_signature_test.rls.A}C{std.core.String}C{std.core.Null}}";
+    "X{C{mangle_signature_test.rls.A}C{std:core.String}C{std:core.Double}}:"
+    "X{A{C{mangle_signature_test.rls.A}}C{mangle_signature_test.rls.A}C{std:core.String}C{std:core.Null}}";
 
 TEST_F(MangleSignatureTest, FormatVoid_NewToOld)
 {
@@ -223,10 +223,10 @@ TEST_F(MangleSignatureTest, FormatReferences_NewToOld)
     std::optional<PandaString> desc;
 
     // Check 'class'
-    desc = Mangle::ConvertSignature("C{std.core.Object}:");
+    desc = Mangle::ConvertSignature("C{std:core.Object}:");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "Lstd/core/Object;:V");
-    desc = Mangle::ConvertSignature(":C{std.core.Object}");
+    desc = Mangle::ConvertSignature(":C{std:core.Object}");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), ":Lstd/core/Object;");
 
@@ -407,7 +407,7 @@ TEST_F(MangleSignatureTest, FormatReferencesFixedArray_NewToOld)
 {
     std::optional<PandaString> desc;
 
-    desc = Mangle::ConvertSignature("A{C{std.core.String}}dA{A{E{a.b.Color}}}:A{P{a.b.X}}");
+    desc = Mangle::ConvertSignature("A{C{std:core.String}}dA{A{E{a.b.Color}}}:A{P{a.b.X}}");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "[Lstd/core/String;D[[La/b/Color;:[La/b/%%partial-X;");
 }
@@ -425,12 +425,12 @@ TEST_F(MangleSignatureTest, FormatUnion_NewToRuntime)
     std::optional<PandaString> desc;
 
     // type F = (u: a.b | double | FixedArray<int>) => null | e
-    desc = Mangle::ConvertSignature("X{C{a.b}C{std.core.Double}A{i}}:X{C{std.core.Null}E{e}}");
+    desc = Mangle::ConvertSignature("X{C{a.b}C{std:core.Double}A{i}}:X{C{std:core.Null}E{e}}");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "{ULa/b;[ILstd/core/Double;}:{ULe;Lstd/core/Null;}");
 
     // type F = (u: (e | double) | FixedArray<string[] | FunctionR1>) => void
-    desc = Mangle::ConvertSignature("X{X{E{e}C{std.core.Double}}A{X{A{C{std.core.String}}C{std.core.FunctionR1}}}}:");
+    desc = Mangle::ConvertSignature("X{X{E{e}C{std:core.Double}}A{X{A{C{std:core.String}}C{std:core.FunctionR1}}}}:");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "{U{ULe;Lstd/core/Double;}[{ULstd/core/FunctionR1;[Lstd/core/String;}}:V");
 
@@ -522,7 +522,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
     // Check references
     const char *signature = "dC{mangle_signature_test.A}C{mangle_signature_test.B}:E{mangle_signature_test.E}";
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", signature, &fn), ANI_OK);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{mangle_signature_test.A}C{std:core.Array}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
@@ -604,7 +604,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     const char *signature =
         "dC{mangle_signature_test.rls.A}C{mangle_signature_test.rls.B}:E{mangle_signature_test.rls.E}";
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", signature, &fn), ANI_OK);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{mangle_signature_test.A}C{std:core.Array}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", NAMESPACE_FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", NAMESPACE_FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
@@ -686,7 +686,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
     // Check references
     const char *signature = "dC{mangle_signature_test.A}C{mangle_signature_test.B}:E{mangle_signature_test.E}";
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", signature, &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{mangle_signature_test.A}C{std:core.Array}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
@@ -768,7 +768,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
     // Check references
     const char *signature = "dC{mangle_signature_test.A}C{mangle_signature_test.B}:E{mangle_signature_test.E}";
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", signature, &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &method),
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{mangle_signature_test.A}C{std:core.Array}:", &method),
               ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
@@ -860,7 +860,7 @@ TEST_F(MangleSignatureTest, Class_FindIndexableSetter)
     EXPECT_EQ(env_->Class_FindIndexableSetter(cls, "dN:", &method), ANI_OK);
 
     // Check references
-    EXPECT_EQ(env_->Class_FindIndexableSetter(cls, "dC{std.core.String}:", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindIndexableSetter(cls, "dC{std:core.String}:", &method), ANI_OK);
 }
 
 TEST_F(MangleSignatureTest, Class_FindIndexableSetter_OldFormat)
@@ -1036,8 +1036,8 @@ TEST_F(MangleSignatureTest, Class_BindNativeMethods)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "C{std.core.Array}:C{std.core.Array}", foo1},
-        ani_native_function {"foo", "C{std.core.Array}C{std.core.Function1}:", foo2},
+        ani_native_function {"foo", "C{std:core.Array}:C{std:core.Array}", foo1},
+        ani_native_function {"foo", "C{std:core.Array}C{std:core.Function1}:", foo2},
     };
 
     ani_class cls {};
@@ -1067,8 +1067,8 @@ TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "C{std.core.Array}:C{std.core.Array}", foo1},
-        ani_native_function {"foo", "C{std.core.Array}C{std.core.Function1}:", foo2},
+        ani_native_function {"foo", "C{std:core.Array}:C{std:core.Array}", foo1},
+        ani_native_function {"foo", "C{std:core.Array}C{std:core.Function1}:", foo2},
     };
 
     ani_namespace ns {};
@@ -1098,8 +1098,8 @@ TEST_F(MangleSignatureTest, Module_BindNativeFunctions)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "C{std.core.Array}:C{std.core.Array}", foo1},
-        ani_native_function {"foo", "C{std.core.Array}C{std.core.Function1}:", foo2},
+        ani_native_function {"foo", "C{std:core.Array}:C{std:core.Array}", foo1},
+        ani_native_function {"foo", "C{std:core.Array}C{std:core.Function1}:", foo2},
     };
 
     ani_module m {};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,8 @@ class ArrayHelperTest : public AniTest {
 public:
     void InitTest()
     {
-        env_->FindClass("std.core.Boolean", &booleanClass);
-        env_->FindClass("std.core.Int", &intClass);
+        env_->FindClass("std:core.Boolean", &booleanClass);
+        env_->FindClass("std:core.Int", &intClass);
         ASSERT(booleanClass != nullptr);
         ASSERT(intClass != nullptr);
         env_->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanCtor);

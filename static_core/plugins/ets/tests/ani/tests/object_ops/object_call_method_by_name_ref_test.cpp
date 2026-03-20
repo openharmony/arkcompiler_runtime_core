@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(
-            env_->Object_CallMethodByName_Ref_V(obj, "method", "C{std.core.String}:C{std.core.String}", value, args),
+            env_->Object_CallMethodByName_Ref_V(obj, "method", "C{std:core.String}:C{std:core.String}", value, args),
             ANI_OK);
         va_end(args);
     }
@@ -54,7 +54,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(
-            env_->Object_CallMethodByName_Ref_V(obj, "method", "C{std/core/String}:C{std.core.String}", value, args),
+            env_->Object_CallMethodByName_Ref_V(obj, "method", "C{std/core/String}:C{std:core.String}", value, args),
             ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
@@ -280,7 +280,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
 
     std::string result {};
     ani_ref ref = nullptr;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std:core.String}", &ref, VAL1, VAL2), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -288,7 +288,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
     ani_value args[2U];
     args[0U].i = VAL1;
     args[1U].i = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std.core.String}", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std:core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -308,14 +308,14 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_002)
 
     std::string result {};
     ani_ref ref = nullptr;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "i:C{std.core.String}", &ref, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "i:C{std:core.String}", &ref, VAL1), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Greater");
 
     ani_value args[1U];
     args[0U].i = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "i:C{std.core.String}", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "i:C{std:core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Greater");
@@ -367,7 +367,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
     ani_ref ref = nullptr;
     const ani_int value1 = 5;
     const ani_int value2 = 8;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std:core.String}", &ref, value1, value2),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
@@ -376,7 +376,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std.core.String}", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std:core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -550,14 +550,14 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
     ani_ref ref = nullptr;
     const ani_int value1 = 5;
     const ani_int value2 = 6;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std:core.String}", &ref, value1, value2),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 
     const ani_int value3 = 7;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value3),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std:core.String}", &ref, value1, value3),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
@@ -567,20 +567,20 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
     ani_value args[3U];
     args[0U].i = value1;
     args[1U].i = value4;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std.core.String}", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std:core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 
     const ani_int value5 = 5;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value5),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std:core.String}", &ref, value1, value5),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Equality");
 
     const ani_int value6 = 12;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value6),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std:core.String}", &ref, value1, value6),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
@@ -627,28 +627,28 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_011)
 
     ani_ref res = nullptr;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethodByName_Ref(nullptr, object, "getName", "ii:C{std.core.String}", &res, VAL1, VAL2),
+        env_->c_api->Object_CallMethodByName_Ref(nullptr, object, "getName", "ii:C{std:core.String}", &res, VAL1, VAL2),
         ANI_INVALID_ARGS);
     ASSERT_EQ(
-        env_->c_api->Object_CallMethodByName_Ref_A(nullptr, object, "getName", "ii:C{std.core.String}", &res, args),
+        env_->c_api->Object_CallMethodByName_Ref_A(nullptr, object, "getName", "ii:C{std:core.String}", &res, args),
         ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(nullptr, "getName", "ii:C{std.core.String}", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(nullptr, "getName", "ii:C{std:core.String}", &res, VAL1, VAL2),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(nullptr, "getName", "ii:C{std.core.String}", &res, args),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(nullptr, "getName", "ii:C{std:core.String}", &res, args),
               ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, nullptr, "ii:C{std.core.String}", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, nullptr, "ii:C{std:core.String}", &res, VAL1, VAL2),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, nullptr, "ii:C{std.core.String}", &res, args),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, nullptr, "ii:C{std:core.String}", &res, args),
               ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", nullptr, &res, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", nullptr, &res, args), ANI_OK);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", "ii:C{std.core.String}", nullptr, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", "ii:C{std:core.String}", nullptr, VAL1, VAL2),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", "ii:C{std.core.String}", nullptr, args),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", "ii:C{std:core.String}", nullptr, args),
               ANI_INVALID_ARGS);
 }
 
@@ -666,9 +666,9 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_012)
 
     for (const auto &methodName : invalidMethodNames) {
         ASSERT_EQ(
-            env_->Object_CallMethodByName_Ref(object, methodName.data(), "ii:C{std.core.String}", &res, VAL1, VAL2),
+            env_->Object_CallMethodByName_Ref(object, methodName.data(), "ii:C{std:core.String}", &res, VAL1, VAL2),
             ANI_NOT_FOUND);
-        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, methodName.data(), "ii:C{std.core.String}", &res, args),
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, methodName.data(), "ii:C{std:core.String}", &res, args),
                   ANI_NOT_FOUND);
     }
 }
@@ -711,18 +711,18 @@ TEST_F(CallObjectMethodByNameRefTest, check_wrong_signature)
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
     ani_ref res;
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Ref(env_, obj, "method", "C{std.core.String}:C{std.core.String}",
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Ref(env_, obj, "method", "C{std:core.String}:C{std:core.String}",
                                                        &res, str),
               ANI_OK);
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Ref(env_, obj, "method", "C{std/core/String}:C{std.core.String}",
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Ref(env_, obj, "method", "C{std/core/String}:C{std:core.String}",
                                                        &res, str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "method", "C{std.core.String}:C{std.core.String}", &res, &arg),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "method", "C{std:core.String}:C{std:core.String}", &res, &arg),
               ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "method", "C{std/core/String}:C{std.core.String}", &res, &arg),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "method", "C{std/core/String}:C{std:core.String}", &res, &arg),
               ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, &res, str);
