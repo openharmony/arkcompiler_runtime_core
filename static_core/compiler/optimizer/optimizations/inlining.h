@@ -32,6 +32,8 @@ struct InlineContext {
     bool chaDevirtualize {false};
     bool replaceToStatic {false};
     RuntimeInterface::IntrinsicId intrinsicId {RuntimeInterface::IntrinsicId::INVALID};
+    RuntimeInterface::IdType typeGuardClassId {0};
+    RuntimeInterface::MethodPtr typeGuardMethod {};
 };
 
 struct InlinedGraph {
@@ -115,7 +117,7 @@ protected:
     bool DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterface::ClassPtr> *receivers);
     SaveStateInst *GetOrCloneSaveState(CallInst *callInst, BasicBlock *callBb);
     void CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
-                            BasicBlock *callBb, RuntimeInterface::MethodPtr ctxMethod);
+                            BasicBlock *callBb, const InlineContext &ctx);
     BasicBlockPair MakeCallBbs(InstPair insts, BasicBlockPair bbs, [[maybe_unused]] PhiInst **phiInst,
                                [[maybe_unused]] size_t receiversSize);
     void InlineReceiver(InstTriple insts, BasicBlockPair bbs, FlagPair flags, size_t receiversSize,
@@ -172,6 +174,8 @@ protected:
     }
 
     virtual bool SkipBlock(const BasicBlock *block) const;
+
+    bool CheckClassIdCanBeResolved(const CallInst *callInst, RuntimeInterface::ClassPtr receiver, InlineContext &ctx);
 
 private:
     bool CheckVregsLimit(CallInst *callInst, const InlineContext &ctx) const;

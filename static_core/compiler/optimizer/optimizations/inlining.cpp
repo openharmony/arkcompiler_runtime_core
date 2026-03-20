@@ -361,10 +361,35 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
     return false;
 }
 
+bool Inlining::CheckClassIdCanBeResolved(const CallInst *callInst, RuntimeInterface::ClassPtr receiver,
+                                         InlineContext &ctx)
+{
+    // In AOT mode with a virtual call, we need to create a type guard (LoadClass) after inlining.
+    // This requires resolving the receiver's classId in some panda file. If the receiver class comes from
+    // a different .abc file than both the current method and the callee, classId resolution will fail.
+    // Bail out before inlining to avoid hitting ASSERT(typeGuardClassId != 0) later.
+    if (GetGraph()->IsAotMode() && receiver != nullptr) {
+        auto runtime = GetGraph()->GetRuntime();
+        auto classId = runtime->GetClassIdWithinFile(GetGraph()->GetMethod(), receiver);
+        auto method = GetGraph()->GetMethod();
+        if (classId == 0) {
+            classId = runtime->GetClassIdWithinFile(ctx.method, receiver);
+            method = ctx.method;
+        }
+        if (classId == 0) {
+            EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::FAIL_RESOLVE);
+            LOG_INLINING(DEBUG) << "Cannot resolve classId for receiver class, skip inlining";
+            return false;
+        }
+        ctx.typeGuardClassId = classId;
+        ctx.typeGuardMethod = method;
+    }
+    return true;
+}
+
 bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPtr receiver)
 {
     auto runtime = GetGraph()->GetRuntime();
-    auto currMethod = GetGraph()->GetMethod();
 
     InlineContext ctx;
     ctx.method = runtime->ResolveVirtualMethod(receiver, callInst->GetCallMethod());
@@ -376,6 +401,10 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
     LOG_INLINING(DEBUG) << "Try to inline monomorphic(size=" << runtime->GetMethodCodeSize(ctx.method)
                         << "): " << GetMethodFullName(GetGraph(), ctx.method);
 
+    if (!CheckClassIdCanBeResolved(callInst, receiver, ctx)) {
+        return false;
+    }
+
     if (!DoInline(callInst, &ctx)) {
         return false;
     }
@@ -385,15 +414,10 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
 
     Inst *loadClsInst = nullptr;
     if (GetGraph()->IsAotMode()) {
-        auto classId = runtime->GetClassIdWithinFile(currMethod, receiver);
-        MethodPtr method = currMethod;
-        if (classId == 0) {
-            classId = runtime->GetClassIdWithinFile(ctx.method, receiver);
-            method = ctx.method;
-        }
-        ASSERT(classId != 0);
-        loadClsInst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
-                                                      TypeIdMixin {classId, method}, receiver);
+        ASSERT(ctx.typeGuardClassId != 0);
+        loadClsInst =
+            GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
+                                            TypeIdMixin {ctx.typeGuardClassId, ctx.typeGuardMethod}, receiver);
     } else {
         loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     }
@@ -436,23 +460,15 @@ SaveStateInst *Inlining::GetOrCloneSaveState(CallInst *callInst, BasicBlock *cal
 }
 
 void Inlining::CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
-                                  BasicBlock *callBb, RuntimeInterface::MethodPtr ctxMethod)
+                                  BasicBlock *callBb, const InlineContext &ctx)
 {
-    auto runtime = GetGraph()->GetRuntime();
-    auto currMethod = GetGraph()->GetMethod();
-
     Inst *loadClsInst = nullptr;
     if (GetGraph()->IsAotMode()) {
+        ASSERT(ctx.typeGuardClassId != 0);
         auto saveState = GetOrCloneSaveState(callInst, callBb);
-        auto classId = runtime->GetClassIdWithinFile(currMethod, receiver);
-        MethodPtr method = currMethod;
-        if (classId == 0) {
-            classId = runtime->GetClassIdWithinFile(ctxMethod, receiver);
-            method = ctxMethod;
-        }
-        ASSERT(classId != 0);
-        loadClsInst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
-                                                      TypeIdMixin {classId, method}, receiver);
+        loadClsInst =
+            GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
+                                            TypeIdMixin {ctx.typeGuardClassId, ctx.typeGuardMethod}, receiver);
     } else {
         loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     }
@@ -658,6 +674,10 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
         }
         ASSERT(ctx.intrinsicId == RuntimeInterface::IntrinsicId::INVALID);
 
+        if (!CheckClassIdCanBeResolved(callInst, receiver, ctx)) {
+            continue;
+        }
+
         // Create Call.inlined
         CallInst *newCallInst = CloneVirtualCallInst(callInst, GetGraph());
         newCallInst->SetCallMethodId(runtime->GetMethodId(ctx.method));
@@ -671,7 +691,7 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
         callBb = blocks.first;
         callContBb = blocks.second;
 
-        CreateCompareClass(callInst, getClsInst, receiver, callBb, ctx.method);
+        CreateCompareClass(callInst, getClsInst, receiver, callBb, ctx);
         InlineReceiver({callInst, newCallInst, phiInst}, {callBb, callContBb},
                        {&hasUnreachableBlocks, &hasRuntimeCalls}, receivers->size(), inlGraph);
 
