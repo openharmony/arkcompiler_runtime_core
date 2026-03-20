@@ -79,13 +79,13 @@ static void AppStateCallback(int state, int64_t timeStamp)
         case AppState::State::SENSITIVE_START:
             etsVm->GetGC()->PostponeGCStart();
             break;
-        case AppState::State::SENSITIVE_END:
-            [[fallthrough]];
         case AppState::State::COLD_START_FINISHED:
+            LOG(INFO, GC) << "App cold start finished";
+            [[fallthrough]];
+        case AppState::State::SENSITIVE_END:
             etsVm->GetGC()->PostponeGCEnd();
             etsVm->GetGC()->Trigger(
                 MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
-            LOG(INFO, GC) << "App cold start finished";
             break;
         default:
             break;
