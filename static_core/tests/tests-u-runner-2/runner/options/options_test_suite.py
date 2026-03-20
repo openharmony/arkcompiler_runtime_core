@@ -20,9 +20,9 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, cast
 
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import InvalidConfiguration, MacroNotExpanded
 from runner.logger import Log
-from runner.options.macros import Macros, ParameterNotFound
+from runner.options.macros import Macros
 from runner.options.options import IOptions
 from runner.options.options_collections import CollectionsOptions
 from runner.options.options_ets import ETSOptions
@@ -258,7 +258,7 @@ class TestSuiteOptions(IOptions):
             for coll_param, coll_value in collection.parameters.items():
                 try:
                     new_coll_value = Macros.correct_macro(coll_value, self)
-                except ParameterNotFound:
+                except MacroNotExpanded:
                     new_coll_value = Macros.correct_macro(coll_value, parent)
 
                 if new_coll_value != coll_value:
