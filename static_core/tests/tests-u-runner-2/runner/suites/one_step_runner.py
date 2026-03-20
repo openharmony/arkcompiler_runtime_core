@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import inspect
 import subprocess
 import tempfile
 from collections.abc import Callable
@@ -22,15 +23,14 @@ from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import cast
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.fail_kind import FailKind, FailureReturnCode
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.logger import Log
 from runner.options.options_step import Step, StepKind
+from runner.types.step_report import StepReport
 from runner.types.test_env import TestEnv
-from runner.types.test_report import TestReport
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -40,10 +40,48 @@ CommonResultValidator = Callable[..., ValidationResult]  # type: ignore[explicit
 ReturnCodeInterpreter = Callable[[str, str, int], int]
 
 
-class OneTestRunner:
-    def __init__(self, test_env: TestEnv) -> None:
+def is_gtest_result_validator(result_validator: CommonResultValidator) -> bool:
+    try:
+        sig = inspect.signature(result_validator)
+        params = list(sig.parameters.values())
+
+        if len(params) != 2:
+            return False
+
+        if (params[0].annotation not in (str, inspect.Parameter.empty) or
+            params[1].annotation not in (CompletedProcess, inspect.Parameter.empty)):
+            return False
+
+    except (ValueError, TypeError):
+        return False
+
+    return True
+
+
+def is_result_validator(result_validator: CommonResultValidator) -> bool:
+    try:
+        sig = inspect.signature(result_validator)
+        params = list(sig.parameters.values())
+
+        if len(params) != 3:
+            return False
+
+        if (params[0].annotation not in (str, inspect.Parameter.empty) or
+            params[1].annotation not in (str, inspect.Parameter.empty) or
+            params[2].annotation not in (int, inspect.Parameter.empty)):
+            return False
+
+    except (ValueError, TypeError):
+        return False
+
+    return True
+
+
+class OneStepRunner:
+    def __init__(self, step: Step, test_env: TestEnv) -> None:
         self.test_env = test_env
-        self.reproduce = ""
+        self.step = step
+        self.report: StepReport = StepReport(step.name)
         self.coverage_config = self.test_env.config.general.coverage
         self.coverage_manager = test_env.coverage
 
@@ -59,13 +97,10 @@ class OneTestRunner:
             return FailKind.NEG_FAIL.make_fail_kind(name)
         return FailKind.FAIL.make_fail_kind(name)
 
-    def run_with_coverage(self, step: Step,
-                          result_validator: CommonResultValidator,
-                          return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
-            -> tuple[bool, TestReport, str | None]:
-
+    def run_with_coverage(self, result_validator: CommonResultValidator,
+                          return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) -> bool:
         coverage_per_binary = self.coverage_config.coverage_per_binary
-        profraw_file, profdata_file, step = self.__get_prof_files(step.name, step)
+        profraw_file, profdata_file, step = self.__get_prof_files(self.step.name, self.step)
 
         if self.coverage_config.use_lcov and coverage_per_binary:
             component_name = step.executable_path.stem if step.executable_path else "no_component"
@@ -75,78 +110,70 @@ class OneTestRunner:
             env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
             step = replace(step, env=env)
 
-        passed, report, fail_kind = self.run_one_step(step, result_validator, return_code_interpreter)
+        passed = self.run_one_step(step, result_validator, return_code_interpreter)
 
         if self.coverage_config.use_llvm_cov and profraw_file and profdata_file:
             self.coverage_manager.llvm_cov_tool.merge_and_delete_profraw_files(profraw_file, profdata_file)
 
-        return passed, report, fail_kind
+        return passed
 
     def run_one_step(self, step: Step,
                      result_validator: CommonResultValidator,
-                     return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
-            -> tuple[bool, TestReport, str | None]:
+                     return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) -> bool:
         name = step.name
         passed = False
-        output = ""
-        error = ""
 
         try:
             if step.step_kind == StepKind.GTEST_RUNNER:
-                (passed, fail_kind, output,
-                 error, return_code) = self.__run_gtest(step, cast(GTestResultValidator, result_validator))
+                passed = self.__run_gtest(step, result_validator)
             else:
-                passed, fail_kind, output, error, return_code = self.__run(step,
-                                                                           cast(ResultValidator, result_validator),
-                                                                           return_code_interpreter)
+                passed = self.__run(step, result_validator, return_code_interpreter)
         except subprocess.SubprocessError as ex:
-            fail_kind = FailKind.SUBPROCESS.make_fail_kind(name)
-            fail_kind_msg = f"{name}: Failed with {str(ex).strip()}"
-            error = f"{error}\n{fail_kind_msg}" if error else fail_kind_msg
-            return_code = -1
-        self.__log_cmd(f"{name}: Actual error: {error.strip()}")
-        self.__log_cmd(f"{name}: Actual return code: {return_code}\n")
-        if fail_kind is None:
-            fail_kind = FailKind.PASSED.make_fail_kind(name) if passed else FailKind.OTHER.make_fail_kind(name)
+            self.report.status = FailKind.SUBPROCESS.make_fail_kind(name)
+            failed_msg = f"{name}: Failed with {str(ex).strip()}"
+            error = self.report.cmd_error
+            self.report.cmd_error = f"{error}\n{failed_msg}" if error else failed_msg
+            self.report.cmd_return_code = -1 if self.report.cmd_return_code == 0 else self.report.cmd_return_code
 
-        report = TestReport(
-            output=output,
-            error=error,
-            return_code=return_code
-        )
+        if not self.report.status:
+            self.report.status = FailKind.PASSED.make_fail_kind(name) if passed else FailKind.OTHER.make_fail_kind(name)
 
-        return passed, report, fail_kind.upper() if fail_kind else fail_kind
+        return passed
 
-    def _terminate_timed_out_process(self, process: subprocess.Popen, name: str) -> tuple[str, str]:
+    def _terminate_timed_out_process(self, process: subprocess.Popen) -> tuple[str, str]:
         timeout = self.test_env.config.general.retrieve_log_timeout
+        error = ""
         try:
             process.terminate()
             output, error = process.communicate(timeout=timeout)
-            self.__log_cmd(f"{name}: Actual partial output: {output.strip()}")
+            output = str(output).strip()
+            error = str(error).strip()
+            output = f"Actual partial output: {output}"
         except subprocess.TimeoutExpired:
             process.kill()
             output = ""
-            self.__log_cmd(f"{name}: Failed by second timeout on retrieving partial output after {timeout} sec")
-            error = f"Failed by second timeout on retrieving partial output after {timeout} sec"
+            error += f"Failed by second timeout on retrieving partial output after {timeout} sec"
         return output, error
 
-    def __log_cmd(self, cmd: str) -> None:
-        self.reproduce += f"\n{cmd}"
-
     def __run(self, step: Step, result_validator: ResultValidator,
-              return_code_interpreter: ReturnCodeInterpreter) -> tuple[bool, str | None, str, str, int]:
+              return_code_interpreter: ReturnCodeInterpreter) -> bool:
+        if not is_result_validator(result_validator):
+            raise InvalidConfiguration(f"{step.name}: Invalid result validator for the step. "
+                                       "Expected ResultValidator")
+
         if step.executable_path is None:
             raise InvalidConfiguration(f"Cannot run step without executable path: {step.name}")
+
         cmd = [step.executable_path.as_posix()]
         if self.test_env.cmd_prefix and not step.skip_qemu:
             cmd = [*self.test_env.cmd_prefix, *cmd]
         cmd.extend(step.args)
         passed = False
-        output = ""
         name = step.name
+        validation_result: ValidationResult | None = None
 
-        self.__log_cmd(f"{name}: {' '.join(cmd)}")
-        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
+        self.report.command_line = ' '.join(cmd)
+        _LOGGER.all(f"Run {name}: {self.report.command_line}")
 
         with (subprocess.Popen(
                 cmd,
@@ -156,9 +183,10 @@ class OneTestRunner:
                 encoding='utf-8',
                 errors='ignore',
         ) as process):
-            fail_kind: str | None = None
             try:
                 output, error = process.communicate(timeout=step.timeout)
+                output = str(output).strip()
+                error = str(error).strip()
                 if step.stdout:
                     step.stdout.write_text(output, encoding="utf-8")
                 if step.stderr:
@@ -166,36 +194,47 @@ class OneTestRunner:
                 return_code = return_code_interpreter(output, error, process.returncode)
                 validation_result = result_validator(output, error, return_code)
                 passed = validation_result.passed
-                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
                 if not passed:
                     if validation_result.kind in [ValidatorFailKind.COMPARE_OUTPUT,
                                                   ValidatorFailKind.STDERR_NOT_EMPTY,
                                                   ValidatorFailKind.POST_REQ_FAILED]:
-                        fail_kind = validation_result.kind.make_fail_kind(name)
-                        error += validation_result.description
+                        step_status = validation_result.kind.make_fail_kind(name)
                     else:
-                        fail_kind = self._detect_fail_kind(name, return_code)
-
+                        step_status = self._detect_fail_kind(name, return_code)
+                else:
+                    step_status = FailKind.PASSED.make_fail_kind(name)
             except subprocess.TimeoutExpired:
-                self.__log_cmd(f"{name}: Failed by timeout after {step.timeout} sec")
-                fail_kind = FailKind.TIMEOUT.make_fail_kind(name)
+                step_status = FailKind.TIMEOUT.make_fail_kind(name)
                 return_code = process.returncode
-                output, error = self._terminate_timed_out_process(process, name)
-        return passed, fail_kind, output, error, return_code
+                output, error = self._terminate_timed_out_process(process)
+                error = f"Failed by timeout after {step.timeout} sec\n{error}"
+
+        self.report.cmd_output = output
+        self.report.cmd_error = error
+        self.report.cmd_return_code = return_code
+        self.report.validator_messages = validation_result.description if validation_result is not None else ""
+        self.report.status = step_status
+        return passed
 
     def __run_gtest(self, step: Step,
-                    result_validator: GTestResultValidator) -> tuple[bool, str | None, str, str, int]:
+                    result_validator: GTestResultValidator) -> bool:
+        if not is_gtest_result_validator(result_validator):
+            raise InvalidConfiguration(f"{step.name}: Invalid result validator for the step. "
+                                       "Expected GTestResultValidator")
+
         if step.executable_path is None:
             raise InvalidConfiguration(f"Cannot run step without executable path: {step.name}")
+
         cmd = [step.executable_path.as_posix()]
         if self.test_env.cmd_prefix and not step.skip_qemu:
             cmd = [*self.test_env.cmd_prefix, *cmd]
         cmd.extend(step.args)
         passed = False
         name = step.name
+        validator_result: ValidationResult | None = None
 
-        self.__log_cmd(f"{name}: {' '.join(cmd)}")
-        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
+        self.report.command_line = ' '.join(cmd)
+        _LOGGER.all(f"Run {name}: {self.report.command_line}")
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json') as f:
             json_file = f.name
@@ -209,21 +248,27 @@ class OneTestRunner:
                     env=step.env,
                     check=False
                 )
-                output = result.stdout
-                error = result.stderr
+                output = result.stdout.strip()
+                error = result.stderr.strip()
                 return_code = result.returncode
                 validator_result = result_validator(json_file, result)
                 passed = validator_result.passed
-                fail_kind: str | None = validator_result.kind.value
-                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
+                step_status: str = (FailKind.PASSED.make_fail_kind(name)
+                                    if validator_result.kind == ValidatorFailKind.NONE
+                                    else validator_result.kind.value)
             except subprocess.TimeoutExpired as pt:
-                self.__log_cmd(f"{name}: Failed by timeout after {step.timeout} sec")
-                fail_kind = FailKind.TIMEOUT.make_fail_kind(name)
-                error = pt.stderr.decode() if pt.stderr else ""
-                output = pt.stdout.decode() if pt.stdout else ""
+                step_status = FailKind.TIMEOUT.make_fail_kind(name)
+                error = pt.stderr.decode().strip() if pt.stderr else ""
+                error = f"Failed by timeout after {step.timeout} sec\n{error}".strip()
+                output = pt.stdout.decode().strip() if pt.stdout else ""
                 return_code = -1
 
-        return passed, fail_kind, output, error, return_code
+        self.report.cmd_output = output
+        self.report.cmd_error = error
+        self.report.cmd_return_code = return_code
+        self.report.validator_messages = validator_result.description if validator_result is not None else ""
+        self.report.status = step_status
+        return passed
 
     def __get_prof_files(
             self,

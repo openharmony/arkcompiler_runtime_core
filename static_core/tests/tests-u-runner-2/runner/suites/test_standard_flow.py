@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import re
 from collections import OrderedDict
 from collections.abc import Sequence
@@ -37,11 +38,11 @@ from runner.logger import Log
 from runner.options.macros import Macros, ParameterNotFound
 from runner.options.options import IOptions
 from runner.options.options_step import Step, StepKind
-from runner.suites.one_test_runner import OneTestRunner
+from runner.suites.one_step_runner import OneStepRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
+from runner.types.step_report import StepReport
 from runner.types.test_env import TestEnv
-from runner.types.test_report import TestReport
 from runner.utils import get_validator_class
 
 if TYPE_CHECKING:
@@ -71,8 +72,8 @@ class ComparisonUtils:
 
     @staticmethod
     def normalize_output_lines(output: str, expected: str) -> tuple[str, str]:
-        norm_output = ''.join(ComparisonUtils.normalize_line(line) + '\n' for line in output.splitlines())
-        norm_output_err = ''.join(ComparisonUtils.normalize_line(line) + '\n' for line in expected.splitlines())
+        norm_output = '\n'.join(ComparisonUtils.normalize_line(line) for line in output.splitlines())
+        norm_output_err = '\n'.join(ComparisonUtils.normalize_line(line) for line in expected.splitlines())
         return norm_output, norm_output_err
 
     @staticmethod
@@ -90,9 +91,10 @@ class ComparisonUtils:
 
         differences = []
 
-        dif_exp_output = find_difference(actual_output, expected_output)
+        dif_exp_output = sorted(list(find_difference(actual_output, expected_output)))
         if dif_exp_output:
-            differences.append(f"Actual output doesn't contain expected lines: \n{dif_exp_output}\n")
+            differences.append("Actual output doesn't contain expected lines:")
+            differences.append(f"{dif_exp_output}")
 
         return differences
 
@@ -299,8 +301,8 @@ class TestStandardFlow(ITestFlow, Test):
             pattern = re.compile(translate(step.step_filter))
             if not pattern.search(str(self.path)):
                 continue
-
-            self.passed, self.report, self.fail_kind = self._do_run_one_step(step)
+            self.passed = self._do_run_one_step(step)
+            self.fail_kind = self.step_reports[-1].status
             if step.step_kind in allowed_steps:
                 allowed_steps.remove(step.step_kind)
 
@@ -385,33 +387,35 @@ class TestStandardFlow(ITestFlow, Test):
 
         return replace(step, args=args)
 
-    def compare_with_stdout(self, output: str) -> bool:
+    def compare_with_stdout(self, output: str) -> tuple[bool, str]:
         """
         Compare test stdout with expected output
         """
         try:
             self._get_expected_data()
-            passed = self._determine_test_status(output, self.expected)
+            passed, message = self._determine_test_status(output, self.expected)
 
         except OSError:
-            _LOGGER.all("Failed to read expected data")
+            message = "Failed to read expected data"
             passed = False
+            _LOGGER.all(message)
 
-        return passed
+        return passed, message
 
-    def compare_with_stderr(self, error: str) -> bool:
+    def compare_with_stderr(self, error: str) -> tuple[bool, str]:
         """
         Compare test stderr with expected output
         """
         try:
             self._get_expected_data()
-            passed = self._determine_test_status(error, self.expected_err)
+            passed, message = self._determine_test_status(error, self.expected_err)
 
         except OSError:
-            _LOGGER.all("Failed to read expected data")
+            message = "Failed to read expected data"
             passed = False
+            _LOGGER.all(message)
 
-        return passed
+        return passed, message
 
     def configure_step_last_call(self, step: Step) -> Step:
         """
@@ -469,7 +473,8 @@ class TestStandardFlow(ITestFlow, Test):
         for test in self.dependent_tests:
             with test.run_lock:
                 dependent_result = test.do_run()
-            self.reproduce += dependent_result.reproduce
+            for dependent_report in dependent_result.step_reports:
+                self.add_step_report(dependent_report)
             simple_failed = not dependent_result.passed
             negative_compile = dependent_result.passed and dependent_result.is_negative_compile
             dep_package = dependent_result.metadata.get_package_name()
@@ -477,7 +482,6 @@ class TestStandardFlow(ITestFlow, Test):
             if simple_failed or negative_compile or package_neg_compile:
                 self.passed = dependent_result.passed if not package_neg_compile else True
                 self.excluded = dependent_result.excluded
-                self.report = dependent_result.report
                 self.fail_kind = dependent_result.fail_kind
                 self.last_failure_check_passed = dependent_result.last_failure_check_passed
                 return False
@@ -506,18 +510,19 @@ class TestStandardFlow(ITestFlow, Test):
         if self.expected_err:
             self.expected_err = TestStandardFlow._remove_main_decl(self.expected_err)
 
-    def _determine_test_status(self, actual_output: str, expected_output: str) -> bool:
+    def _determine_test_status(self, actual_output: str, expected_output: str) -> tuple[bool, str]:
         actual_output, expected_output = ComparisonUtils.normalize_output_lines(actual_output, expected_output)
         passed = ComparisonUtils.compare_line_sets(expected_output, actual_output, self.path_to_expected_err)
 
         if passed:
-            self.expected_err_log = "Comparison with expected output/error has passed\n"
+            expected_err_log = "Comparison with expected output/error has passed"
         else:
-            self.expected_err_log = "Comparison with expected output/error has failed\n"
+            expected_err_log = "Comparison with expected output/error has failed"
             differences = ComparisonUtils.log_comparison_difference(actual_output, expected_output)
-            self.expected_err_log += "\n".join(differences)
+            if differences:
+                expected_err_log += "\n" + "\n".join(differences)
 
-        return passed
+        return passed, expected_err_log
 
     def _check_expected_err(self, error: str | None) -> bool:
         # to cover case: there is no expected_err file, but stderr is not empty
@@ -528,20 +533,20 @@ class TestStandardFlow(ITestFlow, Test):
 
         return passed
 
-    def _do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
+    def _do_run_one_step(self, step: Step) -> bool:
         if not step.enabled:
-            passed, report, fail_kind = True, None, None
+            passed = True
         elif step.step_kind == StepKind.COMPILER:
-            passed, report, fail_kind = self.__run_step(self.prepare_compiler_step(step))
+            passed = self.__run_step(self.prepare_compiler_step(step))
         elif step.step_kind == StepKind.VERIFIER:
-            passed, report, fail_kind = self.__run_step(self.prepare_verifier_step(step))
+            passed = self.__run_step(self.prepare_verifier_step(step))
         elif step.step_kind == StepKind.AOT:
-            passed, report, fail_kind = self.__run_step(self.prepare_aot_step(step))
+            passed = self.__run_step(self.prepare_aot_step(step))
         elif step.step_kind == StepKind.RUNTIME:
-            passed, report, fail_kind = self.__run_step(self.prepare_runtime_step(step))
+            passed = self.__run_step(self.prepare_runtime_step(step))
         else:
-            passed, report, fail_kind = self.__run_step(step)
-        return passed, report, fail_kind
+            passed = self.__run_step(step)
+        return passed
 
     def _init_bytecode_paths(self, test_env: TestEnv) -> None:
         self.bytecode_path: Path = test_env.work_dir.intermediate
@@ -595,28 +600,25 @@ class TestStandardFlow(ITestFlow, Test):
                 break
         return new_args
 
-    def __run_step(self, orig_step: Step) -> tuple[bool, TestReport, str | None]:
+    def __run_step(self, orig_step: Step) -> bool:
         step = self.configure_step_last_call(orig_step)
 
         pre_reqs_succeed, pre_reqs_result = step.check_pre_requirements()
         if not pre_reqs_succeed:
-            test_report = TestReport("", "\n".join(pre_reqs_result), -1)
-            self.reproduce += f"\nStep {step.name}: FAILED\n{test_report.error}\n"
-            return False, test_report, f"{step.name.upper()}_PRE_REQS_FAILED"
+            errors = "\n".join(pre_reqs_result)
+            test_report = StepReport(name=orig_step.name, status=f"{step.name.upper()}_PRE_REQS_FAILED",
+                                     validator_messages=errors)
+            self.add_step_report(test_report)
+            return False
 
-        test_runner = OneTestRunner(self.test_env)
-        passed, report, fail_kind = test_runner.run_with_coverage(
-            step=step,
+        step_runner = OneStepRunner(step, self.test_env)
+        passed = step_runner.run_with_coverage(
             result_validator=lambda out, err, return_code:
-            self.validator_utils.step_validator(step, out, err, return_code),
+                self.validator_utils.step_validator(step, out, err, return_code),
             return_code_interpreter=lambda out, err, return_code: self._get_return_code_from_device(out, return_code)
         )
-        self.reproduce += test_runner.reproduce
-        self.reproduce += self.expected_err_log
-
-        result = "PASSED" if passed else f"FAILED with {fail_kind}"
-        self.reproduce += f"Step '{step.name}' result: {result}\n"
-        return passed, report, fail_kind
+        self.add_step_report(step_runner.report)
+        return passed
 
     def __expand_last_call_in_path(self, arg: Path) -> Path:
         line = arg.as_posix()

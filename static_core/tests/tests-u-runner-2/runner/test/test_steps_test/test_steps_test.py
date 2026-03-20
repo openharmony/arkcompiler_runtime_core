@@ -31,6 +31,7 @@ from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
 from runner.test.test_utils import test_cmake_build
+from runner.types.step_report import StepReport
 
 
 @dataclass
@@ -59,9 +60,10 @@ class TestStepsTest(TestCase):
         return [cast(TestStandardFlow, test.do_run()) for test in runner.tests]
 
     @staticmethod
-    def get_steps(reproduce: str) -> list[TestStep]:
+    def get_steps(step_reports: list[StepReport]) -> list[TestStep]:
         lines_per_step = 5
         result: list[TestStep] = []
+        reproduce = "\n".join([str(r) for r in step_reports if r.command_line])
         lines = [line for line in reproduce.split('\n') if line]
         for i in range(len(lines) // lines_per_step):
             line = lines[i * lines_per_step]
@@ -96,7 +98,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
             expected_main_ets = os.path.basename(result.path)
             file_type = expected_main_ets.split('.')[-1]
             expected_types = [file_type, RUNTIME_STEP]
@@ -136,7 +138,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
             expected_types = [COMPILER_STEP, COMPILER_STEP, RUNTIME_STEP]
             expected_dependent_ets = "dependent_nat.ets"
             expected_main_ets = "imports_nat.ets"
@@ -183,7 +185,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
 
             expected_types = [COMPILER_STEP, COMPILER_STEP, RUNTIME_STEP]
             expected_dependent_ets = "dependent_nat_co.ets"
@@ -232,7 +234,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
 
             expected_types = [COMPILER_STEP, COMPILER_STEP, COMPILER_STEP, RUNTIME_STEP]
             expected_dependent2_ets = "dependent_nat_co.ets"
@@ -283,7 +285,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
             expected_types = [COMPILER_STEP, RUNTIME_STEP]
             expected_main_ets = "simple1.ets"
             expected_main_ets_abc = f"{INTERMEDIATE}/{expected_main_ets}.abc"
@@ -323,7 +325,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
             expected_types = [COMPILER_STEP]
             expected_main_ets = "simple_co.ets"
             expected_main_ets_abc = f"{INTERMEDIATE}/{expected_main_ets}.abc"
@@ -359,7 +361,7 @@ class TestStepsTest(TestCase):
             # preparation
             result = self.prepare()[0]
             # test
-            steps = self.get_steps(result.reproduce)
+            steps = self.get_steps(result.step_reports)
             expected_types = [COMPILER_STEP]
             expected_main_ets = "simple_co_neg.ets"
             expected_main_ets_abc = f"{INTERMEDIATE}/{expected_main_ets}.abc"

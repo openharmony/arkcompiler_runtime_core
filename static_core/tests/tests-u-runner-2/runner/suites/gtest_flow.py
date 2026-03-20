@@ -22,12 +22,11 @@ from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options import IOptions
 from runner.options.options_step import Step
-from runner.suites.one_test_runner import OneTestRunner
+from runner.suites.one_step_runner import OneStepRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import StandardFlowUtils
 from runner.test_base import GTest
 from runner.types.test_env import TestEnv
-from runner.types.test_report import TestReport
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -46,8 +45,6 @@ class GTestFlow(ITestFlow, GTest):
     passed: bool | None
     is_negative_runtime: bool
     fail_kind: str | None
-    report: TestReport | None
-    reproduce: str
     flow_utils: StandardFlowUtils
 
     def __init__(self, test_env: TestEnv, test_path: Path, *,
@@ -78,10 +75,9 @@ class GTestFlow(ITestFlow, GTest):
             self.fail_kind = 'None'
 
         for step in steps:
-            passed, report, fail_kind = self._run_step(step)
+            passed = self._run_step(step)
             self.passed = passed
-            self.report = report
-            self.fail_kind = fail_kind
+            self.fail_kind = next(iter(self.step_reports)).status
 
             if not self.passed:
                 self.is_completed = True
@@ -116,12 +112,10 @@ class GTestFlow(ITestFlow, GTest):
     # NOTE: duplicate with TestStandardFlow._run_step — intentional.
     # They may diverge later (different flow-specific logic).
     # pylint: disable=duplicate-code
-    def _run_step(self, orig_step: Step) -> tuple[bool, TestReport, str | None]:
+    def _run_step(self, orig_step: Step) -> bool:
         step = self._configure_step(orig_step)
 
-        test_runner = OneTestRunner(self.test_env)
-        passed, report, fail_kind = test_runner.run_with_coverage(
-            step=step,
-            result_validator=BaseValidator.gtest_result_validator)
-        self.reproduce += test_runner.reproduce
-        return passed, report, fail_kind
+        test_runner = OneStepRunner(step, self.test_env)
+        passed = test_runner.run_with_coverage(result_validator=BaseValidator.gtest_result_validator)
+        self.add_step_report(test_runner.report)
+        return passed

@@ -73,18 +73,17 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_passed(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
-                    test_utils.set_process_mock(mock_popen, return_code=0)
+            with self.subTest(argv=argv) and patch('sys.argv', argv):
+                test_utils.set_process_mock(mock_popen, return_code=0)
 
-                    test_result = self.run_test()
-
+                test_result = self.run_test()
+                try:
                     self.assertTrue(test_result.passed)
                     self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
-
+                finally:
                     work_dir = Path(os.environ["WORK_DIR"])
                     shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -94,7 +93,7 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_fail(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv:
             with self.subTest(argv=argv):
@@ -115,7 +114,7 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_neg_fail(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv_test5:
             with self.subTest(argv=argv):
@@ -136,7 +135,7 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_segfault(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv:
             with self.subTest(argv=argv):
@@ -157,18 +156,17 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_abort_fail(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
-                    test_utils.set_process_mock(mock_popen, return_code=-6)
+            with self.subTest(argv=argv) and patch('sys.argv', argv):
+                test_utils.set_process_mock(mock_popen, return_code=-6)
 
-                    test_result = self.run_test()
-
+                test_result = self.run_test()
+                try:
                     self.assertFalse(test_result.passed)
                     self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_ABORT_FAIL")
-
+                finally:
                     work_dir = Path(os.environ["WORK_DIR"])
                     shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -178,20 +176,20 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_irtoc_fail(self, mock_popen: MagicMock) -> None:
-        for argv in self.sys_argv:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
+        try:
+            for argv in self.sys_argv:
+                with self.subTest(argv=argv) and patch('sys.argv', argv):
                     test_utils.set_process_mock(mock_popen, return_code=133)
 
                     test_result = self.run_test()
 
                     self.assertFalse(test_result.passed)
                     self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_IRTOC_ASSERT_FAIL")
-
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        finally:
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -199,16 +197,15 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_expected_fail(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv_test1:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
-                    test_utils.set_process_mock(mock_popen, return_code=0, output="default: 5")
-                    test_result = self.run_test()
+            with self.subTest(argv=argv) and patch('sys.argv', argv):
+                test_utils.set_process_mock(mock_popen, return_code=0, output="default: 5")
+                test_result = self.run_test()
 
-                    self.assertFalse(test_result.passed)
-                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
+                self.assertFalse(test_result.passed)
+                self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -216,17 +213,17 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_expected_output_ok(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv_test1:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
-                    test_utils.set_process_mock(mock_popen, return_code=0, output="default: 1\ndefault: 2\ndefault: 3\n"
-                                                                        "userClick: 1\nuserClick: 2\nuserClick: 3")
-                    test_result = self.run_test()
+            with self.subTest(argv=argv) and patch('sys.argv', argv):
+                test_utils.set_process_mock(mock_popen, return_code=0,
+                                            output="default: 1\ndefault: 2\ndefault: 3\n"
+                                                   "userClick: 1\nuserClick: 2\nuserClick: 3")
+                test_result = self.run_test()
 
-                    self.assertTrue(test_result.passed)
-                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
+                self.assertTrue(test_result.passed)
+                self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -234,7 +231,7 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_expected_stderr_not_empty_fail(self, mock_popen: MagicMock) -> None:
         sys_argv = [
             ["runner.sh", "panda", "test_suite1", "--test-file", "test1.ets"],
@@ -254,14 +251,15 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_expected_err_fail(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv_test1:
             with self.subTest(argv=argv):
                 with patch('sys.argv', argv):
-                    test_utils.set_process_mock(mock_popen, return_code=0, output="default: 1\ndefault: 2\ndefault: 3\n"
-                                                                        "userClick: 1\nuserClick: 2\nuserClick: 3",
-                                        error_out="error!")
+                    test_utils.set_process_mock(mock_popen, return_code=0,
+                                                output="default: 1\ndefault: 2\ndefault: 3\n"
+                                                       "userClick: 1\nuserClick: 2\nuserClick: 3",
+                                                error_out="error!")
                     test_result = self.run_test()
                     self.assertFalse(test_result.passed)
                     self.assertEqual(test_result.fail_kind,
@@ -273,14 +271,14 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_expected_err_fail_no_file(self, mock_popen: MagicMock) -> None:
         for argv in self.sys_argv_test1:
             with self.subTest(argv=argv):
                 with patch('sys.argv', argv):
                     test_utils.set_process_mock(mock_popen, return_code=0,
                                                 error_out="default: 1\ndefault: 2\ndefault: 3\n"
-                                                                        "userClick: 1\nuserClick: 2\nuserClick: 3")
+                                                          "userClick: 1\nuserClick: 2\nuserClick: 3")
                     test_result = self.run_test()
                     self.assertFalse(test_result.passed)
                     self.assertEqual(test_result.fail_kind,
@@ -299,14 +297,13 @@ class FailKindTest(TestCase):
         - fail_kind is <COMPILER_STEP_NAME>_TIMEOUT
         """
         for argv in self.sys_argv_test12:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
-
-                    test_result = self.run_test()
-
-                    self.assertIn(f"Actual partial output: {test_result.test_id}", test_result.reproduce)
+            with self.subTest(argv=argv) and patch('sys.argv', argv):
+                test_result = self.run_test()
+                try:
+                    self.assertIn(f"Actual partial output: {test_result.test_id}",
+                                  test_result.step_reports[0].cmd_output)
                     self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_TIMEOUT")
-
+                finally:
                     work_dir = Path(os.environ["WORK_DIR"])
                     shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -316,7 +313,7 @@ class FailKindTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_fail_kind_timeout_second(self, mock_popen: MagicMock) -> None:
         """
         Feature: Upon failure by second timeout on retreiving output, error message contains correct info
@@ -324,18 +321,16 @@ class FailKindTest(TestCase):
         - fail_kind is <COMPILER_STEP_NAME>_TIMEOUT
         """
         for argv in self.sys_argv_test13:
-            with self.subTest(argv=argv):
-                with patch('sys.argv', argv):
-                    test_utils.set_process_mock(mock_popen, return_code=-1, timeout_exception=True)
-
-                    test_result = self.run_test()
-
-                    config = test_result.test_env.config
-
-                    self.assertIn(f"{config.workflow.steps[0].name}: Failed by second timeout \
-on retrieving partial output after {config.general.retrieve_log_timeout} sec", test_result.reproduce)
+            with self.subTest(argv=argv) and patch('sys.argv', argv):
+                test_utils.set_process_mock(mock_popen, return_code=-1, timeout_exception=True)
+                test_result = self.run_test()
+                config = test_result.test_env.config
+                steps_to_reproduce = "\n".join([str(r) for r in test_result.step_reports])
+                try:
+                    self.assertIn("Failed by second timeout on retrieving partial output after "
+                                  f"{config.general.retrieve_log_timeout} sec", steps_to_reproduce)
                     self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_TIMEOUT")
-
+                finally:
                     work_dir = Path(os.environ["WORK_DIR"])
                     shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -346,7 +341,7 @@ on retrieving partial output after {config.general.retrieve_log_timeout} sec", t
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_all_steps_pass(self, mock_popen: MagicMock) -> None:
         """
         test-file: test1.ets
@@ -379,7 +374,7 @@ on retrieving partial output after {config.general.retrieve_log_timeout} sec", t
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_one_step_failure(self, mock_popen: MagicMock) -> None:
         """
         test-file: test1.ets
@@ -415,7 +410,7 @@ on retrieving partial output after {config.general.retrieve_log_timeout} sec", t
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_two_steps_failure(self, mock_popen: MagicMock) -> None:
         """
         test-file: test1.ets

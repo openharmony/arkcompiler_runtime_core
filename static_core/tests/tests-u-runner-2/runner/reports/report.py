@@ -25,11 +25,11 @@ from runner.enum_types.verbose_format import VerboseFilter
 from runner.logger import Log
 from runner.reports.report_format import ReportFormat
 from runner.types.test_env import TestEnv
-from runner.types.test_report import TestReport
 from runner.utils import write_2_file
 
 if TYPE_CHECKING:
     from runner.test_base import GTest, Test
+
     TestType: TypeAlias = GTest | Test
 
 _LOGGER = Log.get_logger(__file__)
@@ -97,10 +97,21 @@ def convert_to_array(output: str) -> list[str]:
 class Report(ABC):
     def __init__(self, test: 'Test') -> None:
         self.test = test
+        self.actual_reports = list(set(self.test.step_reports))
 
     @abstractmethod
     def make_report(self) -> str:
         pass
+
+    def _consolidate_stdout(self) -> str:
+        return "\n".join(filter(None, (r.cmd_output for r in self.actual_reports)))
+
+    def _consolidate_stderr(self) -> str:
+        return "\n".join(filter(None, (r.cmd_error for r in self.actual_reports)))
+
+    def _consolidate_return_code(self) -> int:
+        return_codes = [r.cmd_return_code for r in self.actual_reports if r.cmd_return_code != 0][::-1]
+        return next(iter(return_codes), 0)
 
 
 class HtmlReport(Report):
@@ -113,8 +124,8 @@ class HtmlReport(Report):
         return f'<span class="output_line output_line--failed">{line}</span>'
 
     def make_report(self) -> str:
-        actual_report = self.test.report if self.test.report is not None else TestReport("", "", -1)
-        expected, actual = self.__make_output_diff_html(self.test.expected, actual_report.output)
+        output = self._consolidate_stdout()
+        expected, actual = self.__make_output_diff_html(self.test.expected, output)
         test_expected, test_actual = "\n".join(expected), "\n".join(actual)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.html")
@@ -134,22 +145,24 @@ class HtmlReport(Report):
         else:
             report = report.replace(REPORT_TIME, NO_TIME)
 
-        report = report.replace(REPORT_REPRODUCE, self.test.reproduce)
+        steps_to_reproduce = [r.command_line for r in self.test.step_reports]
+        report = report.replace(REPORT_REPRODUCE, "\n".join(steps_to_reproduce))
         report = report.replace(REPORT_EXPECTED, test_expected)
         report = report.replace(REPORT_ACTUAL, test_actual)
-        report = report.replace(REPORT_ERROR, actual_report.error)
-        if self.test.report is None:
-            report = report.replace(REPORT_RETURN_CODE, "Not defined")
-        else:
-            report = report.replace(REPORT_RETURN_CODE, str(actual_report.return_code))
+
+        error = self._consolidate_stderr()
+        report = report.replace(REPORT_ERROR, error)
+
+        return_code = self._consolidate_return_code()
+        report = report.replace(REPORT_RETURN_CODE, str(return_code))
 
         return report
 
     def __make_output_diff_html(self, expected: str, actual: str) -> tuple[list[str], list[str]]:
-        expected_list = convert_to_array(expected)
-        actual_list = convert_to_array(actual)
-        result_expected = []
-        result_actual = []
+        expected_list: list[str] = convert_to_array(expected)
+        actual_list: list[str] = convert_to_array(actual)
+        result_expected: list[str] = []
+        result_actual: list[str] = []
 
         min_len = min(len(expected_list), len(actual_list))
         for i in range(min_len):
@@ -187,8 +200,8 @@ class MdReport(Report):
         return f"| {expected} | {actual} |"
 
     def make_report(self) -> str:
-        actual_report = self.test.report if self.test.report is not None else TestReport("", "", -1)
-        result = self.__make_output_diff_md(self.test.expected, actual_report.output)
+        output = self._consolidate_stdout()
+        result = self.__make_output_diff_md(self.test.expected, output)
         test_result = "\n".join(result)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.md")
@@ -208,13 +221,15 @@ class MdReport(Report):
         else:
             report = report.replace(REPORT_TIME, NO_TIME)
 
-        report = report.replace(REPORT_REPRODUCE, self.test.reproduce)
+        steps_to_reproduce = [r.command_line for r in self.test.step_reports]
+        report = report.replace(REPORT_REPRODUCE, "\n".join(steps_to_reproduce))
         report = report.replace(REPORT_RESULT, test_result)
-        report = report.replace(REPORT_ERROR, actual_report.error)
-        if self.test.report is None:
-            report = report.replace(REPORT_RETURN_CODE, "Not defined")
-        else:
-            report = report.replace(REPORT_RETURN_CODE, str(actual_report.return_code))
+
+        error = self._consolidate_stderr()
+        report = report.replace(REPORT_ERROR, error)
+
+        return_code = self._consolidate_return_code()
+        report = report.replace(REPORT_RETURN_CODE, str(return_code))
 
         return report
 
@@ -247,10 +262,11 @@ class TextReport(Report):
     def make_report(self) -> str:
         result = "PASSED" if self.test.passed else "FAILED"
         time_line = f"{round(self.test.time, 2)} sec" if self.test.time is not None else NO_TIME
+        steps_to_reproduce = "\n".join([str(r) for r in self.test.step_reports])
         return "\n".join([
             f"Test ID: {self.test.test_id}",
             f"Test path: {self.test.path}\n",
             f"Result: {result}",
             f"Execution time: {time_line}\n",
-            f"Steps to reproduce:{self.test.reproduce}\n",
+            f"Steps to reproduce:{steps_to_reproduce}\n",
         ])

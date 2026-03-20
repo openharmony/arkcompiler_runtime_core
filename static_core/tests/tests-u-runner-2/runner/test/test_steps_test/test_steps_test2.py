@@ -34,6 +34,7 @@ from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
 from runner.test.test_steps_test.test_steps_test import TestStep
 from runner.test.test_utils import compare_dicts, compare_lists, test_cmake_build
+from runner.types.step_report import StepReport
 
 
 class TestStepsTest2(TestCase):
@@ -196,11 +197,12 @@ class TestStepsTest2(TestCase):
             args = get_args()
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
-            self.assertFalse(result.passed, "Test with failed requirement check 'FileExist' should fail")
-            report_error = result.report.error if result.report is not None else ""
             try:
-                self.assertFalse(result.passed, "Test with failed pre/post requirement check 'FileExist' should fail")
-                self.assertIn("FILE_EXIST", report_error)
+                self.assertGreater(len(result.step_reports), 0, "Expected at least one step report")
+                report: StepReport = next(iter(result.step_reports))
+                self.assertFalse(result.passed,
+                                 "Test with failed pre/post requirement check 'FileExist' should fail")
+                self.assertIn("FILE_EXIST", report.validator_messages)
             finally:
                 # clear up
                 work_dir = Path(os.environ["WORK_DIR"])
@@ -227,10 +229,11 @@ class TestStepsTest2(TestCase):
             args = get_args()
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
-            report_error = result.report.error if result.report is not None else ""
             try:
+                self.assertGreater(len(result.step_reports), 0, "Expected at least one step report")
+                report = next(iter(result.step_reports))
                 self.assertFalse(result.passed, "Test with failed requirement check 'FolderExist' should fail")
-                self.assertIn("FOLDER_EXIST", report_error)
+                self.assertIn("FOLDER_EXIST", report.validator_messages)
             finally:
                 # clear up
                 work_dir = Path(os.environ["WORK_DIR"])
@@ -265,12 +268,12 @@ class TestStepsTest2(TestCase):
                 self.assertTrue(expected_rep_path.exists(), f"Folder '{expected_rep_path}' not found")
                 self.assertTrue(expected_out_path.exists(), f"File with stdout '{expected_out_path}' not found")
                 self.assertTrue(expected_err_path.exists(), f"File with stderr '{expected_err_path}' not found")
-                report_output = result.report.output if result.report is not None else ""
+                self.assertGreater(len(result.step_reports), 0, "Expected at least one step report")
+                report = next(iter(result.step_reports))
                 expected_output = expected_out_path.read_text(encoding="utf-8")
-                self.assertEqual(expected_output, report_output)
-                report_error = result.report.error if result.report is not None else ""
+                self.assertEqual(expected_output, report.cmd_output)
                 expected_error = expected_err_path.read_text(encoding="utf-8")
-                self.assertEqual(expected_error, report_error)
+                self.assertEqual(expected_error, report.cmd_error)
             finally:
                 # clear up
                 work_dir = Path(os.environ["WORK_DIR"])

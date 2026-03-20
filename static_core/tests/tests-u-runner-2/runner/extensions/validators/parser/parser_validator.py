@@ -49,16 +49,30 @@ class ParserValidator(BaseValidator):
     def es2panda_result_validator(test: "TestStandardFlow", _: str, actual_output: str, _2: str,
                                   return_code: int) -> ValidationResult:
         fail_kind = ValidatorFailKind.NONE
+        actual_output = actual_output.strip()
+        validator_message = ""
+        expected_name = f"{test.path.stem}-expected"
+        expected_path = test.path.with_stem(expected_name).with_suffix(".txt")
+        if not expected_path.exists():
+            return ValidationResult(False,
+                                    ValidatorFailKind.OTHER,
+                                    f"Expected file {expected_path.as_posix()} not found")
         try:
-            expected_name = f"{test.path.stem}-expected"
-            expected_path = test.path.with_stem(expected_name).with_suffix(".txt")
             with open(expected_path, encoding="utf-8") as file_pointer:
-                expected = file_pointer.read()
+                expected = file_pointer.read().strip()
             normalized_output = ParserValidator.normalize_build_system_path(actual_output)
-            passed = expected == normalized_output and return_code in [0, 1]
-            if not passed:
+            passed_outputs = expected == normalized_output
+            passed_returns_codes = return_code in [0, 1]
+            if not passed_outputs:
                 fail_kind = ValidatorFailKind.COMPARE_OUTPUT
+                validator_message = f"Actual output '{normalized_output}' does not match to expected one '{expected}'"
+            elif not passed_returns_codes:
+                fail_kind = ValidatorFailKind.COMPARE_OUTPUT
+                validator_message = f"Actual return code {return_code} does not match to expected values [0, 1]"
+            passed = passed_outputs and passed_returns_codes
         except OSError:
             passed = False
+            fail_kind = ValidatorFailKind.OTHER
+            validator_message = f"Cannot read {expected_path.as_posix()}"
 
-        return ValidationResult(passed, fail_kind, "")
+        return ValidationResult(passed, fail_kind, validator_message)

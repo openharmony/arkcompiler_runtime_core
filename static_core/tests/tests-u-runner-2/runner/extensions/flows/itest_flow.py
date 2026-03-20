@@ -19,7 +19,7 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from runner.types.test_report import TestReport
+from runner.types.step_report import StepReport
 
 
 class ITestFlow(ABC):
@@ -28,9 +28,8 @@ class ITestFlow(ABC):
     path: Path
     ignored: bool
     last_failure: str
-    reproduce: str
+    step_reports: list[StepReport]
     fail_kind: str | None
-    report: TestReport | None
     last_failure_check_passed: bool
 
     @property
