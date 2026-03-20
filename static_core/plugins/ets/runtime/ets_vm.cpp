@@ -307,6 +307,38 @@ static mem::Reference *PreallocOOMError(EtsCoroutine *coro, PandaEtsVM *vm)
     return vm->GetGlobalObjectStorage()->Add(oom->AsObject()->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
 }
 
+static void CreateEtsObjects(PandaVector<CoroutineWorker::LocalObjectData> &objectRefs)
+{
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        auto *coro = EtsCoroutine::GetCurrent();
+        EtsHandleScope scope(coro);
+        EtsHandle<DoubleToStringCache> cacheDouble(coro, DoubleToStringCache::Create(coro));
+        EtsHandle<FloatToStringCache> cacheFloat(coro, FloatToStringCache::Create(coro));
+        EtsHandle<LongToStringCache> cacheLong(coro, LongToStringCache::Create(coro));
+        if (cacheDouble.GetPtr() == nullptr || cacheFloat.GetPtr() == nullptr || cacheLong.GetPtr() == nullptr) {
+            LOG(WARNING, ETS) << "Cannot initialize number-to-string caches";
+            return;
+        }
+
+        LOG(DEBUG, ETS) << "Initialized number-to-string caches";
+        auto *refStorage = coro->GetVM()->GetGlobalObjectStorage();
+        auto *cacheRefDouble = refStorage->Add(cacheDouble->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        objectRefs.push_back(CoroutineWorker::LocalObjectData {
+            CoroutineWorker::DataIdx::DOUBLE_TO_STRING_CACHE, cacheRefDouble,
+            [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
+
+        auto *cacheRefFloat = refStorage->Add(cacheFloat->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        objectRefs.push_back(CoroutineWorker::LocalObjectData {
+            CoroutineWorker::DataIdx::FLOAT_TO_STRING_CACHE, cacheRefFloat,
+            [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
+
+        auto *cacheRefLong = refStorage->Add(cacheLong->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        objectRefs.push_back(CoroutineWorker::LocalObjectData {
+            CoroutineWorker::DataIdx::LONG_TO_STRING_CACHE, cacheRefLong,
+            [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
+    }
+}
+
 bool PandaEtsVM::Initialize()
 {
     if (!ark::intrinsics::Initialize(ark::panda_file::SourceLang::ETS)) {
@@ -335,20 +367,9 @@ bool PandaEtsVM::Initialize()
         finalizableWeakRefList_ = PreallocSpecialReference(this, PlatformTypes(coro)->coreFinalizableWeakRef);
 
         coro->SetupNullValue(GetNullValue());
-
-        if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-            doubleToStringCache_ = DoubleToStringCache::Create(coro);
-            floatToStringCache_ = FloatToStringCache::Create(coro);
-            longToStringCache_ = LongToStringCache::Create(coro);
-        }
-
         referenceProcessor_->Initialize();
-        coroutineManager_->InitializeManagedStructures();
+        coroutineManager_->InitializeManagedStructures(CreateEtsObjects);
     }
-    [[maybe_unused]] bool cachesCreated =
-        (doubleToStringCache_ != nullptr && floatToStringCache_ != nullptr && longToStringCache_ != nullptr);
-    LOG_IF(!cachesCreated, WARNING, ETS) << "Cannot initialize number-to-string caches";
-    LOG_IF(cachesCreated, DEBUG, ETS) << "Initialized number-to-string caches";
 
     // Check if Intrinsics/native methods should be initialized, we don't want to attempt to
     // initialize  native methods in certain scenarios where we don't have ets stdlib at our disposal
@@ -706,9 +727,6 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
         return true;
     });
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&doubleToStringCache_)));
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&floatToStringCache_)));
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&longToStringCache_)));
         PlatformTypes(this)->VisitRoots(visitor);
     }
     {

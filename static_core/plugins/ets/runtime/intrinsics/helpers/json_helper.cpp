@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/intrinsics/helpers/json_helper.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
@@ -24,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "intrinsics.h"
 
 namespace ark::ets::intrinsics::helpers {
 
@@ -403,9 +405,7 @@ bool JSONStringifier::SerializeJSONBoxedBoolean(EtsHandle<EtsObject> &value)
 bool JSONStringifier::SerializeJSONBoxedDouble(EtsHandle<EtsObject> &value)
 {
     auto val = EtsBoxPrimitive<EtsDouble>::Unbox(value.GetPtr());
-    auto cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    auto coro = EtsCoroutine::GetCurrent();
-    PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
+    PandaString v = StdCoreDoubleToString(val, helpers::DECIMAL)->GetMutf8();
     if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
         buffer_ += "null";
     } else {
@@ -417,9 +417,7 @@ bool JSONStringifier::SerializeJSONBoxedDouble(EtsHandle<EtsObject> &value)
 bool JSONStringifier::SerializeJSONBoxedFloat(EtsHandle<EtsObject> &value)
 {
     auto val = EtsBoxPrimitive<EtsFloat>::Unbox(value.GetPtr());
-    auto cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
-    auto coro = EtsCoroutine::GetCurrent();
-    PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
+    PandaString v = StdCoreFloatToString(val, helpers::DECIMAL)->GetMutf8();
     if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
         buffer_ += "null";
     } else {
@@ -431,9 +429,7 @@ bool JSONStringifier::SerializeJSONBoxedFloat(EtsHandle<EtsObject> &value)
 bool JSONStringifier::SerializeJSONBoxedLong(EtsHandle<EtsObject> &value)
 {
     auto val = EtsBoxPrimitive<EtsLong>::Unbox(value.GetPtr());
-    auto cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
-    auto coro = EtsCoroutine::GetCurrent();
-    PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
+    PandaString v = StdCoreToStringLong(val)->GetMutf8();
     if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
         buffer_ += "null";
     } else {
@@ -472,11 +468,9 @@ template <typename T>
 PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
 {
     PandaString result;
-    auto coro = EtsCoroutine::GetCurrent();
     if constexpr (std::is_same_v<T, EtsDouble>) {
         auto val = EtsBoxPrimitive<EtsDouble>::FromCoreType(value.GetPtr())->GetValue();
-        auto cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-        auto v = cache->GetOrCache(coro, val)->GetMutf8();
+        auto v = StdCoreDoubleToString(val, helpers::DECIMAL)->GetMutf8();
         if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
             result = "null";
         } else {
@@ -484,8 +478,7 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
         }
     } else if constexpr (std::is_same_v<T, EtsFloat>) {
         auto val = EtsBoxPrimitive<EtsFloat>::FromCoreType(value.GetPtr())->GetValue();
-        auto cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
-        auto v = cache->GetOrCache(coro, val)->GetMutf8();
+        auto v = StdCoreFloatToString(val, helpers::DECIMAL)->GetMutf8();
         if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
             result = "null";
         } else {
@@ -493,8 +486,7 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
         }
     } else if constexpr (std::is_same_v<T, EtsLong>) {
         auto val = EtsBoxPrimitive<EtsLong>::FromCoreType(value.GetPtr())->GetValue();
-        auto cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
-        auto v = cache->GetOrCache(coro, val)->GetMutf8();
+        auto v = StdCoreToStringLong(val)->GetMutf8();
         if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
             result = "null";
         } else {
@@ -784,8 +776,8 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
-bool JSONStringifier::HandleField(EtsCoroutine *coro, EtsHandle<EtsObject> &obj, EtsField *etsField, bool &hasContent,
-                                  PandaUnorderedSet<PandaString> &keys)
+bool JSONStringifier::HandleField([[maybe_unused]] EtsCoroutine *coro, EtsHandle<EtsObject> &obj, EtsField *etsField,
+                                  bool &hasContent, PandaUnorderedSet<PandaString> &keys)
 {
     if (!etsField->IsPublic() || etsField->IsStatic()) {
         return true;
@@ -831,22 +823,19 @@ bool JSONStringifier::HandleField(EtsCoroutine *coro, EtsHandle<EtsObject> &obj,
         case EtsType::LONG: {
             ASSERT(obj.GetPtr() != nullptr);
             auto val = obj->GetFieldPrimitive<EtsLong>(etsField);
-            auto cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
-            PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
+            PandaString v = StdCoreToStringLong(val)->GetMutf8();
             AppendJSONPrimitive(v, hasContent);
             break;
         }
         case EtsType::FLOAT: {
             auto val = obj->GetFieldPrimitive<EtsFloat>(etsField);
-            auto cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
-            PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
+            PandaString v = StdCoreFloatToString(val, helpers::DECIMAL)->GetMutf8();
             AppendJSONPrimitive(v, hasContent);
             break;
         }
         case EtsType::DOUBLE: {
             auto val = obj->GetFieldPrimitive<EtsDouble>(etsField);
-            auto cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-            PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
+            PandaString v = StdCoreDoubleToString(val, helpers::DECIMAL)->GetMutf8();
             AppendJSONPrimitive(v, hasContent);
             break;
         }

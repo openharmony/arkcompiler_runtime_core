@@ -146,7 +146,7 @@ public:
      */
     virtual void InitializeScheduler(Runtime *runtime, PandaVM *vm) = 0;
     /// should be called once the VM is ready to create managed objects in the managed heap
-    virtual void InitializeManagedStructures() = 0;
+    virtual void InitializeManagedStructures(const CoroutineWorker::CreatePluginObjFunc &createEtsObj) = 0;
     /// Should be called after all execution is finished. Destroys the main coroutine.
     virtual void Finalize() = 0;
     /// Add coroutine to registry (used for enumeration and tracking) and perform all the required actions

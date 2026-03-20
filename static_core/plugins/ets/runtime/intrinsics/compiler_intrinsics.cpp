@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -368,9 +368,27 @@ extern "C" void CompilerEtsNullcheck(ObjectHeader *obj)
     }
 }
 
-extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,
-                                                    [[maybe_unused]] uint64_t unused)
+extern "C" EtsString *CompilerLongToStringDecimal(int64_t number, [[maybe_unused]] uint64_t unused)
 {
+    auto *cache = ManagedThread::GetCurrent()->GetLongToStringCache();
+    if (UNLIKELY(cache == nullptr)) {
+        return LongToStringCache::GetNoCache(number);
+    }
+    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number);
+}
+
+extern "C" EtsString *CompilerFloatToStringDecimal(uint32_t number, [[maybe_unused]] uint64_t unused)
+{
+    auto *cache = ManagedThread::GetCurrent()->GetFloatToStringCache();
+    if (UNLIKELY(cache == nullptr)) {
+        return FloatToStringCache::GetNoCache(bit_cast<float>(number));
+    }
+    return FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<float>(number));
+}
+
+extern "C" EtsString *CompilerDoubleToStringDecimal(uint64_t number, [[maybe_unused]] uint64_t unused)
+{
+    auto *cache = ManagedThread::GetCurrent()->GetDoubleToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         return DoubleToStringCache::GetNoCache(bit_cast<double>(number));
     }

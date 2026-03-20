@@ -18,8 +18,6 @@ DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetTlsNull
 DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetTlsAniEnvOffset())
 DEFINE_VALUE(ETS_COROUTINE_LOCAL_STORAGE_OFFSET, ark::ets::EtsCoroutine::GetLocalStorageOffset())
 
-DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoubleToStringCacheOffset())
-
 DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
 DEFINE_VALUE(ETS_CLASS_FLAGS_OFFSET, ark::ets::EtsClass::GetFlagsOffset())
 
@@ -83,5 +81,12 @@ DEFINE_VALUE(ETS_BASE_ENUM_VALUE_OFFSET, ark::ets::EtsBaseEnum::GetValueOffset()
 
 DEFINE_VALUE(ETS_BIG_INT_BYTES_OFFSET, ark::ets::EtsBigInt::GetBytesOffset())
 DEFINE_VALUE(ETS_BIG_INT_SIGN_OFFSET, ark::ets::EtsBigInt::GetSignOffset())
+
+DEFINE_VALUE(ETS_LONG_TO_STRING_CACHE_ENTRY_STRING_OFFSET, ark::ets::detail::EtsToStringCacheElement<ark::ets::EtsLong>::GetStringOffset())
+DEFINE_VALUE(ETS_LONG_TO_STRING_CACHE_ENTRY_NUMBER_OFFSET, ark::ets::detail::EtsToStringCacheElement<ark::ets::EtsLong>::GetNumberOffset())
+DEFINE_VALUE(ETS_FLOAT_TO_STRING_CACHE_ENTRY_STRING_OFFSET, ark::ets::detail::EtsToStringCacheElement<ark::ets::EtsFloat>::GetStringOffset())
+DEFINE_VALUE(ETS_FLOAT_TO_STRING_CACHE_ENTRY_NUMBER_OFFSET, ark::ets::detail::EtsToStringCacheElement<ark::ets::EtsFloat>::GetNumberOffset())
+DEFINE_VALUE(ETS_DOUBLE_TO_STRING_CACHE_ENTRY_STRING_OFFSET, ark::ets::detail::EtsToStringCacheElement<ark::ets::EtsDouble>::GetStringOffset())
+DEFINE_VALUE(ETS_DOUBLE_TO_STRING_CACHE_ENTRY_NUMBER_OFFSET, ark::ets::detail::EtsToStringCacheElement<ark::ets::EtsDouble>::GetNumberOffset())
 
 // NOLINTEND(readability-identifier-naming)

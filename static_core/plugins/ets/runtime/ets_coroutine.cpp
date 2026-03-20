@@ -274,11 +274,22 @@ void EtsCoroutine::UpdateCachedObjects()
 
     if (GetType() == Coroutine::Type::MUTATOR) {
         ASSERT_MANAGED_CODE();
-        // update the string cache pointer
-        auto *cacheRef =
-            worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::FLATTENED_STRING_CACHE, mem::Reference *>();
-        auto *cache = GetVM()->GetGlobalObjectStorage()->Get(cacheRef);
-        SetFlattenedStringCache(cache);
+        auto *gStorage = GetVM()->GetGlobalObjectStorage();
+        auto &lStorage = worker->GetLocalStorage();
+
+        // update the flattenedString cache pointer
+        auto *cacheRef = lStorage.Get<CoroutineWorker::DataIdx::FLATTENED_STRING_CACHE, mem::Reference *>();
+        SetFlattenedStringCache(gStorage->Get(cacheRef));
+
+        // update toString cache pointers
+        if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+            auto *cacheRefD = lStorage.Get<CoroutineWorker::DataIdx::DOUBLE_TO_STRING_CACHE, mem::Reference *>();
+            SetDoubleToStringCache(gStorage->Get(cacheRefD));
+            auto *cacheRefF = lStorage.Get<CoroutineWorker::DataIdx::FLOAT_TO_STRING_CACHE, mem::Reference *>();
+            SetFloatToStringCache(gStorage->Get(cacheRefF));
+            auto *cacheRefL = lStorage.Get<CoroutineWorker::DataIdx::LONG_TO_STRING_CACHE, mem::Reference *>();
+            SetLongToStringCache(gStorage->Get(cacheRefL));
+        }
     }
 }
 

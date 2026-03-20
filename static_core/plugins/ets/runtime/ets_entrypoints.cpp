@@ -369,6 +369,56 @@ extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
     return StringBuilderToString(sb)->GetCoreType();
 }
 
+extern "C" ObjectHeader *LongToStringDecimalEntrypoint(ObjectHeader *cache, int64_t number)
+{
+    if (UNLIKELY(cache == nullptr)) {
+        return LongToStringDecimalNoCacheEntrypoint(number);
+    }
+    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number)->GetCoreType();
+}
+
+extern "C" ObjectHeader *LongToStringDecimalStoreEntrypoint(ObjectHeader *elem, int64_t number)
+{
+    auto *cache = ManagedThread::GetCurrent()->GetLongToStringCache();
+    if (UNLIKELY(cache == nullptr)) {
+        return LongToStringDecimalNoCacheEntrypoint(number);
+    }
+    return LongToStringCache::FromCoreType(cache)
+        ->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), number, elem)
+        ->GetCoreType();
+}
+
+extern "C" ObjectHeader *LongToStringDecimalNoCacheEntrypoint(int64_t number)
+{
+    return LongToStringCache::GetNoCache(number)->GetCoreType();
+}
+
+extern "C" ObjectHeader *FloatToStringDecimalEntrypoint(ObjectHeader *cache, uint32_t number)
+{
+    if (UNLIKELY(cache == nullptr)) {
+        return FloatToStringDecimalNoCacheEntrypoint(number);
+    }
+    return FloatToStringCache::FromCoreType(cache)
+        ->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<float>(number))
+        ->GetCoreType();
+}
+
+extern "C" ObjectHeader *FloatToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint32_t number)
+{
+    auto *cache = ManagedThread::GetCurrent()->GetFloatToStringCache();
+    if (UNLIKELY(cache == nullptr)) {
+        return FloatToStringDecimalNoCacheEntrypoint(number);
+    }
+    return FloatToStringCache::FromCoreType(cache)
+        ->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<float>(number), elem)
+        ->GetCoreType();
+}
+
+extern "C" ObjectHeader *FloatToStringDecimalNoCacheEntrypoint(uint32_t number)
+{
+    return FloatToStringCache::GetNoCache(bit_cast<float>(number))->GetCoreType();
+}
+
 extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number)
 {
     if (UNLIKELY(cache == nullptr)) {
@@ -379,13 +429,15 @@ extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, ui
         ->GetCoreType();
 }
 
-extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint64_t number, uint64_t cached)
+extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint64_t number)
 {
-    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    auto *cache = ManagedThread::GetCurrent()->GetDoubleToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         return DoubleToStringDecimalNoCacheEntrypoint(number);
     }
-    return cache->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem, cached)->GetCoreType();
+    return DoubleToStringCache::FromCoreType(cache)
+        ->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem)
+        ->GetCoreType();
 }
 
 extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)

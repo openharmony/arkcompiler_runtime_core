@@ -72,9 +72,6 @@
 #include "common_interfaces/vm_interface.h"
 
 namespace ark::ets {
-class DoubleToStringCache;
-class FloatToStringCache;
-class LongToStringCache;
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
 class FinalizationRegistryManager;
@@ -320,26 +317,6 @@ public:
         return true;
     }
 
-    DoubleToStringCache *GetDoubleToStringCache()
-    {
-        return doubleToStringCache_;
-    }
-
-    FloatToStringCache *GetFloatToStringCache()
-    {
-        return floatToStringCache_;
-    }
-
-    LongToStringCache *GetLongToStringCache()
-    {
-        return longToStringCache_;
-    }
-
-    static constexpr uint32_t GetDoubleToStringCacheOffset()
-    {
-        return MEMBER_OFFSET(PandaEtsVM, doubleToStringCache_);
-    }
-
     EtsFinalizableWeakRef *RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
                                                       void (*finalizer)(void *), void *finalizerArg);
 
@@ -470,9 +447,6 @@ private:
     std::optional<std::mt19937> randomEngine_;
     // for JS Atomics
     os::memory::Mutex atomicsMutex_;
-    DoubleToStringCache *doubleToStringCache_ {nullptr};
-    FloatToStringCache *floatToStringCache_ {nullptr};
-    LongToStringCache *longToStringCache_ {nullptr};
     UnhandledObjectManager *unhandledObjectManager_ {nullptr};
     FullGCLongTimeListener *fullGCLongTimeListener_ {nullptr};
 

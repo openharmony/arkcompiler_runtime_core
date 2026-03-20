@@ -1816,11 +1816,6 @@ public:
         UNREACHABLE();
     }
 
-    virtual void *GetDoubleToStringCache() const
-    {
-        return nullptr;
-    }
-
     virtual void *GetAsciiCharCache() const
     {
         return nullptr;

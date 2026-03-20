@@ -142,7 +142,7 @@ public:
     size_t GetCoroutineCount() override;
 
     /// should be called once the VM is ready to create managed objects in the managed heap
-    void InitializeManagedStructures() override;
+    void InitializeManagedStructures(const CoroutineWorker::CreatePluginObjFunc &createEtsObj) override;
 
 protected:
     static constexpr CoroutineWorker::Id MAIN_WORKER_ID = 0U;
@@ -307,6 +307,9 @@ private:  // data members
     CoroutineWorkerGroup::Id eaWorkerGroup_ = CoroutineWorkerGroup::Empty();
 
     NativeStackAllocator nativeStackAllocator_;
+
+    // Issue 33462, needs to be removed after refactoring ManagedThread
+    CoroutineWorker::CreatePluginObjFunc createEtsObjFunc_ {nullptr};
 };
 
 }  // namespace ark

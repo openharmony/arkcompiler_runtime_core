@@ -311,9 +311,19 @@ void LLVMIrConstructor::StringBuilderAppendStringMain(Inst *inst, llvm::Value *s
     builder_.CreateBr(contBb);
 }
 
+bool LLVMIrConstructor::EmitLongToStringDecimal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::LONG_TO_STRING_DECIMAL, 2U);
+}
+
+bool LLVMIrConstructor::EmitFloatToStringDecimal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT_TO_STRING_DECIMAL, 2U);
+}
+
 bool LLVMIrConstructor::EmitDoubleToStringDecimal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::DOUBLE_TO_STRING_DECIMAL, 3U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::DOUBLE_TO_STRING_DECIMAL, 2U);
 }
 
 bool LLVMIrConstructor::EmitStringTrimLeft(Inst *inst)

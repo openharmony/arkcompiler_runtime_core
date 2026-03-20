@@ -434,15 +434,34 @@ void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS 
     }
 }
 
+void Codegen::CreateLongToStringDecimal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    auto num = src[FIRST_OPERAND];
+    auto unused = src[SECOND_OPERAND];
+    auto entrypoint = EntrypointId::LONG_TO_STRING_DECIMAL;
+    CallFastPath(inst, entrypoint, dst, {}, num, unused);
+}
+
+void Codegen::CreateFloatToStringDecimal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    auto numAsInt = src[FIRST_OPERAND];
+    auto unused = src[SECOND_OPERAND];
+    auto entrypoint = EntrypointId::FLOAT_TO_STRING_DECIMAL;
+    CallFastPath(inst, entrypoint, dst, {}, numAsInt, unused);
+}
+
 void Codegen::CreateDoubleToStringDecimal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    ASSERT(inst->GetInputsCount() == 4U && inst->RequireState());
-    auto cache = src[FIRST_OPERAND];
-    auto numAsInt = src[SECOND_OPERAND];
-    auto unused = src[THIRD_OPERAND];
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    auto numAsInt = src[FIRST_OPERAND];
+    auto unused = src[SECOND_OPERAND];
     auto entrypoint = EntrypointId::DOUBLE_TO_STRING_DECIMAL;
-    CallFastPath(inst, entrypoint, dst, {}, cache, numAsInt, unused);
+    CallFastPath(inst, entrypoint, dst, {}, numAsInt, unused);
 }
 
 void Codegen::CreateFloatIsInteger([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)

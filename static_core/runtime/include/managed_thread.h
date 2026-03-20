@@ -463,6 +463,21 @@ public:
         return MEMBER_OFFSET(ManagedThread, flattenedStringCache_);
     }
 
+    static constexpr uint32_t GetDoubleToStringCacheOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, doubleToStringCache_);
+    }
+
+    static constexpr uint32_t GetFloatToStringCacheOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, floatToStringCache_);
+    }
+
+    static constexpr uint32_t GetLongToStringCacheOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, longToStringCache_);
+    }
+
     static constexpr uint32_t GetUnwindingDepthOffset()
     {
         return MEMBER_OFFSET(ManagedThread, unwindingDepth_);
@@ -531,6 +546,12 @@ public:
 
     void SetFlattenedStringCache(ObjectHeader *cacheInstance);
     ObjectHeader *GetFlattenedStringCache() const;
+    void SetDoubleToStringCache(ObjectHeader *cacheInstance);
+    ObjectHeader *GetDoubleToStringCache() const;
+    void SetFloatToStringCache(ObjectHeader *cacheInstance);
+    ObjectHeader *GetFloatToStringCache() const;
+    void SetLongToStringCache(ObjectHeader *cacheInstance);
+    ObjectHeader *GetLongToStringCache() const;
 
 #if EVENT_METHOD_ENTER_ENABLED || EVENT_METHOD_EXIT_ENABLED
     uint32_t RecordMethodEnter()
@@ -843,6 +864,10 @@ private:
 
     // NOTE(konstanting): this is to be moved once we decouple Thread from ManagedThread
     ObjectHeader *flattenedStringCache_ {nullptr};
+    // Issue 33462, needs to be moved after refactoring ManagedThread
+    ObjectHeader *doubleToStringCache_ {nullptr};
+    ObjectHeader *floatToStringCache_ {nullptr};
+    ObjectHeader *longToStringCache_ {nullptr};
 
     mem::TLAB *tlab_ {nullptr};
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};

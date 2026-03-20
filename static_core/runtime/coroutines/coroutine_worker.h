@@ -41,7 +41,15 @@ enum class CoroutinePriority {
 /// Represents a coroutine worker, which can host multiple coroutines and schedule them.
 class CoroutineWorker : public Thread {
 public:
-    enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, FLATTENED_STRING_CACHE, LAST_ID };
+    enum class DataIdx {
+        INTEROP_CTX_PTR,
+        EXTERNAL_IFACES,
+        FLATTENED_STRING_CACHE,
+        DOUBLE_TO_STRING_CACHE,
+        FLOAT_TO_STRING_CACHE,
+        LONG_TO_STRING_CACHE,
+        LAST_ID
+    };
     using LocalStorage = StaticLocalStorage<DataIdx>;
     using Id = int32_t;
 
@@ -52,6 +60,8 @@ public:
     };
 
     static constexpr Id INVALID_ID = -1;
+
+    using CreatePluginObjFunc = std::function<void(PandaVector<LocalObjectData> &)>;
 
     NO_COPY_SEMANTIC(CoroutineWorker);
     NO_MOVE_SEMANTIC(CoroutineWorker);
@@ -132,12 +142,12 @@ public:
     void InitWorkerLocalObjects(PandaVector<LocalObjectData> &&objectRefs);
 
     /// should be called once the VM is ready to create managed objects in the managed heap
-    void InitializeManagedStructures();
+    void InitializeManagedStructures(const CreatePluginObjFunc &createEtsObj = nullptr);
 
-    static PandaVector<LocalObjectData> CreateWorkerLocalObjects();
+    static PandaVector<LocalObjectData> CreateWorkerLocalObjects(const CreatePluginObjFunc &createEtsObj = nullptr);
 
     /// @brief should be called by CoroutineManager just before the worker become visible for others
-    void OnBeforeWorkerStartup();
+    void OnBeforeWorkerStartup(const CreatePluginObjFunc &createEtsObj = nullptr);
 
     /**
      * @brief Must be called by CoroutineManager after the worker is created,

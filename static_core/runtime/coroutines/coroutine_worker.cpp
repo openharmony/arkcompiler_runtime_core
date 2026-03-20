@@ -43,20 +43,20 @@ void CoroutineWorker::DestroyCallbackPoster()
     extSchedulingPoster_.reset(nullptr);
 }
 
-void CoroutineWorker::InitializeManagedStructures()
+void CoroutineWorker::InitializeManagedStructures(const CreatePluginObjFunc &createEtsObj)
 {
     ASSERT_MANAGED_CODE();
-    InitWorkerLocalObjects(CreateWorkerLocalObjects());
+    InitWorkerLocalObjects(CreateWorkerLocalObjects(createEtsObj));
     CacheLocalObjectsInCoroutines();
 }
 
-void CoroutineWorker::OnBeforeWorkerStartup()
+void CoroutineWorker::OnBeforeWorkerStartup(const CreatePluginObjFunc &createEtsObj)
 {
     auto *currCoro = Coroutine::GetCurrent();
     ASSERT(currCoro->GetWorker() == this);
     if (GetRuntime()->IsInitialized()) {
         ScopedManagedCodeThread msc(currCoro);
-        InitializeManagedStructures();
+        InitializeManagedStructures(createEtsObj);
         currCoro->UpdateCachedObjects();
     }
 }
@@ -67,7 +67,8 @@ void CoroutineWorker::OnWorkerStartup()
 }
 
 /*static*/
-PandaVector<CoroutineWorker::LocalObjectData> CoroutineWorker::CreateWorkerLocalObjects()
+PandaVector<CoroutineWorker::LocalObjectData> CoroutineWorker::CreateWorkerLocalObjects(
+    const CreatePluginObjFunc &createEtsObj)
 {
     auto *coro = Coroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -84,6 +85,10 @@ PandaVector<CoroutineWorker::LocalObjectData> CoroutineWorker::CreateWorkerLocal
         CoroutineWorker::DataIdx::FLATTENED_STRING_CACHE, flattenedStringCacheRef,
         [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
 
+    if (createEtsObj != nullptr) {
+        createEtsObj(objectRefs);
+    }
+
     return objectRefs;
 }
 
@@ -97,6 +102,32 @@ void CoroutineWorker::InitWorkerLocalObjects(PandaVector<LocalObjectData> &&obje
                         nullptr));
                 GetLocalStorage().Set<CoroutineWorker::DataIdx::FLATTENED_STRING_CACHE>(
                     objectData.objectRef, std::move(objectData.finalizer));
+                break;
+            case CoroutineWorker::DataIdx::DOUBLE_TO_STRING_CACHE:
+                if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+                    ASSERT(
+                        (GetLocalStorage().Get<CoroutineWorker::DataIdx::DOUBLE_TO_STRING_CACHE, mem::Reference *>() ==
+                         nullptr));
+                    GetLocalStorage().Set<CoroutineWorker::DataIdx::DOUBLE_TO_STRING_CACHE>(
+                        objectData.objectRef, std::move(objectData.finalizer));
+                }
+                break;
+            case CoroutineWorker::DataIdx::FLOAT_TO_STRING_CACHE:
+                if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+                    ASSERT(
+                        (GetLocalStorage().Get<CoroutineWorker::DataIdx::FLOAT_TO_STRING_CACHE, mem::Reference *>() ==
+                         nullptr));
+                    GetLocalStorage().Set<CoroutineWorker::DataIdx::FLOAT_TO_STRING_CACHE>(
+                        objectData.objectRef, std::move(objectData.finalizer));
+                }
+                break;
+            case CoroutineWorker::DataIdx::LONG_TO_STRING_CACHE:
+                if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+                    ASSERT((GetLocalStorage().Get<CoroutineWorker::DataIdx::LONG_TO_STRING_CACHE, mem::Reference *>() ==
+                            nullptr));
+                    GetLocalStorage().Set<CoroutineWorker::DataIdx::LONG_TO_STRING_CACHE>(
+                        objectData.objectRef, std::move(objectData.finalizer));
+                }
                 break;
             default:
                 UNREACHABLE();

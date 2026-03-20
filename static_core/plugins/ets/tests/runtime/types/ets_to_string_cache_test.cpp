@@ -31,10 +31,7 @@
 
 namespace ark::ets::test {
 
-static constexpr uint32_t TEST_THREADS = 8;
-static constexpr uint32_t TEST_ITERS = 1;
 static constexpr uint32_t TEST_ARRAY_SIZE = 1000;
-static constexpr int32_t VALUE_RANGE = 1000;
 
 enum GenType { COPY, SHUFFLE, INDEPENDENT };
 
@@ -85,8 +82,8 @@ public:
     }
     void TestMainLoop(double value, [[maybe_unused]] bool needCheck)
     {
-        auto etsVm = mainCoro_->GetPandaVM();
-        auto *cache = etsVm->GetDoubleToStringCache();
+        auto *thread = ManagedThread::GetCurrent();
+        auto *cache = DoubleToStringCache::FromCoreType(thread->GetDoubleToStringCache());
         auto *etsCoro = EtsCoroutine::GetCurrent();
         [[maybe_unused]] auto [str, result] = cache->GetOrCacheImpl(etsCoro, value);
 #ifndef NDEBUG
@@ -105,91 +102,6 @@ public:
 #endif
     }
 
-    void TestConcurrentInsertion(const std::array<double, TEST_ARRAY_SIZE> &values)
-    {
-        auto runtime = Runtime::GetCurrent();
-        auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(
-            runtime, runtime->GetPandaVM(), true, "worker", Coroutine::Type::MUTATOR,
-            CoroutinePriority::DEFAULT_PRIORITY);
-        ASSERT(coro != nullptr);
-        std::mt19937 engine(std::random_device {}());
-        std::uniform_real_distribution<> dis(-VALUE_RANGE, VALUE_RANGE);
-        std::bernoulli_distribution bern(1.0 / TEST_THREADS);
-        coro->ManagedCodeBegin();
-        ASSERT(coro == EtsCoroutine::GetCurrent());
-        for (uint32_t i = 0; i < TEST_ITERS; i++) {
-            for (auto value : values) {
-                bool needCheck = bern(engine);
-                TestMainLoop(value, needCheck);
-            }
-        }
-
-        coro->ManagedCodeEnd();
-        mainCoro_->GetCoroutineManager()->DestroyEntrypointlessCoroutine(coro);
-    }
-
-    void SetupSimple()
-    {
-        std::uniform_real_distribution<double> dist(-VALUE_RANGE, VALUE_RANGE);
-        std::generate(values_.begin(), values_.end(), [&dist, this]() { return dist(engine_); });
-    }
-
-    void SetupExp()
-    {
-        std::uniform_int_distribution<int> dist(-VALUE_RANGE, VALUE_RANGE);
-        std::generate(values_.begin(), values_.end(), [&dist, this]() { return std::pow(2U, dist(engine_)); });
-    }
-
-    void SetupRepeatedHashes()
-    {
-        std::uniform_real_distribution<double> dist(-VALUE_RANGE, VALUE_RANGE);
-
-        std::generate(values_.begin(), values_.end(), [&dist, this]() {
-            constexpr auto UNIQUE_HASHES = 3;
-            double value;
-            do {
-                value = dist(engine_);
-            } while (DoubleToStringCache::GetIndex(value) >= UNIQUE_HASHES);
-            return value;
-        });
-    }
-
-    void SetupRepeatedHashesAndValues()
-    {
-        std::uniform_real_distribution<double> dist(-VALUE_RANGE, VALUE_RANGE);
-
-        static constexpr auto UNIQUE_VALUES = 8;
-        std::generate(values_.begin(), values_.begin() + UNIQUE_VALUES, [&dist, this]() {
-            constexpr auto UNIQUE_HASHES = 2;
-            double value;
-            do {
-                value = dist(engine_);
-            } while (DoubleToStringCache::GetIndex(value) >= UNIQUE_HASHES);
-            return value;
-        });
-        for (size_t i = UNIQUE_VALUES; i < values_.size(); i++) {
-            values_[i] = values_[i - UNIQUE_VALUES];
-        }
-    }
-
-    void SetupUniqueHashes()
-    {
-        std::uniform_real_distribution<double> dist(-VALUE_RANGE, VALUE_RANGE);
-
-        std::unordered_map<uint32_t, double> cacheIndexToValue;
-        while (cacheIndexToValue.size() < DoubleToStringCache::SIZE / 2U) {
-            auto value = dist(engine_);
-            cacheIndexToValue[DoubleToStringCache::GetIndex(value)] = value;
-        }
-        auto it = cacheIndexToValue.begin();
-        std::generate(values_.begin(), values_.end(), [&cacheIndexToValue, &it]() {
-            if (it == cacheIndexToValue.end()) {
-                it = cacheIndexToValue.begin();
-            }
-            return (*it++).second;
-        });
-    }
-
     EtsCoroutine *GetMainCoro()
     {
         return mainCoro_;
@@ -203,9 +115,6 @@ public:
     template <typename T>
     static void CheckCacheElementMembers()
     {
-        ASSERT(detail::EtsToStringCacheElement<T>::STRING_OFFSET ==
-               MEMBER_OFFSET(detail::EtsToStringCacheElement<T>, data_));
-
         // We can call "classLinker->GetClass" only with MutatorLock or with disabled GC.
         // So just for testing is necessary add "MutatorLock"
         // NOTE: In the main place of use (in initialization VM), during execution method
@@ -213,95 +122,27 @@ public:
         PandaVM::GetCurrent()->GetMutatorLock()->WriteLock();
         auto *klass = detail::EtsToStringCacheElement<T>::GetClass(EtsCoroutine::GetCurrent());
         std::vector<MirrorFieldInfo> members {
-            MirrorFieldInfo("string", detail::EtsToStringCacheElement<T>::STRING_OFFSET),
-            MirrorFieldInfo("lock", detail::EtsToStringCacheElement<T>::FLAG_OFFSET),
-            MIRROR_FIELD_INFO(detail::EtsToStringCacheElement<T>, number_, "number")};
+            MirrorFieldInfo("string", detail::EtsToStringCacheElement<T>::GetStringOffset()),
+            MirrorFieldInfo("number", detail::EtsToStringCacheElement<T>::GetNumberOffset())};
         MirrorFieldInfo::CompareMemberOffsets(klass, members);
         PandaVM::GetCurrent()->GetMutatorLock()->Unlock();
     }
 
-protected:
-    void DoTest(void (EtsToStringCacheTest::*setup)(), GenType genType)
-    {
-        (this->*setup)();
-        for (uint32_t i = 0; i < TEST_THREADS; i++) {
-            if (genType == GenType::SHUFFLE) {
-                std::shuffle(values_.begin(), values_.end(), GetEngine());
-            } else if (genType == GenType::INDEPENDENT && i > 0) {
-                (this->*setup)();
-            }
-            threadValues_[i] = values_;
-        }
-
-        for (uint32_t i = 0; i < TEST_THREADS; i++) {
-            threads_[i] = std::thread([this, i]() { TestConcurrentInsertion(threadValues_[i]); });
-        }
-
-        for (uint32_t i = 0; i < TEST_THREADS; i++) {
-            threads_[i].join();
-        }
-    }
-
 private:
-    std::array<double, TEST_ARRAY_SIZE> values_ {};
-    std::array<std::array<double, TEST_ARRAY_SIZE>, TEST_THREADS> threadValues_ {};
-
-    std::array<std::thread, TEST_THREADS> threads_;
     std::mt19937 engine_;
     EtsCoroutine *mainCoro_ {};
 };
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class EtsToStringCacheParamTest : public EtsToStringCacheTest,
-                                  public testing::WithParamInterface<std::tuple<const char *, GenType>> {
-public:
-    EtsToStringCacheParamTest() : EtsToStringCacheTest(std::get<0>(GetParam())) {}
-
-    void DoTest(void (EtsToStringCacheTest::*setup)())
-    {
-        EtsToStringCacheTest::DoTest(setup, std::get<1>(GetParam()));
-    }
-};
-
-TEST_P(EtsToStringCacheParamTest, ConcurrentInsertion)
-{
-    DoTest(&EtsToStringCacheTest::SetupSimple);
-}
-
-TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionExp)
-{
-    DoTest(&EtsToStringCacheTest::SetupExp);
-}
-
-TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionRepeatedHashes)
-{
-    DoTest(&EtsToStringCacheTest::SetupRepeatedHashes);
-}
-
-TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionRepeatedHashesAndValues)
-{
-    DoTest(&EtsToStringCacheTest::SetupRepeatedHashesAndValues);
-}
-
-TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionUniqueHashes)
-{
-    DoTest(&EtsToStringCacheTest::SetupUniqueHashes);
-}
-
-INSTANTIATE_TEST_SUITE_P(EtsToStringCacheTestSuite, EtsToStringCacheParamTest,
-                         testing::Combine(testing::Values("stw", "g1-gc"),
-                                          testing::Values(GenType::COPY, GenType::SHUFFLE, GenType::INDEPENDENT)));
 
 TEST_F(EtsToStringCacheTest, BitcastTestCached)
 {
     auto &engine = GetEngine();
     auto coro = GetMainCoro();
-    auto etsVm = coro->GetPandaVM();
+    auto *thread = ManagedThread::GetCurrent();
     std::uniform_int_distribution<uint32_t> dis(0, std::numeric_limits<uint32_t>::max());
     coro->ManagedCodeBegin();
     auto etsCoro = EtsCoroutine::GetCurrent();
     ASSERT(coro == etsCoro);
-    auto *cache = etsVm->GetDoubleToStringCache();
+    auto *cache = DoubleToStringCache::FromCoreType(thread->GetDoubleToStringCache());
 
     for (uint32_t i = 0; i < TEST_ARRAY_SIZE; i++) {
         auto longValue = (static_cast<uint64_t>(dis(engine)) << BITS_PER_UINT32) | dis(engine);
@@ -418,12 +259,7 @@ TEST_F(EtsToStringCacheTest, BitcastTestFloat)
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #32786)
-TEST_F(EtsToStringCacheTest, DISABLED_ToStringCacheElementLayout)
-#else
 TEST_F(EtsToStringCacheTest, ToStringCacheElementLayout)
-#endif
 {
     CheckCacheElementMembers<EtsDouble>();
     CheckCacheElementMembers<EtsFloat>();
@@ -438,10 +274,10 @@ public:
 
 TEST_P(EtsToStringCacheCLITest, TestCacheUsage)
 {
-    auto etsVm = GetMainCoro()->GetPandaVM();
-    auto *doubleCache = etsVm->GetDoubleToStringCache();
-    auto *floatCache = etsVm->GetFloatToStringCache();
-    auto *longCache = etsVm->GetLongToStringCache();
+    auto *thread = ManagedThread::GetCurrent();
+    auto *doubleCache = DoubleToStringCache::FromCoreType(thread->GetDoubleToStringCache());
+    auto *floatCache = FloatToStringCache::FromCoreType(thread->GetFloatToStringCache());
+    auto *longCache = LongToStringCache::FromCoreType(thread->GetLongToStringCache());
     if (!GetParam()) {  // cache disabled
         ASSERT_EQ(doubleCache, nullptr);
         ASSERT_EQ(floatCache, nullptr);

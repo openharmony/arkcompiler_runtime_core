@@ -1,5 +1,5 @@
 # plugin string_builder
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,63 +18,106 @@ include_relative '../../../irtoc/scripts/common.irt'
 module Constants
   MUL_32 = "0x5bd1e995U"
   MUL_64 = "0xc6a4a7935bd1e995ULL"
-  #TO_STRING_CACHE_OFFSET = "cross_values::GetEtsVmDoubleToStringCacheOffset(GetArch())"
-  ELEM_DATA_OFFSET = "8"
-  ELEM_STRING_OFFSET = ELEM_DATA_OFFSET
-  ELEM_FLAG_OFFSET = "12"
-  ELEM_NUMBER_OFFSET = "16"
+
+  LONG_TO_STRING_CACHE_OFFSET = "cross_values::GetManagedThreadLongToStringCacheOffset(GetArch())"
+  LONG_ELEM_STRING_OFFSET = "cross_values::GetEtsLongToStringCacheEntryStringOffset(GetArch())"
+  LONG_ELEM_NUMBER_OFFSET = "cross_values::GetEtsLongToStringCacheEntryNumberOffset(GetArch())"
+
+  FLOAT_TO_STRING_CACHE_OFFSET = "cross_values::GetManagedThreadFloatToStringCacheOffset(GetArch())"
+  FLOAT_ELEM_STRING_OFFSET = "cross_values::GetEtsFloatToStringCacheEntryStringOffset(GetArch())"
+  FLOAT_ELEM_NUMBER_OFFSET = "cross_values::GetEtsFloatToStringCacheEntryNumberOffset(GetArch())"
+
+  DOUBLE_TO_STRING_CACHE_OFFSET = "cross_values::GetManagedThreadDoubleToStringCacheOffset(GetArch())"
+  DOUBLE_ELEM_STRING_OFFSET = "cross_values::GetEtsDoubleToStringCacheEntryStringOffset(GetArch())"
+  DOUBLE_ELEM_NUMBER_OFFSET = "cross_values::GetEtsDoubleToStringCacheEntryNumberOffset(GetArch())"
 end
 
-function(:DoubleToStringDecimal,
-          params: {cache: 'ref', numInt: 'u64', unused: 'u64'},
+
+scoped_macro(:hash32) do |numInt|
+  mul := Cast(Constants::MUL_32).u32
+  hash := Mul(numInt, mul).u32
+  res := Cast(ShrI(hash).Imm(24).u32).u64
+end
+
+scoped_macro(:hash64) do |numInt|
+  mul := Cast(Constants::MUL_64).u64
+  hash := Mul(numInt, mul).u64
+  res := ShrI(hash).Imm(56).u64
+end
+
+
+def GenerateNumberToStringDecimal(name)
+  suffix = name.upcase
+  if (name == "Long")
+    itype = 'i64'
+    type = 'i64'
+  elsif (name == "Float")
+    itype = 'u32'
+    type = 'f32'
+  elsif (name == "Double")
+    itype = 'u64'
+    type = 'f64'
+  end
+
+  function("#{name}ToStringDecimal".to_sym,
+          params: {numInt: itype, unused: 'u64'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [:FastPath]) {
 
-  # Arm32 is not supported
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).void.Terminator
-    next
-  end
+    # Arm32 is not supported
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
 
-  num := Bitcast(numInt).f64
-  mul := Cast(Constants::MUL_64).u64
-  hash := Mul(numInt, mul).u64
-  hash := ShrI(hash).Imm(56).u64
+    # load cache
+    cache := LoadI(%tr).Imm(eval("Constants::#{suffix}_TO_STRING_CACHE_OFFSET")).SetNeedBarrier(false).ref
+    If(cache, 0).EQ.Unlikely {
+      Goto(:SlowPathNoCache)
+    }
 
-  elem_offset := AddI(ShlI(hash).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
-  elem := Load(cache, elem_offset).Volatile.ref
-  IfImm(Compare(elem, 0).EQ.b).Imm(0).NE.Unlikely {
-    Goto(:SlowPath)
+    # get element hash
+    if (name == "Long")
+      num := numInt
+      hash := hash64(numInt).u64
+    elsif (name == "Float")
+      num := Bitcast(numInt).f32
+      hash := hash32(numInt).u64
+    elsif (name == "Double")
+      num := Bitcast(numInt).f64
+      hash := hash64(numInt).u64
+    end
+
+    # get cache element
+    elem_offset := AddI(ShlI(hash).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
+    elem := Load(cache, elem_offset).SetNeedBarrier(true).ref
+    IfImm(Compare(elem, 0).EQ.b).Imm(0).NE.Unlikely {
+      Goto(:SlowPath)
+    }
+
+    # compare number key
+    cachedNumber := eval("LoadI(elem).Imm(Constants::#{suffix}_ELEM_NUMBER_OFFSET).#{type}")
+    IfImm(Compare(num, cachedNumber).NE.b).Imm(0).NE.Unlikely {
+      Goto(:SlowPathStore)
+    }
+
+    # return string value
+    cachedStr := Cast(LoadI(elem).Imm(eval("Constants::#{suffix}_ELEM_STRING_OFFSET")).SetNeedBarrier(true).ref).ptr
+    Return(cachedStr).ptr
+
+  Label(:SlowPathStore)
+    ep_offset = get_entrypoint_offset("#{suffix}_TO_STRING_DECIMAL_STORE_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, elem, numInt).AddImm(ep_offset).MethodAsImm("#{name}ToStringDecimalStore3ArgBridge").Terminator.ptr
+  Label(:SlowPath)
+    ep_offset = get_entrypoint_offset("#{suffix}_TO_STRING_DECIMAL_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, cache, numInt).AddImm(ep_offset).MethodAsImm("#{name}ToStringDecimal3ArgBridge").Terminator.ptr
+  Label(:SlowPathNoCache)
+    ep_offset = get_entrypoint_offset("#{suffix}_TO_STRING_DECIMAL_NO_CACHE_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, numInt).AddImm(ep_offset).MethodAsImm("#{name}ToStringDecimalNoCache2ArgBridge").Terminator.ptr
   }
-  # Volatile because need acquire ordering
-  cachedData := LoadI(elem).Imm(Constants::ELEM_DATA_OFFSET).Volatile.u64
-  cachedNumber := LoadI(elem).Imm(Constants::ELEM_NUMBER_OFFSET).Volatile.f64
+end
 
-  flag := Cast(ShrI(cachedData).Imm(32).u64).u32
-  If(And(flag, 1).u32, 0).NE.Unlikely {
-    # elem is already being updated
-    Goto(:SlowPathNoCache)
-  }
-  IfImm(Compare(num, cachedNumber).NE.b).Imm(0).NE.Unlikely {
-    Goto(:SlowPathStore)
-  }
-
-  cachedStr := Bitcast(Cast(Cast(cachedData).u32).u64).ptr
-  # Relaxed load because we have acquire above
-  newFlag := LoadI(elem).Imm(Constants::ELEM_FLAG_OFFSET).u32
-  If(flag, newFlag).NE.Unlikely {
-    Goto(:SlowPathNoCache)
-  }
-  Return(cachedStr).ptr
-
-Label(:SlowPathStore)
-  ep_offset = get_entrypoint_offset("DOUBLE_TO_STRING_DECIMAL_STORE_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, elem, numInt, cachedData).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimalStoreOddSavedBridge").Terminator.ptr
-Label(:SlowPath)
-  ep_offset = get_entrypoint_offset("DOUBLE_TO_STRING_DECIMAL_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, cache, numInt).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimal3ArgBridge").Terminator.ptr
-Label(:SlowPathNoCache)
-  ep_offset = get_entrypoint_offset("DOUBLE_TO_STRING_DECIMAL_NO_CACHE_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, numInt).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimalNoCache3ArgBridge").Terminator.ptr
-}
+GenerateNumberToStringDecimal('Long')
+GenerateNumberToStringDecimal('Float')
+GenerateNumberToStringDecimal('Double')

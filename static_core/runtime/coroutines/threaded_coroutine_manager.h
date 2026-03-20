@@ -80,7 +80,7 @@ public:
     };
 
     /// should be called once the VM is ready to create managed objects in the managed heap
-    void InitializeManagedStructures() override;
+    void InitializeManagedStructures(const CoroutineWorker::CreatePluginObjFunc &createEtsObj) override;
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,

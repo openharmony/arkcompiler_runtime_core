@@ -28,5 +28,6 @@
 #include "plugins/ets/runtime/types/ets_set.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 
 #endif  // PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H

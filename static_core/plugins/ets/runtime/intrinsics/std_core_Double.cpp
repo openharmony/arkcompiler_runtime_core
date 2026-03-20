@@ -59,11 +59,11 @@ double ParseFloat(EtsString *s, const uint32_t flags)
 
 EtsString *StdCoreDoubleToString(double number, int radix)
 {
-    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    auto *cache = ManagedThread::GetCurrent()->GetDoubleToStringCache();
     if (UNLIKELY(radix != helpers::DECIMAL || cache == nullptr)) {
         return helpers::FpToString(number, radix);
     }
-    return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
+    return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 
 bool IsNegativeNan(double x)

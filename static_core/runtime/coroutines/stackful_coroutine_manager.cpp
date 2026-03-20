@@ -184,7 +184,7 @@ void StackfulCoroutineManager::OnWorkerShutdown(StackfulCoroutineWorker *worker)
 
 void StackfulCoroutineManager::OnWorkerStartup(StackfulCoroutineWorker *worker)
 {
-    worker->OnBeforeWorkerStartup();
+    worker->OnBeforeWorkerStartup(createEtsObjFunc_);
     os::memory::LockHolder lock(workersLock_);
     OnWorkerStartupImpl(worker);
 }
@@ -1249,7 +1249,7 @@ void StackfulCoroutineManager::CalculateWorkerLimits(size_t &exclusiveWorkersLim
                            << ", when suggested " << eWorkersLimit;
 }
 
-void StackfulCoroutineManager::InitializeManagedStructures()
+void StackfulCoroutineManager::InitializeManagedStructures(const CoroutineWorker::CreatePluginObjFunc &createEtsObj)
 {
     ASSERT_NATIVE_CODE();
     auto *currCoro = Coroutine::GetCurrent();
@@ -1260,12 +1260,16 @@ void StackfulCoroutineManager::InitializeManagedStructures()
 
     os::memory::LockHolder l {workersLock_};
 
+    if (!createEtsObjFunc_) {
+        createEtsObjFunc_ = createEtsObj;
+    }
+
     auto numWorkers = workers_.size();
     workersLock_.Unlock();
 
     eachWorkerLocalObjects.reserve(numWorkers);
     for (size_t i = 0; i < numWorkers; i++) {
-        eachWorkerLocalObjects.push_back(CoroutineWorker::CreateWorkerLocalObjects());
+        eachWorkerLocalObjects.push_back(CoroutineWorker::CreateWorkerLocalObjects(createEtsObjFunc_));
     }
     workersLock_.Lock();
     ASSERT(numWorkers == workers_.size());
