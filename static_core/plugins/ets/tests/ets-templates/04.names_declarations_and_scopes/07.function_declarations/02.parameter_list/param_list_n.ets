@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,6 +19,9 @@ desc: >-
   A function declaration introduces a named function, specifying
   its name, signature and body. Types of all parameters must be explicitly defined.
 tags: [compile-only, negative]
+{% if fd.expected_out is defined %}
+expected_out: "{{fd.expected_out}}"
+{% endif -%}
 ---*/
 
 {{fd.decl}}

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,21 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for fd in function_decls %}
 /*---
-desc: >-
-  A function declaration introduces a named function, specifying
-  its name, signature and body. Types of all parameters must be explicitly defined.
+desc: Call instance method of a class.
+assert: A method call expression calls a static or instance method of a class or an interface.
 tags: [compile-only, negative]
-{% if fd.expected_out is defined %}
-expected_out: "{{fd.expected_out}}"
-{% endif -%}
+expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
 ---*/
 
-{{fd.decl}}
-
-function main(): void {
-    {{fd.call}}
+interface IFoo {
+    foo() {}
 }
 
-{% endfor %}
+function main() {
+    let ifoo: IFoo = {}
+    ifoo.foo<string>()
+}

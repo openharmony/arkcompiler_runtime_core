@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-/*---
-desc: >-
-    Compile-time error occurs if the expression type is one of the following:
-     • Different than the function type;
-     • Nullish type without '?.'
-tags: [compile-only, negative]
-{% if c.expected_out is defined %}
-expected_out: "{{c.expected_out}}"
-{% endif -%}
----*/
+ /*---
+ desc: Using indexed access types as type
+ tags: [negative, compile-only]
+ expected_out: "Syntax error ESY49888: Indexed access types are not supported, use type name instead!"
+ ---*/
 
-{{c.decl}}
-
-function main() {
-    {{c.use|indent}}
+class CC {
+    static readonly name: string = 'Test'
 }
-{%- endfor %}
+
+const CCC: CC['name'] = "I am Groot"

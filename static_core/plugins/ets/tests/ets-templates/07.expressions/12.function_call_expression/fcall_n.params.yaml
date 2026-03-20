@@ -124,3 +124,33 @@ cases:
         let value = ((up: LP): User => { return up() }) () { return {name: 'Alice', age: 16 } }
         arktest.assertEQ('Alice', value.name)
         arktest.assertTrue(value instanceof User)
+
+    - decl: |-
+        function foo() {}
+      use: |-
+        foo<string>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - decl: |-
+        class IFoo {}
+        function foo(this: IFoo) {}
+      use: |-
+        (new IFoo()).foo<string>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - decl: |-
+        let ac = () => '12'
+      use: |-
+        let ar = ac<number>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - use: |-
+        let ac: Any = () => '12'
+        let ar = ac<number>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - decl: |-
+        const ac: Any = () => '12'
+      use: |-
+        let ar = ac<number>()
+      expected_out: "Semantic error ESE0289: This expression is not callable."

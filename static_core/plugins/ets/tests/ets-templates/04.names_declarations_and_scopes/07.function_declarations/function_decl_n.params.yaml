@@ -61,3 +61,8 @@ function_decls:
       call: |-
           let arr: Color[] = foo();
           arktest.assertTrue(arr instanceof Array && arr[0] instanceof Color && arr.length == 1 && arr[0] == Color.Red)
+
+    # generator functions are not supported
+    - decl: 'function* generator() {}'
+      call: 'generator();'
+      expected_out: "Syntax error ESY0314: Generator functions are not supported, please use async/await mechanism for multitasking"
