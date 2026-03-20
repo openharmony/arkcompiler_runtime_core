@@ -1,0 +1,91 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: Deadlock itself.
+    decl: |-
+      async function startTest() {
+        let options = new AsyncLockOptions<void>();
+        options.timeout = 100;
+        let lock = new AsyncLock();
+
+        await lock.lockAsync<void, void>(async () => {
+          await lock.lockAsync<void, void>(async () => {
+          }, AsyncLockMode.EXCLUSIVE, options);
+        }, AsyncLockMode.EXCLUSIVE, options);
+      }
+    logic: |-
+      waitForCompletion(startTest);
+    expected_error: |-
+      "Error: AsyncLock:: Operation timed out"
+
+  - desc: AsyncLock Timeout Prevents Deadlock.
+    decl: |-
+      async function startTest() {
+        let lock1 = new AsyncLock();
+        let lock2 = new AsyncLock();
+
+        const task1 = async () => {
+          const p1 = lock1.lockAsync(async () => {
+            await lock2.lockAsync(async () => {
+            }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(false, null, 50));
+          }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(true, null, 100));
+          await p1;
+        };
+
+        const task2 = async () => {
+          const p2 = lock2.lockAsync(async () => {
+            await lock1.lockAsync(async () => {
+            }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(false, null, 50));
+          }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(true, null, 100));
+          await p2;
+        };
+        await Promise.all([task1(), task2()]);
+      }
+    logic: |-
+      waitForCompletion(startTest);
+    expected_error: |-
+      "Error: AsyncLock:: Operation timed out"
+
+  - desc: Circular Dependency Timeout.
+    decl: |-
+      async function startTest() {
+        const locks = [
+          new AsyncLock(),
+          new AsyncLock(),
+          new AsyncLock()
+        ];
+          
+        const task = async (lockOrder: int[]) => {
+          let firstLock = locks[lockOrder[0]];
+          let secondLock = locks[lockOrder[1]];
+          
+          const p1 = firstLock.lockAsync(async () => {
+            await secondLock.lockAsync(async () => {
+            }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(false, null, 100));
+          }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(true, null, 50));
+          await p1;
+        };
+          
+        // Circular Dependency
+        await Promise.all([
+          task([0, 1]), // A -> B
+          task([1, 2]), // B -> C  
+          task([2, 0])  // C -> A
+        ]);
+      }
+    logic: |-
+      waitForCompletion(startTest);
+    expected_error: |-
+      "Error: AsyncLock:: Operation timed out"
