@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,26 +42,6 @@ protected:
     {
     }
     virtual bool ShouldRunTenuredGC(const GCTask &task);
-
-    void DisableTenuredGC()
-    {
-        majorPeriod_ = DISABLED_MAJOR_PERIOD;  // Disable tenured GC temporarily.
-    }
-
-    void RestoreTenuredGC()
-    {
-        majorPeriod_ = DEFAULT_MAJOR_PERIOD;
-    }
-
-    ALWAYS_INLINE size_t GetMajorPeriod() const
-    {
-        return majorPeriod_;
-    }
-
-    void PostForkCallback([[maybe_unused]] size_t restoreLimit) override
-    {
-        GenerationalGC<LanguageConfig>::RestoreTenuredGC();
-    }
 
     template <typename Marker>
     NO_THREAD_SAFETY_ANALYSIS void MarkImpl(Marker *marker, GCMarkingStackType *objectsStack,

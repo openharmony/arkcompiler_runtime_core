@@ -458,14 +458,36 @@ void PandaEtsVM::PostZygoteFork()
     if (saverWorker_ != nullptr) {
         saverWorker_->PostZygoteFork();
     }
-    // Postpone GC on application start-up
-    // Postpone GCEnd method should be called on start-up ending event
-    mm_->GetGC()->PostponeGCStart();
 
     auto runtime = Runtime::GetCurrent();
     runtime->StartCoverageListener();
 
-    PreStartup();
+    // stop GCtask for application start-up
+    PostForkStart();
+}
+
+void PandaEtsVM::PostForkStart()
+{
+    isPostFork_ = true;
+    // Add a delay GCTask.
+    if ((!Runtime::GetCurrent()->IsZygote()) && (!mm_->GetGC()->GetSettings()->RunGCInPlace())) {
+        // set target footprint to a high value to disable GC during App startup.
+        size_t startupTargetFootprint = Runtime::GetOptions().GetHeapSizeLimit() / 2;
+        size_t startupLimit = startupTargetFootprint / 2;
+        mm_->GetGCTrigger()->SetMinTargetFootprint(startupTargetFootprint);
+        originSize_ = mm_->GetGC()->AdjustStartupLimit(startupLimit);
+        constexpr uint64_t DISABLE_GC_DURATION_NS = 2000ULL * 1000 * 1000;
+        auto task = MakePandaUnique<GCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE,
+                                            time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS);
+        mm_->GetGC()->AddGCTask(true, std::move(task));
+        LOG(DEBUG, GC) << "Add Startup Complete GCTask";
+    }
+}
+
+void PandaEtsVM::PostForkEnd()
+{
+    mm_->GetGC()->AdjustStartupLimit(originSize_);
+    isPostFork_ = false;
 }
 
 void PandaEtsVM::InitializeGC()
