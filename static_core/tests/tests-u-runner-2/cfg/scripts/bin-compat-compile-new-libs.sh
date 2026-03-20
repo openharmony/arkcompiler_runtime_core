@@ -24,8 +24,8 @@
 #   arktsconfig          - path to arktsconfig.json
 #   extension            - source extension (ets)
 #   opt-level            - optimization level (0-2)
-#   gen-prefix           - ${work-dir}/gen/${test-id-name}
-#   intermediate-prefix  - ${work-dir}/intermediate/${test-id-name}
+#   gen-prefix           - ${work-dir}/gen/${test-id:parent}/${test-id:stem}
+#   intermediate-prefix  - ${work-dir}/intermediate/${test-id:parent}/${test-id:stem}
 
 set -e
 

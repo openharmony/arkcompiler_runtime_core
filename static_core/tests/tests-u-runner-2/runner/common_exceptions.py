@@ -60,6 +60,10 @@ class MacroNotExpanded(RunnerException):
     pass
 
 
+class MacroSyntaxError(RunnerException):
+    pass
+
+
 class RunnerCustomSchemeException(RunnerException):
     pass
 

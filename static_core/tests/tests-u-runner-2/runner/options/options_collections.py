@@ -19,8 +19,9 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, cast
 
+from runner.common_exceptions import MacroNotExpanded, MacroSyntaxError
 from runner.logger import Log
-from runner.options.macros import Macros, ParameterNotFound
+from runner.options.macros import Macros
 from runner.options.options import IOptions
 from runner.options.root_dir import RootDir
 from runner.utils import convert_minus
@@ -108,6 +109,5 @@ class CollectionsOptions(IOptions):
             if isinstance(param_value, str):
                 try:
                     self.__parameters[param_name] = Macros.correct_macro(param_value, self)
-                # NOTE(pronai): who is responsible for logging the error?  can it truly be ignored?
-                except ParameterNotFound:
-                    pass
+                except (MacroSyntaxError, MacroNotExpanded):
+                    _LOGGER.all(f"Macro not expanded or has syntax error: {param_value}")

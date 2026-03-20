@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import os
-import shutil
 import sys
 from collections.abc import Callable, Generator
 from datetime import datetime
@@ -36,6 +35,7 @@ from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.tests_flow_registry import TestFlowRegistry
 from runner.suites.work_dir import WorkDir
 from runner.test import test_utils
+from runner.test.test_utils import clear_after_test
 from runner.types.test_env import TestEnv
 
 
@@ -60,7 +60,7 @@ class OptionsTest(TestCase):
         for first, second in zip(list1, list2, strict=True):
             yield first.endswith(second)
 
-    def prepare(self) -> tuple[TestEnv, Path, WorkDir]:
+    def prepare(self) -> tuple[TestEnv, Path]:
         args = get_args()
         config = Config(args)
         timestamp = int(datetime.timestamp(datetime.now(pytz.UTC)))
@@ -77,7 +77,7 @@ class OptionsTest(TestCase):
             test_flow_registry=TestFlowRegistry()
         )
         test_root = self.data_folder
-        return test_env, test_root, work_dir
+        return test_env, test_root
 
     def check_parameter(self, param: str, args: list[str], *, is_present: bool = True) -> None:
         checked = self.divide_param(param)
@@ -122,7 +122,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111111")
     def test_workflow_panda(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -130,24 +130,25 @@ class OptionsTest(TestCase):
             params=IOptions({}),
             test_id="test1.ets"
         )
-        self.assertTrue(test.is_panda)
-        for step in test_env.config.workflow.steps:
-            match step.step_kind:
-                case StepKind.COMPILER:
-                    new_step = test.prepare_compiler_step(step)
-                    self.assertListEqual(step.args, new_step.args)
-                case StepKind.VERIFIER:
-                    new_step = test.prepare_verifier_step(step)
-                    self.assertListEqual(step.args, new_step.args)
-                case StepKind.AOT:
-                    new_step = test.prepare_aot_step(step)
-                    self.check_parameter("--paoc-panda-files=intermediate/test1.ets.abc", new_step.args)
-                case StepKind.RUNTIME:
-                    new_step = test.prepare_runtime_step(step)
-                    self.check_parameter("--panda-files=intermediate/test1.ets.abc", new_step.args)
+        try:
+            self.assertTrue(test.is_panda)
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        new_step = test.prepare_compiler_step(step)
+                        self.assertListEqual(step.args, new_step.args)
+                    case StepKind.VERIFIER:
+                        new_step = test.prepare_verifier_step(step)
+                        self.assertListEqual(step.args, new_step.args)
+                    case StepKind.AOT:
+                        new_step = test.prepare_aot_step(step)
+                        self.check_parameter("--paoc-panda-files=intermediate/test1.ets.abc", new_step.args)
+                    case StepKind.RUNTIME:
+                        new_step = test.prepare_runtime_step(step)
+                        self.check_parameter("--panda-files=intermediate/test1.ets.abc", new_step.args)
 
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -161,7 +162,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111112")
     def test_expand_last_call(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -170,14 +171,15 @@ class OptionsTest(TestCase):
             test_id="test1.ets"
         )
         expected_args = ['--boot-panda-files=stdlib', 'test1.ets', 'test1']
-        for step in test_env.config.workflow.steps:
-            match step.step_kind:
-                case StepKind.RUNTIME:
-                    expanded_step = test.configure_step_last_call(step)
-                    self.assertListEqual(expanded_step.args, expected_args)
+        try:
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.RUNTIME:
+                        expanded_step = test.configure_step_last_call(step)
+                        self.assertListEqual(expanded_step.args, expected_args)
 
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -191,7 +193,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "999999999")
     def test_workflow_not_panda(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -199,26 +201,27 @@ class OptionsTest(TestCase):
             params=IOptions({}),
             test_id="test1.ets"
         )
-        self.assertFalse(test.is_panda)
-        for step in test_env.config.workflow.steps:
-            match step.step_kind:
-                case StepKind.COMPILER:
-                    new_step = test.prepare_compiler_step(step)
-                    self.assertListEqual(step.args, new_step.args)
-                case StepKind.VERIFIER:
-                    new_step = test.prepare_verifier_step(step)
-                    self.assertListEqual(step.args, new_step.args)
-                case StepKind.AOT:
-                    new_step = test.prepare_aot_step(step)
-                    self.check_parameter("--paoc-panda-files=intermediate/test1.ets.abc", new_step.args,
-                                         is_present=False)
-                case StepKind.RUNTIME:
-                    new_step = test.prepare_runtime_step(step)
-                    self.check_parameter("--panda-files=intermediate/test1.ets.abc", new_step.args,
-                                         is_present=False)
+        try:
+            self.assertFalse(test.is_panda)
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        new_step = test.prepare_compiler_step(step)
+                        self.assertListEqual(step.args, new_step.args)
+                    case StepKind.VERIFIER:
+                        new_step = test.prepare_verifier_step(step)
+                        self.assertListEqual(step.args, new_step.args)
+                    case StepKind.AOT:
+                        new_step = test.prepare_aot_step(step)
+                        self.check_parameter("--paoc-panda-files=intermediate/test1.ets.abc", new_step.args,
+                                             is_present=False)
+                    case StepKind.RUNTIME:
+                        new_step = test.prepare_runtime_step(step)
+                        self.check_parameter("--panda-files=intermediate/test1.ets.abc", new_step.args,
+                                             is_present=False)
 
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -232,7 +235,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222222")
     def test_workflow_panda_multiple(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -242,45 +245,46 @@ class OptionsTest(TestCase):
         )
 
         dependent_tests = test.dependent_tests
-        self.assertEqual(len(dependent_tests), 1)
-        dependent_test = dependent_tests[0]
-        self.assertEqual(dependent_test.test_id, "dependent_test2.ets")
-        self.assertFalse(dependent_test.is_valid_test)
-        self.assertEqual(dependent_test.parent_test_id, "test2.ets")
-        self.assertEqual(dependent_test.test_abc.name, "dependent_test2.ets.abc")
-        self.assertEqual(dependent_test.test_an.name, "dependent_test2.ets.an")
+        try:
+            self.assertEqual(len(dependent_tests), 1)
+            dependent_test = dependent_tests[0]
+            self.assertEqual(dependent_test.test_id, "dependent_test2.ets")
+            self.assertFalse(dependent_test.is_valid_test)
+            self.assertEqual(dependent_test.parent_test_id, "test2.ets")
+            self.assertEqual(dependent_test.test_abc.name, "dependent_test2.ets.abc")
+            self.assertEqual(dependent_test.test_an.name, "dependent_test2.ets.an")
 
-        self.assertTrue(test.is_panda)
-        for step in test_env.config.workflow.steps:
-            match step.step_kind:
-                case StepKind.COMPILER:
-                    new_step = test.prepare_compiler_step(step)
-                    self.assertListEqual(step.args, new_step.args)
-                case StepKind.VERIFIER:
-                    new_step = test.prepare_verifier_step(step)
-                    boot_panda_files = arg[0] \
-                        if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
-                        else ""
-                    self.check_boot_panda_files(
-                        ['intermediate/dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
-                        boot_panda_files)
-                case StepKind.AOT:
-                    new_step = test.prepare_aot_step(step)
-                    boot_panda_files = arg[0] \
-                        if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
-                        else ""
-                    self.check_boot_panda_files([], boot_panda_files)
-                    self.check_parameter("--paoc-panda-files=intermediate/dependent_test2.ets.abc", new_step.args)
-                    self.check_parameter("--paoc-panda-files=intermediate/test2.ets.abc", new_step.args)
-                case StepKind.RUNTIME:
-                    new_step = test.prepare_runtime_step(step)
-                    boot_panda_files = arg[0] \
-                        if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
-                        else ""
-                    self.check_boot_panda_files_ark(boot_panda_files)
+            self.assertTrue(test.is_panda)
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        new_step = test.prepare_compiler_step(step)
+                        self.assertListEqual(step.args, new_step.args)
+                    case StepKind.VERIFIER:
+                        new_step = test.prepare_verifier_step(step)
+                        boot_panda_files = arg[0] \
+                            if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
+                            else ""
+                        self.check_boot_panda_files(
+                            ['intermediate/dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
+                            boot_panda_files)
+                    case StepKind.AOT:
+                        new_step = test.prepare_aot_step(step)
+                        boot_panda_files = arg[0] \
+                            if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
+                            else ""
+                        self.check_boot_panda_files([], boot_panda_files)
+                        self.check_parameter("--paoc-panda-files=intermediate/dependent_test2.ets.abc", new_step.args)
+                        self.check_parameter("--paoc-panda-files=intermediate/test2.ets.abc", new_step.args)
+                    case StepKind.RUNTIME:
+                        new_step = test.prepare_runtime_step(step)
+                        boot_panda_files = arg[0] \
+                            if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
+                            else ""
+                        self.check_boot_panda_files_ark(boot_panda_files)
 
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -294,7 +298,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222223")
     def test_reproduce_str_short_cli(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -307,23 +311,23 @@ class OptionsTest(TestCase):
         test_data = {"workflow": sys.argv[1],
                      "test_suite": sys.argv[2],
                      "test-file": test.test_id}
+        try:
+            self.assertIn(test.test_id, short_cli)
+            self.assertIn(test_data["workflow"], short_cli)
+            self.assertIn(test_data["test_suite"], short_cli)
 
-        self.assertIn(test.test_id, short_cli)
-        self.assertIn(test_data["workflow"], short_cli)
-        self.assertIn(test_data["test_suite"], short_cli)
+            # check there are no additional unexpected args in short cli
+            short_cli_items = [item for item in short_cli.split(" ")[1:] if item]
 
-        # check there are no additional unexpected args in short cli
-        short_cli_items = [item for item in short_cli.split(" ")[1:] if item]
+            for val in test_data.values():
+                short_cli_items.remove(val)
 
-        for val in test_data.values():
-            short_cli_items.remove(val)
+            short_cli_items.remove("--test-file")
 
-        short_cli_items.remove("--test-file")
+            self.assertEqual(0, len(short_cli_items))
 
-        assert len(short_cli_items) == 0
-
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -337,7 +341,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222224")
     def test_reproduce_str_full_cli(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -349,13 +353,13 @@ class OptionsTest(TestCase):
         full_cli = test.get_full_cli()
         workflow_name = sys.argv[1]
         test_suite_name = sys.argv[2]
+        try:
+            self.assertIn(test.test_id, full_cli)
+            self.assertIn(workflow_name, full_cli)
+            self.assertIn(test_suite_name, full_cli)
 
-        self.assertIn(test.test_id, full_cli)
-        self.assertIn(workflow_name, full_cli)
-        self.assertIn(test_suite_name, full_cli)
-
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -369,7 +373,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222225")
     def test_reproduce_str_redefine_option_from_ts(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -382,10 +386,11 @@ class OptionsTest(TestCase):
         full_cli = test.get_full_cli()
         extension = sys.argv[4]
 
-        self.assertIn(extension, short_cli)
-        self.assertIn(" ".join(sys.argv[4].split("=")), full_cli)
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        try:
+            self.assertIn(extension, short_cli)
+            self.assertIn(" ".join(sys.argv[4].split("=")), full_cli)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -400,7 +405,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222226")
     def test_reproduce_str_redefine_option_from_wf(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -412,12 +417,13 @@ class OptionsTest(TestCase):
         short_cli = test.get_short_cli()
         full_cli = test.get_full_cli()
         panda_timeout = sys.argv[5]
-        self.assertIn(panda_timeout, short_cli)
+        try:
+            self.assertIn(panda_timeout, short_cli)
 
-        timeout = sys.argv[5].split("=")
-        self.assertIn(" ".join(timeout), full_cli)
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+            timeout = sys.argv[5].split("=")
+            self.assertIn(" ".join(timeout), full_cli)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -431,7 +437,7 @@ class OptionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222227")
     def test_reproduce_str_full_cli_option_default(self) -> None:
         # preparation
-        test_env, test_root, work_dir = self.prepare()
+        test_env, test_root = self.prepare()
         # test
         test = TestStandardFlow(
             test_env=test_env,
@@ -444,17 +450,18 @@ class OptionsTest(TestCase):
         workflow_name = sys.argv[1] + ".yaml"
         workflow_data = utils.load_config(OptionsTest.data_folder / workflow_name)
 
-        for key, val in cast(dict, workflow_data['parameters']).items():
-            if not val:
-                continue
+        try:
+            for key, val in cast(dict, workflow_data['parameters']).items():
+                if not val:
+                    continue
 
-            if str(val).startswith("$"):
-                self.assertIn(key, full_cli)
-            else:
-                self.assertIn(f"--{key} {val}", full_cli)
+                if str(val).startswith("$"):
+                    self.assertIn(key, full_cli)
+                else:
+                    self.assertIn(f"--{key} {val}", full_cli)
 
-        # clear up
-        shutil.rmtree(work_dir.root, ignore_errors=True)
+        finally:
+            clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
@@ -473,7 +480,7 @@ class OptionsTest(TestCase):
     def test_cli_enum_vals_case_insensitive(self, argv: Callable) -> None:
         with patch('sys.argv', argv):
             # preparation
-            test_env, test_root, work_dir = self.prepare()
+            test_env, test_root = self.prepare()
             # test
             test = TestStandardFlow(
                 test_env=test_env,
@@ -487,10 +494,11 @@ class OptionsTest(TestCase):
             test_suite_name = sys.argv[2]
             verbose_val = sys.argv[4]
 
-            self.assertIn(test.test_id, full_cli)
-            self.assertIn(workflow_name, full_cli)
-            self.assertIn(test_suite_name, full_cli)
-            self.assertIn(verbose_val.lower(), full_cli)
+            try:
+                self.assertIn(test.test_id, full_cli)
+                self.assertIn(workflow_name, full_cli)
+                self.assertIn(test_suite_name, full_cli)
+                self.assertIn(verbose_val.lower(), full_cli)
 
-            # clear up
-            shutil.rmtree(work_dir.root, ignore_errors=True)
+            finally:
+                clear_after_test()
