@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,6 @@ readonly GEN_ESCOMPAT_PATH="${1:-${GENPATH}}/escompat"
 readonly GEN_STDCORE_PATH="${1:-${GENPATH}}/std/core"
 readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
 readonly GEN_STDINTEROP_PATH="${1:-${GENPATH}}/std/interop/js"
-readonly ARR="${GEN_STDCORE_PATH}/Array.ets"
-readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.ets"
 readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.ets"
 readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.ets"
 readonly DATAVIEW="${GEN_STDCORE_PATH}/DataView.ets"
@@ -45,13 +43,6 @@ function format_file() {
 mkdir -p "${GEN_ESCOMPAT_PATH}"
 mkdir -p "${GEN_STDCORE_PATH}"
 mkdir -p "${GEN_STDINTEROP_PATH}"
-
-# Generate Array
-echo "Generating ${ARR}"
-erb Array_escompat.erb | format_file > "${ARR}"
-
-echo "Generating ${BLT_ARR}"
-erb Array_builtin.erb | format_file > "${BLT_ARR}"
 
 echo "Generating ${BLT_ARR_SORT}"
 "${JINJA_PATH}" Array_builtin_sort.ets.j2 | format_file > "${BLT_ARR_SORT}"
