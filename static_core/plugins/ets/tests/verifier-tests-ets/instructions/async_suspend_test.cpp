@@ -52,9 +52,9 @@ TEST_F(VerifierEtsOpcodeTest, DISABLED_NegSuspend2)
     // ets.async.suspend outside of async function
     auto source = R"(
         .language eTS
-        .record std.core.AsyncContext {} <external>
+        .record arkruntime.AsyncContext {} <external>
         .record ETSGLOBAL <extends=panda.Object, access.record=public> {}
-        .function void ETSGLOBAL.test(std.core.AsyncContext a0) <static, access.function=public> {
+        .function void ETSGLOBAL.test(arkruntime.AsyncContext a0) <static, access.function=public> {
             ets.async.suspend a0
             return.void
         }
@@ -75,10 +75,10 @@ TEST_F(VerifierEtsOpcodeTest, DISABLED_PosSuspend1)
 
     auto source =
         ".language eTS\n"
-        ".record std.core.AsyncContext {} <external>\n"
+        ".record arkruntime.AsyncContext {} <external>\n"
         ".record ets.coroutine.Async {} <external>\n"
         ".record ETSGLOBAL <extends=panda.Object, access.record=public> {}\n"
-        ".function void ETSGLOBAL.test(std.core.AsyncContext a0)"
+        ".function void ETSGLOBAL.test(arkruntime.AsyncContext a0)"
         "<static, access.function=public, ets.annotation.class=ets.coroutine.Async, ets.annotation.id=id_0>"
         "{\n"
         "    ets.async.suspend a0\n"

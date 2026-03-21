@@ -38,7 +38,7 @@ export final class AsyncContext {
      * Method returns current AsyncContext of async function
      * @returns { AsyncContext } current async context
      */
-    static native current(): AsyncContext;
+    static native current(): AsyncContext | undefined;
 
     /**
      * Method sets value to resolve associated promise  

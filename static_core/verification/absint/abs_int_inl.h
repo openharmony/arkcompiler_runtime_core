@@ -4126,7 +4126,10 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        /*
+         * NOTE(knazarov): Workaround until Any in runtime is not merged
+         */
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -4152,7 +4155,10 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        /*
+         * NOTE(knazarov): Workaround until Any in runtime is not merged
+         */
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
