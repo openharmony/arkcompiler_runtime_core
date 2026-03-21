@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-enum EnumTestIntegar {
+enum EnumTestIntegar:double {
     e1 = 2.0,
     e2 = 1.23,
     e3 = 5.1,

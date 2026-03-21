@@ -39,21 +39,21 @@ cases:
     - decl: |-
           // different numeric types literals - different types
           const d: double = 1.234
-          enum NumT {Doub = 1.234, Next = 1.234 + 2, Byt = 1}
+          enum NumT:double {Doub = 1.234, Next = 1.234 + 2, Byt = 1}
       checks: |-
           arktest.assertTrue(NumT.Doub.valueOf() == d, "Mixed num types problem")
 
     - decl: |-
           // different numeric types literals - double
           const d: double = 1.234
-          enum NumT {Doub = 1.234, Next = 1.234 + 2.2}
+          enum NumT:double {Doub = 1.234, Next = 1.234 + 2.2}
       checks: |-
           arktest.assertTrue(NumT.Doub.valueOf() == d, "Double problem")
           arktest.assertTrue(NumT.Next.valueOf() >= d + 2.2, "Double.Next problem")
 
     - decl: |-
           // different numeric types literals - double
-          enum NumT {Doub = 1.234, Next = 1.234 + 2.2}
+          enum NumT:double {Doub = 1.234, Next = 1.234 + 2.2}
       checks: |-
           arktest.assertTrue(NumT.Doub.valueOf() == 1.234, "Double problem")
           arktest.assertTrue(NumT.Next.valueOf() <= 1.234 + 2.2, "Double.Next problem")
@@ -61,14 +61,14 @@ cases:
     - decl: |-
           // different numeric types literals - float
           const f: float = 2.3456f
-          enum NumT {Flo = 2.3456f, Next = 2.3456f + 1.1f}
+          enum NumT:float {Flo = 2.3456f, Next = 2.3456f + 1.1f}
       checks: |-
           arktest.assertTrue(NumT.Flo.valueOf() == f, "Float problem")
           arktest.assertTrue(NumT.Next.valueOf() > f , "Float.Next problem")
 
     - decl: |-
           const f: float = 2.3456f
-          enum NumT {Flo = 2.3456f, Next = 2.3456f + 1.1f}
+          enum NumT:float {Flo = 2.3456f, Next = 2.3456f + 1.1f}
       checks: |-
           arktest.assertTrue(NumT.Flo.valueOf() == f, "Float problem")
           arktest.assertTrue(NumT.Next.valueOf() == f + 1.1f, "Float.Next problem")

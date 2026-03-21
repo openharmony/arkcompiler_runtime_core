@@ -24,7 +24,7 @@ desc: >-
 tags: [negative, compile-only]
 expected_out: "Semantic error ESE0318: Type 'Enm' cannot be assigned to type '{{type}}'"
 ---*/
-enum Enm {{c.enum_values}}
+enum Enm:{{c.enum_type}} {{c.enum_values}}
 
 function main() {
     

@@ -22,7 +22,7 @@ desc: >-
 const a: {{c.type1}} = {{c.value1}}
 const b: {{c.type2}} = {{c.value2}}
 
-enum TestEnum { One = a {{c.sign}} b }
+enum TestEnum:{{c.type2}} { One = a {{c.sign}} b }
 
 function main() {
     arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})

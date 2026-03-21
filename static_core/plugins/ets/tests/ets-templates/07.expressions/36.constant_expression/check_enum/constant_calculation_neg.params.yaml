@@ -19,10 +19,8 @@ cases:
     sign: |-
       *
     expected: 1120
-    expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+    expect: |-
+      Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
   - type: |-
       char
     value: |-
@@ -30,10 +28,8 @@ cases:
     sign: |-
       /
     expected: 11
-    expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+    expect: |-
+      Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
   - type: |-
       char
     value: |-
@@ -41,10 +37,8 @@ cases:
     sign: |-
       %
     expected: 2
-    expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+    expect: |-
+      Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
   - type: |-
       char
     value: |-
@@ -52,10 +46,8 @@ cases:
     sign: |-
       +
     expected: 122
-    expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+    expect: |-
+      Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
   - type: |-
       char
     value: |-
@@ -63,7 +55,5 @@ cases:
     sign: |-
       -
     expected: 102
-    expect: >-
-      Semantic error ESE0342: Enumeration members can be initialized
-      only by compile-time expressions and initializers must be of
-      the same type.
+    expect: |-
+      Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.

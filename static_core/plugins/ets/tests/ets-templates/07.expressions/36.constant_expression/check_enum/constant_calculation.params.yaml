@@ -12,32 +12,32 @@
 # limitations under the License.
 ---
 cases:
-  - { type: byte,   value: 26,      sign: '*', expected: 260        }
-  - { type: byte,   value: 26,      sign: '/', expected: 2          }
-  - { type: byte,   value: 26,      sign: '%', expected: 6          }
-  - { type: byte,   value: 26,      sign: '+', expected: 36         }
-  - { type: byte,   value: 26,      sign: '-', expected: 16         }
+  - { type: byte,   enumType: int,    value: 26,      sign: '*', expected: 260        }
+  - { type: byte,   enumType: int,    value: 26,      sign: '/', expected: 2          }
+  - { type: byte,   enumType: int,    value: 26,      sign: '%', expected: 6          }
+  - { type: byte,   enumType: int,    value: 26,      sign: '+', expected: 36         }
+  - { type: byte,   enumType: int,    value: 26,      sign: '-', expected: 16         }
 
-  - { type: short,  value: 260,     sign: '*', expected: 2600       }
-  - { type: short,  value: 260,     sign: '/', expected: 26         }
-  - { type: short,  value: 260,     sign: '%', expected: 0          }
-  - { type: short,  value: 260,     sign: '+', expected: 270        }
-  - { type: short,  value: 260,     sign: '-', expected: 250        }
+  - { type: short,  enumType: int,    value: 260,     sign: '*', expected: 2600       }
+  - { type: short,  enumType: int,    value: 260,     sign: '/', expected: 26         }
+  - { type: short,  enumType: int,    value: 260,     sign: '%', expected: 0          }
+  - { type: short,  enumType: int,    value: 260,     sign: '+', expected: 270        }
+  - { type: short,  enumType: int,    value: 260,     sign: '-', expected: 250        }
 
-  - { type: long,   value: 5006,    sign: '*', expected: 50060      }
-  - { type: long,   value: 50006,   sign: '/', expected: 5000       }
-  - { type: long,   value: 50006,   sign: '%', expected: 6          }
-  - { type: long,   value: 50006,   sign: '+', expected: 50016      }
-  - { type: long,   value: 50006,   sign: '-', expected: 49996      }
+  - { type: long,   enumType: long,   value: 5006,    sign: '*', expected: 50060      }
+  - { type: long,   enumType: long,   value: 50006,   sign: '/', expected: 5000       }
+  - { type: long,   enumType: long,   value: 50006,   sign: '%', expected: 6          }
+  - { type: long,   enumType: long,   value: 50006,   sign: '+', expected: 50016      }
+  - { type: long,   enumType: long,   value: 50006,   sign: '-', expected: 49996      }
 
-  - { type: float,  value: 123.2f,  sign: '*', expected: 1232       }
-  - { type: float,  value: 123.2f,  sign: '/', expected: 12.32f     }
-  - { type: float,  value: 123.2f,  sign: '%', expected: 123.2f%10  }
-  - { type: float,  value: 123.2f,  sign: '+', expected: 133.2f     }
-  - { type: float,  value: 123.2f,  sign: '-', expected: 113.2f     }
+  - { type: float,  enumType: float,  value: 123.2f,  sign: '*', expected: 1232       }
+  - { type: float,  enumType: float,  value: 123.2f,  sign: '/', expected: 12.32f     }
+  - { type: float,  enumType: float,  value: 123.2f,  sign: '%', expected: 123.2f%10  }
+  - { type: float,  enumType: float,  value: 123.2f,  sign: '+', expected: 133.2f     }
+  - { type: float,  enumType: float,  value: 123.2f,  sign: '-', expected: 113.2f     }
 
-  - { type: number, value: 5051.9,  sign: '*', expected: 50519      }
-  - { type: number, value: 5051.9,  sign: '/', expected: 5051.9/10  }
-  - { type: number, value: 5051.9,  sign: '%', expected: 5051.9%10  }
-  - { type: number, value: 5051.9,  sign: '+', expected: 5061.9     }
-  - { type: number, value: 5051.9,  sign: '-', expected: 5041.9     }
+  - { type: number, enumType: double, value: 5051.9,  sign: '*', expected: 50519      }
+  - { type: number, enumType: double, value: 5051.9,  sign: '/', expected: 5051.9/10  }
+  - { type: number, enumType: double, value: 5051.9,  sign: '%', expected: 5051.9%10  }
+  - { type: number, enumType: double, value: 5051.9,  sign: '+', expected: 5061.9     }
+  - { type: number, enumType: double, value: 5051.9,  sign: '-', expected: 5041.9     }

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,13 @@
 ---
 cases:
     - enum_values: '{ First, Second = 100, Third }'
+      enum_type: int
     - enum_values: '{ First = 0.2f, Second = 10.1f, Third = 3.3f }'
-    - enum_values: '{ First = 100.0, Second = 10.0, Third = -0.0 }' 
-    - enum_values: '{ First, Second = 0x3434343456565656, Third }' 
+      enum_type: float
+    - enum_values: '{ First = 100.0, Second = 10.0, Third = -0.0 }'
+      enum_type: double
+    - enum_values: '{ First, Second = 0x3434343456565656, Third }'
+      enum_type: long
 
 non_numeric_types:
     - String

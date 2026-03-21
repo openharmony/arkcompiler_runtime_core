@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,21 +25,21 @@ cases:
       use: |-
           arktest.assertEQ(Enum.second.toString(), "12")
       stdout: |- 
-        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
 
     - decl: |-
           enum Enum { first = "11", second = null, third = "13" }  // cannot use null
       use: |-
           arktest.assertEQ(Enum.first.toString(), "11")
       stdout: |- 
-        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
 
     - decl: |-
           enum Enum { first = "11", second = undefined, third = "13" }  // cannot use undefined
       use: |-
           arktest.assertEQ(Enum.first.toString(), "11")
       stdout: |- 
-        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
 
     - decl: |-
           let a = "ABC"   // not a constant
@@ -48,6 +48,6 @@ cases:
           arktest.assertEQ(Enum.e1.toString(), "ABC")
           arktest.assertEQ(Enum.e2.toString(), "DEF")
       stdout: |- 
-        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
 
 
