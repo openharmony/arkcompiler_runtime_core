@@ -555,8 +555,7 @@ static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLin
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto [pf, entityId] = GetPandaFileByIndex(fileEntityId);
 
-    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
-           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+    ASSERT(!PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     Class *klass = pf->GetPandaCache()->GetClassFromCache(entityId);
     if (klass != nullptr) {

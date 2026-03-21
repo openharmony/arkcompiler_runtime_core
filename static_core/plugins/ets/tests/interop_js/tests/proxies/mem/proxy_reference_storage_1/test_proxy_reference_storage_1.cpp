@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,17 @@ class SharedReferenceStorage1GTest : public js::testing::EtsInteropTest {
 public:
     void SetUp() override
     {
+        ManagedThread::GetCurrent()->ManagedCodeBegin();
         storage_ = SharedReferenceStorage::GetCurrent();
         ASSERT_NE(storage_, nullptr);
 
         memset_s(&objectArray_, sizeof(objectArray_), 0, sizeof(objectArray_));
         nextFreeIdx_ = 0;
+    }
+
+    void TearDown() override
+    {
+        ManagedThread::GetCurrent()->ManagedCodeEnd();
     }
 
     EtsObject *NewEtsObject()
@@ -42,13 +48,16 @@ public:
 
     SharedReference *CreateReference(EtsObject *etsObject)
     {
-        auto coro = EtsCoroutine::GetCurrent();
+        auto *coro = EtsCoroutine::GetCurrent();
         [[maybe_unused]] EtsHandleScope s(coro);
         EtsHandle<EtsObject> objHandle(coro, etsObject);
         napi_value jsObj;
-
-        NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
-        SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), objHandle, jsObj);
+        auto *interopCtx = InteropCtx::Current(coro);
+        {
+            ScopedNativeCodeThread nativeCodeScope(coro);
+            NAPI_CHECK_FATAL(napi_create_object(interopCtx->GetJSEnv(), &jsObj));
+        }
+        SharedReference *ref = storage_->CreateETSObjectRef(interopCtx, objHandle, jsObj);
 
         // Emulate wrappper usage
         ((uintptr_t *)ref)[0] = 0xcc00ff23deadbeef;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)

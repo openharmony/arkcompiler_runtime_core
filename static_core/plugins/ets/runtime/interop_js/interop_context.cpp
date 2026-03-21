@@ -406,7 +406,10 @@ void InteropCtx::InitExternalInterfaces()
     interfaceTable_.SetCreateInteropCtxFunction([](Coroutine *coro, ExternalIfaceTable::JSEnv jsEnv) {
         auto env = static_cast<napi_env>(jsEnv);
         auto *etsCoro = static_cast<EtsCoroutine *>(coro);
-        InteropCtx::Init(etsCoro, env);
+        {
+            ScopedManagedCodeThread managedScope(etsCoro);
+            InteropCtx::Init(etsCoro, env);
+        }
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
         INTEROP_CODE_SCOPE_ETS_TO_JS(etsCoro);
         // Here need to init interop in the given JSVM instance.
