@@ -681,7 +681,10 @@ export class JSON {
      */
     public static stringify(obj: Any): String {
         if (obj === undefined) {
-            return 'undefined'
+            return ''
+        }
+        if (obj instanceof Function) {
+            return ''
         }
         if (obj instanceof JSValue) {
             return JSON.stringifyJSValue(obj as JSValue)
@@ -1326,7 +1329,7 @@ class JSONWriter {
         if (obj === null) {
             this.buffer.append('null')
         } else if (obj === undefined) {
-            this.buffer.append('undefined')
+            this.buffer.append('')
         } else if (obj instanceof String) {
             this.buffer.append(JSON.stringify(obj as String))
         } else if(obj instanceof Tuple) {
@@ -1345,7 +1348,7 @@ class JSONWriter {
         } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Function) {
-            this.buffer.append('undefined')
+            this.buffer.append('')
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else if (obj instanceof Date) {
@@ -2147,7 +2150,7 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return 'null'
 
         case jsonx.JsonType.JsonUndefined:
-            return 'undefined'
+            return ''
 
         case jsonx.JsonType.JsonTrue:
             return 'true'
