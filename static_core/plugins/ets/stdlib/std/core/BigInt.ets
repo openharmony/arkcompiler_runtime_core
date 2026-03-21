@@ -94,7 +94,7 @@ export interface BigIntToLocaleStringOptions {
      * @FaAndStageModel
      * @since 24
      */
-    maximumFractionDigits?: number;
+    maximumFractionDigits?: int;
 
     /**
      * The maximum number of significant digits to use.
@@ -104,7 +104,7 @@ export interface BigIntToLocaleStringOptions {
      * @FaAndStageModel
      * @since 24
      */
-    maximumSignificantDigits?: number;
+    maximumSignificantDigits?: int;
 
     /**
      * The minimum number of fraction digits to use.
@@ -114,7 +114,7 @@ export interface BigIntToLocaleStringOptions {
      * @FaAndStageModel
      * @since 24
      */
-    minimumFractionDigits?: number;
+    minimumFractionDigits?: int;
 
     /**
      * The minimum number of integer digits to use.
@@ -124,7 +124,7 @@ export interface BigIntToLocaleStringOptions {
      * @FaAndStageModel
      * @since 24
      */
-    minimumIntegerDigits?: number;
+    minimumIntegerDigits?: int;
 
     /**
      * The minimum number of significant digits to use.
@@ -134,7 +134,7 @@ export interface BigIntToLocaleStringOptions {
      * @FaAndStageModel
      * @since 24
      */
-    minimumSignificantDigits?: number;
+    minimumSignificantDigits?: int;
 
     /**
      * The notation to use.

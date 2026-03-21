@@ -30,7 +30,7 @@
 
 namespace ark::ets::stdlib::intl {
 
-using SelectOptions = std::tuple<std::string, std::string, double, double, double, double, double>;
+using SelectOptions = std::tuple<std::string, std::string, int32_t, int32_t, int32_t, int32_t, int32_t>;
 
 namespace {
 ani_field g_localeField = nullptr;
@@ -97,22 +97,20 @@ static SelectOptions ExtractOptions(ani_env *env, ani_object options)
     ANI_FATAL_IF_ERROR(env->Object_GetField_Ref(options, g_typeField, &typeRef));
     auto type = ConvertFromAniString(env, reinterpret_cast<ani_string>(typeRef));
 
-    ani_double minimumIntegerDigits;
-    ANI_FATAL_IF_ERROR(env->Object_GetField_Double(options, g_minimumIntegerDigitsField, &minimumIntegerDigits));
+    ani_int minimumIntegerDigits;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Int(options, g_minimumIntegerDigitsField, &minimumIntegerDigits));
 
-    ani_double minimumFractionDigits;
-    ANI_FATAL_IF_ERROR(env->Object_GetField_Double(options, g_minimumFractionDigitsField, &minimumFractionDigits));
+    ani_int minimumFractionDigits;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Int(options, g_minimumFractionDigitsField, &minimumFractionDigits));
 
-    ani_double maximumFractionDigits;
-    ANI_FATAL_IF_ERROR(env->Object_GetField_Double(options, g_maximumFractionDigitsField, &maximumFractionDigits));
+    ani_int maximumFractionDigits;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Int(options, g_maximumFractionDigitsField, &maximumFractionDigits));
 
-    ani_double minimumSignificantDigits;
-    ANI_FATAL_IF_ERROR(
-        env->Object_GetField_Double(options, g_minimumSignificantDigitsField, &minimumSignificantDigits));
+    ani_int minimumSignificantDigits;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Int(options, g_minimumSignificantDigitsField, &minimumSignificantDigits));
 
-    ani_double maximumSignificantDigits;
-    ANI_FATAL_IF_ERROR(
-        env->Object_GetField_Double(options, g_maximumSignificantDigitsField, &maximumSignificantDigits));
+    ani_int maximumSignificantDigits;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Int(options, g_maximumSignificantDigitsField, &maximumSignificantDigits));
 
     return {locale,
             type,

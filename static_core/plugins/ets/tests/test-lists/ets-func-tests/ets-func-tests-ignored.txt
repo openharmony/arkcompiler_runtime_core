@@ -332,6 +332,5 @@ std/core/EAWorker_out_of_coro_creation.ets
 
 #31475
 escompat/DateTest.ets
-std/core/IntlPluralRulesSupportedLocalesOfTest.ets
 std/concurrency/message_basic_interface.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets

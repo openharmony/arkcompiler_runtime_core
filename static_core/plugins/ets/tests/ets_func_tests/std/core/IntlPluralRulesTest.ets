@@ -87,15 +87,17 @@ function testResolvedOptions() {
         arktest.assertEQ(result.minimumSignificantDigits, 3)
     }
     {
-        const rules = new Intl.PluraRules('zh',{ minimumSignificantDigits: 4});
+        const rules = new Intl.PluralRules('zh',{ minimumSignificantDigits: 4});
+        const resolved = rules.resolvedOptions();
         const value = rules.select(0);
-        arktest.assertEQ(result.maximumFractionDigits, 4);
+        arktest.assertEQ(resolved.minimumSignificantDigits, 4);
         arktest.assertEQ(value, 'other');
     }
     {
-        const rules = new Intl.PluraRules('zh',{ minimumSignificantDigits: 10});
+        const rules = new Intl.PluralRules('zh',{ minimumSignificantDigits: 10});
+        const resolved = rules.resolvedOptions();
         const value = rules.select(0);
-        arktest.assertEQ(result.maximumFractionDigits, 10);
+        arktest.assertEQ(resolved.minimumSignificantDigits, 10);
         arktest.assertEQ(value, 'other');
     }
 }
