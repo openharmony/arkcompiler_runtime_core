@@ -209,10 +209,11 @@ private:
 
         constexpr uint64_t branchNotTakenCount = 3;
         constexpr uint64_t throwTakenCount = 2;
+        constexpr uint64_t branchTakenCount = 8;
 
         PandaVector<ark::pgo::AotProfilingData::AotBranchData> branches(1);
         branches[0].pc = 0x22;  // NOLINT
-        branches[0].taken = 8;  // NOLINT
+        branches[0].taken = branchTakenCount;
         branches[0].notTaken = branchNotTakenCount;
 
         PandaVector<ark::pgo::AotProfilingData::AotThrowData> throwsData(1);
@@ -607,20 +608,22 @@ ark::pgo::AotProfilingData::AotMethodProfilingData BuildNoisyBranchMethod(const 
     constexpr uint64_t branch1NotTaken = 4;
     constexpr size_t branch2Idx = 2;
     constexpr size_t branch3Idx = 3;
+    constexpr size_t branch4Idx = 4;
+    constexpr size_t branch5Idx = 5;
     constexpr uint64_t branch3Taken = 3;
     constexpr uint64_t branch3NotTaken = 3;
+    constexpr uint64_t throwTaken = 3;
 
     PandaVector<BranchData> branches(branchCount);
     branches[0] = MakeBranch(0x10, 1, branch0NotTaken);
     branches[1] = MakeBranch(0x16, branch1Taken, branch1NotTaken);
     branches[branch2Idx] = MakeBranch(0x1A, 0, 0);
     branches[branch3Idx] = MakeBranch(0x20, branch3Taken, branch3NotTaken);
-    branches[4] = MakeBranch(0x27, 0, 0);  // NOLINT
-    branches[5] = MakeBranch(0x3C, 0, 0);  // NOLINT
-                                           // NOLINT
-    PandaVector<ThrowData> throws(1);      // NOLINT
-    throws[0] = MakeThrow(0x36, 3);        // NOLINT
-                                           // NOLINT
+    branches[branch4Idx] = MakeBranch(0x27, 0, 0);
+    branches[branch5Idx] = MakeBranch(0x3C, 0, 0);
+
+    PandaVector<ThrowData> throws(1);
+    throws[0] = MakeThrow(0x36, throwTaken);
     return ark::pgo::AotProfilingData::AotMethodProfilingData(
         entities.methodNoisyBranch, entities.classEtsglobal,  // NOLINT
         std::move(inlineCaches), std::move(branches), std::move(throws));
@@ -636,15 +639,15 @@ ark::pgo::AotProfilingData::AotMethodProfilingData BuildRunPolymorphicMethod(con
     inlineCaches[lastInlineCacheIdx] = MakeInlineCache(0x31, {{entities.classAdder, 0}, {entities.classDoubler, 0}});
 
     constexpr size_t polymorphicBranchCount = 3;
+    constexpr size_t polyBranch2Idx = 2;
     constexpr uint64_t branchNotTaken6 = 6;
     PandaVector<BranchData> branches(polymorphicBranchCount);
     branches[0] = MakeBranch(0x10, 1, branchNotTaken6);
     branches[1] = MakeBranch(0x20, 0, branchNotTaken6);
-    branches[2] = MakeBranch(0x3D, 0, 0);  // NOLINT
+    branches[polyBranch2Idx] = MakeBranch(0x3D, 0, 0);
 
-    PandaVector<ThrowData> throws(1);  // NOLINT
-    throws[0] = MakeThrow(0x4B, 0);    // NOLINT
-                                       // NOLINT
+    PandaVector<ThrowData> throws(1);
+    throws[0] = MakeThrow(0x4B, 0);
     return ark::pgo::AotProfilingData::AotMethodProfilingData(
         entities.methodRunPolymorphic, entities.classEtsglobal,  // NOLINT
         std::move(inlineCaches), std::move(branches), std::move(throws));
@@ -1225,6 +1228,83 @@ TEST_F(AptoolDumpTest, IntegrationTestPandaFileFiltering)
 
     // Verify filtered output only has one panda file in PandaFiles section
     EXPECT_FALSE(appOnlyHasTwoPandaFiles) << "Filtered output should only have app.abc in PandaFiles section";
+}
+
+TEST_F(AptoolDumpTest, MatchesAbcByChecksumWhenRenamed)
+{
+    APTOOL_SKIP_IF_NO_ETS();
+    auto ctx = SetupCliContext("checksum_match");
+    ASSERT_FALSE(ctx.workspace.empty());
+
+    // Rename ABC to a completely different name — basename won't match "dump_test.abc"
+    auto renamedAbc = ctx.workspace / "completely_different.abc";
+    std::error_code ec;
+    fs::rename(ctx.abcPath, renamedAbc, ec);
+    ASSERT_FALSE(ec) << "Failed to rename ABC: " << ec.message();
+
+    // Run with the renamed file — checksum-only matching should still find it
+    int ret = RunAptool({"--ap-path", ctx.apPath, "--output", ctx.outputPath.string(), "--abc-path", renamedAbc});
+    ASSERT_EQ(ret, 0) << "aptool dump should succeed with checksum-only matching";
+
+    auto yaml = ReadFile(ctx.outputPath);
+    EXPECT_NE(yaml.find("method_signature:"), std::string::npos)
+        << "Checksum-only match should still resolve method signatures";
+}
+
+TEST_F(AptoolDumpTest, NoMethodDetailsWhenChecksumMismatches)
+{
+    APTOOL_SKIP_IF_NO_ETS();
+    auto workspace = PrepareArtifactsDir("checksum_reject");
+    ASSERT_FALSE(workspace.empty());
+
+    auto abcPath = workspace / "dump_test.abc";
+    auto artifacts = CreateDumpTestAbc(abcPath);
+    auto apPath = workspace / "profile.ap";
+
+    // Create profile with a corrupted checksum
+    auto corruptedChecksum = artifacts.checksum;
+    if (!corruptedChecksum.empty()) {
+        corruptedChecksum[0] = corruptedChecksum[0] == '0' ? '1' : '0';
+    } else {
+        corruptedChecksum = "deadbeef";
+    }
+    CreateDumpTestProfile(apPath, artifacts.entities, corruptedChecksum);
+
+    auto outputPath = workspace / "output.yaml";
+    int ret = RunAptool({"--ap-path", apPath, "--output", outputPath.string(), "--abc-path", abcPath});
+    // VerifyClassContext: basename matches but checksum doesn't → skip → returns true
+    // FindRecordByBaseName: expected checksum (corrupted) != ABC's real checksum → returns nullptr
+    // Result: dump succeeds but without method details
+    ASSERT_EQ(ret, 0) << "aptool dump should not crash with mismatched checksum";
+
+    auto yaml = ReadFile(outputPath);
+    EXPECT_NE(yaml.find("method_index:"), std::string::npos) << "Output should still contain method indices";
+    EXPECT_EQ(yaml.find("method_signature:"), std::string::npos)
+        << "Method signatures should NOT appear when checksum doesn't match";
+}
+
+TEST_F(AptoolDumpTest, WarnsWhenAbcDoesNotMatchProfile)
+{
+    APTOOL_SKIP_IF_NO_ETS();
+    auto workspace = PrepareArtifactsDir("abc_no_match");
+    ASSERT_FALSE(workspace.empty());
+
+    // Synthetic profile uses panda files "boot.abc" and "sample.abc"
+    auto profilePath = CreateSyntheticProfile();
+    ASSERT_FALSE(profilePath.empty());
+
+    // Provide an ABC file that doesn't match any panda file name in the profile
+    auto abcPath = workspace / "dump_test.abc";
+    CreateDumpTestAbc(abcPath);
+
+    auto outputPath = workspace / "no_match.yaml";
+    int ret = RunAptool({"--ap-path", profilePath, "--output", outputPath.string(), "--abc-path", abcPath});
+    ASSERT_EQ(ret, 0) << "aptool dump should succeed even when ABC doesn't match";
+
+    auto yaml = ReadFile(outputPath);
+    EXPECT_NE(yaml.find("Methods:"), std::string::npos) << "Output should contain Methods section";
+    EXPECT_EQ(yaml.find("class_descriptor:"), std::string::npos)
+        << "No class descriptors should appear when ABC doesn't match profile";
 }
 
 }  // namespace ark::compiler

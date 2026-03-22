@@ -40,4 +40,7 @@ panda_target_include_directories(ark_aptool
 
 panda_gen_options(TARGET ark_aptool YAML_FILE dump/dump_options.yaml GENERATED_HEADER dump_options.h)
 
+# CMake builds always include dump (development environment)
+panda_target_compile_options(ark_aptool PUBLIC -DAPTOOL_INCLUDE_DUMP)
+
 panda_add_sanitizers(TARGET ark_aptool SANITIZERS ${PANDA_SANITIZERS_LIST})
