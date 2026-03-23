@@ -32,9 +32,8 @@ namespace ark::mem {
 class GCBarrierSet {
 public:
     GCBarrierSet() = delete;
-    GCBarrierSet(mem::InternalAllocatorPtr allocator, BarrierType preReadType, BarrierType preType,
-                 BarrierType postType)
-        : preReadType_(preReadType),
+    GCBarrierSet(mem::InternalAllocatorPtr allocator, BarrierType readType, BarrierType preType, BarrierType postType)
+        : readType_(readType),
           preType_(preType),
           postType_(postType),
           preOperands_(allocator->Adapter()),
@@ -46,10 +45,9 @@ public:
     NO_MOVE_SEMANTIC(GCBarrierSet);
     virtual ~GCBarrierSet() = 0;
 
-    BarrierType GetPreReadType() const
+    BarrierType GetReadType() const
     {
-        ASSERT(IsPreBarrier(preReadType_));
-        return preReadType_;
+        return readType_;
     }
 
     BarrierType GetPreType() const
@@ -66,7 +64,7 @@ public:
 
     virtual bool IsReadBarrierEnabled()
     {
-        return !mem::IsEmptyBarrier(preReadType_);
+        return !mem::IsEmptyBarrier(readType_);
     }
 
     virtual bool IsPreBarrierEnabled()
@@ -136,9 +134,9 @@ protected:
     }
 
 private:
-    BarrierType preReadType_;  // Type of PRE-Read barrier
-    BarrierType preType_;      // Type of PRE-Write barrier.
-    BarrierType postType_;     // Type of POST-Write barrier.
+    BarrierType readType_;  // Type of PRE-Read barrier
+    BarrierType preType_;   // Type of PRE-Write barrier.
+    BarrierType postType_;  // Type of POST-Write barrier.
     PandaMap<PandaString, BarrierOperand> preOperands_;
     PandaMap<PandaString, BarrierOperand> postOperands_;
 };

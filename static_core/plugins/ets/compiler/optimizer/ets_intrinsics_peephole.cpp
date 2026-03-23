@@ -190,7 +190,7 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
         if (runtime->IsFieldVolatile(field)) {
             loadField->SetVolatile(true);
         }
-        if (type == DataType::REFERENCE && runtime->NeedsPreReadBarrier()) {
+        if (type == DataType::REFERENCE && runtime->NeedsReadBarrier()) {
             loadField->SetNeedBarrier(true);
         }
         memObj = loadField;

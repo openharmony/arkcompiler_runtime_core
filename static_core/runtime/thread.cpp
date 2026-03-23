@@ -166,7 +166,7 @@ void ManagedThread::InitCardTableData(mem::GCBarrierSet *barrier)
         case mem::PRE_WRB_NONE:
         case mem::PRE_RB_NONE:
         case mem::PRE_SATB_BARRIER:
-        case ark::mem::BarrierType::PRE_CMC_READ_BARRIER:
+        case ark::mem::BarrierType::CMC_READ_BARRIER:
             LOG(FATAL, RUNTIME) << "Post barrier expected";
             break;
     }

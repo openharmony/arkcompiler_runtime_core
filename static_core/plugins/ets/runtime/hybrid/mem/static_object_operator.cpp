@@ -26,32 +26,6 @@ namespace ark::mem {
 
 StaticObjectOperator StaticObjectOperator::instance_;
 
-class SkipReferentHandler {
-public:
-    explicit SkipReferentHandler(const common_vm::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
-        : visitor_(visitor), weakReferentPointer_(weakReferentPointer)
-    {
-    }
-
-    ~SkipReferentHandler() = default;
-
-    bool ProcessObjectPointer([[maybe_unused]] ObjectHeader *obj, ObjectPointerType *p)
-    {
-        if (p == weakReferentPointer_) {
-            // skip referent
-            return true;
-        }
-        if (*p != 0) {
-            visitor_(reinterpret_cast<common_vm::RefField<> &>(*reinterpret_cast<common_vm::BaseObject **>(p)));
-        }
-        return true;
-    }
-
-private:
-    const common_vm::RefFieldVisitor &visitor_;
-    const ObjectPointerType *weakReferentPointer_ {nullptr};
-};
-
 class Handler {
 public:
     explicit Handler(const common_vm::RefFieldVisitor &visitor) : visitor_(visitor) {}
@@ -67,13 +41,37 @@ public:
         auto *oldValue = *ref;
         visitor_(reinterpret_cast<common_vm::RefField<> &>(*ref));
         auto *newValue = reinterpret_cast<ObjectHeader *>(*ref);
-        LOG(DEBUG, MM_OBJECT_EVENTS) << "Forward object " << oldValue << " -> " << newValue << " "
-                                     << GetDebugInfoAboutObject(newValue) << " accessed from: " << obj;
+        if (ark::ToUintPtr(oldValue) != ark::ToUintPtr(newValue)) {
+            LOG(DEBUG, MM_OBJECT_EVENTS) << "Forward object " << oldValue << " -> " << newValue << " "
+                                         << GetDebugInfoAboutObject(newValue) << " accessed from: " << obj;
+        }
         return true;
     }
 
 private:
     const common_vm::RefFieldVisitor &visitor_;
+};
+
+class SkipReferentHandler : public Handler {
+public:
+    explicit SkipReferentHandler(const common_vm::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
+        : Handler(visitor), weakReferentPointer_(weakReferentPointer)
+    {
+    }
+
+    ~SkipReferentHandler() = default;
+
+    bool ProcessObjectPointer(ObjectHeader *obj, ObjectPointerType *p)
+    {
+        if (p == weakReferentPointer_) {
+            // skip referent
+            return true;
+        }
+        return Handler::ProcessObjectPointer(obj, p);
+    }
+
+private:
+    const ObjectPointerType *weakReferentPointer_ {nullptr};
 };
 
 void StaticObjectOperator::Initialize()

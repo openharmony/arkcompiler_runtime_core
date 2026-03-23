@@ -20,6 +20,7 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/runtime.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark {
 
@@ -153,6 +154,7 @@ bool ClassLinkerExtension::InitializeRoots(ManagedThread *thread)
 {
     ASSERT(IsInitialized());
 
+    ScopedManagedCodeThread scope(thread);
     for (auto *klass : classRoots_) {
         if (klass == nullptr) {
             continue;

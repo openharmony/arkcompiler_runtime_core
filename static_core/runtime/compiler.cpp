@@ -843,9 +843,9 @@ RuntimeInterface::FieldId PandaRuntimeInterface::GetFieldId(FieldPtr field) cons
     return FieldCast(field)->GetFileId().GetOffset();
 }
 
-ark::mem::BarrierType PandaRuntimeInterface::GetPreReadType() const
+ark::mem::BarrierType PandaRuntimeInterface::GetReadType() const
 {
-    return Mutator::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreReadType();
+    return Mutator::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetReadType();
 }
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPreType() const

@@ -84,6 +84,10 @@ class WorkflowOptions(IOptions):
 
         return "\n".join(result)
 
+    @property
+    def is_panda(self) -> bool:
+        return to_bool(self.__parameters.get(IS_PANDA, DEFAULT_IS_PANDA))
+
     @cached_property
     def name(self) -> str:
         return str(self.__name)
@@ -91,10 +95,6 @@ class WorkflowOptions(IOptions):
     @cached_property
     def steps(self) -> list[Step]:
         return self.__steps
-
-    @cached_property
-    def is_panda(self) -> bool:
-        return to_bool(self.__parameters.get(IS_PANDA, DEFAULT_IS_PANDA))
 
     @cached_property
     def parameters(self) -> dict[str, Any]:  # type: ignore[explicit-any]

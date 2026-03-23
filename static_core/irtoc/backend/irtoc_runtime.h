@@ -94,10 +94,10 @@ public:
         return unit->GetArgsCount();
     }
 
-    ::ark::mem::BarrierType GetPreReadType() const override
+    ::ark::mem::BarrierType GetReadType() const override
     {
 #if defined(ARK_USE_COMMON_RUNTIME)
-        return ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
+        return ::ark::mem::BarrierType::CMC_READ_BARRIER;
 #else
         return ::ark::mem::BarrierType::PRE_RB_NONE;
 #endif

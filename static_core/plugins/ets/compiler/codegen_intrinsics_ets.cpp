@@ -246,7 +246,7 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     auto labelFastPathDone = enc->CreateLabel();
     auto labelIncIndex = enc->CreateLabel();
     // Jump to slowPath if buffer is full and needs to be reallocated
-    if (cg->GetRuntime()->NeedsPreReadBarrier()) {
+    if (cg->GetRuntime()->NeedsReadBarrier()) {
         cg->CreateReadViaBarrier(inst, args.SbBufferAddr(), reg0, false,
                                  MakeMask(args.SbBufferAddr().GetBase().GetId(), args.Value().GetId()));
     } else {

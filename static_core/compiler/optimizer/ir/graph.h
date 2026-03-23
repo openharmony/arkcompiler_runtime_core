@@ -1099,7 +1099,7 @@ public:
             SetAbcKitFlags(inst);
         }
         if constexpr (inst_flags::HasFlag(OPCODE, inst_flags::READ_BARRIER)) {
-            bool needsBarrier = GetRuntime()->NeedsPreReadBarrier();
+            bool needsBarrier = GetRuntime()->NeedsReadBarrier();
             if (needsBarrier && inst->GetType() == DataType::REFERENCE) {
                 inst->SetNeedBarrier(true);
             }

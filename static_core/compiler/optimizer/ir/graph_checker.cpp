@@ -1304,7 +1304,7 @@ void GraphChecker::CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[ma
         CheckGCBarrierEntrypointInput(v, inst, needBarrier);
     }
     auto asGraphChecker = static_cast<GraphChecker *>(v);
-    auto needsPreREB = asGraphChecker->GetGraph()->GetRuntime()->NeedsPreReadBarrier();
+    auto needsPreREB = asGraphChecker->GetGraph()->GetRuntime()->NeedsReadBarrier();
     if (needsPreREB && inst->IsLoad() && (inst->GetInputType(0) != DataType::POINTER) &&
         (inst->GetType() == DataType::REFERENCE)) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(

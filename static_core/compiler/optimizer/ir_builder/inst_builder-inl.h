@@ -730,7 +730,7 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
         }
         inst = loadField;
     }
-    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsReadBarrier()) {
         static_cast<LoadInst *>(inst)->SetNeedBarrier(true);
     }
 
@@ -836,7 +836,7 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
         }
         AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved static field address
-        auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsPreReadBarrier();
+        auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsReadBarrier();
         auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(
             type, pc, resolveField, TypeIdMixin {typeId, GetGraph()->GetMethod()}, false, needsBarrier);
         return loadField;
@@ -847,7 +847,7 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
-    auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsPreReadBarrier();
+    auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsReadBarrier();
     auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, TypeIdMixin {typeId, GetGraph()->GetMethod()},
                                                   field, GetRuntime()->IsFieldVolatile(field), needsBarrier);
     // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
@@ -879,7 +879,7 @@ void InstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::T
     auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
     AddInstruction(saveState);
     auto *inst = BuildLoadStaticInst(GetPc(bcInst->GetAddress()), type, fieldId, saveState);
-    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsReadBarrier()) {
         static_cast<LoadStaticInst *>(inst)->SetNeedBarrier(true);
     }
     AddInstruction(inst);
@@ -985,7 +985,7 @@ void InstBuilder::BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Ty
     // Create instruction
     auto inst = graph_->CreateInstLoadArray(type, pc, nullCheck, boundsCheck);
     boundsCheck->SetInput(1, GetDefinitionAcc());
-    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsReadBarrier()) {
         inst->SetNeedBarrier(true);
     }
     AddInstruction(saveState, nullCheck, arrayLength, boundsCheck, inst);

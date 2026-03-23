@@ -293,6 +293,7 @@ static thread_local common_vm::Mutator *g_SharedExternalMutator = nullptr;
 void Mutator::BindMutator()
 {
     GetMutator()->BindMutator();
+    GetMutator()->SetArkthreadPtr(this);
 }
 
 void Mutator::UnbindMutator()

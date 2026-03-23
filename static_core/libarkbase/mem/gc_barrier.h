@@ -124,8 +124,7 @@ enum BarrierType : uint8_t {
      * Runtime should provide these parameters:
      * CMC_READ_BARRIER - CMC-GC Read Barrier function
      */
-    PRE_CMC_READ_BARRIER =
-        EncodeBarrierType(2U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::READ_BARRIER),
+    CMC_READ_BARRIER = EncodeBarrierType(2U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::READ_BARRIER),
 };
 
 constexpr bool IsPreBarrier(BarrierType barrierType)

@@ -888,7 +888,7 @@ public:
         return 0;
     }
 
-    virtual ::ark::mem::BarrierType GetPreReadType() const
+    virtual ::ark::mem::BarrierType GetReadType() const
     {
         return ::ark::mem::BarrierType::PRE_RB_NONE;
     }
@@ -903,10 +903,10 @@ public:
         return ::ark::mem::BarrierType::POST_WRB_NONE;
     }
 
-    bool NeedsPreReadBarrier() const
+    bool NeedsReadBarrier() const
     {
-        auto type = GetPreReadType();
-        return type == ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
+        auto type = GetReadType();
+        return type == ::ark::mem::BarrierType::CMC_READ_BARRIER;
     }
 
     bool NeedsPreWriteBarrier() const
