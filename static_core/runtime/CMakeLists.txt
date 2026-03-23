@@ -1057,6 +1057,13 @@ if(TARGET arkruntime_aot_escape_signal_test)
     panda_target_compile_options(arkruntime_aot_escape_signal_test PUBLIC "-Wno-ignored-attributes")
 endif()
 
+if (PANDA_TARGET_UNIX)
+    add_gtests(
+        arkruntime_sighook_mask_test
+        tests/sighook_mask_test.cpp
+    )
+endif()
+
 add_gtests(
     arkruntime_regexp_test
     tests/regexp_test.cpp
