@@ -1,0 +1,6 @@
+# The reason is: these are negative tests that should check for a broken hierarchy.
+# The error message is compared with the expected one.
+# Therefore, using AOT here makes no sense.
+
+#33139
+ets-common-tests/atomics/index_range.ets
