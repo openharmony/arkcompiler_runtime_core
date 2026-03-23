@@ -194,8 +194,8 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
 extern "C" void *ReadBarrierFuncEntrypoint(void **fieldPtr)
 {
     if constexpr (GCCMCBarrierSet::USE_READ_BARRIERS) {
-        auto field = *reinterpret_cast<common_vm::RefField<false> *>(*fieldPtr);
-        return common_vm::BaseRuntime::ReadBarrier(field.GetTargetObject(), *fieldPtr);
+        auto field = reinterpret_cast<common_vm::RefField<false> &>(*fieldPtr);
+        return common_vm::BaseRuntime::ReadBarrier(field.GetTargetObject(), fieldPtr);
     }
     return nullptr;
 }
@@ -259,11 +259,11 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
         auto *readBarrier = ManagedThread::GetCurrent()->GetReadBarrierEntrypoint();
         if (readBarrier != nullptr) {
             reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(refAddr);
-            auto field = *reinterpret_cast<common_vm::RefField<false> *>(*refAddr);
+            auto field = reinterpret_cast<common_vm::RefField<false> &>(*refAddr);
             return field.GetTargetObject();
         }
     }
-    auto field = *reinterpret_cast<common_vm::RefField<false> *>(*refAddr);
+    auto field = reinterpret_cast<common_vm::RefField<false> &>(*refAddr);
     return field.GetTargetObject();
 }
 

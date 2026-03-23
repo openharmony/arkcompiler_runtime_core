@@ -140,7 +140,7 @@ public:
     static void WriteRoot(void *obj);
     static void WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator = nullptr);
     static void *ReadBarrier(void *obj, void *field);
-    static void *ReadBarrier(void *field);
+    static void *ReadBarrier(void **field);
     static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);
     static void RequestGC(GCReason reason, bool async, GCType gcType);
     static void WaitForGCFinish();

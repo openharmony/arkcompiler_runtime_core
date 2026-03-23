@@ -206,9 +206,9 @@ void *BaseRuntime::ReadBarrier(void *obj, void *field)
                                                                     *reinterpret_cast<RefField<false> *>(field)));
 }
 
-void *BaseRuntime::ReadBarrier(void *field)
+void *BaseRuntime::ReadBarrier(void **field)
 {
-    return reinterpret_cast<void *>(Heap::GetBarrier().ReadStaticRef(*reinterpret_cast<RefField<false> *>(field)));
+    return reinterpret_cast<void *>(Heap::GetBarrier().ReadStaticRef(reinterpret_cast<RefField<false> &>(*field)));
 }
 
 void *BaseRuntime::AtomicReadBarrier(void *obj, void *field, std::memory_order order)
