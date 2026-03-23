@@ -104,9 +104,6 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 
-#32775
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_41.ets
-
 #33502
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_0.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_1.ets
