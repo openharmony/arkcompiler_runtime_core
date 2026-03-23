@@ -83,7 +83,7 @@ export interface BigIntToLocaleStringOptions {
     /**
      * The maximum number of fraction digits to use.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
@@ -92,7 +92,7 @@ export interface BigIntToLocaleStringOptions {
     /**
      * The maximum number of significant digits to use.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
@@ -101,7 +101,7 @@ export interface BigIntToLocaleStringOptions {
     /**
      * The minimum number of fraction digits to use.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
@@ -110,7 +110,7 @@ export interface BigIntToLocaleStringOptions {
     /**
      * The minimum number of integer digits to use.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
@@ -119,7 +119,7 @@ export interface BigIntToLocaleStringOptions {
     /**
      * The minimum number of significant digits to use.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
@@ -718,20 +718,6 @@ export final class BigInt {
     }
 
     /**
-     * Clamps a BigInt to a signed integer with the specified number of bits.
-     *
-     * @param { Number } bits The number of bits for the signed integer representation.
-     * @param { BigInt } num The BigInt value to clamp.
-     * @returns { BigInt } A BigInt value clamped to the specified number of bits as a signed integer.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static asIntN(bits: Number, num: BigInt): BigInt {
-        return BigInt.asIntN(bits.toLong(), num)
-    }
-
-    /**
      * Clamps a BigInt to an unsigned integer with the specified number of bits.
      *
      * @param { long } bits The number of bits for the unsigned integer representation.
@@ -756,20 +742,6 @@ export final class BigInt {
         // in this case must be bits <= 255
         // please check `operatorLeftShift` implementation
         return num & ((1n << (new BigInt(bits))) - 1n)
-    }
-
-    /**
-     * Clamps a BigInt to an unsigned integer with the specified number of bits.
-     *
-     * @param { Number } bits The number of bits for the unsigned integer representation.
-     * @param { BigInt } num The BigInt value to clamp.
-     * @returns { BigInt } A BigInt value clamped to the specified number of bits as an unsigned integer.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static asUintN(bits: Number, num: BigInt): BigInt {
-        return BigInt.asUintN(bits.toLong(), num)
     }
 
     /**
@@ -1931,7 +1903,7 @@ export final class BigInt {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    static $_invoke(value: number): BigInt {
+    static $_invoke(value: Double): BigInt {
         return new BigInt(value)
     }
 
@@ -1970,11 +1942,11 @@ export final class BigInt {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    static $_invoke(value: BigInt | Number | String | Boolean): BigInt {
+    static $_invoke(value: BigInt | Double | String | Boolean): BigInt {
         if (value instanceof BigInt) {
             return new BigInt(value as BigInt)
-        } else if (value instanceof Number) {
-            return new BigInt(value as Number)
+        } else if (value instanceof Double) {
+            return new BigInt(value as Double)
         } else if (value instanceof String) {
             return new BigInt(value as String)
         } else if (value instanceof Boolean) {
