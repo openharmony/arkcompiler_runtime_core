@@ -25,6 +25,8 @@
 const MAX_LOOP_COUNT: long = {{max_loop_count}};
 const NS2MS: long = 1_000_000;
 const S2MS: long = {{s2ms}};
+const COROUTINES_TIMEOUT: int = 60000;
+const COROUTINES_NO_CHANGE_LIMIT: int = 60000;
 
 class VmbLauncher {
 
@@ -33,12 +35,13 @@ class VmbLauncher {
     static IT: int = {{it}};
     static WT: int = {{wt}};
     static FI: int = {{fi}};
-    static CL: int = {{cl}};
+    static CL: long = {{cl}};
     static CT: double = {{ct}};
     static loopCount1: long = 0;
     static totalOps: long = 0;
     static totalNs: long = 0;
     static iter: int = 0;
+    static beforeBenchCoroutinesCount: long = 0;
 
     static log(msg: string): void {
         // timestamp is needed by GC parser
@@ -56,11 +59,23 @@ class VmbLauncher {
 
     static coroutinesTeardown(): long {
         let start = Chrono.nanoNow();
-        VmbLauncher.log("Force Coroutines Teardown");
-        let current_coroutines_pool_size = CoroutineExtras.getCoroutineCount();
-        let finish_coroutines_pool_size = round((1 - VmbLauncher.CT) * current_coroutines_pool_size);
-        while (current_coroutines_pool_size > finish_coroutines_pool_size) {
-            current_coroutines_pool_size = CoroutineExtras.getCoroutineCount();
+        VmbLauncher.log('Force Coroutines Teardown');
+        let currentCount = CoroutineExtras.getCoroutineCount();
+        let passBarrier = round((1 - VmbLauncher.CT) * VmbLauncher.CL);
+        let no_change_counter: int = 0;
+        VmbLauncher.log('Coroutines count before run: ' + VmbLauncher.beforeBenchCoroutinesCount);
+        VmbLauncher.log('Coroutines count before teardown: ' + currentCount);
+        while (
+            currentCount > VmbLauncher.beforeBenchCoroutinesCount &&
+            currentCount > passBarrier &&
+            (Chrono.nanoNow() - start) / NS2MS < COROUTINES_TIMEOUT &&
+            no_change_counter < COROUTINES_NO_CHANGE_LIMIT
+        ) {
+            let prevCount = currentCount;
+            currentCount = CoroutineExtras.getCoroutineCount();
+            if (currentCount - prevCount === 0) {
+                no_change_counter++;
+            }
         }
         return Chrono.nanoNow() - start;
     }
@@ -91,10 +106,14 @@ class VmbLauncher {
                 catch (error) {
                     if (error instanceof CoroutinesLimitExceedError) {
                         VmbLauncher.log('CoroutinesLimitExceedError: ' + error.toString());
+                        let actual_limit = CoroutineExtras.getCoroutineCount();
+                        if (actual_limit > VmbLauncher.CL) {
+                            VmbLauncher.log('Discovered actual coroutines limit: ' + actual_limit);
+                            VmbLauncher.CL = actual_limit;
+                        }
                         let teardown_time = VmbLauncher.coroutinesTeardown();
                         VmbLauncher.log('Coroutines Teardown has taken ' + teardown_time + 'ns');
                         start -= teardown_time;
-                        break;
                     }
                 }
             {% else %}
@@ -156,6 +175,7 @@ class VmbLauncher {
     }
 
     static main(): void {
+        VmbLauncher.beforeBenchCoroutinesCount = CoroutineExtras.getCoroutineCount();
         let bench: {{state_name}} = new {{state_name}}();
         VmbLauncher.log("Startup execution started: " + Chrono.nanoNow());
         {{state_params}}
