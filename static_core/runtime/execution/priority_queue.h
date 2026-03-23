@@ -111,14 +111,17 @@ public:
         visitor(elems_.cbegin(), elems_.cend());
     }
 
-    /// Removes Elements from the priority queue by given sequence of iterators
+    /// Removes Elements from the priority queue by given sorted sequence of iterators
     template <typename Container,
               typename U = std::enable_if_t<std::is_same_v<typename Container::value_type, CIterator>>>
     void RemoveElements(const Container &elementsIterators)
     {
-        for (auto &iter : elementsIterators) {
-            elems_.erase(iter);
+        auto remRangeEnd = elems_.begin();
+        for (const auto &iter : elementsIterators) {
+            auto mutIter = elems_.begin() + (iter - elems_.cbegin());
+            std::iter_swap(remRangeEnd++, mutIter);
         }
+        elems_.erase(elems_.begin(), remRangeEnd);
         std::make_heap(elems_.begin(), elems_.end(), Comparator);
     }
 
