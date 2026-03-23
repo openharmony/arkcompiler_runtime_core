@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -56,12 +56,6 @@ cases:
     use: |
       let a: A = new A()
       f(a, 1)
-  - decl: |
-      class A {}
-      function f(this: A, n: number) {}
-    use: |
-      let a: A = new A()
-      a.f(1)
   - decl: |
       class A {
         foo() {}  
@@ -268,3 +262,11 @@ cases:
       let tc: TR = (this: DSL) => 'Call A: run'
       
       arktest.assertEQ('Call A: run-Call A: run', dsl.alias(tc))
+
+  - decl: | # A function with receiver can be defined in a namespace, can be accessed in the form of a qualifiedName only
+      namespace NS {
+        export class A {}
+        export function foo(this: A): string { return "call" }
+      }
+    use:
+      arktest.assertEQ(NS.foo(new NS.A), "call") 

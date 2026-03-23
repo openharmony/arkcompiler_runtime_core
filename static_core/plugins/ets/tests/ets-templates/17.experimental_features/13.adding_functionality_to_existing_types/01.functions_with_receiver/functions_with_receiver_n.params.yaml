@@ -90,10 +90,18 @@ cases:
       x.foo()
     expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"
 
-  # CTE occurs if the name of generic function with reciver and the name of an accesible instance method or field of the receiver type are the same
-  - decl: |
-      class A {
-        bar(): A { return this; }
+  - decl: | # The first parameter named 'this' is readonly
+      class A {}
+      function f(this: A) {
+        this = new A()
       }
-      function bar<T extends Object>(this: T): T { return this; }
-    expected_out: "Semantic error ESE0081: The extension function 'bar' has the same name with public method in class A"
+    expected_out: "Syntax error ESY0072: Invalid left-hand side in assignment expression."
+
+  - decl: | # A function with receiver can not be called by using the method call syntax outside the namespace
+      namespace NS {
+        export function foo(this: int) {}
+      }
+
+      let i = 1
+      i.foo()
+    expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'Int'"

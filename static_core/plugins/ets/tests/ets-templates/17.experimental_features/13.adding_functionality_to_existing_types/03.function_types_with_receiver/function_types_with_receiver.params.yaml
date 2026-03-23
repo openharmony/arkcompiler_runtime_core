@@ -54,12 +54,6 @@ cases:
       let t: T = (this: boolean[]): boolean => { return true }
       arktest.assertEQ(b.t(), true)
   - decl: |
-      type T = (this: boolean[]) => boolean
-    use: |
-      let b: boolean[] = [true, false]
-      let t: T = (this: boolean[]): boolean => { return true }
-      arktest.assertEQ(b.t(), true)
-  - decl: |
       class A {}
       type t1 = (this: A) => boolean
       type t2 = (a: A) => boolean
@@ -259,12 +253,14 @@ cases:
       let a: A = new A()
       let f: FA = (this: A): Function => { return this.f }
       a.f()
+      arktest.assertTrue(result instanceof Function)
   - decl: |
       interface I { }
       type FI = (this: I) => Function
     use: |
       let i: I = {}
       let f: FI = (this: I): Function => { return this.f }
+      arktest.assertTrue(i.f() instanceof Function)
   - decl: |
       class A { }
       type FA = (this: A, p: int) => int
@@ -330,3 +326,5 @@ cases:
     use: |
       let fa: FA = (this: A): int => { return 0 }
       let far: FAr = (a: A): int => { return 1 }
+      arktest.assertEQ(fa(new A), 0)
+      arktest.assertEQ(far(new A), 1)
