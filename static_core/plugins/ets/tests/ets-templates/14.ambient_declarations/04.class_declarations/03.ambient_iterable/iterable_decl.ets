@@ -26,10 +26,8 @@ export class MyIterator implements Iterator<String> {
         this.base = base
     }
     next(): IteratorResult<String> {
-        return {
-            done: this.index >= this.base.data.length,
-            value: this.base.data.length > this.index ? this.base.data[this.index++] : undefined
-        }
+        return new IteratorResult<String>(this.index >= this.base.data.length,
+            this.index >= this.base.data.length ? undefined : this.base.data[this.index++]);
     }
 }
 

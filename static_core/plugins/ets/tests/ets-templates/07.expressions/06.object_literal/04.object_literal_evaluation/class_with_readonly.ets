@@ -17,6 +17,7 @@
 desc: >-
     Assignment of the value of expression to the corresponding field of x as its initial value.
     This rule also applies to readonly fields.
+tags: ['compile-only', 'negative']
 ---*/
 
 class X {

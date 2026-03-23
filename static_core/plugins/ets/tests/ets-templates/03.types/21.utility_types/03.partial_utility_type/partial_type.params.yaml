@@ -17,9 +17,6 @@ properties:
   - { i: "i?: number", j: "j: string" }
   - { i: "i?: number", j: "j?: string" }
   - { i: "i: number", j: "j?: string" }
-  - { i: "readonly i: number", j: "j: string" }
-  - { i: "i: number", j: "readonly j: string" }
-  - { i: "readonly i: number", j: "readonly j: string" }
 
 cases:
   - { argument: "{i: 1.9, j: \"some str\"}", result: 3 }

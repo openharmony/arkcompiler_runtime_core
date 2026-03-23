@@ -280,10 +280,8 @@ cases:
               }
 
               next(): IteratorResult<Number> {
-                  return {
-                      done: this.index >= data.length,
-                      value: this.index >= data.length ? undefined : data[this.index++]
-                  }
+                  return new IteratorResult<Number>(this.index >= data.length,
+                      this.index >= data.length ? undefined : data[this.index++]);
               }
           }
       use: |-

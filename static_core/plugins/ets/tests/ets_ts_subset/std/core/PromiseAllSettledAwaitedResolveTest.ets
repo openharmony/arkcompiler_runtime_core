@@ -115,16 +115,14 @@ class TwoNumberIterator implements Iterator<number | PromiseLike<number>> {
     next(): IteratorResult<number | PromiseLike<number>> {
         if (this.idx == 0) {
             this.idx++;
-            return { done: false, value: Promise.resolve(33.0) } as IteratorResult<number | PromiseLike<number>>;
+            return new IteratorResult<number | PromiseLike<number>>(false, Promise.resolve(33.0));
         }
         if (this.idx == 1) {
             this.idx++;
-            return {
-                done: false,
-                value: new Promise<number>((resolve) => { resolve(66) })
-            } as IteratorResult<number | PromiseLike<number>>;
+            return new IteratorResult<number | PromiseLike<number>>(false,
+                new Promise<number>((resolve) => { resolve(66) }))
         }
-        return { done: true, value: undefined } as IteratorResult<number | PromiseLike<number>>;
+        return new IteratorResult<number | PromiseLike<number>>(true, undefined);
     }
     private idx: number = 0;
 }
@@ -192,25 +190,18 @@ class MixIterator implements Iterator<number | PromiseLike<number>> {
     next(): IteratorResult<number | PromiseLike<number>> {
         if (this.idx == 0) {
             this.idx++;
-            return { done: false, value: Promise.resolve(10.0) } as IteratorResult<number | PromiseLike<number>>;
+            return new IteratorResult<number | PromiseLike<number>>(false, Promise.resolve(10.0));
         }
         if (this.idx == 1) {
             this.idx++;
-            return {
-                done: false,
-                value: Promise.reject<number>(mixErr),
-            } as IteratorResult<number | PromiseLike<number>>;
+            return new IteratorResult<number | PromiseLike<number>>(false, Promise.reject<number>(mixErr));
         }
         if (this.idx == 2) {
             this.idx++;
-            return {
-                done: false,
-                value: new Promise<number>((resolve) => {
-                    resolve(30);
-                }),
-            } as IteratorResult<number | PromiseLike<number>>;
+            return new IteratorResult<number | PromiseLike<number>>(false,
+                new Promise<number>((resolve) => { resolve(30); }));
         }
-        return { done: true, value: undefined } as IteratorResult<number | PromiseLike<number>>;
+        return new IteratorResult<number | PromiseLike<number>>(true, undefined);
     }
     private idx: number = 0;
 }
