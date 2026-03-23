@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,27 +17,14 @@
 desc: Standalone expression (see Type of Expression) is an expression for which no target type is expected in its context.
 ---*/
 
-{% for c in cases %}
-let v{{loop.index}} = {{c}}
-const c{{loop.index}} = {{c}}
-{% endfor %}
+function main(): int {
+    let testsuite = new arktest.ArkTestsuite("Type of standalone expression");
+    
+    {% for c in cases %}
+    testsuite.addTest("{{ c.name }}", () => {
+        arktest.assertTrue({{c.expr}} instanceof {{c.expr_type}});
+    });
+    {% endfor %}
 
-let lorem = `lorem
-    ipsum dolor
-    sit amet
-    `
-const ipsum = lorem
-
-function main() {
-{% for c in cases %}
-    {{c}};
-{% endfor %}
-
-    42; "foo"
-    3.14;
-    null; undefined
-
-    `consectetur adipiscing elit,
-    sed do eiusmo`
-
+    return testsuite.run();
 }

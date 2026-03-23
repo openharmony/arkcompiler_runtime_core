@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-{% for m in modules %}
+{% for c in cases %}
 /*---
-desc: module scope to import but not exported
-files: ['./module_to_export.ets']
+desc: >-
+    Constants and variables are accessible from their respective points 
+    of declaration to the end of the module.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0365: Variable 'y' is accessed before it's initialization."
 ---*/
 
-import { {{m.entity}} } from './module_to_export'
+{{c.decl_type}} x = y
+{{c.decl_type}} y = 1
 
-{{m.decl}}
-
-function main() {
-    arktest.assertEQ({{m.use}}, {{m.expected}})
+function main(): void {
 }
 
 {% endfor %}
-
