@@ -99,7 +99,7 @@ class TestFileBased(Test):
         return default_fail_kind
 
     # pylint: disable=too-many-locals
-    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator, no_log: bool = False) \
+    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         coverage_per_binary = self.test_env.config.general.coverage.coverage_per_binary
         profraw_file, profdata_file, params = self.__get_prof_files(name, params)
@@ -153,12 +153,12 @@ class TestFileBased(Test):
 
         report = TestReport(output.strip(), error.strip(), return_code)
 
-        if not no_log or report.error or report.return_code != 0:
-            self.log_cmd(f"Output: '{report.output}'\nError: '{report.error}'\nReturn code: {report.return_code}")
+        # if not no_log or report.error or report.return_code != 0:
+        # self.log_cmd(f"Output: '{report.output}'\nError: '{report.error}'\nReturn code: {report.return_code}")
 
         return passed, report, fail_kind
 
-    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator, no_log: bool = False) \
+    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = flags[:]
         es2panda_flags.append("--thread=0")
@@ -178,7 +178,7 @@ class TestFileBased(Test):
             fail_kind_other=FailKind.ES2PANDA_OTHER,
         )
 
-        return self.run_one_step("es2panda", params, result_validator, no_log)
+        return self.run_one_step("es2panda", params, result_validator)
 
     def run_runtime(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,12 +35,13 @@ class TestSRCDumper(TestFileBased):
         self.passed = True
         self.original_ast: str = ""
         self.dumped_ast: str = ""
+        self.excluded = self.expects_error()
 
         self.path_conv = PathConverter(test_id, test_env.work_dir.root.as_posix())
 
 
     def do_run(self) -> TestFileBased:
-        if not self.expects_error():
+        if not self.excluded:
             self.path_conv.init_artefact_dirs()
             self.compile_original_with_dump_src()
             self.compile_original_with_dump_ast()
@@ -105,7 +106,6 @@ class TestSRCDumper(TestFileBased):
             flags=es2panda_flags,
             test_abc='',
             result_validator=self.es2panda_result_validator,
-            no_log=True
         )
 
         self.original_ast = self.report.output[self.report.output.find("\n") + 1:]
@@ -123,7 +123,6 @@ class TestSRCDumper(TestFileBased):
             flags=es2panda_flags,
             test_abc='',
             result_validator=self.es2panda_result_validator,
-            no_log=True
         )
 
         if not self.passed:

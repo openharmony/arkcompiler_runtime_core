@@ -240,6 +240,8 @@ class TestStandardFlow(ITestFlow, Test):
         allowed_steps = [StepKind.COMPILER, StepKind.DECLGEN]  # steps to run for compile only or not-a-test tests
         steps = self._collect_steps(compile_only_test, allowed_steps)
         for i, step in enumerate(steps):
+            if self.excluded:
+                break
             pattern = re.compile(translate(step.step_filter))
             if not pattern.search(str(self.path)):
                 continue
@@ -410,18 +412,22 @@ class TestStandardFlow(ITestFlow, Test):
         post_requirements = [replace(req, value=self.__expand_last_call_in_args([req.value])[0])
                              for req in step.post_requirements]
         if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
-            if 'dynamic-ast' in self.metadata.es2panda_options:
-                index = flags.index("--dump-ast")
-                flags[index] = "--dump-dynamic-ast"
-            if 'module' in self.metadata.es2panda_options:
-                flags.insert(0, "--module")
-            if 'emit-declaration' in self.metadata.es2panda_options:
-                flags.insert(0, "--emit-declaration")
-            if 'emit-metadata' in self.metadata.es2panda_options:
-                flags.insert(0, "--emit-metadata")
-            if 'simultaneous' in self.metadata.es2panda_options:
-                flags.pop()
-                flags.append("--simultaneous")
+            es2panda_replaces = [
+                ('dynamic-ast', '--dump-dynamic-ast',
+                 lambda: flags.index("--dump-ast") if "--dump-ast" in flags else -1),
+                ('module', '--module', lambda: 0),
+                ('emit-declaration', '--emit-declaration', lambda: 0),
+                ('emit-metadata', '--emit-metadata', lambda: 0),
+                # Option simultaneous replaces the last arg - source file
+                ('simultaneous', '--simultaneous', lambda: len(flags) - 1)
+            ]
+            for flag, opt, index_fn in es2panda_replaces:
+                if flag in self.metadata.es2panda_options:
+                    index = index_fn()
+                    if index > 0:  # replace the value at the index
+                        flags[index] = opt
+                    elif index == 0:  # insert at new value at the beginning
+                        flags.insert(0, opt)
         if step.step_kind == StepKind.RUNTIME and self.metadata.ark_options:
             prepend_options = self.__add_options(self.metadata.ark_options)
             flags = prepend_options + flags
@@ -547,6 +553,20 @@ class TestStandardFlow(ITestFlow, Test):
             if clarified_failed_kind is not None:
                 self.fail_kind = clarified_failed_kind
 
+    def _update_expected(self) -> None:
+        """Update expected output files using the configured updater.
+
+        Instantiates and runs the updater class specified in the test suite configuration
+        to update expected output files based on the current test execution results.
+        Skips updating if update_expected is disabled, test is excluded, or no updater is configured.
+        """
+        updater_class_name = self.test_env.config.test_suite.updater_class
+        if not self.update_expected or self.excluded or updater_class_name is None:
+            return
+        updater_class = get_updater_class(updater_class_name)
+        updater = updater_class(self.test_env.config)
+        updater.process(self.path, self.step_reports)
+
     def __fix_entry_point(self, args: list[str]) -> list[str]:
         result: list[str] = args[:]
         for index, arg in enumerate(result):
@@ -586,7 +606,7 @@ class TestStandardFlow(ITestFlow, Test):
         step_runner = OneStepRunner(step, self.test_env)
         passed = step_runner.run_with_coverage(
             result_validator=lambda out, err, return_code:
-                self.validator_utils.step_validator(step, out, err, return_code),
+            self.validator_utils.step_validator(step, out, err, return_code),
             return_code_interpreter=lambda out, err, return_code: self._get_return_code_from_device(out, return_code)
         )
         self.add_step_report(step_runner.report)
@@ -634,20 +654,6 @@ class TestStandardFlow(ITestFlow, Test):
             else:
                 dep_files_args.append(arg)
         return dep_files_args
-
-    def _update_expected(self) -> None:
-        """Update expected output files using the configured updater.
-        
-        Instantiates and runs the updater class specified in the test suite configuration
-        to update expected output files based on the current test execution results.
-        Skips updating if update_expected is disabled, test is excluded, or no updater is configured.
-        """
-        updater_class_name = self.test_env.config.test_suite.updater_class
-        if not self.update_expected or self.excluded or updater_class_name is None:
-            return
-        updater_class = get_updater_class(updater_class_name)
-        updater = updater_class(self.test_env.config)
-        updater.process(self.path, self.step_reports)
 
 
 class ValidatorUtils:

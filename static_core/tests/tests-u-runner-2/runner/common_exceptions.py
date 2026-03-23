@@ -122,6 +122,10 @@ class YamlException(RunnerException):
     pass
 
 
+class JsonException(RunnerException):
+    pass
+
+
 class TimeoutException(RunnerException):
     pass
 
@@ -145,4 +149,8 @@ class CompileEtsTestPartException(RunnerException):
 
 
 class CompileEtsTestPartTimeoutException(RunnerException):
+    pass
+
+
+class ComparisonException(RunnerException):
     pass

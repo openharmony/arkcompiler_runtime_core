@@ -1,0 +1,105 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+type: workflow
+workflow-name: run-srcdumper # only for test suite `srcdumper`
+description: >-
+    This workflow is used only for test suite `srcdumper` to compile a source file with the es2panda compiler and 
+    dump the source code.
+parameters:
+    arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
+    build: ${PANDA_BUILD}
+    work-dir: ${parameters.work-dir}
+    es2panda-args: []  # for specifying in CLI
+    es2panda-test-suite-args: []  # for specifying in test-suite config
+    es2panda-workflow-args:
+      - '--exit-after-phase'
+      - 'plugins-after-parse'
+      - '--extension=${parameters.extension}'
+      - '--arktsconfig=${parameters.arktsconfig}'
+      - '--output=/dev/null'
+    es2panda-timeout: 30
+    extension: ets
+    load-runtimes: ets
+    opt-level: 2
+    output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
+    stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
+    test-id-dumped: "${parameters.work-dir}/intermediate/dump/${test-id}.dump"
+    test-id-dumped-stripped: "${parameters.work-dir}/intermediate/dump/${test-id}"
+    test-id-ast: "${parameters.work-dir}/intermediate/ast/${test-id:parent}/${test-id:stem}.ast"
+    test-id-dumped-ast: "${parameters.work-dir}/intermediate/dump-ast/${test-id:parent}/${test-id:stem}.dumped.ast"
+steps:
+    compile-original-with-dump-src:
+        pre-reqs:
+            - req: ParentExistCreate
+              value: "${parameters.test-id-dumped}"
+        executable-path: "${parameters.build}/bin/es2panda"
+        timeout: ${parameters.es2panda-timeout}
+        step-type: compiler
+        args:
+            - "${parameters.es2panda-workflow-args}"
+            - '--dump-ets-src-after-phases'
+            - 'plugins-after-parse'
+            - "--thread=0"
+            - "${parameters.work-dir}/gen/${test-id}"
+        stdout: "${parameters.test-id-dumped}"
+    strip-first-line:
+        pre-reqs:
+            - req: FileExist
+              value: "${parameters.test-id-dumped}"
+        executable-path: /bin/bash
+        args:
+            - "${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner-2/cfg/scripts/strip-dump.sh"
+            - "${parameters.test-id-dumped}"
+            - "${parameters.test-id-dumped-stripped}"
+    compile-original-with-dump-ast:
+        pre-reqs:
+            - req: ParentExistCreate
+              value: "${parameters.test-id-ast}"
+        executable-path: "${parameters.build}/bin/es2panda"
+        timeout: ${parameters.es2panda-timeout}
+        step-type: compiler
+        args:
+            - "${parameters.es2panda-workflow-args}"
+            - '--dump-after-phases'
+            - 'plugins-after-parse'
+            - "--thread=0"
+            - "${parameters.work-dir}/gen/${test-id}"
+        stdout: "${parameters.test-id-ast}"
+        validator: runner.extensions.validators.bypass_validator.BypassValidator
+    compile-dumped-with-dump-ast:
+        pre-reqs:
+            - req: ParentExistCreate
+              value: "${parameters.test-id-dumped-ast}"
+        executable-path: "${parameters.build}/bin/es2panda"
+        timeout: ${parameters.es2panda-timeout}
+        step-type: compiler
+        args:
+            - "${parameters.es2panda-workflow-args}"
+            - '--dump-after-phases'
+            - 'plugins-after-parse'
+            - "--thread=0"
+            - "${parameters.test-id-dumped-stripped}"
+        stdout: "${parameters.test-id-dumped-ast}"
+        validator: runner.extensions.validators.bypass_validator.BypassValidator
+    compare-dumps:
+        pre-reqs:
+            - req: FileExist
+              value: "${parameters.test-id-ast}"
+            - req: FileExist
+              value: "${parameters.test-id-dumped-ast}"
+        executable-path: /bin/bash
+        args:
+            - "${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner-2/cfg/scripts/compare-dumps.sh"
+            - "${parameters.test-id-ast}"
+            - "${parameters.test-id-dumped-ast}"
