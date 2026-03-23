@@ -82,13 +82,13 @@ class C extends A {
 
 function main(): void {
     const c = new C(200);
-    arktest.assertEQ(C.COMMON_VALUE, 100);
+    arktest.assertEQ(A.COMMON_VALUE, 100);
     arktest.assertEQ(c.value, 200);
     arktest.assertEQ(c.getValue(), 400);
     arktest.assertEQ(c.greet(), "Hello, 200")
     
     const b = new B(300);
-    arktest.assertEQ(B.COMMON_VALUE, 100);
+    arktest.assertEQ(A.COMMON_VALUE, 100);
     arktest.assertEQ(b.value, 300);
     arktest.assertEQ(b.getValue(), 300);
     arktest.assertEQ(b.greet(), "Hello, 300")

@@ -44,7 +44,7 @@ class Child extends Parent {
 
 function main(): void {
     arktest.assertEQ(Child.CHILD_CONST, "Child Constant");
-    arktest.assertEQ(Child.OVERRIDE_CONST, "Parent Override Constant");
+    arktest.assertEQ(Parent.OVERRIDE_CONST, "Parent Override Constant");
     const c: Child = new Child();
     arktest.assertEQ(c.INTERFACE_CONST, "Interface Constant");
     arktest.assertEQ(c.OVERRIDE_CONST, "Override Constant");

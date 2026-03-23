@@ -66,7 +66,7 @@ class GenericExtends extends GenericStatic { };
 
 
 function genericClassExtendsCallFromSts<T>(arg: T): T {
-    return GenericExtends.get(arg);
+    return GenericStatic.get(arg);
 }
 
 class SubsetByRefStatic {

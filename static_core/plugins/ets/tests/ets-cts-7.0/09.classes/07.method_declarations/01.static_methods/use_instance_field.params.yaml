@@ -104,6 +104,9 @@ cases:
           constructor(count: number) {
             super(count)
           }
+          static getCount(i: number): number {
+            return B.getCount(i)
+          }
         }
         function main() {
           arktest.assertEQ(C.getCount(2), 3)
@@ -181,5 +184,5 @@ cases:
           }
         }
         function main() {
-          arktest.assertEQ(C.getCount(2), 3)
+          arktest.assertEQ(B.getCount(2), 3)
         }

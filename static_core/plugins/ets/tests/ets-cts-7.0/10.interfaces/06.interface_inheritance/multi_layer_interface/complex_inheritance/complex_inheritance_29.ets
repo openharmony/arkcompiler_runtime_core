@@ -63,12 +63,9 @@ function main(): void {
 
     arktest.assertEQ(Parent.parentStaticMethod(), "Parent static method");
     arktest.assertEQ(Parent.overrideMethod(), "Parent override method");
-    arktest.assertEQ(Parent.grandParentStaticMethod(), "GrandParent static method");
 
     arktest.assertEQ(Child.childStaticMethod(), "Child static method");
     arktest.assertEQ(Child.overrideMethod(), "Child override method");
-    arktest.assertEQ(Child.parentStaticMethod(), "Parent static method");
-    arktest.assertEQ(Child.grandParentStaticMethod(), "GrandParent static method");
 
     arktest.assertEQ(Child.overrideMethod(), "Child override method");
     arktest.assertEQ(Parent.overrideMethod(), "Parent override method");

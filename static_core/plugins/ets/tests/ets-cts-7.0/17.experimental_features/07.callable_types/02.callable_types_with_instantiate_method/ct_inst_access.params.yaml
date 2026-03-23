@@ -83,7 +83,7 @@ cases:
               }
           }
           class C extends B {
-              public static $_instantiate(f: ()=>C, p: number): B { return C('' + p) }
+              public static $_instantiate(f: ()=>C, p: number): B { return B.$_instantiate(f, '' + p) }
           }
       use: |-
           arktest.assertEQ(C(42.0).fld, '42')
@@ -100,7 +100,7 @@ cases:
           }
           class C extends B {
               meth(p: number): B {
-                  return C('' + p)
+                  return B('' + p)
               }
           }
       use: |-
