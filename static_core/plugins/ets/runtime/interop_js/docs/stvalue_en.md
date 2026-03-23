@@ -42,9 +42,28 @@ The STValue partial interface requires the ArkTS-Sta type of the specified opera
 
 Currently you can get STValue and SType in the following way:
 
+1. Create a new `config.json` file in the module directory and add the following content to `config.json`:
+```json
+{
+    "static.@ohos.lang.interop": {
+        "originalAPIName": "@ohos.lang.interop",
+        "isStatic": true
+    }
+}
+```
+2. Add configuration to the `buildOptions` in the module's `build-profile.json5` file:
+```json
+{
+    "buildOptions": {
+        "arkOptions": {
+            "sdkAliasConfigPath": "./config.json"
+        }
+    }
+}
+```
+3. Import STValue and SType in the source file:
 ```typescript
-let STValue = globalThis.Panda.STValue;
-let SType = globalThis.Panda.SType;
+import {STValue, SType} from "static.@ohos.lang.interop";
 ```
 ---
 ### Name Modifier (Mangling) Rules
@@ -57,6 +76,8 @@ In the interface provided by STValue, `classInstantiate`, `namespaceInvokeFuncti
 An example of Mangling's function signature using `namespaceInvokeFunction` as an example is shown below:
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
@@ -76,6 +97,8 @@ A simple example is shown below, with the main steps including:
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_test.testNameSpace');
 let student = tns.namespaceGetVariable('student', SType.REFERENCE);
 let JSONCls = STValue.findClass("escompat.JSON");
@@ -127,6 +150,8 @@ Used to find class definitions based on ArkTS-Sta class names, accept a fully qu
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_accessor.Student');
 ```
 
@@ -139,10 +164,12 @@ When the number of parameters passed during invocation is not 1, a compilation e
 
 Example:
 ```typescript
-try{
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
     // Invalid Class
     let klass = STValue.findClass('stvalue_accessor/Animal');
-}catch (e: Error){
+} catch (e: Error) {
     // Throw Error 
     console.log(e.message); 
 }
@@ -173,7 +200,10 @@ Used to find a namespace based on its name, it accepts a string parameter (a ful
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
+
 ```
 
 ```typescript
@@ -185,10 +215,12 @@ When the number of parameters passed during invocation is not 1, a compilation e
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Namespace
     let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#'); 
-}catch (e: Error){
+} catch (e: Error) {
     // Throw Error 
     console.log(e.message);  
 }
@@ -217,6 +249,8 @@ Used to find enumeration type definitions by name, accepts a string parameter (t
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 ```
 
@@ -233,6 +267,8 @@ When the number of parameters passed during invocation is not 1, a compilation e
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Enum
     let testEnum = STValue.findEnum('stvalue_accessor.COLOR#'); 
@@ -262,6 +298,8 @@ Used to get the parent class definition of a class, does not accept any paramete
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let subClass = STValue.findClass('stvalue_accessor.Dog');
 let parentClass = subClass.classGetSuperClass(); // STValue object representing the parent class 'stvalue_accessor.Animal'
 ```
@@ -281,6 +319,8 @@ When the number of parameters passed during invocation is not 0, a compilation e
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let nonClass = STValue.wrapInt(111);
@@ -312,6 +352,8 @@ Used to get the number of elements of an array of fixed length, does not accept 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 let arrayLength = strArray.fixedArrayGetLength(); // 3
@@ -329,6 +371,8 @@ When the number of parameters passed during invocation is not 0, a compilation e
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     STValue.wrapInt(1).fixedArrayGetLength();
@@ -363,6 +407,8 @@ Used to query its index position in an enumeration based on its member name, it 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 let redIndex = colorEnum.enumGetIndexByName('Red'); // 0
 ```
@@ -413,6 +459,8 @@ Used to get the value of an enumeration member based on its name, it accepts two
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 let redValue = colorEnum.enumGetValueByName('Red', SType.INT);
 // The enumeration value obtained is an STValue object, which needs to be unboxed to obtain the corresponding primitive value
@@ -432,6 +480,8 @@ If the number of parameters passed during invocation is not 2, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Object
     let nullEnum = STValue.getNull();
@@ -467,6 +517,8 @@ Used to get the static field value of a class, it accepts two parameters: field 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let personClass = STValue.findClass('stvalue_accessor.Person');
 let name = personClass.classGetStaticField('name', SType.REFERENCE).unwrapToString(); // 'Person'
 let age = personClass.classGetStaticField('age', SType.INT).unwrapToNumber(); // 18
@@ -484,6 +536,8 @@ If the number of parameters passed during invocation is not 2, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let nonClass = STValue.wrapInt(111);
@@ -516,6 +570,8 @@ A static field value used to set a class that accepts three parameters: the fiel
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let personClass = STValue.findClass('stvalue_accessor.Person');
 personClass.classSetStaticField('name', STValue.wrapString('Bob'), SType.REFERENCE);
 personClass.classSetStaticField('age', STValue.wrapNumber(21), SType.DOUBLE);
@@ -536,6 +592,8 @@ If the number of parameters passed during invocation is not 3, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     personClass.classSetStaticField('male', STValue.wrapBoolean(false), SType.INT);
@@ -571,6 +629,8 @@ Used to get the property value of an object instance, it accepts two parameters:
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let alice = tns.namespaceGetVariable('studentAlice', SType.REFERENCE);
 let name = alice.objectGetProperty('name', SType.REFERENCE).unwrapToString(); // 'Alice'
@@ -594,6 +654,8 @@ export namespace testNameSpace {
 If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid instance object, a runtime error `Illegal instance object` is thrown; if the corresponding property cannot be found, a runtime error `Property does not exist` is thrown; if the property types do not match, a runtime error `Mismatched property type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let priObject = STValue.wrapInt(111);
@@ -626,6 +688,8 @@ Used to set the property value of an object instance, it accepts three parameter
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let alice = tns.namespaceGetVariable('studentAlice', SType.REFERENCE);
 let name = alice.objectSetProperty('name', STValue.wrapString('Bob'), SType.REFERENCE);
@@ -651,6 +715,8 @@ If the number of parameters passed during invocation is not 3, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     alice.objectSetProperty('name', STValue.wrapNumber(111), SType.REFERENCE);
@@ -685,6 +751,8 @@ It is used to get the element value of a specified index in a fixed-length array
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace');
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 let str = strArray.fixedArrayGet(1, SType.REFERENCE).unwrapToString(); // 'cd'
@@ -701,6 +769,8 @@ If the number of parameters passed during invocation is not 2, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let notArray = STValue.wrapInt(111);  
@@ -733,6 +803,8 @@ Used to set the value of an element at a specified index in a fixed-length array
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace');
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 strArray.fixedArraySet(1, STValue.wrapString('xy'), SType.REFERENCE);
@@ -751,6 +823,8 @@ If the number of parameters passed during invocation is not 3, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let notArray = STValue.wrapInt(111);
@@ -787,6 +861,8 @@ Used to get the variable value in the namespace, it accepts two parameters: vari
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
 let data = ns.namespaceGetVariable('data', SType.INT);
 let num = data.unwrapToNumber(); // 42
@@ -804,6 +880,8 @@ If the number of parameters passed during invocation is not 2, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     ns.namespaceGetVariable(1, SType.INT)
@@ -839,6 +917,8 @@ Used to set the value of a variable in a namespace, it accepts three parameters:
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
 ns.namespaceSetVariable('data', STValue.wrapInt(0), SType.INT);
 let data = ns.namespaceGetVariable('data', SType.INT);
@@ -857,6 +937,8 @@ If the number of parameters passed during invocation is not 3, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     ns.namespaceSetVariable(1, STValue.wrapInt(44), SType.INT);
@@ -886,6 +968,8 @@ Used to get the type information of the reference type object, does not accept a
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let strWrap = STValue.wrapString('hello world');
 let strType = strWrap.objectGetType();
 let isString = strWrap.objectInstanceOf(strType); // true
@@ -896,6 +980,8 @@ If the number of parameters passed during invocation is not 0, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     STValue.getUndefined().objectGetType();
@@ -927,6 +1013,8 @@ Used to retrieve the element at the specified index of a dynamic array, encapsul
 **Example:**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 // Ark-Dyn
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
@@ -947,6 +1035,8 @@ A compilation error `Incorrect number of arguments` is thrown if the number of p
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Arguments Number
     intArray.arrayGet(0, SType.INT);
@@ -977,6 +1067,8 @@ Used to set the value of the element at the specified index of a dynamic array. 
 **Example:**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 // Ark-Dyn
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
@@ -1030,6 +1122,8 @@ Adds a new element to the end of a dynamic array. The object invoking this metho
 **Example:**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 // Ark-Dyn
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
@@ -1083,6 +1177,8 @@ Removes and returns the last element of a dynamic array. The object invoking thi
 **Example:**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 // Ark-Dyn
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
@@ -1132,6 +1228,8 @@ Used to retrieve the length of a dynamic array. The object invoking this method 
 **Example:**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 // Ark-Dyn
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
@@ -1186,6 +1284,8 @@ Used to check whether the STValue object is wrapped with an ArkTS-Sta string, do
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let str = STValue.wrapString('Hello');
 let isStr = str.isString(); // true
 
@@ -1239,6 +1339,8 @@ Used to check whether the STValue object is wrapped is an ArkTS-Sta BigInt objec
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let bigNum = STValue.wrapBigInt(1234567890n);
 let isBigInt = bigNum.isBigInt(); // true
 let num = STValue.wrapInt(42);
@@ -1280,6 +1382,8 @@ Used to check whether the STValue object is wrapped with `null` of ArkTS-Sta, do
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nullValue = STValue.getNull();
 let isNull = nullValue.isNull(); // true
 let intValue = STValue.wrapNumber(42);
@@ -1321,6 +1425,8 @@ Used to check whether the STValue object is wrapped with `undefined` of ArkTS-St
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let undefValue = STValue.getUndefined();
 let isUndef = undefValue.isUndefined(); // true
 let intValue = STValue.wrapNumber(42);
@@ -1368,6 +1474,8 @@ Used to compare whether the ArkTS-Sta object references wrapped with `this` and 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_check.Check');
 let leftRef = ns.namespaceGetVariable('leftRef', SType.REFERENCE);
 let rightRef = ns.namespaceGetVariable('rightRef', SType.REFERENCE);
@@ -1390,6 +1498,8 @@ If the number of parameters passed during invocation is not 1, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Instance
     STValue.wrapInt(1).isEqualTo(STValue.wrapInt(1));
@@ -1423,6 +1533,8 @@ ArkTS-Sta object references used to compare `this` and `other` wrappers are stri
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_check.Check');
 let magicNull = STValue.getNull();
 let magicUndefined = STValue.getUndefined();
@@ -1447,6 +1559,8 @@ If the number of parameters passed during invocation is not 1, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Instance
     magicString1.isEqualTo(STValue.wrapInt(1));
@@ -1476,6 +1590,8 @@ Used to check whether the STValue object is wrapped with the boolean value of Ar
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let boolValue = STValue.wrapBoolean(true);
 let isBool = boolValue.isBoolean(); // true
 let numValue = STValue.wrapInt(1);
@@ -1517,6 +1633,8 @@ Used to check whether the STValue object is wrapped with the byte value of ArkTS
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let byteValue = STValue.wrapByte(127);
 let isByte = byteValue.isByte(); // true
 let intValue = STValue.wrapInt(42);g
@@ -1557,6 +1675,8 @@ Used to check whether the STValue object is wrapped with the char value of ArkTS
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let charValue = STValue.wrapChar('A');
 let isChar = charValue.isChar(); // true
 let strValue = STValue.wrapString('Hello');
@@ -1598,6 +1718,8 @@ Used to check whether the STValue object is wrapped with a short value of ArkTS-
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let shortValue = STValue.wrapShort(32767);
 let isShort = shortValue.isShort(); // true
 let intValue = STValue.wrapInt(32767);
@@ -1639,6 +1761,8 @@ Used to check whether the STValue object is wrapped with an int value of ArkTS-S
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intValue = STValue.wrapInt(44);
 let isInt = intValue.isInt(); // true
 let longValue = STValue.wrapLong(1024);
@@ -1680,6 +1804,8 @@ The long value of ArkTS-Sta is used to check whether the STValue object is wrapp
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let longValue = STValue.wrapLong(1024);
 let isLong = longValue.isLong(); // true
 let intValue = STValue.wrapInt(44);
@@ -1721,6 +1847,8 @@ The STValue object is used to check whether it is wrapped with the float value o
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let floatValue = STValue.wrapFloat(3.14);
 let isFloat = floatValue.isFloat(); // true
 let intValue = STValue.wrapInt(42);
@@ -1762,6 +1890,8 @@ Used to check whether the STValue object is wrapped with the number/double value
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let doubleValue = STValue.wrapNumber(3.14);
 let isNumber = doubleValue.isNumber(); // true
 let intValue = STValue.wrapInt(42);
@@ -1808,6 +1938,8 @@ Used to check assignment compatibility between types, it accepts two parameters:
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_example.Student');
 let subStudentCls = STValue.findClass('stvalue_example.SubStudent');
 let isAssignable = STValue.typeIsAssignableFrom(subStudentCls, studentCls); // true
@@ -1823,6 +1955,8 @@ If the number of parameters passed during invocation is not 2, a compilation err
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Arguments Number
     let isAssignable = STValue.typeIsAssignableFrom(subStudentCls);
@@ -1857,6 +1991,8 @@ Used to check whether an object is an instance of a specified type, accepts a pa
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_check.Student');
 let stuObj = studentCls.classInstantiate(':', []);
 let isInstance = stuObj.objectInstanceOf(studentCls); // true
@@ -1911,6 +2047,8 @@ Used to instantiate an object through the class`s constructor, accepting two par
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_instance.Student');
 let clsObj1 = studentCls.classInstantiate(':', []);
 let obj1Age = clsObj1.objectGetProperty('age', SType.INT).unwrapToNumber(); // 0
@@ -1932,6 +2070,8 @@ If the number of parameters passed is not 2, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Type
     studentCls.classInstantiate(':', STValue.wrapNumber(1));
@@ -1966,6 +2106,8 @@ Used to create a base type array of fixed length in preallocated memory, it only
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_instance.Instance');
 // The initial length of the created SType.BOOLEAN type array boolArray is 5, and the initial value is false
 let boolArray = STValue.newFixedArrayPrimitive(5, SType.BOOLEAN);
@@ -1995,6 +2137,8 @@ If the number of parameters passed is not 2, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Type
     STValue.newFixedArrayPrimitive(5, SType.REFERENCE);
@@ -2030,6 +2174,8 @@ Used to create an array of reference types of fixed length in preallocated memor
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_instance.Instance');
 let intClass = STValue.findClass('std.core.Int');
 let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(5)]);
@@ -2060,6 +2206,8 @@ If the number of parameters passed is not 3, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid InitialElement
     STValue.newFixedArrayReference(999, intClass, [STValue.getNull()]);
@@ -2092,6 +2240,8 @@ A static method of STValue, used to create a new dynamic array of the specified 
 **Example:**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(0)]);
 // The passed object is an Int reference type
 let intArray = STValue.newArray(5, intObj); // [0, 0, 0, 0, 0]
@@ -2103,6 +2253,8 @@ A compilation error `Incorrect number of arguments` is thrown if the number of p
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid InitialElement
     STValue.newArray(999, STValue.wrapInt(123));
@@ -2141,6 +2293,8 @@ Used to call a specified function in a namespace, it accepts three parameters: f
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
@@ -2195,6 +2349,8 @@ Used to call functional objects (such as lambda expressions or function objects)
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let getNumberFn = nsp.namespaceGetVariable('getNumberFn', SType.REFERENCE); // The obtained functional object getNumberFn is of reference type
 let numRes = getNumberFn.functionalObjectInvoke([]); // The function call result numRes is the reference type after boxing
@@ -2223,6 +2379,8 @@ If the number of parameters passed is not 1, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Function Instance
     STValue.getUndefined().functionalObjectInvoke([]);
@@ -2260,6 +2418,8 @@ A method used to dynamically call an object that accepts three parameters: the m
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 let clsObj = studentCls.classInstantiate('iC{std.core.String}:', [STValue.wrapInt(18), STValue.wrapString('stu1')]);
 let stuAge = clsObj.objectInvokeMethod('getStudentAge', ':i', []); 
@@ -2291,6 +2451,8 @@ If the number of parameters passed is not 3, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Parameter Type
     subClsObj.objectInvokeMethod('setStudentAge', 'i:', [[STValue.getUndefined()]]);
@@ -2326,6 +2488,8 @@ A static method used to call a class that accepts three parameters: the method n
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 let stuId = studentCls.classInvokeStaticMethod('getStudentId', ':i', []);
 let unwrapStuId = stuId.unwrapToNumber(); // 999
@@ -2353,6 +2517,8 @@ If the number of parameters passed is not 3, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Class Instance
     STValue.getUndefined().classInvokeStaticMethod('setUId', 's:', []);
@@ -2384,6 +2550,8 @@ Used to unpack STValue objects into numbers, not accept any parameters, and retu
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intValue = STValue.wrapInt(42);
 let num = intValue.unwrapToNumber(); // 42
 ```
@@ -2393,6 +2561,8 @@ If the number of parameters passed is not 0, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2423,6 +2593,8 @@ Used to unpack the STValue object into a string, do not accept any parameters, a
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let strValue = STValue.wrapString('Hello World');
 let str = strValue.unwrapToString(); // 'Hello World'
 ```
@@ -2432,6 +2604,8 @@ If the number of parameters passed is not 0, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2462,6 +2636,8 @@ Used to unpack the STValue object into a Boolean value, not accept any parameter
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let boolValue = STValue.wrapBoolean(true);
 let bool = boolValue.unwrapToBoolean(); // true
 let intValue = STValue.wrapInt(1);
@@ -2475,6 +2651,8 @@ If the number of parameters passed is not 0, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2505,6 +2683,8 @@ Used to unpack large integer objects in STValue into BigInt type, does not accep
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let bigIntValue = STValue.wrapBigInt(12345678901234567890n); 
 let bigInt = bigIntValue.unwrapToBigInt(); // 12345678901234567890n
 ```
@@ -2514,6 +2694,8 @@ If the number of parameters passed is not 0, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2551,6 +2733,8 @@ An STValue object used to wrap numbers into byte bytes (8-bit signed integers), 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let byteValue = STValue.wrapByte(127);
 let isByte = byteValue.isByte(); // true
 ```
@@ -2560,6 +2744,8 @@ If the number of parameters passed is not 1, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     let byteValue = STValue.wrapByte(1000);
@@ -2594,6 +2780,8 @@ An STValue object used to wrap a string as a character type (16-bit Unicode char
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let charValue = STValue.wrapChar('A');
 let isChar = charValue.isChar(); // true
 ```
@@ -2603,6 +2791,8 @@ If the number of parameters passed is not 1, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Input String Length
     let charValue = STValue.wrapChar('123');
@@ -2637,6 +2827,8 @@ An STValue object used to wrap numbers into short integers (16-bit signed intege
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let shortValue = STValue.wrapShort(32767);
 let isShort = shortValue.isShort(); // true
 ```
@@ -2645,6 +2837,8 @@ If the number of parameters passed is not 1, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     let shortValue = STValue.wrapShort(100000);
@@ -2679,6 +2873,8 @@ An STValue object used to wrap numbers into an integer (a 32-bit signed integer)
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intValue = STValue.wrapInt(123);
 let isInt = intValue.isInt(); // true
 ```
@@ -2687,6 +2883,8 @@ If the number of parameters passed is not 1, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     let intValue = STValue.wrapInt(2147483648);
@@ -2722,6 +2920,8 @@ An STValue object used to wrap a number or large integer into a long integer (a 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let longValue = STValue.wrapLong(123);
 let isLong = longValue.isLong(); // true
 
@@ -2734,6 +2934,8 @@ If the number of parameters passed is not 1, a compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     const MIN_LONG = -(1n << 63n);
@@ -2769,6 +2971,8 @@ An STValue object used to wrap numbers as single-precision floating-point number
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let floatValue = STValue.wrapFloat(3.14);
 let isFloat = floatValue.isFloat(); // true
 ```
@@ -2777,6 +2981,8 @@ When the number of parameters passed in is not 1, an error `Wrong number of para
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let floatValue = STValue.wrapFloat();
@@ -2812,6 +3018,8 @@ An STValue object used to wrap numbers into double-precision floating-point type
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let doubleValue = STValue.wrapNumber(3.14);
 let isDouble = doubleValue.isNumber(); // true
 ```
@@ -2821,6 +3029,8 @@ When the number of parameters passed in is not 1, an error `Wrong number of para
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let doubleValue = STValue.wrapNumber();
@@ -2855,6 +3065,8 @@ It is used to wrap Boolean values into STValue objects of Boolean type, accept a
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let boolValue = STValue.wrapBoolean(true);
 let isBool = boolValue.isBoolean(); // true
 ```
@@ -2864,6 +3076,8 @@ If the number of passed parameters is not 1, raise compilation error `Invalid pa
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let boolValue = STValue.wrapBoolean();
@@ -2898,6 +3112,8 @@ Used to wrap a string into an STValue object of type string, accept a string par
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let strValue = STValue.wrapString('Hello World');
 let isStr = strValue.isString(); // true
 ```
@@ -2907,6 +3123,8 @@ If the number of passed parameters != 1, raise compilation error `Invalid parame
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let strValue = STValue.wrapString();
@@ -2942,6 +3160,8 @@ Used to wrap the ArkTS-Dyn BigInt object into an STValue object of the ArkTS-Sta
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let stBigInt = STValue.wrapBigInt(12345678901234567890n);
 let isBigInt = stBigInt.isBigInt(); // true
 ```
@@ -2951,6 +3171,8 @@ When the number of parameters passed is not 1, a compilation error `Invalid para
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let stBigInt = STValue.wrapBigInt();
@@ -2981,6 +3203,8 @@ Used to get the STValue object representing ArkTS-Sta null, does not accept any 
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let stNull = STValue.getNull();
 let isNull = stNull.isNull(); // true
 let stNull1 = STValue.getNull();
@@ -2992,6 +3216,8 @@ When the number of parameters passed is not 0, a compilation error `Invalid para
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let stNull = STValue.getNull(1);
@@ -3000,7 +3226,7 @@ try {
     console.log(e.message);
 }
 // ArkTS Compiler Error
-// Expected 1 Arguments, bug got 0.
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -3022,6 +3248,8 @@ Used to get the STValue object representing ArkTS-Sta undefined, does not accept
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let undefValue = STValue.getUndefined();
 let isUndef = undefValue.isUndefined(); // true
 let undefValue1 = STValue.getUndefined();
@@ -3033,9 +3261,296 @@ When the number of parameters passed is not 0, a compilation error `Invalid para
 
 Example:
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let undefValue = STValue.getUndefined(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+## 7 STValue_ArkTS-Sta_builtin_type
+
+### 7.1 newSTArray
+
+`static newSTArray<T = any>(): st.Array<T>`
+
+Used to create an st.Array object, representing the std.core.Array type object in ArkTS-Sta. The initial capacity is the same as the object created by the std.core.Array no-argument constructor.
+
+**Parameters:** None
+
+**Return Value:**
+
+|  Type   | Description |
+| :-----: | :---------: |
+| st.Array | Represents the std.core.Array type object in ArkTS-Sta |
+
+**Example:**
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stArr: st.Array<string> = STValue.newSTArray<string>();
+```
+
+**Error:**
+
+When the number of parameters passed is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
+Example:
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    let stArr: st.Array<string> = STValue.newSTArray<string>(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+### 7.2 isSTArray
+
+`static isSTArray(value: object): boolean`
+
+Used to determine whether an object represents a std.core.Array type object in ArkTS-Sta, returning a boolean result.
+
+**Parameters:**
+
+| Parameter Name |  Type  | Required | Description |
+| :----: | :----: | :-----: | :---------: |
+|  value  | object |   Yes   | The object to be judged |
+
+**Return Value:**
+
+|  Type    | Description |
+| :-----: | :---------: |
+| boolean | Returns true if the object is a std.core.Array type in ArkTS-Sta, otherwise returns false |
+
+**Example:**
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stArr: st.Array<string> = STValue.newSTArray<string>();
+STValue.isSTArray(stArr);  // true
+let otherVal = new Object();
+STValue.isSTArray(otherVal);  // false
+```
+
+**Error:**
+
+When the number of parameters passed is not 1, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
+Example:
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    STValue.isSTArray();
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
+```
+---
+
+### 7.3 newSTMap
+
+`static newSTMap<K = any, V = any>(): st.Map<K, V>`
+
+Used to create an st.Map object, representing the std.core.Map type object in ArkTS-Sta. The initial capacity is 8.
+
+**Parameters:** None
+
+**Return Value:**
+
+|  Type   | Description |
+| :-----: | :---------: |
+| st.Map | Represents the std.core.Map type object in ArkTS-Sta |
+
+**Example:**
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stMap: st.Map<string, object> = STValue.newSTMap<string, object>();
+```
+
+**Error:**
+
+When the number of parameters passed is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
+Example:
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    let stMap: st.Map<string, object> = STValue.newSTMap<string, object>(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+### 7.4 isSTMap
+
+`static isSTMap(value: object): boolean`
+
+Used to determine whether an object represents a std.core.Map type object in ArkTS-Sta, returning a boolean result.
+
+**Parameters:**
+
+| Parameter Name |  Type  | Required | Description |
+| :----: | :----: | :-----: | :---------: |
+|  value  | object |   Yes   | The object to be judged |
+
+**Return Value:**
+
+|  Type    | Description |
+| :-----: | :---------: |
+| boolean | Returns true if the object is a std.core.Map type in ArkTS-Sta, otherwise returns false |
+
+**Example:**
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stMap: st.Map<string, object> = STValue.newSTMap<string, object>();
+STValue.isSTMap(stMap);  // true
+let otherVal = new Object();
+STValue.isSTMap(otherVal);  // false
+```
+
+**Error:**
+
+When the number of parameters passed is not 1, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
+Example:
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
+    STValue.isSTMap();
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
+```
+---
+
+### 7.5 newSTSet
+
+`static newSTSet<T = any>(): st.Set<T>`
+
+Used to create an st.Set object, representing the std.core.Set type object in ArkTS-Sta. The initial capacity is 8.
+
+**Parameters:** None
+
+**Return Value:**
+
+|  Type   | Description |
+| :-----: | :---------: |
+| st.Set | Represents the std.core.Set type object in ArkTS-Sta |
+
+**Example:**
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stSet: st.Set<string> = STValue.newSTSet<string>();
+```
+
+**Error:**
+
+When the number of parameters passed is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
+Example:
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    let stSet: st.Set<string> = STValue.newSTSet<string>(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+### 7.6 isSTSet
+
+`static isSTSet(value: object): boolean`
+
+Used to determine whether an object represents a std.core.Set type object in ArkTS-Sta, returning a boolean result.
+
+**Parameters:**
+
+| Parameter Name |  Type  | Required | Description |
+| :----: | :----: | :-----: | :---------: |
+|  value  | object |   Yes   | The object to be judged |
+
+**Return Value:**
+
+|  Type    | Description |
+| :-----: | :---------: |
+| boolean | Returns true if the object is a std.core.Set type in ArkTS-Sta, otherwise returns false |
+
+**Example:**
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stSet: st.Set<string> = STValue.newSTSet<string>();
+STValue.isSTSet(stSet);  // true
+let otherVal = new Object();
+STValue.isSTSet(otherVal);  // false
+```
+
+**Error:**
+
+When the number of parameters passed is not 1, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
+Example:
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
+    STValue.isSTSet();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
