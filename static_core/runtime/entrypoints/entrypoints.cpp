@@ -1163,6 +1163,19 @@ extern "C" NO_ADDRESS_SANITIZE void ClassCastExceptionEntrypoint(Class *instClas
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
+extern "C" NO_ADDRESS_SANITIZE void NullClassCastExceptionUnresolvedEntrypoint(uint32_t typeId)
+{
+    BEGIN_ENTRYPOINT();
+    LOG(DEBUG, INTEROP) << "NullClassCastExceptionUnresolvedEntrypoint \n";
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    ASSERT(!thread->HasPendingException());
+    const Method *method = StackWalker::Create(thread).GetMethod();
+    Class *instClass = ResolveClassEntrypoint(method, typeId);
+    ThrowClassCastException(instClass, nullptr);
+    HandlePendingException(UnwindPolicy::SKIP_INLINED);
+}
+
 extern "C" NO_ADDRESS_SANITIZE void StackOverflowExceptionEntrypoint()
 {
     // WARNING: We should not add any heavy code constructions here, like events or other debug/testing stuff,

@@ -84,7 +84,7 @@ bool ObjectTypeCheckElimination::TryEliminateIsInstance(Inst *inst)
     }
     auto isInstance = inst->CastToIsInstance();
     if (!graph->IsBytecodeOptimizer() && IsMember(ref, isInstance->GetTypeId(), isInstance)) {
-        if (BoundsAnalysis::IsInstNotNull(ref, block)) {
+        if (IsInstNotNullAtUse(ref, inst)) {
             auto newCnst = graph->FindOrCreateConstant(true);
             inst->ReplaceUsers(newCnst);
             return true;
@@ -106,7 +106,7 @@ bool ObjectTypeCheckElimination::TryEliminateIsInstance(Inst *inst)
                 // Cannot run BoundsAnalysis
                 return false;
             }
-            if (!BoundsAnalysis::IsInstNotNull(ref, block)) {
+            if (!IsInstNotNullAtUse(ref, inst)) {
                 return false;
             }
         }
@@ -181,6 +181,23 @@ bool ObjectTypeCheckElimination::IsMember(Inst *inst, uint32_t typeId, Inst *ref
                 break;
         }
         if (success) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ObjectTypeCheckElimination::IsInstNotNullAtUse(Inst *inst, Inst *refUser)
+{
+    if (BoundsAnalysis::IsInstNotNull(inst, refUser->GetBasicBlock())) {
+        return true;
+    }
+    for (auto &user : inst->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst == refUser || !userInst->IsDominate(refUser)) {
+            continue;
+        }
+        if (userInst->GetOpcode() == Opcode::NullCheck) {
             return true;
         }
     }

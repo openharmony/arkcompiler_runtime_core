@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,7 @@ private:
     void ReplaceCheckMustThrowByUnconditionalDeoptimize();
 
     static bool IsMember(Inst *inst, uint32_t typeId, Inst *refUser);
+    static bool IsInstNotNullAtUse(Inst *inst, Inst *refUser);
     static bool IsSuccessfulIsInstance(IsInstanceInst *isInstance, uint32_t typeId, Inst *refUser);
 
     void SetApplied()

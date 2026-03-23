@@ -792,13 +792,28 @@ void GlobalVarInst::DumpOpcode(std::ostream *out) const
     DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
 }
 
+void NullCheckInst::DumpOpcode(std::ostream *out) const
+{
+    if (!GetIsClassCastCheck()) {
+        return Inst::DumpOpcode(out);
+    }
+
+    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    const auto &adapter = allocator->Adapter();
+    ArenaString flags("", adapter);
+    if (CanDeoptimize()) {
+        flags += " D";
+    }
+    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), flags, allocator);
+}
+
 void CheckCastInst::DumpOpcode(std::ostream *out) const
 {
     auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
     ArenaString flags("", adapter);
     if (CanDeoptimize()) {
-        flags = " D";
+        flags += " D";
     }
     DumpTypedOpcode(out, GetOpcode(), GetTypeId(), flags, allocator);
 }

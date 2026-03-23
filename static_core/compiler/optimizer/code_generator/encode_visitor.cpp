@@ -707,14 +707,19 @@ void EncodeVisitor::VisitBuiltin([[maybe_unused]] GraphVisitor *visitor, [[maybe
 
 void EncodeVisitor::VisitNullCheck(GraphVisitor *visitor, Inst *inst)
 {
-    if (inst->CastToNullCheck()->IsImplicit()) {
+    NullCheckInst *nullCheck = inst->CastToNullCheck();
+    if (nullCheck->IsImplicit()) {
         return;
     }
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto deoptimizeType =
-        inst->CastToNullCheck()->GetIsClassCastCheck() ? DeoptimizeType::CHECK_CAST : DeoptimizeType::NULL_CHECK;
-    enc->GetCodegen()->template CreateUnaryCheck<SlowPathImplicitNullCheck>(inst, EntrypointId::NULL_POINTER_EXCEPTION,
-                                                                            deoptimizeType, Condition::EQ);
+
+    if (nullCheck->GetIsClassCastCheck()) {
+        return enc->GetCodegen()->template CreateUnaryCheck<SlowPathNullCheckCastUnresolved>(
+            inst, EntrypointId::NULL_CLASS_CAST_EXCEPTION_UNRESOLVED, DeoptimizeType::CHECK_CAST, Condition::EQ);
+    }
+
+    return enc->GetCodegen()->template CreateUnaryCheck<SlowPathExplicitNullCheck>(
+        inst, EntrypointId::NULL_POINTER_EXCEPTION, DeoptimizeType::NULL_CHECK, Condition::EQ);
 }
 
 void EncodeVisitor::VisitBoundsCheck(GraphVisitor *visitor, Inst *inst)

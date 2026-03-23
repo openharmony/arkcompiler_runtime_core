@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,7 @@ void SlowPathEntrypoint::GenerateImpl(Codegen *codegen)
             case EntrypointId::CHECK_STORE_ARRAY_REFERENCE:
             case EntrypointId::RESOLVE_STRING_AOT:
             case EntrypointId::CLASS_CAST_EXCEPTION:
+            case EntrypointId::NULL_CLASS_CAST_EXCEPTION_UNRESOLVED:
                 break;
             default:
                 LOG(FATAL, COMPILER) << "Unsupported entrypoint!";
@@ -185,7 +186,7 @@ void SlowPathIntrinsic::GenerateImpl(Codegen *codegen)
     codegen->CreateCallIntrinsic(GetInst()->CastToIntrinsic());
 }
 
-void SlowPathImplicitNullCheck::GenerateImpl(Codegen *codegen)
+void SlowPathExplicitNullCheck::GenerateImpl(Codegen *codegen)
 {
     ASSERT(!GetInst()->CastToNullCheck()->IsImplicit());
     SlowPathEntrypoint::GenerateImpl(codegen);
@@ -241,6 +242,15 @@ void SlowPathCheckCast::GenerateImpl(Codegen *codegen)
     auto src = codegen->ConvertRegister(inst->GetSrcReg(0), inst->GetInputType(0));
 
     codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), classReg_, src);
+}
+
+void SlowPathNullCheckCastUnresolved::GenerateImpl(Codegen *codegen)
+{
+    SCOPED_DISASM_STR(codegen,
+                      std::string("SlowPath for Null-CheckCast exception") + std::to_string(GetInst()->GetId()));
+    auto nullcheck = GetInst()->CastToNullCheck();
+    auto typeIdImm = codegen->GetTypeIdImm(GetInst(), nullcheck->GetTypeId());
+    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), typeIdImm);
 }
 
 void SlowPathUnresolved::GenerateImpl(Codegen *codegen)

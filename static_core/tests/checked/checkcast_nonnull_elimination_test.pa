@@ -237,3 +237,67 @@ exit_failure:
 
 .catchall  try_begin, try_end, catch_block_begin
 }
+
+#! CHECKER      CheckCast and NullCheck are not replaced to Deoptimize, ClassCastException called.
+#! RUN          force_jit: true, options: "--compiler-regex=_GLOBAL.* --compiler-inlining=false", entry: "_GLOBAL::main7"
+#! EVENT_NOT    /DeoptimizationReason,.*,CHECK_CAST/
+#! EVENT        /Exception,.*,CAST_CHECK/
+#!
+#! METHOD       "_GLOBAL::test4"
+#! PASS_AFTER   "Codegen"
+#! INST         "NullCheck"
+#! INST         "CheckCast"
+
+.function u1 test4(u32 a0) {
+    movi v1, 1
+    movi v2, 2
+    lda a0
+    jeq v1, create_a
+    jeq v2, create_b
+
+create_null:
+    lda.null
+    jmp check
+create_a:
+    newobj v3, A
+    lda.obj v3
+    jmp check
+create_b:
+    call.short createB
+
+check:
+try_begin:
+    checkcast.nonnull B
+    ldai 0
+    return
+try_end:
+catch_block_begin:
+    ldai 1
+    return
+
+.catch panda.ClassCastException, try_begin, try_end, catch_block_begin
+}
+
+.function u1 main7() {
+try_begin:
+    movi v0, 0
+    call.short test4, v0
+    jeqz exit_failure
+    movi v0, 1
+    call.short test4, v0
+    jeqz exit_failure
+    movi v0, 2
+    call.short test4, v0
+    return
+try_end:
+
+catch_block_begin:
+    ldai 3
+    return
+
+exit_failure:
+    ldai 4
+    return
+
+.catchall  try_begin, try_end, catch_block_begin
+}
