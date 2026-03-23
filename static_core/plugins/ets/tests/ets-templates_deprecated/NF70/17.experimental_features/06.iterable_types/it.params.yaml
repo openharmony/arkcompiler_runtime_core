@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,8 +28,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
       use: |-
@@ -55,8 +57,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
       use: |-
@@ -82,8 +86,10 @@ cases:
                 this.data = p
             }
             override next(): IteratorResult<T> {
-                return new IteratorResult<T>(this.index >= this.data.len(),
-                    this.index >= this.data.len() ? undefined : this.data.val(this.index++))
+                return {
+                    done: this.index >= this.data.len(),
+                    value: this.index >= this.data.len() ? undefined : this.data.val(this.index++)
+                }
             }
         }
 
@@ -136,8 +142,10 @@ cases:
                 this.data = p
             }
             override next(): IteratorResult<T> {
-                return new IteratorResult<T>(this.index >= this.data.len(),
-                    this.index >= this.data.len() ? undefined : this.data.val(this.index++))
+                return {
+                    done: this.index >= this.data.len(),
+                    value: this.index >= this.data.len() ? undefined : this.data.val(this.index++)
+                }
             }
         }
 
@@ -184,8 +192,10 @@ cases:
             index = 0
             data: string[] = ['a', 'b', 'c']
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.data.length,
-                    this.index >= this.data.length ? undefined : this.data[this.index++])
+                return {
+                    done: this.index >= this.data.length,
+                    value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                }
             }
             iterate(): string {
                 let res = ''
@@ -211,8 +221,10 @@ cases:
                 return this
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.data.length,
-                    this.index >= this.data.length ? undefined : this.data[this.index++])
+                return {
+                    done: this.index >= this.data.length,
+                    value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                }
             }
             iterate(): string {
                 let res = ''
@@ -236,8 +248,10 @@ cases:
                 return this
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.data.length,
-                    this.index >= this.data.length ? undefined : this.data[this.index++])
+                return {
+                    done: this.index >= this.data.length,
+                    value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                }
             }
         }
       use: |-
@@ -274,9 +288,9 @@ cases:
             next(): IteratorResult<T> {
                 try {
                     let v: T = this.data[this.index++]
-                    return new IteratorResult<T>(false, v)
+                    return { done: false, value: v }
                 } catch (e) {
-                    return new IteratorResult<T>(true, undefined)
+                    return { done: true, value: undefined }
                 }
             }
         }
@@ -320,9 +334,9 @@ cases:
             next(): IteratorResult<T> {
                 try {
                     let v: T = this.data[this.index++]
-                    return new IteratorResult<T>(false, v)
+                    return { done: false, value: v }
                 } catch (e) {
-                    return new IteratorResult<T>(true, undefined)
+                    return { done: true, value: undefined }
                 }
             }
         }
@@ -354,8 +368,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
 
@@ -373,8 +389,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
       use: |-
@@ -404,8 +422,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
 
@@ -425,8 +445,10 @@ cases:
         class XIterator implements Iterator<string> {
             index: int = 0
             override next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= data.length,
-                    this.index >= data.length ? undefined : data[this.index++])
+                return {
+                    done: this.index >= data.length,
+                    value: this.index >= data.length ? undefined : data[this.index++]
+                }
             }
         }
         interface I {
@@ -449,8 +471,10 @@ cases:
         class XIterator implements Iterator<string> {
             index: int = 0
             override next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= data.length,
-                    this.index >= data.length ? undefined : data[this.index++])
+                return {
+                    done: this.index >= data.length,
+                    value: this.index >= data.length ? undefined : data[this.index++]
+                }
             }
         }
         abstract class D {
@@ -474,7 +498,7 @@ cases:
                 return this
             }
             next(): IteratorResult<Object> {
-                return new IteratorResult<Object>(true, undefined)
+                return { done: true, value: undefined }
             }
         }
       use: |-
@@ -497,8 +521,10 @@ cases:
                 return this
             }
             next(): IteratorResult<T> {
-                return new IteratorResult<T>(this.index >= this.data.length,
-                    this.index >= this.data.length ? undefined : this.data[this.index++])
+                return {
+                    done: this.index >= this.data.length,
+                    value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                }
             }
         }
       use: |-
@@ -528,8 +554,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
       use: |-
@@ -554,8 +582,10 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
             }
         }
       use: |-
@@ -589,10 +619,40 @@ cases:
                 this.base = base
             }
             next(): IteratorResult<string> {
-                return new IteratorResult<string>(this.index >= this.base.data.length,
-                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base[this.index++]
+                }
             }
         }
+      use: |-
+        let c = new C()
+        let res = ''
+        for (let x of c) {
+            res += x
+        }
+        arktest.assertEQ(res, 'abc')
+
+    - decl: |-
+        // Class implements iterable with interface literal implementation
+        class C implements Iterable<string> {
+            data: string[] = ['a', 'b', 'c']
+            index: int = 0;
+        
+            next(): IteratorResult<string> {
+                return {
+                    done: this.index >= this.data.length,
+                    value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                }
+            }
+        
+            $_iterator(): Iterator<string> {
+                this.index = 0;
+                let t: Iterator<string> = { next(): IteratorResult<string> { return this.next() } }
+                return t;
+            }
+        }
+
       use: |-
         let c = new C()
         let res = ''
