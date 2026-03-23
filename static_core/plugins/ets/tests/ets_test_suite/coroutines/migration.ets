@@ -25,10 +25,19 @@ function BackOff() {
 // this task, if was scheduled correctly (on same worker), actively waits for someone's migration
 function task(wId: int, isLaunchedOnSameWorker: AtomicFlag) {
     if (wId == CoroutineExtras.getWorkerId()) {
+        let migrated = false;
+        for (let i = 0; i < 20; i++) {
+            Coroutine.Schedule();
+            if (wId != CoroutineExtras.getWorkerId()) {
+                migrated = true;
+            }
+            let currWId = CoroutineExtras.getWorkerId();
+            setTimeout(() => {arktest.assertEQ(currWId, CoroutineExtras.getWorkerId(), 'timeout coro should not migrate')}, 0);
+        }
         isLaunchedOnSameWorker.set(true);
         while (!isLaunchMigrated.get()) {
             Coroutine.Schedule();
-            if (wId != CoroutineExtras.getWorkerId()) {
+            if (migrated || wId != CoroutineExtras.getWorkerId()) {
                 isLaunchMigrated.set(true);
             }
         }
