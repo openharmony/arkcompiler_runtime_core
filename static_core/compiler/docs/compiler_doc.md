@@ -324,6 +324,7 @@ roots: REGISTER[11]=0x4432c0
 - [Documentation about Deoptimization](../../docs/deoptimization.md)
 - [Documentation about IrToc](../../docs/irtoc.md)
 - [Documentation about OSR](../../docs/on-stack-replacement.md)
+- [Documentation about FillSaveStateSuspendInputs pass](fill_savestate_suspend_inputs_doc.md)
 - [Documentation about Interaction of compiled code and the runtime](../../docs/runtime-compiled_code-interaction.md)
 - [Codegen documentation](codegen_doc.md)
 - [Encoder documentation](.../optimizer/code_generator/encoder.md)

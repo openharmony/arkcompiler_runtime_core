@@ -69,6 +69,7 @@ TEST_F(SaveStateSuspendCheckerTest, AllLiveValuesPresent)
         }
     }
     GetGraph()->SetInliningComplete();
+    GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
 #else
@@ -91,18 +92,14 @@ TEST_F(SaveStateSuspendCheckerTest, MissingLiveValue)
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
-            // Missing v3 in SaveStateSuspend inputs
             INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({0U, 1U});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
     GetGraph()->SetInliningComplete();
+    GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
-#ifndef NDEBUG
     ASSERT_DEATH(checker.Check(), "");
-#else
-    ASSERT_FALSE(checker.Check());
-#endif
 #else
     GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
 #endif
@@ -127,6 +124,7 @@ TEST_F(SaveStateSuspendCheckerTest, ValueAfterSuspend)
         }
     }
     GetGraph()->SetInliningComplete();
+    GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
 #else
@@ -155,6 +153,7 @@ TEST_F(SaveStateSuspendCheckerTest, UserNotDominated)
         }
     }
     GetGraph()->SetInliningComplete();
+    GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
 #else
@@ -194,6 +193,7 @@ TEST_F(SaveStateSuspendCheckerTest, PhiLiveValue)
         }
     }
     GetGraph()->SetInliningComplete();
+    GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
 #else
@@ -236,6 +236,7 @@ TEST_F(SaveStateSuspendCheckerTest, LoopLatchToHeader)
         }
     }
     GetGraph()->SetInliningComplete();
+    GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
 #else

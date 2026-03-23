@@ -405,6 +405,14 @@ public:
         FlagInliningComplete::Set(true, &bitFields_);
     }
 #ifdef COMPILER_DEBUG_CHECKS
+    bool IsSaveStateSuspendInputsAllocated() const
+    {
+        return FlagSaveStateSuspendInputsAllocated::Get(bitFields_);
+    }
+    void SetSaveStateSuspendInputsAllocated()
+    {
+        FlagSaveStateSuspendInputsAllocated::Set(true, &bitFields_);
+    }
     bool IsRegAllocApplied() const
     {
         return FlagRegallocApplied::Get(bitFields_);
@@ -1417,13 +1425,21 @@ private:
     using FlagRegallocApplied = FlagUnrollComplete::NextFlag;
     using FlagRegaccallocApplied = FlagRegallocApplied::NextFlag;
     using FlagInliningComplete = FlagRegaccallocApplied::NextFlag;
+
+#ifdef COMPILER_DEBUG_CHECKS
+    using FlagSaveStateSuspendInputsAllocated = FlagInliningComplete::NextFlag;
+    using BeforeRegallocFlags = FlagSaveStateSuspendInputsAllocated;
+#else
+    using BeforeRegallocFlags = FlagInliningComplete;
+#endif  // COMPILER_DEBUG_CHECKS
+
 #if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
     using LastField = FlagUnrollComplete;
 #else
     using FlagLowLevelInstnsEnabled = FlagInliningComplete::NextFlag;
     using FlagDynUnitTest = FlagLowLevelInstnsEnabled::NextFlag;
     using LastField = FlagDynUnitTest;
-#endif  // NDEBUG
+#endif  // NDEBUG && !ENABLE_LIBABCKIT
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
     using FlagLineDebugInfoEnabled = LastField::NextFlag;

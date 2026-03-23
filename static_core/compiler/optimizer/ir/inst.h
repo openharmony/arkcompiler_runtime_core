@@ -1619,6 +1619,11 @@ public:
                opcode_ == Opcode::SaveStateDeoptimize || opcode_ == Opcode::SaveStateSuspend;
     }
 
+    bool IsSaveStateSuspend() const
+    {
+        return opcode_ == Opcode::SaveStateSuspend;
+    }
+
     bool IsClassInst() const
     {
         return opcode_ == Opcode::InitClass || opcode_ == Opcode::LoadClass || opcode_ == Opcode::LoadAndInitClass ||

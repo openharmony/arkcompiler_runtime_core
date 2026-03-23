@@ -161,6 +161,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/cse.cpp",
   "optimizer/optimizations/deoptimize_elimination.cpp",
   "optimizer/optimizations/escape.cpp",
+  "optimizer/optimizations/fill_savestate_suspend_inputs.cpp",
   "optimizer/optimizations/if_conversion.cpp",
   "optimizer/optimizations/if_merging.cpp",
   "optimizer/optimizations/inline_intrinsics.cpp",

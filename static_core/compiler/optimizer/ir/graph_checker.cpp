@@ -1159,6 +1159,9 @@ void GraphChecker::CheckSaveStateInputs()
 #ifdef COMPILER_DEBUG_CHECKS
 void GraphChecker::CheckSaveStateSuspendInputs()
 {
+    if (!GetGraph()->IsSaveStateSuspendInputsAllocated()) {
+        return;
+    }
     for (auto &block : GetGraph()->GetBlocksRPO()) {
         for (const auto &inst : block->AllInsts()) {
             if (inst->GetOpcode() != Opcode::SaveStateSuspend) {
@@ -2427,6 +2430,11 @@ void GraphChecker::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[may
                                                   << *inst << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->GetUsers().Empty(),
                                         std::cerr << "SaveStateSuspend can't have users");
+    [[maybe_unused]] auto ss = inst->CastToSaveStateSuspend();
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !ss->GetInputsWereDeleted(),
+                                        std::cerr << "Some inputs from SaveStateSuspend were deleted." << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ss->RequireRegMap(),
+                                        std::cerr << "SaveStateSuspend must require RegMap." << std::endl);
 }
 
 void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)

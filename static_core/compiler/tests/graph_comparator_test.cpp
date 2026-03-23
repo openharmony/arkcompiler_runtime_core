@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,6 +242,124 @@ TEST_F(GraphComparatorTest, CompareDifferentInstCount)
         }
     }
     ASSERT_FALSE(GraphComparator().Compare(graph1, graph2));
+}
+
+TEST_F(GraphComparatorTest, CompareSaveStateInputsIgnoringOrder)
+{
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        CONSTANT(2U, 42U);
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({2U, 0U, 1U});
+            INST(4U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto graph2 = CreateEmptyGraph();
+    GRAPH(graph2)
+    {
+        PARAMETER(10U, 0U).s32();
+        PARAMETER(11U, 1U).s32();
+        CONSTANT(12U, 42U);
+        BASIC_BLOCK(22U, 1U)
+        {
+            INST(13U, Opcode::SaveState).Inputs(11U, 12U, 10U).SrcVregs({0U, 1U, 2U});
+            INST(14U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
+}
+
+TEST_F(GraphComparatorTest, CompareSaveStateBridgeInputsIgnoringOrder)
+{
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({VirtualRegister::BRIDGE, VirtualRegister::BRIDGE});
+            INST(4U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto graph2 = CreateEmptyGraph();
+    GRAPH(graph2)
+    {
+        PARAMETER(10U, 0U).ref();
+        PARAMETER(11U, 1U).ref();
+        BASIC_BLOCK(22U, 1U)
+        {
+            INST(13U, Opcode::SaveState).Inputs(11U, 10U).SrcVregs({VirtualRegister::BRIDGE, VirtualRegister::BRIDGE});
+            INST(14U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
+}
+
+TEST_F(GraphComparatorTest, CompareSaveStateInputsRequireMatchingInputVregPairs)
+{
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto graph2 = CreateEmptyGraph();
+    GRAPH(graph2)
+    {
+        PARAMETER(10U, 0U).s32();
+        PARAMETER(11U, 1U).s32();
+        BASIC_BLOCK(22U, 1U)
+        {
+            INST(13U, Opcode::SaveState).Inputs(10U, 11U).SrcVregs({1U, 0U});
+            INST(14U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    ASSERT_FALSE(GraphComparator().Compare(graph1, graph2));
+}
+
+TEST_F(GraphComparatorTest, CompareSafePointInputsIgnoringOrder)
+{
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        INST(2U, Opcode::SafePoint).Inputs(0U, 1U).SrcVregs({0U, 1U});
+        BASIC_BLOCK(3U, 1U)
+        {
+            INST(4U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto graph2 = CreateEmptyGraph();
+    GRAPH(graph2)
+    {
+        PARAMETER(10U, 0U).s32();
+        PARAMETER(11U, 1U).s32();
+        INST(12U, Opcode::SafePoint).Inputs(11U, 10U).SrcVregs({1U, 0U});
+        BASIC_BLOCK(13U, 1U)
+        {
+            INST(14U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
 }
 // NOLINTEND(readability-magic-numbers)
 

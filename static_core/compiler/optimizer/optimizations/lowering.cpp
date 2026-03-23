@@ -1442,35 +1442,11 @@ void Lowering::LowerConstArrayIndex(Inst *inst, Opcode lowLevelOpcode)
 
 void Lowering::LowerStateInst(SaveStateInst *saveState)
 {
-    size_t idx = 0;
-    size_t inputsCount = saveState->GetInputsCount();
-    auto graph = saveState->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer()) {
-        return;
-    }
-    bool skipFloats = (graph->GetArch() == Arch::AARCH32);
-    while (idx < inputsCount) {
-        auto inputInst = saveState->GetInput(idx).GetInst();
-        // In Aarch32 floats values stores in different format then integer
-        if (inputInst->GetOpcode() == Opcode::NullPtr ||
-            (inputInst->IsConst() && (!skipFloats || inputInst->GetType() == DataType::INT64))) {
-            uint64_t rawValue =
-                inputInst->GetOpcode() == Opcode::NullPtr ? 0 : inputInst->CastToConstant()->GetRawValue();
-            auto vreg = saveState->GetVirtualRegister(idx);
-            auto type = inputInst->GetType();
-            // There are no INT64 in dynamic
-            if (type == DataType::INT64 && graph->IsDynamicMethod()) {
-                type = DataType::INT32;
-            }
-            saveState->AppendImmediate(rawValue, vreg.Value(), type, vreg.GetVRegType());
-            saveState->RemoveInput(idx);
-            inputsCount--;
-            graph->GetEventWriter().EventLowering(GetOpcodeString(saveState->GetOpcode()), saveState->GetId(),
-                                                  saveState->GetPc());
-            COMPILER_LOG(DEBUG, LOWERING) << "Lowering is applied for " << GetOpcodeString(saveState->GetOpcode());
-        } else {
-            idx++;
-        }
+    if (OptimizeSaveStateConstantInputs(saveState)) {
+        auto graph = saveState->GetBasicBlock()->GetGraph();
+        graph->GetEventWriter().EventLowering(GetOpcodeString(saveState->GetOpcode()), saveState->GetId(),
+                                              saveState->GetPc());
+        COMPILER_LOG(DEBUG, LOWERING) << "Lowering is applied for " << GetOpcodeString(saveState->GetOpcode());
     }
 }
 

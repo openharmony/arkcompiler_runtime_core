@@ -1191,10 +1191,12 @@ instructions:
   - opcode: SaveStateSuspend
     base: SaveStateInst
     signature: [d-real-pseudo, real-dyn]
-    flags: [no_dce, no_hoist, no_cse, barrier, heap_inv]
+    flags: [no_dce, no_hoist, no_cse, barrier, heap_inv, can_deoptimize]
     modes: [jit_aot]
     description: >-
       Do coroutines suspension. Contains information about virtual registers that must be saved before suspension.
+      VReg inputs are set by the IR builder; non-VReg (bridge) inputs are added by the FillSaveStateSuspendInputs
+      pass before register allocation.
 
   - opcode: Dispatch
     base: DispatchInst

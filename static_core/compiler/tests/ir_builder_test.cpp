@@ -5294,7 +5294,7 @@ OUT_GRAPH(NestedTryCatch, Graph *graph)
         }
         BASIC_BLOCK(6U, 11U)
         {
-            INST(12U, Opcode::SaveState).Inputs(0U, 0U, 2U).SrcVregs({0U, 2U, 3U});
+            INST(12U, Opcode::SaveState).Inputs(0U, 0U, 2U).SrcVregs({0U, 3U, 2U});
             INST(13U, Opcode::ZeroCheck).s32().Inputs(2U, 12U);
             INST(14U, Opcode::Div).s32().Inputs(0U, 13U);
         }

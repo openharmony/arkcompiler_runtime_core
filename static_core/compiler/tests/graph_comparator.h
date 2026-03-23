@@ -81,6 +81,9 @@ public:
             instCompareMap_.erase(inst1);
             return false;
         }
+        if (inst1->IsSaveState()) {
+            return true;
+        }
         if (inst1->GetOpcode() != Opcode::Phi) {
             auto inst1Begin = inst1->GetInputs().begin();
             auto inst1End = inst1->GetInputs().end();
@@ -235,17 +238,7 @@ public:
             return false;
         }
 
-        std::vector<VirtualRegister::ValueType> regs1;
-        std::vector<VirtualRegister::ValueType> regs2;
-        regs1.reserve(svSt1->GetInputsCount());
-        regs2.reserve(svSt2->GetInputsCount());
-        for (size_t i {0}; i < svSt1->GetInputsCount(); ++i) {
-            regs1.emplace_back(svSt1->GetVirtualRegister(i).Value());
-            regs2.emplace_back(svSt2->GetVirtualRegister(i).Value());
-        }
-        std::sort(regs1.begin(), regs1.end());
-        std::sort(regs2.begin(), regs2.end());
-        if (regs1 != regs2) {
+        if (!CompareSaveStateInputsUnordered(svSt1, svSt2)) {
             instCompareMap_.erase(inst1);
             return false;
         }
@@ -276,6 +269,44 @@ public:
     }
 
 private:
+    // Compares SaveState inputs as an unordered set of (input, vreg) pairs by
+    // recursively matching each input from svSt1 to one still-unmatched input in svSt2.
+    bool CompareSaveStateInputsUnordered(SaveStateInst *svSt1, SaveStateInst *svSt2)
+    {
+        std::vector<bool> matched(svSt2->GetInputsCount(), false);
+        return CompareSaveStateInputsUnordered(svSt1, svSt2, 0, &matched);
+    }
+
+    bool CompareSaveStateInputsUnordered(SaveStateInst *svSt1, SaveStateInst *svSt2, size_t index,
+                                         std::vector<bool> *matched)
+    {
+        if (index == svSt1->GetInputsCount()) {
+            return true;
+        }
+
+        auto *input1 = svSt1->GetInput(index).GetInst();
+        auto vreg1 = svSt1->GetVirtualRegister(index).Value();
+        for (size_t candidate = 0; candidate < svSt2->GetInputsCount(); ++candidate) {
+            if ((*matched)[candidate] || vreg1 != svSt2->GetVirtualRegister(candidate).Value()) {
+                continue;
+            }
+
+            auto instCompareMapSnapshot = instCompareMap_;
+            if (!Compare(input1, svSt2->GetInput(candidate).GetInst())) {
+                instCompareMap_ = std::move(instCompareMapSnapshot);
+                continue;
+            }
+
+            (*matched)[candidate] = true;
+            if (CompareSaveStateInputsUnordered(svSt1, svSt2, index + 1, matched)) {
+                return true;
+            }
+            (*matched)[candidate] = false;
+            instCompareMap_ = std::move(instCompareMapSnapshot);
+        }
+        return false;
+    }
+
     bool CompareCommon(Inst *inst1, Inst *inst2)
     {
         if (auto it = instCompareMap_.insert({inst1, inst2}); !it.second) {
@@ -333,10 +364,12 @@ public:
                 return false;
             }
         }
-        for (size_t i = 0; i < inst2->GetInputsCount(); i++) {
-            if (inst1->GetInputType(i) != inst2->GetInputType(i)) {
-                instCompareMap_.erase(inst1);
-                return false;
+        if (!inst1->IsSaveState()) {
+            for (size_t i = 0; i < inst2->GetInputsCount(); i++) {
+                if (inst1->GetInputType(i) != inst2->GetInputType(i)) {
+                    instCompareMap_.erase(inst1);
+                    return false;
+                }
             }
         }
         if (inst1->IsSaveState()) {
