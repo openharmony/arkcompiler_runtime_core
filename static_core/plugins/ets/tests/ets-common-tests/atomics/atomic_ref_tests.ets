@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicReference } from "std/concurrency"
+import { AtomicReference } from 'std/concurrency'
 
 class Container {
     public value: int = 0;

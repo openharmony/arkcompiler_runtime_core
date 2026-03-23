@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicBoolean } from "std/concurrency"
+import { AtomicBoolean } from 'std/concurrency'
 
 function nonconcurrentLoadStoreTest() {
     let atomicBoolean = new AtomicBoolean(false);

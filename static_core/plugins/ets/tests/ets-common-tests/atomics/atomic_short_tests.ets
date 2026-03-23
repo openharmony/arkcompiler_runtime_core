@@ -13,7 +13,7 @@
  * limitations under the License.
 r*/
 
-import { AtomicShort } from "std/concurrency"
+import { AtomicShort } from 'std/concurrency'
 
 function nonconcurrentLoadStoreTest() {
     let atomicShort = new AtomicShort(1);

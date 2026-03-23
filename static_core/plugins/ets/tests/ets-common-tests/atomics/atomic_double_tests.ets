@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicDouble } from "std/concurrency"
+import { AtomicDouble } from 'std/concurrency'
 
 function nonconcurrentLoadStoreTest() {
     let atomicDouble = new AtomicDouble(1);
