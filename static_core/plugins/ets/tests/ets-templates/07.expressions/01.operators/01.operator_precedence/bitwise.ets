@@ -17,161 +17,281 @@
 desc: bitwise operators with other operators
 ---*/
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Bitwise operators precedence")
 
-    let res: int, t2 = 2, t3 = 3, t4 = 4, t7 = 7, t8 = 8, t255 = 255
+    suite.addTest("bitwise OR over AND", () => {
+        let res: int, t3 = 3, t4 = 4, t8 = 8
 
-    // bitwise
-    res = t3 | t4 & t8
-    arktest.assertEQ(res, 3)
+        res = t3 | t4 & t8
+        arktest.assertEQ(res, 3)
+    })
 
-    res = t3 ^ t4 & t2
-    arktest.assertEQ(res, 3)
+    suite.addTest("bitwise XOR over AND", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-    res = t3 | t4 ^ t2
-    arktest.assertEQ(res, 7)
+        res = t3 ^ t4 & t2
+        arktest.assertEQ(res, 3)
+    })
 
-    // ternary
-    res = t3 <= t4 ? t7 : t2 & t3
-    arktest.assertEQ(res, 7)
+    suite.addTest("bitwise OR over XOR", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-    res = t3 <= t4 ? t7 : t2 ^ t3
-    arktest.assertEQ(res, 7)
+        res = t3 | t4 ^ t2
+        arktest.assertEQ(res, 7)
+    })
 
-    res = t3 <= t4 ? t7 : t2 | t255
-    arktest.assertEQ(res, 7)
+    suite.addTest("ternary AND", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4, t7 = 7
 
-    // assignments
-    res = t2 += t7 & t3
-    arktest.assertEQ(res, 5)
-    t2 = 2
+        res = t3 <= t4 ? t7 : t2 & t3
+        arktest.assertEQ(res, 7)
+    })
 
-    res = t2 += t7 ^ t3
-    arktest.assertEQ(res, 6)
-    t2 = 2
+    suite.addTest("ternary XOR", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4, t7 = 7
 
-    res = t2 += t7 | t3
-    arktest.assertEQ(res, 9)
-    t2 = 2
+        res = t3 <= t4 ? t7 : t2 ^ t3
+        arktest.assertEQ(res, 7)
+    })
 
-    res = t2 -= t7 & t3
-    arktest.assertEQ(res, -1)
-    t2 = 2
+    suite.addTest("ternary OR", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4, t7 = 7, t255 = 255
 
-    res = t2 -= t7 ^ t3
-    arktest.assertEQ(res, -2)
-    t2 = 2
+        res = t3 <= t4 ? t7 : t2 | t255
+        arktest.assertEQ(res, 7)
+    })
 
-    res = t2 -= t7 | t255
-    arktest.assertEQ(res, -253)
-    t2 = 2
+    suite.addTest("assignment += AND", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t2 *= t7 & t3
-    arktest.assertEQ(res, 6)
-    t2 = 2
+        res = t2 += t7 & t3
+        arktest.assertEQ(res, 5)
+    })
 
-    res = t2 *= t7 ^ t3
-    arktest.assertEQ(res, 8)
-    t2 = 2
+    suite.addTest("assignment += XOR", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t2 *= t7 | t255
-    arktest.assertEQ(res, 510)
-    t2 = 2
+        res = t2 += t7 ^ t3
+        arktest.assertEQ(res, 6)
+    })
 
-    res = t255 /= t7 & t3
-    arktest.assertEQ(res, 85)
-    t255 = 255
+    suite.addTest("assignment += OR", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t255 /= t7 ^ t3
-    arktest.assertEQ(res, 63)
-    t255 = 255
+        res = t2 += t7 | t3
+        arktest.assertEQ(res, 9)
+    })
 
-    res = t255 /= t7 | t255
-    arktest.assertEQ(res, 1)
-    t255 = 255
+    suite.addTest("assignment -= AND", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t255 %= t7 & t3
-    arktest.assertEQ(res, 0)
-    t255 = 255
+        res = t2 -= t7 & t3
+        arktest.assertEQ(res, -1)
+    })
 
-    res = t255 %= t7 ^ t3
-    arktest.assertEQ(res, 3)
-    t255 = 255
+    suite.addTest("assignment -= XOR", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t255 %= t7 | t255
-    arktest.assertEQ(res, 0)
-    t255 = 255
+        res = t2 -= t7 ^ t3
+        arktest.assertEQ(res, -2)
+    })
 
-    res = t255 &= t7 & t3
-    arktest.assertEQ(res, 3)
-    t255 = 255
+    suite.addTest("assignment -= OR", () => {
+        let res: int, t2 = 2, t7 = 7, t255 = 255
 
-    res = t255 &= t7 ^ t255
-    arktest.assertEQ(res, 248)
-    t255 = 255
+        res = t2 -= t7 | t255
+        arktest.assertEQ(res, -253)
+    })
 
-    res = t255 &= t7 | t255
-    arktest.assertEQ(res, 255)
-    t255 = 255
+    suite.addTest("assignment *= AND", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t255 ^= t7 & t3
-    arktest.assertEQ(res, 252)
-    t255 = 255
+        res = t2 *= t7 & t3
+        arktest.assertEQ(res, 6)
+    })
 
-    res = t255 ^= t7 ^ t255
-    arktest.assertEQ(res, 7)
-    t255 = 255
+    suite.addTest("assignment *= XOR", () => {
+        let res: int, t2 = 2, t3 = 3, t7 = 7
 
-    res = t255 ^= t7 | t255
-    arktest.assertEQ(res, 0)
-    t255 = 255
+        res = t2 *= t7 ^ t3
+        arktest.assertEQ(res, 8)
+    })
 
-    res = t255 |= t7 & t3
-    arktest.assertEQ(res, 255)
-    t255 = 255
+    suite.addTest("assignment *= OR", () => {
+        let res: int, t2 = 2, t7 = 7, t255 = 255
 
-    res = t255 |= t7 ^ t255
-    arktest.assertEQ(res, 255)
-    t255 = 255
+        res = t2 *= t7 | t255
+        arktest.assertEQ(res, 510)
+    })
 
-    res = t255 |= t7 | t255
-    arktest.assertEQ(res, 255)
-    t255 = 255
+    suite.addTest("assignment /= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
 
-    res = t255 <<= t7 & t3
-    arktest.assertEQ(res, 2040)
-    t255 = 255
+        res = t255 /= t7 & t3
+        arktest.assertEQ(res, 85)
+    })
 
-    res = t255 <<= t7 ^ t255
-    arktest.assertEQ(res, -16777216)
-    t255 = 255
+    suite.addTest("assignment /= XOR", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
 
-    res = t255 <<= t7 | t255
-    arktest.assertEQ(res, -2147483648)
-    t255 = 255
+        res = t255 /= t7 ^ t3
+        arktest.assertEQ(res, 63)
+    })
 
-    res = t255 >>= t7 & t3
-    arktest.assertEQ(res, 31)
-    t255 = 255
+    suite.addTest("assignment /= OR", () => {
+        let res: int, t7 = 7, t255 = 255
 
-    res = t255 >>= t2 ^ t7
-    arktest.assertEQ(res, 7)
-    t255 = 255
+        res = t255 /= t7 | t255
+        arktest.assertEQ(res, 1)
+    })
 
-    res = t255 >>= t7 | t7
-    arktest.assertEQ(res, 1)
-    t255 = 255
+    suite.addTest("assignment %= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
 
-    res = t255 >>>= t7 & t3
-    arktest.assertEQ(res, 31)
-    t255 = 255
+        res = t255 %= t7 & t3
+        arktest.assertEQ(res, 0)
+    })
 
-    res = t255 >>>= t2 ^ t7
-    arktest.assertEQ(res, 7)
-    t255 = 255
+    suite.addTest("assignment %= XOR", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
 
-    res = t255 >>>= t7 | t7
-    arktest.assertEQ(res, 1)
-    t255 = 255
+        res = t255 %= t7 ^ t3
+        arktest.assertEQ(res, 3)
+    })
 
+    suite.addTest("assignment %= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 %= t7 | t255
+        arktest.assertEQ(res, 0)
+    })
+
+    suite.addTest("assignment &= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
+
+        res = t255 &= t7 & t3
+        arktest.assertEQ(res, 3)
+    })
+
+    suite.addTest("assignment &= XOR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 &= t7 ^ t255
+        arktest.assertEQ(res, 248)
+    })
+
+    suite.addTest("assignment &= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 &= t7 | t255
+        arktest.assertEQ(res, 255)
+    })
+
+    suite.addTest("assignment ^= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
+
+        res = t255 ^= t7 & t3
+        arktest.assertEQ(res, 252)
+    })
+
+    suite.addTest("assignment ^= XOR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 ^= t7 ^ t255
+        arktest.assertEQ(res, 7)
+    })
+
+    suite.addTest("assignment ^= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 ^= t7 | t255
+        arktest.assertEQ(res, 0)
+    })
+
+    suite.addTest("assignment |= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
+
+        res = t255 |= t7 & t3
+        arktest.assertEQ(res, 255)
+    })
+
+    suite.addTest("assignment |= XOR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 |= t7 ^ t255
+        arktest.assertEQ(res, 255)
+    })
+
+    suite.addTest("assignment |= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 |= t7 | t255
+        arktest.assertEQ(res, 255)
+    })
+
+    suite.addTest("assignment <<= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
+
+        res = t255 <<= t7 & t3
+        arktest.assertEQ(res, 2040)
+    })
+
+    suite.addTest("assignment <<= XOR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 <<= t7 ^ t255
+        arktest.assertEQ(res, -16777216)
+    })
+
+    suite.addTest("assignment <<= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 <<= t7 | t255
+        arktest.assertEQ(res, -2147483648)
+    })
+
+    suite.addTest("assignment >>= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
+
+        res = t255 >>= t7 & t3
+        arktest.assertEQ(res, 31)
+    })
+
+    suite.addTest("assignment >>= XOR", () => {
+        let res: int, t2 = 2, t7 = 7, t255 = 255
+
+        res = t255 >>= t2 ^ t7
+        arktest.assertEQ(res, 7)
+    })
+
+    suite.addTest("assignment >>= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 >>= t7 | t7
+        arktest.assertEQ(res, 1)
+    })
+
+    suite.addTest("assignment >>>= AND", () => {
+        let res: int, t3 = 3, t7 = 7, t255 = 255
+
+        res = t255 >>>= t7 & t3
+        arktest.assertEQ(res, 31)
+    })
+
+    suite.addTest("assignment >>>= XOR", () => {
+        let res: int, t2 = 2, t7 = 7, t255 = 255
+
+        res = t255 >>>= t2 ^ t7
+        arktest.assertEQ(res, 7)
+    })
+
+    suite.addTest("assignment >>>= OR", () => {
+        let res: int, t7 = 7, t255 = 255
+
+        res = t255 >>>= t7 | t7
+        arktest.assertEQ(res, 1)
+    })
+
+    return suite.run()
 }

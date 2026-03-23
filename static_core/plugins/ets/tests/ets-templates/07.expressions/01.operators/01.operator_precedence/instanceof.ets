@@ -21,24 +21,41 @@ interface I {}
 class A implements I {}
 class B {}
 
-function main() {
-	let a: A = new A();
-	let b: B = new B();
-	let i: I = a;
-	let an: A|null = null;
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Instanceof operator precedence")
 
-	// equality
-	let res: boolean = a instanceof A == i instanceof A
-	arktest.assertTrue(res)
+    suite.addTest("equality ==", () => {
+        let a: A = new A();
+        let i: I = a;
 
-	res = a instanceof A != b instanceof A
-	arktest.assertTrue(res)
+        let res: boolean = a instanceof A == i instanceof A
+        arktest.assertTrue(res)
+    })
 
-	// ternary
-	res = i instanceof A ? b instanceof A : b instanceof B
-	arktest.assertFalse(res)
+    suite.addTest("equality !=", () => {
+        let a: A = new A();
+        let b: B = new B();
 
-	res = i instanceof B ? b instanceof A : b instanceof B
-	arktest.assertTrue(res)
-    
+        let res: boolean = a instanceof A != b instanceof A
+        arktest.assertTrue(res)
+    })
+
+    suite.addTest("ternary true condition", () => {
+        let a: A = new A();
+        let b: B = new B();
+        let i: I = a;
+
+        let res: boolean = i instanceof A ? b instanceof A : b instanceof B
+        arktest.assertFalse(res)
+    })
+
+    suite.addTest("ternary false condition", () => {
+        let b: B = new B();
+        let i: I = new A();
+
+        let res: boolean = i instanceof B ? b instanceof A : b instanceof B
+        arktest.assertTrue(res)
+    })
+
+    return suite.run()
 }
