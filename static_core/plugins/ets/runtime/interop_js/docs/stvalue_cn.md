@@ -43,9 +43,28 @@ STValue部分接口需要指定操作的ArkTS-Sta类型。为此我们提供了�
 
 目前可以通过以下方式获取STValue以及SType:
 
+1、在模块目录下新建一个config.json文件，在config.json编译以下内容:
+```json
+{
+    "static.@ohos.lang.interop": {
+        "originalAPIName": "@ohos.lang.interop",
+        "isStatic": true
+    }
+}
+```
+2、在模块的build-profile.json5文件buildOptions添加配置： :
+```json
+{
+    "buildOptions": {
+        "arkOptions": {
+            "sdkAliasConfigPath": "./config.json"
+        }
+    }
+}
+```
+3、在源文件中引入STValue和SType:
 ```typescript
-let STValue = globalThis.Panda.STValue;
-let SType = globalThis.Panda.SType;
+import {STValue, SType} from "static.@ohos.lang.interop";
 ```
 ---
 ### 名称修饰符（Mangling）规则
@@ -99,6 +118,8 @@ ArkTS中常用类型的**类型Mangling参考**如下所示：
 以`namespaceInvokeFunction`为例的Mangling的函数签名示例如下所示：
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
@@ -117,6 +138,8 @@ let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]); // Boole
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_test.testNameSpace');
 let student = tns.namespaceGetVariable('student', SType.REFERENCE);
 let JOSNCls = STValue.findClass("escompat.JSON");
@@ -167,6 +190,8 @@ export namespace testNameSpace {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_accessor.Student');
 ```
 
@@ -180,6 +205,8 @@ export class Student {}
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Class
     let klass = STValue.findClass('stvalue_accessor/Animal');
@@ -213,6 +240,8 @@ try{
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
 ```
 
@@ -226,10 +255,12 @@ export namespace MyNamespace {}
 
 示例：
 ```typescript
-try{
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
     // Invalid Namespace
     let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#'); 
-}catch (e: Error){
+} catch (e: Error) {
     // Throw Error 
     console.log(e.message);  
 }
@@ -258,6 +289,8 @@ try{
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 ```
 
@@ -275,10 +308,12 @@ export enum COLOR {
 
 示例：
 ```typescript
-try{
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
     // Invalid Enum
     let testEnum = STValue.findEnum('stvalue_accessor.COLOR#'); 
-}catch (e: Error){
+} catch (e: Error) {
     // Throw Error 
     console.log(e.message);
 }
@@ -304,6 +339,8 @@ try{
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let subClass = STValue.findClass('stvalue_accessor.Dog');
 let parentClass = subClass.classGetSuperClass();  // 代表父类'stvalue_accessor.Animal'的STValue对象
 ```
@@ -324,6 +361,8 @@ export class Dog extends Animal {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let nonClass = STValue.wrapInt(111);
@@ -354,6 +393,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 let arrayLength = strArray.fixedArrayGetLength(); // 3
@@ -372,6 +413,8 @@ export namespace testNameSpace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     STValue.wrapInt(1).fixedArrayGetLength();
@@ -406,6 +449,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 let redIndex = colorEnum.enumGetIndexByName('Red'); // 0
 ```
@@ -457,6 +502,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');  
 let redValue = colorEnum.enumGetValueByName('Red', SType.INT);
 // 获取的枚举值是一个STValue对象，需要拆箱获取对应primitive值
@@ -477,6 +524,8 @@ export enum COLOR{
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Object
     let nullEnum = STValue.getNull();
@@ -512,6 +561,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let personClass = STValue.findClass('stvalue_accessor.Person');
 let name = personClass.classGetStaticField('name', SType.REFERENCE).unwrapToString(); // 'Person'
 let age = personClass.classGetStaticField('age', SType.INT).unwrapToNumber();  // 18
@@ -530,6 +581,8 @@ export class Person {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let nonClass = STValue.wrapInt(111);
@@ -562,6 +615,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let personClass = STValue.findClass('stvalue_accessor.Person');
 personClass.classSetStaticField('name', STValue.wrapString('Bob'), SType.REFERENCE);
 personClass.classSetStaticField('age', STValue.wrapNumber(21), SType.DOUBLE);
@@ -583,6 +638,8 @@ export class Person {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     personClass.classSetStaticField('male', STValue.wrapBoolean(false), SType.INT);
@@ -618,6 +675,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let alice = tns.namespaceGetVariable('studentAlice', SType.REFERENCE);
 let name = alice.objectGetProperty('name', SType.REFERENCE).unwrapToString(); // 'Alice'
@@ -643,6 +702,8 @@ export namespace testNameSpace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let priObject = STValue.wrapInt(111);
@@ -675,6 +736,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let alice = tns.namespaceGetVariable('studentAlice', SType.REFERENCE);
 let name = alice.objectSetProperty('name', STValue.wrapString('Bob'), SType.REFERENCE);
@@ -701,6 +764,8 @@ export namespace testNameSpace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     alice.objectSetProperty('name', STValue.wrapNumber(111), SType.REFERENCE);
@@ -735,6 +800,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace');
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 let str = strArray.fixedArrayGet(1, SType.REFERENCE).unwrapToString(); // 'cd'
@@ -752,6 +819,8 @@ export namespace testNameSpace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let notArray = STValue.wrapInt(111);  
@@ -784,6 +853,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace');
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 strArray.fixedArraySet(1, STValue.wrapString('xy'), SType.REFERENCE);
@@ -803,6 +874,8 @@ export namespace testNameSpace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     let notArray = STValue.wrapInt(111);
@@ -839,6 +912,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
 let data = ns.namespaceGetVariable('data', SType.INT);
 let num = data.unwrapToNumber();  // 42
@@ -857,6 +932,8 @@ export namespace MyNamespace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     ns.namespaceGetVariable(1, SType.INT)
@@ -892,6 +969,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
 ns.namespaceSetVariable('data', STValue.wrapInt(0), SType.INT);
 let data = ns.namespaceGetVariable('data', SType.INT);
@@ -911,6 +990,8 @@ export namespace MyNamespace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     ns.namespaceSetVariable(1, STValue.wrapInt(44), SType.INT);
@@ -940,6 +1021,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let strWrap = STValue.wrapString('hello world');
 let strType = strWrap.objectGetType();
 let isString = strWrap.objectInstanceOf(strType); // true
@@ -951,6 +1034,8 @@ let isString = strWrap.objectInstanceOf(strType); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Instance
     STValue.getUndefined().objectGetType();
@@ -985,6 +1070,8 @@ try {
 
 ```typescript
 // Ark-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
 // 返回值为封装了Int类型的STValue对象
@@ -1004,6 +1091,8 @@ export namespace testNameSpace {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Arguments Number
     intArray.arrayGet(0, SType.INT);
@@ -1035,6 +1124,8 @@ try {
 
 ```typescript
 // Ark-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
 let intClass = STValue.findClass('std.core.Int');
@@ -1089,6 +1180,8 @@ try {
 
 ```typescript
 // Ark-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
 let intClass = STValue.findClass('std.core.Int');
@@ -1142,6 +1235,8 @@ try {
 
 ```typescript
 // Ark-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
 let intPop = intArray.arrayPop();
@@ -1191,6 +1286,8 @@ try {
 
 ```typescript
 // Ark-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
 let num = intArray.arrayGetLength(); // 5
@@ -1243,6 +1340,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let str = STValue.wrapString("Hello");
 let isStr = str.isString(); // true
 
@@ -1297,6 +1396,8 @@ let isStr = str.isString(1);
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let bigNum = STValue.wrapBigInt(1234567890n);
 let isBigInt = bigNum.isBigInt(); // true
 let num = STValue.wrapInt(42);
@@ -1339,6 +1440,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nullValue = STValue.getNull();
 let isNull = nullValue.isNull(); // true
 let intValue = STValue.wrapNumber(42);
@@ -1381,6 +1484,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let undefValue = STValue.getUndefined();
 let isUndef = undefValue.isUndefined(); // true
 let intValue = STValue.wrapNumber(42);
@@ -1428,6 +1533,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_check.Check');
 let leftRef = ns.namespaceGetVariable('leftRef', SType.REFERENCE);
 let rightRef = ns.namespaceGetVariable('rightRef', SType.REFERENCE);
@@ -1451,6 +1558,8 @@ export namespace Check {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Instance
     STValue.wrapInt(1).isEqualTo(STValue.wrapInt(1));
@@ -1484,6 +1593,8 @@ try{
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_check.Check');
 let magicNull = STValue.getNull();
 let magicUndefined = STValue.getUndefined();
@@ -1509,6 +1620,8 @@ export namespace Check {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try{
     // Invalid Instance
     magicString1.isEqualTo(STValue.wrapInt(1));
@@ -1538,6 +1651,8 @@ try{
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let boolValue = STValue.wrapBoolean(true);
 let isBool = boolValue.isBoolean(); // true
 let numValue = STValue.wrapInt(1);
@@ -1580,6 +1695,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let byteValue = STValue.wrapByte(127);
 let isByte = byteValue.isByte(); // true
 let intValue = STValue.wrapInt(42);g
@@ -1621,6 +1738,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let charValue = STValue.wrapChar('A');
 let isChar = charValue.isChar(); // true
 let strValue = STValue.wrapString("Hello");
@@ -1663,6 +1782,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let shortValue = STValue.wrapShort(32767);
 let isShort = shortValue.isShort(); // true
 let intValue = STValue.wrapInt(32767);
@@ -1705,6 +1826,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intValue = STValue.wrapInt(44);
 let isInt = intValue.isInt(); // true
 let longValue = STValue.wrapLong(1024);
@@ -1747,6 +1870,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let longValue = STValue.wrapLong(1024);
 let isLong = longValue.isLong(); // true
 let intValue = STValue.wrapInt(44);
@@ -1789,6 +1914,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let floatValue = STValue.wrapFloat(3.14);
 let isFloat = floatValue.isFloat(); // true
 let intValue = STValue.wrapInt(42);
@@ -1831,6 +1958,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let doubleValue = STValue.wrapNumber(3.14);
 let isNumber = doubleValue.isNumber(); // true
 let intValue = STValue.wrapInt(42);
@@ -1878,6 +2007,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_example.Student');
 let subStudentCls = STValue.findClass('stvalue_example.SubStudent');
 let isAssignable = STValue.typeIsAssignableFrom(subStudentCls, studentCls); // true
@@ -1894,6 +2025,8 @@ export class SubStudent extends Student {}
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Arguments Number
     let isAssignable = STValue.typeIsAssignableFrom(subStudentCls);
@@ -1928,6 +2061,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_check.Student');
 // 调用类构造函数，签名为无传参无返回值
 let stuObj = studentCls.classInstantiate(':', []);
@@ -1984,6 +2119,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_instance.Student');
 let clsObj1 = studentCls.classInstantiate(':', []);
 let obj1Age = clsObj1.objectGetProperty('age', SType.INT).unwrapToNumber(); // 0
@@ -2006,6 +2143,8 @@ export class Student {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Type
     studentCls.classInstantiate(':', STValue.wrapNumber(1));
@@ -2040,6 +2179,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_instance.Instance');
 // 创建的SType.BOOLEAN类型数组boolArray初始长度为5，初始值为false
 let boolArray = STValue.newFixedArrayPrimitive(5, SType.BOOLEAN);
@@ -2071,6 +2212,8 @@ export namespace Instance {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Type
     STValue.newFixedArrayPrimitive(5, SType.REFERENCE);
@@ -2108,6 +2251,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let ns = STValue.findNamespace('stvalue_instance.Instance');
 let intClass = STValue.findClass('std.core.Int');
 let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(5)]);
@@ -2140,6 +2285,8 @@ export namespace Instance {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid InitialElement
     STValue.newFixedArrayReference(999, intClass, [STValue.getNull()]);
@@ -2173,6 +2320,8 @@ STValue静态方法，用于创建一个指定长度的新动态数组，并使�
 **示例：**
 
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(0)]);
 // 传入对象为Int引用类型
 let intArray = STValue.newArray(5, intObj); // [0, 0, 0, 0, 0]
@@ -2184,6 +2333,8 @@ let intArray = STValue.newArray(5, intObj); // [0, 0, 0, 0, 0]
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid InitialElement
     STValue.newArray(999, STValue.wrapInt(123));
@@ -2202,6 +2353,7 @@ try {
 `namespaceInvokeFunction(functionName: string, signature: string, args: STValue[]): STValue`
 
 用于在命名空间中调用指定函数，接受三个参数：函数名称、函数签名和参数数组，返回函数调用的结果。主要作用是执行命名空间中的全局函数或静态函数，支持带参数的函数调用，如果函数不存在、签名不匹配或参数错误，会抛出异常。
+此外，不支持调用静态中使用overload关键字定义的重载函数（`overload foo {foo1, foo2}`）。
 
 **参数：** 
 
@@ -2222,6 +2374,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
@@ -2261,6 +2415,7 @@ try {
 `functionalObjectInvoke(args: STValue[]): STValue`
 
 用于调用函数式对象（如lambda表达式或函数对象），接受一个参数数组（必须为引用类型如果需要使用primitive需要事先装箱），返回函数调用的结果。主要作用是执行函数式对象，支持带参数的调用，如果参数非引用类型或函数对象无效，会抛出异常。
+此外，不支持调用静态中使用overload关键字定义的重载函数（`overload foo {foo1, foo2}`）。
 
 **参数：** 
 
@@ -2278,6 +2433,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let getNumberFn = nsp.namespaceGetVariable('getNumberFn', SType.REFERENCE); // 获取的函数式对象getNumberFn为引用类型
 let numRes = getNumberFn.functionalObjectInvoke([]); // 函数调用结果numRes是装箱后的引用类型
@@ -2307,6 +2464,8 @@ export namespace Invoke {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Function Instance
     STValue.getUndefined().functionalObjectInvoke([]);
@@ -2324,7 +2483,7 @@ try {
 `objectInvokeMethod(name: string, signature: string, args: STValue[]): STValue`
 
 用于动态调用对象的方法，接受三个参数：方法名称、方法签名以及参数数组，返回方法调用的结果。主要作用是执行对象的实例方法，支持带参数的方法调用，如果方法不存在、签名不匹配或参数错误，会抛出异常。
-
+此外，不支持调用静态中使用overload关键字定义的重载函数（`overload foo {foo1, foo2}`）。
 
 **参数：** 
 
@@ -2344,6 +2503,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 // 类实例化函数，函数签名表示有两个入参分别为int和String类型，无返回值
 let clsObj = studentCls.classInstantiate('iC{std.core.String}:', [STValue.wrapInt(18), STValue.wrapString('stu1')]);
@@ -2378,6 +2539,8 @@ export class Student {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Parameter Type
     subClsObj.objectInvokeMethod('setStudentAge', 'i:', [[STValue.getUndefined()]]);
@@ -2394,6 +2557,7 @@ try {
 `classInvokeStaticMethod(name: string, signature: string, args: STValue[]): STValue`
 
 用于调用类的静态方法，接受三个参数：方法名称、方法签名和参数数组，返回方法调用的结果。主要作用是执行类的静态方法，支持带参数的方法调用，如果方法不存在、签名不匹配或参数错误，会抛出异常。
+此外，不支持调用静态中使用overload关键字定义的重载函数（`overload foo {foo1, foo2}`）。
 
 **参数：** 
 
@@ -2413,6 +2577,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 let stuId = studentCls.classInvokeStaticMethod('getStudentId', ':i', []);
 let unwrapStuId = stuId.unwrapToNumber(); // 999
@@ -2441,6 +2607,8 @@ export class Student {
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Class Instance
     STValue.getUndefined().classInvokeStaticMethod('setUId', 's:', []);
@@ -2472,6 +2640,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intValue = STValue.wrapInt(42);
 let num = intValue.unwrapToNumber(); // 42
 ```
@@ -2482,6 +2652,8 @@ let num = intValue.unwrapToNumber(); // 42
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2512,6 +2684,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let strValue = STValue.wrapString("Hello World");
 let str = strValue.unwrapToString(); // "Hello World"
 ```
@@ -2522,6 +2696,8 @@ let str = strValue.unwrapToString(); // "Hello World"
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2552,6 +2728,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let boolValue = STValue.wrapBoolean(true);
 let bool = boolValue.unwrapToBoolean(); // true
 let intValue = STValue.wrapInt(1);
@@ -2566,6 +2744,8 @@ let bool2 = zeroValue.unwrapToBoolean(); // false
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2596,6 +2776,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let bigIntValue = STValue.wrapBigInt(12345678901234567890n); 
 let bigInt = bigIntValue.unwrapToBigInt(); // 12345678901234567890n
 ```
@@ -2606,6 +2788,8 @@ let bigInt = bigIntValue.unwrapToBigInt(); // 12345678901234567890n
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Type
     let magicSTValueNull = STValue.getNull();
@@ -2643,6 +2827,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let byteValue = STValue.wrapByte(127);
 let isByte = byteValue.isByte(); // true
 ```
@@ -2653,6 +2839,8 @@ let isByte = byteValue.isByte(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     let byteValue = STValue.wrapByte(1000);
@@ -2687,6 +2875,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let charValue = STValue.wrapChar('A');
 let isChar = charValue.isChar(); // true
 ```
@@ -2697,6 +2887,8 @@ let isChar = charValue.isChar(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Input String Length
     let charValue = STValue.wrapChar('123');
@@ -2731,6 +2923,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let shortValue = STValue.wrapShort(32767);
 let isShort = shortValue.isShort(); // true
 ```
@@ -2740,6 +2934,8 @@ let isShort = shortValue.isShort(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     let shortValue = STValue.wrapShort(100000);
@@ -2774,6 +2970,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let intValue = STValue.wrapInt(123);
 let isInt = intValue.isInt(); // true
 ```
@@ -2783,6 +2981,8 @@ let isInt = intValue.isInt(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     let intValue = STValue.wrapInt(2147483648);
@@ -2818,6 +3018,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let longValue = STValue.wrapLong(123);
 let isLong = longValue.isLong(); // true
 
@@ -2831,6 +3033,8 @@ let isLong = longValue.isLong(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Out of Range
     const MIN_LONG = -(1n << 63n);
@@ -2866,6 +3070,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let floatValue = STValue.wrapFloat(3.14);
 let isFloat = floatValue.isFloat(); // true
 ```
@@ -2875,6 +3081,8 @@ let isFloat = floatValue.isFloat(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let floatValue = STValue.wrapFloat();
@@ -2910,6 +3118,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let doubleValue = STValue.wrapNumber(3.14);
 let isDouble = doubleValue.isNumber(); // true
 ```
@@ -2920,6 +3130,8 @@ let isDouble = doubleValue.isNumber(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let doubleValue = STValue.wrapNumber();
@@ -2954,6 +3166,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let boolValue = STValue.wrapBoolean(true);
 let isBool = boolValue.isBoolean(); // true
 ```
@@ -2964,6 +3178,8 @@ let isBool = boolValue.isBoolean(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let boolValue = STValue.wrapBoolean();
@@ -2998,6 +3214,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let strValue = STValue.wrapString("Hello World");
 let isStr = strValue.isString(); // true
 ```
@@ -3008,6 +3226,8 @@ let isStr = strValue.isString(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let strValue = STValue.wrapString();
@@ -3043,6 +3263,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let stBigInt = STValue.wrapBigInt(12345678901234567890n);
 let isBigInt = stBigInt.isBigInt(); // true
 ```
@@ -3053,6 +3275,8 @@ let isBigInt = stBigInt.isBigInt(); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let stBigInt = STValue.wrapBigInt();
@@ -3083,6 +3307,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let stNull = STValue.getNull();
 let isNull = stNull.isNull(); // true
 let stNull1 = STValue.getNull();
@@ -3095,6 +3321,8 @@ stNull === stNull1; // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let stNull = STValue.getNull(1);
@@ -3103,7 +3331,7 @@ try {
     console.log(e.message);
 }
 // ArkTS Compiler Error
-// Expected 1 Arguments, bug got 0.
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -3125,6 +3353,8 @@ try {
 
 ```typescript
 // ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 let undefValue = STValue.getUndefined();
 let isUndef = undefValue.isUndefined(); // true
 let undefValue1 = STValue.getUndefined();
@@ -3137,6 +3367,8 @@ let tst = (undefValue === undefValue1); // true
 
 示例：
 ```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
 try {
     // Invalid Argument Number
     let undefValue = STValue.getUndefined(1);
@@ -3145,8 +3377,285 @@ try {
     console.log(e.message);
 }
 // ArkTS Compiler Error
-// Expected 1 Arguments, bug got 0.
+// Expected 0 Arguments, bug got 1.
 ```
 ---
  
- 
+## 7 STValue_ArkTS-Sta_builtin_type
+
+### 7.1 newSTArray
+
+`static newSTArray<T = any>(): st.Array<T>`
+
+用于创建一个st.Array对象，代表ArkTS-Sta内的std.core.Array类型对象，初始容量与std.core.Array无参构造的对象一致。
+
+**参数：**  无
+
+**返回值：** 
+
+|  类型   |            说明            |
+| :-----: | :------------------------: |
+| st.Array | 代表ArkTS-Sta内的std.core.Array类型对象 |
+
+**示例：** 
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stArr: st.Array<string> = STValue.newSTArray<string>();
+```
+
+**报错异常：**
+
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    let stArr: st.Array<string> = STValue.newSTArray<string>(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+### 7.2 isSTArray
+
+`static isSTArray(value: object): boolean`
+
+用于判断一个对象是否代表ArkTS-Sta内的std.core.Array类型对象，返回布尔值结果。
+
+**参数：**  无
+
+**返回值：** 
+
+|  类型   |            说明            |
+| :-----: | :------------------------: |
+| st.Array | 如果是ArkTS-Sta内的std.core.Array类型返回true, 否则返回false |
+
+**示例：** 
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stArr: st.Array<string> = STValue.newSTArray<string>();
+STValue.isSTArray(stArr);  // true
+let otherVal = new Object();
+STValue.isSTArray(otherVal);  // false
+```
+
+**报错异常：**
+
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    STValue.isSTArray(); 
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
+```
+---
+
+### 7.3 newSTMap
+
+`static newSTMap<K = any, V = any>(): st.Map<K, V>`
+
+用于创建一个st.Map对象，代表ArkTS-Sta内的std.core.Map类型对象，初始容量为8。
+
+**参数：**  无
+
+**返回值：** 
+
+|  类型   |            说明            |
+| :-----: | :------------------------: |
+| st.Map | 代表ArkTS-Sta内的std.core.Map类型对象 |
+
+**示例：** 
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stMap: st.Map<string, object> = STValue.newSTMap<string, object>();
+```
+
+**报错异常：**
+
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    let stMap: st.Map<string, object> = STValue.newSTMap<string, object>(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+### 7.4 isSTMap
+
+`static isSTMap(value: object): boolean`
+
+用于判断一个对象是否代表ArkTS-Sta内的std.core.Map类型对象，返回布尔值结果。
+
+**参数：**  
+| 参数名 |  类型  | 必填 |       说明       |
+| :----: | :----: | :--: | :--------------: |
+| value  | object |  是  | 要判断的对象 |
+
+**返回值：** 
+
+|  类型   |            说明            |
+| :-----: | :------------------------: |
+| boolean | 如果是ArkTS-Sta内的std.core.Map类型返回true, 否则返回false |
+
+**示例：** 
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stMap: st.Map<string, object> = STValue.newSTMap<string, object>();
+STValue.isSTMap(stMap);  // true
+let otherVal = new Object();
+STValue.isSTMap(otherVal);  // false
+```
+
+**报错异常：**
+
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
+    STValue.isSTMap(); 
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
+```
+---
+
+### 7.5 newSTSet
+
+`static newSTSet<T = any>(): st.Set<T>`
+
+用于创建一个st.Set对象，代表ArkTS-Sta内的std.core.Set类型对象，初始容量为8。
+
+**参数：**  无
+
+**返回值：** 
+
+|  类型   |            说明            |
+| :-----: | :------------------------: |
+| st.Set | 代表ArkTS-Sta内的std.core.Set类型对象 |
+
+**示例：** 
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stSet: st.Set<string> = STValue.newSTSet<string>();
+```
+
+**报错异常：**
+
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+try {
+    let stSet: st.Set<string> = STValue.newSTSet<string>(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
+```
+---
+
+### 7.4 isSTSet
+
+`static isSTSet(value: object): boolean`
+
+用于判断一个对象是否代表ArkTS-Sta内的std.core.Map类型对象，返回布尔值结果。
+
+**参数：**  
+| 参数名 |  类型  | 必填 |       说明       |
+| :----: | :----: | :--: | :--------------: |
+| value  | object |  是  | 要判断的对象 |
+
+**返回值：** 
+
+|  类型   |            说明            |
+| :-----: | :------------------------: |
+| boolean | 如果是ArkTS-Sta内的std.core.Set类型返回true, 否则返回false |
+
+**示例：** 
+
+```typescript
+// ArkTS-Dyn
+import {STValue, SType} from "static.@ohos.lang.interop";
+import st from "static.@ohos.lang.interop";
+
+let stSet: st.Set<string> = STValue.newSTSet<string>();
+STValue.isSTSet(stSet);  // true
+let otherVal = new Object();
+STValue.isSTSet(otherVal);  // false
+```
+
+**报错异常：**
+
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+import {STValue, SType} from "static.@ohos.lang.interop";
+
+try {
+    STValue.isSTSet(); 
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
+```
+---
