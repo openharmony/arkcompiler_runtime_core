@@ -337,10 +337,8 @@
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
 
-#32603
-07.expressions/14.chaining_operator/condition_compile_time.ets
-
 # 33235
+07.expressions/14.chaining_operator/condition_compile_time_compile.ets
 07.expressions/14.chaining_operator/expression_not_nullish_0.ets
 07.expressions/14.chaining_operator/expression_not_nullish_1.ets
 07.expressions/14.chaining_operator/expression_not_nullish_2.ets
