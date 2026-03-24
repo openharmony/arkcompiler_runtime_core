@@ -234,7 +234,7 @@ cases:
       let type_from_fixed_array = Class.from<FixedArray<number>>();
       let type_of_fixed_array = Class.of(new FixedArray<number>(1));
       arktest.assertEQ(type_from_fixed_array, type_of_fixed_array);
-      arktest.assertEQ(type_from_fixed_array.getName(), "f64[]");
+      arktest.assertEQ(type_from_fixed_array.getName(), "std.core.Double[]");
   - desc: How to get double from Awaited<number> via reflection.
     logic: |-
       let type_from_awaited = Class.from<Awaited<number>>();

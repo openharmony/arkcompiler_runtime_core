@@ -25,8 +25,8 @@ export final class AsyncContext {
     private returnValue: Promise<Any> | undefined = undefined;
 
     private refValues: FixedArray<Any> | undefined = undefined;
-    private primValues: FixedArray<long> | undefined = undefined;
-    private frameOffsets: FixedArray<short> | undefined = undefined;
+    private primValues: ValueArray<long> | undefined = undefined;
+    private frameOffsets: ValueArray<short> | undefined = undefined;
 
     private refCount: long;
     private primCount: long;

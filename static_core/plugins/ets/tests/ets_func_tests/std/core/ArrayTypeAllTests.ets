@@ -73,9 +73,9 @@ function testElementTypePrimitive() {
     const at = Type.of(new FixedArray<boolean>(0)) as ArrayType;
     const et = at.getElementType();
     arktest.assertEQ(
-        'boolean',
+        'Boolean',
         et.getLiteral(),
-        `Expected element literal 'boolean', got '${et.getLiteral()}'`
+        `Expected element literal 'Boolean', got '${et.getLiteral()}'`
     );
 }
 

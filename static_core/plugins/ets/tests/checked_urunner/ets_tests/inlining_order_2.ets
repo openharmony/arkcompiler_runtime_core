@@ -84,7 +84,7 @@ function hot(i:int):int {
 
 function testLoops(): void {
     let N = cold();
-    let arr: FixedArray<int> = new FixedArray<int>(N);
+    let arr: ValueArray<int> = new ValueArray<int>(N);
 
     for (let i:int = 0; i < N; i++) {
         if (i % 4 != 0) {

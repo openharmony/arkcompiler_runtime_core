@@ -406,7 +406,7 @@ bool PandaEtsVM::InitializeFinish()
         }
     }
     // Initialize platform classes only if intrinsics were loaded, because static initializers might call them
-    if (Runtime::GetOptions().ShouldInitializeIntrinsics()) {
+    if (!Runtime::GetOptions().IsMockRuntime() && Runtime::GetOptions().ShouldInitializeIntrinsics()) {
         classLinker_->GetEtsClassLinkerExtension()->InitializeFinish();
     }
     return true;

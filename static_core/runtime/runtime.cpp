@@ -1062,7 +1062,9 @@ void Runtime::SetThreadClassPointers()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    classLinker_->InitializeRoots(thread);
+    if (!Runtime::GetOptions().IsMockRuntime()) {
+        classLinker_->InitializeRoots(thread);
+    }
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {
         thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::LINE_STRING));

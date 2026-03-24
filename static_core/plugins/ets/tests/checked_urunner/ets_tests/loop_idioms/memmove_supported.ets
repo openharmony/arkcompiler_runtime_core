@@ -106,8 +106,8 @@ let GLOBAL_OFFS: int = 1;
 
 class TestSupported {
     static testPatternMatchOffsets1(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         for (let i: int = 0; i < src.length; i++) {
             dst[i + offs] = src[i];
@@ -126,8 +126,8 @@ class TestSupported {
     }
 
     static testPatternMatchOffsets2(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         for (let i: int = offs; i < dst.length; i++) {
             dst[i] = src[i - offs];
@@ -146,8 +146,8 @@ class TestSupported {
     }
 
     static testPatternMatchOffsets3(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         for (let i: int = 0; i < src.length; i++) {
             dst[i + offs] = src[i];
@@ -166,8 +166,8 @@ class TestSupported {
     }
 
     static testPatternMatchOffsets4(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         for (let i: int = offs; i < dst.length; i++) {
             dst[i] = src[i - offs];
@@ -186,8 +186,8 @@ class TestSupported {
     }
 
     static testPatternMatchOffsetsSameNegOffset(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         for (let i: int = 1; i < src.length; i++) {
             dst[i - 1] = src[i - 1];
         }
@@ -204,8 +204,8 @@ class TestSupported {
     }
 
     static testPatternMatchOffsetsNegOffsets(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         for (let i: int = 2; i < src.length + 1; i++) {
             dst[i - 1] = src[i - 2];
         }

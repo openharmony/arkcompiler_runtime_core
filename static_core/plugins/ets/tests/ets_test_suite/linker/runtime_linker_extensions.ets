@@ -78,7 +78,7 @@ class Test {
         Test.testEmptyLinker(linker);
     }
 
-    private static native loadFile(path: string): FixedArray<byte> | undefined;
+    private static native loadFile(path: string): ValueArray<byte> | undefined;
 
     private static getAdditionalFilesList(): string[] {
         let procManager = new StdProcess.ProcessManager();
@@ -87,8 +87,8 @@ class Test {
         return abcFiles.split(":");
     }
 
-    private static loadRawFiles(paths: string[]): Array<FixedArray<byte>> {
-        const rawFiles = Array.create<FixedArray<byte>>(paths.length, new FixedArray<byte>(0));
+    private static loadRawFiles(paths: string[]): Array<ValueArray<byte>> {
+        const rawFiles = Array.create<ValueArray<byte>>(paths.length, new ValueArray<byte>(0));
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
             arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);

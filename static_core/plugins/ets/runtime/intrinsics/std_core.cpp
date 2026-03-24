@@ -491,28 +491,4 @@ extern "C" void StdSystemDumpUhandledFailedJobs()
     coro->ProcessUnhandledFailedJobs();
 }
 
-static void SetPrimitiveFieldInClass(const char *name, ClassRoot root)
-{
-    auto *ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(panda_file::SourceLang::ETS);
-    auto *klass = EtsClass::FromRuntimeClass(ext->GetClassRoot(ClassRoot::CLASS));
-    auto *primCls = EtsClass::FromRuntimeClass(ext->GetClassRoot(root));
-    EtsField *primField = klass->GetStaticFieldIDByName(name, nullptr);
-    ASSERT(primField != nullptr);
-    klass->SetStaticFieldObject(primField, reinterpret_cast<EtsObject *>(primCls));
-}
-
-extern "C" void InitializePrimitivesInClass()
-{
-    SetPrimitiveFieldInClass("PRIMITIVE_BOOLEAN", ClassRoot::U1);
-    SetPrimitiveFieldInClass("PRIMITIVE_BYTE", ClassRoot::I8);
-    SetPrimitiveFieldInClass("PRIMITIVE_CHAR", ClassRoot::U16);
-    SetPrimitiveFieldInClass("PRIMITIVE_SHORT", ClassRoot::I16);
-    SetPrimitiveFieldInClass("PRIMITIVE_INT", ClassRoot::I32);
-    SetPrimitiveFieldInClass("PRIMITIVE_LONG", ClassRoot::I64);
-    SetPrimitiveFieldInClass("PRIMITIVE_FLOAT", ClassRoot::F32);
-    SetPrimitiveFieldInClass("PRIMITIVE_DOUBLE", ClassRoot::F64);
-    SetPrimitiveFieldInClass("PRIMITIVE_NUMBER", ClassRoot::F64);
-    SetPrimitiveFieldInClass("PRIMITIVE_VOID", ClassRoot::V);
-}
-
 }  // namespace ark::ets::intrinsics

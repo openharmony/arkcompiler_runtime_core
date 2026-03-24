@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-function getArray(): FixedArray<char> {
-    let a: FixedArray<char> = [c'a', c'b', c'c', c'd', c'e']
+function getArray(): ValueArray<char> {
+    let a: ValueArray<char> = [c'a', c'b', c'c', c'd', c'e']
     return a
 }
 
-function checkArray(a: FixedArray<char>): boolean {
-    let b: FixedArray<char> = [c'a', c'b', c'x', c'y', c'z']
+function checkArray(a: ValueArray<char>): boolean {
+    let b: ValueArray<char> = [c'a', c'b', c'x', c'y', c'z']
     return compareCharArrays(a, b) == 0
 }
 
-function changeArray(arr: FixedArray<char>): FixedArray<char> {
+function changeArray(arr: ValueArray<char>): ValueArray<char> {
     arr[0] = c'a'
     arr[1] = c'b'
     arr[2] = c'x'
@@ -32,7 +32,7 @@ function changeArray(arr: FixedArray<char>): FixedArray<char> {
     return arr
 }
 
-function compareCharArrays(a: FixedArray<char>, b: FixedArray<char>): int {
+function compareCharArrays(a: ValueArray<char>, b: ValueArray<char>): int {
     for (let i: int = 0; i < a.length; ++i) {
         if (a[i] != b[i]) {
             return 1
@@ -41,7 +41,7 @@ function compareCharArrays(a: FixedArray<char>, b: FixedArray<char>): int {
     return 0
 }
 
-function getSpecialArray(): FixedArray<char> {
-    let aChar: FixedArray<char> = [c'\0', c'\0', c'\n', c'\r', c'\t', c'\b', c'\a', c'\v', c'\f', c'\0']
+function getSpecialArray(): ValueArray<char> {
+    let aChar: ValueArray<char> = [c'\0', c'\0', c'\n', c'\r', c'\t', c'\b', c'\a', c'\v', c'\f', c'\0']
     return aChar
 }

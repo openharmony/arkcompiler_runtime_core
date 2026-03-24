@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<byte> = [1, 2, 3, 4, 5]
+    public static array: ValueArray<byte> = [1, 2, 3, 4, 5]
 
     public static changeStaticArray() {
         ArrayClass.array[2] = 22 as byte
@@ -32,18 +32,18 @@ class ArrayClass {
     }
 }
 
-function getArray(): FixedArray<byte> {
-    let a: FixedArray<byte> = [1, 2, 3, 4, 5]
+function getArray(): ValueArray<byte> {
+    let a: ValueArray<byte> = [1, 2, 3, 4, 5]
     return a
 }
 
-function checkArray(a: FixedArray<byte>): boolean {
+function checkArray(a: ValueArray<byte>): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
 
-function getSpecialArray(): FixedArray<byte> {
+function getSpecialArray(): ValueArray<byte> {
 	let min: byte = -128
 	let max: byte = 127
-    let a: FixedArray<byte> = [min, max, 0, 0, 0]
+    let a: ValueArray<byte> = [min, max, 0, 0, 0]
     return a
 }

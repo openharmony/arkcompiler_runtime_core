@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<double> = [1.0, 2.0, 3.0, 4.0, 5.0]
+    public static array: ValueArray<double> = [1.0, 2.0, 3.0, 4.0, 5.0]
 
     public static changeStaticArray() {
         ArrayClass.array[2] = 22.0
@@ -32,19 +32,19 @@ class ArrayClass {
     }
 }
 
-function getArray(): FixedArray<double> {
-    let a: FixedArray<double> = [1.0, 2.0, 3.0, 4.0, 5.0]
+function getArray(): ValueArray<double> {
+    let a: ValueArray<double> = [1.0, 2.0, 3.0, 4.0, 5.0]
     return a
 }
 
-function checkArray(a: FixedArray<double>): boolean {
+function checkArray(a: ValueArray<double>): boolean {
     return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
-function getSpecialArray(): FixedArray<double> {
+function getSpecialArray(): ValueArray<double> {
 	let min: double = Number.MIN_VALUE
 	let max: double = Number.MAX_VALUE
 	let minus: double = -Number.MAX_VALUE
-    let a: FixedArray<double> = [min, max, minus, 0, 0, 0]
+    let a: ValueArray<double> = [min, max, minus, 0, 0, 0]
     return a
 }

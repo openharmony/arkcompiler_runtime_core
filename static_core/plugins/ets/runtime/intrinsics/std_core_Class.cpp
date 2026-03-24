@@ -610,4 +610,28 @@ EtsBoolean StdCoreClassIsPrimitive(EtsClass *cls)
     return ToEtsBoolean(cls->IsPrimitive());
 }
 
+extern "C" void StdCoreClassInitializeStatics()
+{
+    auto ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(panda_file::SourceLang::ETS);
+    auto classClass = EtsClass::FromRuntimeClass(ext->GetClassRoot(ClassRoot::CLASS));
+
+    auto const initStaticPrimitiveRoot = [classClass, ext](const char *name, ClassRoot root) {
+        auto primitiveRoot = EtsClass::FromRuntimeClass(ext->GetClassRoot(root));
+        EtsField *field = classClass->GetStaticFieldIDByName(name, nullptr);
+        ASSERT(field != nullptr);
+        classClass->SetStaticFieldObject(field, primitiveRoot->AsObject());
+    };
+
+    initStaticPrimitiveRoot("PRIMITIVE_BOOLEAN", ClassRoot::U1);
+    initStaticPrimitiveRoot("PRIMITIVE_BYTE", ClassRoot::I8);
+    initStaticPrimitiveRoot("PRIMITIVE_CHAR", ClassRoot::U16);
+    initStaticPrimitiveRoot("PRIMITIVE_SHORT", ClassRoot::I16);
+    initStaticPrimitiveRoot("PRIMITIVE_INT", ClassRoot::I32);
+    initStaticPrimitiveRoot("PRIMITIVE_LONG", ClassRoot::I64);
+    initStaticPrimitiveRoot("PRIMITIVE_FLOAT", ClassRoot::F32);
+    initStaticPrimitiveRoot("PRIMITIVE_DOUBLE", ClassRoot::F64);
+    initStaticPrimitiveRoot("PRIMITIVE_NUMBER", ClassRoot::F64);
+    initStaticPrimitiveRoot("PRIMITIVE_VOID", ClassRoot::V);
+}
+
 }  // namespace ark::ets::intrinsics

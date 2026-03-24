@@ -33,12 +33,12 @@
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT      /Inlined/
 
-function sum2(a: FixedArray<int>): int {
+function sum2(a: ValueArray<int>): int {
     return a[0] + a[1];
 }
 
 function testAfterChecksElim(): int {
-    let a: FixedArray<int> = new FixedArray<int>(2);
+    let a: ValueArray<int> = new ValueArray<int>(2);
     a[0] = 2;
     a[1] = 3;
     return sum2(a);

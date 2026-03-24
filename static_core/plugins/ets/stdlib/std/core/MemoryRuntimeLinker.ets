@@ -14,16 +14,23 @@
  */
 
 package std.core;
+import { stub } from "arkruntime"
 
 /**
  * @class RuntimeLinker backed by in-memory ABC files.
  */
 export class MemoryRuntimeLinker extends AbcRuntimeLinker {
-    public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>>) {
+    public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>> | Array<ValueArray<byte>>) {
         super(parentLinker, [])
         const abcFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(Double.toInt(rawAbcFiles.length))
-        for (let i = 0; i < rawAbcFiles.length; i++) {
-            abcFiles[i] = AbcFile.loadFromMemory(this, rawAbcFiles[i])
+        let i = 0
+        for (const rawFile of rawAbcFiles) {
+            if (rawFile instanceof ValueArray<byte>) {
+                abcFiles[i] = AbcFile.loadFromMemory(this, rawFile)
+            } else {
+                abcFiles[i] = AbcFile.loadFromMemory(this, rawFile as FixedArray<byte>)
+            }
+            i++
         }
         this.addAbcFiles(abcFiles)
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<boolean> = [true, true, true, true, true]
+    public static array: ValueArray<boolean> = [true, true, true, true, true]
 
     public static changeStaticArray() {
         ArrayClass.array[2] = false
@@ -32,11 +32,11 @@ class ArrayClass {
     }
 }
 
-function getArray(): FixedArray<boolean> {
-    let a: FixedArray<boolean> = [true, true, true, true, true]
+function getArray(): ValueArray<boolean> {
+    let a: ValueArray<boolean> = [true, true, true, true, true]
     return a
 }
 
-function checkArray(a: FixedArray<boolean>): boolean {
+function checkArray(a: ValueArray<boolean>): boolean {
     return a[0] == true && a[1] == true && a[2] == true && a[3] == false && a[4] == true
 }

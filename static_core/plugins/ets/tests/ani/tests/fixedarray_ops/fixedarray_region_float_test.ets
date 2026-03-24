@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
+    public static array: ValueArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
 
     public static changeStaticArray() {
         ArrayClass.array[2] = 22.0f
@@ -33,19 +33,19 @@ class ArrayClass {
     }
 }
 
-function getArray(): FixedArray<float> {
-    let a: FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
+function getArray(): ValueArray<float> {
+    let a: ValueArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
     return a
 }
 
-function checkArray(a: FixedArray<float>): boolean {
+function checkArray(a: ValueArray<float>): boolean {
     return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
-function getSpecialArray(): FixedArray<float> {
+function getSpecialArray(): ValueArray<float> {
 	let min: float = new Float(1.40129846432481707e-45)
 	let max: float = new Float(3.40282346638528860e+38)
 	let minus: float = new Float(-3.40282346638528860e+38)
-    let a: FixedArray<float> = [min, max, minus, 0.0f, 0.0f, 0.0f]
+    let a: ValueArray<float> = [min, max, minus, 0.0f, 0.0f, 0.0f]
     return a
 }

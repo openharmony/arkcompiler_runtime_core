@@ -35,7 +35,7 @@ class F {
     }
     foo(x: double, y: A, z: B): E { return E.R }
     foo(p: Partial<A>, a: Array<B>) {}
-    foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+    foo(u: number | string | ValueArray<char>): (E | B) | Partial<A> { return E.R }
     foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     foo1<T>(u: T) {}
     foo1<T>(): T { return 'Hello' as T}
@@ -85,7 +85,7 @@ class G {
     }
     static foo(x: double, y: A, z: B): E { return E.R }
     static foo(p: Partial<A>, a: Array<B>) {}
-    static foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+    static foo(u: number | string | ValueArray<char>): (E | B) | Partial<A> { return E.R }
     static foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     static foo1<T>(u: T) {}
     static foo1<T>(): T { return 'Hello' as T }
@@ -117,7 +117,7 @@ function fooNever(): never {
 }
 function foo(x: double, y: A, z: B): E { return E.R }
 function foo(p: Partial<A>, a: Array<B>) {}
-function foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+function foo(u: number | string | ValueArray<char>): (E | B) | Partial<A> { return E.R }
 function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
 function foo1<T>(u: T) {}
 function foo1<T>(): T { return 'Hello' as T }
@@ -154,7 +154,7 @@ namespace rls {
     }
     function foo(x: double, y: A, z: B): E { return E.R }
     function foo(p: Partial<A>, a: Array<B>) {}
-    function foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+    function foo(u: number | string | ValueArray<char>): (E | B) | Partial<A> { return E.R }
     function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     function foo1<T>(u: T) {}
     function foo1<T>(): T { return 'Hello' as T }

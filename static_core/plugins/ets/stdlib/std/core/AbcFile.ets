@@ -50,7 +50,11 @@ export final class AbcFile {
      * 
      * @throws errors happened on loading ABC file. 
      */ 
-    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile	 
+    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: ValueArray<byte>): AbcFile
+
+    public static loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile {
+        return AbcFile.loadFromMemory(runtimeLinker, arkruntime.stub.toValueArray(rawFile))
+    }
 
     /** 
      * Loads class from ABC file. 

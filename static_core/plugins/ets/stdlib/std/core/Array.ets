@@ -384,7 +384,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: int) => U): Array<U> {
         const ret: Array<U> = new Array<U>()
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1)
+        const idx : ValueArray<int> = new ValueArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
             ret.push(mapfn(x, idx[0]))

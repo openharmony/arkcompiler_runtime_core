@@ -447,6 +447,10 @@ export class JSON {
         return s.toString()
     }
 
+    public static stringify(d: ValueArray<byte>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
+    }
+
     /**
      * Converts chars array to JSON format
      *
@@ -471,6 +475,10 @@ export class JSON {
         return s.toString()
     }
 
+    public static stringify(d: ValueArray<char>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
+    }
+
     /**
      * Converts shorts array to JSON format
      *
@@ -490,6 +498,10 @@ export class JSON {
         }
         s.append(']')
         return s.toString()
+    }
+
+    public static stringify(d: ValueArray<short>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
     }
 
     /**
@@ -513,6 +525,10 @@ export class JSON {
         return s.toString()
     }
 
+    public static stringify(d: ValueArray<int>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
+    }
+
     /**
      * Converts longs array to JSON format
      *
@@ -532,6 +548,10 @@ export class JSON {
         }
         s.append(']')
         return s.toString()
+    }
+
+    public static stringify(d: ValueArray<long>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
     }
 
     /**
@@ -555,6 +575,10 @@ export class JSON {
         return s.toString()
     }
 
+    public static stringify(d: ValueArray<float>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
+    }
+
     /**
      * Converts doubles array to JSON format
      *
@@ -574,6 +598,10 @@ export class JSON {
         }
         s.append(']')
         return s.toString()
+    }
+
+    public static stringify(d: ValueArray<double>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
     }
 
     /**
@@ -598,6 +626,10 @@ export class JSON {
         }
         s.append(']')
         return s.toString()
+    }
+
+    public static stringify(d: ValueArray<boolean>): String {
+        return JSON.stringify(arkruntime.stub.toFixedArray(d))
     }
 
     public static stringify(d: Array<Number>): String {
@@ -1081,9 +1113,9 @@ interface ArrayHandle {
 }
 
 class BoolArrayHandle implements ArrayHandle {
-    private arr: FixedArray<boolean>
+    private arr: ValueArray<boolean>
 
-    public constructor(arr: FixedArray<boolean>) {
+    public constructor(arr: ValueArray<boolean>) {
         this.arr = arr
     }
 
@@ -1101,9 +1133,9 @@ class BoolArrayHandle implements ArrayHandle {
 }
 
 class ByteArrayHandle implements ArrayHandle {
-    private arr: FixedArray<byte>
+    private arr: ValueArray<byte>
 
-    public constructor(arr: FixedArray<byte>) {
+    public constructor(arr: ValueArray<byte>) {
         this.arr = arr
     }
 
@@ -1121,9 +1153,9 @@ class ByteArrayHandle implements ArrayHandle {
 }
 
 class CharArrayHandle implements ArrayHandle {
-    private arr: FixedArray<char>
+    private arr: ValueArray<char>
 
-    public constructor(arr: FixedArray<char>) {
+    public constructor(arr: ValueArray<char>) {
         this.arr = arr
     }
 
@@ -1141,9 +1173,9 @@ class CharArrayHandle implements ArrayHandle {
 }
 
 class ShortArrayHandle implements ArrayHandle {
-    private arr: FixedArray<short>
+    private arr: ValueArray<short>
 
-    public constructor(arr: FixedArray<short>) {
+    public constructor(arr: ValueArray<short>) {
         this.arr = arr
     }
 
@@ -1161,9 +1193,9 @@ class ShortArrayHandle implements ArrayHandle {
 }
 
 class IntArrayHandle implements ArrayHandle {
-    private arr: FixedArray<int>
+    private arr: ValueArray<int>
 
-    public constructor(arr: FixedArray<int>) {
+    public constructor(arr: ValueArray<int>) {
         this.arr = arr
     }
 
@@ -1181,9 +1213,9 @@ class IntArrayHandle implements ArrayHandle {
 }
 
 class LongArrayHandle implements ArrayHandle {
-    private arr: FixedArray<long>
+    private arr: ValueArray<long>
 
-    public constructor(arr: FixedArray<long>) {
+    public constructor(arr: ValueArray<long>) {
         this.arr = arr
     }
 
@@ -1201,9 +1233,9 @@ class LongArrayHandle implements ArrayHandle {
 }
 
 class FloatArrayHandle implements ArrayHandle {
-    private arr: FixedArray<float>
+    private arr: ValueArray<float>
 
-    public constructor(arr: FixedArray<float>) {
+    public constructor(arr: ValueArray<float>) {
         this.arr = arr
     }
 
@@ -1221,9 +1253,9 @@ class FloatArrayHandle implements ArrayHandle {
 }
 
 class DoubleArrayHandle implements ArrayHandle {
-    private arr: FixedArray<double>
+    private arr: ValueArray<double>
 
-    public constructor(arr: FixedArray<double>) {
+    public constructor(arr: ValueArray<double>) {
         this.arr = arr
     }
 
@@ -1341,22 +1373,22 @@ class JSONWriter {
         } else if (obj instanceof Object) {
             const objCls = Class.of(obj)
             if (objCls.isFixedArray()) {
-                if (obj instanceof FixedArray<boolean>) {
-                    this.writeArrayHandleValue(new BoolArrayHandle(obj))
-                } else if (obj instanceof FixedArray<byte>) {
-                    this.writeArrayHandleValue(new ByteArrayHandle(obj))
-                } else if (obj instanceof FixedArray<char>) {
-                    this.writeArrayHandleValue(new CharArrayHandle(obj))
-                } else if (obj instanceof FixedArray<short>) {
-                    this.writeArrayHandleValue(new ShortArrayHandle(obj))
-                } else if (obj instanceof FixedArray<int>) {
-                    this.writeArrayHandleValue(new IntArrayHandle(obj))
-                } else if (obj instanceof FixedArray<long>) {
-                    this.writeArrayHandleValue(new LongArrayHandle(obj))
-                } else if (obj instanceof FixedArray<float>) {
-                    this.writeArrayHandleValue(new FloatArrayHandle(obj))
-                } else if (obj instanceof FixedArray<double>) {
-                    this.writeArrayHandleValue(new DoubleArrayHandle(obj))
+                if (obj instanceof ValueArray<boolean>) {
+                    this.writeArrayHandleValue(new BoolArrayHandle(obj as ValueArray<boolean>))
+                } else if (obj instanceof ValueArray<byte>) {
+                    this.writeArrayHandleValue(new ByteArrayHandle(obj as ValueArray<byte>))
+                } else if (obj instanceof ValueArray<char>) {
+                    this.writeArrayHandleValue(new CharArrayHandle(obj as ValueArray<char>))
+                } else if (obj instanceof ValueArray<short>) {
+                    this.writeArrayHandleValue(new ShortArrayHandle(obj as ValueArray<short>))
+                } else if (obj instanceof ValueArray<int>) {
+                    this.writeArrayHandleValue(new IntArrayHandle(obj as ValueArray<int>))
+                } else if (obj instanceof ValueArray<long>) {
+                    this.writeArrayHandleValue(new LongArrayHandle(obj as ValueArray<long>))
+                } else if (obj instanceof ValueArray<float>) {
+                    this.writeArrayHandleValue(new FloatArrayHandle(obj as ValueArray<float>))
+                } else if (obj instanceof ValueArray<double>) {
+                    this.writeArrayHandleValue(new DoubleArrayHandle(obj as ValueArray<double>))
                 } else {
                     // NOTE(aantipina): Issue #31995
                     this.writeArrayValue(obj as FixedArray<Any>)

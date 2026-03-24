@@ -19,7 +19,7 @@
 
 package std.core;
 
-import * as arkruntime from 'arkruntime'
+import * as arkruntime from "arkruntime"
 
 /**
  * Provides core functionality of ArkTS runtime.

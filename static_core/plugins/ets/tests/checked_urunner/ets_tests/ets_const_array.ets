@@ -64,7 +64,7 @@ function testConstArrayStr(): int {
 //! RUN             entry: "ets_const_array.ETSGLOBAL::testConstArrayInt"
 
 function constArrayInt(idx: int): int {
-    let a: FixedArray<int> = [5, 8, 13];
+    let a: ValueArray<int> = [5, 8, 13];
     return a[idx];
 }
 

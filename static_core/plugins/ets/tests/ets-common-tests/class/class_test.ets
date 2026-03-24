@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,49 +55,49 @@ class Test {
     private intArrayComponentType(): void {
         const ints: FixedArray<int> = [1, 2]
         const compCls = Class.of(ints).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_INT)
+        arktest.assertEQ(compCls, Class.from<int>())
     }
 
     private longArrayComponentType(): void {
         const longs: FixedArray<long> = [1, 2]
         const compCls = Class.of(longs).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_LONG)
+        arktest.assertEQ(compCls, Class.from<long>())
     }
 
     private doubleArrayComponentType(): void {
         const doubles: FixedArray<double> = [1.0, 2.0]
         const compCls = Class.of(doubles).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_DOUBLE)
+        arktest.assertEQ(compCls, Class.from<double>())
     }
 
     private floatArrayComponentType(): void {
         const floats: FixedArray<float> = [1.0, 2.0]
         const compCls = Class.of(floats).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_FLOAT)
+        arktest.assertEQ(compCls, Class.from<float>())
     }
 
     private byteArrayComponentType(): void {
         const bytes: FixedArray<byte> = [1, 2]
         const compCls = Class.of(bytes).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_BYTE)
+        arktest.assertEQ(compCls, Class.from<byte>())
     }
 
     private shortArrayComponentType(): void {
         const shorts: FixedArray<short> = [1, 2]
         const compCls = Class.of(shorts).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_SHORT)
+        arktest.assertEQ(compCls, Class.from<short>())
     }
 
     private charArrayComponentType(): void {
         const chars: FixedArray<char> = [c'A', c'B']
         const compCls = Class.of(chars).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_CHAR)
+        arktest.assertEQ(compCls, Class.from<char>())
     }
 
     private booleanArrayComponentType(): void {
         const bools: FixedArray<boolean> = [true, false]
         const compCls = Class.of(bools).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.PRIMITIVE_BOOLEAN)
+        arktest.assertEQ(compCls, Class.from<boolean>())
     }
 
     public testClassGetFixedArrayComponentType(): void {
@@ -117,7 +117,7 @@ class Test {
         const arraysCompCls = Class.of(arrays).getFixedArrayComponentType()
         arktest.assertNE(arraysCompCls, undefined)
         arktest.assertNE(arraysCompCls!.getFixedArrayComponentType(), undefined)
-        arktest.assertEQ(arraysCompCls!.getFixedArrayComponentType(), Class.PRIMITIVE_INT)
+        arktest.assertEQ(arraysCompCls!.getFixedArrayComponentType(), Class.from<int>())
     }
 }
 
