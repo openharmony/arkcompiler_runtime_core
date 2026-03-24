@@ -741,6 +741,87 @@ bool Peepholes::PeepholeIstrue([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
             HandleIstrueBoxedClass(klass, input, intrinsic, graph, runtime));
 }
 
+bool Peepholes::PeepholeIntShortToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    ASSERT(intrinsic->GetInput(1U).GetInst()->IsSaveState());
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32 ||
+        !graph->GetRuntime()->IsStringCachesUsed()) {
+        return false;
+    }
+    auto pc = intrinsic->GetPc();
+    auto num = intrinsic->GetInput(0).GetInst();
+    auto numInt = graph->CreateInstCast(DataType::INT64, pc, num, num->GetType());
+    auto newInst = graph->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LONG_TO_STRING_DECIMAL);
+    newInst->SetInputs(graph->GetAllocator(), {{numInt, DataType::INT64},
+                                               {graph->FindOrCreateConstant<uint64_t>(0), DataType::UINT64},
+                                               {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    intrinsic->InsertBefore(numInt);
+    intrinsic->InsertBefore(newInst);
+    intrinsic->ReplaceUsers(newInst);
+    // remove intrinsic to satisfy SaveState checker
+    intrinsic->GetBasicBlock()->RemoveInst(intrinsic);
+    intrinsic->SetNext(newInst->GetNext());
+    return true;
+}
+
+bool Peepholes::PeepholeLongToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    ASSERT(intrinsic->GetInput(1U).GetInst()->IsSaveState());
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32 ||
+        !graph->GetRuntime()->IsStringCachesUsed()) {
+        return false;
+    }
+    auto pc = intrinsic->GetPc();
+    auto num = intrinsic->GetInput(0).GetInst();
+    auto newInst = graph->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LONG_TO_STRING_DECIMAL);
+    newInst->SetInputs(graph->GetAllocator(), {{num, DataType::INT64},
+                                               {graph->FindOrCreateConstant<uint64_t>(0), DataType::UINT64},
+                                               {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    intrinsic->InsertBefore(newInst);
+    intrinsic->ReplaceUsers(newInst);
+    // remove intrinsic to satisfy SaveState checker
+    intrinsic->GetBasicBlock()->RemoveInst(intrinsic);
+    intrinsic->SetNext(newInst->GetNext());
+    return true;
+}
+
+bool Peepholes::PeepholeFloatToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 3U);
+    ASSERT(intrinsic->GetInput(2U).GetInst()->IsSaveState());
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32 ||
+        !graph->GetRuntime()->IsStringCachesUsed()) {
+        return false;
+    }
+    auto radix = intrinsic->GetInput(1U).GetInst();
+    constexpr auto TEN = 10U;
+    if (!(radix->IsConst() && radix->CastToConstant()->GetIntValue() == TEN)) {
+        return false;
+    }
+    auto pc = intrinsic->GetPc();
+    auto num = intrinsic->GetInput(0).GetInst();
+    auto numInt = graph->CreateInstBitcast(DataType::UINT32, pc, num);
+    auto newInst = graph->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_FLOAT_TO_STRING_DECIMAL);
+    newInst->SetInputs(graph->GetAllocator(), {{numInt, DataType::UINT32},
+                                               {graph->FindOrCreateConstant<uint64_t>(0), DataType::UINT64},
+                                               {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    intrinsic->InsertBefore(numInt);
+    intrinsic->InsertBefore(newInst);
+    intrinsic->ReplaceUsers(newInst);
+    // remove intrinsic to satisfy SaveState checker
+    intrinsic->GetBasicBlock()->RemoveInst(intrinsic);
+    intrinsic->SetNext(newInst->GetNext());
+    return true;
+}
+
 bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     ASSERT(intrinsic->GetInputsCount() == 3U);
@@ -758,28 +839,11 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
     auto pc = intrinsic->GetPc();
     auto num = intrinsic->GetInput(0).GetInst();
     auto numInt = graph->CreateInstBitcast(DataType::UINT64, pc, num);
-    Inst *cache = nullptr;
-    void *cachePtr = nullptr;
-    if (!graph->IsAotMode() && (cachePtr = graph->GetRuntime()->GetDoubleToStringCache()) != nullptr) {
-        cache =
-            graph->CreateInstLoadImmediate(DataType::REFERENCE, pc, cachePtr, LoadImmediateInst::ObjectType::OBJECT);
-    } else {
-        auto vm = graph->CreateInstLoadImmediate(DataType::POINTER, pc, Mutator::GetVmOffset(),
-                                                 LoadImmediateInst::ObjectType::TLS_OFFSET);
-        intrinsic->InsertBefore(vm);
-        cache = graph->CreateInstLoad(
-            DataType::REFERENCE, pc, vm,
-            graph->FindOrCreateConstant(cross_values::GetEtsVmDoubleToStringCacheOffset(graph->GetArch())));
-        // GraphChecker hack
-        cache->ClearFlag(inst_flags::LOW_LEVEL);
-    }
     auto newInst = graph->CreateInstIntrinsic(
         DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_DOUBLE_TO_STRING_DECIMAL);
-    newInst->SetInputs(graph->GetAllocator(), {{cache, DataType::REFERENCE},
-                                               {numInt, DataType::UINT64},
+    newInst->SetInputs(graph->GetAllocator(), {{numInt, DataType::UINT64},
                                                {graph->FindOrCreateConstant<uint64_t>(0), DataType::UINT64},
                                                {intrinsic->GetSaveState(), DataType::NO_TYPE}});
-    intrinsic->InsertBefore(cache);
     intrinsic->InsertBefore(numInt);
     intrinsic->InsertBefore(newInst);
     intrinsic->ReplaceUsers(newInst);

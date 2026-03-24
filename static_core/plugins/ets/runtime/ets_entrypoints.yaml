@@ -429,13 +429,134 @@
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # string builder
 
+- name: LongToStringDecimal
+  entrypoint: LongToStringDecimal
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - int64_t             # number
+    - uint64_t            # unused
+
+- name: LongToStringDecimalSlowPath
+  entrypoint: LongToStringDecimalEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - int64_t             # number
+
+- name: LongToStringDecimal3Arg
+  entrypoint: LongToStringDecimalEntrypoint
+  bridge: odd_saved3
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - int64_t             # number
+
+- name: LongToStringDecimalStoreSlowPath
+  entrypoint: LongToStringDecimalStoreEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache element
+    - int64_t             # number
+
+- name: LongToStringDecimalStore3Arg
+  entrypoint: LongToStringDecimalStoreEntrypoint
+  bridge: odd_saved3
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache element
+    - int64_t             # number
+
+- name: LongToStringDecimalNoCacheSlowPath
+  entrypoint: LongToStringDecimalNoCacheEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - int64_t             # number
+
+- name: LongToStringDecimalNoCache2Arg
+  entrypoint: LongToStringDecimalNoCacheEntrypoint
+  bridge: odd_saved2
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - int64_t             # number
+
+- name: FloatToStringDecimal
+  entrypoint: FloatToStringDecimal
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - uint32_t            # number
+    - uint64_t            # unused
+
+- name: FloatToStringDecimalSlowPath
+  entrypoint: FloatToStringDecimalEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - uint32_t            # number
+
+- name: FloatToStringDecimal3Arg
+  entrypoint: FloatToStringDecimalEntrypoint
+  bridge: odd_saved3
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - uint32_t            # number
+
+- name: FloatToStringDecimalStoreSlowPath
+  entrypoint: FloatToStringDecimalStoreEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache element
+    - uint32_t            # number
+
+- name: FloatToStringDecimalStore3Arg
+  entrypoint: FloatToStringDecimalStoreEntrypoint
+  bridge: odd_saved3
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache element
+    - uint32_t            # number
+
+- name: FloatToStringDecimalNoCacheSlowPath
+  entrypoint: FloatToStringDecimalNoCacheEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - uint32_t            # number
+
+- name: FloatToStringDecimalNoCache2Arg
+  entrypoint: FloatToStringDecimalNoCacheEntrypoint
+  bridge: odd_saved2
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - uint32_t            # number
+
 - name: DoubleToStringDecimal
   entrypoint: DoubleToStringDecimal
   bridge: none
   properties: [irtoc]
   signature:
     - ark::ObjectHeader*  # string (result)
-    - ark::ObjectHeader*  # cache
     - uint64_t            # number
     - uint64_t            # unused
 
@@ -465,17 +586,15 @@
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # cache element
     - uint64_t            # number
-    - uint64_t            # cache data
 
-- name: DoubleToStringDecimalStoreOddSaved
+- name: DoubleToStringDecimalStore3Arg
   entrypoint: DoubleToStringDecimalStoreEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # cache element
     - uint64_t            # number
-    - uint64_t            # cache data
 
 - name: DoubleToStringDecimalNoCacheSlowPath
   entrypoint: DoubleToStringDecimalNoCacheEntrypoint
@@ -485,9 +604,9 @@
     - ark::ObjectHeader*  # string (result)
     - uint64_t            # number
 
-- name: DoubleToStringDecimalNoCache3Arg
+- name: DoubleToStringDecimalNoCache2Arg
   entrypoint: DoubleToStringDecimalNoCacheEntrypoint
-  bridge: odd_saved3
+  bridge: odd_saved2
   properties: []
   signature:
     - ark::ObjectHeader*  # string (result)

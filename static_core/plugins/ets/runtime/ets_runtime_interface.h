@@ -99,7 +99,6 @@ public:
     IntrinsicId GetStringBuilderAppendStringsIntrinsicId(size_t numArgs) const override;
     IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
-    void *GetDoubleToStringCache() const override;
     void *GetAsciiCharCache() const override;
     bool IsStringCachesUsed() const override;
     bool IsUseAllStrings() const override;

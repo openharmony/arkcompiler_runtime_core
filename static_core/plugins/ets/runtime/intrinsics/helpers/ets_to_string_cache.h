@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,19 +25,11 @@ class EtsToStringCacheTest;
 class EtsToStringCacheElementTest;
 }  // namespace test
 
-enum class ToStringResult : size_t {
-    LOAD_CACHED = 0,
-    LOAD_FAIL_LOCKED,
-    LOAD_FAIL_UPDATED,
-    STORE_NEW,
-    STORE_UPDATE,
-    STORE_FAIL
-};
+enum class ToStringResult : size_t { LOAD_CACHED = 0, STORE_NEW, STORE_UPDATE };
 
 inline std::ostream &operator<<(std::ostream &out, ToStringResult res)
 {
-    static constexpr auto NAMES =
-        std::array {"LOAD_CACHED", "LOAD_FAIL_LOCKED", "LOAD_FAIL_UPDATED", "STORE_NEW", "STORE_UPDATE", "STORE_FAIL"};
+    static constexpr auto NAMES = std::array {"LOAD_CACHED", "STORE_NEW", "STORE_UPDATE"};
     ASSERT(static_cast<size_t>(res) < NAMES.size());
     return out << NAMES[static_cast<size_t>(res)];
 }
@@ -45,10 +37,70 @@ inline std::ostream &operator<<(std::ostream &out, ToStringResult res)
 namespace detail {
 
 template <typename T>
+struct SimpleHash;
+
+template <typename T>
 class EtsToStringCacheElement;
 
 template <typename T>
-struct SimpleHash;
+class EtsToStringCacheElement : public EtsObject {
+public:
+    ~EtsToStringCacheElement() = default;
+    NO_COPY_SEMANTIC(EtsToStringCacheElement);
+    NO_MOVE_SEMANTIC(EtsToStringCacheElement);
+
+    static EtsClass *GetClass(EtsCoroutine *coro);
+    static EtsToStringCacheElement<T> *Create(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle, T number,
+                                              EtsClass *klass);
+
+    static EtsToStringCacheElement<T> *FromCoreType(ObjectHeader *obj)
+    {
+        return reinterpret_cast<EtsToStringCacheElement<T> *>(obj);
+    }
+
+    ObjectHeader *GetCoreType()
+    {
+        return reinterpret_cast<ObjectHeader *>(this);
+    }
+
+    EtsObject *AsObject()
+    {
+        return this;
+    }
+
+    static constexpr uint32_t GetStringOffset()
+    {
+        return MEMBER_OFFSET(EtsToStringCacheElement<T>, string_);
+    }
+
+    static constexpr uint32_t GetNumberOffset()
+    {
+        return MEMBER_OFFSET(EtsToStringCacheElement<T>, number_);
+    }
+
+    ToStringResult TryStore(EtsCoroutine *coro, EtsString *string, T number);
+
+    EtsString *GetString(EtsCoroutine *coro)
+    {
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetStringOffset());
+        return EtsString::FromEtsObject(EtsObject::FromCoreType(obj));
+    }
+
+    T GetNumber() const
+    {
+        return number_;
+    }
+
+private:
+    void SetString(EtsCoroutine *coro, EtsString *string);
+    void SetNumber(T number);
+
+private:
+    ObjectPointer<EtsString> string_;
+    T number_;
+
+    friend class ark::ets::test::EtsToStringCacheTest;
+};
 
 template <typename T, typename Derived, typename Hash>
 class EtsToStringCache;
@@ -67,11 +119,8 @@ public:
      * @param coro         Pointer to current coroutine
      * @param number       Number (double, float or int64) to get representation for
      * @param elem         Pointer to `EtsToStringCacheElement` loaded from cache
-     * @param cached       Cached `Data` (string and flag) which was read from \p elem
-     * @pre                `flag` in `Data` \p cached must be even (unlocked)
-     * @pre                `number` stored in `elem` is supposed to differ from \p number (because we force store)
      */
-    EtsString *CacheAndGetNoCheck(EtsCoroutine *coro, T number, ObjectHeader *elem, uint64_t cached);
+    EtsString *CacheAndGetNoCheck(EtsCoroutine *coro, T number, ObjectHeader *elem);
 
     /**
      * @brief Load string representation of number from cache, or compute it and store to cache if possible
@@ -98,8 +147,7 @@ private:
 
     static uint32_t GetIndex(T number);
     void StoreToCache(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle, T number, uint32_t index);
-    std::pair<EtsString *, ToStringResult> FinishUpdate(EtsCoroutine *coro, T number, EtsToStringCacheElement<T> *elem,
-                                                        uint64_t cached);
+    std::pair<EtsString *, ToStringResult> FinishUpdate(EtsCoroutine *coro, T number, EtsToStringCacheElement<T> *elem);
     std::pair<EtsString *, ToStringResult> GetOrCacheImpl(EtsCoroutine *coro, T number);
 
     friend class ark::ets::test::EtsToStringCacheTest;

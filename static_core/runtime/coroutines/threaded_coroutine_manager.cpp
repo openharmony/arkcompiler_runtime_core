@@ -524,7 +524,7 @@ void ThreadedCoroutineManager::ProcessTimerEvents()
     }
 }
 
-void ThreadedCoroutineManager::InitializeManagedStructures()
+void ThreadedCoroutineManager::InitializeManagedStructures(const CoroutineWorker::CreatePluginObjFunc &createEtsObj)
 {
     ASSERT_NATIVE_CODE();
     auto *currCoro = Coroutine::GetCurrent();
@@ -540,7 +540,7 @@ void ThreadedCoroutineManager::InitializeManagedStructures()
 
     eachWorkerLocalObjects.reserve(numWorkers);
     for (size_t i = 0; i < numWorkers; i++) {
-        eachWorkerLocalObjects.push_back(CoroutineWorker::CreateWorkerLocalObjects());
+        eachWorkerLocalObjects.push_back(CoroutineWorker::CreateWorkerLocalObjects(createEtsObj));
     }
     workersLock_.Lock();
     ASSERT(numWorkers == workers_.size());

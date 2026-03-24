@@ -33,6 +33,8 @@ llvm::Value *CreateStringBuilderAppendStrings(Inst *inst);
 void StringBuilderAppendStringNull(Inst *inst, llvm::PHINode *result, llvm::BasicBlock *contBb);
 void StringBuilderAppendStringMain(Inst *inst, llvm::Value *sbIndexOffset, llvm::Value *sbIndex, llvm::Value *sbBuffer,
                                    llvm::BasicBlock *contBb);
+bool EmitLongToStringDecimal(Inst *inst);
+bool EmitFloatToStringDecimal(Inst *inst);
 bool EmitDoubleToStringDecimal(Inst *inst);
 bool EmitStringTrim(Inst *inst);
 bool EmitStringTrimLeft(Inst *inst);

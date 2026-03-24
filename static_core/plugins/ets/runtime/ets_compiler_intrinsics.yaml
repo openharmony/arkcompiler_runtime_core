@@ -202,13 +202,39 @@ intrinsics:
     need_param_locations: true
     peephole_func: PeepholeIstrue
 
+  - name: CompilerEtsLongToStringDecimal
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64, u64 ]
+    impl: ark::ets::intrinsics::CompilerLongToStringDecimal
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateLongToStringDecimal
+    llvm_codegen_func: EmitLongToStringDecimal
+    need_param_locations: true
+
+  - name: CompilerEtsFloatToStringDecimal
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u32, u64 ]
+    impl: ark::ets::intrinsics::CompilerFloatToStringDecimal
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloatToStringDecimal
+    llvm_codegen_func: EmitFloatToStringDecimal
+    need_param_locations: true
+
   - name: CompilerEtsDoubleToStringDecimal
     space: ets
     compiler_only: true
     static: true
     signature:
       ret: std.core.String
-      args: [ ref, u64, u64 ]
+      args: [ u64, u64 ]
     impl: ark::ets::intrinsics::CompilerDoubleToStringDecimal
     codegen_arch: [arm64, amd64]
     codegen_func: CreateDoubleToStringDecimal

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -680,12 +680,12 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
     // May trigger GC
-    auto *cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
+    auto *cache = ManagedThread::GetCurrent()->GetLongToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         auto *str = LongToStringCache::GetNoCache(v);
         return StringBuilderAppendString(sbHandle->GetCoreType(), str);
     }
-    auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    auto *str = LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
@@ -711,12 +711,12 @@ ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
-    auto *cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
+    auto *cache = ManagedThread::GetCurrent()->GetFloatToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         auto *str = FloatToStringCache::GetNoCache(v);
         return StringBuilderAppendString(sbHandle->GetCoreType(), str);
     }
-    auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    auto *str = FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
@@ -728,12 +728,12 @@ ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
-    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    auto *cache = ManagedThread::GetCurrent()->GetDoubleToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         auto *str = DoubleToStringCache::GetNoCache(v);
         return StringBuilderAppendString(sbHandle->GetCoreType(), str);
     }
-    auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    auto *str = DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 

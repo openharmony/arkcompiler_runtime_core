@@ -766,6 +766,16 @@ void ManagedThread::VisitGCRoots(const GCRootVisitor &cb)
     if (flattenedStringCache_ != nullptr) {
         cb({mem::RootType::ROOT_THREAD, &flattenedStringCache_});
     }
+
+    if (doubleToStringCache_ != nullptr) {
+        cb({mem::RootType::ROOT_THREAD, &doubleToStringCache_});
+    }
+    if (floatToStringCache_ != nullptr) {
+        cb({mem::RootType::ROOT_THREAD, &floatToStringCache_});
+    }
+    if (longToStringCache_ != nullptr) {
+        cb({mem::RootType::ROOT_THREAD, &longToStringCache_});
+    }
 }
 
 void MTManagedThread::Destroy()
@@ -824,6 +834,36 @@ void ManagedThread::SetFlattenedStringCache(ObjectHeader *cacheInstance)
 ObjectHeader *ManagedThread::GetFlattenedStringCache() const
 {
     return flattenedStringCache_;
+}
+
+void ManagedThread::SetDoubleToStringCache(ObjectHeader *cacheInstance)
+{
+    doubleToStringCache_ = cacheInstance;
+}
+
+ObjectHeader *ManagedThread::GetDoubleToStringCache() const
+{
+    return doubleToStringCache_;
+}
+
+void ManagedThread::SetFloatToStringCache(ObjectHeader *cacheInstance)
+{
+    floatToStringCache_ = cacheInstance;
+}
+
+ObjectHeader *ManagedThread::GetFloatToStringCache() const
+{
+    return floatToStringCache_;
+}
+
+void ManagedThread::SetLongToStringCache(ObjectHeader *cacheInstance)
+{
+    longToStringCache_ = cacheInstance;
+}
+
+ObjectHeader *ManagedThread::GetLongToStringCache() const
+{
+    return longToStringCache_;
 }
 
 LanguageContext ManagedThread::GetLanguageContext()
@@ -938,6 +978,9 @@ void ManagedThread::CleanUp()
 
     CleanUpMutatorStatus();
     SetFlattenedStringCache(nullptr);
+    SetDoubleToStringCache(nullptr);
+    SetFloatToStringCache(nullptr);
+    SetLongToStringCache(nullptr);
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 
