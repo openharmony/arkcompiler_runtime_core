@@ -233,6 +233,14 @@
 #28679
 05.generics/03.utility_types/06.record_utility_type/enum_record_0_n.ets
 
+#33818
+06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
+06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_1.ets
+06.contexts_and_conversions/02.string_operator_contexts/conversion3_n_0.ets
+06.contexts_and_conversions/02.string_operator_contexts/conversion3_n_1.ets
+06.contexts_and_conversions/02.string_operator_contexts/conversion_n_0.ets
+06.contexts_and_conversions/02.string_operator_contexts/conversion_n_1.ets
+
 #31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
 20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
 
