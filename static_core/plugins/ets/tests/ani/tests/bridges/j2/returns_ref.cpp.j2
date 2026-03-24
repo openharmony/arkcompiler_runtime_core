@@ -15,7 +15,6 @@
 
 #include "ani.h"
 #include <iostream>
-#include <filesystem>
 #include <cstring>
 #include <cassert>
 #include <vector>
@@ -45,8 +44,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_env *env;
     LOG_IF(vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK, FATAL, ANI) << "Unsupported ANI_VERSION_1";
 
-    std::filesystem::path test_body_path(__FILE__);
-    auto moduleName = test_body_path.stem();
+    std::string moduleName = "{{ ModuleName }}";
 
     ani_module module;
     LOG_IF(env->FindModule(moduleName.c_str(), &module) != ANI_OK, FATAL, ANI) << "Not found '" << moduleName << "'";
