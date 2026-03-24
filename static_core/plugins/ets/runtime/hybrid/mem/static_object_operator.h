@@ -44,7 +44,7 @@ public:
     size_t ForEachRefFieldAndGetSize(const common_vm::BaseObject *object,
                                      const common_vm::RefFieldVisitor &fieldHandler,
                                      const common_vm::RefFieldVisitor &weakFieldHandler) const override;
-    void ClearRef(common_vm::RefField<> &field) const override;
+    void ClearRef(common_vm::BaseObject *object, common_vm::RefField<> &field) const override;
 
     size_t GetSize(const common_vm::BaseObject *object) const override
     {

@@ -59,7 +59,7 @@ bool Mutator::TransitionGCPhase(bool bySelf)
         // If this mutator phase transition has finished, just return
         if (state == FINISH_TRANSITION) {
             bool result = mutatorPhase_.load() == Heap::GetHeap().GetGCPhase();
-            if (!bySelf && !result) { // why check bySelf?
+            if (!bySelf && !result) {  // why check bySelf?
                 LOG_COMMON(FATAL) << "Unresolved fatal";
                 UNREACHABLE_CC();
             }
@@ -121,18 +121,22 @@ void Mutator::HandleSuspensionRequest()
         if (LIKELY_CC(!HasAnySuspensionRequestExceptCallbacks())) {
             if (HasSuspensionRequest(SUSPENSION_FOR_FINALIZE)) {
                 ClearFinalizeRequest();
-                HandleJSGCCallback();
+                HandleGCCallback();
             }
             return;
         }
     }
 }
 
-void Mutator::HandleJSGCCallback()
+void Mutator::HandleGCCallback()
 {
     void *vm = GetEcmaVMPtr();
     if (vm != nullptr) {
         JSGCCallback(vm);
+    }
+    void *thread = GetArkthreadPtr();
+    if (thread != nullptr) {
+        BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
     }
 }
 
@@ -146,7 +150,7 @@ void Mutator::SuspendForStw()
 #if defined(_WIN64) || defined(__APPLE__)
         MutatorManager::Instance().MutatorWait();
 #else
-        int* countAddr = MutatorManager::Instance().GetStwFutexWord();
+        int *countAddr = MutatorManager::Instance().GetStwFutexWord();
         // FUTEX_WAIT may fail when gc thread wakes up all threads before the current thread reaches this position.
         // But it is not important because there won't be data race between the current thread and the gc thread,
         // and it also won't be frozen since gc thread also modifies the value at countAddr before its waking option.
@@ -163,9 +167,9 @@ void Mutator::SuspendForStw()
     }
 }
 
-static SatbBuffer::TreapNode*& CastSatbNode(void *&satbNode)
+static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)
 {
-    return reinterpret_cast<SatbBuffer::TreapNode*&>(satbNode);
+    return reinterpret_cast<SatbBuffer::TreapNode *&>(satbNode);
 }
 
 void Mutator::Init()
@@ -184,15 +188,15 @@ Mutator::~Mutator()
     }
 }
 
-Mutator* Mutator::NewMutator()
+Mutator *Mutator::NewMutator()
 {
-    Mutator* mutator = new (std::nothrow) Mutator();
+    Mutator *mutator = new (std::nothrow) Mutator();
     LOGF_CHECK(mutator != nullptr) << "new Mutator failed";
     mutator->Init();
     return mutator;
 }
 
-void Mutator::RememberObjectImpl(const BaseObject* obj)
+void Mutator::RememberObjectImpl(const BaseObject *obj)
 {
     if (LIKELY_CC(Heap::IsHeapAddress(obj))) {
         if (SatbBuffer::ShouldEnqueue(obj)) {
@@ -220,7 +224,10 @@ void Mutator::InitTid()
     }
 }
 
-const void* Mutator::GetSatbBufferNode() const { return satbNode_; }
+const void *Mutator::GetSatbBufferNode() const
+{
+    return satbNode_;
+}
 
 void Mutator::ClearSatbBufferNode()
 {
@@ -230,7 +237,7 @@ void Mutator::ClearSatbBufferNode()
     CastSatbNode(satbNode_)->Clear();
 }
 
-void Mutator::VisitMutatorRoots(const RootVisitor& visitor)
+void Mutator::VisitMutatorRoots(const RootVisitor &visitor)
 {
     LOG_COMMON(FATAL) << "Unresolved fatal";
     UNREACHABLE_CC();
@@ -238,29 +245,31 @@ void Mutator::VisitMutatorRoots(const RootVisitor& visitor)
 
 void Mutator::DumpMutator() const
 {
-    LOG_COMMON(ERROR) << "mutator " << this << ": inSaferegion " <<
-        inSaferegion_.load(std::memory_order_relaxed) << ", tid " << tid_ <<
-        ", gc phase: " << mutatorPhase_.load() << ", suspension request "<< suspensionFlag_.load();
+    LOG_COMMON(ERROR) << "mutator " << this << ": inSaferegion " << inSaferegion_.load(std::memory_order_relaxed)
+                      << ", tid " << tid_ << ", gc phase: " << mutatorPhase_.load() << ", suspension request "
+                      << suspensionFlag_.load();
 }
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-void Mutator::CreateCurrentGCInfo() { gcInfos_.CreateCurrentGCInfo(); }
+void Mutator::CreateCurrentGCInfo()
+{
+    gcInfos_.CreateCurrentGCInfo();
+}
 #endif
 
-
-void Mutator::VisitRawObjects(const RootVisitor& func)
+void Mutator::VisitRawObjects(const RootVisitor &func)
 {
     if (rawObject_.object != nullptr) {
         func(rawObject_);
     }
 }
 
-Mutator* Mutator::GetMutator() noexcept
+Mutator *Mutator::GetMutator() noexcept
 {
     return ThreadLocal::GetMutator();
 }
 
-inline void CheckAndPush(BaseObject* obj, std::set<BaseObject*>& rootSet, std::stack<BaseObject*>& rootStack)
+inline void CheckAndPush(BaseObject *obj, std::set<BaseObject *> &rootSet, std::stack<BaseObject *> &rootStack)
 {
     auto search = rootSet.find(obj);
     if (search == rootSet.end()) {
@@ -271,14 +280,10 @@ inline void CheckAndPush(BaseObject* obj, std::set<BaseObject*>& rootSet, std::s
     }
 }
 
-void Mutator::GcPhaseEnum(GCPhase newPhase)
-{
-}
+void Mutator::GcPhaseEnum(GCPhase newPhase) {}
 
 // comment all
-void Mutator::GCPhasePreForward(GCPhase newPhase)
-{
-}
+void Mutator::GCPhasePreForward(GCPhase newPhase) {}
 
 void Mutator::HandleGCPhase(GCPhase newPhase)
 {
@@ -304,7 +309,7 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
 {
     HandleGCPhase(newPhase);
     SetSafepointActive(false);
-    mutatorPhase_.store(newPhase, std::memory_order_relaxed); // handshake between mutator & mainGC thread
+    mutatorPhase_.store(newPhase, std::memory_order_relaxed);  // handshake between mutator & mainGC thread
     if (jsThread_ != nullptr) {
         // non-atomic, should update JSThread local gc state before SuspensionFlag store,
         // and SuspensionFlag load when transfer to running will guarantee the visibility of
@@ -316,7 +321,7 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
             [thr = thread_, newPhase](VMInterface *vm) { vm->UpdateReadBarrierEntrypoint(thr, newPhase); });
     }
     // Clear mutator's suspend request after phase transition
-    ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE); // atomic seq-cst
+    ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE);  // atomic seq-cst
 }
 
 inline void Mutator::HandleCpuProfile()
@@ -332,7 +337,7 @@ void Mutator::TransitionToCpuProfileExclusive()
     ClearSuspensionFlag(SUSPENSION_FOR_CPU_PROFILE);
 }
 
-void PreRunManagedCode(Mutator* mutator, int layers, ThreadLocalData* threadData)
+void PreRunManagedCode(Mutator *mutator, int layers, ThreadLocalData *threadData)
 {
     if (UNLIKELY_CC(MutatorManager::Instance().StwTriggered())) {
         mutator->SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_STW);
@@ -348,18 +353,18 @@ Mutator *Mutator::CreateAndRegisterNewMutator(void *vm)
         LOG_COMMON(FATAL) << "CreateAndRegisterNewMutator fail";
         return nullptr;
     }
-    Mutator* mutator = Mutator::NewMutator();
+    Mutator *mutator = Mutator::NewMutator();
     CHECK_CC(mutator != nullptr);
     mutator->SetEcmaVMPtr(vm);
 
-    auto& mutator_manager = MutatorManager::Instance();
-    mutator_manager.MutatorManagementRLock();
+    auto &mutatorManager = MutatorManager::Instance();
+    mutatorManager.MutatorManagementRLock();
     {
-        std::lock_guard<std::mutex> guard(mutator_manager.allMutatorListLock_);
-        mutator_manager.allMutatorList_.push_back(mutator);
+        std::lock_guard<std::mutex> guard(mutatorManager.allMutatorListLock_);
+        mutatorManager.allMutatorList_.push_back(mutator);
     }
     mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
-    mutator_manager.MutatorManagementRUnlock();
+    mutatorManager.MutatorManagementRUnlock();
 
     return mutator;
 }
@@ -401,15 +406,15 @@ bool Mutator::TryBindMutator()
         return false;
     }
 
-    auto& mutator_manager = MutatorManager::Instance();
-    mutator_manager.MutatorManagementRLock();
+    auto &mutatorManager = MutatorManager::Instance();
+    mutatorManager.MutatorManagementRLock();
 
-    mutator_manager.BindMutator(*this);
+    mutatorManager.BindMutator(*this);
 
-    mutator_manager.MutatorManagementRUnlock();
+    mutatorManager.MutatorManagementRUnlock();
 
     allocBuffer_ = ThreadLocal::GetAllocBuffer();
-    reinterpret_cast<AllocationBuffer*>(allocBuffer_)->IncreaseRefCount();
+    reinterpret_cast<AllocationBuffer *>(allocBuffer_)->IncreaseRefCount();
     DCHECK_CC(allocBuffer_ != nullptr);
     return true;
 }
@@ -425,19 +430,19 @@ void Mutator::BindMutator()
 void Mutator::UnbindMutator()
 {
     allocBuffer_ = nullptr;
-    auto& mutator_manager = MutatorManager::Instance();
-    mutator_manager.MutatorManagementRLock();
+    auto &mutatorManager = MutatorManager::Instance();
+    mutatorManager.MutatorManagementRLock();
 
-    mutator_manager.UnbindMutator(*this);
+    mutatorManager.UnbindMutator(*this);
 
-    mutator_manager.MutatorManagementRUnlock();
+    mutatorManager.MutatorManagementRUnlock();
 }
 
 void Mutator::ReleaseAllocBuffer()
 {
     MutatorManagedScope scope(this);
     if (allocBuffer_) {
-        auto buf = reinterpret_cast<AllocationBuffer*>(allocBuffer_);
+        auto buf = reinterpret_cast<AllocationBuffer *>(allocBuffer_);
         if (buf->DecreaseRefCount()) {
             buf->Unregister();
             delete buf;
@@ -451,18 +456,18 @@ void Mutator::DestroyMutator(Mutator *mutator)
     mutator->ReleaseAllocBuffer();
     mutator->TransferToNative();
 
-    auto& mutator_manager = MutatorManager::Instance();
-    mutator_manager.MutatorManagementRLock();
+    auto &mutatorManager = MutatorManager::Instance();
+    mutatorManager.MutatorManagementRLock();
     {
-        std::lock_guard<std::mutex> guard(mutator_manager.allMutatorListLock_);
-        auto& list = mutator_manager.allMutatorList_;
+        std::lock_guard<std::mutex> guard(mutatorManager.allMutatorListLock_);
+        auto &list = mutatorManager.allMutatorList_;
         auto it = std::find(list.begin(), list.end(), mutator);
         if (it != list.end()) {
             list.erase(it);
         }
     }
     mutator->ResetMutator();
-    mutator_manager.MutatorManagementRUnlock();
+    mutatorManager.MutatorManagementRUnlock();
 }
 
 Mutator::TryBindMutatorScope::TryBindMutatorScope(Mutator *mutator) : mutator_(nullptr)

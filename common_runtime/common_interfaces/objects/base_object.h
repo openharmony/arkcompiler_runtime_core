@@ -71,7 +71,7 @@ public:
     // Clear the specified field
     void ClearRef(RefField<> &field)
     {
-        GetOperator()->ClearRef(field);
+        GetOperator()->ClearRef(this, field);
     }
 
     inline BaseObject *GetForwardingPointer() const

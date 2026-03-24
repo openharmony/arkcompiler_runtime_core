@@ -18,10 +18,12 @@
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/base_runtime.h"
+#include "plugins/ets/runtime/mem/ets_reference_processor.h"
 
 namespace ark::mem::ets {
 
@@ -135,6 +137,15 @@ static void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase)
            phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB);
 }
 
+static void ProcessFinalizationRegistryCleanup()
+{
+    auto *vm = static_cast<ark::ets::PandaEtsVM *>(GetPandaVM());
+    auto *referenceProcessor = static_cast<mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor());
+    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
+    referenceProcessor->ProcessClearedReferences();
+    vm->GetFinalizationRegistryManager()->StartCleanupCoroIfNeeded(coro);
+}
+
 class StaticVMInterface : public common_vm::VMInterface {
 public:
     StaticVMInterface()
@@ -175,6 +186,11 @@ public:
     void UpdateReadBarrierEntrypoint(void *thread, common_vm::GCPhase phase) override
     {
         ark::mem::ets::UpdateReadBarrierEntrypoint(thread, phase);
+    }
+
+    void ProcessFinalizationRegistryCleanup() override
+    {
+        ark::mem::ets::ProcessFinalizationRegistryCleanup();
     }
 
     void VisitPreforwardRoots([[maybe_unused]] const common_vm::RefFieldVisitor &visitor) override {}
