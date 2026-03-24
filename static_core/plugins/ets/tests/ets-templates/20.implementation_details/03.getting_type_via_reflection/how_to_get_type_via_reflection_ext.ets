@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,14 @@ class User {
     }
 }
 
+class ExtendedUser extends User {
+    age: int;
+    constructor(name: string, age: int) {
+        super(name);
+        this.age = age;
+    }
+}
+
 enum Color {
     red = 0,
     green = 1,
@@ -33,13 +41,30 @@ enum Color {
 }
 
 interface SomeInterface {
-    name: string;
-    age: number;
+    getAge(): string;
 }
+
+class ExtendedUserImplementedInterface extends User implements SomeInterface {
+    age: int;
+    constructor(name: string, age: int) {
+        super(name);
+        this.age = age;
+    }
+    getAge() {
+        return this.age + ' years';
+    }
+}
+
+type NullableUser = User | null;
+
+type NullableObject = Object | null | undefined;
+
+type TypeAlias = (x: number, y: number) => number;
+
+type UType = 'One' | 'Two';
 
 function main(): void {
   {{c.logic}}
 }
 
 {% endfor %}
-
