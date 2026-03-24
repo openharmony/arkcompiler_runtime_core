@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -84,7 +84,7 @@ assert('All tags are used') do
   %i[verification exceptions properties].map do |type|
     uses = Panda.instructions.flat_map(&type.to_proc).uniq
     defs = Panda.send(type).map(&:tag)
-    (defs - uses - ['suspend']).size # 'suspend' is non-core optional property, allowed to be unused
+    (defs - uses - ['suspend', 'dispatch']).size # 'suspend' and 'dispatch' are non-core optional property, allowed to be unused
   end.reduce(:+).zero?
 end
 

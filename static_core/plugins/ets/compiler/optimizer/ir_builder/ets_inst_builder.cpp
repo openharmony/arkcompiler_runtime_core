@@ -417,16 +417,74 @@ void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
     }
 }
 
-void InstBuilder::BuildSuspend([[maybe_unused]] const BytecodeInstruction *bcInst)
+void InstBuilder::BuildSuspend(const BytecodeInstruction *bcInst)
 {
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Suspend is not yet supported in the inst builder";
-    failed_ = true;
+    // NOTE(compiler_team): support stackless in BCO #33857
+    if (GetGraph()->IsBytecodeOptimizer()) {
+        failed_ = true;
+        return;
+    }
+
+    auto asyncContextVreg = bcInst->GetVReg(0);
+    auto saveStateSuspend = CreateSaveState(Opcode::SaveStateSuspend, GetPc(bcInst->GetAddress()));
+
+    // AsyncContext is already among SaveStateSuspend inputs.
+    size_t actualAsyncContextInputIdx = saveStateSuspend->GetInputsCount();
+    for (size_t idx = 0; idx < saveStateSuspend->GetInputsCount(); ++idx) {
+        auto reg = saveStateSuspend->GetVirtualRegister(idx);
+        if (reg.Value() == asyncContextVreg) {
+            actualAsyncContextInputIdx = idx;
+            break;
+        }
+    }
+
+    ASSERT(actualAsyncContextInputIdx < saveStateSuspend->GetInputsCount());
+    auto expectedAsyncContextInputIdx = saveStateSuspend->GetAsyncContextIndex();
+    // It may be not in the expected place.
+    if (actualAsyncContextInputIdx != expectedAsyncContextInputIdx) {
+        auto expectedInput = saveStateSuspend->GetInput(expectedAsyncContextInputIdx).GetInst();
+        auto actualAsyncContextInput = saveStateSuspend->GetInput(actualAsyncContextInputIdx).GetInst();
+        auto expectedVreg = saveStateSuspend->GetVirtualRegister(expectedAsyncContextInputIdx);
+        auto actualAsyncContextVreg = saveStateSuspend->GetVirtualRegister(actualAsyncContextInputIdx);
+
+        // Move AsyncContext to the expected place.
+        saveStateSuspend->SetInput(expectedAsyncContextInputIdx, actualAsyncContextInput);
+        saveStateSuspend->SetInput(actualAsyncContextInputIdx, expectedInput);
+
+        // Keep inputs and vregs in sync.
+        saveStateSuspend->SetVirtualRegister(expectedAsyncContextInputIdx, actualAsyncContextVreg);
+        saveStateSuspend->SetVirtualRegister(actualAsyncContextInputIdx, expectedVreg);
+    }
+
+    AddInstruction(saveStateSuspend);
 }
 
-void InstBuilder::BuildDispatch([[maybe_unused]] const BytecodeInstruction *bcInst)
+void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
 {
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Dispatch is not yet supported in the inst builder";
-    failed_ = true;
+    // NOTE(compiler_team): support stackless in BCO #33857.
+    if (GetGraph()->IsBytecodeOptimizer()) {
+        failed_ = true;
+        return;
+    }
+
+    auto graph = GetGraph();
+    auto pc = GetPc(bcInst->GetAddress());
+    auto currentBlock = GetCurrentBlock();
+
+    // Create compare and if instructions in the current block to check async context.
+    auto asyncContext = GetDefinition(bcInst->GetVReg(0));
+    auto compareInst = graph->CreateInstCompare(DataType::BOOL, pc, asyncContext, graph->GetOrCreateNullPtr(),
+                                                DataType::REFERENCE, ConditionCode::CC_NE);
+    auto ifImmInst = graph->CreateInstIfImm(DataType::NO_TYPE, pc, compareInst, 0U, DataType::BOOL,
+                                            ConditionCode::CC_NE, GetMethod());
+    ifImmInst->SetUnlikely();
+    AddInstruction(compareInst);
+    AddInstruction(ifImmInst);
+
+    // Create dispatch instruction in separate block.
+    auto dispatchBlock = currentBlock->GetSuccessor(0U);
+    auto dispatchInst = graph->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext);
+    dispatchBlock->AppendInst(dispatchInst);
 }
 
 }  // namespace ark::compiler

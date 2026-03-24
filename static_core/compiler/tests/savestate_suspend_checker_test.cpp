@@ -60,11 +60,12 @@ TEST_F(SaveStateSuspendCheckerTest, AllLiveValuesPresent)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(10U, 2U).ref();
         CONSTANT(2U, 42U).s32();
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 1U, 2U, 3U).SrcVregs({4U, 0U, 1U, 2U, 3U});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -89,10 +90,12 @@ TEST_F(SaveStateSuspendCheckerTest, MissingLiveValue)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(10U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            // Missing v3 in SaveStateSuspend inputs
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 1U).SrcVregs({4U, 0U, 1U});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -116,9 +119,10 @@ TEST_F(SaveStateSuspendCheckerTest, ValueAfterSuspend)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(10U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 1U).SrcVregs({4U, 0U, 1U});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -144,11 +148,12 @@ TEST_F(SaveStateSuspendCheckerTest, UserNotDominated)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(10U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Add).s32().Inputs(3U, 3U);  // user of v3
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U, 5U).SrcVregs({0U, 1U, 2U});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 1U, 5U).SrcVregs({4U, 0U, 1U, 2U});
             INST(6U, Opcode::Return).s32().Inputs(5U);
         }
     }
@@ -174,6 +179,7 @@ TEST_F(SaveStateSuspendCheckerTest, PhiLiveValue)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(10U, 2U).ref();
         CONSTANT(2U, 0U).s32();
         CONSTANT(6U, 1U).s32();
         BASIC_BLOCK(2U, 3U, 4U)
@@ -188,7 +194,7 @@ TEST_F(SaveStateSuspendCheckerTest, PhiLiveValue)
         }
         BASIC_BLOCK(4U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 1U, 2U, 3U).SrcVregs({4U, 0U, 1U, 2U, 3U});
             INST(9U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -213,6 +219,7 @@ TEST_F(SaveStateSuspendCheckerTest, LoopLatchToHeader)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(10U, 2U).ref();
         CONSTANT(2U, 0U).s32();
         CONSTANT(6U, 1U).s32();
         // Loop header
@@ -231,7 +238,7 @@ TEST_F(SaveStateSuspendCheckerTest, LoopLatchToHeader)
         BASIC_BLOCK(4U, -1L)
         {
             // v5 does not dominate v4, so not required. Phi v3 dominates v4 and is live.
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 1U, 2U, 3U).SrcVregs({4U, 0U, 1U, 2U, 3U});
             INST(9U, Opcode::Return).s32().Inputs(3U);
         }
     }

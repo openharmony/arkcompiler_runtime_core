@@ -94,9 +94,10 @@ TEST_F(FillSaveStateSuspendInputsTest, LivePrimitiveValuesAddedAsBridgeInputs)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -108,9 +109,10 @@ TEST_F(FillSaveStateSuspendInputsTest, LivePrimitiveValuesAddedAsBridgeInputs)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({BRIDGE_VREG, BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U, 1U).SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -128,9 +130,10 @@ TEST_F(FillSaveStateSuspendInputsTest, LiveObjectValuesAddedAsBridgeInputs)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(5U, Opcode::Return).ref().Inputs(0U);
         }
     }
@@ -141,9 +144,10 @@ TEST_F(FillSaveStateSuspendInputsTest, LiveObjectValuesAddedAsBridgeInputs)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U).SrcVregs({BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U).SrcVregs({4U, BRIDGE_VREG});
             INST(5U, Opcode::Return).ref().Inputs(0U);
         }
     }
@@ -159,11 +163,12 @@ TEST_F(FillSaveStateSuspendInputsTest, NonLiveValuesNotAdded)
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         CONSTANT(2U, 10U).s32();
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::Add).s32().Inputs(0U, 2U);
-            INST(4U, Opcode::SaveStateSuspend);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -173,11 +178,12 @@ TEST_F(FillSaveStateSuspendInputsTest, NonLiveValuesNotAdded)
     GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         CONSTANT(2U, 10U).s32();
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::Add).s32().Inputs(0U, 2U);
-            INST(4U, Opcode::SaveStateSuspend).Inputs(3U).SrcVregs({BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 3U).SrcVregs({4U, BRIDGE_VREG});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -194,9 +200,10 @@ TEST_F(FillSaveStateSuspendInputsTest, ExistingInputsNotRemovedNoDuplicates)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U).SrcVregs({4U, 0U});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -208,9 +215,10 @@ TEST_F(FillSaveStateSuspendInputsTest, ExistingInputsNotRemovedNoDuplicates)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({0, BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U, 1U).SrcVregs({4U, 0, BRIDGE_VREG});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -224,6 +232,7 @@ TEST_F(FillSaveStateSuspendInputsTest, NoSaveStateSuspendReturnsFalse)
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         BASIC_BLOCK(2U, -1L)
         {
             INST(5U, Opcode::Return).s32().Inputs(0U);
@@ -236,6 +245,7 @@ TEST_F(FillSaveStateSuspendInputsTest, NoSaveStateSuspendReturnsFalse)
     GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         BASIC_BLOCK(2U, -1L)
         {
             INST(5U, Opcode::Return).s32().Inputs(0U);
@@ -253,12 +263,13 @@ TEST_F(FillSaveStateSuspendInputsTest, MultipleSaveStateSuspendDifferentLiveSets
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         CONSTANT(2U, 10U).s32();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(6U, Opcode::SaveStateSuspend);
+            INST(6U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(3U, Opcode::Add).s32().Inputs(0U, 2U);
-            INST(7U, Opcode::SaveStateSuspend);
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -268,12 +279,13 @@ TEST_F(FillSaveStateSuspendInputsTest, MultipleSaveStateSuspendDifferentLiveSets
     GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         CONSTANT(2U, 10U).s32();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(6U, Opcode::SaveStateSuspend).Inputs(0U, 2U).SrcVregs({BRIDGE_VREG, BRIDGE_VREG});
+            INST(6U, Opcode::SaveStateSuspend).Inputs(14U, 0U, 2U).SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG});
             INST(3U, Opcode::Add).s32().Inputs(0U, 2U);
-            INST(7U, Opcode::SaveStateSuspend).Inputs(3U).SrcVregs({BRIDGE_VREG});
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U, 3U).SrcVregs({4U, BRIDGE_VREG});
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
@@ -288,9 +300,10 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphFlagSetAfterPass)
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(5U, Opcode::Return).s32().Inputs(0U);
         }
     }
@@ -300,9 +313,10 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphFlagSetAfterPass)
     GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U).SrcVregs({BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U).SrcVregs({4U, BRIDGE_VREG});
             INST(5U, Opcode::Return).s32().Inputs(0U);
         }
     }
@@ -320,9 +334,10 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphCheckerPassesAfterFillPass)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -334,9 +349,10 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphCheckerPassesAfterFillPass)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({BRIDGE_VREG, BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U, 1U).SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG});
             INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
@@ -352,10 +368,11 @@ TEST_F(FillSaveStateSuspendInputsTest, ConstantsConvertedToImmediates)
 {
     GRAPH(GetGraph())
     {
+        PARAMETER(14U, 0U).ref();
         CONSTANT(0U, 42U).s64();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(5U, Opcode::Return).s64().Inputs(0U);
         }
     }
@@ -364,10 +381,11 @@ TEST_F(FillSaveStateSuspendInputsTest, ConstantsConvertedToImmediates)
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
     {
+        PARAMETER(14U, 0U).ref();
         CONSTANT(0U, 42U).s64();
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::SaveStateSuspend).Inputs(0U).SrcVregs({BRIDGE_VREG});
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U, 0U).SrcVregs({4U, BRIDGE_VREG});
             INST(5U, Opcode::Return).s64().Inputs(0U);
         }
     }
@@ -389,6 +407,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInThenBranch)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(5U, Opcode::Compare).b().CC(CC_NE).Inputs(0U, 1U);
@@ -396,7 +415,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInThenBranch)
         }
         BASIC_BLOCK(3U, -1L)
         {
-            INST(7U, Opcode::SaveStateSuspend);
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(8U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(9U, Opcode::Return).s32().Inputs(8U);
         }
@@ -417,6 +436,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInThenBranch)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(5U, Opcode::Compare).b().CC(CC_NE).Inputs(0U, 1U);
@@ -424,7 +444,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInThenBranch)
         }
         BASIC_BLOCK(3U, -1L)
         {
-            INST(7U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({BRIDGE_VREG, BRIDGE_VREG});
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U, 0U, 1U).SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG});
             INST(8U, Opcode::Add).s32().Inputs(0U, 1U);
             INST(9U, Opcode::Return).s32().Inputs(8U);
         }
@@ -449,6 +469,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInElseBranch)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         CONSTANT(2U, 0U).s32();
         BASIC_BLOCK(2U, 3U, 4U)
         {
@@ -460,7 +481,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInElseBranch)
         }
         BASIC_BLOCK(4U, 5U)
         {
-            INST(7U, Opcode::SaveStateSuspend);
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(8U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
         BASIC_BLOCK(5U, -1L)
@@ -476,6 +497,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInElseBranch)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         CONSTANT(2U, 0U).s32();
         BASIC_BLOCK(2U, 3U, 4U)
         {
@@ -487,7 +509,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInElseBranch)
         }
         BASIC_BLOCK(4U, 5U)
         {
-            INST(7U, Opcode::SaveStateSuspend).Inputs(0U, 1U).SrcVregs({BRIDGE_VREG, BRIDGE_VREG});
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U, 0U, 1U).SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG});
             INST(8U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
         BASIC_BLOCK(5U, -1L)
@@ -505,19 +527,21 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInElseBranch)
  * Test: Simple loop with SaveStateSuspend in loop body.
  * entry -> loop (Phi, SSS, Add, back-edge) -> exit. Phi and Add are live at SSS.
  */
+// CC-OFFNXT(huge_method, G.FUD.05) graph creation
 TEST_F(FillSaveStateSuspendInputsTest, LoopWithSaveStateSuspendInBody)
 {
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         CONSTANT(2U, 1U).s32();
         CONSTANT(3U, 100U).s32();
         BASIC_BLOCK(2U, 2U, 4U)
         {
             INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
             INST(6U, Opcode::Phi).s32().Inputs(1U, 9U);
-            INST(7U, Opcode::SaveStateSuspend);
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(8U, Opcode::Add).s32().Inputs(5U, 2U);
             INST(9U, Opcode::Add).s32().Inputs(6U, 2U);
             INST(10U, Opcode::Compare).b().CC(CC_GE).Inputs(8U, 3U);
@@ -535,6 +559,7 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopWithSaveStateSuspendInBody)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         CONSTANT(2U, 1U).s32();
         CONSTANT(3U, 100U).s32();
         BASIC_BLOCK(2U, 2U, 4U)
@@ -542,8 +567,8 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopWithSaveStateSuspendInBody)
             INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
             INST(6U, Opcode::Phi).s32().Inputs(1U, 9U);
             INST(7U, Opcode::SaveStateSuspend)
-                .Inputs(6U, 5U, 2U, 3U)
-                .SrcVregs({BRIDGE_VREG, BRIDGE_VREG, BRIDGE_VREG, BRIDGE_VREG});
+                .Inputs(14U, 6U, 5U, 2U, 3U)
+                .SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG, BRIDGE_VREG, BRIDGE_VREG});
             INST(8U, Opcode::Add).s32().Inputs(5U, 2U);
             INST(9U, Opcode::Add).s32().Inputs(6U, 2U);
             INST(10U, Opcode::Compare).b().CC(CC_GE).Inputs(8U, 3U);
@@ -569,11 +594,12 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopTwoExitsSaveStateSuspendInHeader)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         CONSTANT(2U, 0U).s32();
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(6U, Opcode::Phi).s32().Inputs(0U, 10U);
-            INST(7U, Opcode::SaveStateSuspend);
+            INST(7U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
             INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(6U, 2U);
             INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
@@ -598,11 +624,14 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopTwoExitsSaveStateSuspendInHeader)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(14U, 2U).ref();
         CONSTANT(2U, 0U).s32();
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(6U, Opcode::Phi).s32().Inputs(0U, 10U);
-            INST(7U, Opcode::SaveStateSuspend).Inputs(1U, 6U, 2U).SrcVregs({BRIDGE_VREG, BRIDGE_VREG, BRIDGE_VREG});
+            INST(7U, Opcode::SaveStateSuspend)
+                .Inputs(14U, 1U, 6U, 2U)
+                .SrcVregs({4U, BRIDGE_VREG, BRIDGE_VREG, BRIDGE_VREG});
             INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(6U, 2U);
             INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }

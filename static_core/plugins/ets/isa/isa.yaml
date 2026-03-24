@@ -383,6 +383,8 @@ groups:
       - none
     exceptions:
       - x_none
+    properties:
+      - dispatch
     pseudo: |
       context = vs
       if context != null then

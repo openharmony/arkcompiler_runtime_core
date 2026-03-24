@@ -154,7 +154,8 @@ properties:
     description: Calls the object initialization function.
   - tag: ic_slot
     description: Use the immediate number after opcode of length 8-bit as ic slot, and two slots are used.
-
+  - tag: dispatch
+    description: May resume execution from continuation selected by the async context.
 exceptions:
   - tag: x_none
     description: Bytecode doesn't throw exceptions.
