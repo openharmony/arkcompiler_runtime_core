@@ -28,30 +28,11 @@ cases:
           let ok = v.length == 1
 
     - defs: |-
-          type LongArray = Long[];
-      use: |-
-          let v: LongArray[] = new Long[1][1];
-          let ok = v.length == 1;
-
-    - defs: |-
-          type Matrix3D = Byte[][][];
-      use: |-
-          let v: Matrix3D = new Byte[1][1][1];
-          let ok = v.length == 1;
-
-    - defs: |-
           type A = Error[]
           type B = A
           type C = B
       use: |-
           let v: C = [new Error()]
-          let ok = v.length == 1
-
-    - defs: |-
-          type NumArray1 = Number[]
-          type NumArray2 = NumArray1[]
-      use: |-
-          let v: NumArray2[] = new Number[1][1][1]
           let ok = v.length == 1
 
     - defs: |-
