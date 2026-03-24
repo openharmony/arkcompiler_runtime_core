@@ -41,48 +41,77 @@ EtsPromise *EtsAsyncContext::GetAwaitee(EtsCoroutine *coro) const
     return EtsPromise::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, awaitee_)));
 }
 
-void EtsAsyncContext::SetVRegsRefs(EtsCoroutine *coro, EtsObjectArray *vregsRefs)
+void EtsAsyncContext::SetRefValues(EtsCoroutine *coro, EtsObjectArray *refValues)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, vregsRefs_), vregsRefs->GetCoreType());
+    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, refValues_), refValues->GetCoreType());
 }
 
-EtsObjectArray *EtsAsyncContext::GetVRegsRefs(EtsCoroutine *coro) const
+EtsObjectArray *EtsAsyncContext::GetRefValues(EtsCoroutine *coro) const
 {
     return EtsObjectArray::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, vregsRefs_)));
+        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, refValues_)));
 }
 
-void EtsAsyncContext::SetVRegsPrimitives(EtsCoroutine *coro, EtsLongArray *vregsPrimitives)
+void EtsAsyncContext::SetPrimValues(EtsCoroutine *coro, EtsLongArray *primValues)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, vregsPrimitives_),
-                              vregsPrimitives->GetCoreType());
+    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, primValues_), primValues->GetCoreType());
 }
 
-EtsLongArray *EtsAsyncContext::GetVRegsPrimitives(EtsCoroutine *coro) const
+EtsLongArray *EtsAsyncContext::GetPrimValues(EtsCoroutine *coro) const
 {
     return EtsLongArray::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, vregsPrimitives_)));
+        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, primValues_)));
 }
 
-void EtsAsyncContext::SetVRegsMask(EtsCoroutine *coro, EtsByteArray *vregsMask)
+void EtsAsyncContext::SetRefCount(EtsLong refCount)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, vregsMask_), vregsMask->GetCoreType());
+    ObjectAccessor::SetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, refCount_), refCount);
 }
 
-EtsByteArray *EtsAsyncContext::GetVRegsMask(EtsCoroutine *coro) const
+EtsLong EtsAsyncContext::GetRefCount() const
 {
-    return EtsByteArray::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, vregsMask_)));
+    return ObjectAccessor::GetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, refCount_));
+}
+
+void EtsAsyncContext::SetPrimCount(EtsLong primCount)
+{
+    ObjectAccessor::SetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, primCount_), primCount);
+}
+
+EtsLong EtsAsyncContext::GetPrimCount() const
+{
+    return ObjectAccessor::GetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, primCount_));
+}
+
+void EtsAsyncContext::SetFrameOffsets(EtsCoroutine *coro, EtsShortArray *frameOffsets)
+{
+    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, frameOffsets_), frameOffsets->GetCoreType());
+}
+
+EtsShortArray *EtsAsyncContext::GetFrameOffsets(EtsCoroutine *coro) const
+{
+    return EtsShortArray::FromCoreType(
+        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, frameOffsets_)));
+}
+
+void EtsAsyncContext::SetCompiledCode(EtsLong compiledCode)
+{
+    ObjectAccessor::SetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, compiledCode_), compiledCode);
+}
+
+EtsLong EtsAsyncContext::GetCompiledCode() const
+{
+    return ObjectAccessor::GetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, compiledCode_));
 }
 
 void EtsAsyncContext::SetAwaitId(EtsLong awaitId)
 {
-    awaitId_ = awaitId;
+    ObjectAccessor::SetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, awaitId_), awaitId);
 }
 
-EtsLong EtsAsyncContext::GetAwaitId()
+EtsLong EtsAsyncContext::GetAwaitId() const
 {
-    return awaitId_;
+    return ObjectAccessor::GetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, awaitId_));
 }
 
 }  // namespace ark::ets

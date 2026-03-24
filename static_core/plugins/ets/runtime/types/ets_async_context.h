@@ -36,22 +36,27 @@ public:
 
     inline void SetReturnValue(EtsCoroutine *coro, EtsPromise *returnValue);
     inline void SetAwaitee(EtsCoroutine *coro, EtsPromise *awaitee);
-    inline void SetVRegsRefs(EtsCoroutine *coro, EtsObjectArray *vregsRefs);
-    inline void SetVRegsPrimitives(EtsCoroutine *coro, EtsLongArray *vregsPrimitives);
-    inline void SetVRegsMask(EtsCoroutine *coro, EtsByteArray *vregsMask);
+    inline void SetRefValues(EtsCoroutine *coro, EtsObjectArray *refValues);
+    inline void SetPrimValues(EtsCoroutine *coro, EtsLongArray *primValues);
+    inline void SetRefCount(EtsLong refCount);
+    inline void SetPrimCount(EtsLong primCount);
+    inline void SetFrameOffsets(EtsCoroutine *coro, EtsShortArray *frameOffsets);
+    inline void SetCompiledCode(EtsLong compiledCode);
     inline void SetAwaitId(EtsLong awaitId);
+
     inline EtsPromise *GetReturnValue(EtsCoroutine *coro) const;
     inline EtsPromise *GetAwaitee(EtsCoroutine *coro) const;
-    inline EtsObjectArray *GetVRegsRefs(EtsCoroutine *coro) const;
-    inline EtsLongArray *GetVRegsPrimitives(EtsCoroutine *coro) const;
-    inline EtsByteArray *GetVRegsMask(EtsCoroutine *coro) const;
-    inline EtsLong GetAwaitId();
-
-    enum VRegType : EtsByte { REFERENCE_TYPE, PRIMITIVE_TYPE };
+    inline EtsObjectArray *GetRefValues(EtsCoroutine *coro) const;
+    inline EtsLongArray *GetPrimValues(EtsCoroutine *coro) const;
+    inline EtsLong GetRefCount() const;
+    inline EtsLong GetPrimCount() const;
+    inline EtsShortArray *GetFrameOffsets(EtsCoroutine *coro) const;
+    inline EtsLong GetCompiledCode() const;
+    inline EtsLong GetAwaitId() const;
 
     void AddReference(EtsCoroutine *coro, uint32_t idx, EtsObject *ref);
     void AddPrimitive(EtsCoroutine *coro, uint32_t idx, EtsLong primitive);
-    VRegType GetVRegType(EtsCoroutine *coro, uint32_t idx);
+    EtsShort GetVregOffset(EtsCoroutine *coro, uint32_t idx) const;
 
     EtsObject *AsObject()
     {
@@ -74,14 +79,18 @@ public:
     }
 
 private:
-    static constexpr uint32_t INITIAL_VREGS_LENGTH = 16;
-
     ObjectPointer<EtsPromise> awaitee_;
     ObjectPointer<EtsPromise> returnValue_;
-    ObjectPointer<EtsByteArray> vregsMask_;
-    ObjectPointer<EtsObjectArray> vregsRefs_;
-    ObjectPointer<EtsLongArray> vregsPrimitives_;
+
+    ObjectPointer<EtsObjectArray> refValues_;
+    ObjectPointer<EtsLongArray> primValues_;
+    ObjectPointer<EtsShortArray> frameOffsets_;
+
+    EtsLong refCount_;
+    EtsLong primCount_;
+
     EtsLong awaitId_;
+    EtsLong compiledCode_;
 
     friend class test::EtsAsyncContextTest;
 };

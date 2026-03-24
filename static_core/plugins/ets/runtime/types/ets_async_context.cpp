@@ -33,6 +33,11 @@ EtsAsyncContext *EtsAsyncContext::Create(EtsCoroutine *coro)
         return nullptr;
     }
 
+    auto *frame = coro->GetCurrentFrame();
+    ASSERT(frame != nullptr);
+    uint32_t frameSize = frame->GetSize();
+    ASSERT(frameSize <= static_cast<uint32_t>(std::numeric_limits<EtsShort>::max()));
+
     EtsHandle<EtsAsyncContext> asyncCtx(coro, ctx);
     auto *returnValue = EtsPromise::Create(coro);
     if (UNLIKELY(returnValue == nullptr)) {
@@ -41,44 +46,47 @@ EtsAsyncContext *EtsAsyncContext::Create(EtsCoroutine *coro)
     }
     asyncCtx->SetReturnValue(coro, returnValue);
 
-    auto *vregsRefs = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, INITIAL_VREGS_LENGTH);
-    if (UNLIKELY(vregsRefs == nullptr)) {
+    auto *refValues = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, frameSize);
+    if (UNLIKELY(refValues == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetVRegsRefs(coro, vregsRefs);
+    asyncCtx->SetRefValues(coro, refValues);
 
-    auto *vregsPrimitives = EtsLongArray::Create(INITIAL_VREGS_LENGTH);
-    if (UNLIKELY(vregsPrimitives == nullptr)) {
+    auto *primValues = EtsLongArray::Create(frameSize);
+    if (UNLIKELY(primValues == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetVRegsPrimitives(coro, vregsPrimitives);
+    asyncCtx->SetPrimValues(coro, primValues);
 
-    auto *vregsMask = EtsByteArray::Create(INITIAL_VREGS_LENGTH);
-    if (UNLIKELY(vregsMask == nullptr)) {
+    asyncCtx->SetRefCount(0);
+    asyncCtx->SetPrimCount(0);
+
+    auto *frameOffsets = EtsShortArray::Create(frameSize);
+    if (UNLIKELY(frameOffsets == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetVRegsMask(coro, vregsMask);
+    asyncCtx->SetFrameOffsets(coro, frameOffsets);
+
     return asyncCtx.GetPtr();
 }
 
 void EtsAsyncContext::AddReference(EtsCoroutine *coro, uint32_t idx, EtsObject *ref)
 {
-    GetVRegsRefs(coro)->Set(idx, ref);
-    GetVRegsMask(coro)->Set(idx, VRegType::REFERENCE_TYPE);
+    GetRefValues(coro)->Set(idx, ref);
 }
 
 void EtsAsyncContext::AddPrimitive(EtsCoroutine *coro, uint32_t idx, EtsLong primitive)
 {
-    GetVRegsPrimitives(coro)->Set(idx, primitive);
-    GetVRegsMask(coro)->Set(idx, VRegType::PRIMITIVE_TYPE);
+    GetPrimValues(coro)->Set(idx, primitive);
 }
 
-EtsAsyncContext::VRegType EtsAsyncContext::GetVRegType(EtsCoroutine *coro, uint32_t idx)
+EtsShort EtsAsyncContext::GetVregOffset(EtsCoroutine *coro, uint32_t idx) const
 {
-    return static_cast<VRegType>(GetVRegsMask(coro)->Get(idx));
+    ASSERT(idx < 0U + GetRefCount() + GetPrimCount());
+    return GetFrameOffsets(coro)->Get(idx);
 }
 
 }  // namespace ark::ets
