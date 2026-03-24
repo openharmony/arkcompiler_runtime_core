@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <string>
 #include "disassembler.h"
 #include "file.h"
@@ -166,7 +167,7 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_006, Te
 
 /**
  * @tc.name: disassembler_module_literal_test_007
- * @tc.desc: test module reuqire index.
+ * @tc.desc: test corrupted module request data.
  * @tc.type: FUNC
  * @tc.require: file path
  */
@@ -181,9 +182,11 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_007, Te
     EXPECT_TRUE(baseFile.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(baseFile), {});
-    // change module request idx
-    buffer[680] = 0xff;
-    buffer[681] = 0xff;
+    const std::string module_request = "./module-export-file.js";
+    auto iter = std::search(buffer.begin(), buffer.end(), module_request.begin(), module_request.end());
+    ASSERT_NE(iter, buffer.end()) << "Failed to locate module request string in abc buffer";
+    // Corrupt module request content to ensure disassembler output no longer matches expected literals.
+    *iter = '#';
 
     const std::string targetFileName = GRAPH_TEST_ABC_DIR "module-regular-import-001.abc";
     GenerateModifiedAbc(buffer, targetFileName);
