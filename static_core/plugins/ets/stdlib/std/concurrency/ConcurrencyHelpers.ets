@@ -81,12 +81,12 @@ class NativeAsyncWorkHelper {
         if (timeout > 0) {
             setTimeout(() => {
                 launch(launchParams) {
-                    NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
+                    NativeAsyncWorkHelper.eventNativeInvoke(executeCb, data, true);
                 };
             }, timeout.toInt());
         } else {
             launch(launchParams) {
-                NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
+                NativeAsyncWorkHelper.eventNativeInvoke(executeCb, data, true);
             };
         }
     }
