@@ -16,6 +16,9 @@
 // NOLINTBEGIN(readability-identifier-naming)
 
 DEFINE_VALUE(MANAGED_THREAD_STACK_FRAME_ALLOCATOR_OFFSET, ManagedThread::GetStackFrameAllocatorOffset())
+DEFINE_VALUE(MANAGED_THREAD_FRAME_KIND_INTERPRETER, static_cast<uint8_t>(CurrentFrameKind::INTERPRETER))
+DEFINE_VALUE(MANAGED_THREAD_FRAME_KIND_COMPILER, static_cast<uint8_t>(CurrentFrameKind::COMPILER))
+DEFINE_VALUE(MANAGED_THREAD_FRAME_KIND_NATIVE, static_cast<uint8_t>(CurrentFrameKind::NATIVE))
 DEFINE_VALUE(STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET, mem::StackFrameAllocator::GetFreePointerOffset())
 DEFINE_VALUE(STACK_FRAME_ALLOCATOR_END_ADDR_OFFSET, mem::StackFrameAllocator::GetEndAddrOffset())
 

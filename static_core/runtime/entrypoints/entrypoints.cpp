@@ -123,10 +123,10 @@ extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame 
     Frame *prevFrame = thread->GetCurrentFrame();
     thread->SetCurrentFrame(frame);
 
-    auto isCompiledCode = thread->IsCurrentFrameCompiled();
-    thread->SetCurrentFrameIsCompiled(false);
+    auto frameKind = thread->GetCurrentFrameKind();
+    thread->SetCurrentFrameKind(CurrentFrameKind::INTERPRETER);
     interpreter::Execute(thread, pc, frame);
-    thread->SetCurrentFrameIsCompiled(isCompiledCode);
+    thread->SetCurrentFrameKind(frameKind);
     if (prevFrame != nullptr && reinterpret_cast<uintptr_t>(prevFrame->GetMethod()) == COMPILED_CODE_TO_INTERPRETER) {
         thread->SetCurrentFrame(prevFrame->GetPrevFrame());
     } else {

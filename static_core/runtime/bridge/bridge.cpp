@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,17 +65,16 @@ static inline int64_t GetVRegValue(VRegRef reg)
  * specific pc. Note, that it releases input interpreter's frame at the exit.
  */
 
-std::tuple<bool, int64_t, Frame *, interpreter::AccVRegister> InvokeInterpreterCheckParams(ManagedThread *thread,
-                                                                                           const uint8_t *pc,
-                                                                                           Frame *frame)
+std::tuple<CurrentFrameKind, int64_t, Frame *, interpreter::AccVRegister> InvokeInterpreterCheckParams(
+    ManagedThread *thread, const uint8_t *pc, Frame *frame)
 {
     ASSERT(thread != nullptr);
     ASSERT(pc != nullptr);
     ASSERT(frame != nullptr);
 
-    bool prevFrameKind = thread->IsCurrentFrameCompiled();
+    auto prevFrameKind = thread->GetCurrentFrameKind();
     thread->SetCurrentFrame(frame);
-    thread->SetCurrentFrameIsCompiled(false);
+    thread->SetCurrentFrameKind(CurrentFrameKind::INTERPRETER);
     LOG(DEBUG, INTEROP) << "InvokeInterpreter for method: " << frame->GetMethod()->GetFullName();
 
     interpreter::Execute(thread, pc, frame, thread->HasPendingException());
@@ -137,7 +136,7 @@ extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, F
         thread->SetCurrentFrame(prevFrame);
         FreeFrame(frame);
     }
-    thread->SetCurrentFrameIsCompiled(prevFrameKind);
+    thread->SetCurrentFrameKind(prevFrameKind);
 
     return res;
 }

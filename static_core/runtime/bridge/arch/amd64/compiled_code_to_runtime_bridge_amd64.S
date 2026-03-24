@@ -138,7 +138,9 @@
 TYPE_FUNCTION(\name)
 \name:
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG), %r10b
-    testb %r10b, %r10b
+    // Test the current frame kind is CurrentFrameKind::INTERPRETER (0) or CurrentFrameKind::NATIVE (2)
+    // In both cases bit #0 must be 0
+    testb $1, %r10b
     jnz \compiled_entry
     jmp \notcompiled_entry
 .endm
@@ -311,7 +313,7 @@ TYPE_FUNCTION(\name)
     // If the caller is not a compiled method, we need to call \entry
     // and return back after its execution
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG), %r9b
-    testb %r9b, %r9b
+    testb $1, %r9b
     jz .L\notcompiled
     CFI_REMEMBER_STATE
 

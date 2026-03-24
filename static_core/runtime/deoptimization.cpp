@@ -156,7 +156,7 @@ void NO_ADDRESS_SANITIZE PrevFrameDeopt(FrameKind prevFrameKind, ManagedThread *
             // FindCatchBlockInCallStack
             //          |
             //      Deoptimize
-            thread->SetCurrentFrameIsCompiled(true);
+            thread->SetCurrentFrameKind(CurrentFrameKind::COMPILER);
             DeoptimizeAfterCFrame(thread, pc, iframe, cframe.GetFrameOrigin(), lastIframe,
                                   stack->GetCalleeRegsForDeoptimize().end());
         case FrameKind::NONE:

@@ -3615,7 +3615,7 @@ public:
             InterpreterToCompiledCodeBridge(this->GetInst().GetAddress(), this->GetFrame(), method, this->GetThread());
         }
 
-        this->GetThread()->SetCurrentFrameIsCompiled(false);
+        this->GetThread()->SetCurrentFrameKind(CurrentFrameKind::INTERPRETER);
         this->GetThread()->SetCurrentFrame(this->GetFrame());
 
         if (UNLIKELY(this->GetThread()->HasPendingException())) {

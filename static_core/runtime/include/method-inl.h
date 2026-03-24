@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,12 +118,12 @@ public:
                                                                            coretypes::TaggedValue *args)
     {
         Frame *currentFrame = thread->GetCurrentFrame();
-        bool isCompiled = thread->IsCurrentFrameCompiled();
+        auto frameKind = thread->GetCurrentFrameKind();
 
         ASSERT(numArgs >= 2U);  // NOTE(asoldatov): Adjust this check
         uint64_t ret = InvokeCompiledCodeWithArgArrayDyn(reinterpret_cast<uint64_t *>(args), numArgs, currentFrame,
                                                          method, thread);
-        thread->SetCurrentFrameIsCompiled(isCompiled);
+        thread->SetCurrentFrameKind(frameKind);
         thread->SetCurrentFrame(currentFrame);
         return coretypes::TaggedValue(ret);
     }
@@ -172,7 +172,7 @@ inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs,
 {
     Frame *currentFrame = thread->GetCurrentFrame();
     Span<Value> argsSpan(args, numArgs);
-    bool isCompiled = thread->IsCurrentFrameCompiled();
+    auto frameKind = thread->GetCurrentFrameKind();
     // Use frame allocator to alloc memory for parameters as thread can be terminated and
     // InvokeCompiledCodeWithArgArray will not return in this case we will get memory leak with internal
     // allocator
@@ -202,7 +202,7 @@ inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs,
 
     uint64_t retValue = InvokeCompiledCodeWithArgArray(values.get(), currentFrame, this, thread);
 
-    thread->SetCurrentFrameIsCompiled(isCompiled);
+    thread->SetCurrentFrameKind(frameKind);
     thread->SetCurrentFrame(currentFrame);
     if (UNLIKELY(thread->HasPendingException())) {
         retValue = 0;
@@ -234,11 +234,11 @@ void Method::InvokeEntry(ManagedThread *thread, Frame *currentFrame, Frame *fram
 {
     LOG(DEBUG, INTERPRETER) << "Invoke entry: " << GetFullName();
 
-    auto isCompiled = thread->IsCurrentFrameCompiled();
-    thread->SetCurrentFrameIsCompiled(false);
+    auto frameKind = thread->GetCurrentFrameKind();
+    thread->SetCurrentFrameKind(CurrentFrameKind::INTERPRETER);
     thread->SetCurrentFrame(frame);
 
-    if (isCompiled && currentFrame != nullptr) {
+    if (frameKind != CurrentFrameKind::INTERPRETER && currentFrame != nullptr) {
         // Create C2I bridge frame in case of previous frame is a native frame or other compiler frame.
         // But create only if the previous frame is not a C2I bridge already.
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
@@ -262,7 +262,7 @@ void Method::InvokeEntry(ManagedThread *thread, Frame *currentFrame, Frame *fram
         Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, this);
         InvokeHelper::InterpreterExecute(thread, pc, frame);
         Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, this);
-        thread->SetCurrentFrameIsCompiled(true);
+        thread->SetCurrentFrameKind(frameKind);
     } else {
         Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, this);
         InvokeHelper::InterpreterExecute(thread, pc, frame);

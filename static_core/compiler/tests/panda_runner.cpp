@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ namespace ark::test {
 int PandaRunnerHookAArch64()
 {
     ASSERT(PandaRunner::callback_);
-    ManagedThread::GetCurrent()->SetCurrentFrameIsCompiled(true);
+    ManagedThread::GetCurrent()->SetCurrentFrameKind(CurrentFrameKind::COMPILER);
     auto fp = reinterpret_cast<uintptr_t>(ManagedThread::GetCurrent()->GetCurrentFrame());
     auto lr = ManagedThread::GetCurrent()->GetNativePc();
     return PandaRunner::callback_(lr, fp);
@@ -29,7 +29,7 @@ int PandaRunnerHookAArch64()
 int PandaRunnerHook(uintptr_t lr, uintptr_t fp)
 {
     ASSERT(PandaRunner::callback_);
-    ManagedThread::GetCurrent()->SetCurrentFrameIsCompiled(true);
+    ManagedThread::GetCurrent()->SetCurrentFrameKind(CurrentFrameKind::COMPILER);
     ManagedThread::GetCurrent()->SetCurrentFrame(reinterpret_cast<Frame *>(fp));
     ManagedThread::GetCurrent()->SetNativePc(lr);
     return PandaRunner::callback_(lr, fp);

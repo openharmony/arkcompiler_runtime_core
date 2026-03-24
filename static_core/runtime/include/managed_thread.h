@@ -43,6 +43,9 @@ class GlobalHandleStorage;
 template <class TYPE>
 class HandleScope;
 
+// NOTE(audovichenko): Unify with FrameKind in libarkbase/utils/cframe_layout.h
+enum class CurrentFrameKind : uint8_t { INTERPRETER = 0, COMPILER = 1, NATIVE = 2 };
+
 struct CustomTLSData {
     CustomTLSData() = default;
     virtual ~CustomTLSData() = default;
@@ -145,12 +148,17 @@ public:
 
     bool IsCurrentFrameCompiled() const
     {
-        return isCompiledFrame_;
+        return frameKind_ != CurrentFrameKind::INTERPRETER;
     }
 
-    void SetCurrentFrameIsCompiled(bool value)
+    CurrentFrameKind GetCurrentFrameKind()
     {
-        isCompiledFrame_ = value;
+        return frameKind_;
+    }
+
+    void SetCurrentFrameKind(CurrentFrameKind value)
+    {
+        frameKind_ = value;
     }
 
     void SetException(ObjectHeader *exception)
@@ -357,7 +365,7 @@ public:
 
     static constexpr uint32_t GetFrameKindOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, isCompiledFrame_);
+        return MEMBER_OFFSET(ManagedThread, frameKind_);
     }
     static constexpr uint32_t GetFlagOffset()
     {
@@ -856,7 +864,7 @@ private:
     EntrypointsTable *entrypointsTable_ {nullptr};
     Frame *frame_ {nullptr};
     uintptr_t nativePc_ {};
-    bool isCompiledFrame_ {false};
+    CurrentFrameKind frameKind_ {0};
     ObjectHeader *exception_ {nullptr};
     void *cardTableAddr_ {nullptr};
     void *cardTableMinAddr_ {nullptr};

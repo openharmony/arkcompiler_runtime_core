@@ -82,7 +82,7 @@ MAKE_ASM_NAME(AniCriticalNativeEntryPoint):
     ldrb w20, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
 
     str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
-    mov w1, #1
+    mov w1, #MANAGED_THREAD_FRAME_KIND_NATIVE
     strb w1, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
 
     // Check num args. If all args could be settle in regs
@@ -345,7 +345,7 @@ MAKE_ASM_NAME(AniCriticalNativeEntryPoint):
     mov x26, x0
 
     str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
-    mov w1, #1
+    mov w1, #MANAGED_THREAD_FRAME_KIND_NATIVE
     strb w1, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
 
     // Check num args. If all args could be settle in regs

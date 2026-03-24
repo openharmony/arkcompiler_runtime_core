@@ -184,7 +184,7 @@
 .type \name, %function
 \name:
     ldrb r12, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst r12, r12
+    tst r12, #1
     bne \compiled_entry
     b \notcompiled_entry
 .endm
@@ -315,7 +315,7 @@
     // If the caller is not a compiled method, we need to call \entry
     // and return back after its execution
     ldrb r1, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst r1, r1
+    tst r1, #1
     beq .L\notcompiled
     CFI_REMEMBER_STATE
   

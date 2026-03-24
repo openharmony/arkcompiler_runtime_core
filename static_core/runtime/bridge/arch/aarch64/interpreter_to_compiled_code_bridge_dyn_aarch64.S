@@ -34,7 +34,7 @@ MAKE_ASM_NAME(InterpreterToCompiledCodeBridgeDyn):
 
     // According to the current frame kind set the bridge type
     ldrb w4, [x3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w4, #0x1
+    cmp w4, #0
     mov w5, #BYPASS_BRIDGE
     mov w6, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     csel w4, w5, w6, ne
@@ -128,7 +128,7 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArrayDyn):
 
     // According to the current frame kind set the bridge type
     ldrb w5, [x4, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w5, #0x1
+    cmp w5, #0
     mov w6, #BYPASS_BRIDGE
     mov w7, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     csel w5, w6, w7, ne

@@ -102,7 +102,7 @@ pseudocode:
 ```
 int64_t InvokeInterpreter(ManagedThread* thread, const uint8_t* pc, Frame* frame, Frame* last_frame) {
     thread->SetCurrentFrame(frame);
-    thread->SetCurrentFrameIsCompiled(false);
+    thread->SetCurrentFrameKind(CurrentFrameKind::INTERPRETER);
 
     interpreter::Execute(thread, pc, frame, thread->HasPendingException());
 
