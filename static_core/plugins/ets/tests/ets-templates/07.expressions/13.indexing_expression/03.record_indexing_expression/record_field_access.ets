@@ -29,6 +29,6 @@ let x: Record<Keys, number> = {
 }
 
 function main(): void {
-  arktest.assertEQ(x.{{c.index}}, {{c.value}});
+  arktest.assertEQ(x['{{c.index}}'], {{c.value}});
 }
 {% endfor %}

@@ -22,7 +22,5 @@ tags: [negative, compile-only]
 enum Enm { A = -2, B = 3, C = 8 }
 
 function main(): void {
-
   arktest.assertEQ(Enm.A ** Enm.B, Enm.C)
-
 }
