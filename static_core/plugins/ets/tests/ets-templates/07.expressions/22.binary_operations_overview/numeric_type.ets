@@ -18,8 +18,8 @@
 
 /*---
 desc: Binary operations types per table in chapter 7.22 for numeric types and bigint.
+test_suffix: "{{operator.name}}"
 ---*/
-//#4097 (urunner) note use this after declgen runs support test suffix: "{{operator.name}}"
 
 function main(): int {
   let testSuite = new arktest.ArkTestsuite("numeric_type_{{operator.name}}");

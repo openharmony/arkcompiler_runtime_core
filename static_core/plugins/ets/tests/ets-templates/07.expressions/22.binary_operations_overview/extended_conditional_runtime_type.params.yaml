@@ -27,3 +27,8 @@ cases:
   - { type: "EN", init_t: "EN.b", init_f: "EN.a" }
   - { type: "ES", init_t: "ES.b", init_f: "ES.a" }
   - { type: "union_example", init_t: "true", init_f: "''" }
+  # other non-nullable types
+  - { type: "Cls", init_t: "new Cls", init_f: "new Cls" }
+  - { type: "array_example", init_t: "[0, 0]", init_f: "[0, 0]" }
+  - { type: "func_example", init_t: "foo", init_f: "foo" }
+  - { type: "tuple_example", init_t: "[false, 0]", init_f: "[false, 0]" }

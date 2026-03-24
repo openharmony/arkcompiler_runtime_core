@@ -652,7 +652,24 @@
 07.expressions/21.unary_expressions/05.unary_plus/sign_plus_byte_short_to_int/unary_plus.neg.byte_short.inside_static_method_let_23.ets
 
 #33627
-07.expressions/22.binary_operations_overview/numeric_type_15.ets
+07.expressions/22.binary_operations_overview/numeric_type_exp.ets
+
+#33844
+07.expressions/22.binary_operations_overview/type_combinations_n_geq3_ES_boolean.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_greater3_ES_boolean.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_leq3_ES_boolean.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_less3_ES_boolean.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_less3_boolean_ES.ets
+
+#33845
+07.expressions/22.binary_operations_overview/type_combinations_n_eq4_byte_foo_type.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_eq4_foo_type_byte.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_eq4_foo_type_null.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_eq4_foo_type_undefined.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_eq_ext4_foo_type_byte.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_neq4_foo_type_byte.ets
+07.expressions/22.binary_operations_overview/type_combinations_n_neq_ext4_foo_type_byte.ets
+
 
 #33613
 07.expressions/21.unary_expressions/06.unary_minus/sign_minus_byte_short_to_int/unary_minus.neg.byte_short.constructor_0.ets

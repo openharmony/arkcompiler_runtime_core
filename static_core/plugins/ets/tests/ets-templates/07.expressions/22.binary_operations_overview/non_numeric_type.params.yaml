@@ -104,10 +104,6 @@ table_lines:
     result_type: "boolean"
 
   - operator: [ { sign: "==", name: "eq7" }, { sign: "!=", name: "neq7" }, { sign: "===", name: "eq_ext7" }, { sign: "!==", name: "neq_ext7" } ]
-    decl: |-
-      function foo1() {}
-      function foo2() {}
-      type foo_type = () => void
     type1: [{t: "null", i: "null"}, {t: "undefined", i: "undefined"}]
     type2: [{t: "null", i: "null"}, {t: "undefined", i: "undefined"}]
     result_type: "boolean"

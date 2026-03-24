@@ -19,7 +19,11 @@ cases:
   - { type: "EAB", init_t: "EAB.B", init_f: "EAB.A" }
   - { type: "EN", init_t: "EN.b", init_f: "EN.a" }
   - { type: "ES", init_t: "ES.b", init_f: "ES.a" }
-  - { type: "Cls", init_t: "new Cls", init_f: "new Cls", always_true: "true" }
+  - { type: "union_example", init_t: "true", init_f: "''" }
   - { type: "null", init_t: "null", init_f: "null", always_false: "true" }
   - { type: "undefined", init_t: "undefined", init_f: "undefined", always_false: "true" }
-  - { type: "union_example", init_t: "true", init_f: "''" }
+  # other non-nullable types
+  - { type: "Cls", init_t: "new Cls", init_f: "new Cls", always_true: "true" }
+  - { type: "array_example", init_t: "[0, 0]", init_f: "[0, 0]", always_true: "true" }
+  - { type: "func_example", init_t: "foo", init_f: "foo", always_true: "true" }
+  - { type: "tuple_example", init_t: "[false, 0]", init_f: "[false, 0]", always_true: "true" }

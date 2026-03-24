@@ -17,11 +17,15 @@
 
 /*---
 desc: Extended semantics for logical operators ‘&&’, ‘||’ as per chapter 15.14.1.
+test_suffix: "{{case1.type}}"
 ---*/
-//#4097 (urunner) note use this after declgen runs support test suffix: "{{case1.type}}"
 
-// type alias for union for test suffix support
+// type aliases for test suffix support
 type union_example = boolean|string
+type array_example = int[]
+type func_example = () => void
+function foo() {}
+type tuple_example = [boolean, int]
 
 let alwaysFalse1: boolean = false
 let alwaysTrue1: boolean = false
