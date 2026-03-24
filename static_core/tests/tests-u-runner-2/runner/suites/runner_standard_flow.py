@@ -53,7 +53,7 @@ class RunnerStandardFlow(RunnerFileBased):
             cmd_prefix=self.cmd_prefix,
             cmd_env=self.cmd_env,
             timestamp=int(datetime.timestamp(datetime.now(pytz.UTC))),
-            report_formats={self.config.general.report_format},
+            report_formats={self.config.general.report.report_format},
             work_dir=WorkDir(config, self.default_work_dir_root),
             coverage=CoverageManager(self.config.general.build, self.work_dir.coverage_dir, config.general.coverage),
             test_flow_registry=TestFlowRegistry()

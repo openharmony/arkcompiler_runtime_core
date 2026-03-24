@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from __future__ import annotations
+
+
+class SpecNode:
+    """
+    A node in the specification table-of-contents tree. Each node corresponds to a spec section
+    and holds test result counters both own (non-accumulated) and accumulated from all descendants.
+    """
+
+    def __init__(self, title: str, prefix: str, status: str, parent: SpecNode | None):
+        self.title = title
+        self.prefix = prefix
+        self.status = status
+        self.parent: SpecNode | None = parent
+        self.dir: str = ""
+        self.children: list[SpecNode] = []
+        if parent:
+            parent.children.append(self)
+
+        # Counters with recursive accumulation from children:
+        self.total_acc: int = 0
+        self.passed_acc: int = 0
+        self.failed_acc: int = 0
+        self.ignored_acc: int = 0
+        self.ignored_but_passed_acc: int = 0
+        self.excluded_acc: int = 0
+        self.excluded_after_acc: int = 0
+
+        # Counters without accumulation:
+        self.total: int = 0
+        self.passed: int = 0
+        self.failed: int = 0
+        self.ignored: int = 0
+        self.ignored_but_passed: int = 0
+        self.excluded: int = 0
+        self.excluded_after: int = 0
+
+    def to_dict(self) -> dict:
+        ret: dict = {
+            'title': self.title
+        }
+
+        if len(self.prefix) > 0:
+            ret['prefix'] = self.prefix
+
+        if len(self.status) > 0:
+            ret['status'] = self.status
+
+        if len(self.dir) > 0:
+            ret['test_dir'] = self.dir
+
+        if self.total:
+            ret['total'] = self.total
+            ret['passed'] = self.passed
+            ret['failed'] = self.failed
+            ret['ignored'] = self.ignored
+            ret['ignored_but_passed'] = self.ignored_but_passed
+            ret['excluded'] = self.excluded
+            ret['excluded_after'] = self.excluded_after
+
+        if self.total_acc:
+            ret['total_acc'] = self.total_acc
+            ret['passed_acc'] = self.passed_acc
+            ret['failed_acc'] = self.failed_acc
+            ret['ignored_acc'] = self.ignored_acc
+            ret['ignored_but_passed_acc'] = self.ignored_but_passed_acc
+            ret['excluded_acc'] = self.excluded_acc
+            ret['excluded_after_acc'] = self.excluded_after_acc
+
+        if len(self.children) > 0:
+            ret['subsections'] = self.children
+
+        return ret

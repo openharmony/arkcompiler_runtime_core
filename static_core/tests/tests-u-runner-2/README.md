@@ -7,7 +7,7 @@ Universal test runner, version 2, for Open Harmony.
 -   Panda build
 -   Python3 version at least 3.8. 3.10 is recommended.
 -   Make sure to run `sudo static_core/scripts/install-deps-ubuntu -i=test` to create a ~/.venv-panda virtual environment with
-all required python libraries  (`tqdm`, `dataclasses`, `python-dotenv`, etc). 
+all required python libraries  (`tqdm`, `dataclasses`, `python-dotenv`, etc).
 -   Suite `ets-es-checked` requires [node and some packages](#ETS-ES-checked-dependencies)
 
 ## Quick run
@@ -81,7 +81,7 @@ Test list name usually has the following format: `<test-suite-name>[-<additional
 -   `kind` is one of `excluded` or `ignored`
 -   `OS` is one of `LIN`, `WIN`, `MAC`.   If an operating system is set explicitly, the test list is applied only to this OS. If none is set, the list is applied to any OS.
 -   `architecture` is one of `ARM32`, `ARM64`, `AMD32`, `AMD64`.  If an architecture is set explicitly, the test list is applied only to this architecture. If none is set, the list is applied to any architecture.
--   `configuration` is one of `INT`, `AOT`, `AOT-FULL`, `IRTOC`, `LLVM`, `JIT`. If a configuration is set explicitly, the test list is applied only to this configuration. If none is set, the list is applied to any configuration. 
+-   `configuration` is one of `INT`, `AOT`, `AOT-FULL`, `IRTOC`, `LLVM`, `JIT`. If a configuration is set explicitly, the test list is applied only to this configuration. If none is set, the list is applied to any configuration.
 -   `interpreter`  used value for `interpreter-type` option. `DEFAULT` can be used to specify specific only for default interpreter. If an interpreter is set explicitly, the test list is applied only to this interpreter. If none is set, the list is applied to any interpreter.
 -   `sanitizer` is one of `ASAN` or `TSAN`. If a sanitizer is set explicitly, the test list is applied only to this build configuration. If none is set, the list is applied to any configuration.
 -   `opt-level` is `OLx`, where `x` is opt-level, usually 0 or 2.
@@ -111,7 +111,7 @@ All test lists are loaded automatically from the specified `LIST_ROOT` and got a
 > **Note**: these options just specifies what test lists to load and do not affect on how and where to start the runner
 > itself and binaries used within.
 
-It is possible to describe an expected failure for a test in the ignore list.  
+It is possible to describe an expected failure for a test in the ignore list.
 Place the Failure markup in the comment immediately before the test entry:
 @@Failure: _Expected failure description_@@
 
@@ -139,6 +139,14 @@ Detailed report shows test statistics for every folder
 - `--detailed-report` - if it's specified the report is generated
 - `--general.detailed-report-file` - specifies file/path where the report should be saved to
 
+## ArkTS Specification coverage report
+
+ArkTS Specification coverage report shows test statistics for every specification chapter or section
+- `--spec-report`/`report.spec-report: True` - if it's specified the two report files are generated
+- `--spec-report-file FILE`/`report.spec-report-file: FILE` - specifies file/path to output the markdown-formatted report
+- `--spec-report-yaml FILE`/`report.spec-report-yaml: FILE` - specifies file/path to output the YAML-formatted report
+- `--spec-file FILE`/`report.spec-file: FILE` - specifies file/path to the specification PDF file
+
 ## Verbose and logging options:
 
 -  `--verbose`, `-v` - Enable verbose output. Possible values one of:
@@ -164,7 +172,7 @@ Main help function for the runner gives mandatory parameters, <workflow_name> <t
 
 ```./runner.sh --help```
 
-If use ```'runner.sh <workflow_name> <test_suite_name> --help'``` 
+If use ```'runner.sh <workflow_name> <test_suite_name> --help'```
 e.g.:
 
 ```./runner.sh panda-int ets-cts --help```
@@ -203,7 +211,7 @@ If you want to run arbitrary set of ETS tests with URunner you can use your own 
 
 1. If required, create new workflow config in cfg/workflows with required parameters and steps
 2. If required, create new test suite config in cfg/test-suites with required paths to test templates and ignore lists
-3. Run with these configs 
+3. Run with these configs
 ```commandline
 urunner2>./runner.sh <your_new_workflow_name> <your_new_test_suite_name> <other parameters if required>
 ```
@@ -219,9 +227,9 @@ steps:
         enabled: ${parameters.enable-es2panda} # switches on or off the step execution
         step-type: compiler
         # path to file with contents of the standard output after the binary has completed
-        stdout: "${parameters.work-dir}/gen/${test-id}.output.txt" 
+        stdout: "${parameters.work-dir}/gen/${test-id}.output.txt"
         # path to file with contents of the standard error after the binary has completed
-        stderr: "${parameters.work-dir}/gen/${test-id}.error.txt" 
+        stderr: "${parameters.work-dir}/gen/${test-id}.error.txt"
         validator: Python path to class with custom validator (inherited from IValidator or BaseValidator)
         pre-reqs:  # check before the binary is executed
             - req: FileExist  # the file specified in the value must exist
@@ -244,7 +252,7 @@ The values can contain macros detected by `${}`. The macro's name is yaml path t
 ### Special macros
 In workflow/test-suite configuration files following special macros are supported:
 - `${test-id}` refers to the test file name (or path to the test file if some folder hierarchy is used from the TEST_ROOT).
-- `${test-id-name}` refers to the same test file name, but without all suffixes. 
+- `${test-id-name}` refers to the same test file name, but without all suffixes.
 All special macros are expanded at last call just before the binary executing.
 
 ## ETS ES checked dependencies
