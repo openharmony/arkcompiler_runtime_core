@@ -13,16 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
-#define PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
+#ifndef PGO_PROFILE_MERGER_H
+#define PGO_PROFILE_MERGER_H
 
-namespace ark::aptool::dump {
+#include "aot_profiling_data.h"
 
-class DumpCommand {
-public:
-    int Run(const char *progName, int argc, const char **argv);
+#include <cstdint>
+#include <string>
+#include <string_view>
+
+namespace ark::pgo {
+
+struct MergedProfile {
+    // Owns panda file strings referenced by MergedProfile::data (AotProfilingData stores string_view).
+    PandaVector<PandaString> pandaFilesStorage;
+    AotProfilingData data;
 };
 
-}  // namespace ark::aptool::dump
+class ProfileMerger {
+public:
+    bool Merge(const PandaVector<const AotProfilingData *> &inputs, MergedProfile &output, std::string *error) const;
+};
 
-#endif  // PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
+}  // namespace ark::pgo
+
+#endif  // PGO_PROFILE_MERGER_H

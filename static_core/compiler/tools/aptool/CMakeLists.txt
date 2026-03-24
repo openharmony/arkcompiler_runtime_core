@@ -13,32 +13,42 @@
 
 project(aptool)
 
-panda_add_executable(ark_aptool
-    main.cpp
-    common/utils.cpp
-    common/profile_loader.cpp
-    common/abc_metadata.cpp
-    dump/filter.cpp
-    dump/yaml_writer.cpp
-    dump/dump_command.cpp
+set(APTOOL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(APTOOL_COMMON_INCLUDE_DIRS
+    ${PANDA_ROOT}
+    ${PANDA_ROOT}/runtime
+    ${PANDA_ROOT}/libarkfile
+    ${PANDA_ROOT}/assembler
+    ${APTOOL_SOURCE_DIR}
 )
-
-panda_target_link_libraries(ark_aptool
+set(APTOOL_COMMON_LIBRARIES
     arkbase
     arkruntime
     arkfile
     arkassembler
 )
 
-panda_target_include_directories(ark_aptool
-    PUBLIC ${PANDA_ROOT}
-    PUBLIC ${PANDA_ROOT}/runtime
-    PUBLIC ${PANDA_ROOT}/libarkfile
-    PUBLIC ${PANDA_ROOT}/assembler
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+panda_add_executable(ark_aptool
+    main.cpp
+    common/utils.cpp
+    common/profile_loader.cpp
+    common/abc_metadata.cpp
 )
 
-panda_gen_options(TARGET ark_aptool YAML_FILE dump/dump_options.yaml GENERATED_HEADER dump_options.h)
+add_subdirectory(dump)
+add_subdirectory(merge)
+panda_target_sources(ark_aptool PRIVATE
+    $<TARGET_OBJECTS:ark_aptool_dump>
+    $<TARGET_OBJECTS:ark_aptool_merge>
+)
+
+panda_target_link_libraries(ark_aptool
+    ${APTOOL_COMMON_LIBRARIES}
+)
+
+panda_target_include_directories(ark_aptool
+    PUBLIC ${APTOOL_COMMON_INCLUDE_DIRS}
+)
 
 # CMake builds always include dump (development environment)
 panda_target_compile_options(ark_aptool PUBLIC -DAPTOOL_INCLUDE_DUMP)

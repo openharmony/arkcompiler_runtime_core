@@ -33,7 +33,7 @@ namespace ark::aptool::dump {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_APTOOL(level) LOG(level, PROFILER) << "APTOOL: "
 
-int DumpCommand::Run(int argc, const char **argv)
+int DumpCommand::Run(const char *progName, int argc, const char **argv)
 {
     PandArgParser parser;
     PandArg<bool> help("help", false, "Print this message and exit");
@@ -43,13 +43,20 @@ int DumpCommand::Run(int argc, const char **argv)
     parser.Add(&help);
 
     if (!parser.Parse(argc, argv)) {
-        LOG_APTOOL(ERROR) << parser.GetErrorString();
-        std::cout << std::endl;
-        std::cout << parser.GetHelpString() << std::endl;
+        auto error = parser.GetErrorString();
+        while (!error.empty() && (error.back() == '\n' || error.back() == '\r')) {
+            error.pop_back();
+        }
+        LOG_APTOOL(ERROR) << error;
+        LOG_APTOOL(ERROR) << "Run '" << progName << " " << argv[0] << " --help' for usage.";
         return EXIT_FAILURE;
     }
 
     if (help.GetValue()) {
+        std::cout << "Usage: " << progName << " " << argv[0]
+                  << " --ap-path <input-profile> --output <output.yaml> [options]" << std::endl;
+        std::cout << std::endl;
+        std::cout << "Options:" << std::endl;
         std::cout << parser.GetHelpString() << std::endl;
         return EXIT_SUCCESS;
     }

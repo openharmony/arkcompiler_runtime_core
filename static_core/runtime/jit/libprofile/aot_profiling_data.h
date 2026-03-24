@@ -135,7 +135,17 @@ public:
         return pandaFileMap_;
     }
 
+    const PandaMap<std::string_view, PandaFileIdxType> &GetPandaFileMap() const
+    {
+        return pandaFileMap_;
+    }
+
     PandaMap<PandaFileIdxType, std::string_view> &GetPandaFileMapReverse()
+    {
+        return pandaFileMapRev_;
+    }
+
+    const PandaMap<PandaFileIdxType, std::string_view> &GetPandaFileMapReverse() const
     {
         return pandaFileMapRev_;
     }
@@ -151,7 +161,7 @@ public:
         return allMethodsMap_;
     }
 
-    int32_t GetPandaFileIdxByName(std::string_view pandaFileName)
+    int32_t GetPandaFileIdxByName(std::string_view pandaFileName) const
     {
         auto pfIdx = pandaFileMap_.find(pandaFileName);
         if (pfIdx == pandaFileMap_.end()) {
@@ -176,10 +186,7 @@ public:
 
     void AddMethod(PandaFileIdxType pfIdx, uint32_t methodIdx, AotMethodProfilingData &&profData)
     {
-        if (allMethodsMap_[pfIdx].find(methodIdx) != allMethodsMap_[pfIdx].end()) {
-            allMethodsMap_[pfIdx].erase(methodIdx);
-        }
-        allMethodsMap_[pfIdx].insert(std::make_pair(methodIdx, std::move(profData)));
+        allMethodsMap_[pfIdx].insert_or_assign(methodIdx, std::move(profData));
     }
 
 private:

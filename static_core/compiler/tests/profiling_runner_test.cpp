@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,7 +102,10 @@ TEST_F(ProfilingRunnerTest, ProfilingDataNullptTestCpp)
     ASSERT_EQ(nullptr, profilingData);
     ProfilingSaver saver;
     pgo::AotProfilingData profData;
-    saver.AddMethod(&profData, method, 0);
+    ProfilingSaver::PendingLastSavedMap pendingLastSaved;
+    saver.AddMethod(&profData, method, 0, pendingLastSaved, false);
+    ASSERT_TRUE(profData.GetAllMethods().empty());
+    ASSERT_TRUE(pendingLastSaved.empty());
     Runtime::Destroy();
 }
 
@@ -133,7 +136,10 @@ TEST_F(ProfilingRunnerTest, ProfilingDataNullptTest)
     ASSERT_EQ(nullptr, profilingData);
     ProfilingSaver saver;
     pgo::AotProfilingData profData;
-    saver.AddMethod(&profData, method, 0);
+    ProfilingSaver::PendingLastSavedMap pendingLastSaved;
+    saver.AddMethod(&profData, method, 0, pendingLastSaved, false);
+    ASSERT_TRUE(profData.GetAllMethods().empty());
+    ASSERT_TRUE(pendingLastSaved.empty());
     Runtime::Destroy();
 }
 
@@ -246,7 +252,8 @@ TEST_F(ProfilingRunnerTest, ProfilingDataFlagsConstruction)
     auto profilingDataEnabled = ProfilingData::Make(
         allocator, 0, 0, 0,
         [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
-            [[maybe_unused]] void *throwsMem) { return new (data) ProfilingData({}, {}, {}, true); });
+            [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *branchLastSavedMem,
+            [[maybe_unused]] void *throwLastSavedMem) { return new (data) ProfilingData({}, {}, {}, {}, {}, true); });
 
     ASSERT_NE(nullptr, profilingDataEnabled);
     ASSERT_TRUE(profilingDataEnabled->IsBranchProfilingEnabled());
@@ -255,7 +262,8 @@ TEST_F(ProfilingRunnerTest, ProfilingDataFlagsConstruction)
     auto profilingDataDisabled = ProfilingData::Make(
         allocator, 0, 0, 0,
         [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
-            [[maybe_unused]] void *throwsMem) { return new (data) ProfilingData({}, {}, {}, false); });
+            [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *branchLastSavedMem,
+            [[maybe_unused]] void *throwLastSavedMem) { return new (data) ProfilingData({}, {}, {}, {}, {}, false); });
 
     ASSERT_NE(nullptr, profilingDataDisabled);
     ASSERT_FALSE(profilingDataDisabled->IsBranchProfilingEnabled());
@@ -264,8 +272,9 @@ TEST_F(ProfilingRunnerTest, ProfilingDataFlagsConstruction)
     auto profilingDataDefault =
         ProfilingData::Make(allocator, 0, 0, 0,
                             [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
-                                [[maybe_unused]] void *throwsMem) {
-                                return new (data) ProfilingData({}, {}, {});  // No flags parameter - use default
+                                [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *branchLastSavedMem,
+                                [[maybe_unused]] void *throwLastSavedMem) {
+                                return new (data) ProfilingData({}, {}, {}, {}, {});  // Use default flag value
                             });
 
     ASSERT_NE(nullptr, profilingDataDefault);

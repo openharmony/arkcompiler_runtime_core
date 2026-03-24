@@ -379,7 +379,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/vn_test.cpp
     tests/class_hash_table_test.cpp
     tests/linear_order_test.cpp
-    tests/profiling_merger_test.cpp
+    tests/profiling_runtime_save_merge_test.cpp
     tests/profiling_multi_path_test.cpp
     tests/profiling_runner_test.cpp
     tests/lower_boxed_boolean.cpp
@@ -396,6 +396,7 @@ endif()
 # aptool is only built for AMD64 and ARM64
 if(PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
     list(APPEND PANDA_COMPILER_TESTS_SOURCES
+        tests/aptool_merge_test.cpp
         tests/aptool_dump_test.cpp
     )
 endif()

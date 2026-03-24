@@ -140,6 +140,8 @@ set(SOURCES
     profilesaver/profile_saver.cpp
     profilesaver/profile_dump_info.cpp
     jit/libprofile/pgo_file_builder.cpp
+    jit/libprofile/pgo_class_context_utils.cpp
+    jit/libprofile/profile_merger.cpp
     jit/profiling_loader.cpp
     jit/profiling_saver.cpp
     jit/profile_saver_worker.cpp
@@ -868,6 +870,16 @@ add_gtests(
 add_gtests(
     arkruntime_ark_vm_api_test
     tests/ark_vm_api_test.cpp
+)
+
+add_gtests(
+    arkruntime_pgo_class_context_utils_test
+    tests/pgo_class_context_utils_test.cpp
+)
+
+add_gtests(
+    arkruntime_profile_merger_test
+    tests/profile_merger_test.cpp
 )
 
 add_gtests(

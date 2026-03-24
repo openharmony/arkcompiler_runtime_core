@@ -13,16 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
-#define PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
+#ifndef ARK_RUNTIME_JIT_LIBPROFILE_PGO_CLASS_CONTEXT_UTILS_H
+#define ARK_RUNTIME_JIT_LIBPROFILE_PGO_CLASS_CONTEXT_UTILS_H
 
-namespace ark::aptool::dump {
+#include <map>
+#include <string>
+#include <string_view>
+#include <vector>
 
-class DumpCommand {
+namespace ark::pgo {
+
+class PgoClassContextUtils {
 public:
-    int Run(const char *progName, int argc, const char **argv);
+    static bool Parse(std::string_view ctx, std::map<std::string, std::string> &entries, std::string *error);
+    static bool Merge(const std::vector<std::string_view> &contexts, std::string &merged, std::string *error);
 };
 
-}  // namespace ark::aptool::dump
+}  // namespace ark::pgo
 
-#endif  // PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
+#endif  // ARK_RUNTIME_JIT_LIBPROFILE_PGO_CLASS_CONTEXT_UTILS_H
