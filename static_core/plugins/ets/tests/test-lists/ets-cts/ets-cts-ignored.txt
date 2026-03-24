@@ -1286,6 +1286,9 @@
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_5.ets
 
+#33911
+16.concurrency/06.api_details_and_restrictions/02.using_the_asynchronous_api/async_main_entry_point.ets
+
 #32664
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_creation.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_creation_0.ets
