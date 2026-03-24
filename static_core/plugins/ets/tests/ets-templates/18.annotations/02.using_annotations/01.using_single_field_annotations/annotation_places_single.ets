@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ tags: [compile-only]
 @interface SomeAnnotation {
    field1: {{ case.type }} = {{ case.value }}
 }
+
+let var_name1: @SomeAnnotation({{ case.value }}) (string)
 
 @SomeAnnotation({{ case.value }})
 const c: string = "some_string"

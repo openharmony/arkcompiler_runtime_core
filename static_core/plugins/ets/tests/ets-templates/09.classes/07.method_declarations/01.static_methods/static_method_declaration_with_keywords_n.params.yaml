@@ -1,0 +1,30 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # List of invalid static method modifiers
+modifiers:
+#0
+  - mod: "abstract"
+    expected: "Semantic error ESE0047: Invalid method modifier(s): an abstract method can't have private, override, static, final or native modifier."
+#1
+  - mod: "override"
+    expected: "Semantic error ESE0077: Invalid method modifier(s): a static method can't have abstract, final or override modifier."
+#2
+  - mod: "open"
+    expected: "Syntax error ESY0121: Field type annotation expected."
+#3
+  - mod: "synchronized"
+    expected: "Syntax error ESY0121: Field type annotation expected."
+#4
+  - mod: "final"
+    expected: "Semantic error ESE0077: Invalid method modifier(s): a static method can't have abstract, final or override modifier."

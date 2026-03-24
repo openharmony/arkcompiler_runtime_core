@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,29 +11,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of invalid interface members
+---
 cases:
-  - byte
-  - short
-  - int
-  - long
-  - bigint
-  - BigInt
-  - float
-  - double
-  - char
-  - boolean
-  - Object
-  - String
-  - number[]
-  - number|string
-  - Function
-  - Any
-  - "null"
-  - undefined
-  - never
-  - "(n: number) => string"
-  - "(n: number, ...ns: number[]) => string"
-  - '"a" | "b"'
-  - "[number, string]"
-  - Color
+#1
+  - type: byte
+    value: 1
+#2
+  - type: short
+    value: 1
+#3
+  - type: int
+    value: 1
+#4
+  - type: long
+    value: 1
+#5
+  - type: bigint
+    value: new BigInt(1)
+#6
+  - type: BigInt
+    value: 10000n
+#7
+  - type: float
+    value: 2.1
+#8
+  - type: double
+    value: 3.3
+#9
+  - type: number
+    value: 44.555
+#10
+  - type: char
+    value: c'a'
+#11
+  - type: boolean
+    value: 'false'
+#12
+  - type: Object
+    value: new Object()
+#13
+  - type: String
+    value: "'test:'"
+#14
+  - type: number[]
+    value: [1]
+#15
+  - type: number|string
+    value: "'obj1'"
+#16
+  - type: 'null'
+    value: 'null'
+#17
+  - type: undefined
+    value: undefined
+#18
+  - type: '"a" | "b"'
+    value:  "'a'"
+#19
+  - type: "[number, string]"
+    value: "[1,'test']"
+#20
+  - type: Color
+    value: Color.Green
+#21
+  - type: 'never'
+    value: never
+#22
+  - type: Function 
+    value: ()=>{}
+#23
+  - type: "(n: number) => string"
+    value: "(n: number) => {return '0'}"
+#24
+  - type: "(n: number, ...ns: number[]) => string"
+    value: "(n: number, ...ns: number[]) => {return '0'}"
+#25
+  - type: Any
+    value: new Promise<void>((res, rej) => {setTimeout(res, 1, undefined)})

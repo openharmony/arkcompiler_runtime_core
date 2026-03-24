@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,20 +19,21 @@ desc: >-
     or derived one represented as parameters or local variables
     Access inherited private field
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0293: Property count is not visible here."
 ---*/
 
 class B {
-  private count: number
-  constructor(count: number) {
-    this.count = count
-  }
+    private count: number
+    constructor(count: number) {
+        this.count = count
+    }
 }
 class C extends B {
-  constructor(count: number) {
-    super(count)
-  }
-  static getCount(c: C): number {
-    return c.count
-  }
-}
+    constructor(count: number) {
+        super(count)
+    }
 
+    static getCount(c: C): number {
+        return c.count
+    }
+}

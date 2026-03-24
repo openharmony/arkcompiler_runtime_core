@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,16 +14,17 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static method call.
-assert: A class method is always invoked without reference to a particular object.
+desc: >-
+    Static method call.
+    A class method is always invoked without reference to a particular object.
 ---*/
 
 class A {
-  public static run(): int {
-    return 5;
-  }
+    public static run(): int {
+        return 5;
+    }
 }
 
 function main(): void {
-  arktest.assertEQ( A.run(), 5 );
+    arktest.assertEQ( A.run(), 5 );
 }

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,33 +14,32 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static method call.
-assert: >-
+desc: >-
+    Non-static method call.
     An instance method is always invoked with respect to an object, which becomes the current object
     to which the keyword this and super refer during execution of the method body.
 ---*/
 
 class A {
-  public foo(): int {
-    return 5;
-  }
+    public foo(): int {
+        return 5;
+    }
 }
 
 class B extends A {
-  public x: int;
+    public x: int;
 
-  public static run(): int {
-    return 5;
-  }
+    public static run(): int {
+        return 5;
+    }
 
-  public bar(): int {
-    this.x = 5;
-    return super.foo() + this.x;
-  }
+    public bar(): int {
+        this.x = 5;
+        return super.foo() + this.x;
+    }
 }
 
 function main(): void {
-  let instance: B = new B();
-
-  arktest.assertTrue( instance.bar() == 10 );
+    let instance: B = new B();
+    arktest.assertTrue( instance.bar() == 10 );
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,9 @@
  */
 
 /*---
-desc: methods returning this, implements multiple interfaces with the same method that return this, negative.
-tags: [negative, compile-only]
+desc: methods returning this, implements multiple interfaces with the same method that return this
 ---*/
+
 interface I {
     foo(): this {
         return this
@@ -30,4 +30,11 @@ interface II {
 }
 
 class C implements I, II {
+    foo(): this {
+        return this
+    }    
+}
+
+function main() {
+    arktest.assertTrue(new C().foo() instanceof C)
 }

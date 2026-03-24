@@ -2586,3 +2586,4 @@
 #FailKind.DECLGEN_ETS2TS_FAIL:
 15.semantic_rules/10.overloading/main_overload_neg.ets
 17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
+09.classes/07.method_declarations/05.overriding_methods/overriding_by_instance_methods/instance_method_overridden_by_abstract.ets
