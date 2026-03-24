@@ -527,23 +527,23 @@ export namespace StdProcess {
         errorHandler.reset(listener);
     }
 
-    const THROW_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => {
+    const THROW_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => {
         throw reason;
     }
-    const WARN_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => {
+    const WARN_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => {
         console.error("Unhandled Job fail:", reason);
     }
-    const NONE_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => {}
+    const NONE_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => {}
 
-    const THROW_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => {
+    const THROW_PROMISE_HANDLER_CALLBACK: (reason: Error, promise: Object) => void = (reason: Error, promise: Object) => {
         throw reason;
     }
-    const WARN_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => {
+    const WARN_PROMISE_HANDLER_CALLBACK: (reason: Error, promise: Object) => void = (reason: Error, promise: Object) => {
         console.error("Unhandled Promise fail:", reason);
     }
-    const NONE_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => {}
+    const NONE_PROMISE_HANDLER_CALLBACK: (reason: Error, promise: Object) => void = (reason: Error, promise: Object) => {}
 
-    const DEFAULT_ERROR_HANDLER_CALLBACK = (error: Object): void => {
+    const DEFAULT_ERROR_HANDLER_CALLBACK: (error: Object) => void = (error: Object): void => {
         console.error('Unhandled exception:', Class.of(error).getName());
         let out = new String();
         let toStr = new String();
@@ -576,7 +576,7 @@ export namespace StdProcess {
         None
     }
 
-    function getDefaultPromiseHandler(defaultHandlerMode: int)
+    function getDefaultPromiseHandler(defaultHandlerMode: int): (reason: Error, promise: Object) => void
     {
         if (defaultHandlerMode == DefaultHandlerMode.Throw) {
             return THROW_PROMISE_HANDLER_CALLBACK;
@@ -587,7 +587,7 @@ export namespace StdProcess {
         return NONE_PROMISE_HANDLER_CALLBACK;
     }
 
-    function getDefaultJobHandler(defaultHandlerMode: int)
+    function getDefaultJobHandler(defaultHandlerMode: int): (reason: Error, job: Object) => void
     {
         if (defaultHandlerMode == DefaultHandlerMode.Throw) {
             return THROW_JOB_HANDLER_CALLBACK;
@@ -598,7 +598,7 @@ export namespace StdProcess {
         return NONE_JOB_HANDLER_CALLBACK;
     }
 
-    function callJobHandler(objAndReason: Object[], defaultHandlerMode: int)
+    function callJobHandler(objAndReason: Object[], defaultHandlerMode: int): void
     {
         let reason = objAndReason[0] as Error;
         let obj = objAndReason[1];
@@ -610,7 +610,7 @@ export namespace StdProcess {
         failedJobHandler.apply(reason, obj);
     }
 
-    function callPromiseHandler(objAndReason: Object[], defaultHandlerMode: int)
+    function callPromiseHandler(objAndReason: Object[], defaultHandlerMode: int): void
     {
         let reason = objAndReason[0] as Error;
         let obj = objAndReason[1];

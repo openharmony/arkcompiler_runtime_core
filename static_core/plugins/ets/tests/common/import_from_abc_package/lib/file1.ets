@@ -20,7 +20,7 @@ export class C {
     field1: A = new A();
     field2: B = new B();
 
-    print() {
+    print(): void {
         this.field1.print();
         this.field2.print();
     }

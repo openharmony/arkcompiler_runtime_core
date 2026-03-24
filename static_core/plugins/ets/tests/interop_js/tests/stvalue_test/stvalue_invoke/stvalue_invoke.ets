@@ -185,19 +185,19 @@ export function BigIntEmptyInvoke(): BigInt {
 }
 
 // void
-export function VoidInvoke(str1: String, str2: String) {
+export function VoidInvoke(str1: String, str2: String): void {
     console.log(str1 + str2);
 }
 
-export function VoidEmptyInvoke() {
+export function VoidEmptyInvoke(): void {
     console.log('string');
 }
 
 export namespace Invoke {
 
-    export let getNumberFn = () => { return 123; }
+    export let getNumberFn: () => int = () => { return 123; }
 
-    export let getSumFn = (n1: number, n2: number) => { return n1 + n2; }
+    export let getSumFn: (n1: number, n2: number) => number = (n1: number, n2: number) => { return n1 + n2; }
 
     // boolean type
     export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
@@ -299,11 +299,11 @@ export namespace Invoke {
     }
 
     // void
-    export function VoidInvoke(str1: String, str2: String) {
+    export function VoidInvoke(str1: String, str2: String): void {
         console.log(str1 + str2);
     }
 
-    export function VoidEmptyInvoke() {
+    export function VoidEmptyInvoke(): void {
         console.log('string');
     }
 
@@ -312,7 +312,7 @@ export namespace Invoke {
         return str === 'test';
     }
 
-    export let lambdaFun = () => {
+    export let lambdaFun: () => string = () => {
         return 'test';
     }
 

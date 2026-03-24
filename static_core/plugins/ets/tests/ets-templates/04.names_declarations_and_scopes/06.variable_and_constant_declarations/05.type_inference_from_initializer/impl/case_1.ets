@@ -18,4 +18,4 @@ desc: Check type inference from the initialization expression
 tags: [not-a-test, compile-only]
 ---*/
 
-export const myC = 10
+export const myC: int = 10

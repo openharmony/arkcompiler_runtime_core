@@ -13,48 +13,48 @@
  * limitations under the License.
  */
 
-export declare let a: number
-export declare let b: string
-export declare let c: bigint
-export declare let d: boolean
+export declare let a: number;
+export declare let b: string;
+export declare let c: bigint;
+export declare let d: boolean;
 
-export declare let n: Number
-export declare let e: number
+export declare let n: Number;
+export declare let e: number;
 
-export declare type Greeting = "Hello"
-export declare let h: "Hello"
-export declare let g: Greeting
+export declare type Greeting = "Hello";
+export declare let h: "Hello";
+export declare let g: Greeting;
 
 export declare enum Color {
     Red, Green, Blue
-}
+};
 
-export declare type union = number | string
-export declare let u: union
+export declare type union = number | string;
+export declare let u: union;
 
 export declare enum UserRole {
     Admin = "admin",
     Editor = "editor",
     Viewer = "viewer",
     Guest = "guest"
-}
+};
 
-export declare function foo(n: number): number
+export declare function foo(n: number): number;
 export declare class C {
-    static foo(n: number): number
-    bar(n: number): number
+    static foo(n: number): number;
+    bar(n: number): number;
 }
 
 export declare interface iface {
-    foo(n?: number): void
+    foo(n?: number): void;
 }
 
-export declare function error(msg: string): never
+export declare function error(msg: string): never;
 
-export declare let numberlist: es.Array<number>
-export declare let stringlist: es.Array<string>
+export declare let numberlist: es.Array<number>;
+export declare let stringlist: es.Array<string>;
 
-export declare let bar: ()=>number
+export declare let bar: ()=>number;
 
 type StdArray<T> = T[];
 

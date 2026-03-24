@@ -20,7 +20,7 @@ desc: >-
 ---*/
 
 namespace CONST {
-  export const value = 'namespaceValue';
+  export const value: string = 'namespaceValue';
 }
 
 interface NamespaceConflictInterface {
@@ -29,7 +29,7 @@ interface NamespaceConflictInterface {
 
 class NamespaceConflictClass implements NamespaceConflictInterface {
   readonly CONST: number = 62;
-  getNamespaceValue() {
+  getNamespaceValue(): string {
     return CONST.value;
   }
 }

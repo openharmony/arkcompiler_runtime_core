@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-export const int_1 = 3;
-export const int_2 = -0.0, int_3 = 9007199254740991;
+export const int_1: int = 3;
+export const int_2: double = -0.0, int_3: long = 9007199254740991;
 export { int_1,  int_2, int_3 };
 
-export  const int_4 = 3;
-export  const int_5 = -0.0, int_6 = 9007199254740991;
+export  const int_4: int = 3;
+export  const int_5: double = -0.0, int_6: long = 9007199254740991;
 export type { int_4 , int_5, int_6 };
 

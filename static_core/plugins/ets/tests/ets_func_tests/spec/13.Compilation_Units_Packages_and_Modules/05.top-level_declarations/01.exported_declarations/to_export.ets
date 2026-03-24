@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,11 +28,11 @@ export class Point {
    this.y = y
   }
 }
-export let Origin = new Point(0, 0)
+export let Origin: Point = new Point(0, 0)
 export function Distance(p1: number, p2: number): number {
   return p2-p1
 }
-export default let PI = 3.141592653589
+export default let PI: double = 3.141592653589
 
 
 

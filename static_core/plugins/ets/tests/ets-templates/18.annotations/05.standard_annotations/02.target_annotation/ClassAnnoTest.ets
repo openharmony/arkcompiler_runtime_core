@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -31,10 +31,10 @@ export namespace app {
         interface MyInterface {
             @ads.InterfaceMethod
             @ads.MethodOrFunction
-            someDefault() {}
+            someDefault(): void {}
             @ads.InterfaceMethod
             @ads.MethodOrFunction
-            someToImplement()
+            someToImplement(): void
         }
 
 
@@ -43,19 +43,19 @@ export namespace app {
         export final class MyClass implements MyInterface {
             @ads.ClassMethod
             @ads.MethodOrFunction
-            static classStatic() {}
+            static classStatic(): void {}
 
             @ads.ClassMethod
             @ads.MethodOrFunction
-            classMethod() {}
+            classMethod(): void {}
 
             @ads.ClassMethod
             @ads.MethodOrFunction
-            final classFinal(@ads.CallParameter echo: string) {}
+            final classFinal(@ads.CallParameter echo: string): void {}
 
             @ads.ClassMethod
             @ads.MethodOrFunction
-            override someToImplement() {}
+            override someToImplement(): void {}
         }
 
         @ads.InterfaceAnnotation
@@ -75,7 +75,7 @@ export namespace app {
         abstract class Stub {
             @ads.ClassMethod
             @ads.MethodOrFunction
-            abstract method()
+            abstract method(): void
         }
         @ads.ClassAnnotation
         class GetTarget {

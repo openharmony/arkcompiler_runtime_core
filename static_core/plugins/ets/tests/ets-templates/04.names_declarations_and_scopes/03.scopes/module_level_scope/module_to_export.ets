@@ -18,9 +18,9 @@ desc: module scope to export
 tags: [not-a-test, compile-only]
 ---*/
 
-export let x = 1;
+export let x: int= 1;
 
-const y = 2;
+const y: int = 2;
 
 export function foo(): int {
     let y = x

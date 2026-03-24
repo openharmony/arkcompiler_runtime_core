@@ -37,6 +37,6 @@ export class ArrayWithThrowingLength<T> extends Array<T> {
     }
 }
 
-export function getExtendedArray() {
+export function getExtendedArray(): ArrayWithThrowingLength<int> {
     return new ArrayWithThrowingLength<int>()
 }

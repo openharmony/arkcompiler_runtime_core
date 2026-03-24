@@ -123,8 +123,8 @@ class ABFaceHandler implements reflect.InvocationHandler {
     }
 }
 
-export let objA = new A();
-export let objAB = new AB();
+export let objA: A = new A();
+export let objAB: AB = new AB();
 
 export function getProxyA(): AIface {
     let linker = Class.of(objA).getLinker();
@@ -138,13 +138,13 @@ export function getProxyAB(): AIface | BIface {
     return reflect.Proxy.create(linker, interfaces, new ABFaceHandler(objAB)) as AIface | BIface;
 }
 
-export function testProxyA(a: AIface, message: string) {
+export function testProxyA(a: AIface, message: string): void {
     arktest.assertEQ(a.messageA, message);
     arktest.assertEQ(a.fooCalled(), true);
     arktest.assertEQ(a.booCalled(), true);
 }
 
-export function testProxyAB(ab: AIface | BIface, messageA: string, messageB: string) {
+export function testProxyAB(ab: AIface | BIface, messageA: string, messageB: string): void {
     testProxyA(ab as AIface, messageA);
     let b: BIface = ab as BIface;
     arktest.assertEQ(b.messageB, messageB);

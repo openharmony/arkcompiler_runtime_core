@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,38 +13,38 @@
  * limitations under the License.
  */
 
-export let s = new Set<number>()
+export let s: Set<number> = new Set<number>()
 
 export const weakMap: WeakMap<object, string> = new WeakMap<object, string>();
 
-export let w = new WeakSet<object>()
+export let w: WeakSet<object> = new WeakSet<object>()
 
-export let map = new Map<string, number>()
+export let map: Map<string, number> = new Map<string, number>()
 
-export let f32 = new Float32Array()
+export let f32: Float32Array = new Float32Array()
 
-export let f64 = new Float64Array()
+export let f64: Float64Array = new Float64Array()
 
-export let i8 = new Int8Array()
+export let i8: Int8Array = new Int8Array()
 
-export let i16 = new Int16Array()
+export let i16: Int16Array = new Int16Array()
 
-export let i32 = new Int32Array()
+export let i32: Int32Array = new Int32Array()
 
-export let ui8 = new Uint8Array()
+export let ui8: Uint8Array = new Uint8Array()
 
-export let ui16 = new Uint16Array()
+export let ui16: Uint16Array = new Uint16Array()
 
-export let ui32 = new Uint32Array()
+export let ui32: Uint32Array = new Uint32Array()
 
-export let ui8c = new Uint8ClampedArray()
+export let ui8c: Uint8ClampedArray = new Uint8ClampedArray()
 
 const buffer = new ArrayBuffer(16);
 export const dataView: DataView = new DataView(buffer);
 
-export let b64 = new BigInt64Array(2)
+export let b64: BigInt64Array = new BigInt64Array(2)
 
-export let ub64 = new BigUint64Array(2)
+export let ub64: BigUint64Array = new BigUint64Array(2)
 
 const regExp: RegExp = new RegExp('abc');
 export const matchResult: RegExpExecArray | null = regExp.exec('abcdef');

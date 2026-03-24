@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,29 +41,29 @@ export function error(msg: string): never {
   throw new Error(msg)
 }
 
-export function foo(x: string) {
+export function foo(x: string): void {
   console.log(x)
 }
 
 export class X { data: number = 0 }
-export function foo1(arg: X) {}
+export function foo1(arg: X): void {}
 
-export function foo2(a: number = 1) {}
+export function foo2(a: number = 1): void {}
 
-export function foo3(...nums: number[]) {}
+export function foo3(...nums: number[]): void {}
 
-export function foo4(a: number) {}
+export function foo4(a: number): void {}
 
 export native function foo5(a: number): int
 
-export async function foo6() {}
+export async function foo6(): Promise<void> {}
 
 export class A {}
-export function foo7(this: A) {}
+export function foo7(this: A): void {}
 
 export type Callback = (arg: number) => void
-export function foo8(cb : Callback) {
+export function foo8(cb : Callback): void {
    cb(42)
 }
 
-export function foo9(cb: () => void) {}
+export function foo9(cb: () => void): void {}

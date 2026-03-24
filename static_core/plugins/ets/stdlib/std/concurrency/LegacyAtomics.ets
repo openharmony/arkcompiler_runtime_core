@@ -751,7 +751,7 @@ export namespace Atomics {
         return startByteOffset + (index * elementSize)
     }
 
-    function validateIndex(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int) {
+    function validateIndex(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int): void {
         if (typedArray instanceof Int8Array) {
             let notUnionTypedArray = typedArray as Int8Array;
             if (index < 0 || index >= notUnionTypedArray.length) {

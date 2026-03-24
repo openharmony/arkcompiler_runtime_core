@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,11 @@
  */
 
 export namespace A {
-  export let v1 = 1;
+  export let v1: int = 1;
   export namespace B {
-    export let v2 = 2;
+    export let v2: int = 2;
     export namespace C {
-      export let v3 = 3;
+      export let v3: int = 3;
     }
   }
 }
@@ -53,11 +53,11 @@ export function bar(arg: BarNameSpace.FooNameSpace.Callback2): void {
 
 export namespace MySpace {
     // 1. Variable definition and assignment
-    export let count = 123;
-    export let message = "Initial message";
+    export let count: int = 123;
+    export let message: string = "Initial message";
 
     // 2. Function definition
-    export function resetMessage() {
+    export function resetMessage(): void {
         message = "Message has been reset";
     }
 
@@ -94,7 +94,7 @@ export namespace MySpace {
     }
 
     // Reset function to initialize the variables to their default values
-    export function resetState() {
+    export function resetState(): void {
         count = 123;
         message = "Initial message";
     }
@@ -117,8 +117,8 @@ export namespace N {
 export let a: N.NA
 export let b: N.NN.NNA
 export let c: N.NN.NNN.NNNA
-export function foo1(arg: N.NA) {}
-export function foo2(arg: N.NN.NNA) {}
+export function foo1(arg: N.NA): void {}
+export function foo2(arg: N.NN.NNA): void {}
 export function foo3(arg: N.NN.NNN.NNNA):N.NN.NNN.NNNA {
     return new N.NN.NNN.NNNA;
 }

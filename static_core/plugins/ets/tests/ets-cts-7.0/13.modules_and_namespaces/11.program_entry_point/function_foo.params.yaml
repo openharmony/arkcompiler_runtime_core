@@ -68,7 +68,7 @@ cases:
               arktest.assertTrue(true)
           }
 
-          function main() { // should not be called
+          function main(): void { // should not be called
               arktest.assertTrue(false)
           }
 
@@ -129,7 +129,7 @@ cases:
               arktest.expectThrow(() => main())
           }
 
-          function main() {
+          function main(): void {
               throw new Error
           }
 
@@ -150,7 +150,7 @@ cases:
               return 0
           }
 
-          export function main() {
+          export function main(): void {
               throw new Error
           }
 

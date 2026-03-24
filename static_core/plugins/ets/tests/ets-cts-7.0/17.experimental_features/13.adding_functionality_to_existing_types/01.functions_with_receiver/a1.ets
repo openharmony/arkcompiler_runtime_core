@@ -23,4 +23,4 @@ tags: [not-a-test, compile-only]
 
 export class A {}
 
-export function f(this: A) {}
+export function f(this: A): void {}

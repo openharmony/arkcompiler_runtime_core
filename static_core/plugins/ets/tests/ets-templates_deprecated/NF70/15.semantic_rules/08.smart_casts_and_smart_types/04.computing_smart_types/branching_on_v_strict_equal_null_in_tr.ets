@@ -53,7 +53,7 @@ namespace testNS{{c_id}} {
       check_as_type_null(v, v_id) : check_as_type_A_diff_Null(v, v_id);
   }
 
-  export function runTest() {
+  export function runTest(): void {
     let checks_number: int = 0
     for (let v_id: int = 0; v_id < check_values.length; v_id++) {
       check(check_values[v_id][0],

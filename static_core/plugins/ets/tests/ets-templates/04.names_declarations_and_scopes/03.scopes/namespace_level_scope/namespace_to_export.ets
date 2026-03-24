@@ -19,27 +19,27 @@ tags: [not-a-test, compile-only]
 ---*/
 
 export namespace ExternalSpace {
-    let x1 = 1
-    export let x2 = x1
-    let x3 = x2
-    export const y1 = x1 + 1
-    export const y2 = y1
-    const y3 = y2
+    let x1: int = 1
+    export let x2: int = x1
+    let x3: int = x2
+    export const y1: int = x1 + 1
+    export const y2: int = y1
+    const y3: int = y2
     export function foo(): int { 
         return x2 + y2;
     }
 
     export namespace EmbeddedSpace {
-        export let z1 = foo()
-        export const z2 = y2
+        export let z1: int = foo()
+        export const z2: int = y2
         export function bar(): int {
             return z1 + z2
         }
     }
 
     namespace EmbeddedSpaceNotExp {
-        let z1 = foo()
-        const z2 = y2
+        let z1: int = foo()
+        const z2: int = y2
         function bar(): int {
             return z1 + z2
         }

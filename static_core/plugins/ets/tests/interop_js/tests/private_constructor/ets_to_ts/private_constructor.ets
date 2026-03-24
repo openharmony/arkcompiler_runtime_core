@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ export class TestCls {
     private constructor() {
         this.foo = 1234;
     }
-    static getInstance() {
+    static getInstance(): TestCls | undefined {
         if (!TestCls.instance) {
             TestCls.instance = new TestCls();
         }

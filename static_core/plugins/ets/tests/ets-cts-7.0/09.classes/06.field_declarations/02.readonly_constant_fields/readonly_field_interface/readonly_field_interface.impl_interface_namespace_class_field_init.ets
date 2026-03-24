@@ -39,7 +39,7 @@ namespace testNS0 {
     }
   }
 
-  export function runTest() {
+  export function runTest(): void {
     let a: A = new A()
     arktest.assertTrue(a.field instanceof C, "Expected C but was " + (typeof a.field))
     arktest.assertTrue(a.field.data instanceof int, "Expected int but was " + (typeof a.field.data))
@@ -64,7 +64,7 @@ namespace testNS1 {
     readonly field: C = new C(5)
   }
 
-  export function runTest() {
+  export function runTest(): void {
     let a: A = new A()
     arktest.assertTrue(a.field instanceof C, "Expected C but was " + (typeof a.field))
     arktest.assertTrue(a.field.data instanceof int, "Expected int but was " + (typeof a.field.data))

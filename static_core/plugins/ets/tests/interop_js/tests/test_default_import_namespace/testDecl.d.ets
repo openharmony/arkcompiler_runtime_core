@@ -15,15 +15,15 @@
 
 export default declare namespace ns {
     export interface I {
-        i: string
-        foo(s:string):string
+        i: string;
+        foo(s:string):string;
     }
     export class A implements I{
-        i: string
-        foo(s:string):string
+        i: string;
+        foo(s:string):string;
     }
 
-    export function bar(n:number):number
+    export function bar(n:number):number;
 
-    export const a: A
+    export const a: A;
 }

@@ -451,7 +451,7 @@ export namespace jsonx {
          * @param {JsonElement} value - The JSON element to set
          * @throws {JsonTypeError} If this element is not an object
          */
-        setElement(key: string, value: JsonElement) {
+        setElement(key: string, value: JsonElement): void {
             if (this.jsonType != JsonType.JsonObject) {
                 this.setUndefined();
                 this.maybeObjectValues = new Map<string, JsonElement>();
@@ -991,7 +991,7 @@ export namespace jsonx {
          * Deserializes an object from a JsonElement.
          * @param {JsonElement} jsonElem - The JSON element to deserialize from
          */
-        fromJSON(jsonElem: JsonElement)
+        fromJSON(jsonElem: JsonElement): void
     }
 
 }

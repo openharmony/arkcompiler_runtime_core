@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export let err = new Error('123')
-export function foo() { throw err }
+export let err: Error = new Error('123')
+export function foo(): void { throw err }
 
-export let err2 = new RangeError('123')
-export function foo2() { throw err2 }
+export let err2: RangeError = new RangeError('123')
+export function foo2(): void { throw err2 }

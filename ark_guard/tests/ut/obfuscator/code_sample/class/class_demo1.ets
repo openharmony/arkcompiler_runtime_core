@@ -43,10 +43,10 @@ console.log(ClassA1.ClassA());
 
 // export class
 export class ClassA2 {
-    public static sFieldA0 = 0;
-    public fieldA1 = 1;
+    public static sFieldA0: int = 0;
+    public fieldA1: int = 1;
 
-    methodA1() {
+    methodA1(): number {
         return ClassA2.sFieldA0 + this.value1;
     }
 
@@ -87,5 +87,5 @@ class ClassFloat {
 }
 
 export class BaseClass {
-    public field1 = 1;
+    public field1: int = 1;
 }

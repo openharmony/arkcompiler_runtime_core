@@ -81,7 +81,7 @@ cases:
     - use: |-
           // entry point exported function main, inferred void, negative
           let res = ''
-          export function main() {
+          export function main(): void {
               if (true) {
                   arktest.assertNE(res, '')
               }
@@ -101,7 +101,7 @@ cases:
     # exported function main, int return type
     - use: |-
           // entry point exported function main, inferred int, negative
-          export function main() {
+          export function main(): int {
               return 1
           }
 

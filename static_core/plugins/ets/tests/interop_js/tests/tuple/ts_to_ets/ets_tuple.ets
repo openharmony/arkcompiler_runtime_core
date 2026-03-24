@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 
-export function setTupleObject(val: [number, number]) {
+export function setTupleObject(val: [number, number]): void {
 }

@@ -27,7 +27,7 @@ export function testArrayValByIndex(arr: Array<string>, idx: int, val: string): 
     return arr[idx] === val;
 }
 
-export function setArrayValByIndex(arr: Array<string>, idx: int, val: string) {
+export function setArrayValByIndex(arr: Array<string>, idx: int, val: string): void {
     arr[idx] = val;
 }
 
@@ -63,6 +63,6 @@ export function testUserArrayAge(arr: Array<User>, idx: int, val: int): boolean 
     return arr[idx].age === val;
 }
 
-export function esFuncArrayTest(func: (val: Array<string>) => void, arr: Array<string>) {
+export function esFuncArrayTest(func: (val: Array<string>) => void, arr: Array<string>): void {
     func(arr);
 }

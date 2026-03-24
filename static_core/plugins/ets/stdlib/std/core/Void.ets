@@ -33,6 +33,6 @@ export final class Void {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    static readonly void_instance = new Void();
+    static readonly void_instance: Void = new Void();
     private constructor() { }
 }

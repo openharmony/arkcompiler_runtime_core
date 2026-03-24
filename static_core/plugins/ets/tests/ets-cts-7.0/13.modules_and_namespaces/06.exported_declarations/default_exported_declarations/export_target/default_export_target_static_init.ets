@@ -29,7 +29,7 @@ export class A {
   static {
     A.c = 5
   }
-  foo() {
+  foo(): int {
     return A.c
   }
 }

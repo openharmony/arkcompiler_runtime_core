@@ -26,8 +26,8 @@ import buffer from '@ohos.buffer';
  *
  */
 export namespace stream {
-    const DEFAULT_ENCODING = 'utf-8';
-    const DEFAULT_HIGH_WATER_MARK = 16 * 1024;
+    const DEFAULT_ENCODING: string = 'utf-8';
+    const DEFAULT_HIGH_WATER_MARK: int = 16 * 1024;
     const ENCODING_SET: string[] = [
         'ascii', 'utf-8', 'UTF-8', 'gbk', 'GBK', 'GB2312', 'gb2312',
         'GB18030', 'gb18030', 'ibm866', 'iso-8859-2', 'iso-8859-3',
@@ -72,7 +72,7 @@ export namespace stream {
         RESUME = 'resume',
     }
 
-    function createBusinessError(code: int, message: string) {
+    function createBusinessError(code: int, message: string): BusinessError {
         let err: BusinessError = new BusinessError();
         err.name = 'BusinessError';
         err.message = message;
@@ -118,7 +118,7 @@ export namespace stream {
         stream.listener?.emit(ReadableEvent.CLOSE);
     }
 
-    function onceWrapper(state: OnceState) {
+    function onceWrapper(state: OnceState): Any {
         if (!state.fired) {
             state.target!.off(state.event!, state.wrapFn!);
             state.fired = true;
@@ -296,7 +296,7 @@ export namespace stream {
         public doWritevFunc: ((chunks: string[] | Uint8Array[], callback: Function) => void) | null;
         public listener: EventEmitter | undefined;
 
-        protected encoder = new util.TextEncoder();
+        protected encoder: util.TextEncoder = new util.TextEncoder();
 
         private buffer: Array<WritableBuffer>;
         private closedInner: boolean;
@@ -1087,8 +1087,8 @@ export namespace stream {
         public errorEmitted: boolean;
         public closedEmitted: boolean;
 
-        protected encoder = new util.TextEncoder();
-        protected stringDecoderInner = new util.StringDecoder();
+        protected encoder: util.TextEncoder = new util.TextEncoder();
+        protected stringDecoderInner: util.StringDecoder = new util.StringDecoder();
 
         private buf: Array<buffer.Buffer | string | null>;
         private bufIndex: int;

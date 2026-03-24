@@ -150,7 +150,7 @@ cases:
               return 0
           }
 
-          export function main() {
+          export function main(): void {
               throw new Error
           }
 

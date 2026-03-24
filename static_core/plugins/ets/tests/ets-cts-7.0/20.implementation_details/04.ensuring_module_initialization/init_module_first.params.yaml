@@ -35,13 +35,13 @@ tests:
 
   test03: |-
     initModule("./init_module_second_[loop.index0].ets")
-    export function foo() {}
+    export function foo(): void {}
     export class C {}
 
   test04: |-
     import {SharedVars} from "./shared_vars_module.ets"
     initModule("./init_module_second_[loop.index0].ets")
-    export function foo() {}
+    export function foo(): void {}
     export class C {
       v: int
       constructor(){
@@ -52,7 +52,7 @@ tests:
   test05: |-
     import {SharedVars} from "./shared_vars_module.ets"
     initModule("./init_module_second_[loop.index0].ets")
-    export function foo() {}
+    export function foo(): void {}
     export class C {
       v: int
       constructor(){
@@ -77,14 +77,14 @@ tests:
     import {SharedVars} from "./shared_vars_module.ets"
     initModule("./init_module_second_[loop.index0].ets")
     namespace NameSpace {
-      export function foo(){}
-      export let v = 4
+      export function foo(): void {}
+      export let v: int = 4
       static {
         if (v > 0) {
           v++
         }
       }
-      export function bar(){}
+      export function bar(): void {}
     }
     SharedVars.v1 = NameSpace.v
 
@@ -92,25 +92,25 @@ tests:
     import {SharedVars} from "./shared_vars_module.ets"
     initModule("./init_module_second_[loop.index0].ets")
     export namespace NameSpace {
-      export function foo(){}
+      export function foo(): void {}
       export let v: int = 2
       static {
         if (v > 0) {
           v += SharedVars.v2
         }
       }
-      export function bar(){}
+      export function bar(): void {}
     }
 
   test09: |-
     import {SharedVars} from "./shared_vars_module.ets"
     initModule("./init_module_second_[loop.index0].ets")
     namespace ExternalSpace {
-      export function foo(){}
-      export let v = 0
-      export function bar(){}
+      export function foo(): void {}
+      export let v: int = 0
+      export function bar(): void {}
       export namespace EmbeddedSpace {
-        export let v = 5
+        export let v: int = 5
         static {
           if (v > 0) {
             v++
@@ -124,11 +124,11 @@ tests:
     import {SharedVars} from "./shared_vars_module.ets"
     initModule("./init_module_second_[loop.index0].ets")
     export namespace ExternalSpace {
-      export function foo(){}
-      export let v = 0
-      export function bar(){}
+      export function foo(): void {}
+      export let v: int = 0
+      export function bar(): void {}
       export namespace EmbeddedSpace {
-        export let v = 5
+        export let v: int = 5
         static {
           if (v > 0) {
             v += SharedVars.v2

@@ -131,7 +131,7 @@ cases:
     - defs: |-
           namespace NS {
               export class MyError extends Error {}
-              export let err = new MyError
+              export let err: MyError = new MyError
           }
       use: |-
           try {

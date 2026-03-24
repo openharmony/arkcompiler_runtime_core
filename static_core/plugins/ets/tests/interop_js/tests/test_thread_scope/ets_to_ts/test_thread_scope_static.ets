@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 */
 
 export let testObject: Object = {};
-export let testStr = 'test';
-export let testNumber = 11.22;
+export let testStr: string = 'test';
+export let testNumber: number = 11.22;
 
 export class Foo {
     constructor() {

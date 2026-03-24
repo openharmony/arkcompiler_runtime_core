@@ -23,6 +23,6 @@ export class ArrayWithThrowingPushPop<T> extends Array<T> {
     }
 }
 
-export function getExtendedArray() {
+export function getExtendedArray(): ArrayWithThrowingPushPop<int> {
     return new ArrayWithThrowingPushPop<int>()
 }

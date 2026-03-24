@@ -17,6 +17,6 @@
   tags: [not-a-test]
 ---*/
 
-export function foo() {
+export function foo(): number {
   return 1;
 }

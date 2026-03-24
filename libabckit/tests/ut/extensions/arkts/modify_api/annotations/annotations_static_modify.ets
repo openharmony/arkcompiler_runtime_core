@@ -61,8 +61,8 @@ export class Class1 {
         a: 'field2'
     })
     @Anno1()
-    public field1 = 1;
-    foo() {}
+    public field1: int = 1;
+    foo(): void {}
 }
 
 @Anno5()

@@ -18,7 +18,7 @@ desc: Module contains variable to verify the initialization order
 tags: [compile-only, not-a-test]
 ---*/
 
-export function seq(i: string) {
+export function seq(i: string): void {
   seqstr += ":" + i
 }
 export let seqstr: string = "MOD"

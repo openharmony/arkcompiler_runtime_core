@@ -43,15 +43,15 @@ export namespace url {
         static ASCII_127: int = 127;
         static specialCharForBit: Array<number> = new Array<number>(128);
         static head: Map<string, number> = new Map<string, number>();
-        static doubleSegment = new Array<string>("..", ".%2e", ".%2E", "%2e.", "%2E.",
+        static doubleSegment: Array<string> = new Array<string>("..", ".%2e", ".%2E", "%2e.", "%2E.",
             "%2e%2e", "%2E%2E", "%2e%2E", "%2E%2e");
 
-        static singlesegment = new Array<string>('.', "%2e", "%2E");
+        static singlesegment: Array<string> = new Array<string>('.', "%2e", "%2E");
 
         static spesicalSymbols: Record<string, string> =
             { "@": "%40", "#": "%23", "=": "%3D", ":": "%3A", "/": "%2F", ";": "%3B", "?": "%3F" };
 
-        static specialcharacter = new Array<string>('\0', '\t', '\n', '\r', ' ', '#', '%', '/', ':', '?', '@', '[', '\\', ']');
+        static specialcharacter: Array<string> = new Array<string>('\0', '\t', '\n', '\r', ' ', '#', '%', '/', ':', '?', '@', '[', '\\', ']');
 
         static hexTable: Array<string> = new Array<string>(256);
 
@@ -83,7 +83,7 @@ export namespace url {
         }
 
         // hostname, host
-        static URL_ENCODED_PERCENT_SIGN_CHARS = new Int8Array([
+        static URL_ENCODED_PERCENT_SIGN_CHARS: Int8Array = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
             0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
@@ -95,7 +95,7 @@ export namespace url {
         ]);
 
         // username, password {'%25':'%'}
-        static USERINFO_PERCENT_SIGN_CHARS = new Int8Array([
+        static USERINFO_PERCENT_SIGN_CHARS: Int8Array = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
             0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
@@ -107,7 +107,7 @@ export namespace url {
         ]);
 
         // path {'%7C': '|', '%5B': '[', '%5D': ']', '%25': '%'} %5C '\\'
-        static PATH_PERCENT_SIGN_CHARS = new Int8Array([
+        static PATH_PERCENT_SIGN_CHARS: Int8Array = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
             0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
@@ -119,7 +119,7 @@ export namespace url {
         ]);
 
         // hash, fragment {'%7C': '|', '%5B': '[', '%5D': ']', '%7B': '{', '%7D': '}', '%60': '`', '%25': '%'}
-        static FRAGMENT_PERCENT_SIGN_CHARS = new Int8Array([
+        static FRAGMENT_PERCENT_SIGN_CHARS: Int8Array = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
             0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
@@ -131,7 +131,7 @@ export namespace url {
         ]);
 
         // query {'%7C': '|', '%5B': '[', '%5D': ']', '%7B': '{', '%7D': '}', '%60': '`', '%5E': '^', '%25': '%'}
-        static QUERY_PERCENT_SIGN_CHARS = new Int8Array([
+        static QUERY_PERCENT_SIGN_CHARS: Int8Array = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
             0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
@@ -143,7 +143,7 @@ export namespace url {
         ]);
 
         // params tostring encode
-        static PARAMS_TOSTRING_SIGN_CHARS = new Int8Array([
+        static PARAMS_TOSTRING_SIGN_CHARS: Int8Array = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, // 0x20 - 0x2F
@@ -154,7 +154,7 @@ export namespace url {
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, // 0x70 - 0x7F
         ]);
 
-        static unhexTable = new Int8Array([
+        static unhexTable: Int8Array = new Int8Array([
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0 - 15
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 16 - 31
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 32 - 47
@@ -174,7 +174,7 @@ export namespace url {
         ]);
     }
 
-    function checkCharacter(input: string) {
+    function checkCharacter(input: string): boolean {
         let inputLen = input.length;
         for (let i = 0; i < inputLen; i++) {
             let charPos: int = input.charCodeAt(i)
@@ -214,11 +214,11 @@ export namespace url {
         return Char.isLetter(ch) || Char.isDecDigit(ch);
     }
 
-    function isSpecialScheme(scheme: string) {
+    function isSpecialScheme(scheme: string): boolean {
         return Helper.head.has(scheme);
     }
 
-    function isFileNotHost(input: string) {
+    function isFileNotHost(input: string): boolean {
         return Char.isLetter(input.charAt(0)) && (input.charAt(1) == c':' || input.charAt(1) == c'|');
     }
 
@@ -430,18 +430,18 @@ export namespace url {
         return res.slice(0, res.length - 1);
     }
 
-    const INDEX_INVALID = 0;
-    const INDEX_SPECIAL = 1;
-    const INDEX_USERNAME = 2;
-    const INDEX_PASSWORD = 3;
-    const INDEX_HOST = 4;
-    const INDEX_PORT = 5;
-    const INDEX_PATH = 6;
-    const INDEX_QUERY = 7;
-    const INDEX_FRAGMENT = 8;
-    const INDEX_INFOPATH = 9;
-    const INDEX_IPV6 = 10;
-    const INDEX_DOUBLE_SLASH = 11;
+    const INDEX_INVALID: int = 0;
+    const INDEX_SPECIAL: int = 1;
+    const INDEX_USERNAME: int = 2;
+    const INDEX_PASSWORD: int = 3;
+    const INDEX_HOST: int = 4;
+    const INDEX_PORT: int = 5;
+    const INDEX_PATH: int = 6;
+    const INDEX_QUERY: int = 7;
+    const INDEX_FRAGMENT: int = 8;
+    const INDEX_INFOPATH: int = 9;
+    const INDEX_IPV6: int = 10;
+    const INDEX_DOUBLE_SLASH: int = 11;
 
 
     /**
@@ -693,7 +693,7 @@ export namespace url {
             this.flags[INDEX_HOST] = true;
         }
 
-        analysizeHost(input: string, special: boolean) {
+        analysizeHost(input: string, special: boolean): void {
             if (input.length == 0) {
                 this.flags[INDEX_INVALID] = true;
                 return;
@@ -791,7 +791,7 @@ export namespace url {
             return strHost;
         }
 
-        analysizePort(port: string) {
+        analysizePort(port: string): void {
             if (port.length == 0) {
                 return;
             }
@@ -823,7 +823,7 @@ export namespace url {
             this.cPort = it;
         }
 
-        analysizePath(path: string, special: boolean) {
+        analysizePath(path: string, special: boolean): void {
             let temp = new Array<string>();
             let pos: int = 0;
             while ((pos = path.indexOf('/')) != -1 || ((pos = path.indexOf('\\')) != -1 && special)) {
@@ -1130,7 +1130,7 @@ export namespace url {
             return temp;
         }
 
-        setHostName(input: string) {
+        setHostName(input: string): void {
             if (this.flags[INDEX_INFOPATH]) {
                 return;
             }
@@ -1160,7 +1160,7 @@ export namespace url {
             }
         }
 
-        setUserName(input: string) {
+        setUserName(input: string): void {
             if (input.length == 0) {
                 this.cUsername = "";
                 this.flags[INDEX_USERNAME] = false;
@@ -1174,7 +1174,7 @@ export namespace url {
             }
         }
 
-        setPassword(input: string) {
+        setPassword(input: string): void {
             if (input.length == 0) {
                 this.cPassword = "";
                 this.flags[INDEX_PASSWORD] = false;
@@ -1188,7 +1188,7 @@ export namespace url {
             }
         }
 
-        setScheme(input: string) {
+        setScheme(input: string): void {
             let strInput: string = input;
             let special: boolean = Helper.head.has(this.cScheme);
             let inputIsSpecial: boolean = Helper.head.has(input);
@@ -1204,7 +1204,7 @@ export namespace url {
             }
         }
 
-        setFragment(input: string) {
+        setFragment(input: string): void {
             let temp: string = "";
             if (input.length == 0) {
                 this.cFragment = "";
@@ -1220,7 +1220,7 @@ export namespace url {
             }
         }
 
-        setSearch(input: string) {
+        setSearch(input: string): void {
             let temp: string = "";
             if (input.length == 0) {
                 this.cQuery = "";
@@ -1239,11 +1239,11 @@ export namespace url {
             }
         }
 
-        setEncodeSearch(input: string) {
+        setEncodeSearch(input: string): void {
             this.setSearch(encodePercentEncoding(input, Helper.QUERY_PERCENT_SIGN_CHARS));
         }
 
-        setHost(input: string) {
+        setHost(input: string): void {
             if (input.length == 0 || this.flags[INDEX_INFOPATH]) {
                 return;
             }
@@ -1300,7 +1300,7 @@ export namespace url {
             }
         }
 
-        setPort(input: string) {
+        setPort(input: string): void {
             let port: string = input;
             let portLen = port.length
             for (let pos = 0; pos < portLen; pos++) {
@@ -1321,7 +1321,7 @@ export namespace url {
             }
         }
 
-        setHref(input: string) {
+        setHref(input: string): void {
             let str: string = input;
             str = deleteC0OrSpace(str);
             let newUrl: InnerURL = new InnerURL();
@@ -1341,7 +1341,7 @@ export namespace url {
             }
         }
 
-        setPath(input: string) {
+        setPath(input: string): void {
             let strPath: string = encodePercentEncoding(input, Helper.PATH_PERCENT_SIGN_CHARS);
             if (this.flags[INDEX_INFOPATH] || strPath.length == 0) {
                 return;
@@ -1468,7 +1468,7 @@ export namespace url {
 
     }
 
-    function baseIntoUrl(base: InnerURL, res: InnerURL, inputIsEmpty: boolean) {
+    function baseIntoUrl(base: InnerURL, res: InnerURL, inputIsEmpty: boolean): void {
         res.cScheme = base.cScheme;
         res.flags[INDEX_SPECIAL] = base.flags[INDEX_SPECIAL];
 
@@ -1498,7 +1498,7 @@ export namespace url {
         res.flags[INDEX_IPV6] = base.flags[INDEX_IPV6];
     }
 
-    function shorteningPath(resUrl: InnerURL, baseUrl: InnerURL, isFile: boolean) {
+    function shorteningPath(resUrl: InnerURL, baseUrl: InnerURL, isFile: boolean): void {
         if (baseUrl.cPath.length == 0) {
             return;
         }
@@ -1528,7 +1528,7 @@ export namespace url {
         return temp;
     }
 
-    function setEncodedData(dst: URL, src: InnerURL) {
+    function setEncodedData(dst: URL, src: InnerURL): void {
         dst.cSearch = src.getEncodeSearch();
         dst.cUsername = src.getUsername();
         dst.cPassword = src.getPassword();
@@ -2363,7 +2363,7 @@ export namespace url {
         * @param { function } callbackFn - callbackFn value Current traversal key value,
         * key Indicates the name of the key that is traversed.
         */
-        forEach(objfun: UrlCbFn) {
+        forEach(objfun: UrlCbFn): void {
             let current = this.head;
             if (current == undefined) {
                 return;
@@ -2556,7 +2556,7 @@ export namespace url {
         }
     }
 
-    function utf8Decode(uint8Array: Uint8Array) {
+    function utf8Decode(uint8Array: Uint8Array): string {
         let result: string = '';
         let i = 0;
         const UNICODE_0x80 = 0x80;
@@ -2783,11 +2783,11 @@ export namespace url {
         return seachParasVec;
     }
 
-    function fixUSVstring(str: string) {
+    function fixUSVstring(str: string): string {
         return str.toWellFormed();
     }
 
-    function encodePercentEncoding(str: string, noEscapeTable: Int8Array) {
+    function encodePercentEncoding(str: string, noEscapeTable: Int8Array): string {
         const len = str.length;
         if (len == 0)
             return '';

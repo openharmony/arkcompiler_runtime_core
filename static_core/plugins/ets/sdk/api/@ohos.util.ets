@@ -688,8 +688,8 @@ export namespace util {
         private encoding_: string = "utf-8";
         private fatal_: boolean = false;
         ignoreBOM_: boolean = false;
-        readonly CONVERTER_FLAGS_FATAL = 0x2;
-        readonly CONVERTER_FLAGS_IGNORE_BOM = 0x4;
+        readonly CONVERTER_FLAGS_FATAL: int = 0x2;
+        readonly CONVERTER_FLAGS_IGNORE_BOM: int = 0x4;
         private nativeDecoder_: long;
 
         constructor() {

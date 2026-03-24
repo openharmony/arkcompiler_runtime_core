@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ export class SubStudent extends Student {
 }
 
 export namespace Check {
-    export let subStu = new SubStudent();
+    export let subStu: SubStudent = new SubStudent();
 
     export let magicBoolean: boolean = false;
     export let magicByte: byte = 24;
@@ -50,10 +50,10 @@ export namespace Check {
     export let shouldBeNumber: double = 3.141592;
 
     // isNull isUndefined
-    export let shouldBeNull = null;
+    export let shouldBeNull: null = null;
     export let shouldBePrimitive: int = 123;
     export let shouldBeRef: Object = new Object();
-    export let shouldBeUndefined = undefined;
+    export let shouldBeUndefined: undefined = undefined;
 
     // isEqualTo()
     export let leftRef: string = 'isEqualTo';

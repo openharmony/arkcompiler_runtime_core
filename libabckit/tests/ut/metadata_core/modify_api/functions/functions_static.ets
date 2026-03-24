@@ -36,7 +36,7 @@ export class MyClass {
     }
 }
 
-export function initFuncName(a: string, inst: MyClass) {
+export function initFuncName(a: string, inst: MyClass): void {
   console.log(a)
   console.log(inst.prop)
 }

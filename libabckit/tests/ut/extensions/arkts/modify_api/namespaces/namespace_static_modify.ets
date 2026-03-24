@@ -23,14 +23,14 @@ export namespace NS1{
         @Anno2
         export class C1{
             @Anno1
-            f1(){}
+            f1(): void {}
             
             @Anno1
             field1:string;
             
         }
         const field3:string="";
-        function f2(){}
+        function f2(): void{}
         export enum E1{}
         namespace NS3{
             namespace NS5{}

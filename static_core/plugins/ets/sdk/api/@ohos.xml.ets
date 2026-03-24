@@ -142,9 +142,9 @@ export namespace xml {
         isServiceTagNode?: boolean
     }
 
-    export const MaxXmlLength = 100000;
-    const OffsetDepth = 1;
-    const SpacesIndentation = 2;
+    export const MaxXmlLength: int = 100000;
+    const OffsetDepth: int = 1;
+    const SpacesIndentation: int = 2;
 
     enum XmlDynamicType {
         NONE,
@@ -561,9 +561,9 @@ export namespace xml {
         }
     }
 
-    const DepthOffset = 1;
-    const BufferIndexOffset = 1;
-    const IndentationSpaces = 2;
+    const DepthOffset: int = 1;
+    const BufferIndexOffset: int = 1;
+    const IndentationSpaces: int = 2;
 
     enum XmlType {
         NONE,

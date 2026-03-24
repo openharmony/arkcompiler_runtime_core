@@ -18,7 +18,7 @@ namespace Foo {
         name: string = "Foo";
     }
 
-    export function foo(name: string) {
+    export function foo(name: string): string {
         return 'Foo' + name;
     }
 
