@@ -23,6 +23,7 @@ class IsAssignableFromUnionTest : public AniTest {
 public:
     void SetUp() override
     {
+        AniTest::SetUp();
         coro_ = EtsCoroutine::GetCurrent();
         coro_->ManagedCodeBegin();
     }
@@ -30,6 +31,7 @@ public:
     void TearDown() override
     {
         coro_->ManagedCodeEnd();
+        AniTest::TearDown();
     }
 
     EtsClass *GetClassFromDesc(std::string_view desc)

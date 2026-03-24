@@ -139,12 +139,12 @@ inline bool Class::IsSubClassOf(const Class *klass) const
     return false;
 }
 
-inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super, uint32_t depth);
+inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super);
 
-inline static bool UnionIsAssignableToRef(const Class *subUnion, const Class *super, uint32_t depth)
+inline static bool UnionIsAssignableToRef(const Class *subUnion, const Class *super)
 {
     for (auto *consClass : subUnion->GetConstituentTypes()) {
-        bool isAssignableTo = RefIsAssignableToImpl(consClass, super, depth);
+        bool isAssignableTo = RefIsAssignableToImpl(consClass, super);
         if (!isAssignableTo) {
             return false;
         }
@@ -152,10 +152,10 @@ inline static bool UnionIsAssignableToRef(const Class *subUnion, const Class *su
     return true;
 }
 
-inline static bool IsAssignableToUnion(const Class *sub, const Class *superUnion, uint32_t depth)
+inline static bool IsAssignableToUnion(const Class *sub, const Class *superUnion)
 {
     for (auto *consClass : superUnion->GetConstituentTypes()) {
-        bool isAssignableTo = RefIsAssignableToImpl(sub, consClass, depth);
+        bool isAssignableTo = RefIsAssignableToImpl(sub, consClass);
         if (isAssignableTo) {
             return true;
         }
@@ -164,21 +164,16 @@ inline static bool IsAssignableToUnion(const Class *sub, const Class *superUnion
 }
 
 // CC-OFFNXT(G.FUD.06, huge_method) perf critical, solid logic
-inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super, uint32_t depth)
+inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super)
 {
-    if (UNLIKELY(depth-- == 0)) {
-        LOG(ERROR, RUNTIME) << "Max class assignability test depth reached";
-        return false;
-    }
-
     if (sub == super) {
         return true;
     }
     if (sub->IsUnionClass()) {
-        return UnionIsAssignableToRef(sub, super, depth);
+        return UnionIsAssignableToRef(sub, super);
     }
     if (super->IsUnionClass()) {
-        return IsAssignableToUnion(sub, super, depth);
+        return IsAssignableToUnion(sub, super);
     }
     if (super->IsObjectClass()) {
         return !sub->IsPrimitive();
@@ -190,23 +185,17 @@ inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super, u
         if (!super->IsArrayClass()) {
             return false;
         }
-        return RefIsAssignableToImpl(sub->GetComponentType(), super->GetComponentType(), depth);
+        return RefIsAssignableToImpl(sub->GetComponentType(), super->GetComponentType());
     }
 
     return sub->IsSubClassOf(super);
-}
-
-inline static bool RefIsAssignableTo(const Class *sub, const Class *super)
-{
-    constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
-    return RefIsAssignableToImpl(sub, super, ASSIGNABILITY_MAX_DEPTH);
 }
 
 // CC-OFFNXT(G.FUD.06, huge_method) perf critical, solid logic
 inline static bool RefIsAssignableToNoSuper(const Class *sub, const Class *super)
 {
     if (sub->IsUnionClass() || super->IsUnionClass()) {
-        return RefIsAssignableTo(sub, super);
+        return RefIsAssignableToImpl(sub, super);
     }
     if (sub == super) {
         return true;
@@ -219,7 +208,7 @@ inline static bool RefIsAssignableToNoSuper(const Class *sub, const Class *super
     }
     if (sub->IsArrayClass()) {
         if (super->IsArrayClass()) {
-            return RefIsAssignableTo(sub->GetComponentType(), super->GetComponentType());
+            return RefIsAssignableToImpl(sub->GetComponentType(), super->GetComponentType());
         }
     }
     return false;
@@ -227,7 +216,7 @@ inline static bool RefIsAssignableToNoSuper(const Class *sub, const Class *super
 
 inline bool Class::IsAssignableFrom(const Class *klass) const
 {
-    return RefIsAssignableTo(klass, this);
+    return RefIsAssignableToImpl(klass, this);
 }
 
 inline bool Class::IsAssignableFromRefNoSuper(const Class *klass) const
