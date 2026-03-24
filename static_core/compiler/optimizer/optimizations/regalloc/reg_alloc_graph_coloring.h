@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,12 +53,12 @@ protected:
 private:
     void InitWorkingRanges(WorkingRanges *generalRanges, WorkingRanges *fpRanges);
     void FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges, ArenaVector<ColorNode *> &physicalNodes);
+    void SetSpillWeight(LifeIntervals *interval, const LivenessAnalyzer &la, ColorNode *node);
     void BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool rematConstants = false);
     IndexVector PrecolorIG(InterferenceGraph *ig);
     IndexVector PrecolorIG(InterferenceGraph *ig, const RegisterMap &map);
     void BuildBias(InterferenceGraph *ig, const IndexVector &affinityNodes);
-    void WalkNodes(IndexVectorPair &&vectors, NodeVector &nodes, ColorNode node, InterferenceGraph *ig,
-                   const IndexVector &affinityNodes);
+    void WalkNodes(IndexVectorPair &&vectors, NodeVector &nodes, ColorNode node, InterferenceGraph *ig);
     void AddAffinityEdgesToPhi(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinityNodes);
     void AddAffinityEdgesToSiblings(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinityNodes);
     void AddAffinityEdgesToPhysicalNodes(InterferenceGraph *ig, IndexVector *affinityNodes);
@@ -72,6 +72,9 @@ private:
     void Presplit(WorkingRanges *ranges);
     void SparseIG(InterferenceGraph *ig, unsigned regsCount, WorkingRanges *ranges, WorkingRanges *stackRanges);
     void SpillInterval(LifeIntervals *interval, WorkingRanges *ranges, WorkingRanges *stackRanges);
+
+    ArenaVector<ArenaVector<unsigned>> affinityAdj_;
+    ArenaUnorderedMap<LifeIntervals *, float> spillWeightCache_;
 };
 }  // namespace ark::compiler
 

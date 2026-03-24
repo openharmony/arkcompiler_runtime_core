@@ -975,31 +975,68 @@ bool LifeIntervals::Intersects(const LiveRange &range) const
         (GetBegin() <= range.GetBegin() && range.GetEnd() <= GetEnd());
 }
 
+template <bool OTHER_IS_PHYSICAL>
+bool LifeIntervals::IntersectsWith(const LifeIntervals *other) const
+{
+    const auto &ranges = GetRanges();
+    const auto &otherRanges = other->GetRanges();
+    // The single-range case is common after splitting/merging and can be handled without walking ranges.
+    if (ranges.size() == 1U && otherRanges.size() == 1U) {
+        auto range = ranges.front();
+        auto otherRange = otherRanges.front();
+        auto start = std::max(range.GetBegin(), otherRange.GetBegin());
+        auto end = std::min(range.GetEnd(), otherRange.GetEnd());
+        if constexpr (OTHER_IS_PHYSICAL) {
+            ASSERT(other->IsPhysical());
+            if (start == GetBegin()) {
+                start = GetBegin() + 1U;
+            }
+        }
+        return start < end;
+    }
+    auto intersection = GetFirstIntersectionWith(other);
+    if constexpr (OTHER_IS_PHYSICAL) {
+        ASSERT(other->IsPhysical());
+        // Interval can intersect the physical one at the beginning of its live range only if that physical
+        // interval's range was created for it. Try to find next intersection
+        //
+        // interval [--------------------------]
+        // physical [-]       [-]           [-]
+        //           ^         ^
+        //          skip      intersection
+        if (intersection == GetBegin()) {
+            intersection = GetFirstIntersectionWith(other, intersection + 1U);
+        }
+    }
+    return intersection != INVALID_LIFE_NUMBER;
+}
+
 LifeNumber LifeIntervals::GetFirstIntersectionWith(const LifeIntervals *other, LifeNumber searchFrom) const
 {
-    for (auto it = GetRanges().rbegin(); it != GetRanges().rend(); it++) {
+    auto it = GetRanges().rbegin();
+    auto otherIt = other->GetRanges().rbegin();
+    while (it != GetRanges().rend() && otherIt != other->GetRanges().rend()) {
         auto range = *it;
+        auto otherRange = *otherIt;
         if (range.GetEnd() <= searchFrom) {
+            ++it;
             continue;
         }
-        for (auto otherIt = other->GetRanges().rbegin(); otherIt != other->GetRanges().rend(); otherIt++) {
-            auto otherRange = *otherIt;
-            if (otherRange.GetEnd() <= searchFrom) {
-                continue;
-            }
-            auto rangeBegin = std::max<LifeNumber>(searchFrom, range.GetBegin());
-            auto otherRangeBegin = std::max<LifeNumber>(searchFrom, otherRange.GetBegin());
-            if (rangeBegin <= otherRangeBegin && otherRangeBegin < range.GetEnd()) {
-                // [range]
-                //    [other]
-                return otherRangeBegin;
-                // NOLINTNEXTLINE(readability-else-after-return)
-            } else if (rangeBegin > otherRangeBegin && rangeBegin < otherRange.GetEnd()) {
-                //     [range]
-                // [other]
-                return rangeBegin;
-            }
+        if (otherRange.GetEnd() <= searchFrom) {
+            ++otherIt;
+            continue;
         }
+        auto rangeBegin = std::max<LifeNumber>(searchFrom, range.GetBegin());
+        auto otherRangeBegin = std::max<LifeNumber>(searchFrom, otherRange.GetBegin());
+        if (range.GetEnd() <= otherRangeBegin) {
+            ++it;
+            continue;
+        }
+        if (otherRange.GetEnd() <= rangeBegin) {
+            ++otherIt;
+            continue;
+        }
+        return std::max(rangeBegin, otherRangeBegin);
     }
     return INVALID_LIFE_NUMBER;
 }
@@ -1055,6 +1092,9 @@ float CalcSpillWeight(const LivenessAnalyzer &la, LifeIntervals *interval)
     }
     return useWeight;
 }
+
+template bool LifeIntervals::IntersectsWith<false>(const LifeIntervals *) const;
+template bool LifeIntervals::IntersectsWith<true>(const LifeIntervals *) const;
 
 /**
  * Get all live values at the specified instruction point.

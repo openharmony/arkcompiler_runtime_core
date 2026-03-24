@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "interference_graph.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
+#include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/code_generator/callconv.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/datatype.h"
@@ -26,9 +27,22 @@
 #include "reg_type.h"
 
 namespace ark::compiler {
-RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph) : RegAllocBase(graph) {}
-RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regsCount) : RegAllocBase(graph, regsCount) {}
-RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, LocationMask mask) : RegAllocBase(graph, std::move(mask))
+RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph)
+    : RegAllocBase(graph),
+      affinityAdj_(graph->GetLocalAllocator()->Adapter()),
+      spillWeightCache_(graph->GetLocalAllocator()->Adapter())
+{
+}
+RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regsCount)
+    : RegAllocBase(graph, regsCount),
+      affinityAdj_(graph->GetLocalAllocator()->Adapter()),
+      spillWeightCache_(graph->GetLocalAllocator()->Adapter())
+{
+}
+RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, LocationMask mask)
+    : RegAllocBase(graph, std::move(mask)),
+      affinityAdj_(graph->GetLocalAllocator()->Adapter()),
+      spillWeightCache_(graph->GetLocalAllocator()->Adapter())
 {
     ASSERT(!IsFrameSizeLarge() || graph->IsAbcKit());
 }
@@ -44,10 +58,22 @@ void RegAllocGraphColoring::FillPhysicalNodes(InterferenceGraph *ig, WorkingRang
     }
 }
 
+void RegAllocGraphColoring::SetSpillWeight(LifeIntervals *interval, const LivenessAnalyzer &la, ColorNode *node)
+{
+    auto it = spillWeightCache_.find(interval);
+    if (it == spillWeightCache_.end()) {
+        auto weight = CalcSpillWeight(la, interval);
+        spillWeightCache_.emplace(interval, weight);
+        node->SetSpillWeight(weight);
+    } else {
+        node->SetSpillWeight(it->second);
+    }
+}
+
 void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool rematConstants)
 {
     ig->Reserve(ranges->regular.size() + ranges->physical.size());
-    ArenaDeque<ColorNode *> activeNodes(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<ColorNode *> activeNodes(GetGraph()->GetLocalAllocator()->Adapter());
     ArenaVector<ColorNode *> physicalNodes(GetGraph()->GetLocalAllocator()->Adapter());
     const auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
 
@@ -60,24 +86,27 @@ void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges
             continue;
         }
 
-        // Expire active_ranges
-        while (!activeNodes.empty() && activeNodes.front()->GetLifeIntervals()->GetEnd() <= rangeStart) {
-            activeNodes.pop_front();
-        }
-
         ColorNode *node = ig->AllocNode();
         node->Assign(currentInterval);
 
         if (ig->IsUsedSpillWeight()) {
-            node->SetSpillWeight(CalcSpillWeight(la, currentInterval));
+            SetSpillWeight(currentInterval, la, node);
         }
 
-        // Interfer node
-        for (auto activeNode : activeNodes) {
+        // activeNodes is unsorted: remove expired intervals with swap+pop to keep this path O(active).
+        // Ordering is not required here because all candidates are re-checked with IntersectsWith.
+        for (size_t i = 0; i < activeNodes.size();) {
+            auto activeNode = activeNodes[i];
             auto activeInterval = activeNode->GetLifeIntervals();
+            if (activeInterval->GetEnd() <= rangeStart) {
+                activeNodes[i] = activeNodes.back();
+                activeNodes.pop_back();
+                continue;
+            }
             if (currentInterval->IntersectsWith(activeInterval)) {
                 ig->AddEdge(node->GetNumber(), activeNode->GetNumber());
             }
+            ++i;
         }
 
         for (auto physicalNode : physicalNodes) {
@@ -101,17 +130,18 @@ void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges
             la.EnumerateFixedLocationsOverlappingTemp(currentInterval, callback);
         }
 
-        // Add node to active_nodes sorted by End time
-        auto rangesIter =
-            std::upper_bound(activeNodes.begin(), activeNodes.end(), node, [](const auto &lhs, const auto &rhs) {
-                return lhs->GetLifeIntervals()->GetEnd() <= rhs->GetLifeIntervals()->GetEnd();
-            });
-        activeNodes.insert(rangesIter, node);
+        activeNodes.push_back(node);
     }
 }
 
 RegAllocGraphColoring::IndexVector RegAllocGraphColoring::PrecolorIG(InterferenceGraph *ig)
 {
+    // Prebuild affinity adjacency once and reuse it in WalkNodes instead of scanning all affinity nodes.
+    affinityAdj_.clear();
+    affinityAdj_.reserve(ig->GetNodes().size());
+    for (size_t i = 0; i < ig->GetNodes().size(); ++i) {
+        affinityAdj_.emplace_back(GetGraph()->GetLocalAllocator()->Adapter());
+    }
     // Walk nodes and propagate properties
     IndexVector affinityNodes;
     for (const auto &node : ig->GetNodes()) {
@@ -123,6 +153,12 @@ RegAllocGraphColoring::IndexVector RegAllocGraphColoring::PrecolorIG(Interferenc
 // Find precolorings and set registers to intervals in advance
 RegAllocGraphColoring::IndexVector RegAllocGraphColoring::PrecolorIG(InterferenceGraph *ig, const RegisterMap &map)
 {
+    // Prebuild affinity adjacency once and reuse it in WalkNodes instead of scanning all affinity nodes.
+    affinityAdj_.clear();
+    affinityAdj_.reserve(ig->GetNodes().size());
+    for (size_t i = 0; i < ig->GetNodes().size(); ++i) {
+        affinityAdj_.emplace_back(GetGraph()->GetLocalAllocator()->Adapter());
+    }
     // Walk nodes and propagate properties
     IndexVector affinityNodes;
     for (auto &node : ig->GetNodes()) {
@@ -171,12 +207,12 @@ void RegAllocGraphColoring::BuildBias(InterferenceGraph *ig, const IndexVector &
         walked.push_back(node.GetNumber());
         biased.clear();
         biased.push_back(node.GetNumber());
-        WalkNodes(std::make_pair(walked, biased), nodes, node, ig, affinityNodes);
+        WalkNodes(std::make_pair(walked, biased), nodes, node, ig);
     }
 }
 
 void RegAllocGraphColoring::WalkNodes(IndexVectorPair &&vectors, NodeVector &nodes, ColorNode node,
-                                      InterferenceGraph *ig, const IndexVector &affinityNodes)
+                                      InterferenceGraph *ig)
 {
     auto &[walked, biased] = vectors;
     unsigned biasNum = ig->GetBiasCount();
@@ -189,7 +225,9 @@ void RegAllocGraphColoring::WalkNodes(IndexVectorPair &&vectors, NodeVector &nod
         walked.resize(walked.size() - 1);
 
         // Walk N affine nodes
-        for (auto tryIndex : affinityNodes) {
+        ASSERT(curIndex < affinityAdj_.size());
+        auto &neighbors = affinityAdj_[curIndex];
+        for (auto tryIndex : neighbors) {
             auto &tryNode = nodes[tryIndex];
             if (tryNode.HasBias() || !ig->HasAffinityEdge(curIndex, tryIndex)) {
                 continue;
@@ -280,6 +318,10 @@ void RegAllocGraphColoring::AddAffinityEdge(InterferenceGraph *ig, IndexVector *
     if (auto afNode = ig->FindNode(li)) {
         COMPILER_LOG(DEBUG, REGALLOC) << "AfEdge: " << node.GetNumber() << " " << afNode->GetNumber();
         ig->AddAffinityEdge(node.GetNumber(), afNode->GetNumber());
+        ASSERT(node.GetNumber() < affinityAdj_.size());
+        ASSERT(afNode->GetNumber() < affinityAdj_.size());
+        affinityAdj_[node.GetNumber()].push_back(afNode->GetNumber());
+        affinityAdj_[afNode->GetNumber()].push_back(node.GetNumber());
         affinityNodes->push_back(afNode->GetNumber());
     }
 }
@@ -297,6 +339,7 @@ bool RegAllocGraphColoring::AllocateRegisters(InterferenceGraph *ig, WorkingRang
     }
 
     Presplit(ranges);
+    spillWeightCache_.clear();
     ig->SetUseSpillWeight(true);
     auto rounds = 0;
     static constexpr size_t ROUNDS_LIMIT = 30;
