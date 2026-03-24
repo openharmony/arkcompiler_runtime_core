@@ -17,11 +17,15 @@
 {% for c in td.testData %}
 /*---
 desc: >-
-    {{c.desc}} Negative test (inside the method, const). 
+    {{c.desc}} Negative test (inside the method, const, two expected errors). 
+    A constant declaration introduces a named variable with a mandatory explicit value. 
+    The value of a constant cannot be changed by an assignment expression.
+    Violating these rules will result in a compile-time error.
     When using the unary plus operator for operations on short and byte types, conversion to the int type occurs. 
     Attempting to assign this converted value to a variable of the original type (byte or short) results in a compile-time error.
-expected_out: >-
-    Semantic error ESE0318: Type '{{c.resultType | capitalize}}' cannot be assigned to type '{{c.type | capitalize}}'
+expected_out:
+    - "Semantic error ESE4001: Cannot assign to a constant variable val"
+    - "Semantic error ESE0318: Type '{{c.resultType | capitalize}}' cannot be assigned to type '{{c.type | capitalize}}'"
 tags: [negative, compile-only]
 ---*/
 
