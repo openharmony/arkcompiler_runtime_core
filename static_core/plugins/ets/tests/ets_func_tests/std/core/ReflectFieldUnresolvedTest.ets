@@ -12,6 +12,13 @@
  * limitations under the License.
  */
 
+/*---
+expected_error:
+    verifier: 'E/verifier: Verifier error 11: Cannot resolve field type'
+    runtime: 'E/verifier: Verifier error 11: Cannot resolve field type'
+---*/
+
+
 class ThrowOnInit {
     public static thrower: int = ((): int => {throw new Error('Class initialization;'); return 1 })()
     public static staticFld: Number = 42

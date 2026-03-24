@@ -38,6 +38,8 @@ from runner.logger import Log
 from runner.options.macros import Macros, ParameterNotFound
 from runner.options.options import IOptions
 from runner.options.options_step import Step, StepKind
+from runner.options.options_step_utils import StepFields
+from runner.suites.comparison_utils import ComparisonUtils
 from runner.suites.one_step_runner import OneStepRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
@@ -49,70 +51,6 @@ if TYPE_CHECKING:
     pass
 
 _LOGGER = Log.get_logger(__file__)
-
-
-class ComparisonUtils:
-    @staticmethod
-    def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
-        expected_lines = set(filter(None, expected.splitlines()))
-        actual_lines = set(filter(None, actual.splitlines()))
-
-        if not actual_lines and not expected_lines:
-            return True
-
-        if not expected_lines:
-            _LOGGER.all(f"{expected_path} is empty after normalization")
-            return False
-        if not actual_lines:
-            _LOGGER.all(f"{expected_path} is not empty, but actual output is")
-            return False
-
-        is_subset = expected_lines.issubset(actual_lines)
-        return is_subset
-
-    @staticmethod
-    def normalize_output_lines(output: str, expected: str) -> tuple[str, str]:
-        norm_output = '\n'.join(ComparisonUtils.normalize_line(line) for line in output.splitlines())
-        norm_output_err = '\n'.join(ComparisonUtils.normalize_line(line) for line in expected.splitlines())
-        return norm_output, norm_output_err
-
-    @staticmethod
-    def normalize_line(line: str) -> str:
-        return ComparisonUtils._remove_file_info_from_error(ComparisonUtils._normalize_error_report(line))
-
-    @staticmethod
-    def log_comparison_difference(actual_output: str | None, expected_output: str | None) -> list[str]:
-        def find_difference(expected: str | None, actual: str | None) -> set[str]:
-            if expected is None or actual is None:
-                return set()
-            expected_lines = set(filter(None, expected.splitlines()))
-            actual_lines = set(filter(None, actual.splitlines()))
-            return actual_lines.difference(expected_lines)
-
-        differences = []
-
-        dif_exp_output = sorted(list(find_difference(actual_output, expected_output)))
-        if dif_exp_output:
-            differences.append("Actual output doesn't contain expected lines:")
-            differences.append(f"{dif_exp_output}")
-
-        return differences
-
-    @staticmethod
-    def _normalize_error_report(report: str) -> str:
-        pattern = r"\[TID [0-9a-fA-F]{6,}\]\s*"
-        result = re.sub(pattern, "", report).strip()
-        return ComparisonUtils._remove_tabs_and_spaces_from_begin(result)
-
-    @staticmethod
-    def _remove_tabs_and_spaces_from_begin(report: str) -> str:
-        pattern = r"^\s+"
-        return re.sub(pattern, "", report, flags=re.MULTILINE)
-
-    @staticmethod
-    def _remove_file_info_from_error(error_message: str) -> str:
-        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]\s*|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]\s*'
-        return re.sub(pattern, '', error_message)
 
 
 class StandardFlowUtils:
@@ -185,7 +123,6 @@ class TestStandardFlow(ITestFlow, Test):
         self._dependent_tests: list[TestStandardFlow] = []
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
-        self.validator_utils.add_additional_validator()
         self._is_declgen = any(step.step_kind == StepKind.DECLGEN for step in self.test_env.config.workflow.steps)
 
     @property
@@ -241,12 +178,12 @@ class TestStandardFlow(ITestFlow, Test):
     @property
     def has_expected(self) -> bool:
         """ True if test.expected file exists or expected_out is in metadata """
-        return super().has_expected or self.metadata.expected_out is not None
+        return super().has_expected or bool(self.metadata.expected_out)
 
     @property
     def has_expected_err(self) -> bool:
         """ True if test.expected.err file exists or expected_error is in metadata """
-        return super().has_expected_err or self.metadata.expected_error is not None
+        return super().has_expected_err or bool(self.metadata.expected_error)
 
     @property
     def continue_if_failed(self) -> bool:
@@ -387,14 +324,20 @@ class TestStandardFlow(ITestFlow, Test):
 
         return replace(step, args=args)
 
-    def compare_with_stdout(self, output: str) -> tuple[bool, str]:
+    def compare_with_stdout(self, output: str, step_fields: StepFields) -> tuple[bool, str]:
         """
         Compare test stdout with expected output
         """
         try:
             self._get_expected_data()
-            passed, message = self._determine_test_status(output, self.expected)
 
+            step_name = step_fields.step_name
+            step_kind = step_fields.step_kind
+
+            expected_output = self.expected.get(step_name) or self.expected.get(step_kind)
+            if not expected_output:
+                return True, ""
+            passed, message = self._determine_test_status(output, expected_output)
         except OSError:
             message = "Failed to read expected data"
             passed = False
@@ -402,14 +345,20 @@ class TestStandardFlow(ITestFlow, Test):
 
         return passed, message
 
-    def compare_with_stderr(self, error: str) -> tuple[bool, str]:
+    def compare_with_stderr(self, error: str, step_fields: StepFields) -> tuple[bool, str]:
         """
         Compare test stderr with expected output
         """
         try:
             self._get_expected_data()
-            passed, message = self._determine_test_status(error, self.expected_err)
+            step_name = step_fields.step_name
+            step_kind = step_fields.step_kind
 
+            expected_err = self.expected_err.get(step_name) or self.expected_err.get(step_kind)
+            if not expected_err:
+                return False, "There is no expected stderr to compare with"
+
+            passed, message = self._determine_test_status(error, expected_err)
         except OSError:
             message = "Failed to read expected data"
             passed = False
@@ -496,33 +445,41 @@ class TestStandardFlow(ITestFlow, Test):
     def _is_compile_only_test(self) -> bool:
         return self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
 
+    def _read_expected_or_metadata(self, path: Path,
+                                   metadata_value: dict[str, list[str]] | None) -> dict[str, list[str]]:
+
+        expected_data = utils.read_expected_file(path)
+
+        if expected_data is None:
+            return metadata_value if metadata_value is not None else {}
+
+        key = StepKind.COMPILER.value if self.is_compile_only else StepKind.RUNTIME.value
+        return {key: expected_data}
+
     def _get_expected_data(self) -> None:
         if self.has_expected:
-            self.expected = self.metadata.expected_out or utils.read_expected_file(self.path_to_expected)
+            self.expected = self._read_expected_or_metadata(
+                self.path_to_expected,
+                self.metadata.expected_out,
+            )
 
         if self.has_expected_err:
-            self.expected_err = self.metadata.expected_error or utils.read_expected_file(self.path_to_expected_err)
+            self.expected_err = self._read_expected_or_metadata(
+                self.path_to_expected_err,
+                self.metadata.expected_error,
+            )
 
-    def _refactor_expected_str_for_jit(self) -> None:
-        if self.expected:
-            self.expected = TestStandardFlow._remove_main_decl(self.expected)
+    def _determine_test_status(self, actual_output: str, expected_output: list[str]) -> tuple[bool, str]:
+        actual = ComparisonUtils.normalize_output_lines(actual_output.splitlines())
+        expected = ComparisonUtils.normalize_output_lines(expected_output)
+        passed, msg = ComparisonUtils.compare_line_sets(expected, actual, self.path_to_expected_err)
 
-        if self.expected_err:
-            self.expected_err = TestStandardFlow._remove_main_decl(self.expected_err)
-
-    def _determine_test_status(self, actual_output: str, expected_output: str) -> tuple[bool, str]:
-        actual_output, expected_output = ComparisonUtils.normalize_output_lines(actual_output, expected_output)
-        passed = ComparisonUtils.compare_line_sets(expected_output, actual_output, self.path_to_expected_err)
-
-        if passed:
-            expected_err_log = "Comparison with expected output/error has passed"
-        else:
-            expected_err_log = "Comparison with expected output/error has failed"
-            differences = ComparisonUtils.log_comparison_difference(actual_output, expected_output)
+        if not passed:
+            differences = ComparisonUtils.log_comparison_difference(actual, expected)
             if differences:
-                expected_err_log += "\n" + "\n".join(differences)
+                msg += "\n".join(differences)
 
-        return passed, expected_err_log
+        return passed, msg
 
     def _check_expected_err(self, error: str | None) -> bool:
         # to cover case: there is no expected_err file, but stderr is not empty
@@ -671,32 +628,20 @@ class ValidatorUtils:
         self.validator: IValidator = self._init_validator()
         self._flow_type: TestStandardFlow = flow_type
 
-    def add_additional_validator(self) -> None:
-        runtime_steps = [step.step_kind.value for step in self._flow_type.runtime_steps]
-        if self._flow_type.has_expected:
-            if self._flow_type.is_compile_only:
-                self.validator.add(StepKind.COMPILER.value, BaseValidator.check_output)
-            else:
-                for step in runtime_steps:
-                    self.validator.add(step, BaseValidator.check_output)
-
     def step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
         validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
         validator = self.validator.get_validator(validator_name) \
             if step.validator is None \
             else step.validator.get_validator(validator_name)
+        step_fields = StepFields(step_kind=step.step_kind.value, step_name=step.name)
         if validator is not None:
             for validator_func in validator:
-                step_validator_result = validator_func(self._flow_type, step.step_kind.value,
+                step_validator_result = validator_func(self._flow_type, step_fields,
                                                        output, error, return_code)
                 if not step_validator_result.passed:
                     return ValidationResult(step_validator_result.passed,
                                             step_validator_result.kind,
                                             step_validator_result.description)
-                if step_validator_result.stop_runtime_validation:
-                    # we have a comparison result for runtime step - no need in output comparison with expected for
-                    # further steps
-                    self._delete_runtime_validator(step.step_kind.value)
 
         post_reqs_succeed, post_reqs_result = step.check_post_requirements()
         if not post_reqs_succeed:
@@ -713,10 +658,3 @@ class ValidatorUtils:
             return BaseValidator()
         validator_class = get_validator_class(validator_class_name)
         return validator_class()
-
-    def _delete_runtime_validator(self, step_kind: str) -> None:
-        runtime_steps = [step.step_kind.value for step in self._flow_type.runtime_steps]
-        runtime_steps.remove(step_kind)
-
-        for step in runtime_steps:
-            self.validator.delete(step, BaseValidator.check_output)

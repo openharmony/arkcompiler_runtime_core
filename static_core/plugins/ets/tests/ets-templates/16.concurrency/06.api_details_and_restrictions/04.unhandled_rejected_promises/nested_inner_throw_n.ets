@@ -17,11 +17,12 @@
 desc: outer() calls inner(), inner() throws; outer() is not expected.
 assert: stderr contains the error from inner and the stack from inner -> outer.
 tags: [negative]
-expected_error: |-
-    Unhandled exception: nested_inner_throw_n.ExpectedError
-    Error
-    	at nested_inner_throw_n.ExpectedError.<ctor> (nested_inner_throw_n.ets:22:0)
-        at nested_inner_throw_n.ETSGLOBAL.%async-inner (nested_inner_throw_n.ets:1:0)
+expected_error:
+    runtime:
+        - "Unhandled exception: nested_inner_throw_n.ExpectedError"
+        - "Error"
+        - "at nested_inner_throw_n.ExpectedError.<ctor> (nested_inner_throw_n.ets:22:0)"
+        - "at nested_inner_throw_n.ETSGLOBAL.%async-inner (nested_inner_throw_n.ets:1:0)"
 ---*/
 
 class ExpectedError extends Error {}

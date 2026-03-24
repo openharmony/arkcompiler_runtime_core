@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -12,21 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/*---
-desc: Run async without waiting; main completes immediately.
-assert: stdout contains the text message
-tags: [no-warmup]
-expected_out:
-    runtime: main finished (unhandled_rejection.ets)
+  /*---
+    expected_out:
+        echo-compiler-2:
+         - some text
+         - hello world
 ---*/
 
-async function throwNow(): Promise<void> {
-    throw new Error("test-2: unhandled rejection");
-}
-
 function main(): void {
-    throwNow();
-    
-    console.log("main finished (unhandled_rejection.ets)");
+  return;
 }

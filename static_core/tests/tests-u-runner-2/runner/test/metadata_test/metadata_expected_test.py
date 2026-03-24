@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import os
 import unittest
 from pathlib import Path
 
+from runner.options.options_step import StepKind
 from runner.suites.test_metadata import TestMetadata
 
 
@@ -30,8 +31,8 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_out, 'output line 1\noutput line 2')
-        self.assertIsInstance(metadata.expected_out, str)
+        self.assertEqual(metadata.expected_out, {StepKind.COMPILER.value: ['output line 1', 'output line 2']})
+        self.assertIsInstance(metadata.expected_out, dict)
 
     def test_expected_out_list(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -39,8 +40,9 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_out, 'output line 1\noutput line 2\noutput line 3')
-        self.assertIsInstance(metadata.expected_out, str)
+        self.assertEqual(metadata.expected_out,
+                         {StepKind.COMPILER.value: ['output line 1', 'output line 2', 'output line 3']})
+        self.assertIsInstance(metadata.expected_out, dict)
 
     def test_expected_out_empty_string(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -48,8 +50,8 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_out, '')
-        self.assertIsInstance(metadata.expected_out, str)
+        self.assertEqual(metadata.expected_out, {StepKind.COMPILER.value: []})
+        self.assertIsInstance(metadata.expected_out, dict)
 
     def test_expected_error_string(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -57,8 +59,8 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_error, 'error line 1\nerror line 2')
-        self.assertIsInstance(metadata.expected_error, str)
+        self.assertEqual(metadata.expected_error, {StepKind.COMPILER.value: ['error line 1', 'error line 2']})
+        self.assertIsInstance(metadata.expected_error, dict)
 
     def test_expected_error_list(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -66,8 +68,9 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_error, 'error line 1\nerror line 2\nerror line 3')
-        self.assertIsInstance(metadata.expected_error, str)
+        self.assertEqual(metadata.expected_error,
+                         {StepKind.COMPILER.value: ['error line 1', 'error line 2', 'error line 3']})
+        self.assertIsInstance(metadata.expected_error, dict)
 
     def test_expected_error_empty_string(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -75,8 +78,8 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_error, '')
-        self.assertIsInstance(metadata.expected_error, str)
+        self.assertEqual(metadata.expected_error, {StepKind.COMPILER.value: []})
+        self.assertIsInstance(metadata.expected_error, dict)
 
     def test_expected_out_and_error_both_strings(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -85,10 +88,10 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_out, 'output text')
-        self.assertEqual(metadata.expected_error, 'error text')
-        self.assertIsInstance(metadata.expected_out, str)
-        self.assertIsInstance(metadata.expected_error, str)
+        self.assertEqual(metadata.expected_out, {StepKind.COMPILER.value: ['output text']})
+        self.assertEqual(metadata.expected_error, {StepKind.COMPILER.value: ['error text']})
+        self.assertIsInstance(metadata.expected_out, dict)
+        self.assertIsInstance(metadata.expected_error, dict)
 
     def test_expected_out_and_error_both_lists(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -97,10 +100,10 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_out, 'out1\nout2')
-        self.assertEqual(metadata.expected_error, 'err1\nerr2\nerr3')
-        self.assertIsInstance(metadata.expected_out, str)
-        self.assertIsInstance(metadata.expected_error, str)
+        self.assertEqual(metadata.expected_out, {StepKind.COMPILER.value: ['out1', 'out2']})
+        self.assertEqual(metadata.expected_error, {StepKind.COMPILER.value: ['err1', 'err2', 'err3']})
+        self.assertIsInstance(metadata.expected_out, dict)
+        self.assertIsInstance(metadata.expected_error, dict)
 
     def test_expected_out_list_single_element(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -108,8 +111,8 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_out, 'single line')
-        self.assertIsInstance(metadata.expected_out, str)
+        self.assertEqual(metadata.expected_out, {StepKind.COMPILER.value: ['single line']})
+        self.assertIsInstance(metadata.expected_out, dict)
 
     def test_expected_error_list_single_element(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -117,5 +120,23 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(metadata.expected_error, 'single error')
-        self.assertIsInstance(metadata.expected_error, str)
+        self.assertEqual(metadata.expected_error, {StepKind.COMPILER.value: ['single error']})
+        self.assertIsInstance(metadata.expected_error, dict)
+
+    def test_expected_error_dict(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': {StepKind.RUNTIME.value: ['single error']},
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_error, {StepKind.RUNTIME.value: ['single error']})
+        self.assertIsInstance(metadata.expected_error, dict)
+
+    def test_expected_out_dict(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': {StepKind.RUNTIME.value: ['single line']},
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, {StepKind.RUNTIME.value: ['single line']})
+        self.assertIsInstance(metadata.expected_out, dict)

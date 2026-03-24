@@ -27,6 +27,7 @@ from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
+from runner.test.test_utils import clear_after_test
 
 
 class ValidatorsChainTest(unittest.TestCase):
@@ -155,7 +156,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch("runner.suites.one_step_runner.subprocess.Popen")
     def test_runtime_pass(self, mock_popen: MagicMock) -> None:
         """
-        test-file: test4_runtime.ets, stdout for compile step
+        test-file: test4_runtime.ets, stdout for runtime step
         validators:
             - compile/verifier steps: check_return_code - OK, check_stderr - OK
             - runtime(runtime/aot) steps: check_return_code - OK, check_stderr - OK
@@ -204,7 +205,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test5_runtime.ets"])
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test6_aot.ets"])
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
@@ -310,7 +311,7 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test5_runtime.ets"])
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test6_aot.ets"])
     @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
@@ -370,3 +371,171 @@ class ValidatorsChainTest(unittest.TestCase):
 
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test7_runtime_with_exp.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_runtime_expected_compile_step(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test7_runtime.ets, stdout for compile step, expected_out for compile step set by step kind
+        validators:
+            - compile/verifier steps: check_return_code - OK, check_stderr - OK
+            - runtime(runtime/aot) steps: check_stderr - OK
+        expected result: test passes, stdout is compared after compile step
+        """
+        test_utils.set_process_mock(mock_popen, return_code=0, output="some text")
+
+        test_result = self.run_test()
+        self.assertTrue(test_result.passed)
+
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test7_runtime_with_exp.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_runtime_expected_compile_step_fail(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test7_runtime.ets, stdout for compile step, expected_out for compile step set by step kind
+        validators:
+            - compile/verifier steps: check_return_code - fail, check_stderr - OK
+        expected result: test fails, stdout is compared after compile step
+        """
+        test_utils.set_process_mock(mock_popen, return_code=0, output="some text2")
+
+        test_result = self.run_test()
+        self.assertFalse(test_result.passed)
+
+        clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test8_runtime_with_exp.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_runtime_expected_compile_by_step_name(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test8_runtime.ets, stdout for compile step, expected_out refers to the step name
+        validators:
+            - compile/verifier steps: check_return_code - OK, check_stderr - OK
+            - runtime(runtime/aot) steps: check_stderr - OK
+        expected result: test passes, stdout is compared after compile step
+        """
+        test_utils.set_process_mock(mock_popen, return_code=0, output="some text")
+
+        test_result = self.run_test()
+        self.assertTrue(test_result.passed)
+
+        clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda_extended", "test_suite1", "--test-file", "test9_runtime_with_exp.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_runtime_two_compile_steps_pass(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test9_runtime_with_exp.ets, stdout in the 2nd compile step
+        expected_out for 2nd compile stp defined by step name
+            - compiler-1/ verifier-1: check_stderr - OK
+            - runtime-1: check_stderr - OK
+            - compiler-2/ verifier-2: check_stderr - OK, check_stdout - OK
+            - runtime-2: check_stderr - OK
+        expected result: tests passes
+        """
+        mock1 = MagicMock(name="popen1")
+        mock2 = MagicMock(name="popen2")
+
+        for m, out in ((mock1, ("", "")), (mock2, ("some text \n hello world", ""))):
+            m.__enter__.return_value = m
+            m.communicate.return_value = out
+            m.returncode = 0
+
+        mock_popen.side_effect = [mock1, mock1, mock1, mock2, mock1, mock1]
+
+        test_result = self.run_test()
+        self.assertTrue(test_result.passed)
+
+        clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda_extended", "test_suite1", "--test-file", "test9_runtime_with_exp.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_runtime_two_compile_steps_fail(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test9_runtime_with_exp.ets, stdout in the 2nd verifier step
+        expected_out for 2nd compile step defined by step name
+            - compiler-1/ verifier-1: check_stderr - OK
+            - runtime-1: check_stderr - OK
+            - compiler-2/ verifier-2: check_stdout - fail - there are no output but expected
+        expected result: test fails
+        """
+        mock1 = MagicMock(name="popen1")
+        mock2 = MagicMock(name="popen2")
+
+        for m, out in ((mock1, ("", "")), (mock2, ("some text", ""))):
+            m.__enter__.return_value = m
+            m.communicate.return_value = out
+            m.returncode = 0
+
+        mock_popen.side_effect = [mock1, mock1, mock1, mock1, mock2, mock1]
+
+        test_result = self.run_test()
+        self.assertFalse(test_result.passed)
+
+        clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda_extended", "test_suite1", "--test-file", "test10_runtime_with_exp.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_runtime_two_compile_steps_fail_2(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test9_runtime_with_exp.ets, stdout fo compile-1 and runtime-2 steps
+        expected_out for 1st compile step, 2nd runtime defined by step name
+        expected_out
+            - compiler-1/ verifier-1: check_stderr - OK, chek_stdout - OK
+            - runtime-1: check_stderr - OK
+            - compiler-2/ verifier-2: check_stderr - OK
+            - runtime-2: check_stder - OK, check_stdout - fail
+        expected result: test fails
+        """
+        mock1 = MagicMock(name="popen1")
+        mock2 = MagicMock(name="popen2")
+
+        for m, out in ((mock1, ("", "")), (mock2, ("some text", ""))):
+            m.__enter__.return_value = m
+            m.communicate.return_value = out
+            m.returncode = 0
+
+        mock_popen.side_effect = [mock2, mock1, mock1, mock1, mock1, mock2]
+
+        test_result = self.run_test()
+        self.assertFalse(test_result.passed)
+
+        clear_after_test()

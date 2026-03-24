@@ -40,6 +40,7 @@ from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
 from runner.types.step_report import StepReport
 from runner.types.test_env import TestEnv
+from runner.utils import ExpectedField
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -65,8 +66,8 @@ class Test:
         self.test_id = test_id
         self.update_expected = self.test_env.config.test_suite.test_lists.update_expected
         # Expected output. Used in the Parser and CTS test suites
-        self.expected: str = ""
-        self.expected_err: str = ""
+        self.expected: ExpectedField = {}
+        self.expected_err: ExpectedField = {}
         # Test result: True if all steps passed, False is any step fails
         self.passed: bool | None = None
         # If the test is mentioned in any ignored_list

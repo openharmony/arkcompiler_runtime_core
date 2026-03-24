@@ -26,6 +26,7 @@ from runner.extensions.validators.astchecker.util_astchecker import UtilASTCheck
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options_step import StepKind
+from runner.options.options_step_utils import StepFields
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.utils import unlines
 
@@ -78,7 +79,7 @@ class AstCheckerValidator(BaseValidator):
         return {}
 
     @classmethod
-    def es2panda_result_validator(cls, test: "TestStandardFlow", _: str,
+    def es2panda_result_validator(cls, test: "TestStandardFlow", _: StepFields,
                                   actual_stdout: str, _2: str,
                                   return_code: int) -> ValidationResult:
         categorized = cls._categorize_lines(actual_stdout)

@@ -20,6 +20,7 @@ from runner.enum_types.validation_result import ValidationResult, ValidatorFailK
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options_step import StepKind
+from runner.options.options_step_utils import StepFields
 
 if TYPE_CHECKING:
     from runner.suites.test_standard_flow import TestStandardFlow
@@ -46,6 +47,6 @@ class Return1Validator(BaseValidator):
         )
 
     @classmethod
-    def check_return_code_1(cls, _: "TestStandardFlow", _2: str, _3: str,
+    def check_return_code_1(cls, _: "TestStandardFlow", _2: StepFields, _3: str,
                             _4: str, return_code: int) -> ValidationResult:
         return cls.passed() if return_code == 1 else cls.failed(return_code)

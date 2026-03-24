@@ -23,7 +23,7 @@ from runner.enum_types import fail_kind
 class ValidatorFailKind(Enum):
     NONE = "none"
     DEVICE_NOT_FOUND = "device_not_found"
-    COMPARE_OUTPUT = "compare_output"
+    COMPARE_OUTPUT = "compare_output_fail"
     STDERR_NOT_EMPTY = "stderr_not_empty"
     POST_REQ_FAILED = "post_req_failed"
     STEP_FAILED = "step_failed"
@@ -38,4 +38,3 @@ class ValidationResult:
     passed: bool
     kind: ValidatorFailKind = ValidatorFailKind.NONE
     description: str = ""
-    stop_runtime_validation: bool = False

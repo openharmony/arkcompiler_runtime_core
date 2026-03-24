@@ -17,11 +17,12 @@
 desc: Call Error.
 assert: In most case errors are caused by Virtial Machine or by standard libraries. In case it is necessary to cause an error explicitly, use “Error Statements”.
 tags: [negative]
-expected_error: |-
-    Unhandled exception: error_call_n.TestError
-      Error
-        at error_call_n.TestError.<ctor> (error_call_n.ets:29:0)
-        at error_call_n.ETSGLOBAL.main (error_call_n.ets:32:0)
+expected_error:
+    runtime:
+        - 'Unhandled exception: error_call_n.TestError'
+        - 'Error'
+        - 'at error_call_n.TestError.<ctor> (error_call_n.ets:29:0)'
+        - 'at error_call_n.ETSGLOBAL.main (error_call_n.ets:32:0)'
 ---*/
 
 class TestError extends Error {}

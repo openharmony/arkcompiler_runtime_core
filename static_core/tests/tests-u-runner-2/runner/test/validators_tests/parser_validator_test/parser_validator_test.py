@@ -14,16 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
+from typing import ClassVar
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from runner.enum_types.validation_result import ValidatorFailKind
 from runner.extensions.validators.parser.parser_validator import ParserValidator
+from runner.options.options_step import StepKind
+from runner.options.options_step_utils import StepFields
 from runner.suites.test_standard_flow import TestStandardFlow
 
 
 class ParserValidatorTest(TestCase):
     data_folder = Path(__file__).parent / "data"
+    step_fields: ClassVar[StepFields]
+
+    @staticmethod
+    def fill_step_fields(step_kind: StepKind) -> StepFields:
+        return StepFields(
+            step_kind=step_kind.value,
+            step_name="step name"
+        )
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.step_fields = cls.fill_step_fields(StepKind.COMPILER)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_no_output(self, mock_test: MagicMock) -> None:
@@ -32,13 +47,12 @@ class ParserValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test1.ets"
-        step_name = "step"
         actual_output = ""
         actual_error = ""
         actual_return_code = 0
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -52,14 +66,13 @@ class ParserValidatorTest(TestCase):
         Expected: test failed
         """
         mock_test.path = self.data_folder / "test2.ets"
-        step_name = "step"
         actual_output = ""
         actual_error = ""
         actual_return_code = 0
         expected_description = f"Expected file {mock_test.path.parent}/test2-expected.txt not found"
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -74,13 +87,12 @@ class ParserValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = "hello\nworld"
         actual_error = ""
         actual_return_code = 0
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -97,13 +109,12 @@ class ParserValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = "\nhello\nworld\n"
         actual_error = ""
         actual_return_code = 0
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -120,13 +131,12 @@ class ParserValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test4.ets"
-        step_name = "step"
         actual_output = "hello\nworld"
         actual_error = ""
         actual_return_code = 0
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -141,14 +151,13 @@ class ParserValidatorTest(TestCase):
         Expected: test failed
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = "hello\nword"
         actual_error = ""
         actual_return_code = 0
         expected_description = f"Actual output '{actual_output}' does not match to expected one 'hello\nworld'"
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -163,13 +172,12 @@ class ParserValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = "hello\nworld"
         actual_error = ""
         actual_return_code = 1
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -183,14 +191,13 @@ class ParserValidatorTest(TestCase):
         Expected: test failed, as return code is neither 0 nor 1
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = "hello\nworld"
         actual_error = ""
         actual_return_code = 2
         expected_description = f"Actual return code {actual_return_code} does not match to expected values [0, 1]"
         actual = ParserValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=ParserValidatorTest.step_fields,
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)

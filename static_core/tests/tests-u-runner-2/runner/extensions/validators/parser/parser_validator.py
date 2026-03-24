@@ -22,6 +22,7 @@ from runner.enum_types.validation_result import ValidationResult, ValidatorFailK
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options_step import StepKind
+from runner.options.options_step_utils import StepFields
 
 if TYPE_CHECKING:
     from runner.suites.test_standard_flow import TestStandardFlow
@@ -46,7 +47,7 @@ class ParserValidator(BaseValidator):
         return re.sub(pattern, r'At File: \1', output)
 
     @staticmethod
-    def es2panda_result_validator(test: "TestStandardFlow", _: str, actual_output: str, _2: str,
+    def es2panda_result_validator(test: "TestStandardFlow", _: StepFields, actual_output: str, _2: str,
                                   return_code: int) -> ValidationResult:
         fail_kind = ValidatorFailKind.NONE
         actual_output = actual_output.strip()

@@ -15,15 +15,30 @@
 # limitations under the License.
 
 from pathlib import Path
+from typing import ClassVar
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from runner.extensions.validators.astchecker.astchecker_validator import AstCheckerValidator
+from runner.options.options_step import StepKind
+from runner.options.options_step_utils import StepFields
 from runner.suites.test_standard_flow import TestStandardFlow
 
 
 class AstcheckerValidatorTest(TestCase):
     data_folder = Path(__file__).parent / "data"
+    step_fields: ClassVar[StepFields]
+
+    @staticmethod
+    def create_step(step_kind: StepKind) -> StepFields:
+        return StepFields(
+            step_kind=step_kind.value,
+            step_name="step name"
+        )
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.step_fields = cls.create_step(StepKind.COMPILER)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_error_check(self, mock_test: MagicMock) -> None:
@@ -32,7 +47,6 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test1.ts"
-        step_name = "step"
         actual_output = """{
   "type": "Program",
   "statements": [
@@ -44,7 +58,7 @@ class AstcheckerValidatorTest(TestCase):
         actual_return_code = 1
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -57,13 +71,12 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test2.ets"
-        step_name = "step"
         actual_output = (self.data_folder / "test2-expected-stdout.txt").read_text(encoding="utf-8")
         actual_error = ""
         actual_return_code = 0
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -76,7 +89,6 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test failed
         """
         mock_test.path = self.data_folder / "test1.ts"
-        step_name = "step"
         actual_output = """{
   "type": "Program",
   "statements": [
@@ -88,7 +100,7 @@ class AstcheckerValidatorTest(TestCase):
         actual_return_code = 1
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -101,7 +113,6 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test failed
         """
         mock_test.path = self.data_folder / "test1.ts"
-        step_name = "step"
         actual_output = """{
   "type": "Program",
   "statements": [
@@ -113,7 +124,7 @@ class AstcheckerValidatorTest(TestCase):
         actual_return_code = 1
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -126,13 +137,12 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test failed because in such case we expect 0 return code, but get 1
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = (self.data_folder / "test3-expected-stdout.txt").read_text(encoding="utf-8")
         actual_error = ""
         actual_return_code = 1
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -145,13 +155,12 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test passed
         """
         mock_test.path = self.data_folder / "test3.ets"
-        step_name = "step"
         actual_output = (self.data_folder / "test3-expected-stdout.txt").read_text(encoding="utf-8")
         actual_error = ""
         actual_return_code = 0
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -164,7 +173,6 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test failed
         """
         mock_test.path = self.data_folder / "test2.ets"
-        step_name = "step"
         actual_output = """{
           "type": "Program",
           "statements": [
@@ -176,7 +184,7 @@ class AstcheckerValidatorTest(TestCase):
         actual_return_code = 0
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
@@ -190,7 +198,6 @@ class AstcheckerValidatorTest(TestCase):
         Expected: test failed
         """
         mock_test.path = self.data_folder / "test1.ts"
-        step_name = "step"
         actual_output = "[test1.ts:0:0] Semantic error ESE0000: Type '{ }' is not assignable to type 'string'."
         actual_error = """
         es2panda unexpectedly terminated.
@@ -201,7 +208,7 @@ ASSERTION FAILED: false"""
         actual_return_code = -6
         actual = AstCheckerValidator.es2panda_result_validator(
             test=mock_test,
-            _=step_name,
+            _=AstcheckerValidatorTest.step_fields,
             actual_stdout=actual_output,
             _2=actual_error,
             return_code=actual_return_code)

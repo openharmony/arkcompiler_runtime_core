@@ -12,6 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+expected_error:
+    verifier: 'E/verifier: Verifier error 11: Cannot resolve field type'
+    runtime: 'E/verifier: Verifier error 11: Cannot resolve field type'
+---*/
 
 declare class NoImpClass {}
 
