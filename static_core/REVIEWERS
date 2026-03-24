@@ -25,13 +25,14 @@ arkplatform/ @dmitriitr @udav @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd
 common_runtime/ @ipetrov @xucheng46 @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yingguofeng
 
 static_core/ @dmitriitr @Prof @igelhaus @Nojpg
-
+static_core/*.gn{i,}                  @sukhikhalexander
 static_core/abc2program/              @nazarovkonstantin @oatuwwutao ^igelhaus ^seeuiceland
 static_core/assembler/                @nazarovkonstantin ^igelhaus @tension16
 static_core/bytecode_optimizer/       @mbolshov @chernykhsergey ^igelhaus  @oatuwwutao ^seeuiceland
 static_core/cmake/                    @igelhaus
 static_core/compiler/                 @Prof @wanzixuan330 @chernykhsergey ^oatuwwutao	^seeuiceland ^asidorov ^LeechyLiang
 static_core/cross_values/             @Prof @asidorov ^chernykhsergey
+static_core/cross_values/BUILD.gn     @sukhikhalexander
 static_core/disassembler/             @nazarovkonstantin @oatuwwutao ^igelhaus ^seeuiceland
 static_core/docs/                     @igelhaus
 static_core/docs/memory-management*   @dmitriitr
@@ -39,16 +40,21 @@ static_core/docs/task_manager.md      @dmitriitr
 static_core/dprof/                    @slynkodenis @v-cherkashin
 static_core/extras/                   @igelhaus
 static_core/gn/                       @igelhaus
-static_core/irtoc/                    @Prof @mbolshov @asidorov @xucheng46 ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang
+static_core/irtoc/                    @Prof @mbolshov @asidorov @xucheng46 ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang @sukhikhalexander
 static_core/isa/                      @mbolshov ^igelhaus @oatuwwutao ^seeuiceland @xucheng46 ^gitee-dakeQI
+static_core/isa/BUILD.gn              @sukhikhalexander
 static_core/libarkbase/               @dmitriitr @nazarovkonstantin ^igelhaus @xucheng46 ^gitee-dakeQI
+static_core/libarkbase/BUILD.gn       @sukhikhalexander
 static_core/libarkfile/               @igelhaus @xucheng46 ^gitee-dakeQI
+static_core/libarkfile/BUILD.gn       @sukhikhalexander
 static_core/libllvmbackend/           ^Prof @urandon ^asidorov @xucheng46 ^gitee-dakeQI @sukhikhalexander
 static_core/libziparchive/            @nazarovkonstantin ^igelhaus
 static_core/panda/                    @nazarovkonstantin ^igelhaus @xucheng46 ^gitee-dakeQI
+static_core/panda/BUILD.gn            @sukhikhalexander
 static_core/pandastdlib/              @igelhaus
 static_core/patches/                  @asidorov @Prof
 static_core/platforms/                @dmitriitr @igelhaus @xucheng46 ^gitee-dakeQI
+static_core/plugins/plugins.gni       @sukhikhalexander
 static_core/quickener/                @nsizov ^igelhaus
 static_core/runtime/                  @igelhaus @vpukhov
 static_core/runtime/*cframe*          @Prof ^wanzixuan330 ^LeechyLiang
@@ -65,20 +71,24 @@ static_core/tests/cts-*               @igelhaus
 static_core/tests/irtoc-interpreter-* @mbolshov ^igelhaus @schernykh
 static_core/tests/vm-benchmarks       @ignatenkooleg @Prof @michaelfrost @giteeman46 ^asidorov ^wanzixuan330 ^LeechyLiang
 static_core/verification/             @slynkodenis @groshevmaksim ^igelhaus @oatuwwutao ^seeuiceland @vpukhov
+static_core/compiler/**/*.gn{i,}      @sukhikhalexander
 static_core/compiler/aot/             @asidorov @Prof ^chernykhsergey @wanzixuan330 @sukhikhalexander ^LeechyLiang
 static_core/compiler/code_generator/  @asidorov @Prof ^chernykhsergey @wanzixuan330 ^LeechyLiang
 static_core/compiler/code_info/       @asidorov @Prof @chernykhsergey @wanzixuan330 ^LeechyLiang
 static_core/compiler/optimizer/       ^asidorov @Prof @chernykhsergey @wanzixuan330 ^LeechyLiang
 static_core/docs/coroutines/                             @dmitriitr
 static_core/docs/diagrams/                               @dmitriitr
+static_core/gn/**/*.gn{i,}                               @sukhikhalexander
 static_core/libarkbase/mem/                              ^dmitriitr @udav ^ipetrov
 static_core/libarkbase/os/*mem*                          ^dmitriitr @udav ^ipetrov
 static_core/libarkbase/tests/*mem*                       @udav ^ipetrov
+static_core/platforms/**/*.gn{i,}                        @sukhikhalexander
 static_core/platforms/**/*mem*                           ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/abc2program	                     @nazarovkonstantin @oatuwwutao	^seeuiceland
 static_core/plugins/ets/disassembler                     @nazarovkonstantin @oatuwwutao ^seeuiceland
 static_core/plugins/ets/playground                       @anton-sysoev @Nojpg ^cy917474985 ^ivan-tyulyandin ^magikarp777 ^templinkonstantin
 static_core/runtime/arch/                                @Prof @xucheng46 ^gitee-dakeQI @asidorov ^chernykhsergey
+static_core/runtime/asm_defines/BUILD.gn                 @sukhikhalexander
 static_core/runtime/bridge/                              @Prof @wanzixuan330 @asidorov @xucheng46 ^gitee-dakeQI ^chernykhsergey ^LeechyLiang
 static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/runtime/entrypoints/                         @Prof @xucheng46 ^gitee-dakeQI @chernykhsergey
