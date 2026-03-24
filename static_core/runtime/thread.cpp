@@ -282,20 +282,6 @@ NO_INLINE static uintptr_t GetStackTop()
     return ToUintPtr(__builtin_frame_address(0));
 }
 
-NO_INLINE static void LoadStackPages(uintptr_t endAddr)
-{
-    // ISO C++ forbids variable length array and alloca is unsafe,
-    // so we have to extend stack step by step via recursive call
-    constexpr size_t MARGIN = 512;
-    constexpr size_t STACK_PAGE_SIZE = 4_KB;
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    volatile uint8_t stackBuffer[STACK_PAGE_SIZE - MARGIN];
-    if (ToUintPtr(&(stackBuffer[0])) >= endAddr + STACK_PAGE_SIZE) {
-        LoadStackPages(endAddr);
-    }
-    stackBuffer[0] = 0;
-}
-
 bool ManagedThread::RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize)
 {
     int error = os::thread::ThreadGetStackInfo(os::thread::GetNativeHandle(), &stackAddr, &stackSize, &guardSize);
@@ -350,13 +336,10 @@ void ManagedThread::ProtectNativeStack()
     if (nativeStackProtectedSize_ == 0) {
         return;
     }
-
     // Try to mprotect directly
     if (!ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
         return;
     }
-
-    // If fail to mprotect, try to load stack page and then retry to mprotect
     uintptr_t nativeStackTop = AlignDown(GetStackTop(), ark::os::mem::GetPageSize());
     LOG(DEBUG, RUNTIME) << "ProtectNativeStack: try to load pages, mprotect error = " << strerror(errno)
                         << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
@@ -369,18 +352,16 @@ void ManagedThread::ProtectNativeStack()
                             << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
         return;
     }
-    LoadStackPages(nativeStackBegin_);
-    if (ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
-        LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to protect pages, error = " << strerror(errno)
-                            << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
-                            << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
+
+    // If fail to mprotect, try to warm up stack and then retry to mprotect
+    uintptr_t protectedEnd = nativeStackBegin_ + nativeStackProtectedSize_;
+    volatile uint8_t *ptr = reinterpret_cast<volatile uint8_t *>(nativeStackBegin_);
+    for (size_t i = 0; i < nativeStackProtectedSize_; i += ark::os::mem::GetPageSize()) {
+        ptr[i] = 0;
     }
-    size_t releaseSize = nativeStackTop - nativeStackBegin_ - ark::os::mem::GetPageSize();
-    if (ark::os::mem::ReleasePages(nativeStackBegin_, nativeStackBegin_ + releaseSize) != 0) {
-        LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to release pages, error = " << strerror(errno)
-                            << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
-                            << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_
-                            << ", release_size = " << releaseSize;
+    if (ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
+        LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to protect pages"
+                            << ", stack_begin = " << nativeStackBegin_ << ", protected_end = " << protectedEnd;
     }
 }
 

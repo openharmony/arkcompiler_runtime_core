@@ -872,6 +872,11 @@ add_gtests(
 )
 
 add_gtests(
+    arkruntime_stack_overflow_test
+    tests/stack_overflow_test.cpp
+)
+
+add_gtests(
     arkruntime_ark_vm_api_test
     tests/ark_vm_api_test.cpp
 )
@@ -1002,6 +1007,7 @@ set(MULTITHREADING_TESTS_SRC
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
     list(APPEND MULTITHREADING_TESTS_SRC
         tests/thread_test.cpp
+        tests/stack_overflow_test.cpp
     )
 endif()
 
