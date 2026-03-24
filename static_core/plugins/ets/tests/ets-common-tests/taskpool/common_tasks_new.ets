@@ -259,6 +259,81 @@ async function pendingDependencyShouldNotBlockReadyTask(): Promise<void> {
     }
 }
 
+async function onEnqueuedNestedExecuteTest() {
+    let innerResult: string = '';
+    let callbackCalled: boolean = false;
+    let failed: boolean = false;
+    let event = new Event();
+    let outerTask = new taskpool.Task(returnAbc);
+
+    outerTask.onEnqueued(() => {
+        callbackCalled = true;
+        let innerTask = new taskpool.Task(returnAbc);
+        taskpool.execute(innerTask).then((res: Any) => {
+            innerResult = res as string;
+            event.fire();
+        }).catch((e: Error) => {
+            failed = true;
+            event.fire();
+        });
+    });
+
+    let outerResult = await taskpool.execute(outerTask);
+    arktest.assertEQ(outerResult, 'abc');
+    arktest.assertEQ(callbackCalled, true);
+    event.wait();
+    arktest.assertEQ(failed, false);
+    arktest.assertEQ(innerResult, 'abc');
+}
+
+async function onEnqueuedNestedRunnerExecuteTest() {
+    let callbackCalled: boolean = false;
+    let failed: boolean = false;
+    let completedCount: int = 0;
+    let sequenceResult: string = '';
+    let asyncResult: string = '';
+    let event = new Event();
+    let outerTask = new taskpool.Task(returnAbc);
+
+    outerTask.onEnqueued(() => {
+        callbackCalled = true;
+        let sequenceRunner = new taskpool.SequenceRunner();
+        let asyncRunner = new taskpool.AsyncRunner(1);
+        let sequenceTask = new taskpool.Task(returnAbc);
+        let asyncTask = new taskpool.Task(returnAbc);
+        let markDone = () => {
+            completedCount++;
+            if (completedCount == 2) {
+                event.fire();
+            }
+        };
+
+        sequenceRunner.execute(sequenceTask).then((res: Any) => {
+            sequenceResult = res as string;
+            markDone();
+        }).catch((e: Error) => {
+            failed = true;
+            markDone();
+        });
+
+        asyncRunner.execute(asyncTask).then((res: Any) => {
+            asyncResult = res as string;
+            markDone();
+        }).catch((e: Error) => {
+            failed = true;
+            markDone();
+        });
+    });
+
+    let outerResult = await taskpool.execute(outerTask);
+    arktest.assertEQ(outerResult, 'abc');
+    arktest.assertEQ(callbackCalled, true);
+    event.wait();
+    arktest.assertEQ(failed, false);
+    arktest.assertEQ(sequenceResult, 'abc');
+    arktest.assertEQ(asyncResult, 'abc');
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -271,6 +346,8 @@ function main(): int {
     // #33877: Test is incorrect and flaky fails
     commonTaskSuiteDisabled.addAsyncTest(
         'pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);
+    commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
+    commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
 
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
