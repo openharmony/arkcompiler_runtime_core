@@ -2,3 +2,6 @@
 
 #21869
 obj/arkcompiler/runtime_core/compiler/tests/GraphInterfaceTest
+
+#33865
+obj/arkcompiler/runtime_core/disassembler/tests/DisasmModuleTest
