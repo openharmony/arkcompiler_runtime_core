@@ -170,7 +170,7 @@ cases:
           Strings.B: null
       }
     expect: |-
-      Semantic error ESE0144: Enum name 'Strings' used in the wrong context
+      Semantic error ESE0046: Type 'Object' is not compatible with type 'Double' at index 2
   # ReturnType
   - decl: |-
       type A = ReturnType<() => NonNullable<string|null>>

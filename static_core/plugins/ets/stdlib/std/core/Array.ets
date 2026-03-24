@@ -163,6 +163,23 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
+     * Creates a new instance of Array with a specific length and initializes each element using a function.
+     *
+     * @param { int } arrayLen The amount of elements in the array.
+     * @param { function } initializer A function that generates an element for a given index.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        this.buffer = new FixedArray<Any>(arrayLen)
+        this.actualLength = arrayLen
+        for (let k: int = 0; k < arrayLen; k++) {
+            this.$_set_unsafe(k, initializer(k))
+        }
+    }
+
+    /**
      * Creates a new instance of Array with the given elements.
      *
      * @param { T } first The first element of the array.
@@ -178,23 +195,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
         for (let k: int = 0; k < d.length; k++) {
             this.$_set_unsafe(k + 1, d[k])
-        }
-    }
-
-    /**
-     * Creates a new instance of Array with a specific length and initializes each element using a function.
-     *
-     * @param { int } arrayLen The amount of elements in the array.
-     * @param { function } initializer A function that generates an element for a given index.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public constructor(arrayLen: int, initializer: (index: int) => T) {
-        this.buffer = new FixedArray<Any>(arrayLen)
-        this.actualLength = arrayLen
-        for (let k: int = 0; k < arrayLen; k++) {
-            this.$_set_unsafe(k, initializer(k))
         }
     }
 

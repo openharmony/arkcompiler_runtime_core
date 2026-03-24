@@ -141,18 +141,6 @@
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
 
-#28900
-03.types/21.utility_types/incorrect_utility_type_usage_0_0.ets
-03.types/21.utility_types/incorrect_utility_type_usage_0_1.ets
-03.types/21.utility_types/incorrect_utility_type_usage_0_2.ets
-03.types/21.utility_types/incorrect_utility_type_usage_0_3.ets
-03.types/21.utility_types/incorrect_utility_type_usage_0_6.ets
-03.types/21.utility_types/incorrect_utility_type_usage_1_0.ets
-03.types/21.utility_types/incorrect_utility_type_usage_1_1.ets
-03.types/21.utility_types/incorrect_utility_type_usage_1_2.ets
-03.types/21.utility_types/incorrect_utility_type_usage_1_3.ets
-03.types/21.utility_types/incorrect_utility_type_usage_1_6.ets
-
 #32226 missing CTE for circular dependency
 03.types/21.utility_types/01.awaited_utility_type/awaited_circular_n.ets
 
@@ -172,9 +160,6 @@
 
 #31615 RTE for partial class field assignment
 03.types/21.utility_types/03.partial_utility_type/partial_inherit3.ets
-
-#28679
-03.types/21.utility_types/06.record_utility_type/enum_record_0_n.ets
 
 #27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
@@ -259,18 +244,6 @@
 #754(spec)
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_return_type_n_6.ets
 
-#28900
-05.generics/03.utility_types/incorrect_utility_type_usage_0_0.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_0_1.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_0_2.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_0_3.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_0_6.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_1_0.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_1_1.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_1_2.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_1_3.ets
-05.generics/03.utility_types/incorrect_utility_type_usage_1_6.ets
-
 #32226 missing CTE for circular dependency
 05.generics/03.utility_types/01.awaited_utility_type/awaited_circular_n.ets
 
@@ -290,9 +263,6 @@
 
 #31615 RTE for partial class field assignment
 05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
-
-#28679
-05.generics/03.utility_types/06.record_utility_type/enum_record_0_n.ets
 
 #33818
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
@@ -332,17 +302,6 @@
 
 #33086
 07.expressions/06.object_literal/02.object_literal_of_interface_type/interface_literals_negative_0.ets
-
-#25990
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_14.ets
-
-#28679 Record with enum keys - no support in spec 121TP3 but planned in future
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_24.ets
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_25.ets
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_26.ets
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_27.ets
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_n_neg_18.ets
-07.expressions/06.object_literal/03.object_literal_of_record_type/spec_ex4.ets
 
 # 33206
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_n_neg_19.ets
@@ -389,13 +348,6 @@
 07.expressions/12.function_call_expression/fixed_array_predefined_5.ets
 07.expressions/12.function_call_expression/fixed_array_predefined_6.ets
 07.expressions/12.function_call_expression/fixed_array_predefined_7.ets
-
-#28679
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_2.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_3.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_4.ets
 
 # 33235
 07.expressions/14.chaining_operator/condition_compile_time_compile.ets
@@ -1386,20 +1338,7 @@
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_41.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_43.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_2d_dim_assign_to_int_type.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_0.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_1.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_2.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_5.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_6.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_7.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_8.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_9.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_10.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_11.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_12.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_13.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_14.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_15.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_16.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_17.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_18.ets
@@ -1409,14 +1348,10 @@
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_22.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_23.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_24.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_25.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_26.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_27.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_28.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_29.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_30.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_31.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_1d_dim_assign_to_int_type.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_2d_dim_assign_to_int_type.ets
 
 #32725
