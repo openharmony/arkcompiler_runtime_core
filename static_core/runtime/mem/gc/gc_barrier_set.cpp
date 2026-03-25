@@ -219,7 +219,7 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
         return;
     }
     common_vm::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
-                                         storedValAddr);
+                                         storedValAddr, Mutator::GetCurrent());
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
@@ -233,7 +233,7 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
         auto value = *begin;
         if (value != 0) {
             common_vm::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), static_cast<void *>(begin),
-                                                 ToVoidPtr(value));
+                                                 ToVoidPtr(value), Mutator::GetCurrent());
         }
         ++begin;
     }

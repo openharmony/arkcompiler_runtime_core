@@ -96,9 +96,7 @@ void MarkingBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<fa
         UpdateRememberSet(obj, ref);
     }
     ref = (BaseObject*)((uintptr_t)ref & ~(TAG_WEAK));
-    if (UNLIKELY_CC(mutator == nullptr)) {
-        mutator = Mutator::GetMutator();
-    }
+    ASSERT_LOGF(mutator != nullptr, "Mutator is nullptr");
     mutator->RememberObjectInSatbBuffer(ref);
     DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
 }
