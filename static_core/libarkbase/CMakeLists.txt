@@ -299,6 +299,14 @@ option(PANDA_ARKBASE_LTO "Link part of arkbase library into every shared object 
 # * every other library: X - defined, strong, hidden (if any)
 if(PANDA_ENABLE_LTO AND PANDA_ARKBASE_LTO)
     panda_add_library(arkbase_lto STATIC ${ARKBASE_LTO_SOURCES})
+    # PIC is required because the code ends up in shared libraries.
+    # VISIBILITY_INLINES_HIDDEN ensures that inline functions instantiated from
+    # headers (unlike -fvisibility=hidden for .cpp). This prevents collisions
+    # and LTO can fully inline them
+    set_target_properties(arkbase_lto PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        VISIBILITY_INLINES_HIDDEN ON
+    )
     # arkbase_lto: do not export the same symbol from multiple non-arkbase libraries
     panda_target_compile_options(arkbase_lto PRIVATE "-fvisibility=hidden")
     # arkbase: do not conflict with (strong hidden) symbols from
