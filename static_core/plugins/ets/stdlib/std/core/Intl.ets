@@ -831,6 +831,24 @@ export class DateTimeFormat {
 
         private getResolvedOptions(options: DateTimeFormatOptions): DateTimeFormatOptionsImpl {
             let ret = new DateTimeFormatOptionsImpl(options)
+
+            let needDefaults = true
+            if (options.year !== undefined || options.month !== undefined || options.day !== undefined || options.weekday !== undefined) {
+                needDefaults = false
+            }
+            if (options.hour !== undefined || options.minute !== undefined || options.second !== undefined || options.fractionalSecondDigits !== undefined || options.dayPeriod !== undefined) {
+                needDefaults = false
+            }
+            if (options.dateStyle !== undefined || options.timeStyle !== undefined) {
+                needDefaults = false
+            }
+
+            if (needDefaults) {
+                ret.year = "numeric"
+                ret.month = "numeric"
+                ret.day = "numeric"
+            }
+
             if (options.hour12 !== undefined) {
                 let hourCycle = this.getLocaleHourCycle()
 
@@ -871,51 +889,10 @@ export class DateTimeFormat {
             }
         }
 
-        private toDefaultDateTimeSkeleton(): string {
-            let needDateDefaults:boolean = true
-            const skeleton = new StringBuilder()
-            if (this.options.year !== undefined || this.options.month !== undefined || this.options.weekday !== undefined || this.options.day !== undefined) {
-                needDateDefaults = false
-            }
-            if (this.options.hour !== undefined || this.options.minute !== undefined || this.options.second !== undefined) {
-                needDateDefaults = false
-            }
-            if (this.options.dateStyle !== undefined || this.options.timeStyle !== undefined) {
-                needDateDefaults = false
-            }
-
-            const hcDefault = this.getLocaleHourCycle()
-            const hourCycle = this.options.hourCycle
-            const hc = hourCycle == undefined ? hcDefault : hourCycle
-            if (needDateDefaults) {
-                skeleton.append("yMd")
-                switch (hc) {
-                    case "h11":
-                        skeleton.append("Kms")
-                        break
-                    case "h12":
-                        skeleton.append("hms")
-                        break
-                    case "h23":
-                    case undefined:
-                        skeleton.append("Hms")
-                        break
-                    case "h24":
-                        skeleton.append("kms")
-                        break
-                    default:
-                        break
-                }
-
-            }
-            return skeleton.toString()
-        }
-
         private getPattern(): string {
             const datePattern = this.getDatePattern()
             const timePattern = this.getTimePattern()
-            const dtfSkeleton = this.toDefaultDateTimeSkeleton()
-            return datePattern + timePattern + dtfSkeleton
+            return datePattern + timePattern
         }
 
         private getDatePattern(): string {

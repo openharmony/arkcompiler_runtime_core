@@ -713,14 +713,11 @@ export class Date {
     }
 
     private appendDefaultTimeOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
-        const appendTimeOptions = !options.dayPeriod
-            && !options.hour
-            && !options.minute
-            && !options.second
-            && !options.fractionalSecondDigits
+        const hasTimeOptions = options.hour !== undefined || options.minute !== undefined || options.second !== undefined || options.fractionalSecondDigits !== undefined || options.dayPeriod !== undefined
+        const hasStyleOptions = options.timeStyle !== undefined
 
         let effectiveOptions = options
-        if (appendTimeOptions) {
+        if (!hasTimeOptions && !hasStyleOptions) {
             // client options instance should not be modified, so creating a copy
             effectiveOptions = this.copyOptions(options)
             effectiveOptions.hour = Date.TIME_FORMAT_OPTIONS.hour
@@ -771,6 +768,26 @@ export class Date {
     //     return formatter.format(this.getTime())
     // }
 
+    private appendDefaultDateTimeOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
+        const hasDateOptions = options.weekday !== undefined || options.year !== undefined || options.month !== undefined || options.day !== undefined
+        const hasTimeOptions = options.hour !== undefined || options.minute !== undefined || options.second !== undefined || options.fractionalSecondDigits !== undefined || options.dayPeriod !== undefined
+        const hasStyleOptions = options.dateStyle !== undefined || options.timeStyle !== undefined
+
+        let effectiveOptions = options
+        if (!hasDateOptions && !hasTimeOptions && !hasStyleOptions) {
+            // client options instance should not be modified, so creating a copy
+            effectiveOptions = this.copyOptions(options)
+            effectiveOptions.year = Date.DATE_TIME_FORMAT_OPTIONS.year
+            effectiveOptions.month = Date.DATE_TIME_FORMAT_OPTIONS.month
+            effectiveOptions.day = Date.DATE_TIME_FORMAT_OPTIONS.day
+            effectiveOptions.hour = Date.DATE_TIME_FORMAT_OPTIONS.hour
+            effectiveOptions.minute = Date.DATE_TIME_FORMAT_OPTIONS.minute
+            effectiveOptions.second = Date.DATE_TIME_FORMAT_OPTIONS.second
+        }
+
+        return effectiveOptions
+    }
+
     /**
      * Gets a string with a language-sensitive representation of this date with respect to locale.
      *
@@ -788,7 +805,9 @@ export class Date {
         if (options instanceof Intl.DateTimeFormatOptions) {
             options_ = options as Intl.DateTimeFormatOptions
         }
-        const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options_ ?? Date.DATE_TIME_FORMAT_OPTIONS)
+        
+        const effectiveOptions = !options_ ? Date.DATE_TIME_FORMAT_OPTIONS : this.appendDefaultDateTimeOptions(options_!)
+        const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), effectiveOptions)
         return formatter.format(this.getTime())
     }
 
@@ -809,10 +828,11 @@ export class Date {
     }
 
     private appendDefaultDateOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
-        const appendDateOptions = !options.weekday && !options.year && !options.month && !options.day
+        const hasDateOptions = options.weekday !== undefined || options.year !== undefined || options.month !== undefined || options.day !== undefined
+        const hasStyleOptions = options.dateStyle !== undefined
 
         let effectiveOptions = options
-        if (appendDateOptions) {
+        if (!hasDateOptions && !hasStyleOptions) {
             // client options instance should not be modified, so creating a copy
             effectiveOptions = this.copyOptions(options)
             effectiveOptions.year = Date.DATE_FORMAT_OPTIONS.year
@@ -1814,6 +1834,12 @@ export class Date {
     public toISOString(): string {
         let sb = new StringBuilder();
         let y = this.getUTCFullYear();
+        if (y > 9999) {
+            sb.append("+");
+            if (y < 100000) {
+                sb.append("0");
+            }
+        }
         if (y < 0) {
             sb.append("-");
         }
