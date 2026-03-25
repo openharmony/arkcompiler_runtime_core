@@ -17,7 +17,7 @@
 /*---
 desc: >-
     Entry point function must either have no parameters, or have one parameter
-    of type string[] that provides access to the arguments of a program command line
+    of type FixedArray<string> that provides access to the arguments of a program command line
 tags: [no-warmup]
 test_cli: [{{c.cmd_line_args}}]
 ---*/
