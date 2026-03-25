@@ -821,8 +821,8 @@ void LivenessAnalyzer::BlockPhysicalRegisters(Inst *inst, LifeNumber blockFrom)
         }
     }
 
-    // callee registers should not live through runtime native api calls, callees should be spilled on stack
-    if (IsNativeApiRuntimeCall(inst)) {
+    // Callee-saved registers should not live through runtime native API calls or suspension points.
+    if (IsNativeApiRuntimeCall(inst) || inst->Is(Opcode::SaveStateSuspend)) {
         RegMask calleeRegs = GetCalleeRegsMask(arch, IS_FP);
         for (auto reg = GetFirstCalleeReg(arch, IS_FP); reg <= GetLastCalleeReg(arch, IS_FP); ++reg) {
             if (calleeRegs.test(reg)) {
@@ -871,6 +871,9 @@ bool LivenessAnalyzer::IsCallBlockingRegisters(Inst *inst) const
         return true;
     }
     if (inst->IsIntrinsic() && inst->CastToIntrinsic()->IsNativeCall()) {
+        return true;
+    }
+    if (inst->Is(Opcode::SaveStateSuspend)) {
         return true;
     }
     return false;

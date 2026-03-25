@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,12 @@
 #include "optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 
 namespace ark::compiler {
+class TestGraphCloner : public GraphCloner {
+public:
+    using GraphCloner::GetClone;
+    using GraphCloner::GraphCloner;
+};
+
 class RegAllocCommonTest : public GraphTest {
 public:
     template <typename Checker>
@@ -30,24 +36,42 @@ public:
     template <typename Checker>
     void RunRegAllocatorsAndCheck(Graph *graph, RegMask mask, Checker checker) const
     {
+        RunRegAllocatorsAndCheckWithPrepare(
+            graph, mask, []([[maybe_unused]] Graph *preparedGraph, [[maybe_unused]] TestGraphCloner *cloner) {},
+            checker);
+    }
+
+    template <typename Prepare, typename Checker>
+    void RunRegAllocatorsAndCheckWithPrepare(Graph *graph, Prepare prepare, Checker checker) const
+    {
+        RunRegAllocatorsAndCheckWithPrepare(graph, graph->GetArchUsedRegs(), prepare, checker);
+    }
+
+    template <typename Prepare, typename Checker>
+    void RunRegAllocatorsAndCheckWithPrepare(Graph *graph, RegMask mask, Prepare prepare, Checker checker) const
+    {
         if (graph->GetCallingConvention() == nullptr) {
             return;
         }
-        auto graphLs = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
+        auto clonerLs = TestGraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator());
+        auto graphLs = clonerLs.CloneGraph();
+        prepare(graphLs, &clonerLs);
         auto rals = RegAllocLinearScan(graphLs);
         rals.SetRegMask(mask);
         ASSERT_TRUE(rals.Run());
-        checker(graphLs);
+        checker(graphLs, &clonerLs);
 
         // RegAllocGraphColoring is not supported for AARCH32
-        if (GetGraph()->GetArch() == Arch::AARCH32) {
+        if (graph->GetArch() == Arch::AARCH32) {
             return;
         }
-        auto graphGc = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
+        auto clonerGc = TestGraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator());
+        auto graphGc = clonerGc.CloneGraph();
+        prepare(graphGc, &clonerGc);
         auto ragc = RegAllocGraphColoring(graphGc);
         ragc.SetRegMask(mask);
         ASSERT_TRUE(ragc.Run());
-        checker(graphGc);
+        checker(graphGc, &clonerGc);
     }
 
 protected:
@@ -131,7 +155,7 @@ void RegAllocCommonTest::TestParametersLocations() const
         src_graph::TestParametersLocationsUINT32::CREATE(graph);
     }
 
-    RunRegAllocatorsAndCheck(graph, [type = REG_TYPE](Graph *checkGraph) {
+    RunRegAllocatorsAndCheck(graph, [type = REG_TYPE](Graph *checkGraph, [[maybe_unused]] TestGraphCloner *cloner) {
         auto arch = checkGraph->GetArch();
         unsigned slotInc = Is64Bits(type, arch) && !Is64BitsArch(arch) ? 2U : 1U;
 
@@ -198,6 +222,223 @@ static void LocationsNoSplitsCheckBB(BasicBlock *bb)
     }
 }
 
+template <class Predicate>
+static bool HasSpillFillDataAfter(const Inst *inst, Predicate pred)
+{
+    for (auto nextInst = inst->GetNext(); nextInst != nullptr; nextInst = nextInst->GetNext()) {
+        if (!nextInst->IsSpillFill()) {
+            continue;
+        }
+        const auto &spillFills = nextInst->CastToSpillFill()->GetSpillFills();
+        if (std::any_of(spillFills.begin(), spillFills.end(), pred)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+template <class Predicate>
+static bool HasSpillFillDataBefore(const Inst *inst, Predicate pred)
+{
+    auto prevInst = inst->GetPrev();
+    if (prevInst == nullptr || !prevInst->IsSpillFill()) {
+        return false;
+    }
+    const auto &spillFills = prevInst->CastToSpillFill()->GetSpillFills();
+    return std::any_of(spillFills.begin(), spillFills.end(), pred);
+}
+
+static std::vector<uint32_t> CollectRegisterToStackSpillSlotsBefore(const Inst *inst)
+{
+    std::vector<uint32_t> spillSlots;
+    auto prevInst = inst->GetPrev();
+    if (prevInst == nullptr || !prevInst->IsSpillFill()) {
+        return spillSlots;
+    }
+    const auto &spillFills = prevInst->CastToSpillFill()->GetSpillFills();
+    spillSlots.reserve(spillFills.size());
+    for (const auto &spill : spillFills) {
+        if (spill.SrcType() == LocationType::REGISTER && spill.DstType() == LocationType::STACK) {
+            spillSlots.push_back(spill.DstValue());
+        }
+    }
+    std::sort(spillSlots.begin(), spillSlots.end());
+    spillSlots.erase(std::unique(spillSlots.begin(), spillSlots.end()), spillSlots.end());
+    return spillSlots;
+}
+
+static void SetStackParameterLocation(Inst *inst, uint32_t stackParamSlot)
+{
+    ASSERT_NE(inst, nullptr);
+    ASSERT_TRUE(inst->IsParameter());
+    inst->CastToParameter()->SetLocationData(
+        {LocationType::STACK_PARAMETER, LocationType::INVALID, stackParamSlot, GetInvalidReg(), DataType::UINT32});
+}
+
+static bool IsStackLikeLocation(LocationType locationType)
+{
+    return locationType == LocationType::STACK || locationType == LocationType::STACK_PARAMETER;
+}
+
+static void CheckStackValueReloadedAfterSuspend(const Inst *suspendInst, const Inst *postUseInst, uint32_t stackSlot,
+                                                [[maybe_unused]] LocationType srcType)
+{
+    ASSERT_NE(suspendInst, nullptr);
+    ASSERT_NE(postUseInst, nullptr);
+    EXPECT_FALSE(HasSpillFillDataBefore(suspendInst, [stackSlot](const SpillFillData &sf) {
+        return IsStackLikeLocation(sf.SrcType()) && sf.DstType() == LocationType::REGISTER &&
+               sf.SrcValue() == stackSlot;
+    }));
+    auto postUseReg = postUseInst->GetSrcReg(0U);
+    EXPECT_TRUE(HasSpillFillDataAfter(suspendInst, [stackSlot, postUseReg](const SpillFillData &sf) {
+        return IsStackLikeLocation(sf.SrcType()) && sf.DstType() == LocationType::REGISTER &&
+               sf.SrcValue() == stackSlot && sf.DstValue() == postUseReg;
+    }));
+}
+
+static void CheckStackValueNotReloadedAfterSuspend(const Inst *suspendInst, uint32_t stackSlot,
+                                                   [[maybe_unused]] LocationType srcType)
+{
+    ASSERT_NE(suspendInst, nullptr);
+    EXPECT_FALSE(HasSpillFillDataAfter(suspendInst, [stackSlot](const SpillFillData &sf) {
+        return IsStackLikeLocation(sf.SrcType()) && sf.DstType() == LocationType::REGISTER &&
+               sf.SrcValue() == stackSlot;
+    }));
+}
+
+TEST_F(RegAllocCommonTest, SaveStateSuspendRegSpillAndReload)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(10U, 1U).ref();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Add).u32().Inputs(0U, 0U);
+            INST(3U, Opcode::Add).u32().Inputs(2U, 0U);
+            INST(4U, Opcode::SaveStateSuspend).Inputs(10U, 0U, 2U, 3U).SrcVregs({4U, 0U, 1U, 2U});
+            INST(5U, Opcode::Add).u32().Inputs(2U, 3U);
+            INST(6U, Opcode::Add).u32().Inputs(5U, 0U);
+            INST(7U, Opcode::Return).u32().Inputs(6U);
+        }
+    }
+
+    auto suspend = &INS(4U);
+    RunRegAllocatorsAndCheck(graph, [suspend]([[maybe_unused]] Graph *checkGraph, TestGraphCloner *cloner) {
+        auto clonedSuspend = cloner->GetClone(suspend);
+        ASSERT_NE(clonedSuspend, nullptr);
+        auto spillSlots = CollectRegisterToStackSpillSlotsBefore(clonedSuspend);
+        ASSERT_FALSE(spillSlots.empty());
+        for (auto slot : spillSlots) {
+            auto hasReload = HasSpillFillDataAfter(clonedSuspend, [slot](const SpillFillData &sf) {
+                return sf.SrcType() == LocationType::STACK && sf.DstType() == LocationType::REGISTER &&
+                       sf.SrcValue() == slot;
+            });
+            EXPECT_TRUE(hasReload);
+        }
+    });
+}
+
+TEST_F(RegAllocCommonTest, SaveStateSuspendRegSpillWithoutReload)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(10U, 2U).ref();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Add).u32().Inputs(0U, 0U);
+            INST(3U, Opcode::Add).u32().Inputs(2U, 0U);
+            INST(4U, Opcode::Add).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Add).u32().Inputs(4U, 3U);
+            INST(6U, Opcode::Add).u32().Inputs(5U, 4U);
+            INST(7U, Opcode::SaveStateSuspend)
+                .Inputs(10U, 0U, 2U, 3U, 4U, 5U, 6U)
+                .SrcVregs({4U, 0U, 1U, 2U, 3U, 4U, 5U});
+            INST(8U, Opcode::Return).u32().Inputs(1U);
+        }
+    }
+
+    auto suspend = &INS(7U);
+    RunRegAllocatorsAndCheck(graph, [suspend]([[maybe_unused]] Graph *checkGraph, TestGraphCloner *cloner) {
+        auto clonedSuspend = cloner->GetClone(suspend);
+        ASSERT_NE(clonedSuspend, nullptr);
+        auto spillSlots = CollectRegisterToStackSpillSlotsBefore(clonedSuspend);
+        for (auto slot : spillSlots) {
+            auto hasReload = HasSpillFillDataAfter(clonedSuspend, [slot](const SpillFillData &sf) {
+                return sf.SrcType() == LocationType::STACK && sf.DstType() == LocationType::REGISTER &&
+                       sf.SrcValue() == slot;
+            });
+            EXPECT_FALSE(hasReload);
+        }
+    });
+}
+
+TEST_F(RegAllocCommonTest, SaveStateSuspendStackInputReloadAfterResume)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(10U, 1U).ref();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::SaveStateSuspend).Inputs(10U, 0U).SrcVregs({4U, 0U});
+            INST(3U, Opcode::Add).u32().Inputs(0U, 0U);
+            INST(4U, Opcode::Return).u32().Inputs(3U);
+        }
+    }
+
+    auto valueInst = &INS(0U);
+    auto suspend = &INS(2U);
+    auto postUseInst = &INS(3U);
+    const uint32_t stackParamSlot = 0U;
+    RunRegAllocatorsAndCheckWithPrepare(
+        graph,
+        [valueInst]([[maybe_unused]] Graph *preparedGraph, TestGraphCloner *cloner) {
+            SetStackParameterLocation(cloner->GetClone(valueInst), stackParamSlot);
+        },
+        [suspend, postUseInst]([[maybe_unused]] Graph *checkGraph, TestGraphCloner *cloner) {
+            CheckStackValueReloadedAfterSuspend(cloner->GetClone(suspend), cloner->GetClone(postUseInst),
+                                                stackParamSlot, LocationType::STACK_PARAMETER);
+        });
+}
+
+TEST_F(RegAllocCommonTest, SaveStateSuspendStackInputWithoutReload)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(10U, 1U).ref();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::SaveStateSuspend).Inputs(10U, 0U).SrcVregs({4U, 0U});
+            INST(3U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto valueInst = &INS(0U);
+    auto suspend = &INS(2U);
+    const uint32_t stackParamSlot = 0U;
+    RunRegAllocatorsAndCheckWithPrepare(
+        graph,
+        [valueInst]([[maybe_unused]] Graph *preparedGraph, TestGraphCloner *cloner) {
+            SetStackParameterLocation(cloner->GetClone(valueInst), stackParamSlot);
+        },
+        [suspend]([[maybe_unused]] Graph *checkGraph, TestGraphCloner *cloner) {
+            CheckStackValueNotReloadedAfterSuspend(cloner->GetClone(suspend), stackParamSlot,
+                                                   LocationType::STACK_PARAMETER);
+        });
+}
+
 TEST_F(RegAllocCommonTest, LocationsNoSplits)
 {
     auto graph = CreateEmptyGraph();
@@ -222,7 +463,7 @@ TEST_F(RegAllocCommonTest, LocationsNoSplits)
     }
 
     // Check that there are no spill-fills in the graph
-    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
+    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph, [[maybe_unused]] TestGraphCloner *cloner) {
         for (auto bb : checkGraph->GetBlocksRPO()) {
             LocationsNoSplitsCheckBB(bb);
         }
@@ -250,7 +491,7 @@ TEST_F(RegAllocCommonTest, ImplicitNullCheckStackMap)
     }
     INS(7U).CastToNullCheck()->SetImplicit(true);
 
-    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
+    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph, [[maybe_unused]] TestGraphCloner *cloner) {
         auto bb = checkGraph->GetStartBlock()->GetSuccessor(0U);
         // Find null_check
         Inst *nullCheck = nullptr;
@@ -294,7 +535,7 @@ TEST_F(RegAllocCommonTest, DynMethodNargsParamReserve)
         }
     }
 
-    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
+    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph, [[maybe_unused]] TestGraphCloner *cloner) {
         auto reg = Target(checkGraph->GetArch()).GetParamRegId(1U);
 
         for (auto inst : checkGraph->GetStartBlock()->Insts()) {
@@ -327,7 +568,7 @@ TEST_F(RegAllocCommonTest, TempRegisters)
         }
     }
 
-    RunRegAllocatorsAndCheck(graph, RegMask {0xFFFFFFE1}, [](Graph *checkGraph) {
+    auto checker = [](Graph *checkGraph, [[maybe_unused]] TestGraphCloner *cloner) {
         auto bb = checkGraph->GetStartBlock()->GetSuccessor(0U);
         Inst *callInst = nullptr;
         for (auto inst : bb->Insts()) {
@@ -344,7 +585,8 @@ TEST_F(RegAllocCommonTest, TempRegisters)
         for (size_t i = 0; i < callInst->GetInputsCount(); i++) {
             EXPECT_NE(tmpLocation, callInst->GetLocation(i));
         }
-    });
+    };
+    RunRegAllocatorsAndCheck(graph, RegMask {0xFFFFFFE1}, checker);
 }
 // NOLINTEND(readability-magic-numbers)
 
