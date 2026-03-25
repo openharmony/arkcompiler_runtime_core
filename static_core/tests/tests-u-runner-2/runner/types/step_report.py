@@ -32,12 +32,12 @@ class StepReport:
     status: str = ""  # final status of the step (after execution, validator, pre/post-requirements checks), fail_kind?
 
     def __hash__(self) -> int:
-        return hash(self.command_line)
+        return hash(self.command_line) + hash(self.name)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, StepReport):
             return NotImplemented
-        return self.command_line == other.command_line
+        return self.command_line == other.command_line and self.name == other.name
 
     def __str__(self) -> str:
         result: list[str] = []
