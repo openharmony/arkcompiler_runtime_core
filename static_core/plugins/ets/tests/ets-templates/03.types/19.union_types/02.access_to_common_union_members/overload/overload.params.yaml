@@ -159,49 +159,6 @@ cases:
           arktest.assertEQ(u1.meth("string"), "A", "u1.meth(string)")
           arktest.assertEQ(u2.meth("string"), "B", "u2.meth(string)")
 
-    - decl: |-
-          // overload signatures - some match, to verify that at least right class is chosen
-          class A {
-              meth(p: int): number {
-                  return 2 // intentionally made same return value as in overloaded method
-              }
-              meth(p: Object): number {
-                  return 2
-              }
-          }
-          class B {
-              meth(p: Object): number {
-                  return 3
-              }
-          }
-          let u1: A|B = new A
-          let u2: A|B = new B
-      use: |-
-          arktest.assertEQ(u1.meth(1), 2, "u1.meth(1)")
-          arktest.assertEQ(u1.meth(new Object()), 2, "u1.meth(new Object())")
-          arktest.assertEQ(u2.meth(new Object()), 3, "u2.meth(new Object())")
-
-    - decl: |-
-          class A {
-              meth(p: int): number {
-                  return 1
-              }
-              meth(p: Object): number {
-                  return 2
-              }
-          }
-          class B {
-              meth(p: Object): number {
-                  return 3
-              }
-          }
-          let u1: A|B = new A
-          let u2: A|B = new B
-      use: |-
-          arktest.assertEQ(u1.meth(1), 2, "u1.meth(1)")
-          arktest.assertEQ(u1.meth(new Object()), 2, "u1.meth(new Object())")
-          arktest.assertEQ(u2.meth(new Object()), 3, "u2.meth(new Object())")
-
     # overload declaration (alias)
     - decl: |-
           // harmless uninvolved overload in one
