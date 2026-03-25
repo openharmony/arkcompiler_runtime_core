@@ -38,13 +38,7 @@ public:
             return true;
         }
         auto **ref = reinterpret_cast<common_vm::BaseObject **>(p);
-        auto *oldValue = *ref;
         visitor_(reinterpret_cast<common_vm::RefField<> &>(*ref));
-        auto *newValue = reinterpret_cast<ObjectHeader *>(*ref);
-        if (ark::ToUintPtr(oldValue) != ark::ToUintPtr(newValue)) {
-            LOG(DEBUG, MM_OBJECT_EVENTS) << "Forward object " << oldValue << " -> " << newValue << " "
-                                         << GetDebugInfoAboutObject(newValue) << " accessed from: " << obj;
-        }
         return true;
     }
 

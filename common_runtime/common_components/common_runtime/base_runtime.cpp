@@ -16,6 +16,7 @@
 #include "common_interfaces/base_runtime.h"
 
 #include "common_components/common_runtime/base_runtime_param.h"
+#include "common_components/log/log.h"
 #include "common_components/common_runtime/hooks.h"
 #include "common_components/common/page_pool.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
@@ -83,6 +84,11 @@ bool BaseRuntime::HasBeenInitialized()
     return initialized_;
 }
 
+RuntimeParam BaseRuntime::GetDefaultParam()
+{
+    return BaseRuntimeParam::DefaultRuntimeParam();
+}
+
 void BaseRuntime::Init()
 {
     Init(BaseRuntimeParam::DefaultRuntimeParam());
@@ -97,6 +103,7 @@ void BaseRuntime::Init(const RuntimeParam &param)
     }
 
     param_ = param;
+    Log::Initialize(param_.logOptions);
     size_t pagePoolSize = param_.heapParam.heapSize;
 #if defined(PANDA_TARGET_32)
     pagePoolSize = pagePoolSize / 128;  // 128 means divided.
@@ -104,7 +111,7 @@ void BaseRuntime::Init(const RuntimeParam &param)
     PagePool::Instance().Init(pagePoolSize * KB / COMMON_PAGE_SIZE);
     mutatorManager_ = NewAndInit<MutatorManager>();
     heapManager_ = NewAndInit<HeapManager>(param_);
-    VLOG(INFO, "Arkcommon runtime started.");
+    VLOG(DEBUG, "Arkcommon runtime started.");
     // Record runtime parameter to report. heap growth value needs to plus 1.
     VLOG(DEBUG,
          "Runtime parameter:\n\tHeap size: %zu(KB)\n\tRegion size: %zu(KB)\n\tExemption threshold: %.2f\n\t"
@@ -137,7 +144,7 @@ void BaseRuntime::Fini()
         PagePool::Instance().Fini();
     }
 
-    VLOG(INFO, "Arkcommon runtime shutdown.");
+    VLOG(DEBUG, "Arkcommon runtime shutdown.");
     initialized_ = false;
 }
 

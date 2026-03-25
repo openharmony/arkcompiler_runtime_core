@@ -120,6 +120,7 @@ set(SOURCES
     regexp/ecmascript/regexp_opcode.cpp
     regexp/ecmascript/mem/dyn_chunk.cpp
     runtime.cpp
+    common_runtime_stub.cpp
     runtime_controller.cpp
     string_table.cpp
     thread.cpp

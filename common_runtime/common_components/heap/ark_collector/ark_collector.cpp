@@ -80,8 +80,13 @@ bool ArkCollector::TryUpdateRefFieldImpl(BaseObject* obj, RefField<>& field, Bas
                 DLOG(TRACE, "update obj %p<%p>(%zu)+%zu ref-field@%p: %#zx -> %#zx", obj, obj->GetTypeInfo(),
                     obj->GetSize(), BaseObject::FieldOffset(obj, &field), &field, oldRef.GetFieldValue(),
                     tmpField.GetFieldValue());
+                LOG_MM_OBJ_EVENTS(DEBUG) << "BARRIER ref in obj " << obj
+                                         << " field@" << &field
+                                         << ": " << fromObj << " -> " << toObj;
             } else { //LCOV_EXCL_BR_LINE
                 DLOG(TRACE, "update ref@%p: 0x%zx -> %p", &field, oldRef.GetFieldValue(), toObj);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "BARRIER ref @" << &field
+                                         << ": " << fromObj << " -> " << toObj;
             }
             return true;
         } else { //LCOV_EXCL_BR_LINE
@@ -294,6 +299,9 @@ void ArkCollector::FixRefField(BaseObject* obj, RefField<>& field) const
     if (field.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
         DLOG(FIX, "fix obj %p+%zu ref@%p: %#zx => %p<%p>(%zu)", obj, obj->GetSize(), &field,
              oldField.GetFieldValue(), latest, latest->GetTypeInfo(), latest->GetSize());
+        LOG_MM_OBJ_EVENTS(DEBUG) << "FIX ref in obj " << obj
+                                 << " field@" << &field
+                                 << ": " << targetObj << " -> " << latest;
     }
 }
 
@@ -320,6 +328,8 @@ BaseObject* ArkCollector::ForwardUpdateRawRef(ObjectRef& root)
         // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
         if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
             DLOG(FIX, "fix raw-ref @%p: %p -> %p", &root, oldObj, toVersion);
+            LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD raw ref @" << &root
+                                     << ": " << oldObj << " -> " << toVersion;
             return toVersion;
         }
     }
@@ -354,6 +364,8 @@ public:
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
                 DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "REMARK ref @" << &refField
+                                         << ": " << oldObj << " -> " << toVersion;
             }
             MarkToObject(oldObj, toVersion);
         } else {
@@ -487,6 +499,8 @@ void ArkCollector::PreforwardConcurrentRoots()
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
                 DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD concurrent ref @" << &refField
+                                         << ": " << oldObj << " -> " << toVersion;
             }
         }
     };
@@ -629,6 +643,8 @@ WeakRefFieldVisitor ArkCollector::GetWeakRefFieldVisitor()
             // a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
                 DLOG(FIX, "fix weak raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD weak ref @" << &refField
+                                         << ": " << oldObj << " -> " << toVersion;
             }
         }
         return true;
@@ -651,6 +667,8 @@ RefFieldVisitor ArkCollector::GetPrefowardRefFieldVisitor()
             // a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
                 DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD ref @" << &refField
+                                         << ": " << oldObj << " -> " << toVersion;
             }
         }
     };
@@ -1033,6 +1051,8 @@ void ArkCollector::ProcessStringTable()
             RefField<> newField(nullptr);
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
                 DLOG(FIX, "fix weak raw-ref @%p: %p -> %p", &refField, oldObj, nullptr);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "CLEAR string table weak ref @" << &refField
+                                         << ": " << oldObj << " -> null";
             }
             return false;
         }
@@ -1045,6 +1065,8 @@ void ArkCollector::ProcessStringTable()
             // a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
                 DLOG(FIX, "fix weak raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+                LOG_MM_OBJ_EVENTS(DEBUG) << "FIX string table ref @" << &refField
+                                         << ": " << oldObj << " -> " << toVersion;
             }
         }
         return true;
@@ -1132,6 +1154,7 @@ BaseObject* ArkCollector::CopyObjectAfterExclusive(BaseObject* obj)
         return toObj;
     }
     DLOG(COPY, "copy obj %p<%p>(%zu) to %p", obj, obj->GetTypeInfo(), size, toObj);
+    LOG_MM_OBJ_EVENTS(DEBUG) << "MOVE object " << obj << " -> " << toObj;
     CopyObject(*obj, *toObj, size);
 
     ASSERT_LOGF(IsToObject(toObj), "Copy object to invalid region");
@@ -1176,7 +1199,7 @@ void ArkCollector::CollectSmallSpace()
 
     stats.liveBytesAfterGC = space.GetAllocatedBytes();
 
-    VLOG(INFO,
+    VLOG(DEBUG,
          "collect %zu B: small %zu - %zu B, non-movable %zu - %zu B, large %zu - %zu B. garbage ratio %.2f%%",
          stats.collectedBytes, stats.fromSpaceSize, stats.smallGarbageSize, stats.nonMovableSpaceSize,
          stats.nonMovableGarbageSize, stats.largeSpaceSize, stats.largeGarbageSize,

@@ -148,8 +148,9 @@ public:
     void PostFork(bool enableWarmStartup);
 
     bool HasBeenInitialized();
-    void Init(const RuntimeParam &param);  // Support setting custom parameters
-    void Init();                           // Use default parameters
+    static RuntimeParam GetDefaultParam();
+    void Init(const RuntimeParam &param);
+    void Init();
     void Fini();
 
     bool RegisterVM(VMInterface *vm);

@@ -43,7 +43,7 @@ void* CollectorResources::GCMainThreadEntry(void* arg)
     // set current thread as a gc thread.
     ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
 
-    VLOG(INFO, "CollectorResources Thread begin.");
+    VLOG(DEBUG, "CollectorResources Thread begin.");
 
 #ifdef ENABLE_QOS
     OHOS::QOS::SetQosForOtherThread(OHOS::QOS::QosLevel::QOS_USER_INITIATED, GetTid());
@@ -53,7 +53,7 @@ void* CollectorResources::GCMainThreadEntry(void* arg)
     CollectorResources* collectorResources = reinterpret_cast<CollectorResources*>(arg);
     collectorResources->RunTaskLoop();
 
-    VLOG(INFO, "CollectorResources Thread end.");
+    VLOG(DEBUG, "CollectorResources Thread end.");
     return nullptr;
 }
 
