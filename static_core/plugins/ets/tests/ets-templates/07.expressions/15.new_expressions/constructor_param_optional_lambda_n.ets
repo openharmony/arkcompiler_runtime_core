@@ -36,5 +36,5 @@ class C {
 }
 
 function main(): void {
-  let arr = new Array<C>()
+  let arr: Array<C> = new C[5](new C())
 }
