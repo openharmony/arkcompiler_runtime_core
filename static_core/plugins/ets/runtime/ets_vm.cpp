@@ -220,6 +220,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     bool isVerifyANI = etsVmOptions == nullptr ? false : etsVmOptions->IsVerifyANI();
     if (isVerifyANI) {
         aniVerifier_ = MakePandaUnique<ani::verify::ANIVerifier>();
+        aniVerifier_->SetVerifyOptions(etsVmOptions->IsVerifyANIWorkaroundNoCrashIfInvalidUsage());
         c_api = ani::verify::GetVerifyVMAPI();
     }
 

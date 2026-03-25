@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,25 @@ const std::map<std::string_view, ANIOptions::OptionHandler> &ANIOptions::GetOpti
                     }
                     if (extra != nullptr) {
                         return Unexpected(std::string("'--verify:ani' option has 'extra != NULL'"));
+                    }
+                    return std::make_unique<OptionValue>(OptionValue {true, extra});
+                },
+            },
+        },
+        {
+            "--verify:ani:workround:no_crash_if_invalid_usage",
+            {
+                OptionKey::VERIFY_ANI_WORKAROUND_NO_CRASH_IF_INVALID_USAGE,
+                [](std::string_view value, void *extra) -> Expected<std::unique_ptr<OptionValue>, std::string> {
+                    if (!value.empty()) {
+                        std::stringstream ss;
+                        ss << "'--verify:ani:workround:no_crash_if_invalid_usage' option mustn't have value, value='"
+                           << value << "'";
+                        return Unexpected(ss.str());
+                    }
+                    if (extra != nullptr) {
+                        return Unexpected(std::string(
+                            "'--verify:ani:workround:no_crash_if_invalid_usage' option has 'extra != NULL'"));
                     }
                     return std::make_unique<OptionValue>(OptionValue {true, extra});
                 },

@@ -505,122 +505,163 @@ struct ExtArgInfo {
     bool isValid;
 };
 
+enum class ANIErrorSeverity { NONE, ERROR, FATAL };
+
+class VerificationResult final {
+public:
+    VerificationResult() = default;
+    VerificationResult(PandaString msg, ANIErrorSeverity s) : err_(std::move(msg)), severity_(s) {}
+
+    explicit operator bool() const
+    {
+        return err_.has_value();
+    }
+    const std::optional<PandaString> &GetError() const
+    {
+        return err_;
+    }
+    ANIErrorSeverity GetSeverity() const
+    {
+        return severity_;
+    }
+
+    std::optional<PandaString> TakeError()
+    {
+        return std::move(err_);
+    }
+
+private:
+    std::optional<PandaString> err_;
+    ANIErrorSeverity severity_ = ANIErrorSeverity::NONE;
+};
+
 class Verifier {
 public:
     explicit Verifier(VVm *vvm, VEnv *venv) : vvm_(vvm), venv_(venv) {}
 
-    std::optional<PandaString> VerifyVm(VVm *vvm)
+    VerificationResult VerifyVm(VVm *vvm)
     {
         if (UNLIKELY(vvm != vvm_)) {
-            return "wrong VM pointer";
+            return {"wrong VM pointer", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyEnv(VEnv *venv, bool checkPendingError)
+    VerificationResult VerifyEnv(VEnv *venv, bool checkPendingError)
     {
         if (UNLIKELY(venv_ == nullptr)) {
-            return "current native thread is not attached";
+            return {"current native thread is not attached", ANIErrorSeverity::FATAL};
         }
         if (UNLIKELY(venv != venv_)) {
-            return "called from incorrect the native scope";
+            return {"called from incorrect the native scope", ANIErrorSeverity::FATAL};
         }
         auto *pandaEnv = PandaAniEnv::FromAniEnv(venv_->GetEnv());
         ASSERT(pandaEnv == EtsExecutionContext::GetCurrent()->GetPandaAniEnv());
         if (UNLIKELY(checkPendingError && pandaEnv->HasPendingException())) {
-            return "has unhandled an error";
+            return {"has unhandled an error", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyOptions(const ani_options *options)
+    static VerificationResult VerifySingleOption(const ani_option &opt, size_t index)
+    {
+        if (opt.option == nullptr) {
+            PandaStringStream ss;
+            ss << "wrong 'option' pointer, options->options[" << index << "].option == NULL";
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+        std::string_view name = opt.option;
+        constexpr std::string_view EXT_PREFIX = "--ext:";
+        if (name.substr(0, EXT_PREFIX.size()) == EXT_PREFIX) {
+            std::string_view subName = name.substr(EXT_PREFIX.size());
+            bool isValid = !subName.empty() && (isascii(static_cast<unsigned char>(subName[0])) != 0) &&
+                           (std::isalpha(static_cast<unsigned char>(subName[0])) != 0);
+            if (!isValid) {
+                PandaStringStream ss;
+                ss << "wrong 'option' value, options->options[" << index << "].option == " << name;
+                return {ss.str(), ANIErrorSeverity::FATAL};
+            }
+        }
+        return {};
+    }
+
+    VerificationResult VerifyOptions(const ani_options *options)
     {
         if (options == nullptr) {
             return {};
         }
         if (options->options == nullptr) {
-            return "wrong 'options' pointer, options->options == NULL";
+            return {"wrong 'options' pointer, options->options == NULL", ANIErrorSeverity::FATAL};
         }
         const size_t maxNrOptions = 4096;
         if (options->nr_options > maxNrOptions) {
             PandaStringStream ss;
             ss << "'nr_options' value is too large. options->nr_options == " << options->nr_options;
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         for (size_t i = 0; i < options->nr_options; ++i) {
-            const ani_option &opt = options->options[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (opt.option == nullptr) {
-                PandaStringStream ss;
-                ss << "wrong 'option' pointer, options->options[" << i << "].option == NULL";
-                return ss.str();
-            }
-            constexpr std::string_view EXT_PREFIX = "--ext:";
-            std::string_view name = opt.option;
-            if (name.substr(0, EXT_PREFIX.size()) == EXT_PREFIX) {
-                std::string_view subName = name.substr(EXT_PREFIX.size());
-                if (subName.empty() || !(isascii(subName[0]) != 0 && std::isalpha(subName[0]) != 0)) {
-                    PandaStringStream ss;
-                    ss << "wrong 'option' value, options->options[" << i << "].option == " << name;
-                    return ss.str();
-                }
+            auto result =
+                VerifySingleOption(options->options[i], i);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (result) {
+                return result;
             }
         }
         return {};
     }
 
     template <typename Type>
-    std::optional<PandaString> VerifyTypeStorage(Type value, std::string_view typeName)
+    VerificationResult VerifyTypeStorage(Type value, std::string_view typeName)
     {
         if (value == nullptr) {
             PandaStringStream ss;
             ss << "wrong pointer for storing '" << typeName << "'";
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyBoolean(ani_boolean value)
+    VerificationResult VerifyBoolean(ani_boolean value)
     {
         if (value != ANI_TRUE && value != ANI_FALSE) {
-            return "wrong value for ani_boolean";
+            return {"wrong value for ani_boolean", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
     template <typename Type>
-    std::optional<PandaString> VerifyTypePtr(Type value, std::string_view typeName)
+    VerificationResult VerifyTypePtr(Type value, std::string_view typeName)
     {
         if (value == nullptr) {
             PandaStringStream ss;
             ss << "wrong pointer to use as argument in '" << typeName << "'";
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyEnvVersion(uint32_t version)
+    VerificationResult VerifyEnvVersion(uint32_t version)
     {
         if (!IsVersionSupported(version)) {
-            return "unsupported ANI version";
+            return {"unsupported ANI version", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyNrRefs(ani_size nrRefs)
+    VerificationResult VerifyNrRefs(ani_size nrRefs)
     {
         if (nrRefs == 0) {
-            return "wrong value";
+            return {"wrong value", ANIErrorSeverity::FATAL};
         }
         if (nrRefs > std::numeric_limits<uint16_t>::max()) {
             PandaStringStream ss;
             ss << "it is too big";
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyRef(VRef *vref)
+    VerificationResult VerifyRef(VRef *vref)
     {
         if (GetEnvANIVerifier()->IsValidRefInCurrentFrame(vref)) {
             return {};
@@ -628,10 +669,10 @@ public:
         if (GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vref)) {
             return {};
         }
-        return "wrong reference";
+        return {"wrong reference", ANIErrorSeverity::FATAL};
     }
 
-    std::optional<PandaString> VerifyClass(VClass *vclass)
+    VerificationResult VerifyClass(VClass *vclass)
     {
         auto err = VerifyRef(vclass);
         if (err) {
@@ -642,14 +683,14 @@ public:
         if (!ANIRefTypeChecker::IsClass(s, vclass->GetRef())) {
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, vclass->GetRef());
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         class_ = s.ToInternalType(vclass->GetRef());
         return {};
     }
 
-    std::optional<PandaString> VerifyString(VString *vstr)
+    VerificationResult VerifyString(VString *vstr)
     {
         auto err = VerifyRef(vstr);
         if (err) {
@@ -660,12 +701,12 @@ public:
         if (!ANIRefTypeChecker::IsString(s, vstr->GetRef())) {
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, vstr->GetRef());
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyError(VError *verr)
+    VerificationResult VerifyError(VError *verr)
     {
         auto errMessage = VerifyRef(verr);
         if (errMessage) {
@@ -676,12 +717,12 @@ public:
         if (!ANIRefTypeChecker::IsError(s, verr->GetRef())) {
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, verr->GetRef());
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyArray(VArray *varray)
+    VerificationResult VerifyArray(VArray *varray)
     {
         auto err = VerifyRef(varray);
         if (err) {
@@ -692,7 +733,7 @@ public:
         if (!ANIRefTypeChecker::IsArray(s, varray->GetRef())) {
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, varray->GetRef());
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         // Set as current array for subsequent index validation
@@ -700,30 +741,30 @@ public:
         return {};
     }
 
-    std::optional<PandaString> VerifyArrayIndex([[maybe_unused]] ani_size index)
+    VerificationResult VerifyArrayIndex([[maybe_unused]] ani_size index)
     {
         if (currentArray_ == nullptr) {
             PandaStringStream ss;
             ss << "no array context for index validation";
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         return {};
     }
 
-    std::optional<PandaString> VerifyDelLocalRef(VRef *vref)
+    VerificationResult VerifyDelLocalRef(VRef *vref)
     {
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
         if (!envANIVerifier->IsValidRefInCurrentFrame(vref)) {
-            return "it is not local reference";
+            return {"it is not local reference", ANIErrorSeverity::FATAL};
         }
         if (!envANIVerifier->CanBeDeletedFromCurrentScope(vref)) {
-            return "a local reference can only be deleted in the scope where it was created";
+            return {"a local reference can only be deleted in the scope where it was created", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyThisObject(VObject *vobject)
+    VerificationResult VerifyThisObject(VObject *vobject)
     {
         auto err = VerifyRef(vobject);
         if (err) {
@@ -734,7 +775,7 @@ public:
         if (!ANIRefTypeChecker::IsObject(s, vobject->GetRef())) {
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, vobject->GetRef());
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
@@ -742,78 +783,77 @@ public:
         return {};
     }
 
-    std::optional<PandaString> VerifyMethodName(const char *name)
+    VerificationResult VerifyMethodName(const char *name)
     {
         auto err = VerifyTypePtr(name, "const char *");
-        if (err.has_value()) {
+        if (err) {
             return err;
         }
         name_ = name;
         return {};
     }
 
-    std::optional<PandaString> VerifySignature(const char *signature)
+    VerificationResult VerifySignature(const char *signature)
     {
         signature_ = signature;
         return {};
     }
 
-    std::optional<PandaString> DoVerifyMethod(impl::VMethod *vmethod, impl::VMethod::ANIMethodType type,
-                                              EtsType returnType)
+    VerificationResult DoVerifyMethod(impl::VMethod *vmethod, impl::VMethod::ANIMethodType type, EtsType returnType)
     {
         impl::VMethod::ANIMethodType methodType = vmethod->GetType();
         if (methodType != type) {
             PandaStringStream ss;
             ss << "wrong type: " << ANIFuncTypeToString(methodType) << ", expected: " << ANIFuncTypeToString(type);
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         EtsType methodReturnType = vmethod->GetEtsMethod()->GetReturnValueType();
         if (methodReturnType != returnType) {
-            return "wrong return type";
+            return {"wrong return type", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyCtor(VMethod *vctor, EtsType returnType)
+    VerificationResult VerifyCtor(VMethod *vctor, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vctor)) {
-            return "wrong ctor";
+            return {"wrong ctor", ANIErrorSeverity::FATAL};
         }
 
-        std::optional<PandaString> err = DoVerifyMethod(vctor, impl::VMethod::ANIMethodType::METHOD, returnType);
+        auto err = DoVerifyMethod(vctor, impl::VMethod::ANIMethodType::METHOD, returnType);
         if (err) {
             return err;
         }
 
         if (!vctor->GetEtsMethod()->IsConstructor()) {
-            return "method is not ctor";
+            return {"method is not ctor", ANIErrorSeverity::FATAL};
         }
 
         if (vctor->GetEtsMethod()->GetClass() != class_) {
-            return "wrong class for ctor";
+            return {"wrong class for ctor", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyReadField(VField *vfield, EtsType fieldType)
+    VerificationResult VerifyReadField(VField *vfield, EtsType fieldType)
     {
         if (!GetEnvANIVerifier()->IsValidField(vfield)) {
-            return "wrong field";
+            return {"wrong field", ANIErrorSeverity::FATAL};
         }
 
-        std::optional<PandaString> err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
+        auto err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
         if (err) {
             return err;
         }
 
         if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return "wrong object for field";
+            return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyReadFieldByName(const char *name, EtsType fieldType)
+    VerificationResult VerifyReadFieldByName(const char *name, EtsType fieldType)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
@@ -821,7 +861,7 @@ public:
         }
 
         if (class_ == nullptr) {
-            return "wrong object for field";
+            return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
 
         EtsField *field = class_->GetFieldIDByName(name, nullptr);
@@ -838,46 +878,45 @@ public:
         return {};
     }
 
-    std::optional<PandaString> VerifyReadStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
+    VerificationResult VerifyReadStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
     {
         if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
-            return "wrong static field";
+            return {"wrong static field", ANIErrorSeverity::FATAL};
         }
 
-        std::optional<PandaString> err =
-            DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
+        auto err = DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
         if (err) {
             return err;
         }
 
         if (class_ == nullptr || !vstaticfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return "wrong class for static field";
+            return {"wrong class for static field", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyWriteField(VField *vfield, EtsType fieldType)
+    VerificationResult VerifyWriteField(VField *vfield, EtsType fieldType)
     {
         if (!GetEnvANIVerifier()->IsValidField(vfield)) {
-            return "wrong field";
+            return {"wrong field", ANIErrorSeverity::FATAL};
         }
 
-        std::optional<PandaString> err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
+        auto err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
         if (err) {
             return err;
         }
 
         if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return "wrong object for field";
+            return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
 
         if (vfield->GetEtsField()->IsReadonly()) {
-            return "field is read-only";
+            return {"field is read-only", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyWriteFieldByName(const char *name, EtsType fieldType)
+    VerificationResult VerifyWriteFieldByName(const char *name, EtsType fieldType)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
@@ -885,7 +924,7 @@ public:
         }
 
         if (class_ == nullptr) {
-            return "wrong object for field";
+            return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
 
         EtsField *field = class_->GetFieldIDByName(name, nullptr);
@@ -900,35 +939,34 @@ public:
         }
 
         if (field->IsReadonly()) {
-            return "field is read-only";
+            return {"field is read-only", ANIErrorSeverity::FATAL};
         }
 
         return {};
     }
 
-    std::optional<PandaString> VerifyWriteStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
+    VerificationResult VerifyWriteStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
     {
         if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
-            return "wrong static field";
+            return {"wrong static field", ANIErrorSeverity::FATAL};
         }
 
-        std::optional<PandaString> err =
-            DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
+        auto err = DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
         if (err) {
             return err;
         }
 
         if (class_ == nullptr || !vstaticfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return "wrong class for static field";
+            return {"wrong class for static field", ANIErrorSeverity::FATAL};
         }
 
         if (vstaticfield->GetEtsField()->IsReadonly()) {
-            return "static field is read-only";
+            return {"static field is read-only", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyReadPropertyByName(const char *name, EtsType propertyType)
+    VerificationResult VerifyReadPropertyByName(const char *name, EtsType propertyType)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
@@ -943,7 +981,7 @@ public:
                 PandaStringStream ss;
                 ss << "wrong property type: " << EtsTypeToString(field->GetEtsType())
                    << ", expected: " << EtsTypeToString(propertyType);
-                return ss.str();
+                return {ss.str(), ANIErrorSeverity::FATAL};
             }
             return {};
         }
@@ -951,18 +989,18 @@ public:
         EtsMethod *method = class_->GetInstanceMethod((PandaString(GETTER_BEGIN) + name).c_str(), nullptr);
         if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 1 ||
             method->GetArgType(0) != EtsType::OBJECT) {
-            return "wrong property";
+            return {"wrong property", ANIErrorSeverity::FATAL};
         }
         if (method->GetReturnValueType() != propertyType) {
             PandaStringStream ss;
             ss << "wrong property type: " << EtsTypeToString(method->GetReturnValueType())
                << ", expected: " << EtsTypeToString(propertyType);
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyWritePropertyByName(const char *name, EtsType propertyType)
+    VerificationResult VerifyWritePropertyByName(const char *name, EtsType propertyType)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
@@ -977,10 +1015,10 @@ public:
                 PandaStringStream ss;
                 ss << "wrong property type: " << EtsTypeToString(field->GetEtsType())
                    << ", expected: " << EtsTypeToString(propertyType);
-                return ss.str();
+                return {ss.str(), ANIErrorSeverity::FATAL};
             }
             if (field->IsReadonly()) {
-                return "property is read-only";
+                return {"property is read-only", ANIErrorSeverity::FATAL};
             }
             return {};
         }
@@ -988,64 +1026,63 @@ public:
         EtsMethod *method = class_->GetInstanceMethod((PandaString(SETTER_BEGIN) + name).c_str(), nullptr);
         if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 2U ||
             method->GetArgType(0) != EtsType::OBJECT) {
-            return "wrong property";
+            return {"wrong property", ANIErrorSeverity::FATAL};
         }
         if (method->GetArgType(1U) != propertyType) {
             PandaStringStream ss;
             ss << "wrong property type: " << EtsTypeToString(method->GetArgType(1U))
                << ", expected: " << EtsTypeToString(propertyType);
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         if (method->GetReturnValueType() != EtsType::VOID) {
-            return "wrong property";
+            return {"wrong property", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyMethod(VMethod *vmethod, EtsType returnType)
+    VerificationResult VerifyMethod(VMethod *vmethod, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
-            return "wrong method";
+            return {"wrong method", ANIErrorSeverity::FATAL};
         }
 
-        std::optional<PandaString> err = DoVerifyMethod(vmethod, impl::VMethod::ANIMethodType::METHOD, returnType);
+        auto err = DoVerifyMethod(vmethod, impl::VMethod::ANIMethodType::METHOD, returnType);
         if (err) {
             return err;
         }
 
         if (vmethod->GetEtsMethod()->IsConstructor()) {
-            return "method is ctor";
+            return {"method is ctor", ANIErrorSeverity::FATAL};
         }
 
         if (class_ == nullptr || !vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
-            return "wrong object for method";
+            return {"wrong object for method", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyStaticMethod(VStaticMethod *vstaticmethod, EtsType returnType)
+    VerificationResult VerifyStaticMethod(VStaticMethod *vstaticmethod, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vstaticmethod)) {
-            return "wrong static method";
+            return {"wrong static method", ANIErrorSeverity::FATAL};
         }
-        std::optional<PandaString> err =
-            DoVerifyMethod(vstaticmethod, impl::VMethod::ANIMethodType::STATIC_METHOD, returnType);
+        auto err = DoVerifyMethod(vstaticmethod, impl::VMethod::ANIMethodType::STATIC_METHOD, returnType);
         if (err) {
             return err;
         }
 
         if (class_ == nullptr || !vstaticmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
-            return "wrong class for method";
+            return {"wrong class for method", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyFunction(VFunction *vfunction, EtsType returnType)
+    VerificationResult VerifyFunction(VFunction *vfunction, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vfunction)) {
-            return "wrong function";
+            return {"wrong function", ANIErrorSeverity::FATAL};
         }
-        std::optional<PandaString> err = DoVerifyMethod(vfunction, impl::VMethod::ANIMethodType::FUNCTION, returnType);
+        auto err = DoVerifyMethod(vfunction, impl::VMethod::ANIMethodType::FUNCTION, returnType);
         if (err) {
             return err;
         }
@@ -1053,23 +1090,23 @@ public:
         return {};
     }
 
-    std::optional<PandaString> DoVerifyField(impl::VField *vfield, impl::VField::ANIFieldType type, EtsType returnType)
+    VerificationResult DoVerifyField(impl::VField *vfield, impl::VField::ANIFieldType type, EtsType returnType)
     {
         impl::VField::ANIFieldType fieldType = vfield->GetType();
         if (fieldType != type) {
             PandaStringStream ss;
             ss << "wrong type: " << ANIFieldTypeToString(fieldType) << ", expected: " << ANIFieldTypeToString(type);
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         EtsType fieldReturnType = vfield->GetEtsField()->GetEtsType();
         if (fieldReturnType != returnType) {
-            return "wrong return type";
+            return {"wrong return type", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> VerifyMethodReturnType(EtsType returnType)
+    VerificationResult VerifyMethodReturnType(EtsType returnType)
     {
         if (class_ == nullptr || name_ == nullptr) {
             return {};
@@ -1081,47 +1118,50 @@ public:
         }
 
         if (etsMethod->GetReturnValueType() != returnType) {
-            return "wrong return type";
+            return {"wrong return type", ANIErrorSeverity::FATAL};
         }
         return {};
     }
 
-    std::optional<PandaString> DoVerifyFieldByName(EtsField *field, EtsType expectedType, bool isStaticField)
+    VerificationResult DoVerifyFieldByName(EtsField *field, EtsType expectedType, bool isStaticField)
     {
         if (field->IsStatic() != isStaticField) {
-            return isStaticField ? "wrong static field" : "wrong field";
+            if (isStaticField) {
+                return {"wrong static field", ANIErrorSeverity::FATAL};
+            }
+            return {"wrong field", ANIErrorSeverity::FATAL};
         }
 
         if (field->GetEtsType() != expectedType) {
             PandaStringStream ss;
             ss << "wrong field type: " << EtsTypeToString(field->GetEtsType())
                << ", expected: " << EtsTypeToString(expectedType);
-            return ss.str();
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         if (!field->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return "wrong object for field";
+            return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
 
         return {};
     }
 
-    std::optional<PandaString> VerifyMethodAArgs(ANIArg::AniMethodArgs *methodArgs)
+    VerificationResult VerifyMethodAArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         ASSERT(methodArgs != nullptr);
         if (methodArgs->vargs == nullptr) {
-            return "wrong arguments value";
+            return {"wrong arguments value", ANIErrorSeverity::FATAL};
         }
         return DoVerifyMethodArgs(methodArgs);
     }
 
-    std::optional<PandaString> VerifyMethodVArgs(ANIArg::AniMethodArgs *methodArgs)
+    VerificationResult VerifyMethodVArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         ASSERT(methodArgs != nullptr);
         return DoVerifyMethodArgs(methodArgs);
     }
 
-    std::optional<PandaString> VerifyAArgs(const ani_value *vargs)
+    VerificationResult VerifyAArgs(const ani_value *vargs)
     {
         if (class_ == nullptr || name_ == nullptr) {
             return {};
@@ -1131,14 +1171,14 @@ public:
             return {};
         }
         if (vargs == nullptr && etsMethod->GetNumArgs() != 0) {
-            return "wrong arguments value";
+            return {"wrong arguments value", ANIErrorSeverity::FATAL};
         }
 
         methodArgsForExtInfo_ = ANIArg::AniMethodArgs {etsMethod, vargs, {}, false};
         return DoVerifyMethodArgs(&methodArgsForExtInfo_.value());
     }
 
-    std::optional<PandaString> VerifyVvaArgs(va_list *vvaArgs)
+    VerificationResult VerifyVvaArgs(va_list *vvaArgs)
     {
         if (vvaArgs == nullptr || class_ == nullptr || name_ == nullptr) {
             return {};
@@ -1153,25 +1193,25 @@ public:
         return DoVerifyMethodArgs(&methodArgsForExtInfo_.value());
     }
 
-    std::optional<PandaString> DoVerifyMethodArgs(ANIArg::AniMethodArgs *methodArgs)
+    VerificationResult DoVerifyMethodArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         if (methodArgs->method == nullptr) {
-            return "wrong method";
+            return {"wrong method", ANIErrorSeverity::FATAL};
         }
 
         CallArgs callArgs(methodArgs->method, methodArgs->vargs);
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
-        std::optional<PandaString> err;
+        VerificationResult err;
 
         callArgs.ForEachArgs([&](ani_value value, panda_file::Type type, size_t refIndex) -> bool {
             if (UNLIKELY(!IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs))) {
-                err = "wrong method arguments";
+                err = {"wrong method arguments", ANIErrorSeverity::FATAL};
                 return false;
             }
             if (type.IsReference()) {
                 if (UNLIKELY(!IsValidMethodArgRefType(venv_->GetEnv(), methodArgs->method,
                                                       reinterpret_cast<VRef *>(value.r), refIndex))) {
-                    err = "wrong method arguments";
+                    err = {"wrong method arguments", ANIErrorSeverity::FATAL};
                     return false;
                 }
             }
@@ -1180,10 +1220,10 @@ public:
         return err;
     }
 
-    std::optional<PandaString> VerifyResolver(VResolver *vresolver)
+    VerificationResult VerifyResolver(VResolver *vresolver)
     {
         if (!GetEnvANIVerifier()->IsValidGlobalVerifiedResolver(vresolver)) {
-            return "wrong resolver";
+            return {"wrong resolver", ANIErrorSeverity::FATAL};
         }
 
         return {};
@@ -1223,393 +1263,393 @@ private:
     VArray *currentArray_ {};
 };
 
-using CheckerHandler = std::optional<PandaString> (*)(Verifier &, const ANIArg &);
+using CheckerHandler = VerificationResult (*)(Verifier &, const ANIArg &);
 
-static std::optional<PandaString> VerifyVm(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyVm(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VM);
     return v.VerifyVm(arg.GetValueVm());
 }
 
-static std::optional<PandaString> VerifyEnv(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyEnv(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENV);
     return v.VerifyEnv(arg.GetValueEnv(), true);
 }
 
-static std::optional<PandaString> VerifyEnvSkipPendingError(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyEnvSkipPendingError(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENV_SKIP_PENDING_ERROR);
     return v.VerifyEnv(arg.GetValueEnv(), false);
 }
 
-static std::optional<PandaString> VerifyOptions(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyOptions(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_OPTIONS);
     return v.VerifyOptions(arg.GetValueOptions());
 }
 
-static std::optional<PandaString> VerifyEnvVersion(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyEnvVersion(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENV_VERSION);
     return v.VerifyEnvVersion(arg.GetValueU32());
 }
 
-static std::optional<PandaString> VerifyNrRefs(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyNrRefs(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NR_REFS);
     return v.VerifyNrRefs(arg.GetValueSize());
 }
 
-static std::optional<PandaString> VerifyRef(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyRef(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF);
     return v.VerifyRef(arg.GetValueRef());
 }
 
-static std::optional<PandaString> VerifyClass(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyClass(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CLASS);
     return v.VerifyClass(arg.GetValueClass());
 }
 
-static std::optional<PandaString> VerifyString(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyString(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STRING);
     return v.VerifyString(arg.GetValueString());
 }
 
-static std::optional<PandaString> VerifyUTF8Buffer(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyUTF8Buffer(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_BUFFER);
     return v.VerifyTypePtr(arg.GetValueUTF8Buffer(), "char *");
 }
 
-static std::optional<PandaString> VerifyError(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyError(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ERROR);
     return v.VerifyError(arg.GetValueError());
 }
 
-static std::optional<PandaString> VerifyUTF8String(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyUTF8String(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_STRING);
     return v.VerifyTypePtr(arg.GetValueUTF8String(), "const char *");
 }
 
-static std::optional<PandaString> VerifyMethodName(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyMethodName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_NAME);
     return v.VerifyMethodName(arg.GetValueUTF8String());
 }
 
-static std::optional<PandaString> VerifyMethodReturnType(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyMethodReturnType(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_RETURN_TYPE);
     return v.VerifyMethodReturnType(arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifySignature(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifySignature(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIGNATURE);
     return v.VerifySignature(arg.GetValueUTF8String());
 }
 
-static std::optional<PandaString> VerifyUTF16Buffer(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyUTF16Buffer(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF16_BUFFER);
     return v.VerifyTypePtr(arg.GetValueUTF16Buffer(), "uint16_t *");
 }
 
-static std::optional<PandaString> VerifyUTF16String(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyUTF16String(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF16_STRING);
     return v.VerifyTypePtr(arg.GetValueUTF16String(), "const uint16_t *");
 }
 
-static std::optional<PandaString> VerifyArray(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyArray(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY);
     return v.VerifyArray(arg.GetValueArray());
 }
 
-static std::optional<PandaString> VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
+static VerificationResult VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_INDEX);
     return v.VerifyArrayIndex(arg.GetValueSize());
 }
 
-static std::optional<PandaString> VerifyDelLocalRef(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyDelLocalRef(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_DEL_LOCAL_REF);
     return v.VerifyDelLocalRef(arg.GetValueRef());
 }
 
-static std::optional<PandaString> VerifyThisObject(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyThisObject(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_THIS_OBJECT);
     return v.VerifyThisObject(arg.GetValueObject());
 }
 
-static std::optional<PandaString> VerifyCtor(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyCtor(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CTOR);
     return v.VerifyCtor(arg.GetValueMethod(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyReadField(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyReadField(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_FIELD);
     return v.VerifyReadField(arg.GetValueField(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyReadFieldByName(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyReadFieldByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_FIELD_BY_NAME);
     return v.VerifyReadFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyReadStaticField(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyReadStaticField(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_STATIC_FIELD);
     return v.VerifyReadStaticField(arg.GetValueStaticField(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyWriteField(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyWriteField(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_FIELD);
     return v.VerifyWriteField(arg.GetValueField(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyWriteFieldByName(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyWriteFieldByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_FIELD_BY_NAME);
     return v.VerifyWriteFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyWriteStaticField(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyWriteStaticField(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_STATIC_FIELD);
     return v.VerifyWriteStaticField(arg.GetValueStaticField(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyReadPropertyByName(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyReadPropertyByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_PROPERTY_BY_NAME);
     return v.VerifyReadPropertyByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyWritePropertyByName(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyWritePropertyByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_PROPERTY_BY_NAME);
     return v.VerifyWritePropertyByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyMethod(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyMethod(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD);
     return v.VerifyMethod(arg.GetValueMethod(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyStaticMethod(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyStaticMethod(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_METHOD);
     return v.VerifyStaticMethod(arg.GetValueStaticMethod(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyFunction(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFunction(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTION);
     return v.VerifyFunction(arg.GetValueFunction(), arg.GetReturnType());
 }
 
-static std::optional<PandaString> VerifyMethodAArgs(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyMethodAArgs(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_A_ARGS);
     return v.VerifyMethodAArgs(arg.GetValueMethodArgs());
 }
 
-static std::optional<PandaString> VerifyMethodVArgs(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyMethodVArgs(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_V_ARGS);
     return v.VerifyMethodVArgs(arg.GetValueMethodArgs());
 }
 
-static std::optional<PandaString> VerifyAArgs(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyAArgs(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_A_ARGS);
     return v.VerifyAArgs(arg.GetValueValueArgs());
 }
 
-static std::optional<PandaString> VerifyVvaArgs(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyVvaArgs(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VVA_ARGS);
     return v.VerifyVvaArgs(arg.GetValueVvaArgs());
 }
 
-static std::optional<PandaString> VerifyVmStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyVmStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VM_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueVmStorage(), "ani_vm *");
 }
 
-static std::optional<PandaString> VerifyEnvStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyEnvStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENV_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueEnvStorage(), "ani_env *");
 }
 
-static std::optional<PandaString> VerifyBooleanStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyBooleanStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOOLEAN_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueBooleanStorage(), "ani_boolean");
 }
 
-static std::optional<PandaString> VerifyCharStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyCharStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CHAR_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueCharStorage(), "ani_char");
 }
 
-static std::optional<PandaString> VerifyByteStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyByteStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BYTE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueByteStorage(), "ani_byte");
 }
 
-static std::optional<PandaString> VerifyShortStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyShortStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SHORT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueShortStorage(), "ani_short");
 }
 
-static std::optional<PandaString> VerifyIntStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyIntStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_INT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueIntStorage(), "ani_int");
 }
 
-static std::optional<PandaString> VerifyLongStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyLongStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_LONG_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueLongStorage(), "ani_long");
 }
 
-static std::optional<PandaString> VerifyFloatStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFloatStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FLOAT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFloatStorage(), "ani_float");
 }
 
-static std::optional<PandaString> VerifyDoubleStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyDoubleStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_DOUBLE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueDoubleStorage(), "ani_double");
 }
 
-static std::optional<PandaString> VerifyRefStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyRefStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueRefStorage(), "ani_ref");
 }
 
-static std::optional<PandaString> VerifyStringStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyStringStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STRING_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueStringStorage(), "ani_string");
 }
 
-static std::optional<PandaString> VerifySizeStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifySizeStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueSizeStorage(), "ani_size");
 }
 
-static std::optional<PandaString> VerifySize([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
+static VerificationResult VerifySize([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE);
     return {};
 }
 
-static std::optional<PandaString> VerifyBoolean(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyBoolean(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOOLEAN);
     return v.VerifyBoolean(arg.GetValueBoolean());
 }
 
-static std::optional<PandaString> VerifyObjectStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyObjectStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_OBJECT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueObjectStorage(), "ani_object");
 }
 
-static std::optional<PandaString> VerifyErrorStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyErrorStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ERROR_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueErrorStorage(), "ani_error");
 }
 
-static std::optional<PandaString> VerifyArrayStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyArrayStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueArrayStorage(), "ani_array");
 }
 
-static std::optional<PandaString> VerifyFixedArrayBooleanStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayBooleanStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayBooleanStorage(), "ani_fixedarray_boolean");
 }
 
-static std::optional<PandaString> VerifyFixedArrayCharStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayCharStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_CHAR_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayCharStorage(), "ani_fixedarray_char");
 }
 
-static std::optional<PandaString> VerifyFixedArrayByteStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayByteStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_BYTE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayByteStorage(), "ani_fixedarray_byte");
 }
 
-static std::optional<PandaString> VerifyFixedArrayShortStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayShortStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_SHORT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayShortStorage(), "ani_fixedarray_short");
 }
 
-static std::optional<PandaString> VerifyFixedArrayIntStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayIntStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_INT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayIntStorage(), "ani_fixedarray_int");
 }
 
-static std::optional<PandaString> VerifyFixedArrayLongStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayLongStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_LONG_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayLongStorage(), "ani_fixedarray_long");
 }
 
-static std::optional<PandaString> VerifyFixedArrayFloatStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayFloatStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_FLOAT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayFloatStorage(), "ani_fixedarray_float");
 }
 
-static std::optional<PandaString> VerifyFixedArrayDoubleStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyFixedArrayDoubleStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayDoubleStorage(), "ani_fixedarray_double");
 }
 
-static std::optional<PandaString> VerifyResolver(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyResolver(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_RESOLVER);
     return v.VerifyResolver(arg.GetValueResolver());
 }
 
-static std::optional<PandaString> VerifyResolverStorage(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyResolverStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_RESOLVER_STORAGE);
     return v.VerifyTypeStorage<VResolver **>(arg.GetValueResolverStorage(), "ani_resolver");
@@ -1624,13 +1664,13 @@ static constexpr std::array<CheckerHandler, helpers::ToUnderlying(ANIArg::Action
 };
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-static void DoAbortANI(PandaEtsVM *etsVm, std::string_view functionName, std::string_view message)
+static void DoReportANI(PandaEtsVM *etsVm, std::string_view functionName, std::string_view message)
 {
     PandaStringStream ss;
     ss << "DETECT AN ERROR WHEN USING ANI:";
     ss << "\n  ANI method: " << functionName;
     ss << "\n" << message;
-    etsVm->GetANIVerifier()->Abort(ss.str());
+    etsVm->GetANIVerifier()->Report(ss.str());
 }
 
 struct ArgInfo {
@@ -1700,81 +1740,85 @@ static PandaString GetAniTypeByType(panda_file::Type type)
     UNREACHABLE();
 }
 
-// CC-OFFNXT(huge_method[C++]) solid logic
-static void DoANIArgsAbort(PandaEtsVM *etsVm, std::string_view functionName, const ArgsInfo &argsInfo)
-{
+class ReportData final {
+private:
     struct MsgArgInfo {
-        std::string_view name;
+        PandaString name;
         PandaString value;
         PandaString type;
         PandaString error;
     };
-    size_t maxNameSize = 0;
-    size_t maxValueSize = 0;
-    size_t maxTypeSize = 0;
 
-    PandaVector<MsgArgInfo> msgArgInfoList;
-    for (const ArgInfo &v : argsInfo.argInfoList) {
-        PandaStringStream ssError;
-        if (v.err) {
-            ssError << "INVALID: " << v.err.value();
-        } else {
-            ssError << "VALID";
-        }
-        MsgArgInfo argInfo {v.arg.GetName(), v.arg.GetStringValue(), v.arg.GetStringType(), ssError.str()};
-        if (argInfo.name.size() > maxNameSize) {
-            maxNameSize = argInfo.name.size();
-        }
-        if (argInfo.value.size() > maxValueSize) {
-            maxValueSize = argInfo.value.size();
-        }
-        if (argInfo.type.size() > maxTypeSize) {
-            maxTypeSize = argInfo.type.size();
-        }
-        msgArgInfoList.emplace_back(argInfo);
-    }
-    if (argsInfo.extArgInfoList) {
-        for (const ExtArgInfo &v : argsInfo.extArgInfoList.value()) {
-            PandaStringStream ssError;
-            if (v.isValid) {
-                ssError << "VALID";
-            } else {
-                ssError << "INVALID: wrong value";
-            }
-            PandaStringStream ssValue;
-            ssValue << "0x" << std::hex << v.value;
-            MsgArgInfo argInfo {v.name, ssValue.str(), GetAniTypeByType(v.type), ssError.str()};
-            if (argInfo.name.size() > maxNameSize) {
-                maxNameSize = argInfo.name.size();
-            }
-            if (argInfo.value.size() > maxValueSize) {
-                maxValueSize = argInfo.value.size();
-            }
-            if (argInfo.type.size() > maxTypeSize) {
-                maxTypeSize = argInfo.type.size();
-            }
-            msgArgInfoList.emplace_back(argInfo);
-        }
+public:
+    void AddItem(std::string_view name, PandaString value, PandaString type, PandaString error)
+    {
+        maxNameSize_ = std::max(maxNameSize_, name.size());
+        maxValueSize_ = std::max(maxValueSize_, value.size());
+        maxTypeSize_ = std::max(maxTypeSize_, type.size());
+        items_.push_back({PandaString(name), std::move(value), std::move(type), std::move(error)});
     }
 
-    PandaStringStream ss;
-    ss << std::setfill(' ');
-    bool isFirst = true;
-    for (auto &arg : msgArgInfoList) {
-        std::string_view name = arg.name;
-        PandaString &value = arg.value;
-        PandaString &type = arg.type;
-        PandaString &err = arg.error;
-        if (isFirst) {
-            isFirst = false;
-        } else {
-            ss << "\n";
+    PandaString ToString() const
+    {
+        if (items_.empty()) {
+            return "";
         }
-        ss << "    " << std::right << std::setw(maxNameSize) << name << ": " << std::setw(maxValueSize) << value
-           << " | " << std::left << std::setw(maxTypeSize) << type << " | " << err;
+
+        PandaStringStream ss;
+        ss << std::setfill(' ');
+        for (size_t i = 0; i < items_.size(); ++i) {
+            const auto &item = items_[i];
+            if (i > 0) {
+                ss << "\n";
+            }
+
+            ss << "    " << std::right << std::setw(maxNameSize_) << item.name << ": " << std::left
+               << std::setw(maxValueSize_) << item.value << " | " << std::setw(maxTypeSize_) << item.type << " | "
+               << item.error;
+        }
+        return ss.str();
     }
 
-    DoAbortANI(etsVm, functionName, ss.str());
+    bool Empty() const
+    {
+        return items_.empty();
+    }
+
+private:
+    PandaVector<MsgArgInfo> items_;
+    size_t maxNameSize_ = 0;
+    size_t maxValueSize_ = 0;
+    size_t maxTypeSize_ = 0;
+};
+
+static void ProcessStandardArgs(const PandaVector<ArgInfo> &argInfoList, ReportData &data)
+{
+    for (const auto &v : argInfoList) {
+        PandaString error = v.err ? PandaString("INVALID: ") + v.err.value() : "VALID";
+        data.AddItem(v.arg.GetName(), v.arg.GetStringValue(), v.arg.GetStringType(), std::move(error));
+    }
+}
+
+static void ProcessExtArgs(const PandaVector<ExtArgInfo> &extArgInfoList, ReportData &data)
+{
+    for (const auto &v : extArgInfoList) {
+        PandaString error = v.isValid ? "VALID" : "INVALID: wrong value";
+        PandaStringStream ssValue;
+        ssValue << "0x" << std::hex << v.value;
+        data.AddItem(v.name, ssValue.str(), GetAniTypeByType(v.type), std::move(error));
+    }
+}
+
+static void DoANIArgsReport(PandaEtsVM *etsVm, std::string_view functionName, const ArgsInfo &argsInfo)
+{
+    ReportData data;
+    ProcessStandardArgs(argsInfo.argInfoList, data);
+    if (argsInfo.extArgInfoList.has_value()) {
+        ProcessExtArgs(argsInfo.extArgInfoList.value(), data);
+    }
+    if (!data.Empty()) {
+        DoReportANI(etsVm, functionName, data.ToString());
+    }
 }
 
 // CC-OFFNXT(G.NAM.03) false positive
@@ -1782,42 +1826,53 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
 {
     VVm *vvm = VVm::GetInstance();
     VEnv *venv = VEnv::GetCurrent();
+    auto etsVm = PandaEtsVM::FromAniVM(vvm->GetVm());
 
-    bool success = true;
     PandaVector<ArgInfo> argInfoList;
     Verifier verifier(vvm, venv);
+    bool hasAnyError = false;
+    bool hasFatalError = false;
+
     for (const ANIArg &arg : args) {
         auto id = helpers::ToUnderlying(arg.GetAction());
         ASSERT(id < HANDLERS.size());
         CheckerHandler handler = HANDLERS[id];
         ASSERT(handler != nullptr);
         auto err = handler(verifier, arg);
-        success &= !err.has_value();
-        argInfoList.emplace_back(ArgInfo {arg, std::move(err)});
+        if (err) {
+            hasAnyError = true;
+            if (err.GetSeverity() == ANIErrorSeverity::FATAL) {
+                hasFatalError = true;
+            }
+        }
+
+        argInfoList.emplace_back(ArgInfo {arg, err.TakeError()});
     }
 
-    if (!success) {
-        const ArgInfo &lastArgInfo = argInfoList.back();
-        auto action = lastArgInfo.arg.GetAction();
-        ArgsInfo argsInfo {};
-        if (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS) {
-            auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
-            auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
-            argsInfo.extArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
-        } else if (action == ANIArg::Action::VERIFY_VVA_ARGS || action == ANIArg::Action::VERIFY_A_ARGS) {
-            auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
-            argsInfo.extArgInfoList = verifier.GetExtArgInfoListForResolvedArgs(pandaEnv);
-        }
-        argsInfo.argInfoList = std::move(argInfoList);
-        DoANIArgsAbort(PandaEtsVM::FromAniVM(vvm->GetVm()), functionName, argsInfo);
+    if (!hasAnyError) {
+        return true;
     }
-    return success;
+
+    const ArgInfo &lastArgInfo = argInfoList.back();
+    auto action = lastArgInfo.arg.GetAction();
+    ArgsInfo argsInfo {};
+    if (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS) {
+        auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
+        auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
+        argsInfo.extArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
+    } else if (action == ANIArg::Action::VERIFY_VVA_ARGS || action == ANIArg::Action::VERIFY_A_ARGS) {
+        auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
+        argsInfo.extArgInfoList = verifier.GetExtArgInfoListForResolvedArgs(pandaEnv);
+    }
+    argsInfo.argInfoList = std::move(argInfoList);
+    bool isFatal = hasFatalError;
+    DoANIArgsReport(etsVm, functionName, argsInfo);
+    return !isFatal;
 }
 
-void VerifyAbortANI(std::string_view functionName, std::string_view message)
+void VerifyReportANI(std::string_view functionName, std::string_view message)
 {
     PandaEtsVM *etsVm = PandaEtsVM::GetCurrent();
-    DoAbortANI(etsVm, functionName, "    " + std::string(message));
+    DoReportANI(etsVm, functionName, "    " + std::string(message));
 }
-
 }  // namespace ark::ets::ani::verify

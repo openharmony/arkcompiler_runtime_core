@@ -42,7 +42,7 @@
     do {                                                          \
         std::optional<PandaString> err = (fn);                    \
         if (err) {                                                \
-            VerifyAbortANI(__func__, err.value());                \
+            VerifyReportANI(__func__, err.value());               \
             return ANI_ERROR; /* CC-OFF(G.PRE.05) function gen */ \
         }                                                         \
     } while (false)

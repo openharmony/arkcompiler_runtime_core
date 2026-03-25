@@ -424,10 +424,10 @@ extern "C" EtsObject *AniObjEnd(Method *method, EtsReference *etsRef, ManagedThr
     return ret;
 }
 
-extern "C" EtsObject *AniObjEndVerify(Method *method, verify::VRef vref, ManagedThread *thread, bool isFastNative)
+extern "C" EtsObject *AniObjEndVerify(Method *method, verify::VRef *vref, ManagedThread *thread, bool isFastNative)
 {
     auto *executionCtx = EtsExecutionContext::FromMT(thread);
-    ani_ref ref = vref.GetRef();
+    ani_ref ref = vref->GetRef();
     auto etsRef = reinterpret_cast<EtsReference *>(ref);
 
     EtsObject *obj = AniObjEnd(method, etsRef, thread, isFastNative);

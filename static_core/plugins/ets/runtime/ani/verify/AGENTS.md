@@ -55,3 +55,6 @@ ninja ani_test_example_calls_gtests
 ## Typical Development Guidelines
 - **Adding Checks**: New verification logic should be integrated into `verify_ani_checker.cpp`.
 - **API Consistency**: APIs in verify and release versions must **strictly match**. If a new API is added, it must be implemented in both release and verify locations (e.g., `verify_ani_interaction_api.cpp` and `ani_interaction_api.cpp`) and registered in their respective dispatch tables.
+- **Internal Method Visibility**: 
+  - To maintain the integrity and security of the verification layer, internal architectural flags and fallback logic—specifically `IsWorkaroundNoCrashIfInvalidUsage`—**must always be declared as `private`**.
+  - These methods are strictly for internal state management within the verifier class and must never be exposed to the public API or external modules.
