@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "common_interfaces/objects/dynamic_object_accessor_util.h"
 #include "plugins/ets/runtime/interop_js/interop_stacks.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "runtime/include/stack_walker.h"
