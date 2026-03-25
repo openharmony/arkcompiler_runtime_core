@@ -39,33 +39,6 @@ public:
     }
 };
 
-// NOTE(ipetrov, 20146): It's tempoary solution for SharedReferencesStorage. All napi calls should in native scope
-class ScopedNativeCodeThreadIfNeeded {
-public:
-    explicit ScopedNativeCodeThreadIfNeeded(ManagedThread *thread) : thread_(thread)
-    {
-        ASSERT(thread_ != nullptr);
-        if (thread_->IsInNativeCode()) {
-            needToEndNativeCode_ = false;
-        } else {
-            thread_->NativeCodeBegin();
-        }
-    }
-    NO_COPY_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
-    NO_MOVE_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
-
-    ~ScopedNativeCodeThreadIfNeeded()
-    {
-        if (needToEndNativeCode_) {
-            thread_->NativeCodeEnd();
-        }
-    }
-
-private:
-    ManagedThread *thread_ {nullptr};
-    bool needToEndNativeCode_ {true};
-};
-
 SharedReferenceStorage *SharedReferenceStorage::sharedStorage_ = nullptr;
 
 /* static */
@@ -183,7 +156,7 @@ napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env en
         if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
             auto ref = currentRef->jsRef_;
             storageLock_.Unlock();
-            ScopedNativeCodeThreadIfNeeded s(ManagedThread::GetCurrent());
+            ScopedNativeCodeThread s(ManagedThread::GetCurrent());
             napi_value jsValue;
             NAPI_CHECK_FATAL(napi_get_reference_value(env, ref, &jsValue));
             return jsValue;
@@ -256,7 +229,7 @@ static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_r
                                     const SharedReferenceStorage::PreInitJSObjectCallback &preInitCallback = nullptr)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
-    ScopedNativeCodeThreadIfNeeded scope(executionCtx->GetMT());
+    ScopedNativeCodeThread scope(executionCtx->GetMT());
     napi_env env = ctx->GetJSEnv();
     // Deleter can be called after Runtime::Destroy, so InternalAllocator can not be used
     auto **refRef = new SharedReference *(nullptr);
