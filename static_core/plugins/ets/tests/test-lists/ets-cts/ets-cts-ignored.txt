@@ -1115,12 +1115,6 @@
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_4.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_11.ets
 
-#33718 No CTE when a method from superclass is called before superconstructor
-09.classes/09.constructor_declaration/02.explicit_constructor_call/call_to_this_super_3.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/call_to_this_super_9.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_17.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_18.ets
-
 #33189 Spread argument cannot be passed to ordinary parameter
 09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_3.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_4.ets
