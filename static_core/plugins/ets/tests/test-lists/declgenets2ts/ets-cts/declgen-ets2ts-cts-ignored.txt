@@ -958,6 +958,7 @@
 07.expressions/04.named_reference/named_reference_46.ets
 07.expressions/04.named_reference/named_reference_export7.ets
 07.expressions/04.named_reference/qualified_name_1.ets
+07.expressions/05.array_literal/01.type_inference_from_context/value_array_inf_call.ets
 07.expressions/05.array_literal/02.type_inference_from_types_of_elements/arr_inf2_n_0.ets
 07.expressions/05.array_literal/02.type_inference_from_types_of_elements/arr_inf2_n_1.ets
 07.expressions/05.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_20.ets

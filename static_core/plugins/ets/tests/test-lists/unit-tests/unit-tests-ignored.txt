@@ -1,6 +1,9 @@
 #33449
 ets-common-tests/taskpool/blocked_expand_tasks.ets
 
+#33877
+ets-common-tests/taskpool/common_tasks.ets
+
 # 28002
 ets-common-tests/imported_modules_TL_exec_2/a.ets
 ets-common-tests/imported_modules_TL_exec_1/a.ets
