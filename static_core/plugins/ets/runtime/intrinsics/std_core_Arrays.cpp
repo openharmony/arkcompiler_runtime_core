@@ -140,7 +140,7 @@ template <typename T>
 static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, T *srcAddr, T *dstAddr)
 {
     auto *dst = reinterpret_cast<std::atomic<T> *>(dstAddr);
-    auto *src = barrierSet->ReadBarrier(reinterpret_cast<void **>(srcAddr));
+    auto *src = barrierSet->ReadBarrier(reinterpret_cast<void **>(&srcAddr));
     // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
     // of the memory ordering at a higher logical level
     dst->store(reinterpret_cast<T>(src), std::memory_order_relaxed);
