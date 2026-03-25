@@ -1,0 +1,89 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+.language eTS
+
+
+.record Y <external>
+.record N <external>
+
+.function i32 Any(Y a0) <static, access.function=public> {
+    ldai 0
+    return
+}
+.function i32 never(Y a0) <static, access.function=public> {
+    ldai 0
+    return
+}
+.function i32 foo(Y a0) <static, access.function=public> {
+    ldai 0
+    return
+}
+
+.function Y foo2(Y a0) <static, access.function=public> {
+    lda.obj a0
+    return.obj
+}
+.function Y foo7(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {
+    lda.obj a0
+    return.obj
+}
+.function Y foo8(Y a0, f32 a1, Y a2, Y a3, Y a4) <static, access.function=public> {
+    lda.obj a0
+    return.obj
+}
+
+.function i32 foo6(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {
+    ldai 0
+    return
+}
+.function i32 foo5(Y a0, f32 a1, i32 a2) <static, access.function=public> {
+    ldai 0
+    return
+}
+
+.function Y[] foo(Y a0, f32 a1, Y a2, Y[] a3, Y a4) <static, access.function=public> {
+    lda.obj a3
+    return.obj
+}
+
+.function i32 foo(N a0) <static, access.function=public> {
+    ldai 0
+    return
+}
+
+.function N foo2(N a0) <static, access.function=public> {
+    lda.obj a0
+    return.obj
+}
+.function N foo7(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {
+    lda.obj a0
+    return.obj
+}
+.function N foo8(N a0, f32 a1, N a2, N a3, N a4) <static, access.function=public> {
+    lda.obj a0
+    return.obj
+}
+
+.function i32 foo6(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {
+    ldai 0
+    return
+}
+.function i32 foo5(N a0, f32 a1, i32 a2) <static, access.function=public> {
+    ldai 0
+    return
+}
+
+.function void main() <static, access.function=public> {
+    return.void
+}

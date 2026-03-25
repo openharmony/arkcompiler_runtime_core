@@ -149,9 +149,19 @@ bool IsClassArray(Class const *klass)
     return klass->IsArrayClass();
 }
 
-bool IsObjectClass(Class const *klass)
+bool IsSuperObjectClass(Class const *klass)
 {
-    return klass->IsObjectClass();
+    return klass->IsObjectClass() || klass->IsAnyClass();
+}
+
+bool IsBaseObjectClass(Class const *klass)
+{
+    return klass->GetBase() != nullptr || klass->IsObjectClass();
+}
+
+bool IsAnyClass(Class const *klass)
+{
+    return klass->IsAnyClass();
 }
 
 struct ClassSubtypingFuns {
@@ -160,33 +170,33 @@ struct ClassSubtypingFuns {
 };
 
 std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
-    ClassSubtypingFuns {nullptr, nullptr},          /* undefined */
-    ClassSubtypingFuns {AlwaysTrue, nullptr},       /* top */
-    ClassSubtypingFuns {nullptr, nullptr},          /* u1 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* i8 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* u8 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* i16 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* u16 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* i32 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* u32 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* f32 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* f64 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* i64 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* u64 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* integral8 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* integral16 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* integral32 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* integral64 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* float32 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* float64 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* bits32 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* bits64 */
-    ClassSubtypingFuns {nullptr, nullptr},          /* primitive */
-    ClassSubtypingFuns {AlwaysTrue, nullptr},       /* reference */
-    ClassSubtypingFuns {nullptr, AlwaysTrue},       /* null_reference */
-    ClassSubtypingFuns {AlwaysTrue, IsObjectClass}, /* object */
-    ClassSubtypingFuns {IsClassArray, nullptr},     /* array */
-    ClassSubtypingFuns {nullptr, AlwaysTrue}};      /* bot */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* undefined */
+    ClassSubtypingFuns {AlwaysTrue, nullptr},                   /* top */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* u1 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* i8 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* u8 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* i16 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* u16 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* i32 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* u32 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* f32 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* f64 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* i64 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* u64 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* integral8 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* integral16 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* integral32 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* integral64 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* float32 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* float64 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* bits32 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* bits64 */
+    ClassSubtypingFuns {nullptr, nullptr},                      /* primitive */
+    ClassSubtypingFuns {AlwaysTrue, IsAnyClass},                /* reference */
+    ClassSubtypingFuns {nullptr, AlwaysTrue},                   /* null_reference */
+    ClassSubtypingFuns {IsBaseObjectClass, IsSuperObjectClass}, /* object */
+    ClassSubtypingFuns {IsClassArray, nullptr},                 /* array */
+    ClassSubtypingFuns {nullptr, AlwaysTrue}};                  /* bot */
 
 [[maybe_unused]] bool InvariantHolds(Type tp, TypeSystem const *tsys)
 {
@@ -454,7 +464,12 @@ static bool IsClassSubtypeOfType(Class const *lhsClass, Type rhs, TypeSystem *ts
             return IsSubtypeImpl(Type {lhsComponent}, Type {rhsComponent}, tsys);
         }
     }
-
+    if (lhsClass->IsNeverClass()) {
+        return true;
+    }
+    if (rhs.IsClass() && rhs.GetClass()->IsAnyClass()) {
+        return true;
+    }
     return tsys->SupertypesOfClass(lhsClass)->count(rhs) > 0;
 }
 
@@ -752,6 +767,9 @@ Type Type::GetArrayElementType(TypeSystem *tsys) const
             auto *arrayComponent = klass->GetComponentType();
             ASSERT(arrayComponent != nullptr);
             return Type {arrayComponent};
+        }
+        if (klass->IsAnyClass()) {
+            return Reference();
         }
         return Top();
     }

@@ -185,6 +185,9 @@ public:
     static constexpr uint32_t XREF_CLASS = IS_CLONEABLE << 1U;
     // Should be true if parent classes dont have reference fields
     static constexpr uint32_t NO_REFS_IN_PARENTS = XREF_CLASS << 1U;
+    static constexpr uint32_t OBJECT_CLASS = NO_REFS_IN_PARENTS << 1U;
+    static constexpr uint32_t ANY_CLASS = OBJECT_CLASS << 1U;
+    static constexpr uint32_t NEVER_CLASS = ANY_CLASS << 1U;
 
     static constexpr size_t IMTABLE_SIZE = 32;
 
@@ -491,6 +494,21 @@ public:
         SetFlags(GetFlags() & (~NO_REFS_IN_PARENTS));
     }
 
+    bool IsObjectClass() const
+    {
+        return (GetFlags() & OBJECT_CLASS) != 0;
+    }
+
+    bool IsAnyClass() const
+    {
+        return (GetFlags() & ANY_CLASS) != 0;
+    }
+
+    bool IsNeverClass() const
+    {
+        return (GetFlags() & NEVER_CLASS) != 0;
+    }
+
     void SetStringClass()
     {
         SetFlags(GetFlags() | STRING_CLASS);
@@ -499,6 +517,21 @@ public:
     void SetCloneable()
     {
         SetFlags(GetFlags() | IS_CLONEABLE);
+    }
+
+    void SetObjectClass()
+    {
+        SetFlags(GetFlags() | OBJECT_CLASS);
+    }
+
+    void SetAnyClass()
+    {
+        SetFlags(GetFlags() | ANY_CLASS);
+    }
+
+    void SetNeverClass()
+    {
+        SetFlags(GetFlags() | NEVER_CLASS);
     }
 
     void SetXRefClass()
@@ -551,11 +584,6 @@ public:
     bool IsInstantiable() const
     {
         return (IsClass() && !IsAbstract()) || IsArrayClass();
-    }
-
-    bool IsObjectClass() const
-    {
-        return !IsPrimitive() && GetBase() == nullptr && !IsUnionClass();
     }
 
     /**
@@ -1076,6 +1104,7 @@ private:
 
 private:
     Class *base_ {nullptr};
+    // Panda file is specified only for common classes. For arrays and unions pandaFile_ is invalid.
     const panda_file::File *pandaFile_ {nullptr};
     // Decscriptor is a valid MUTF8 string. See docs/file_format.md#typedescriptor for more information.
     const uint8_t *descriptor_;
@@ -1083,6 +1112,7 @@ private:
     Field *fields_ {nullptr};
     Class **ifaces_ {nullptr};
 
+    // File id is specified only for common classes. For arrays and unions fileId_ is invalid.
     panda_file::File::EntityId fileId_ {};
     uint32_t vtableSize_;
     uint32_t imtSize_;

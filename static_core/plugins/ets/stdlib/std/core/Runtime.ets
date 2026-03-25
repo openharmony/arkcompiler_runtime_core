@@ -54,7 +54,7 @@ export final class Runtime {
      * @FaAndStageModel
      * @since 24
      */
-    public static native getHashCodeByValue(o: Object): long;
+    public static native getHashCodeByValue(o: Any): long;
 
     /**
      * Check if the current platform is little-endian.
@@ -79,32 +79,6 @@ export final class Runtime {
      * @since 24
      */
     native static __getTypeInfo(o: Any): Class|undefined;
-
-    // Internal stubs to create a ClassCastError during failed cast events
-    /**
-     * Internal stub to create a ClassCastError when type conversion fails (excluding undefined case).
-     *
-     * @param { Any } source The source object being converted
-     * @param { Class | undefined } target The target type
-     * @returns { ClassCastError } A ClassCastError instance
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    static native failedTypeCastExclUndefinedStub(source: Any, target: Class | undefined): ClassCastError
-    /**
-     * Internal stub to create a ClassCastError when type conversion fails (including undefined case).
-     *
-     * @param { Any } source The source object being converted
-     * @param { Class | undefined } target The target type
-     * @returns { ClassCastError } A ClassCastError instance
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    static native failedTypeCastInclUndefinedStub(source: Any, target: Class | undefined): ClassCastError
 
     // Internal stub to create a FixedArray of the specified type and length
     private native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
@@ -194,6 +168,30 @@ export final class Runtime {
     static lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
         return __lambdaUnsafeCallStub(fn, r)
     }
+
+    // Internal stub to convert any to string
+    private static native anyToString(a: Any): String;
+
+    /**
+    * Converts Any object to a string
+    *
+    * @param object to conversion to a string
+    *
+    * @returns result of the conversion
+    */
+    static toStringStub(a: Any): String {
+        if (a instanceof Object) {
+            return a.toString();
+        }
+        if (a === undefined) {
+            return "undefined";
+        }
+        if (a === null) {
+            return "null";
+        }
+        return Runtime.anyToString(a);
+    }
+
 }
 
 class ErrorOptionsImpl implements ErrorOptions {

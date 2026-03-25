@@ -29,8 +29,8 @@
 //! INST_COUNT  /LenArray/,1
 //! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /StringBuilder::<ctor>/,2
-//! INST_COUNT  /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT  /StringBuilder::<ctor>/,1
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
 //! INST_COUNT  /LenArray/,1
 //! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
 //!

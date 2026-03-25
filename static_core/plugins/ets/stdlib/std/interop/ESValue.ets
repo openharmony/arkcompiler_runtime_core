@@ -17,8 +17,6 @@ package std.interop;
 
 import {IterableIterator, IteratorResult} from "std/core";
 
-export type StaticOrESValue = ESValue | Object | null | undefined
-
 export final class ESValue {
     // #IC51G4: this.ev should be able to storage anything
     private ev: Any
@@ -241,7 +239,7 @@ export final class ESValue {
         return ESValue.areEqualSafe(this, other);
     }
 
-    public instantiate(...args: FixedArray<StaticOrESValue>): ESValue {
+    public instantiate(...args: FixedArray<Any>): ESValue {
         let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         // NOTE(www): ICMTI1, it should be handled in JSRuntime.
         for (let i = 0; i < args.length; i++) {
@@ -300,7 +298,7 @@ export final class ESValue {
         return ESValue.Undefined;
     }
 
-    public setProperty(name: string, value: StaticOrESValue): void {
+    public setProperty(name: string, value: Any): void {
         if (value instanceof ESValue) {
             JSRuntime.setPropertyObject(this.ev, name, (value as ESValue).ev);
             return;
@@ -308,7 +306,7 @@ export final class ESValue {
         JSRuntime.setPropertyObject(this.ev, name, ESValue.wrap(value).ev);
     }
 
-    public setProperty(index: number, value: StaticOrESValue): void {
+    public setProperty(index: number, value: Any): void {
         let valueObj: Any;
         if (value instanceof ESValue) {
             valueObj = (value as ESValue).ev
@@ -323,7 +321,7 @@ export final class ESValue {
         this.setProperty(numObj, value);
     }
 
-    public setProperty(property: ESValue, value: StaticOrESValue): void {
+    public setProperty(property: ESValue, value: Any): void {
         if (value instanceof ESValue) {
             JSRuntime.setProperty(this.ev, property.ev, (value as ESValue).ev);
         } else {
@@ -347,7 +345,7 @@ export final class ESValue {
         return JSRuntime.hasOwnProperty(this.ev, name);
     }
 
-    public invoke(...args: FixedArray<StaticOrESValue>): ESValue {
+    public invoke(...args: FixedArray<Any>): ESValue {
         let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
@@ -360,7 +358,7 @@ export final class ESValue {
         return new ESValue(JSRuntime.invoke(ESValue.Undefined.ev, this.ev, ...argsAny));
     }
 
-    public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue {
+    public invokeWithRecv(recv: ESValue, ...args: FixedArray<Any>): ESValue {
         let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
@@ -373,7 +371,7 @@ export final class ESValue {
         return new ESValue(JSRuntime.invoke(recv.ev, this.ev, ...argsAny));
     }
 
-    public invokeMethod(method: string, ...args: FixedArray<StaticOrESValue>): ESValue {
+    public invokeMethod(method: string, ...args: FixedArray<Any>): ESValue {
         let callable = this.getPropertySafe(method);
         if (callable.isUndefined()) {
             throw Error("failed to get property");

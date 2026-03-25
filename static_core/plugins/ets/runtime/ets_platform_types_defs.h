@@ -43,7 +43,7 @@
     TP("Lstd/core/BigInt;", coreBigInt)                                                                               \
     TP("Lescompat/Error;", escompatError)                                                                             \
     TP("Lstd/core/Function;", coreFunction)                                                                           \
-    IM("Lstd/core/Function;", "unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;", coreFunctionUnsafeCall)           \
+    IM("Lstd/core/Function;", "unsafeCall", "[LY;:LY;", coreFunctionUnsafeCall)                                       \
     TP("Lstd/core/Tuple;", coreTuple)                                                                                 \
     TP("Lstd/core/TupleN;", coreTupleN)                                                                               \
     TP("Lstd/core/BaseEnum;", coreBaseEnum)                                                                           \
@@ -151,10 +151,10 @@
     TP("Lstd/core/FinRegNode;", coreFinRegNode)                                                                       \
     /* Containers */                                                                                                  \
     TP("Lstd/core/Array;", escompatArray)                                                                             \
-    IM("Lstd/core/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                             \
+    IM("Lstd/core/Array;", "pop", ":LY;", escompatArrayPop)                                                           \
     IM("Lstd/core/Array;", "%%get-length", ":I", escompatArrayGetLength)                                              \
-    IM("Lstd/core/Array;", "$_get", "I:Lstd/core/Object;", escompatArrayGet)                                          \
-    IM("Lstd/core/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                         \
+    IM("Lstd/core/Array;", "$_get", "I:LY;", escompatArrayGet)                                                        \
+    IM("Lstd/core/Array;", "$_set", "ILY;:V", escompatArraySet)                                                       \
     /* ArrayBuffer */                                                                                                 \
     TP("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                     \
     TP("Lstd/core/DataView;", coreDataView)                                                                           \
@@ -173,10 +173,8 @@
     TP("Lstd/containers/containers/ArrayAsListInt;", containersArrayAsListInt)                                        \
     TP("Lstd/core/ArrayLike;", coreArrayLike)                                                                         \
     TP("Lstd/core/Record;", coreRecord)                                                                               \
-    IM("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:Lstd/core/Object;",   \
-       coreRecordGet)                                                                                                 \
-    IM("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}Lstd/core/Object;:V",  \
-       coreRecordSet)                                                                                                 \
+    IM("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:LY;", coreRecordGet)  \
+    IM("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}LY;:V", coreRecordSet) \
     TP("Lstd/core/Map;", coreMap)                                                                                     \
     TP("Lstd/core/Set;", coreSet)                                                                                     \
     /* Iterators */                                                                                                   \
@@ -211,13 +209,12 @@
     TP("Lstd/core/reflect/Proxy;", coreReflectProxy)                                                                  \
     IM("Lstd/core/reflect/Proxy;", "<ctor>", "Lstd/core/reflect/InvocationHandler;:V", coreReflectProxyConstructor)   \
     IM("Lstd/core/reflect/Proxy;", "getHandler", ":Lstd/core/reflect/InvocationHandler;", coreReflectProxyGetHandler) \
-    SM("Lstd/core/reflect/Proxy;", "invoke",                                                                          \
-       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;[Lstd/core/Object;:Lstd/core/Object;",               \
+    SM("Lstd/core/reflect/Proxy;", "invoke", "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;[LY;:LY;",     \
        coreReflectProxyInvoke)                                                                                        \
-    SM("Lstd/core/reflect/Proxy;", "invokeSet",                                                                       \
-       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;Lstd/core/Object;:V", coreReflectProxyInvokeSet)     \
-    SM("Lstd/core/reflect/Proxy;", "invokeGet",                                                                       \
-       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;:Lstd/core/Object;", coreReflectProxyInvokeGet)      \
+    SM("Lstd/core/reflect/Proxy;", "invokeSet", "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;LY;:V",     \
+       coreReflectProxyInvokeSet)                                                                                     \
+    SM("Lstd/core/reflect/Proxy;", "invokeGet", "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;:LY;",      \
+       coreReflectProxyInvokeGet)                                                                                     \
     /* Process */                                                                                                     \
     TP("Lstd/core/StdProcess;", coreStdProcess)                                                                       \
     SM("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;:V", coreStdProcessListUnhandledJobs)           \

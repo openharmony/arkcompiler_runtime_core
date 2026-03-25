@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,9 @@ set(ANY_NEVER_TEST_LIST
     "any_general"
     "any_array_general"
     "never_general"
+    "any_test_1"
+    "any_test_2"
+    "any_test_3"
 )
 
 add_custom_target(ets_tests_any_never)
@@ -27,7 +30,7 @@ foreach(NAME ${ANY_NEVER_TEST_LIST})
         DEPENDS etsstdlib
         LANGUAGE_CONTEXT ets
         ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-        RUNTIME_OPTIONS "--interpreter-type=cpp" "--verification-mode=disabled"
+        RUNTIME_OPTIONS "--interpreter-type=cpp"
     )
     add_dependencies(ets_tests_any_never ets_any_never_${NAME}_cpp)
 
@@ -37,7 +40,7 @@ foreach(NAME ${ANY_NEVER_TEST_LIST})
         DEPENDS etsstdlib
         LANGUAGE_CONTEXT ets
         ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-        RUNTIME_OPTIONS "--interpreter-type=irtoc" "--verification-mode=disabled"
+        RUNTIME_OPTIONS "--interpreter-type=irtoc"
     )
     add_dependencies(ets_tests_any_never ets_any_never_${NAME}_irtoc)
 
@@ -48,7 +51,7 @@ foreach(NAME ${ANY_NEVER_TEST_LIST})
         LANGUAGE_CONTEXT ets
         ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
         ASSEMBLER_OPTIONS "--optimize"
-        RUNTIME_OPTIONS "--interpreter-type=cpp" "--verification-mode=disabled"
+        RUNTIME_OPTIONS "--interpreter-type=cpp"
     )
     add_dependencies(ets_tests_any_never ets_any_never_${NAME}_cpp_opt)
 
@@ -59,7 +62,7 @@ foreach(NAME ${ANY_NEVER_TEST_LIST})
         LANGUAGE_CONTEXT ets
         ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
         ASSEMBLER_OPTIONS "--optimize"
-        RUNTIME_OPTIONS "--interpreter-type=irtoc" "--verification-mode=disabled"
+        RUNTIME_OPTIONS "--interpreter-type=irtoc"
     )
     add_dependencies(ets_tests_any_never ets_any_never_${NAME}_irtoc_opt)
 
@@ -74,7 +77,7 @@ foreach(NAME ${ANY_NEVER_TEST_LIST})
                 LANGUAGE_CONTEXT ets
                 ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
                 ASSEMBLER_OPTIONS "--optimize"
-                RUNTIME_OPTIONS "--compiler-enable-jit=true" "--verification-mode=disabled" "--compiler-hotness-threshold=0" "--no-async-jit"
+                RUNTIME_OPTIONS "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
             )
             add_dependencies(ets_tests_any_never ets_any_never_${NAME}_enforce_jit)
         endif()
@@ -88,7 +91,7 @@ foreach(NAME ${ANY_NEVER_TEST_LIST})
                 AOT_MODE TRUE
                 ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
                 ASSEMBLER_OPTIONS "--optimize"
-                RUNTIME_OPTIONS "--compiler-enable-jit=true" "--verification-mode=disabled"
+                RUNTIME_OPTIONS "--compiler-enable-jit=true"
             )
             add_dependencies(ets_tests_any_never ets_any_never_${NAME}_aot)
         endif()

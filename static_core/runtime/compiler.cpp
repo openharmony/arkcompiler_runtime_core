@@ -227,8 +227,8 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klassPtr) const
         return compiler::ClassType::UNRESOLVED_CLASS;
     }
     auto klass = ClassCast(klassPtr);
-    if (klass->IsObjectClass()) {
-        return compiler::ClassType::OBJECT_CLASS;
+    if (klass->IsAnyClass()) {
+        return compiler::ClassType::ANY_CLASS;
     }
     if (klass->IsInterface()) {
         return compiler::ClassType::INTERFACE_CLASS;
@@ -236,8 +236,8 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klassPtr) const
     if (klass->IsArrayClass()) {
         auto componentClass = klass->GetComponentType();
         ASSERT(componentClass != nullptr);
-        if (componentClass->IsObjectClass()) {
-            return compiler::ClassType::ARRAY_OBJECT_CLASS;
+        if (componentClass->IsAnyClass()) {
+            return compiler::ClassType::ARRAY_ANY_CLASS;
         }
         if (componentClass->IsPrimitive()) {
             return compiler::ClassType::FINAL_CLASS;

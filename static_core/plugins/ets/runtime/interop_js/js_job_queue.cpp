@@ -125,7 +125,7 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
         if (isResolved) {
-            auto etsVal = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, value).value();
+            auto etsVal = JSConvertAny::UnwrapWithNullCheck(ctx, env, value).value();
             ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), etsVal, ark::ets::ToEtsBoolean(false));
         } else {
             auto refconv = JSRefConvertResolve<true>(ctx, PlatformTypes(coro)->escompatError->GetRuntimeClass());

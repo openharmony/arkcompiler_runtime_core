@@ -394,9 +394,9 @@ protected:
 
     // Helper functions
     static void FillUnresolvedClass(GraphVisitor *visitor, Inst *inst);
-    static void FillObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
+    static void FillAnyClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillOtherClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel);
-    static void FillArrayObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
+    static void FillArrayAnyClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillInterfaceClass(GraphVisitor *visitor, Inst *inst);
     static void FillUnionClass(GraphVisitor *visitor, Inst *inst);
@@ -408,12 +408,12 @@ protected:
 
     static void FillIsInstanceUnresolved(GraphVisitor *visitor, Inst *inst);
 
-    static void FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg);
+    static void FillIsInstanceCaseAny(GraphVisitor *visitor, Inst *inst, Reg tmpReg);
 
     static void FillIsInstanceCaseOther(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId endLabel);
 
-    static void FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
-                                              LabelHolder::LabelId endLabel);
+    static void FillIsInstanceCaseArrayAny(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                           LabelHolder::LabelId endLabel);
 
     static void FillIsInstanceCaseArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
                                              LabelHolder::LabelId endLabel);

@@ -20,7 +20,7 @@ tags: [compile-only, not-a-test]
 
 export declare function fun(x: int): string;
 
-export declare function foo(x: number, y: string, z: Object[]): double;
+export declare function foo(x: number, y: string, z: Any[]): double;
 
 export declare function bar<U, V, R>(x: U, y: V): R;
 

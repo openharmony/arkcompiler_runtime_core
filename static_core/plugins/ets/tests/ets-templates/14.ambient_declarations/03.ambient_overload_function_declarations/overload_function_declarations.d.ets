@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -24,7 +24,7 @@ export declare function fun2(x: string): string
 export declare overload fun {fun1, fun2}
 
 export declare namespace N {
-    function foo1(x: number, y: string, z: Object[]): double
+    function foo1(x: number, y: string, z: Any[]): double
     function foo2(x: number, y: string): double
     overload foo {foo1, foo2}
 }

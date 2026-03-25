@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,11 +43,6 @@ static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 6;
 static constexpr const char *ITERATOR_METHOD = "$_iterator";
 static constexpr const char *GET_INDEX_METHOD = "$_get";
 static constexpr const char *SET_INDEX_METHOD = "$_set";
-
-static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
-static constexpr const char *STD_CORE_FUNCTION_UNSAFECALL_METHOD = "unsafeCall";
-static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";
-static constexpr const char *STD_CORE_FUNCTION_INVOKE_R_PREFIX = "invokeR";
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 

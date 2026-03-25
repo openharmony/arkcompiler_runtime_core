@@ -106,6 +106,7 @@ private:
         for (auto itctx = const_cast<ClassLinkerContext *>(ctx_); itctx != nullptr;
              itctx = EtsClassLinkerExtension::GetParentContext(itctx)) {
             if (auto cls = linker->FindLoadedClass(descriptor_, itctx); cls != nullptr) {
+                ASSERT(!cls->IsArrayClass());
                 pf_ = cls->GetPandaFile();
                 id_ = cls->GetFileId();
                 return true;
@@ -177,81 +178,43 @@ static bool RefExtendsOrImplements(const ClassLinkerContext *ctx, RefTypeLink su
 }
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-template <bool IS_STRICT, bool IS_SUPERTYPE_OF>
-static bool UnionIsAssignableToRef(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink unionRef, uint32_t depth)
+static bool UnionIsAssignableToRef(const ClassLinkerContext *ctx, RefTypeLink subUnion, RefTypeLink superRef,
+                                   uint32_t depth)
 {
-    auto res = false;
     auto idx = 2U;
-    const auto *descriptor = unionRef.GetDescriptor();
+    const auto *descriptor = subUnion.GetDescriptor();
     while (descriptor[idx] != '}') {
         auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
         idx += typeSp.Size();
 
         PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto cda = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str())).CreateCDA();
-        if (!cda.has_value()) {
-            return false;
-        }
-        auto typePf = &cda.value().GetPandaFile();
-        auto typeClassId = cda.value().GetClassId();
-        auto type = RefTypeLink(ctx, typePf, typeClassId);
-
-        bool isAssignableTo;
-        if constexpr (IS_SUPERTYPE_OF) {
-            isAssignableTo = RefIsAssignableToImpl(ctx, sub, type, depth);
-        } else {
-            isAssignableTo = RefIsAssignableToImpl(ctx, type, sub, depth);
-        }
-
-        res |= isAssignableTo;
-        if constexpr (!IS_STRICT) {
-            continue;
-        }
+        auto type = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+        bool isAssignableTo = RefIsAssignableToImpl(ctx, type, superRef, depth);
         if (!isAssignableTo) {
             return false;
         }
     }
-    return res;
+    return true;
 }
 
-bool UnionIsAssignableToUnion(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth)
+static bool IsAssignableToUnion(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink superUnion, uint32_t depth)
 {
-    auto idx = 2;
-    const auto *descriptor = sub.GetDescriptor();
+    auto idx = 2U;
+    const auto *descriptor = superUnion.GetDescriptor();
     while (descriptor[idx] != '}') {
         auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
         idx += typeSp.Size();
 
         PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto cda = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str())).CreateCDA();
-        if (!cda.has_value()) {
-            return false;
-        }
-        auto typePf = &cda.value().GetPandaFile();
-        auto typeClassId = cda.value().GetClassId();
-
-        auto type = RefTypeLink(ctx, typePf, typeClassId);
-        if (UnionIsAssignableToRef<true, true>(ctx, type, super, depth)) {
+        auto type = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+        bool isAssignableTo = RefIsAssignableToImpl(ctx, sub, type, depth);
+        if (isAssignableTo) {
             return true;
         }
     }
-    return true;
+    return false;
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-bool IsAssignableToUnion([[maybe_unused]] const ClassLinkerContext *ctx, [[maybe_unused]] RefTypeLink sub,
-                         [[maybe_unused]] RefTypeLink super, [[maybe_unused]] uint32_t depth)
-{
-    if (!ClassHelper::IsUnionDescriptor(super.GetDescriptor())) {
-        return UnionIsAssignableToRef<true, false>(ctx, super, sub, depth);
-    }
-
-    if (!ClassHelper::IsUnionDescriptor(sub.GetDescriptor())) {
-        return UnionIsAssignableToRef<false, true>(ctx, sub, super, depth);
-    }
-
-    return UnionIsAssignableToUnion(ctx, sub, super, depth);
-}
 
 static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth)
 {
@@ -265,9 +228,20 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
     if (IsPrimitveDescriptor(sub.GetDescriptor()) || IsPrimitveDescriptor(super.GetDescriptor())) {
         return false;
     }
-    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("Lstd/core/Object;"))) {
+
+    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("LY;"))) {
         return true;
     }
+    if (utf::IsEqual(sub.GetDescriptor(), utf::CStringAsMutf8("LY;"))) {
+        return false;
+    }
+    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("LN;"))) {
+        return false;
+    }
+    if (utf::IsEqual(sub.GetDescriptor(), utf::CStringAsMutf8("LN;"))) {
+        return true;
+    }
+
     if (ClassHelper::IsArrayDescriptor(super.GetDescriptor())) {
         if (!ClassHelper::IsArrayDescriptor(sub.GetDescriptor())) {
             return false;
@@ -276,7 +250,10 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
         RefTypeLink superComp(ctx, ClassHelper::GetComponentDescriptor(super.GetDescriptor()));
         return RefIsAssignableToImpl(ctx, subComp, superComp, depth);
     }
-    if (ClassHelper::IsUnionDescriptor(super.GetDescriptor()) || ClassHelper::IsUnionDescriptor(sub.GetDescriptor())) {
+    if (ClassHelper::IsUnionDescriptor(sub.GetDescriptor())) {
+        return UnionIsAssignableToRef(ctx, sub, super, depth);
+    }
+    if (ClassHelper::IsUnionDescriptor(super.GetDescriptor())) {
         return IsAssignableToUnion(ctx, sub, super, depth);
     }
     // Assume array does not implement interfaces

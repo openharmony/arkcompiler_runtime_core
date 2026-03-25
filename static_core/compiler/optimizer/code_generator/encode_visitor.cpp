@@ -765,10 +765,10 @@ void EncodeVisitor::VisitRefTypeCheck(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->LoadClassFromObject(tmpReg1, refReg);
     // If the object's and array element's types match we do not check further
     encoder->EncodeJump(slowPath->GetBackLabel(), tmpReg, tmpReg1, Condition::EQ);
-    // If the array's element class is not Object (baseclass == null)
+    // If the array's element class hasn't Any type flag
     // we call CheckStoreArrayReference, otherwise we fall through
-    encoder->EncodeLdr(tmpReg1, false, MemRef(tmpReg, runtime->GetClassBaseOffset(enc->GetArch())));
-    encoder->EncodeJump(slowPath->GetLabel(), tmpReg1, Condition::NE);
+    encoder->EncodeLdr(tmpReg1, false, MemRef(tmpReg, runtime->GetBaseClassFlagsOffset(enc->GetArch())));
+    encoder->EncodeJump(slowPath->GetLabel(), tmpReg1, Imm(Class::ANY_CLASS), Condition::NE);
     slowPath->BindBackLabel(encoder);
 }
 
@@ -1595,7 +1595,7 @@ void EncodeVisitor::FillUnresolvedClass(GraphVisitor *visitor, Inst *inst)
     slowPath->BindBackLabel(encoder);
 }
 
-void EncodeVisitor::FillObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel)
+void EncodeVisitor::FillAnyClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
@@ -1637,7 +1637,7 @@ void EncodeVisitor::FillOtherClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg
     encoder->EncodeJump(loopLabel, tmpReg, classReg, Condition::NE);
 }
 
-void EncodeVisitor::FillArrayObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel)
+void EncodeVisitor::FillArrayAnyClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
@@ -1739,8 +1739,8 @@ void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, La
     }
     switch (klassType) {
         // The input class should be not primitive type
-        case ClassType::OBJECT_CLASS: {
-            FillObjectClass(visitor, tmpReg, throwLabel);
+        case ClassType::ANY_CLASS: {
+            FillAnyClass(visitor, tmpReg, throwLabel);
             break;
         }
         case ClassType::OTHER_CLASS: {
@@ -1748,8 +1748,8 @@ void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, La
             break;
         }
         // The input class should be array class and component type should be not primitive type
-        case ClassType::ARRAY_OBJECT_CLASS: {
-            FillArrayObjectClass(visitor, tmpReg, throwLabel);
+        case ClassType::ARRAY_ANY_CLASS: {
+            FillArrayAnyClass(visitor, tmpReg, throwLabel);
             break;
         }
         // Check that components types are equals, else call slow path
@@ -1822,13 +1822,13 @@ void EncodeVisitor::FillIsInstanceUnresolved(GraphVisitor *visitor, Inst *inst)
     slowPath->BindBackLabel(encoder);
 }
 
-void EncodeVisitor::FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg)
+void EncodeVisitor::FillIsInstanceCaseAny(GraphVisitor *visitor, Inst *inst, Reg tmpReg)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    // ClassType::OBJECT_CLASS
+    // ClassType::ANY_CLASS
     Reg typeReg(tmpReg.GetId(), INT8_TYPE);
     // Load type class
     encoder->EncodeLdr(typeReg, false, MemRef(tmpReg, runtime->GetClassTypeOffset(enc->GetArch())));
@@ -1877,15 +1877,15 @@ void EncodeVisitor::FillIsInstanceCaseOther(GraphVisitor *visitor, Inst *inst, R
 }
 
 // Sets true if the Input class is array class and component type is not primitive type
-void EncodeVisitor::FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
-                                                  LabelHolder::LabelId endLabel)
+void EncodeVisitor::FillIsInstanceCaseArrayAny(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                               LabelHolder::LabelId endLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    // ClassType::ARRAY_OBJECT_CLASS
+    // ClassType::ARRAY_ANY_CLASS
     Reg dstRef(dst.GetId(), Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
     Reg typeReg(tmpReg.GetId(), INT8_TYPE);
     // Load Component class
@@ -1988,8 +1988,8 @@ void EncodeVisitor::VisitIsInstance(GraphVisitor *visitor, Inst *inst)
     FillIsInstance(visitor, inst, tmpReg, endLabel);
     switch (klassType) {
         // Sets true if the Input class is not primitive type
-        case ClassType::OBJECT_CLASS: {
-            FillIsInstanceCaseObject(visitor, inst, tmpReg);
+        case ClassType::ANY_CLASS: {
+            FillIsInstanceCaseAny(visitor, inst, tmpReg);
             break;
         }
         case ClassType::OTHER_CLASS: {
@@ -1997,8 +1997,8 @@ void EncodeVisitor::VisitIsInstance(GraphVisitor *visitor, Inst *inst)
             break;
         }
         // Sets true if the Input class is array class and component type is not primitive type
-        case ClassType::ARRAY_OBJECT_CLASS: {
-            FillIsInstanceCaseArrayObject(visitor, inst, tmpReg, endLabel);
+        case ClassType::ARRAY_ANY_CLASS: {
+            FillIsInstanceCaseArrayAny(visitor, inst, tmpReg, endLabel);
             break;
         }
         // Check that components types are equals, else call slow path

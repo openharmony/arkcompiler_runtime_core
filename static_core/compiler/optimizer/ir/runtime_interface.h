@@ -33,9 +33,9 @@
 namespace ark::compiler {
 enum class ClassType {
     UNRESOLVED_CLASS = 0,
-    OBJECT_CLASS,
+    ANY_CLASS,
     ARRAY_CLASS,
-    ARRAY_OBJECT_CLASS,
+    ARRAY_ANY_CLASS,
     INTERFACE_CLASS,
     OTHER_CLASS,
     FINAL_CLASS,

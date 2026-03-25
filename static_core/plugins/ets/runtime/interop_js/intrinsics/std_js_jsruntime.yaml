@@ -15,7 +15,10 @@ coretypes:
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
 
-- managed_class: std.core.Object[]
+- managed_class: Y
+  mirror_class: ark::ets::EtsObject
+
+- managed_class: Y[]
   mirror_class: ark::ets::EtsObjectArray
 
 - managed_class: std.core.Class
@@ -171,8 +174,8 @@ intrinsics:
     method_name: getValueObject
     static: true
     signature:
-      ret: std.core.Object
-      args: [ std.core.Object, std.core.Class ]
+      ret: Y
+      args: [ Y, std.core.Class ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
 
@@ -204,8 +207,8 @@ intrinsics:
     method_name: getPropertyObject
     static: true
     signature:
-      ret: std.core.Object
-      args: [ std.core.Object, std.core.String ]
+      ret: Y
+      args: [ Y, std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -260,7 +263,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ std.core.Object, std.core.String, std.core.Object ]
+      args: [ Y, std.core.String, Y ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -282,7 +285,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ std.core.Object, i32, std.core.Object ]
+      args: [ Y, i32, Y ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetElementObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -336,8 +339,8 @@ intrinsics:
     method_name: getElementObject
     static: true
     signature:
-      ret: std.core.Object
-      args: [ std.core.Object, i32 ]
+      ret: Y
+      args: [ Y, i32 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -402,7 +405,7 @@ intrinsics:
     method_name: createArray
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateArrayIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -413,10 +416,10 @@ intrinsics:
     method_name: instantiate
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args:
-        - std.core.Object
-        - std.core.Object[]
+        - Y
+        - Y[]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInstantiateIntrinsic
     clear_flags: []
 
@@ -440,7 +443,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object, std.core.Object ]
+      args: [ Y, Y ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfDynamicIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -517,7 +520,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ std.core.Object, std.core.Object, std.core.Object ]
+      args: [ Y, Y, Y ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -527,7 +530,7 @@ intrinsics:
     method_name: isStaticValue
     static: true
     signature:
-      args: [ std.core.Object ]
+      args: [ Y ]
       ret: u1
     impl: ark::ets::interop::js::intrinsics::JSRuntimeIsStaticValueIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -539,7 +542,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object, std.core.String]
+      args: [ Y, std.core.String]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyIntrinsic
     clear_flags: []
 
@@ -549,8 +552,8 @@ intrinsics:
     method_name: getProperty
     static: true
     signature:
-      ret: std.core.Object
-      args: [ std.core.Object, std.core.Object]
+      ret: Y
+      args: [ Y, Y]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyIntrinsic
     clear_flags: []
 
@@ -561,7 +564,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object, std.core.Object]
+      args: [ Y, Y]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyObjectIntrinsic
     clear_flags: []
 
@@ -572,7 +575,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object, i32]
+      args: [ Y, i32]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasElementIntrinsic
     clear_flags: []
 
@@ -583,7 +586,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object, std.core.String]
+      args: [ Y, std.core.String]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyIntrinsic
     clear_flags: []
 
@@ -594,7 +597,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object, std.core.Object]
+      args: [ Y, Y]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyObjectIntrinsic
     clear_flags: []
 
@@ -626,11 +629,11 @@ intrinsics:
     method_name: invoke
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args:
-        - std.core.Object
-        - std.core.Object
-        - std.core.Object[]
+        - Y
+        - Y
+        - Y[]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInvokeIntrinsic
     clear_flags: []
 
@@ -651,26 +654,12 @@ intrinsics:
     method_name: invokeDynamicFunction
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args:
         - std.core.Object
-        - std.core.Object[]
+        - Y[]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInvokeDynamicFunctionIntrinsic
     clear_flags: []
-
-####################
-# std.js.JSValue #
-####################
-  - name: JSValueToString
-    space: ets
-    class_name: std.interop.js.JSValue
-    method_name: toString
-    static: false
-    signature:
-      ret: std.core.String
-      args: [ ]
-    impl: ark::ets::interop::js::intrinsics::JSValueToStringIntrinsic
-    clear_flags: [ ]
 
 #######################
 # JSON instrinsics #
@@ -1117,7 +1106,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [std.core.Object, i64]
+      args: [Y, i64]
     impl: ark::ets::interop::js::intrinsics::PromiseInteropResolveIntrinsic
     clear_flags: [can_throw]
 
@@ -1128,7 +1117,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [std.core.Object, i64]
+      args: [Y, i64]
     impl: ark::ets::interop::js::intrinsics::PromiseInteropRejectIntrinsic
     clear_flags: [can_throw]
 
@@ -1152,7 +1141,7 @@ intrinsics:
     method_name: transferArrayBufferToDynamicImpl
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args: [std.core.ArrayBuffer]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperTransferArrayBufferToDynamicImplIntrinsic
     clear_flags: []
@@ -1163,7 +1152,7 @@ intrinsics:
     method_name: createDynamicTypedArray
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args: [std.core.ArrayBuffer, i32, f64, f64]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicTypedArrayIntrinsic
     clear_flags: []
@@ -1174,7 +1163,7 @@ intrinsics:
     method_name: createDynamicDataView
     static: true
     signature:
-      ret: std.core.Object
+      ret: Y
       args: [std.core.ArrayBuffer, f64, f64]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicDataViewIntrinsic
     clear_flags: []
@@ -1214,7 +1203,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.Object ]
+      args: [ Y ]
     impl: ark::ets::interop::js::intrinsics::InteropSerializeHelperIsJSInteropRefImplIntrinsic
     clear_flags: []
 

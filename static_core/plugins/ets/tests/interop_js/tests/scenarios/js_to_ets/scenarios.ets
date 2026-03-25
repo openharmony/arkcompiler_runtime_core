@@ -333,7 +333,7 @@ function testClassInPlaceFieldDeclarations(): boolean {
 function testFunctionReturnsCompositeTypeInt(): boolean {
     let isOk = true;
     for (let i = 0; i < 4; i++){
-        const expectedValue = functionReturnsCompositeType.invoke(i).unwrap() as (string | number | double | object);
+        const expectedValue = functionReturnsCompositeType.invoke(i).unwrap();
         switch (i) {
             case 0:
                 isOk = isOk && expectedValue as String === '1';

@@ -749,7 +749,7 @@ function createWeakRefForSTValue(): void {
 function testSTValueDestruct(): void {
     let [dyWeakRef, staWeakRef] = createWeakRefForSTValue();
     ASSERT_TRUE(dyWeakRef.deref() !== undefined);
-    let staWeakObj = staWeakRef.objectInvokeMethod('deref', ':C{std.core.Object}', []);
+    let staWeakObj = staWeakRef.objectInvokeMethod('deref', ':C{Y}', []);
     ASSERT_TRUE(!staWeakObj.isUndefined());
 
     etsVm.getFunction('Lstvalue_invoke/ETSGLOBAL;', 'runFullGC')();

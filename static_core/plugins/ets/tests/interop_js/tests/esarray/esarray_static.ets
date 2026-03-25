@@ -440,12 +440,12 @@ function testFlat(): boolean {
     arktest.assertEQ(esArr1[0], 1);
     arktest.assertEQ(typeof esArr1[1], 'object');
     let esArr2 = esArr1[1];
-    let esArr4 = esArr1.flat<object>();
+    let esArr4 = esArr1.flat<Any>();
     arktest.assertEQ(typeof esArr4[0], 'number');
     arktest.assertEQ(typeof esArr4[1], 'number');
     arktest.assertEQ(typeof esArr4[2], 'number');
     arktest.assertEQ(typeof esArr4[3], 'object');
-    let esArr5 = esArr1.flat<object>(2);
+    let esArr5 = esArr1.flat<Any>(2);
     arktest.assertEQ(typeof esArr5[0], 'number');
     arktest.assertEQ(typeof esArr5[1], 'number');
     arktest.assertEQ(typeof esArr5[2], 'number');
@@ -467,11 +467,8 @@ function testESValueReturnESArray(): boolean {
     let module = ESValue.load('testDecl');
     let returnArray = module.getProperty('returnSameArray');
     let result = returnArray.invoke();
-    if (result.instanceOf(Type.from<es.Array<number>>())) {
-        let arr: es.Array<number> = result.unwrap() as es.Array<number>;
-        return arr.length === 0;
-    }
-    return false;
+    let arr: es.Array<number> = result.unwrap() as es.Array<number>;
+    return arr.length === 0;
 }
 
 function testAll(): void {

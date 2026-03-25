@@ -295,7 +295,7 @@ protected:
 
     void InitializeArrayClassRoot(ClassRoot root, ClassRoot componentRoot, const char *descriptor);
 
-    void InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor);
+    Class *InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor);
 
     void FreeLoadedClasses();
 

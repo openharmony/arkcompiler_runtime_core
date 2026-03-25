@@ -143,8 +143,10 @@ void EtsClassLinkerExtension::InitializeClassRoots()
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(langCtx_.GetStringArrayClassDescriptor()));
 
-    InitializeSyntheticClassRoot(ClassRoot::ANY, "Y");
-    InitializeSyntheticClassRoot(ClassRoot::NEVER, "N");
+    auto *anyClass = InitializeSyntheticClassRoot(ClassRoot::ANY, "LY;");
+    anyClass->SetAnyClass();
+    auto *neverClass = InitializeSyntheticClassRoot(ClassRoot::NEVER, "LN;");
+    neverClass->SetNeverClass();
 }
 
 Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, Class *stringClass, ClassRoot type)
@@ -259,6 +261,7 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << langCtx_.GetObjectClassDescriptor() << "'";
         return false;
     }
+    objectClass->SetObjectClass();
     SetClassRoot(ClassRoot::OBJECT, objectClass);
 
     auto *classClass = GetClassLinker()->GetClass(langCtx_.GetClassClassDescriptor(), false, GetBootContext());
@@ -285,6 +288,7 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         return false;
     }
     jsValueClass->SetXRefClass();
+    jsValueClass->SetBase(nullptr);
     InitializeClassRoots();
     return true;
 }
@@ -646,7 +650,9 @@ const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) cons
     if (asyncAnnId.IsValid()) {
         return reinterpret_cast<const void *>(EtsAsyncEntryPoint);
     }
-    bool isVerifyEnabled = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM())->IsVerifyANI();
+    // Get PandaVM from Runtime since this method can be invoked from JIT thread
+    auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
+    bool isVerifyEnabled = etsVm->IsVerifyANI();
     switch (GetAniMethodType(method)) {
         case AniMethodType::GENERIC: {
             return ani::GetAniEntryPoint(isVerifyEnabled);
@@ -713,6 +719,7 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
     CacheClass("Lstd/core/Null;", [](auto *c) {
         c->SetNullValue();
         c->SetValueTyped();
+        c->GetRuntimeClass()->SetBase(nullptr);
     });
 
     CacheClass("Lstd/core/Boolean;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });

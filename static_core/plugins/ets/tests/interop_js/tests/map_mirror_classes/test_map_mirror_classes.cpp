@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,30 @@ static void CheckOffsetOfFields(const char *className, const std::vector<MemberI
     }
 }
 
+static void CheckBaseClass(const char *className)
+{
+    ScopedManagedCodeThread scoped(ManagedThread::GetCurrent());
+
+    EtsClassLinker *etsClassLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    EtsClass *klass = etsClassLinker->GetClass(className);
+    ASSERT_NE(klass, nullptr);
+
+    auto baseClass = klass->GetRuntimeClass()->GetBase();
+    ASSERT_EQ(baseClass, nullptr);
+}
+
+static void CheckMethods(const char *className)
+{
+    ScopedManagedCodeThread scoped(ManagedThread::GetCurrent());
+
+    EtsClassLinker *etsClassLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    EtsClass *klass = etsClassLinker->GetClass(className);
+    ASSERT_NE(klass, nullptr);
+
+    auto methods = klass->GetRuntimeClass()->GetMethods();
+    ASSERT_EQ(methods.size(), 0);
+}
+
 class JSValueOffsets {
 public:
     static std::vector<MemberInfo> GetMembersInfo()
@@ -76,6 +100,16 @@ TEST_F(EtsInteropJsClassLinkerTest, Filed_std_interop_ESValue)
 {
     // #IC8LH8: change class name after ESObject is finally removed
     CheckOffsetOfFields("Lstd/interop/ESValue;", ESValueOffsets::GetMembersInfo());
+}
+
+TEST_F(EtsInteropJsClassLinkerTest, Any_base_class_interop_js_JSValue)
+{
+    CheckBaseClass("Lstd/interop/js/JSValue;");
+}
+
+TEST_F(EtsInteropJsClassLinkerTest, Any_methods_interop_js_JSValue)
+{
+    CheckMethods("Lstd/interop/js/JSValue;");
 }
 
 }  // namespace ark::ets::interop::js::testing

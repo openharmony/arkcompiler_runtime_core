@@ -23,7 +23,7 @@ export class MimicJSValueIteratableIterator implements IterableIterator<Any> {
     private iterator: Any;
     private nextMethod: Any;
 
-    constructor(jsIterator: Object) {
+    constructor(jsIterator: Any) {
         this.iterator = jsIterator;
         this.nextMethod = JSRuntime.getPropertyObject(jsIterator, 'next');
         if (this.nextMethod === undefined) {

@@ -667,6 +667,72 @@ function testIsSubtypeOf() {
     arktest.assertFalse(obj.isSubtypeOf(a))
 }
 
+function testAnyClass() {
+    let anyType = Class.from<Any>()
+    testGetName(anyType, "Y")
+    arktest.assertEQ(anyType.getSuper(), undefined)
+
+    let typeBaseObj = Class.of(new Object())
+    let neverType = Class.from<never>()
+    arktest.assertEQ(anyType.isSubtypeOf(neverType), false)
+    arktest.assertEQ(typeBaseObj.isSubtypeOf(anyType), true)
+    arktest.assertEQ(anyType.isSubtypeOf(typeBaseObj), false)
+
+    arktest.assertEQ(anyType.isNamespace(), false)
+    arktest.assertEQ(anyType.getInterfaces().length, 0)
+    arktest.assertEQ(anyType.isEnum(), false)
+    arktest.assertEQ(anyType.isInterface(), false)
+    arktest.assertEQ(anyType.isFixedArray(), false)
+    arktest.assertEQ(anyType.isUnion(), false)
+    arktest.assertEQ(anyType.getInstanceMethods().length, 0)
+    arktest.assertEQ(anyType.getInstanceFields().length, 0)
+    arktest.assertEQ(anyType.getStaticMethods().length, 0)
+    arktest.assertEQ(anyType.getStaticFields().length, 0)
+    arktest.assertEQ(anyType.getConstructors().length, 0)
+    arktest.assertEQ(anyType.getUnionConstituentTypes(), undefined)
+    arktest.assertEQ(anyType.getFixedArrayComponentType(), undefined)
+}
+
+function testNeverClass() {
+    let neverType = Class.from<never>()
+    testGetName(neverType, "N")
+    arktest.assertEQ(neverType.getSuper(), undefined)
+
+    let typeBaseObj = Class.of(new Object())
+    let anyType = Class.from<Any>()
+    arktest.assertEQ(neverType.isSubtypeOf(anyType), true)
+    arktest.assertEQ(neverType.isSubtypeOf(typeBaseObj), true)
+    arktest.assertEQ(typeBaseObj.isSubtypeOf(neverType), false)
+    arktest.assertEQ(typeBaseObj.isSubtypeOf(neverType), false)
+    arktest.assertEQ(anyType.isSubtypeOf(neverType), false)
+
+    arktest.assertEQ(neverType.isNamespace(), false)
+    arktest.assertEQ(neverType.getInterfaces().length, 0)
+    arktest.assertEQ(neverType.isEnum(), false)
+    arktest.assertEQ(neverType.isInterface(), false)
+    arktest.assertEQ(neverType.isFixedArray(), false)
+    arktest.assertEQ(neverType.isUnion(), false)
+    arktest.assertEQ(neverType.getInstanceMethods().length, 0)
+    arktest.assertEQ(neverType.getInstanceFields().length, 0)
+    arktest.assertEQ(neverType.getStaticMethods().length, 0)
+    arktest.assertEQ(neverType.getStaticFields().length, 0)
+    arktest.assertEQ(neverType.getConstructors().length, 0)
+    arktest.assertEQ(neverType.getUnionConstituentTypes(), undefined)
+    arktest.assertEQ(neverType.getFixedArrayComponentType(), undefined)
+}
+
+class AnyTestClass {
+    retArrayAny(): FixedArray<Any> { return [1, 2, 3] }
+}
+
+function testFixedArrAnyClass() {
+    let classType = Class.from<AnyTestClass>()
+    let methodInfo = classType.getInstanceMethod('retArrayAny')
+    let fixedArrAnyType = methodInfo!.getReturnType()
+
+    arktest.assertEQ(fixedArrAnyType.getFixedArrayComponentType(), Class.from<Any>())
+}
+
 function suiteGetInstanceMethods() {
     let typeBaseObj = Class.of(new Object())
 
@@ -745,6 +811,10 @@ function main(): int {
     suite.addTest('UnionField', testUnionField)
     suite.addTest('UnionParameter', testUnionParameter)
     suite.addTest('UnionRet', testUnionRet)
+
+    suite.addTest('Test Class of Any', testAnyClass)
+    suite.addTest('Test Class of never', testNeverClass)
+    suite.addTest('Test FixedArray<Any>', testFixedArrAnyClass)
 
     suite.addTest('Primitives', testPrimitive)
 

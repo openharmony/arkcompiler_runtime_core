@@ -42,6 +42,8 @@
 
 .record std.core.String <external>
 
+.record Y <external>
+
 .function i32 test_stbyidx(std.core.Object a0) <static, access.function=public> {
     lda.obj a0
     checkcast std.core.Array
@@ -89,7 +91,7 @@ jump_label_1:
     jge v2, jump_label_0
     lda v0
     ldarr.obj v1
-    call.acc std.core.Array.$_set:(std.core.Array,i32,std.core.Object), v3, v0, v0, 0x2
+    call.acc std.core.Array.$_set:(std.core.Array,i32,Y), v3, v0, v0, 0x2
     inci v0, 0x1
     jmp jump_label_1
 jump_label_0:
@@ -114,9 +116,9 @@ exit_bad_ld:
     return
 }
 
-.function std.core.Object std.core.Array.$_get(std.core.Array a0, i32 a1) <native, external, access.function=public>
+.function Y std.core.Array.$_get(std.core.Array a0, i32 a1) <native, external, access.function=public>
 
-.function void std.core.Array.$_set(std.core.Array a0, i32 a1, std.core.Object a2) <native, external, access.function=public>
+.function void std.core.Array.$_set(std.core.Array a0, i32 a1, Y a2) <native, external, access.function=public>
 
 .function void std.core.Array._ctor_(std.core.Array a0, i32 a1) <ctor, external, access.function=public>
 

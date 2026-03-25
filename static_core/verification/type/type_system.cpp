@@ -91,7 +91,14 @@ void TypeSystem::ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass
     set->insert(newTp);
 
     Class const *super = klass->GetBase();
-    if (super != nullptr) {
+    if (super == nullptr) {
+        if (!klass->IsAnyClass()) {
+            auto *anyClass = service_->GetClassLinker()->GetExtension(langCtx_)->GetClassRoot(ClassRoot::ANY);
+            if (anyClass != nullptr) {
+                ExtendBySupers(set, anyClass);
+            }
+        }
+    } else {
         ExtendBySupers(set, super);
     }
 

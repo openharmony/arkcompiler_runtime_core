@@ -13,44 +13,43 @@
  * limitations under the License.
  */
 
-#include "include/tooling/debug_interface.h"
-#include "include/tooling/vreg_value.h"
-#include "intrinsics.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/tooling/helpers.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_string.h"
+#include "runtime/include/tooling/debug_interface.h"
+#include "runtime/include/tooling/vreg_value.h"
 
 namespace ark::ets::intrinsics {
-
-static void SetNotFoundException(EtsLong regNumber, EtsCoroutine *coroutine, std::string_view typeName)
-{
-    auto errorMsg =
-        "No local variable found at vreg #" + std::to_string(regNumber) + " and type " + std::string(typeName);
-    ark::ets::ThrowEtsException(coroutine, PlatformTypes()->coreLinkerUnresolvedFieldError, errorMsg);
-}
 
 static void SetRuntimeException(EtsLong regNumber, EtsCoroutine *coroutine, std::string_view typeName)
 {
     auto errorMsg =
         "Failed to access variable at vreg #" + std::to_string(regNumber) + " and type " + std::string(typeName);
-    ark::ets::ThrowEtsException(coroutine, PlatformTypes()->escompatError, errorMsg);
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, errorMsg);
 }
 
 template <typename T>
-static T DebuggerAPIGetLocal(EtsCoroutine *coroutine, EtsLong regNumber)
+static T DebuggerAPIGetLocal(EtsLong regNumber)
 {
     static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
 
-    ASSERT(coroutine);
-
-    if (regNumber < 0) {
-        SetNotFoundException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *runtime = coroutine->GetPandaVM()->GetRuntime();
+    if (UNLIKELY(!runtime->IsDebugMode())) {
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, "Debugger is not enabled");
+        return static_cast<T>(0);
+    }
+    if (UNLIKELY(regNumber < 0)) {
+        SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+        return static_cast<T>(0);
     }
 
     ark::tooling::VRegValue vregValue;
-    auto &debugger = Runtime::GetCurrent()->StartDebugSession()->GetDebugger();
+    auto &debugger = runtime->StartDebugSession()->GetDebugger();
     auto err = debugger.GetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), PREVIOUS_FRAME_DEPTH, regNumber,
                                     &vregValue);
     if (err) {
@@ -61,79 +60,69 @@ static T DebuggerAPIGetLocal(EtsCoroutine *coroutine, EtsLong regNumber)
     return ark::ets::tooling::VRegValueToEtsValue<T>(vregValue);
 }
 
-EtsBoolean DebuggerAPIGetLocalBoolean(EtsLong regNumber)
+extern "C" EtsBoolean DebuggerAPIGetLocalBoolean(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsBoolean>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsBoolean>(regNumber);
 }
 
-EtsByte DebuggerAPIGetLocalByte(EtsLong regNumber)
+extern "C" EtsByte DebuggerAPIGetLocalByte(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsByte>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsByte>(regNumber);
 }
 
-EtsShort DebuggerAPIGetLocalShort(EtsLong regNumber)
+extern "C" EtsShort DebuggerAPIGetLocalShort(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsShort>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsShort>(regNumber);
 }
 
-EtsChar DebuggerAPIGetLocalChar(EtsLong regNumber)
+extern "C" EtsChar DebuggerAPIGetLocalChar(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsChar>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsChar>(regNumber);
 }
 
-EtsInt DebuggerAPIGetLocalInt(EtsLong regNumber)
+extern "C" EtsInt DebuggerAPIGetLocalInt(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsInt>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsInt>(regNumber);
 }
 
-EtsFloat DebuggerAPIGetLocalFloat(EtsLong regNumber)
+extern "C" EtsFloat DebuggerAPIGetLocalFloat(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsFloat>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsFloat>(regNumber);
 }
 
-EtsDouble DebuggerAPIGetLocalDouble(EtsLong regNumber)
+extern "C" EtsDouble DebuggerAPIGetLocalDouble(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsDouble>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsDouble>(regNumber);
 }
 
-EtsLong DebuggerAPIGetLocalLong(EtsLong regNumber)
+extern "C" EtsLong DebuggerAPIGetLocalLong(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    return DebuggerAPIGetLocal<EtsLong>(coroutine, regNumber);
+    return DebuggerAPIGetLocal<EtsLong>(regNumber);
 }
 
-EtsObject *DebuggerAPIGetLocalObject(EtsLong regNumber)
+extern "C" EtsObject *DebuggerAPIGetLocalObject(EtsLong regNumber)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
-    auto *obj = DebuggerAPIGetLocal<ObjectHeader *>(coroutine, regNumber);
-    obj = (obj == nullptr) ? coroutine->GetNullValue() : obj;
-    VMHandle<ObjectHeader> objHandle(coroutine, obj);
-    return EtsObject::FromCoreType(objHandle.GetPtr());
+    return DebuggerAPIGetLocal<EtsObject *>(regNumber);
 }
 
 template <typename T>
-static void DebuggerAPISetLocal(EtsCoroutine *coroutine, EtsLong regNumber, T value)
+static void DebuggerAPISetLocal(EtsLong regNumber, T value)
 {
     static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
 
-    ASSERT(coroutine);
-
-    if (regNumber < 0) {
-        SetNotFoundException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *runtime = coroutine->GetPandaVM()->GetRuntime();
+    if (UNLIKELY(!runtime->IsDebugMode())) {
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, "Debugger is not enabled");
+        return;
+    }
+    if (UNLIKELY(regNumber < 0)) {
+        SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
         return;
     }
 
     auto vregValue = ark::ets::tooling::EtsValueToVRegValue<T>(value);
-    auto &debugger = Runtime::GetCurrent()->StartDebugSession()->GetDebugger();
+    auto &debugger = runtime->StartDebugSession()->GetDebugger();
     auto err = debugger.SetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), PREVIOUS_FRAME_DEPTH, regNumber,
                                     vregValue);
     if (err) {
@@ -142,64 +131,52 @@ static void DebuggerAPISetLocal(EtsCoroutine *coroutine, EtsLong regNumber, T va
     }
 }
 
-void DebuggerAPISetLocalBoolean(EtsLong regNumber, EtsBoolean value)
+extern "C" void DebuggerAPISetLocalBoolean(EtsLong regNumber, EtsBoolean value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsBoolean>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsBoolean>(regNumber, value);
 }
 
-void DebuggerAPISetLocalByte(EtsLong regNumber, EtsByte value)
+extern "C" void DebuggerAPISetLocalByte(EtsLong regNumber, EtsByte value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsByte>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsByte>(regNumber, value);
 }
 
-void DebuggerAPISetLocalShort(EtsLong regNumber, EtsShort value)
+extern "C" void DebuggerAPISetLocalShort(EtsLong regNumber, EtsShort value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsShort>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsShort>(regNumber, value);
 }
 
-void DebuggerAPISetLocalChar(EtsLong regNumber, EtsChar value)
+extern "C" void DebuggerAPISetLocalChar(EtsLong regNumber, EtsChar value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsChar>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsChar>(regNumber, value);
 }
 
-void DebuggerAPISetLocalInt(EtsLong regNumber, EtsInt value)
+extern "C" void DebuggerAPISetLocalInt(EtsLong regNumber, EtsInt value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsInt>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsInt>(regNumber, value);
 }
 
-void DebuggerAPISetLocalFloat(EtsLong regNumber, EtsFloat value)
+extern "C" void DebuggerAPISetLocalFloat(EtsLong regNumber, EtsFloat value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsFloat>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsFloat>(regNumber, value);
 }
 
-void DebuggerAPISetLocalDouble(EtsLong regNumber, EtsDouble value)
+extern "C" void DebuggerAPISetLocalDouble(EtsLong regNumber, EtsDouble value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsDouble>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsDouble>(regNumber, value);
 }
 
-void DebuggerAPISetLocalLong(EtsLong regNumber, EtsLong value)
+extern "C" void DebuggerAPISetLocalLong(EtsLong regNumber, EtsLong value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    DebuggerAPISetLocal<EtsLong>(coroutine, regNumber, value);
+    DebuggerAPISetLocal<EtsLong>(regNumber, value);
 }
 
-void DebuggerAPISetLocalObject(EtsLong regNumber, EtsObject *value)
+extern "C" void DebuggerAPISetLocalObject(EtsLong regNumber, EtsObject *value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> objHandle(coroutine, value->GetCoreType());
-
-    DebuggerAPISetLocal<ObjectHeader *>(coroutine, regNumber, objHandle.GetPtr()->GetCoreType());
+    DebuggerAPISetLocal<EtsObject *>(regNumber, value);
 }
 
-EtsString *DebuggerAPIGetCallerABCPath()
+extern "C" EtsString *DebuggerAPIGetCallerABCPath()
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     std::string abcPath;

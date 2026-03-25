@@ -14,7 +14,7 @@
  */
 
 class TestStsClass {
-    obj: Object|null = null;
+    public obj: Any = null;
     constructor() {
     }
 }
@@ -22,7 +22,7 @@ class TestStsClass {
 function xgc(): void { 
     try {
         GC.waitForFinishGC(JSRuntime.xgc());
-    } catch(e) {
-        arktest.assertTrue(false, "Unexpected error during XGC");
+    } catch (e) {
+        arktest.assertTrue(false, 'Unexpected error during XGC');
     }
 }

@@ -1,0 +1,158 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+.record Y <external>
+.record N <external>
+.record A {}
+
+#! CHECKER      IsInstance instruction in functions 1.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo1"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "IsInstance"
+.function i32 foo1(Y a0) <static, access.function=public> {
+    lda.obj a0
+    isinstance Y
+    return
+}
+
+#! CHECKER      IsInstance instruction in functions 2.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo2"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "IsInstance"
+.function i32 foo2(Y a0) <static, access.function=public> {
+    lda.obj a0
+    isinstance N
+    return
+}
+
+#! CHECKER      IsInstance instruction in functions 3.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo3"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "IsInstance"
+.function i32 foo3(Y a0) <static, access.function=public> {
+    lda.obj a0
+    isinstance Y[]
+    return
+}
+
+#! CHECKER      IsInstance instruction in functions 4.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo4"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "IsInstance"
+.function i32 foo4(Y a0) <static, access.function=public> {
+    lda.obj a0
+    isinstance Y[][]
+    return
+}
+
+#! CHECKER      Checkcast instruction in functions 1.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo5"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "CheckCast"
+.function i32 foo5(Y a0) <static, access.function=public> {
+try_begin:
+    lda.obj a0
+    checkcast Y
+    ldai 0
+    return
+try_end:
+catch_begin:
+    ldai 1
+    return
+.catchall try_begin, try_end, catch_begin
+}
+
+#! CHECKER      Checkcast instruction in functions 2.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo6"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "CheckCast"
+.function i32 foo6(Y a0) <static, access.function=public> {
+try_begin:
+    lda.obj a0
+    checkcast N
+    ldai 1
+    return
+try_end:
+catch_begin:
+    ldai 0
+    return
+.catchall try_begin, try_end, catch_begin
+}
+
+#! CHECKER      Checkcast instruction in functions 3.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo7"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "CheckCast"
+.function i32 foo7(Y a0) <static, access.function=public> {
+try_begin:
+    lda.obj a0
+    checkcast Y[]
+    ldai 1
+    return
+try_end:
+catch_begin:
+    ldai 0
+    return
+.catchall try_begin, try_end, catch_begin
+}
+
+#! CHECKER      Checkcast instruction in functions 4.
+#! RUN          force_jit: true, entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::foo8"
+#! PASS_AFTER   "IrBuilder"
+#! INST         "CheckCast"
+.function i32 foo8(Y a0) <static, access.function=public> {
+try_begin:
+    lda.obj a0
+    checkcast Y[][]
+    ldai 1
+    return
+try_end:
+catch_begin:
+    ldai 0
+    return
+.catchall try_begin, try_end, catch_begin
+}
+
+.function i32 main() <static, access.function=public> {
+    newobj v0, A
+
+    call foo1, v0
+    jeqz exit_failure
+    call foo2, v0
+    jnez exit_failure
+    call foo3, v0
+    jnez exit_failure
+    call foo4, v0
+    jnez exit_failure
+    call foo5, v0
+    jnez exit_failure
+    call foo6, v0
+    jnez exit_failure
+    call foo7, v0
+    jnez exit_failure
+    call foo8, v0
+    jnez exit_failure
+    ldai 0
+    return
+exit_failure:
+    ldai 1
+    return
+}

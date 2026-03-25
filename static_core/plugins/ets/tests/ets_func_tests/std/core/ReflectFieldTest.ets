@@ -43,6 +43,32 @@ class Point3D extends Point {
     ability: String | Number = new Number(1)
 }
 
+class AnyTestClass {
+    anyField: Any
+}
+
+function foo(): never {
+    throw new Error("foo() never returns")
+}
+
+class NeverTestClass {
+    neverField: never = foo()
+}
+
+function testFieldAny(): void {
+    let anyType = Class.from<Any>()
+    let testClassType = Class.from<AnyTestClass>()
+    let anyField = testClassType.getInstanceField("anyField")!
+    arktest.assertEQ(anyField.getType(), anyType)
+}
+
+function testFieldNever(): void {
+    let neverType = Class.from<never>()
+    let testClassType = Class.from<NeverTestClass>()
+    let neverField = testClassType.getInstanceField("neverField")!
+    arktest.assertEQ(neverField.getType(), neverType)
+}
+
 function testField(): void {
     let typePoint = Class.from<Point>()
     let xf = typePoint.getInstanceField("x")!
@@ -91,6 +117,9 @@ function testField(): void {
     arktest.assertFalse(rf.isPrivate())
     arktest.assertEQ(abilityf.getName(), "ability")
     arktest.assertEQ(abilityf.getOwner(), typePoint3D)
+
+    testFieldAny()
+    testFieldNever()
 }
 
 class UClassA {}
