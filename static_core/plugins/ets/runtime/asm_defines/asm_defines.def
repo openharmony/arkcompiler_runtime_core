@@ -67,6 +67,18 @@ DEFINE_VALUE(PLATFORM_TYPES_CORE_LINE_STRING_CLASS_OFFSET, ark::ets::EtsPlatform
 DEFINE_VALUE(PLATFORM_TYPES_CORE_SLICED_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::CORE_SLICED_STRING)
 DEFINE_VALUE(PLATFORM_TYPES_CORE_TREE_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::CORE_TREE_STRING)
 
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_AWAITEE_OFFSET, ark::ets::EtsAsyncContext::GetAwaiteeOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_RETURN_VALUE_OFFSET, ark::ets::EtsAsyncContext::GetReturnValueOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_REF_VALUES_OFFSET, ark::ets::EtsAsyncContext::GetRefValuesOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_PRIM_VALUES_OFFSET, ark::ets::EtsAsyncContext::GetPrimValuesOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_FRAME_OFFSETS_OFFSET, ark::ets::EtsAsyncContext::GetFrameOffsetsOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET, ark::ets::EtsAsyncContext::GetRefCountOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET, ark::ets::EtsAsyncContext::GetPrimCountOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET, ark::ets::EtsAsyncContext::GetAwaitIdOffset())
+DEFINE_VALUE(ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET, ark::ets::EtsAsyncContext::GetCompiledCodeOffset())
+
+DEFINE_VALUE(ETS_PROMISE_VALUE_OFFSET, ark::ets::EtsPromise::ValueOffset())
+
 DEFINE_VALUE(ESCOMPAT_MAP_DATA_OFFSET, ark::ets::EtsEscompatMap::GetDataOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_BUCKETS_OFFSET, ark::ets::EtsEscompatMap::GetBucketsOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_CAP_OFFSET, ark::ets::EtsEscompatMap::GetCapOffset())

@@ -3213,7 +3213,7 @@ include_plugin 'interpreter_main_loop'
       Intrinsic(:UNREACHABLE).Terminator.void
     end
 
-    if (i.properties & ['jump', 'call', 'return']).empty?
+    if (i.properties & ['jump', 'call', 'return', 'dispatch', 'suspend']).empty?
       if !i.exceptions.include?('x_throw')
         if i.exceptions.include?('x_ecma')
           If(exception_val(), 0).NE.Unlikely {

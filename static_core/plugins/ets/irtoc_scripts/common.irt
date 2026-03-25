@@ -56,6 +56,19 @@ module EtsConstants
     ETS_BIG_INT_SIGN_OFFSET = "cross_values::GetEtsBigIntSignOffset(GetArch())"
     ETS_BIG_INT_TO_LONG_SHIFT = "static_cast<uint64_t>(32U)"
     ETS_BIG_INT_TO_LONG_MASK = "((uint64_t{1U} << uint64_t{32U}) - uint64_t{1U})"
+
+    ETS_ASYNC_CONTEXT_AWAITEE_OFFSET = "cross_values::GetEtsAsyncContextAwaiteeOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_RETURN_VALUE_OFFSET = "cross_values::GetEtsAsyncContextReturnValueOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_REF_VALUES_OFFSET = "cross_values::GetEtsAsyncContextRefValuesOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_PRIM_VALUES_OFFSET = "cross_values::GetEtsAsyncContextPrimValuesOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_FRAME_OFFSETS_OFFSET = "cross_values::GetEtsAsyncContextFrameOffsetsOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET = "cross_values::GetEtsAsyncContextRefCountOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET = "cross_values::GetEtsAsyncContextPrimCountOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET = "cross_values::GetEtsAsyncContextAwaitIdOffset(graph->GetArch())"
+    ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET = "cross_values::GetEtsAsyncContextCompiledCodeOffset(graph->GetArch())"
+
+    ETS_PROMISE_VALUE_OFFSET = "cross_values::GetEtsPromiseValueOffset(graph->GetArch())"
+
     LOG2_BYTES_PER_I32 = "2"
 
     OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
