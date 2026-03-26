@@ -191,7 +191,7 @@ if (panda_runtime_sdk_build) {
   enable_irtoc = false
 }
 
-if (ark_static_use_64_bit_managed_pointer || current_os == "win" ||
+if (current_os == "win" ||
     current_os == "mingw" || current_os == "winuwp" || current_os == "mac" ||
     is_emulator || ark_use_common_runtime) {
   is_llvmbackend = false

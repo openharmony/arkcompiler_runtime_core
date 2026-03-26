@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,12 +156,20 @@ public:
     bool IsExternal(llvm::CallInst *call);
 
 public:
-    static constexpr auto NO_INTRINSIC_ID = static_cast<IntrinsicId>(-1);
+    // We specify the address space and GC strategy for managed pointers from llvm-prebuilts:
+    // 271 AS and the 'ark' GC strategy are used for 32-bit pointers,
+    // 1 AS and the 'statepoint-example' GC strategy are used for 64-bit pointers.
+#if defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER)
+    static constexpr auto GC_ADDR_SPACE = 1;
+    static constexpr std::string_view GC_STRATEGY = "statepoint-example";
+#else
     static constexpr auto GC_ADDR_SPACE = 271;
+    static constexpr std::string_view GC_STRATEGY = "ark";
+#endif
+    static constexpr auto NO_INTRINSIC_ID = static_cast<IntrinsicId>(-1);
     static constexpr auto VOLATILE_ORDER = llvm::AtomicOrdering::SequentiallyConsistent;
     static constexpr auto NOT_ATOMIC_ORDER = llvm::AtomicOrdering::NotAtomic;
     static constexpr std::string_view GC_SAFEPOINT_POLL_NAME = "gc.safepoint_poll";
-    static constexpr std::string_view GC_STRATEGY = "ark";
     static constexpr std::string_view FUNCTION_MD_CLASS_ID = "class_id";
     static constexpr std::string_view FUNCTION_MD_INLINE_MODULE = "inline_module";
     static constexpr std::string_view PATCH_STACK_ADJUSTMENT_COMMENT = " ${:comment} patch-stack-adjustment";
