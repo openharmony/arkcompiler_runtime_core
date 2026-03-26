@@ -13,14 +13,30 @@
  * limitations under the License.
  */
 
+{% for timing in ["compile", "runtime"] %}
+
 /*---
-desc: Cannot use 'this' in field initializer.
-assert: A compile-time error occurs if the keyword this appears elsewhere (not in allowed contexts).
-tags: [compile-only, negative]
+desc: |-
+    The instance field initializer expression cannot use
+    the following directly in any form:
+    • super; or
+    • this.
+    If the initializer expression contains one of the above patterns,
+    then a compile-time warning occurs.
+{% if 'compile' in timing %}
+tags: [compile-only]
 expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
+{% endif %}
 ---*/
+
+// #2345 after runner is made to support this properly, remove compile-only tag and "timing" loop
 
 class A {
   public x: int = 10;
   public y: int = this.x + 5;
 }
+
+function main(): void {
+}
+
+{% endfor %}

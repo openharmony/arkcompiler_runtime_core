@@ -210,7 +210,9 @@ cases:
   - desc: |-
       >-
         Checking for initialization with field initializer
-        with usage this or super.
+        with usage super.
+        super is to access constructors declared in the superclass,
+        or the overridden method version of the superclass.
     check_variants:
       - {check_type: "int", check_value: "5"}
       - {check_type: "double", check_value: "7.3"}
@@ -221,5 +223,5 @@ cases:
           protected _v: [check_type] = [check_value]
         }
         class A extends Base {
-          protected _field: [check_type] = super.v
+          protected _field: [check_type] = super._v
         }

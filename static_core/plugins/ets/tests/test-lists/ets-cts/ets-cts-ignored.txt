@@ -288,9 +288,6 @@
 07.expressions/07.spread_expression/spex_61.ets
 07.expressions/07.spread_expression/spex_62.ets
 
-#32640
-07.expressions/09.this_expression/this_in_field_initializer_n.ets
-
 #32641
 07.expressions/09.this_expression/this_in_object_literal.ets
 
@@ -913,38 +910,6 @@
 #32625
 09.classes/06.field_declarations/implementing_property_wrong_type_neg1.ets
 09.classes/06.field_declarations/implementing_property_wrong_type_neg2.ets
-
-#29575
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_96.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_97.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_98.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_99.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_100.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_101.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_102.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_103.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_104.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_105.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_106.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_107.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_108.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_109.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_110.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_111.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_112.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_113.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_114.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_115.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_116.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_117.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_118.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_119.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_120.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_121.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_122.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_123.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_124.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_125.ets
 
 #32586
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_0.ets
