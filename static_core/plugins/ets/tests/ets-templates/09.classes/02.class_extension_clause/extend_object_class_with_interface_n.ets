@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: Extend class.
-assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
+desc: 22148. Incorrect processing of circular inheritance. Extend Object class with interface.
+assert: >-
+    The implements clause must not appear in the definition of the class Object, or a compile-time error occurs,
+    because it is the primordial class and has no direct superclass.
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0295: Object is a predefined type, cannot be used as an identifier"
 ---*/
 
-class A {}
+interface MyInterface {}
 
-final class C extends A {}
-
-function main(): void {
-    let c = new C;
-    arktest.assertTrue(c instanceof A);
+class Object implements MyInterface {
 }

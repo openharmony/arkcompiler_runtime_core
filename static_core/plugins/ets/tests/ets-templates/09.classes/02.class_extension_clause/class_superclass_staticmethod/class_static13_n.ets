@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,23 @@
  */
 
 /*---
-desc: Extend class.
-assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
+desc: A subclass calls a static method of its superclass through the this keyword.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'this' cannot be referenced from a static context"
 ---*/
 
-class A {}
+class Parent {
+  static staticMethod(): string {
+    return "Parent static method";
+  }
+}
 
-final class C extends A {}
+class Child extends Parent {
+  static callParentStaticMethod(): string {
+    return this.staticMethod();
+  }
+}
 
 function main(): void {
-    let c = new C;
-    arktest.assertTrue(c instanceof A);
+  arktest.assertEQ(Child.callParentStaticMethod(), "Parent static method");
 }

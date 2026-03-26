@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,23 @@
  */
 
 /*---
-desc: Extend class.
-assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
+desc: A subclass calls a static method of its superclass through this.constructor.
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0316: Hard keyword 'constructor' cannot be used as identifier"
 ---*/
 
-class A {}
+class Parent {
+  static staticMethod(): string {
+    return "Parent static method";
+  }
+}
 
-final class C extends A {}
+class Child extends Parent {
+  static callParentStaticMethod(): string {
+    return (this.constructor as typeof Parent).staticMethod();
+  }
+}
 
 function main(): void {
-    let c = new C;
-    arktest.assertTrue(c instanceof A);
+  arktest.assertEQ(Child.callParentStaticMethod(), "Parent static method");
 }
