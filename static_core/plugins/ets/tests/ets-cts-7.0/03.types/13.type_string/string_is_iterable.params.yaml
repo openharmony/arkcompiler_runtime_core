@@ -1,0 +1,25 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - string: '\x17\x2b\xef\0\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!'
+    length: 35
+    checks:
+      - { id: 0,  value: '\x17'     }
+      - { id: 3,  value: '\0'       }
+      - { id: 4,  value: '\u1f48'   }
+      - { id: 9,  value: '\n'       }
+      - { id: 11, value: '\u{CAFE}' }
+      - { id: 14, value: '生'       }
+      - { id: 19, value: 'С'        }
+      - { id: 34, value: '!'        }
