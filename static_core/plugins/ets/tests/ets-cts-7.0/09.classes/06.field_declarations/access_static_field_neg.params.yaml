@@ -1,0 +1,643 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access outside the class by simple name
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+    logic: |-
+      x++
+    expected_out:
+      - |-
+        "Semantic error ESE0143: Unresolved reference x"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access outside the class by class instance usage
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+    logic: |-
+      let a: A = new A()
+      let v = a.x
+    expected_out:
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access outside the class by class instance usage
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+    logic: |-
+      let a: A = new A()
+      a.x = 5
+    expected_out:
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class by simple name
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          constructor() {
+            x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          y: int = x
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static y: int = x
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class by this usage
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+          foo(): void {
+            this.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          get field(): int {
+            return this.x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          set field(a: int) {
+            this.x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          constructor() {
+            this.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          y: int = this.x
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static y: int = this.x
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static foo(): void {
+            this.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static get field(): int {
+            return this.x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static set field(a: int) {
+            this.x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+          static {
+            this.x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification.
+        Static members of a superclass are not inherited. The subclass
+        which wants to use static members of its superclass
+        must use explicit qualification using the superclass name.
+    params: |-
+      access outside the class by subclass name
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {}
+    logic: |-
+      B.x++
+    expected_out:
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification.
+        Static members of a superclass are not inherited. The subclass
+        which wants to use static members of its superclass
+        must use explicit qualification using the superclass name.
+    params: |-
+      access within the subclass by simple name
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          constructor() {
+            super()
+            x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          y: int = x
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static y: int = x
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static foo(): void {
+            x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static get field(): int {
+            return x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static set field(a: int) {
+            x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static {
+            x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+      - |-
+        "Semantic error ESE0173: Static property 'x' must be accessed through it's class 'A'"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification.
+        Static members of a superclass are not inherited. The subclass
+        which wants to use static members of its superclass
+        must use explicit qualification using the superclass name.
+    params: |-
+      access within the subclass by this usage
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          foo(): void {
+            this.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          get field(): int {
+            return this.x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          set field(a: int) {
+            this.x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          constructor() {
+            super()
+            this.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          y: int = this.x
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static y: int = this.x
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static foo(): void {
+            this.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static get field(): int {
+            return this.x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static set field(a: int) {
+            this.x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static {
+            this.x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+      - |-
+        "Semantic error ESE0202: 'this' cannot be referenced from a static context"
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification.
+        Static members of a superclass are not inherited. The subclass
+        which wants to use static members of its superclass
+        must use explicit qualification using the superclass name.
+    params: |-
+      access within the subclass by subclass name
+    decl_variants:
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          foo(): void {
+            B.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          get field(): int {
+            return B.x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          set field(a: int) {
+            B.x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          constructor() {
+            super()
+            B.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          y: int = B.x
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static y: int = B.x
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static foo(): void {
+            B.x++
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static get field(): int {
+            return B.x
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static set field(a: int) {
+            B.x = a
+          }
+        }
+      - |-
+        class A {
+          static x: int = 5
+        }
+        class B extends A {
+          static {
+            B.x++
+          }
+        }
+    expected_out:
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"
+      - |-
+        "Semantic error ESE0207: 'x' is a static property of 'A'"

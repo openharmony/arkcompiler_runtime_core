@@ -1,0 +1,1083 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        If initializers for all members are omitted, then the first member
+        is assigned the value zero. The other member is assigned the value
+        of the immediately preceding member plus one.
+        params: all enum member values are set implicitly
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+          enum Color2 { Red, Green, Blue }
+      - decl_data: |-
+          enum Color { Red, Green, Blue, }
+          enum Color2 { Red, Green, Blue, }
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        let r: Color = Color.Red
+        let g: Color = Color.Green
+        let b: Color = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof int)
+        arktest.assertTrue(g.valueOf() instanceof int)
+        arktest.assertTrue(b.valueOf() instanceof int)
+        arktest.assertEQ(r, 0)
+        arktest.assertEQ(g, 1)
+        arktest.assertEQ(b, 2)
+      - |-
+        let r = Color.Red
+        let g = Color.Green
+        let b = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof int)
+        arktest.assertTrue(g.valueOf() instanceof int)
+        arktest.assertTrue(b.valueOf() instanceof int)
+        arktest.assertEQ(r, 0)
+        arktest.assertEQ(g, 1)
+        arktest.assertEQ(b, 2)
+      - |-
+        arktest.assertTrue(Color.Red instanceof Color)
+        arktest.assertTrue(Color.Green instanceof Color)
+        arktest.assertTrue(Color.Blue instanceof Color)
+        arktest.assertFalse(Color.Red instanceof Color2)
+        arktest.assertFalse(Color.Green instanceof Color2)
+        arktest.assertFalse(Color.Blue instanceof Color2)
+        arktest.assertTrue(Color.Red.valueOf() instanceof int)
+        arktest.assertTrue(Color.Green.valueOf() instanceof int)
+        arktest.assertTrue(Color.Blue.valueOf() instanceof int)
+        arktest.assertEQ(Color.Red, 0)
+        arktest.assertEQ(Color.Green, 1)
+        arktest.assertEQ(Color.Blue, 2)
+    test_suffix: "aemvasi"
+    ids: "0-5"
+
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        params: modifying enum variable by other named constant
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        let r: Color = Color.Red
+        r = Color.Blue
+        arktest.assertEQ(Color.Red, 0)
+        arktest.assertEQ(Color.Green, 1)
+        arktest.assertEQ(Color.Blue, 2)
+        arktest.assertEQ(r, 2)
+      - |-
+        let g: Color = Color.Green
+        g = Color.Blue
+        arktest.assertEQ(Color.Red, 0)
+        arktest.assertEQ(Color.Green, 1)
+        arktest.assertEQ(Color.Blue, 2)
+        arktest.assertEQ(g, 2)
+      - |-
+        let b: Color = Color.Blue
+        b = Color.Red
+        arktest.assertEQ(Color.Red, 0)
+        arktest.assertEQ(Color.Green, 1)
+        arktest.assertEQ(Color.Blue, 2)
+        arktest.assertEQ(b, 0)
+    test_suffix: "mevbonc"
+    ids: "6-8"
+
+  - desc: |-
+      >-
+        Qualification by type name is mandatory to access
+        the enumeration member, except initializer expression
+        params: accessing without qualification by type name
+    check_variants:
+      - decl_data: |-
+          enum Flags { Read = 3, Write = 5, ReadWrite = Read | Write }
+        check_val1: "3"
+        check_val2: "5"
+        check_val3: "7"
+        check_type: "int"
+      - decl_data: |-
+          enum Flags: long { Read = 3, Write = 5, ReadWrite = Read | Write }
+        check_val1: "3"
+        check_val2: "5"
+        check_val3: "7"
+        check_type: "long"
+      - decl_data: |-
+          enum Flags: int { Read = 3, Write = 5, ReadWrite = Read | Write }
+        check_val1: "3"
+        check_val2: "5"
+        check_val3: "7"
+        check_type: "int"
+      - decl_data: |-
+          enum Flags: short { Read = 3, Write = 5, ReadWrite = Read | Write }
+        check_val1: "3"
+        check_val2: "5"
+        check_val3: "7"
+        check_type: "short"
+      - decl_data: |-
+          enum Flags: byte { Read = 3, Write = 5, ReadWrite = Read | Write }
+        check_val1: "3"
+        check_val2: "5"
+        check_val3: "7"
+        check_type: "byte"
+      - decl_data: |-
+          enum Flags: double { Read = 5.5, Write = 72.3, ReadWrite = Read + Write }
+        check_val1: "5.5"
+        check_val2: "72.3"
+        check_val3: "77.8"
+        check_type: "double"
+      - decl_data: |-
+          enum Flags: float { Read = 5.5f, Write = 72.3f, ReadWrite = Read + Write }
+        check_val1: "5.5f"
+        check_val2: "72.3f"
+        check_val3: "77.8f"
+        check_type: "float"
+      - decl_data: |-
+          enum Flags { Read = "abc", Write = "efg", ReadWrite = Read + Write }
+        check_val1: "\"abc\""
+        check_val2: "\"efg\""
+        check_val3: "\"abcefg\""
+        check_type: "string"
+      - decl_data: |-
+          enum Flags: string { Read = "abc", Write = "efg", ReadWrite = Read + Write }
+        check_val1: "\"abc\""
+        check_val2: "\"efg\""
+        check_val3: "\"abcefg\""
+        check_type: "string"
+    decl: |-
+      [decl_data]
+    logic: |-
+      let r: Flags = Flags.Read
+      let w: Flags = Flags.Write
+      let rw: Flags = Flags.ReadWrite
+      arktest.assertTrue(r instanceof Flags)
+      arktest.assertTrue(w instanceof Flags)
+      arktest.assertTrue(rw instanceof Flags)
+      arktest.assertTrue(r.valueOf() instanceof [check_type])
+      arktest.assertTrue(w.valueOf() instanceof [check_type])
+      arktest.assertTrue(rw.valueOf() instanceof [check_type])
+      arktest.assertEQ(r, [check_val1])
+      arktest.assertEQ(w, [check_val2])
+      arktest.assertEQ(rw, [check_val3])
+    test_suffix: "awqbtn"
+    ids: "9-17"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: setting enum member values explicitly by const variable
+    check_variants:
+      - decl_data: |-
+          const c: int = 5
+          const check_val: int = c
+          enum IntEnum { A = 5 }
+      - decl_data: |-
+          const c: short = 5
+          const check_val: int = c
+          enum IntEnum { A = 5 }
+      - decl_data: |-
+          const c: byte = 5
+          const check_val: int = c
+          enum IntEnum { A = 5 }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(IntEnum.A instanceof IntEnum)
+      arktest.assertTrue(IntEnum.A.valueOf() instanceof int)
+      arktest.assertEQ(IntEnum.A, check_val)
+    test_suffix: "semvebcv"
+    ids: "18-20"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: int enum base type, first explicitly, other implicitly
+    check_variants:
+      - decl_data: |-
+          enum IntEnum { A = 2, B, C }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(IntEnum.A instanceof IntEnum)
+      arktest.assertTrue(IntEnum.B instanceof IntEnum)
+      arktest.assertTrue(IntEnum.C instanceof IntEnum)
+      arktest.assertTrue(IntEnum.A.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.B.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.C.valueOf() instanceof int)
+      arktest.assertEQ(IntEnum.A, 2)
+      arktest.assertEQ(IntEnum.B, 3)
+      arktest.assertEQ(IntEnum.C, 4)
+    test_suffix: "iebtfeoi"
+    ids: "21"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: int enum base type, widening numeric conversions, not constant expressions
+    check_variants:
+      - decl_data: |-
+          enum IntEnum { A = 10, B, C = 13 as byte, D = 17 as short }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(IntEnum.A instanceof IntEnum)
+      arktest.assertTrue(IntEnum.B instanceof IntEnum)
+      arktest.assertTrue(IntEnum.C instanceof IntEnum)
+      arktest.assertTrue(IntEnum.D instanceof IntEnum)
+      arktest.assertTrue(IntEnum.A.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.B.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.C.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.D.valueOf() instanceof int)
+      arktest.assertEQ(IntEnum.A, 10)
+      arktest.assertEQ(IntEnum.B, 11)
+      arktest.assertEQ(IntEnum.C, 13)
+      arktest.assertEQ(IntEnum.D, 17)
+    test_suffix: "iebtwncnce"
+    ids: "22"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: setting int enum member values explicitly by expressions
+    check_variants:
+      - decl_data: |-
+          enum IntEnum { A = 0, B = 1 << 1, C = 1 << 2,
+            D = (B | C), E = (B | C) << 1 }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(IntEnum.A instanceof IntEnum)
+      arktest.assertTrue(IntEnum.B instanceof IntEnum)
+      arktest.assertTrue(IntEnum.C instanceof IntEnum)
+      arktest.assertTrue(IntEnum.D instanceof IntEnum)
+      arktest.assertTrue(IntEnum.E instanceof IntEnum)
+      arktest.assertTrue(IntEnum.A.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.B.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.C.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.D.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.E.valueOf() instanceof int)
+      arktest.assertEQ(IntEnum.A, 0)
+      arktest.assertEQ(IntEnum.B, 2)
+      arktest.assertEQ(IntEnum.C, 4)
+      arktest.assertEQ(IntEnum.D, 6)
+      arktest.assertEQ(IntEnum.E, 12)
+    test_suffix: "siemvebe"
+    ids: "23"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: setting part of int enum member values explicitly by const expressions
+    check_variants:
+      - decl_data: |-
+          enum IntEnum { A = 0, B = 1 << 1, C = 1 << 2,
+            D, E }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(IntEnum.A instanceof IntEnum)
+      arktest.assertTrue(IntEnum.B instanceof IntEnum)
+      arktest.assertTrue(IntEnum.C instanceof IntEnum)
+      arktest.assertTrue(IntEnum.D instanceof IntEnum)
+      arktest.assertTrue(IntEnum.E instanceof IntEnum)
+      arktest.assertTrue(IntEnum.A.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.B.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.C.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.D.valueOf() instanceof int)
+      arktest.assertTrue(IntEnum.E.valueOf() instanceof int)
+      arktest.assertEQ(IntEnum.A, 0)
+      arktest.assertEQ(IntEnum.B, 2)
+      arktest.assertEQ(IntEnum.C, 4)
+      arktest.assertEQ(IntEnum.D, 5)
+      arktest.assertEQ(IntEnum.E, 6)
+    test_suffix: "spoiemvebce"
+    ids: "24"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: setting int enum member values explicitly by not constant expression
+    check_variants:
+      - decl_data: |-
+          function foo(): int {
+            return 5
+          }
+          enum IntEnum { A = foo() }
+      - decl_data: |-
+          function foo(): short {
+            return 5
+          }
+          enum IntEnum { A = foo() }
+      - decl_data: |-
+          function foo(): byte {
+            return 5
+          }
+          enum IntEnum { A = foo() }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(IntEnum.A instanceof IntEnum)
+      arktest.assertTrue(IntEnum.A.valueOf() instanceof int)
+      arktest.assertEQ(IntEnum.A, 5)
+    test_suffix: "siemvebnce"
+    ids: "25-27"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: setting string enum member values explicitly by not constant expression
+    check_variants:
+      - decl_data: |-
+          function foo(): string {
+            return "5"
+          }
+          enum StrEnum { A = foo() }
+      - decl_data: |-
+          enum StrEnum { A = (5).toString() }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(StrEnum.A instanceof StrEnum)
+      arktest.assertTrue(StrEnum.A.valueOf() instanceof string)
+      arktest.assertEQ(StrEnum.A, "5")
+    test_suffix: "ssemvebnce"
+    ids: "28-29"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: string enum base type
+    check_variants:
+      - decl_data: |-
+          enum Commands { Open = "fopen", Close = "fclose" }
+      - decl_data: |-
+          enum Commands { Open = "f" + "open",
+            Close = "f" + "clo" + "se" }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(Commands.Open instanceof Commands)
+      arktest.assertTrue(Commands.Close instanceof Commands)
+      arktest.assertTrue(Commands.Open.valueOf() instanceof string)
+      arktest.assertTrue(Commands.Close.valueOf() instanceof string)
+      arktest.assertEQ(Commands.Open, "fopen")
+      arktest.assertEQ(Commands.Close, "fclose")
+    test_suffix: "sebt"
+    ids: "30-31"
+
+  - desc: |-
+      >-
+        Values can be the same.
+        A comparison that uses the operators '==' and '===' is evaluated
+        to true if: both operands are of the same enumeration type and have
+        the same numeric value or the same string contents, depending
+        on the enumeration base type.
+        params: same values, int enum base type
+    check_variants:
+      - decl_data: |-
+          enum E1 { A = 5, B = 5, C }
+          enum E2 { A = 5, B = 5, C }
+        check_val1: "5"
+        check_val2: "6"
+        check_type: "int"
+      - decl_data: |-
+          enum E1: long { A = 5, B = 5, C }
+          enum E2: long { A = 5, B = 5, C }
+        check_val1: "5"
+        check_val2: "6"
+        check_type: "long"
+      - decl_data: |-
+          enum E1: int { A = 5, B = 5, C }
+          enum E2: int { A = 5, B = 5, C }
+        check_val1: "5"
+        check_val2: "6"
+        check_type: "int"
+      - decl_data: |-
+          enum E1: short { A = 5, B = 5, C }
+          enum E2: short { A = 5, B = 5, C }
+        check_val1: "5"
+        check_val2: "6"
+        check_type: "short"
+      - decl_data: |-
+          enum E1: byte { A = 5, B = 5, C }
+          enum E2: byte { A = 5, B = 5, C }
+        check_val1: "5"
+        check_val2: "6"
+        check_type: "byte"
+      - decl_data: |-
+          enum E1: double { A = 5.5, B = 5.5, C = 6.7 }
+          enum E2: double { A = 5.5, B = 5.5, C = 6.7 }
+        check_val1: "5.5"
+        check_val2: "6.7"
+        check_type: "double"
+      - decl_data: |-
+          enum E1: float { A = 5.5f, B = 5.5f, C = 6.7f }
+          enum E2: float { A = 5.5f, B = 5.5f, C = 6.7f }
+        check_val1: "5.5f"
+        check_val2: "6.7f"
+        check_type: "float"
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(E1.A instanceof E1)
+      arktest.assertTrue(E1.B instanceof E1)
+      arktest.assertTrue(E1.C instanceof E1)
+      arktest.assertFalse(E1.A instanceof E2)
+      arktest.assertFalse(E1.B instanceof E2)
+      arktest.assertFalse(E1.C instanceof E2)
+      arktest.assertTrue(E1.A.valueOf() instanceof [check_type])
+      arktest.assertTrue(E1.B.valueOf() instanceof [check_type])
+      arktest.assertTrue(E1.C.valueOf() instanceof [check_type])
+      arktest.assertEQ(E1.A, [check_val1])
+      arktest.assertEQ(E1.B, [check_val1])
+      arktest.assertEQ(E1.C, [check_val2])
+      arktest.assertEQ(E1.A, E1.B)
+      arktest.assertNE(E1.A, E1.C)
+      arktest.assertTrue(E2.A instanceof E2)
+      arktest.assertTrue(E2.B instanceof E2)
+      arktest.assertTrue(E2.C instanceof E2)
+      arktest.assertFalse(E2.A instanceof E1)
+      arktest.assertFalse(E2.B instanceof E1)
+      arktest.assertFalse(E2.C instanceof E1)
+      arktest.assertTrue(E2.A.valueOf() instanceof [check_type])
+      arktest.assertTrue(E2.B.valueOf() instanceof [check_type])
+      arktest.assertTrue(E2.C.valueOf() instanceof [check_type])
+      arktest.assertEQ(E2.A, [check_val1])
+      arktest.assertEQ(E2.B, [check_val1])
+      arktest.assertEQ(E2.C, [check_val2])
+      arktest.assertEQ(E2.A, E2.B)
+      arktest.assertNE(E2.A, E2.C)
+      arktest.assertEQ(E1.A, E2.A)
+      arktest.assertEQ(E1.A, E2.B)
+      arktest.assertNE(E1.A, E2.C)
+      arktest.assertEQ(E1.B, E2.A)
+      arktest.assertEQ(E1.B, E2.B)
+      arktest.assertNE(E1.B, E2.C)
+    test_suffix: "sviebt"
+    ids: "32-38"
+
+  - desc: |-
+      >-
+        Values can be the same.
+        A comparison that uses the operators '==' and '===' is evaluated
+        to true if: both operands are of the same enumeration type and have
+        the same numeric value or the same string contents, depending
+        on the enumeration base type.
+        params: same values, string enum base type
+    check_variants:
+      - decl_data: |-
+          enum E1 { A = "abc", B = "abc", C = "efg" }
+          enum E2 { A = "abc", B = "abc", C = "efg" }
+      - decl_data: |-
+          enum E1: string { A = "abc", B = "abc", C = "efg" }
+          enum E2: string { A = "abc", B = "abc", C = "efg" }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(E1.A instanceof E1)
+      arktest.assertTrue(E1.B instanceof E1)
+      arktest.assertTrue(E1.C instanceof E1)
+      arktest.assertFalse(E1.A instanceof E2)
+      arktest.assertFalse(E1.B instanceof E2)
+      arktest.assertFalse(E1.C instanceof E2)
+      arktest.assertTrue(E1.A.valueOf() instanceof string)
+      arktest.assertTrue(E1.B.valueOf() instanceof string)
+      arktest.assertTrue(E1.C.valueOf() instanceof string)
+      arktest.assertEQ(E1.A, "abc")
+      arktest.assertEQ(E1.B, "abc")
+      arktest.assertEQ(E1.C, "efg")
+      arktest.assertEQ(E1.A, E1.B)
+      arktest.assertNE(E1.A, E1.C)
+      arktest.assertTrue(E2.A instanceof E2)
+      arktest.assertTrue(E2.B instanceof E2)
+      arktest.assertTrue(E2.C instanceof E2)
+      arktest.assertFalse(E2.A instanceof E1)
+      arktest.assertFalse(E2.B instanceof E1)
+      arktest.assertFalse(E2.C instanceof E1)
+      arktest.assertTrue(E2.A.valueOf() instanceof string)
+      arktest.assertTrue(E2.B.valueOf() instanceof string)
+      arktest.assertTrue(E2.C.valueOf() instanceof string)
+      arktest.assertEQ(E2.A, "abc")
+      arktest.assertEQ(E2.B, "abc")
+      arktest.assertEQ(E2.C, "efg")
+      arktest.assertEQ(E2.A, E2.B)
+      arktest.assertNE(E2.A, E2.C)
+      arktest.assertEQ(E1.A, E2.A)
+      arktest.assertEQ(E1.A, E2.B)
+      arktest.assertNE(E1.A, E2.C)
+      arktest.assertEQ(E1.B, E2.A)
+      arktest.assertEQ(E1.B, E2.B)
+      arktest.assertNE(E1.B, E2.C)
+    test_suffix: "svsebt"
+    ids: "39-40"
+
+  - desc: |-
+      >-
+        Values can be the same.
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression,
+        all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant plus one.
+        params: same values using expressions
+    decl: |-
+      enum E { A, B, C, D, BC = B | C }
+    logic: |-
+      arktest.assertTrue(E.A instanceof E)
+      arktest.assertTrue(E.B instanceof E)
+      arktest.assertTrue(E.C instanceof E)
+      arktest.assertTrue(E.D instanceof E)
+      arktest.assertTrue(E.A.valueOf() instanceof int)
+      arktest.assertTrue(E.B.valueOf() instanceof int)
+      arktest.assertTrue(E.C.valueOf() instanceof int)
+      arktest.assertTrue(E.D.valueOf() instanceof int)
+      arktest.assertEQ(E.A, 0)
+      arktest.assertEQ(E.B, 1)
+      arktest.assertEQ(E.C, 2)
+      arktest.assertEQ(E.D, 3)
+      arktest.assertEQ(E.BC, 3)
+    test_suffix: "svue"
+    ids: "41"
+
+  - desc: |-
+      >-
+        Empty enum is supported as a corner case for compatibility
+        with TypeScript.
+        params: empty enum
+    decl: |-
+      enum Empty {}
+      function foo1(v: Empty | int) {
+        arktest.assertTrue(v instanceof int)
+        arktest.assertFalse(v instanceof Empty)
+      }
+      function foo2(v: Object) {
+        arktest.assertTrue(v instanceof int)
+        arktest.assertFalse(v instanceof Empty)
+      }
+      function foo3(v: Any) {
+        arktest.assertTrue(v instanceof int)
+        arktest.assertFalse(v instanceof Empty)
+      }
+    logic: |-
+      let v: Empty | int = 5
+      arktest.assertTrue(v instanceof int)
+      arktest.assertFalse(v instanceof Empty)
+      foo1(v)
+      foo2(v)
+      foo3(v)
+    test_suffix: "ee"
+    ids: "42"
+
+  - desc: |-
+      >-
+        The following operators can be applied to operands of enumeration
+        types:
+        • Relational operators, see Enumeration Relational Operators;
+        • Equality operators, see Equality Expressions.
+        If both operands are of the same enumeration type (see Enumerations),
+        then Numeric Relational Operators or String Relational Operators
+        are used depending on the type of enumeration base type.
+        Otherwise, a compile-time error occurs
+        params: relational operators, numeric enum base type
+    check_variants:
+      - decl_data: |-
+          enum E { A, B, C, D = B }
+      - decl_data: |-
+          enum E: long { A, B, C, D = B }
+      - decl_data: |-
+          enum E: int { A, B, C, D = B }
+      - decl_data: |-
+          enum E: short { A, B, C, D = B }
+      - decl_data: |-
+          enum E: byte { A, B, C, D = B }
+      - decl_data: |-
+          enum E: double { A = 0.0, B = 1.5, C = 2.3, D = B }
+      - decl_data: |-
+          enum E: float { A = 0.0f, B = 1.5f, C = 2.3f, D = B }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertTrue(E.A < E.B)
+      arktest.assertTrue(E.A <= E.B)
+      arktest.assertFalse(E.A >= E.B)
+      arktest.assertFalse(E.A > E.B)
+      arktest.assertTrue(E.A < E.C)
+      arktest.assertTrue(E.A <= E.C)
+      arktest.assertFalse(E.A >= E.C)
+      arktest.assertFalse(E.A > E.C)
+      arktest.assertTrue(E.A < E.D)
+      arktest.assertTrue(E.A <= E.D)
+      arktest.assertFalse(E.A >= E.D)
+      arktest.assertFalse(E.A > E.D)
+      arktest.assertFalse(E.B < E.A)
+      arktest.assertFalse(E.B <= E.A)
+      arktest.assertTrue(E.B >= E.A)
+      arktest.assertTrue(E.B > E.A)
+      arktest.assertTrue(E.B < E.C)
+      arktest.assertTrue(E.B <= E.C)
+      arktest.assertFalse(E.B >= E.C)
+      arktest.assertFalse(E.B > E.C)
+      arktest.assertFalse(E.B < E.D)
+      arktest.assertTrue(E.B <= E.D)
+      arktest.assertTrue(E.B >= E.D)
+      arktest.assertFalse(E.B > E.D)
+      arktest.assertFalse(E.C < E.D)
+      arktest.assertFalse(E.C <= E.D)
+      arktest.assertTrue(E.C >= E.D)
+      arktest.assertTrue(E.C > E.D)
+    test_suffix: "ronebt"
+    ids: "43-49"
+
+  - desc: |-
+      >-
+        The following operators can be applied to operands of enumeration
+        types:
+        • Relational operators, see Enumeration Relational Operators;
+        • Equality operators, see Equality Expressions.
+        If both operands are of the same enumeration type (see Enumerations),
+        then Numeric Relational Operators or String Relational Operators
+        are used depending on the type of enumeration base type.
+        Otherwise, a compile-time error occurs
+        params: relational operators, string enum base type
+    check_variants:
+      - decl_data: |-
+          enum E { A = "ac", B = "abc", C = "abcd", D = B }
+      - decl_data: |-
+          enum E: string { A = "ac", B = "abc", C = "abcd", D = B }
+    decl: |-
+      [decl_data]
+    logic: |-
+      arktest.assertFalse(E.A < E.B)
+      arktest.assertFalse(E.A <= E.B)
+      arktest.assertTrue(E.A >= E.B)
+      arktest.assertTrue(E.A > E.B)
+      arktest.assertFalse(E.A < E.C)
+      arktest.assertFalse(E.A <= E.C)
+      arktest.assertTrue(E.A >= E.C)
+      arktest.assertTrue(E.A > E.C)
+      arktest.assertFalse(E.A < E.D)
+      arktest.assertFalse(E.A <= E.D)
+      arktest.assertTrue(E.A >= E.D)
+      arktest.assertTrue(E.A > E.D)
+      arktest.assertTrue(E.B < E.A)
+      arktest.assertTrue(E.B <= E.A)
+      arktest.assertFalse(E.B >= E.A)
+      arktest.assertFalse(E.B > E.A)
+      arktest.assertTrue(E.B < E.C)
+      arktest.assertTrue(E.B <= E.C)
+      arktest.assertFalse(E.B >= E.C)
+      arktest.assertFalse(E.B > E.C)
+      arktest.assertFalse(E.B < E.D)
+      arktest.assertTrue(E.B <= E.D)
+      arktest.assertTrue(E.B >= E.D)
+      arktest.assertFalse(E.B > E.D)
+      arktest.assertFalse(E.C < E.D)
+      arktest.assertFalse(E.C <= E.D)
+      arktest.assertTrue(E.C >= E.D)
+      arktest.assertTrue(E.C > E.D)
+    test_suffix: "rosebt"
+    ids: "50-51"
+
+  - desc: |-
+      >-
+        The following operators can be applied to operands of enumeration
+        types:
+        • Relational operators, see Enumeration Relational Operators;
+        • Equality operators, see Equality Expressions.
+        A comparison that uses the operators '==' and '===' is evaluated
+        to true if: both operands are of the same enumeration type and have
+        the same numeric value or the same string contents, depending
+        on the enumeration base type.
+        params: equality operators, numeric enum base type
+    check_variants:
+      - decl_data: |-
+          enum E1 { A, B, C, D = B }
+          enum E2 { A, B }
+      - decl_data: |-
+          enum E1: long { A, B, C, D = B }
+          enum E2: long { A, B }
+      - decl_data: |-
+          enum E1: int { A, B, C, D = B }
+          enum E2: int { A, B }
+      - decl_data: |-
+          enum E1: short { A, B, C, D = B }
+          enum E2: short { A, B }
+      - decl_data: |-
+          enum E1: byte { A, B, C, D = B }
+          enum E2: byte { A, B }
+      - decl_data: |-
+          enum E1: double { A = 0.0, B = 1.5, C = 2.3, D = B }
+          enum E2: double { A = 0.0, B = 1.5 }
+      - decl_data: |-
+          enum E1: float { A = 0.0f, B = 1.5f, C = 2.3f, D = B }
+          enum E2: float { A = 0.0f, B = 1.5f }
+    decl: |-
+      [decl_data]
+      function eq(a: Object, b: Object): boolean {
+        return a == b
+      }
+      function ne(a: Object, b: Object): boolean {
+        return a != b
+      }
+      function strict_eq(a: Object, b: Object): boolean {
+        return a === b
+      }
+      function strict_ne(a: Object, b: Object): boolean {
+        return a !== b
+      }
+    logic: |-
+      arktest.assertFalse(E1.A == E1.B)
+      arktest.assertTrue(E1.A != E1.B)
+      arktest.assertFalse(E1.A === E1.B)
+      arktest.assertTrue(E1.A !== E1.B)
+      arktest.assertFalse(E1.A == E1.C)
+      arktest.assertTrue(E1.A != E1.C)
+      arktest.assertFalse(E1.A === E1.C)
+      arktest.assertTrue(E1.A !== E1.C)
+      arktest.assertFalse(E1.A == E1.D)
+      arktest.assertTrue(E1.A != E1.D)
+      arktest.assertFalse(E1.A === E1.D)
+      arktest.assertTrue(E1.A !== E1.D)
+      arktest.assertFalse(E1.B == E1.A)
+      arktest.assertTrue(E1.B != E1.A)
+      arktest.assertFalse(E1.B === E1.A)
+      arktest.assertTrue(E1.B !== E1.A)
+      arktest.assertFalse(E1.B == E1.C)
+      arktest.assertTrue(E1.B != E1.C)
+      arktest.assertFalse(E1.B === E1.C)
+      arktest.assertTrue(E1.B !== E1.C)
+      arktest.assertTrue(E1.B == E1.D)
+      arktest.assertFalse(E1.B != E1.D)
+      arktest.assertTrue(E1.B === E1.D)
+      arktest.assertFalse(E1.B !== E1.D)
+      arktest.assertFalse(E1.C == E1.D)
+      arktest.assertTrue(E1.C != E1.D)
+      arktest.assertFalse(E1.C === E1.D)
+      arktest.assertTrue(E1.C !== E1.D)
+      arktest.assertFalse(eq(E1.A, E1.B))
+      arktest.assertTrue(ne(E1.A, E1.B))
+      arktest.assertFalse(strict_eq(E1.A, E1.B))
+      arktest.assertTrue(strict_ne(E1.A, E1.B))
+      arktest.assertFalse(eq(E1.A, E1.C))
+      arktest.assertTrue(ne(E1.A, E1.C))
+      arktest.assertFalse(strict_eq(E1.A, E1.C))
+      arktest.assertTrue(strict_ne(E1.A, E1.C))
+      arktest.assertFalse(eq(E1.A, E1.D))
+      arktest.assertTrue(ne(E1.A, E1.D))
+      arktest.assertFalse(strict_eq(E1.A, E1.D))
+      arktest.assertTrue(strict_ne(E1.A, E1.D))
+      arktest.assertFalse(eq(E1.B, E1.A))
+      arktest.assertTrue(ne(E1.B, E1.A))
+      arktest.assertFalse(strict_eq(E1.B, E1.A))
+      arktest.assertTrue(strict_ne(E1.B, E1.A))
+      arktest.assertFalse(eq(E1.B, E1.C))
+      arktest.assertTrue(ne(E1.B, E1.C))
+      arktest.assertFalse(strict_eq(E1.B, E1.C))
+      arktest.assertTrue(strict_ne(E1.B, E1.C))
+      arktest.assertTrue(eq(E1.B, E1.D))
+      arktest.assertFalse(ne(E1.B, E1.D))
+      arktest.assertTrue(strict_eq(E1.B, E1.D))
+      arktest.assertFalse(strict_ne(E1.B, E1.D))
+      arktest.assertFalse(eq(E1.C, E1.D))
+      arktest.assertTrue(ne(E1.C, E1.D))
+      arktest.assertFalse(strict_eq(E1.C, E1.D))
+      arktest.assertTrue(strict_ne(E1.C, E1.D))
+      arktest.assertTrue(eq(E1.A, E2.A))
+      arktest.assertFalse(ne(E1.A, E2.A))
+      arktest.assertTrue(strict_eq(E1.A, E2.A))
+      arktest.assertFalse(strict_ne(E1.A, E2.A))
+      arktest.assertFalse(eq(E1.A, E2.B))
+      arktest.assertTrue(ne(E1.A, E2.B))
+      arktest.assertFalse(strict_eq(E1.A, E2.B))
+      arktest.assertTrue(strict_ne(E1.A, E2.B))
+    test_suffix: "eonebt"
+    ids: "52-58"
+
+  - desc: |-
+      >-
+        The following operators can be applied to operands of enumeration
+        types:
+        • Relational operators, see Enumeration Relational Operators;
+        • Equality operators, see Equality Expressions.
+        A comparison that uses the operators '==' and '===' is evaluated
+        to true if: both operands are of the same enumeration type and have
+        the same numeric value or the same string contents, depending
+        on the enumeration base type.
+        params: equality operators, string enum base type
+    check_variants:
+      - decl_data: |-
+          enum E1 { A = "ac", B = "abc", C = "abcd", D = B }
+          enum E2 { A = "ac", B = "abc" }
+      - decl_data: |-
+          enum E1: string { A = "ac", B = "abc", C = "abcd", D = B }
+          enum E2: string { A = "ac", B = "abc" }
+    decl: |-
+      [decl_data]
+      function eq(a: Object, b: Object): boolean {
+        return a == b
+      }
+      function ne(a: Object, b: Object): boolean {
+        return a != b
+      }
+      function strict_eq(a: Object, b: Object): boolean {
+        return a === b
+      }
+      function strict_ne(a: Object, b: Object): boolean {
+        return a !== b
+      }
+    logic: |-
+      arktest.assertFalse(E1.A == E1.B)
+      arktest.assertTrue(E1.A != E1.B)
+      arktest.assertFalse(E1.A === E1.B)
+      arktest.assertTrue(E1.A !== E1.B)
+      arktest.assertFalse(E1.A == E1.C)
+      arktest.assertTrue(E1.A != E1.C)
+      arktest.assertFalse(E1.A === E1.C)
+      arktest.assertTrue(E1.A !== E1.C)
+      arktest.assertFalse(E1.A == E1.D)
+      arktest.assertTrue(E1.A != E1.D)
+      arktest.assertFalse(E1.A === E1.D)
+      arktest.assertTrue(E1.A !== E1.D)
+      arktest.assertFalse(E1.B == E1.A)
+      arktest.assertTrue(E1.B != E1.A)
+      arktest.assertFalse(E1.B === E1.A)
+      arktest.assertTrue(E1.B !== E1.A)
+      arktest.assertFalse(E1.B == E1.C)
+      arktest.assertTrue(E1.B != E1.C)
+      arktest.assertFalse(E1.B === E1.C)
+      arktest.assertTrue(E1.B !== E1.C)
+      arktest.assertTrue(E1.B == E1.D)
+      arktest.assertFalse(E1.B != E1.D)
+      arktest.assertTrue(E1.B === E1.D)
+      arktest.assertFalse(E1.B !== E1.D)
+      arktest.assertFalse(E1.C == E1.D)
+      arktest.assertTrue(E1.C != E1.D)
+      arktest.assertFalse(E1.C === E1.D)
+      arktest.assertTrue(E1.C !== E1.D)
+      arktest.assertFalse(eq(E1.A, E1.B))
+      arktest.assertTrue(ne(E1.A, E1.B))
+      arktest.assertFalse(strict_eq(E1.A, E1.B))
+      arktest.assertTrue(strict_ne(E1.A, E1.B))
+      arktest.assertFalse(eq(E1.A, E1.C))
+      arktest.assertTrue(ne(E1.A, E1.C))
+      arktest.assertFalse(strict_eq(E1.A, E1.C))
+      arktest.assertTrue(strict_ne(E1.A, E1.C))
+      arktest.assertFalse(eq(E1.A, E1.D))
+      arktest.assertTrue(ne(E1.A, E1.D))
+      arktest.assertFalse(strict_eq(E1.A, E1.D))
+      arktest.assertTrue(strict_ne(E1.A, E1.D))
+      arktest.assertFalse(eq(E1.B, E1.A))
+      arktest.assertTrue(ne(E1.B, E1.A))
+      arktest.assertFalse(strict_eq(E1.B, E1.A))
+      arktest.assertTrue(strict_ne(E1.B, E1.A))
+      arktest.assertFalse(eq(E1.B, E1.C))
+      arktest.assertTrue(ne(E1.B, E1.C))
+      arktest.assertFalse(strict_eq(E1.B, E1.C))
+      arktest.assertTrue(strict_ne(E1.B, E1.C))
+      arktest.assertTrue(eq(E1.B, E1.D))
+      arktest.assertFalse(ne(E1.B, E1.D))
+      arktest.assertTrue(strict_eq(E1.B, E1.D))
+      arktest.assertFalse(strict_ne(E1.B, E1.D))
+      arktest.assertFalse(eq(E1.C, E1.D))
+      arktest.assertTrue(ne(E1.C, E1.D))
+      arktest.assertFalse(strict_eq(E1.C, E1.D))
+      arktest.assertTrue(strict_ne(E1.C, E1.D))
+      arktest.assertTrue(eq(E1.A, E2.A))
+      arktest.assertFalse(ne(E1.A, E2.A))
+      arktest.assertTrue(strict_eq(E1.A, E2.A))
+      arktest.assertFalse(strict_ne(E1.A, E2.A))
+      arktest.assertFalse(eq(E1.A, E2.B))
+      arktest.assertTrue(ne(E1.A, E2.B))
+      arktest.assertFalse(strict_eq(E1.A, E2.B))
+      arktest.assertTrue(strict_ne(E1.A, E2.B))
+    test_suffix: "eosebt"
+    ids: "59-60"
+
+  - desc: |-
+      >-
+        Implicit conversions (see Enumeration to Numeric Type Conversion,
+        Enumeration to string Type Conversion) are used to convert a value
+        of enumeration type to numeric types or type string depends on the
+        enumeration base type.
+        params: implicit conversions, numeric enum base type
+    check_variants:
+      - decl_data: |-
+          enum Color { Red = 4, Green, Blue }
+        check_val: "5"
+      - decl_data: |-
+          enum Color: long { Red = 4, Green, Blue }
+        check_val: "5"
+      - decl_data: |-
+          enum Color: int { Red = 4, Green, Blue }
+        check_val: "5"
+      - decl_data: |-
+          enum Color: short { Red = 4, Green, Blue }
+        check_val: "5"
+      - decl_data: |-
+          enum Color: byte { Red = 4, Green, Blue }
+        check_val: "5"
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+        check_val: "5.5"
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+        check_val: "5.5f"
+    decl: |-
+      [decl_data]
+    logic: |-
+      let x: number = Color.Red + 1
+      arktest.assertEQ(x, [check_val])
+    test_suffix: "icnebt"
+    ids: "61-67"
+
+  - desc: |-
+      >-
+        Implicit conversions (see Enumeration to Numeric Type Conversion,
+        Enumeration to string Type Conversion) are used to convert a value
+        of enumeration type to numeric types or type string depends on the
+        enumeration base type.
+        params: implicit conversions, string enum base type
+    check_variants:
+      - decl_data: |-
+          enum T { A = "hello", B = "Bye" }
+      - decl_data: |-
+          enum T: string { A = "hello", B = "Bye" }
+    decl: |-
+      [decl_data]
+    logic: |-
+      let s1: string = T.A
+      let s2: string = T.A + T.B
+      let s3: string = T.A + "New"
+      arktest.assertEQ(s1, "hello")
+      arktest.assertEQ(s2, "helloBye")
+      arktest.assertEQ(s3, "helloNew")
+    test_suffix: "icsebt"
+    ids: "68-69"

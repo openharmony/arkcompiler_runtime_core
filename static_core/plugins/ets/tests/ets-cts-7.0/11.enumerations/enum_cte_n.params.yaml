@@ -1,0 +1,481 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Qualification by type name is mandatory to access
+        the enumeration member, except initializer expression
+        params: accessing without qualification by type name
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: long { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: int { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: short { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: byte { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+      - decl_data: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+      - decl_data: |-
+          enum Color: string { Red = "red", Green = "green", Blue = "blue" }
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        let c = Green
+    stdout:
+      - |-
+        "Semantic error ESE0143: Unresolved reference Green"
+    test_suffix: "awqbtn"
+    ids: "0-8"
+
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        params: modifying readonly enum member by value
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: long { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: int { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: short { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: byte { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+        set_val: "5.4"
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+        set_val: "5.4f"
+      - decl_data: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\""
+      - decl_data: |-
+          enum Color: string { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\""
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        Color.Green = [set_val]
+    stdout:
+      - |-
+        "Semantic error ESE4002: Cannot assign to a readonly field Green"
+    test_suffix: "mrembv"
+    ids: "9-17"
+
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        If initializers for all members are omitted, then the first member
+        is assigned the value zero. The other member is assigned the value
+        of the immediately preceding member plus one.
+        params: modifying readonly enum member by enum member
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: long { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: int { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: short { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: byte { Red, Green, Blue }
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+      - decl_data: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+      - decl_data: |-
+          enum Color: string { Red = "red", Green = "green", Blue = "blue" }
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        Color.Green = Color.Blue
+    stdout:
+      - |-
+        "Semantic error ESE4002: Cannot assign to a readonly field Green"
+    test_suffix: "mrembem"
+    ids: "18-26"
+
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        params: modifying variable of enum type by value
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+        set_val: "5"
+        error_message: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: long { Red, Green, Blue }
+        set_val: "5 as long"
+        error_message: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: int { Red, Green, Blue }
+        set_val: "5"
+        error_message: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: short { Red, Green, Blue }
+        set_val: "5 as short"
+        error_message: "Semantic error ESE0318: Type 'Short' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: byte { Red, Green, Blue }
+        set_val: "5 as byte"
+        error_message: "Semantic error ESE0318: Type 'Byte' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+        set_val: "5.4"
+        error_message: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+        set_val: "5.4f"
+        error_message: "Semantic error ESE0318: Type 'Float' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\" as string"
+        error_message: "Semantic error ESE0318: Type 'String' cannot be assigned to type 'Color'"
+      - decl_data: |-
+          enum Color: string { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\" as string"
+        error_message: "Semantic error ESE0318: Type 'String' cannot be assigned to type 'Color'"
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        let g: Color = Color.Green
+        g = [set_val]
+    stdout:
+      - |-
+        "[error_message]"
+    test_suffix: "mvoetbv"
+    ids: "27-35"
+
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        params: modifying readonly enum member using type assertion
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: long { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: int { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: short { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: byte { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+        set_val: "5.4"
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+        set_val: "5.4f"
+      - decl_data: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\""
+      - decl_data: |-
+          enum Color: string { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\""
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        (Color as Any).Green = [set_val]
+    stdout:
+      - |-
+        "Semantic error ESE0144: Enum name 'Color' used in the wrong context"
+    test_suffix: "mremuta"
+    ids: "36-44"
+
+  - desc: |-
+      >-
+        Enumeration type enum specifies a distinct user-defined type
+        with an associated set of named readonly members that define its
+        possible enumeration values.
+        params: adding or reading new elements from enum
+    check_variants:
+      - decl_data: |-
+          enum Color { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: long { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: int { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: short { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: byte { Red, Green, Blue }
+        set_val: "5"
+      - decl_data: |-
+          enum Color: double { Red = 4.5, Green = 5.7, Blue = 8.5 }
+        set_val: "5.4"
+      - decl_data: |-
+          enum Color: float { Red = 4.5f, Green = 5.7f, Blue = 8.5f }
+        set_val: "5.4f"
+      - decl_data: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\""
+      - decl_data: |-
+          enum Color: string { Red = "red", Green = "green", Blue = "blue" }
+        set_val: "\"new\""
+    decl: |-
+      [decl_data]
+    sub_cases_logic:
+      - |-
+        Color.Unexist = [set_val]
+      - |-
+        let v: Color = Color.Unexist
+    stdout:
+      - |-
+        "Semantic error ESE0087: Property 'Unexist' does not exist on type 'Color'"
+      - |-
+        "Semantic error ESE0087: Property 'Unexist' does not exist on type 'Color'"
+    test_suffix: "aornefe"
+    ids: "45-62"
+
+  - desc: |-
+      >-
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: combining int and string types
+    check_variants:
+      - decl_data: |-
+          enum E { A, B = "hello" }
+      - decl_data: |-
+          enum E { A = 5, B = "hello" }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "ciast"
+    ids: "63-64"
+
+  - desc: |-
+      >-
+        All member names in an enumeration must be unique.
+        Otherwise, a compile-time error occurs.
+        params: same names
+    check_variants:
+      - decl_data: |-
+          enum E { A = 5, A = 77 }
+      - decl_data: |-
+          enum E: long { A = 5, A = 77 }
+      - decl_data: |-
+          enum E: int { A = 5, A = 77 }
+      - decl_data: |-
+          enum E: short { A = 5, A = 77 }
+      - decl_data: |-
+          enum E: byte { A = 5, A = 77 }
+      - decl_data: |-
+          enum E: double { A = 5.5, A = 77.3 }
+      - decl_data: |-
+          enum E: float { A = 5.5f, A = 77.3f }
+      - decl_data: |-
+          enum E { A = "ac", A = "abc" }
+      - decl_data: |-
+          enum E: string { A = "ac", A = "abc" }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Semantic error ESE0351: Variable 'A' has already been declared."
+    test_suffix: "sn"
+    ids: "65-73"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: wrong enum implicit base type
+    check_variants:
+      - decl_data: |-
+          enum Enum { A = 5.5 }
+      - decl_data: |-
+          enum Enum { A = 5.5f }
+      - decl_data: |-
+          enum Enum { A = c'5' }
+      - decl_data: |-
+          enum Enum { A = 5n }
+      - decl_data: |-
+          enum Enum { A = null }
+      - decl_data: |-
+          enum Enum { A = undefined }
+      - decl_data: |-
+          const tuple: [int, int] = [5, 10]
+          enum Enum { A = tuple }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "weibt"
+    ids: "74-80"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: long enum implicit base type
+    check_variants:
+      - decl_data: |-
+          enum LongEnum { A = 0x7FFF_FFFF_1 }
+      - decl_data: |-
+          enum LongEnum { A = 5 as long }
+      - decl_data: |-
+          enum LongEnum { A = (5).toLong() }
+      - decl_data: |-
+          const c: long = 5
+          enum LongEnum { A = c }
+      - decl_data: |-
+          let c: long = 5
+          enum LongEnum { A = c }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "leibt"
+    ids: "81-85"
+
+  - desc: |-
+      >-
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: mixing of types
+    check_variants:
+      - decl_data: |-
+          enum Enum { A = 10, B = 5.5 }
+      - decl_data: |-
+          enum Enum { A = 5.5, B = 10 }
+      - decl_data: |-
+          enum Enum { A = 10, B = 5.5f }
+      - decl_data: |-
+          enum Enum { A = 5.5f, B = 10 }
+      - decl_data: |-
+          enum Enum { A = 10, B = 0x7FFF_FFFF_1 }
+      - decl_data: |-
+          enum Enum { A = 10, B = 5n }
+      - decl_data: |-
+          enum Enum { A = 5n, B = 10 }
+      - decl_data: |-
+          enum Enum { A = 10, B = c'5' }
+      - decl_data: |-
+          enum Enum { A = c'5', B = 10 }
+      - decl_data: |-
+          enum Enum { A = 10, B = undefined }
+      - decl_data: |-
+          enum Enum { A = undefined, B = 10 }
+      - decl_data: |-
+          enum Enum { A = 10, B = null }
+      - decl_data: |-
+          enum Enum { A = null, B = 10 }
+      - decl_data: |-
+          const tuple: [int, int] = [5, 10]
+          enum Enum { A = 10, B = tuple }
+      - decl_data: |-
+          const tuple: [int, int] = [5, 10]
+          enum Enum { A = tuple, B = 10 }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "mot"
+    ids: "86-100"
