@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vm_api.h"
+#include "native_engine/native_engine.h"
 
 namespace ark::ets::interop::js {
 
@@ -58,6 +59,11 @@ public:
         return callTestMethod(env, "callJsAsyncFunctionWithAwaitTest");
     }
 
+    static napi_value ExistEnvDetachTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    {
+        return existEnvDetach(env);
+    }
+
     static napi_value Init(napi_env env, napi_value exports)
     {
         const std::array desc = {
@@ -68,6 +74,7 @@ public:
                                       0},
             napi_property_descriptor {"callJsAsyncFunctionWithAwaitTest", 0, CallJsAsyncFunctionWithAwaitTest, 0, 0, 0,
                                       napi_enumerable, 0},
+            napi_property_descriptor {"existEnvDetachTest", 0, ExistEnvDetachTest, 0, 0, 0, napi_enumerable, 0},
         };
 
         napi_define_properties(env, exports, desc.size(), desc.data());
@@ -112,6 +119,36 @@ private:
             etsEnv->c_api->Class_CallStaticMethod_Int(etsEnv, cls, method, &val);
             ASSERT(val == 0);
 
+            etsVM->DetachCurrentThread();
+        });
+
+        event.Wait();
+        t.join();
+
+        return result;
+    }
+
+    static napi_value existEnvDetach(napi_env env)
+    {
+        napi_value result;
+        napi_get_undefined(env, &result);
+
+        ani_vm *etsVM = GetEtsVm();
+        auto event = os::memory::Event();
+        auto t = std::thread([&event, etsVM, env] {
+            napi_env existEnv = nullptr;
+            napi_create_runtime(env, &existEnv);
+            ani_option interopEnabled {"--interop=enable", (void *)existEnv};
+            ani_options aniArgs {1, &interopEnabled};
+            ani_env *etsEnv {nullptr};
+            etsVM->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
+            ASSERT(etsEnv != nullptr);
+            event.Fire();
+            auto *vm = PandaEtsVM::FromAniVM(etsVM);
+            auto *jobMan = vm->GetJobManager();
+            auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
+            [[maybe_unused]] bool isJsEnvNewCreate = ifaceTable->IsJSEnvNewCreate();
+            ASSERT(isJsEnvNewCreate == false);
             etsVM->DetachCurrentThread();
         });
 
