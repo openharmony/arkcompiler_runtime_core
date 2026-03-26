@@ -1,0 +1,129 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Ambient declarations cannot include executable code. As a consequence, they have no initializers.
+  - decl: |-
+      declare const x: int = 1;
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: x"
+  - decl: |-
+      declare const PI: double = 3.14;
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: PI"
+  - decl: |-
+      declare class A {
+        s: string = "should fail"
+      }
+    expected: |-
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+  # No literals allowed for const declaration type definition, only explicit typing
+  - decl: |-
+      declare const x = 1;
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: x"
+  - decl: |-
+      declare const PI = 3.14;
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: PI"
+  - decl: |-
+      declare class A {
+        s = "should fail"
+      }
+    expected: |-
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+  # Ambient functions, methods, and constructors have no body.
+  - decl: |-
+      declare function fun(x: int): void {}
+    expected: |-
+      "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
+  - decl: |-
+      declare class A {
+        constructor() {}
+      }
+    expected: |-
+      "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
+  - decl: |-
+      declare class A {
+        foo(): int { return 0 }
+      }
+    expected: |-
+      "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
+  - decl: |-
+      declare class A {
+        get foo(): int { return 42 }
+      }
+    expected: |-
+      "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
+  # Ambient functions cannot have parameters
+  - decl: |-
+      declare function foo(int param = 1)
+    expected: |-
+      "Semantic error ESE0018: Native and Declare methods should have explicit return type."
+  # A compile-time error occurs if an explicit return type is not specified for an ambient function declaration
+  - decl: |-
+      declare function foo()
+    expected: |-
+      "Semantic error ESE0018: Native and Declare methods should have explicit return type."
+  # The modifier ‘async’ cannot be used in an ambient context
+  - decl: |-
+      declare async function foo(): void {}
+    stdout: |-
+      "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
+
+  # A compile-time error occurs if the modifier ‘declare’ is used in a context that is already ambient
+  - decl: |-
+      declare namespace Ambient {
+        declare namespace NestedAmbient {
+        }
+      }
+    expected: |-
+      "Syntax error ESY0104: A 'declare' modifier cannot be used in an already ambient context."
+  # Some illegal code, should fail
+  - decl: |-
+      declare declare let x: int
+    expected: |-
+      "Syntax error ESY0227: Unexpected token 'declare'."
+  - decl: |-
+      function foo() {
+        declare const c: char
+      }
+    expected: |-
+      "Semantic error ESE0143: Unresolved reference declare"
+  - decl: |-
+      class A {
+        declare y: int
+      }
+    expected: |-
+      "Syntax error ESY0121: Field type annotation expected."
+  - decl: |-
+      declare {}
+    expected: |-
+      "Semantic error ESE0143: Unresolved reference declare"
+  - decl: |-
+      declare declare
+    expected: |-
+      "Semantic error ESE0143: Unresolved reference declare"
+  - decl: |-
+      declare const HelloWithType: String = "Hello"
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: HelloWithType"
+  - decl: |-
+      declare const ConstWithType: int = 42
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: ConstWithType"
+  - decl: |-
+      class A {}
+      declare const a: A = new A;
+    expected: |-
+      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: a"

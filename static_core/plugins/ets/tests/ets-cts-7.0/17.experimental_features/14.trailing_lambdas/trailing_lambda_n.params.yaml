@@ -1,0 +1,72 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # No parameter can be specified for the type of a trailing lambda. Case with empty trailing lambda
+  - decl: |- 
+      class A {
+        foo (f: (i: int)=>void) {  
+          f(5)
+        }
+      }
+    use: |-
+      let a = new A()
+      a.foo() {}
+    exp_out: "TBD"
+
+  # No parameter can be specified for the type of a trailing lambda. Case with using parameter
+  - decl: |- 
+      class A {
+        foo (f: (i: int)=>void) {  
+          f(5)
+        }
+      }
+    use: |-
+      let a = new A()
+      a.foo() { arktest.assertEQ(i, 5) }
+    exp_out: "Semantic error ESE0143: Unresolved reference i"
+
+  # call without trailing lambda block
+  - decl: |- 
+      class A {
+        foo (f: ()=>void) {  
+          f()
+        }
+      }
+    use: |-
+      let a = new A()
+      a.foo()
+    exp_out: "Semantic error ESE0127: No matching call signature for foo()"
+
+  # the lambda must be passed as the last parameter
+  - decl: |- 
+      class A {
+        foo (f: ()=>void, i: int) {  
+          f()
+        }
+      }
+    use: |-
+      let a = new A()
+      a.foo(5) {}
+    exp_out: "Semantic error ESE0124: Expected 2 arguments, got 1."
+
+  # the lambda not passed as the last parameter
+  - decl: |- 
+      class A {
+        foo () {}
+      }
+    use: |-
+      let a = new A()
+      a.foo() {}
+    exp_out: "Semantic error ESE0140: No matching call signature with trailing lambda"
