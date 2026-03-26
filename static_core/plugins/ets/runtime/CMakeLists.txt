@@ -110,6 +110,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_string_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/regexp_preparser.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
     ${ETS_EXT_SOURCES}/main_worker_external_scheduler.cpp
