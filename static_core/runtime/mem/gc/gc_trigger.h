@@ -45,6 +45,7 @@ enum class GCTriggerType {
     ON_NTH_ALLOC,             // Triggers GC on n-th allocation
     PAUSE_TIME_GOAL_TRIGGER,  // Triggers concurrent marking by heap size threshold and ask GC to change eden size to
                               // satisfy pause time goal
+    CMC_GC,                   // No-op trigger for CMC-GC (triggering is handled by common_runtime)
     XGC,                      // Trigger for cross VM references GC
 };
 
@@ -257,6 +258,23 @@ public:
     GCTriggerType GetType() const override
     {
         return GCTriggerType::DEBUG_NEVER;
+    }
+
+    void TriggerGcIfNeeded([[maybe_unused]] GC *gc) override {}
+
+    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override {}
+    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                    [[maybe_unused]] size_t heapSize) override
+    {
+    }
+};
+
+// No-op trigger for CMC-GC (triggering is handled by common_runtime)
+class GCCmcTrigger : public GCTrigger {
+public:
+    GCTriggerType GetType() const override
+    {
+        return GCTriggerType::CMC_GC;
     }
 
     void TriggerGcIfNeeded([[maybe_unused]] GC *gc) override {}

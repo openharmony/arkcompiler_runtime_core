@@ -32,6 +32,11 @@ GCTriggerConfig::GCTriggerConfig(const RuntimeOptions &options, panda_file::Sour
 {
     auto runtimeLang = plugins::LangToRuntimeType(lang);
     gcTriggerType_ = options.GetGcTriggerType(runtimeLang);
+    bool triggerExplicitlySet = options.WasSetGcTriggerType(runtimeLang) || options.WasSetGcTriggerType("");
+    // For CMC-GC use "cmc-gc" trigger type by default
+    if (!triggerExplicitlySet && options.GetGcType(runtimeLang) == "cmc-gc") {
+        gcTriggerType_ = "cmc-gc";
+    }
     debugStart_ = options.GetGcDebugTriggerStart(runtimeLang);
     percentThreshold_ = std::min(options.GetGcTriggerPercentThreshold(), PERCENT_100_U32);
     adaptiveMultiplier_ = options.GetGcTriggerAdaptiveMultiplier();
@@ -218,6 +223,8 @@ GCTriggerType GetTriggerType(std::string_view gcTriggerType)
         triggerType = GCTriggerType::DEBUG_NEVER;
     } else if (gcTriggerType == "pause-time-goal-trigger") {
         triggerType = GCTriggerType::PAUSE_TIME_GOAL_TRIGGER;
+    } else if (gcTriggerType == "cmc-gc") {
+        triggerType = GCTriggerType::CMC_GC;
     }
     return triggerType;
 }
@@ -258,6 +265,9 @@ GCTrigger *CreateGCTrigger(MemStatsType *memStats, HeapSpace *heapSpace, const G
             break;
         case GCTriggerType::DEBUG_NEVER:
             ret = allocator->New<GCNeverTrigger>();
+            break;
+        case GCTriggerType::CMC_GC:
+            ret = allocator->New<GCCmcTrigger>();
             break;
         case GCTriggerType::PAUSE_TIME_GOAL_TRIGGER:
             ret = allocator->New<PauseTimeGoalTrigger>(memStats, DEFAULT_HEAP_SIZE, config.GetPercentThreshold(),
