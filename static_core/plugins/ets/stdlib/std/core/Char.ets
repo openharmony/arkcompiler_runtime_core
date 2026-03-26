@@ -116,6 +116,19 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
+     * toString(int) converts this object to a string
+     *
+     * @param { int } radix the radix base for string representation
+     * @returns { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public toString(radix: int): string {
+        return this.toInt().toString(radix)
+    }
+
+    /**
      * compare(Char, Char) compares two Chars by their underlying chars.
      *
      * @param { Char } lhs the first Char to compare.

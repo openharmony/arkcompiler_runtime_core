@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,4 +52,9 @@ static {
     INVALID_DATE = maxDateOffset + 1;
 
     maxDateYears = 275760;
+
+    digitChars = [
+        c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'a', c'b', c'c', c'd', c'e', c'f', c'g', c'h',
+        c'i', c'j', c'k', c'l', c'm', c'n', c'o', c'p', c'q', c'r', c's', c't', c'u', c'v', c'w', c'x', c'y', c'z'
+    ];
 }

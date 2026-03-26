@@ -240,9 +240,11 @@ export final class Int extends Integral implements Comparable<Int> {
     /**
      * Converts this object to a string
      *
+     * @param radix the radix base for string representation
+     * 
      * @returns result of the conversion
      */
-    public toString(radix: number): string {
+    public toString(radix: int): string {
         return (new Long(this.value)).toString(radix);
     }
 

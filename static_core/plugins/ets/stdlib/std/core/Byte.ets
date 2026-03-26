@@ -332,13 +332,13 @@ export final class Byte extends Integral implements Comparable<Byte> {
     /**
      * Converts this object to a string
      *
-     * @param { number } radix None
+     * @param { int } radix the radix base for string representation
      * @returns { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toString(radix: number): string {
+    public toString(radix: int): string {
         return (new Long(this.value)).toString(radix);
     }
 
