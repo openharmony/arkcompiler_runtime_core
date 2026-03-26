@@ -26,6 +26,9 @@ export declare function esFuncArrayTest(arr: es.Array<number>, func: (arr: es.Ar
 export declare function returnSameArray(): es.Array<number>;
 export declare function createEmptyArray<T>(): es.Array<T>;
 
+export declare let emptyArray: es.Array<string>;
+export declare let numberArray: es.Array<number>;
+
 type StdArray<T> = T[];
 
 export declare namespace es {

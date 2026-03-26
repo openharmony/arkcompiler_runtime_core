@@ -14,7 +14,8 @@
 */
 
 import { es, ESUser, returnESUserArray, testUserArrayName, testUserArrayAge,
-        returnFlatArray, esFuncArrayTest, returnSameArray, createEmptyArray } from 'testDecl';
+        returnFlatArray, esFuncArrayTest, returnSameArray, createEmptyArray, 
+        emptyArray, numberArray } from 'testDecl';
 
 function testGetLength(): boolean {
     let esArr1: es.Array<string> = createEmptyArray<string>();
@@ -477,6 +478,36 @@ function testESValueReturnESArray(): boolean {
     return arr.length === 0;
 }
 
+function testNewArray(): boolean {
+    let global = ESValue.getGlobal();
+    let arrayClass = global.getProperty('Array');
+    let esArr1 = arrayClass.instantiate().unwrap() as es.Array<string>;
+    arktest.assertEQ(esArr1.length, 0);
+    esArr1.push('test1');
+    esArr1.push('test2');
+    arktest.assertEQ(esArr1.length, 2);
+    arktest.assertEQ(esArr1[0], 'test1');
+    arktest.assertEQ(esArr1[1], 'test2');
+    arktest.assertEQ(esArr1.pop(), 'test2');
+    arktest.assertEQ(esArr1.pop(), 'test1');
+    arktest.assertTrue(esArr1.pop() === undefined);
+    arktest.assertEQ(esArr1.length, 0);
+    return true;
+}
+
+function testIsArray(): boolean {
+    let global = ESValue.getGlobal();
+    let arrayClass = global.getProperty('Array');
+    let esArr1 = arrayClass.instantiate().unwrap() as es.Array<string>;
+    arktest.assertTrue(ESValue.wrap(esArr1).instanceOf(arrayClass));
+    arktest.assertTrue(ESValue.wrap(numberArray).instanceOf(arrayClass));
+    arktest.assertTrue(ESValue.wrap(emptyArray).instanceOf(arrayClass));
+
+    let staticArr: number[] = [1, 2, 3];
+    arktest.assertTrue(!ESValue.wrap(staticArr).instanceOf(arrayClass));
+    return true;
+}
+
 function testAll(): void {
     testGetLength();
     testGetSetByIndex();
@@ -517,4 +548,6 @@ function testAll(): void {
     testFlat();
     testESValueConsumeESArray();
     testESValueReturnESArray();
+    testNewArray();
+    testIsArray();
 }
