@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ function main(): int {
     suite.addTest("Test constructor with string and offset", testStringConstructorWithOffset)
     suite.addTest("Test constructor with RFC1123 string", testStringConstructorRFC1123)
     suite.addTest("Test Date.parse matches constructor", testDateParseConsistency)
+    suite.addTest("Test Date.toISOString", testISOString)
 
     return suite.run()
 }
@@ -273,4 +274,18 @@ function checkDateWithIntYMDHMSM(cd: Date, year: int, month: int, day: int, hour
     arktest.assertEQ(cd.getMinutes(), minutes, "minute mismatch")
     arktest.assertEQ(cd.getSeconds(), seconds, "second mismatch")
     arktest.assertEQ(cd.getMilliseconds(), millis, "ms mismatch")
+}
+
+function testISOString(): void {
+    const date1 = new Date(8640000000000000)
+    arktest.assertEQ(date1.toISOString(), '+275760-09-13T00:00:00.000Z')
+
+    const date2 = new Date(12434567890)
+    arktest.assertEQ(date2.toISOString(), '1970-05-24T22:02:47.890Z')
+
+    const date3 = new Date(253402300799999)
+    arktest.assertEQ(date3.toISOString(), '9999-12-31T23:59:59.999Z')
+
+    const date4 = new Date(253402300800000)
+    arktest.assertEQ(date4.toISOString(), '+010000-01-01T00:00:00.000Z')
 }

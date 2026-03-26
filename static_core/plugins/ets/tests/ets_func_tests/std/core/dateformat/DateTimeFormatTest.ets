@@ -100,6 +100,72 @@ function testConsoleLogNegativeDate() {
     arktest.assertEQ(res, "Date: \"1969-12-31T23:55:28.178Z\"")
 }
 
+function testDateForamtTest() {
+    const date = new Date('2024-06-15T12:00:00Z')
+    const formater = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        timeZoneName: 'long'
+    });
+    let a = formater.format(date)
+    arktest.assertEQ(a, '6/15/2024, Eastern Daylight Time')
+
+    const formatter2 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Tokyo',
+        timeZoneName: 'long'
+    });
+    let result2 = formatter2.format(date);
+    arktest.assertEQ(result2, '6/15/2024, Japan Standard Time');
+
+    const formatter3 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Los_Angeles',
+        timeZoneName: 'long'
+    });
+    let result3 = formatter3.format(date);
+    arktest.assertEQ(result3, '6/15/2024, Pacific Daylight Time');
+
+    const date1 = new Date('2023-01-15T20:30:00Z');
+    const formatter4 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Los_Angeles',
+        timeZoneName: 'long'
+    });
+    let result4 = formatter4.format(date1);
+    arktest.assertEQ(result4, '1/15/2023, Pacific Standard Time');
+    
+    // Test with different time and Europe/London timezone
+    const date2 = new Date('2024-12-25T05:45:30Z');
+    const formatter5 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Europe/London',
+        timeZoneName: 'long'
+    });
+    let result5 = formatter5.format(date2);
+    arktest.assertEQ(result5, '12/25/2024, Greenwich Mean Time');
+    
+    // Additional test with Asia/Tokyo timezone
+    const date3 = new Date('2023-07-04T10:15:00Z');
+    const formatter6 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Tokyo',
+        timeZoneName: 'long'
+    });
+    let result6 = formatter6.format(date3);
+    arktest.assertEQ(result6, '7/4/2023, Japan Standard Time');
+
+    const date4 = new Date('2023-07-04T10:15:00Z');
+    const formatter7 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Shanghai',
+        timeZoneName: 'long'
+    });
+    let result7 = formatter7.format(date4);
+    arktest.assertEQ(result7, '7/4/2023, China Standard Time');
+
+    const date5 = new Date('2024-06-15T12:00:00Z');
+    const formatter8 = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Shanghai',
+        timeZoneName: 'long'
+    });
+    let result8 = formatter8.format(date5);
+    arktest.assertEQ(result8, '6/15/2024, China Standard Time');
+}
+
 function main(): int {
     initFormatResults()
 
@@ -111,6 +177,7 @@ function main(): int {
     suite.addTest("date format with custom locale and options containing invalid time zone", dateFormatWithInvalidTimeZone)
     suite.addTest("format w/o parameters", dateFormatWithoutParameters)
     suite.addTest("Test console.log out for Date with negative constructor", testConsoleLogNegativeDate)
+    suite.addTest("date format test", testDateForamtTest)
 
     return suite.run()
 }
