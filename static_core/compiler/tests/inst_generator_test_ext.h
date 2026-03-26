@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-if (id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING ||
-    id == RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_GET_STRING_SIZE_IN_BYTES ||
-    id == RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_STRING ||
-    id == RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_STRING) {
+#if !defined(INST_GENERATOR_TEST_EXT_H)
+#define INST_GENERATOR_TEST_EXT_H
+if (id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_RANGE ||
+    id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE ||
+    id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_RANGE) {
     // Skip it as this intrinsic requires LocationBuilder to be run successfully.
     graph->~Graph();
     graphCreator_.GetAllocator()->Resize(0U);
     continue;
 }
+#endif  // INST_GENERATOR_TEST_EXT_H

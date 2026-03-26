@@ -50,7 +50,7 @@
         loop_idioms_customize_memmove_intrinsic_switch_case_inl: plugins/ets/compiler/optimizer/loop_idioms_customize_memmove_intrinsic_switch_case_ets.inl
 
       Tests:
-        inst_generator_test: plugins/ets/tests/compiler/inst_generator_test_ext.inc
+        inst_generator_test: plugins/ets/tests/compiler/inst_generator_test_ext.h
 
       Disasm:
         language_interface_path: plugins/ets/disassembler/disasm_ets_plugin.inc

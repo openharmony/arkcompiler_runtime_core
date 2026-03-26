@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,7 +113,7 @@ bool ValNum::TryToApplyCse(Inst *inst, InstVector *equivInsts)
         }
         // Check bridges
         if (inst->IsMovableObject()) {
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), equivInst, inst);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {equivInst, inst});
         } else {
             // check result can be moved by GC, but checks have no_cse flag
             ASSERT(!inst->IsCheck());

@@ -530,25 +530,22 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm)
     return std::nullopt;
 }
 
-// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
-ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
-                                                                           Inst *stopSearch, BasicBlock *targetBlock,
-                                                                           Marker visited)
+ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph *graph, ObjCtx params, Marker visited)
 {
     ASSERT(graph != nullptr);
+    Inst *source = params.source;
     ASSERT(source != nullptr);
+    BasicBlock *targetBlock = params.targetBlock;
     ASSERT(targetBlock != nullptr);
     ASSERT(source->IsMovableObject());
 
     AllocOrClear(graph, &bridges_);
 
-    // NOTE(anaumova): This optimization was added because it has a significant positive effect on the operation time of
-    // the StringFlatCheck pass. We will continue to investigate it and the code may be refactored. #32948
     Marker prevMarker = visited;
     if (visited == UNDEF_MARKER) {
         visited = graph->NewMarker();
     }
-    SearchSSOnWay(targetBlock, target, source, visited, stopSearch);
+    SearchSSOnWay(targetBlock, params.target, source, visited, params.stopSearch);
     if (prevMarker == UNDEF_MARKER) {
         graph->EraseMarker(visited);
     }
@@ -621,7 +618,7 @@ void SaveStateBridgesBuilder::FixUsagePhiInBB(BasicBlock *block, Inst *inst)
             if (targetInst->IsPhi() || targetInst->GetBasicBlock() != block) {
                 targetInst = block->GetLastInst();
             }
-            SearchAndCreateMissingObjInSaveState(block->GetGraph(), inst, targetInst, block->GetFirstInst());
+            SearchAndCreateMissingObjInSaveState(block->GetGraph(), ObjCtx {inst, targetInst, block->GetFirstInst()});
         }
     }
 }
@@ -641,7 +638,7 @@ void SaveStateBridgesBuilder::FixUsageInstInOtherBB(BasicBlock *block, Inst *ins
                                             << "  For target inst: " << *targetInst << "\n";
             // If inst usage in other BB than in all case object must must exist until the end of the BB
             targetInst = block->GetLastInst();
-            SearchAndCreateMissingObjInSaveState(block->GetGraph(), inst, targetInst, block->GetFirstInst());
+            SearchAndCreateMissingObjInSaveState(block->GetGraph(), ObjCtx {inst, targetInst, block->GetFirstInst()});
         }
     }
 }
@@ -662,6 +659,33 @@ void SaveStateBridgesBuilder::DeleteUnrealObjInSaveState(Inst *ss)
     }
 }
 
+void SaveStateBridgesBuilder::CheckReferenceInputs(Inst *inst, BasicBlock *block, bool blockInLoop)
+{
+    for (auto &input : inst->GetInputs()) {
+        // We record the original object in SaveState without checks
+        auto realSourceInst = inst->GetDataFlowInput(input.GetInst());
+        if (!realSourceInst->IsMovableObject()) {
+            continue;
+        }
+        // In case, when usege of object in loop and definition is not in loop or usage's loop inside
+        // definition's loop, we should check SaveStates till the end of BasicBlock
+        if (blockInLoop && (block->GetLoop()->IsInside(realSourceInst->GetBasicBlock()->GetLoop()))) {
+            COMPILER_LOG(DEBUG, BRIDGES_SS)
+                << " Check inputs: Try to do SSB for real source inst: " << *realSourceInst << "\n"
+                << "  Block in loop:  " << block->GetLoop() << " So target is end of BB:" << *(block->GetLastInst())
+                << "\n";
+            SearchAndCreateMissingObjInSaveState(block->GetGraph(),
+                                                 ObjCtx {realSourceInst, block->GetLastInst(), block->GetFirstInst()});
+        } else {
+            COMPILER_LOG(DEBUG, BRIDGES_SS)
+                << " Check inputs: Try to do SSB for real source inst: " << *realSourceInst << "\n"
+                << "  For target inst: " << *inst << "\n";
+            SearchAndCreateMissingObjInSaveState(block->GetGraph(),
+                                                 ObjCtx {realSourceInst, inst, block->GetFirstInst()});
+        }
+    }
+}
+
 void SaveStateBridgesBuilder::FixSaveStatesInBB(BasicBlock *block)
 {
     ASSERT(block != nullptr);
@@ -675,29 +699,7 @@ void SaveStateBridgesBuilder::FixSaveStatesInBB(BasicBlock *block)
         if (IsSaveStateForGc(inst)) {
             DeleteUnrealObjInSaveState(inst);
         }
-        // Check reference inputs of instructions
-        for (auto &input : inst->GetInputs()) {
-            // We record the original object in SaveState without checks
-            auto realSourceInst = inst->GetDataFlowInput(input.GetInst());
-            if (!realSourceInst->IsMovableObject()) {
-                continue;
-            }
-            // In case, when usege of object in loop and definition is not in loop or usage's loop inside
-            // definition's loop, we should check SaveStates till the end of BasicBlock
-            if (blockInLoop && (block->GetLoop()->IsInside(realSourceInst->GetBasicBlock()->GetLoop()))) {
-                COMPILER_LOG(DEBUG, BRIDGES_SS)
-                    << " Check inputs: Try to do SSB for real source inst: " << *realSourceInst << "\n"
-                    << "  Block in loop:  " << block->GetLoop() << " So target is end of BB:" << *(block->GetLastInst())
-                    << "\n";
-                SearchAndCreateMissingObjInSaveState(block->GetGraph(), realSourceInst, block->GetLastInst(),
-                                                     block->GetFirstInst());
-            } else {
-                COMPILER_LOG(DEBUG, BRIDGES_SS)
-                    << " Check inputs: Try to do SSB for real source inst: " << *realSourceInst << "\n"
-                    << "  For target inst: " << *inst << "\n";
-                SearchAndCreateMissingObjInSaveState(block->GetGraph(), realSourceInst, inst, block->GetFirstInst());
-            }
-        }
+        CheckReferenceInputs(inst, block, blockInLoop);
         // Check usage reference instruction
         FixUsageInstInOtherBB(block, inst);
     }
@@ -720,29 +722,26 @@ void SaveStateBridgesBuilder::CreateBridgeInSS(Inst *source)
     }
 }
 
-// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
-void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target,
-                                                                   Inst *stopSearchInst, BasicBlock *targetBlock,
-                                                                   Marker visited)
+void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph, ObjCtx params, Marker visited)
 {
     ASSERT(graph != nullptr);
-    ASSERT(source != nullptr);
-    ASSERT(source->IsMovableObject());
+    ASSERT(params.source != nullptr);
+    ASSERT(params.source->IsMovableObject());
 
     if (graph->IsBytecodeOptimizer()) {
         return;  // SaveState bridges useless when bytecode optimizer enabled.
     }
 
-    if (targetBlock == nullptr) {
-        ASSERT(target != nullptr);
-        targetBlock = target->GetBasicBlock();
+    if (params.targetBlock == nullptr) {
+        ASSERT(params.target != nullptr);
+        params.targetBlock = params.target->GetBasicBlock();
     } else {
         // if target is nullptr, we won't traverse the target block
-        ASSERT(target == nullptr || target->GetBasicBlock() == targetBlock);
+        ASSERT(params.target == nullptr || params.target->GetBasicBlock() == params.targetBlock);
     }
-    SearchMissingObjInSaveStates(graph, source, target, stopSearchInst, targetBlock, visited);
+    SearchMissingObjInSaveStates(graph, std::move(params), visited);
     if (!bridges_->empty()) {
-        CreateBridgeInSS(source);
+        CreateBridgeInSS(params.source);
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Created bridge(s)";
     }
 }
@@ -764,10 +763,10 @@ void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
         if (targetInst->IsPhi()) {
             // check SaveStates on path between inst and the end of corresponding predecessor of Phi's block
             auto *predBlock = targetInst->GetBasicBlock()->GetPredecessor(user->GetBbNum());
-            SearchAndCreateMissingObjInSaveState(graph, inst, predBlock->GetLastInst(), nullptr, predBlock,
+            SearchAndCreateMissingObjInSaveState(graph, ObjCtx {inst, predBlock->GetLastInst(), nullptr, predBlock},
                                                  marker.GetMarker());
         } else {
-            SearchAndCreateMissingObjInSaveState(graph, inst, targetInst, nullptr, nullptr, marker.GetMarker());
+            SearchAndCreateMissingObjInSaveState(graph, ObjCtx {inst, targetInst}, marker.GetMarker());
         }
     }
 }

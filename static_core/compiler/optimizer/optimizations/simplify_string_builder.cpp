@@ -385,7 +385,7 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
 void SimplifyStringBuilder::FixBrokenSaveStates(Inst *source, Inst *target)
 {
     if (source->IsMovableObject()) {
-        ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), source, target);
+        ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {source, target});
     }
 }
 

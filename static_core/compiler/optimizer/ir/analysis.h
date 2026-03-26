@@ -71,6 +71,13 @@ bool HasSaveStateBetween(Inst *domInst, Inst *inst);
 
 bool IsSaveStateForGc(const Inst *inst);
 
+struct ObjCtx {
+    Inst *source = nullptr;
+    Inst *target = nullptr;
+    Inst *stopSearch = nullptr;
+    BasicBlock *targetBlock = nullptr;
+};
+
 /**
  * Functions below are using for create bridge in SaveStates between source instruction and target instruction.
  * It use in GVN etc. It inserts `source` instruction into `SaveStates` on each path between `source` and
@@ -79,14 +86,9 @@ bool IsSaveStateForGc(const Inst *inst);
  */
 class SaveStateBridgesBuilder {
 public:
-    // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
-    ArenaVector<Inst *> *SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
-                                                      Inst *stopSearch = nullptr, BasicBlock *targetBlock = nullptr,
-                                                      Marker visited = UNDEF_MARKER);
+    ArenaVector<Inst *> *SearchMissingObjInSaveStates(Graph *graph, ObjCtx params, Marker visited = UNDEF_MARKER);
     void CreateBridgeInSS(Inst *source);
-    // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
-    void SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target, Inst *stopSearchInst = nullptr,
-                                              BasicBlock *targetBlock = nullptr, Marker visited = UNDEF_MARKER);
+    void SearchAndCreateMissingObjInSaveState(Graph *graph, ObjCtx params, Marker visited = UNDEF_MARKER);
     void FixInstUsageInSS(Graph *graph, Inst *inst);
     void FixSaveStatesInBB(BasicBlock *block);
     void FixPhisWithCheckInputs(BasicBlock *block);
@@ -99,6 +101,7 @@ private:
     void FixUsageInstInOtherBB(BasicBlock *block, Inst *inst);
     void FixUsagePhiInBB(BasicBlock *block, Inst *inst);
     void DeleteUnrealObjInSaveState(Inst *ss);
+    void CheckReferenceInputs(Inst *inst, BasicBlock *block, bool blockInLoop);
 
     template <typename C>
     void AllocOrClear(Graph *graph, C **pContainer)

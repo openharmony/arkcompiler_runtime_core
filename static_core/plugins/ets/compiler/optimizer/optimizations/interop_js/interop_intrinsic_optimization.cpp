@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -920,13 +920,13 @@ void InteropIntrinsicOptimization::ReplaceInst(Inst *inst, Inst **newInst, Inst 
         *newInst = inst;
         if (inst->IsReferenceOrAny()) {
             // SSB is needed for conversion from local to JSValue or other ref type
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), *newInst, oldNextInst, nullptr, block);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {*newInst, oldNextInst, nullptr, block});
         }
     } else {
         ASSERT(inst->GetOpcode() == (*newInst)->GetOpcode());
         inst->ReplaceUsers(*newInst);
         if (inst->IsReferenceOrAny()) {
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), *newInst, inst);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {*newInst, inst});
         }
     }
 }

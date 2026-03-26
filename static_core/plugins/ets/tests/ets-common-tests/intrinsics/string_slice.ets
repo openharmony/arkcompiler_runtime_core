@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-let uri: String = "https://ru.wikipedia.org/wiki/Заглавная_страница";
-let line = "https://ru.wikipedia.org/wiki/tail";
+let https: String = 'https://';
+let uri: String = https + 'ru.wikipedia.org/wiki/Заглавная_страница';
+let line = https + 'ru.wikipedia.org/wiki/tail';
 
 function checker(lineString: String): boolean {
-    let must_be_compressed_line_string = uri.slice(0, 30);  // the specified range contains compressible chars only
-    let sb: StringBuilder = new StringBuilder(must_be_compressed_line_string);
-    if (sb.append("tail").toString() == lineString) {
+    let mustBeCompressedLineString = uri.slice(0, 30);  // the specified range contains compressible chars only
+    let sb: StringBuilder = new StringBuilder(mustBeCompressedLineString);
+    if (sb.append('tail').toString() == lineString) {
         return true;
     }
     return false;

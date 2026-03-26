@@ -17,19 +17,19 @@ function xassert(v: boolean) { arktest.assertTrue(v) }
 
 function expectError(action: () => void) {
     try { action() } catch (e) { return }
-    throw new Error("Error expected, but nothing was thrown")
+    throw new Error('Error expected, but nothing was thrown')
 }
 
 class X {
-    prop: string = "ooooooo"
+    public prop: String = 'ooooooo'
     foo() { return this.prop }
-    bar(a: string) { return this.prop + a }
+    bar(a: String) { return this.prop + a }
 }
 
 function testldstname() {
     let x = new X();
-    ((a: any) => a.prop = "ttt")(x);
-    xassert(((a: any) => a.prop)(x) == "ttt");
+    ((a: any) => a.prop = 'ttt')(x);
+    xassert(((a: any) => a.prop)(x) == 'ttt');
 
     // expectError(() => { ((a: any) => a.prop = 1)(x) }); // exception is not thrown
     expectError(() => { ((a: any) => a.nope)(x) });
@@ -38,38 +38,38 @@ function testldstname() {
 
 function testldstval() {
     let x = new X();
-    ((a: any) => a["prop"] = "uuu")(x);
-    xassert(((a: any) => a["prop"])(x) == "uuu");
+    ((a: any) => a['prop'] = 'uuu')(x);
+    xassert(((a: any) => a["prop"])(x) == 'uuu');
 
-    // expectError(() => { ((a: any) => a["prop"] = 1)(x) }); // exception is not thrown
-    expectError(() => { ((a: any) => a["nope"])(x) });
-    expectError(() => { ((a: any) => a["nope"] = 1)(x) });
+    // expectError(() => { ((a: any) => a['prop'] = 1)(x) }); // exception is not thrown
+    expectError(() => { ((a: any) => a['nope'])(x) });
+    expectError(() => { ((a: any) => a['nope'] = 1)(x) });
 }
 
 function testldstidx() {
-    let x: Array<Any> = [undefined, 21, "ay"];
-    ((a: any) => a[1] = "aaa")(x);
+    let x: Any[] = [undefined, 21, 'ay'];
+    ((a: any) => a[1] = 'aaa')(x);
     xassert(((a: any) => a[1])(x) == "aaa");
 
     // expectError(() => { ((a: any) => a[-1])(x) }); // nothing happens
-    // expectError(() => { ((a: any) => a[-1] = "aaa")(x) }); // nothing happens
+    // expectError(() => { ((a: any) => a[-1] = 'aaa')(x) }); // nothing happens
     // expectError(() => { ((a: any) => a[1.5])(x) }); // nothing happens
 }
 
 function testcallthis() {
     let x = new X();
-    ((a: any) => a["prop"] = "ya")(x);
-    xassert(((a: any) => a.foo())(x) == "ya");
-    xassert(((a: any) => a.bar("ee"))(x) == "yaee");
+    ((a: any) => a['prop'] = 'ya')(x);
+    xassert(((a: any) => a.foo())(x) == 'ya');
+    xassert(((a: any) => a.bar('ee'))(x) == 'yaee');
 }
 
 function testcall() {
-    xassert(((a: any) => a())(() => "aaa") == "aaa");
-    xassert(((a: any) => a("bbb"))((v: string) => v) == "bbb");
+    xassert(((a: any) => a())(() => 'aaa') == 'aaa');
+    xassert(((a: any) => a('bbb'))((v: string) => v) == 'bbb');
     xassert(((a: any) => a(123.0))((v: number) => v) == 123.0);
-    xassert(((a: any) => a("foo", "bar"))((v: string, w: string) => v + w) == "foobar");
+    xassert(((a: any) => a('foo', 'bar'))((v: String, w: String) => v + w) == 'foobar');
 
-    expectError(() => { ((a: any) => a(1))((s: string) => s) });
+    expectError(() => { ((a: any) => a(1))((s: String) => s) });
 }
 
 function testcasts() {

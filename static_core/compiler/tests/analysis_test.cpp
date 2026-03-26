@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -234,10 +234,10 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
     SaveStateBridgesBuilder ssb;
 
     const BasicBlock *bb = GetGraph()->GetVectorBlocks().at(2U);
-    ssb.SearchAndCreateMissingObjInSaveState(GetGraph(), bb->GetFirstInst(), bb->GetLastInst());
+    ssb.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {bb->GetFirstInst(), bb->GetLastInst()});
 
     const BasicBlock *bbBc = graphBc->GetVectorBlocks().at(2U);
-    ssb.SearchAndCreateMissingObjInSaveState(graphBc, bbBc->GetFirstInst(), bbBc->GetLastInst());
+    ssb.SearchAndCreateMissingObjInSaveState(graphBc, ObjCtx {bbBc->GetFirstInst(), bbBc->GetLastInst()});
 
     ASSERT_TRUE(GraphComparator().Compare(graphBc, example));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), bridgeExample));
