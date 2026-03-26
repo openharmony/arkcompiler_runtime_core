@@ -1,0 +1,49 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+#integer types
+   #All signed 8-bit integers (−2^7 to 2^7 − 1)
+    - {type: byte, arr: "[127, -1, 0, -128, 1 , 0 , -1]"}
+    - {type: Byte, arr: "[127, -128, -1, 0, 0, -1]"}
+   #All signed 16-bit integers (−2^15 to 2^15 − 1)
+    - {type: short, arr: "[-32768, 0, 32767]"}
+    - {type: Short, arr: "[32767, -32768, 0, 333, -55]"}
+   #All signed 32-bit integers (−2^31 to 2^31 − 1)
+    - {type: int, arr: "[-2147483648, 0, Int.MAX_VALUE, Int.MAX_VALUE]"}
+    - {type: Int, arr: "[-2147483648, 0, Int.MAX_VALUE, Int.MAX_VALUE, -11]"}
+   #All signed 64-bit integers (−2^63 to 2^63 − 1)
+    - {type: long, arr: "[Long.MAX_VALUE, Int.MAX_VALUE, Byte.MAX_VALUE, -10, Long.MIN_VALUE]"}
+    - {type: Long, arr: "[Long.MAX_VALUE, -9, -10, Long.MIN_VALUE]"}
+   #All integers with no limits
+    - {type: bigint, arr: "[1234567890123456789012345678901234567890n, new bigint(-1), new bigint(0)]"}
+    - {type: BigInt, arr: "[100n]" }      
+#boolean
+    - {type: boolean, arr: "[true, Boolean.FALSE, Boolean.TRUE, true, false, true]"}
+    - {type: Boolean, arr: "[Boolean.TRUE, false, true, true, Boolean.FALSE]"}
+
+#char
+    - {type: char, arr: "[c'b', c'\\x7F']"}
+    - {type: Char, arr: "[c'a']"}
+
+#floating-point types
+   #The set of all IEEE 754 32-bit floating-point numbers
+    - {type: float, arr: "[Float.MAX_VALUE, Float.MIN_VALUE, new Float(-3.)]"}
+    - {type: Float, arr: "[6.0, Float.MIN_VALUE, new Float(-3.1), Float.MAX_VALUE]"}
+   #The set of all IEEE 754 64-bit floating-point numbers
+    - {type: number, arr: "[-100.456, Double.MAX_VALUE, 4.41, Double.MIN_VALUE]"}
+    - {type: Number, arr: "[0, Double.MAX_VALUE, -1.1, Double.MIN_VALUE]"}
+   #The set of all IEEE 754 64-bit floating-point numbers
+    - {type: double, arr: "[Double.MAX_VALUE, 4.41, Double.MIN_VALUE, 0]"}
+    - {type: Double, arr: "[Double.MAX_VALUE, Double.MIN_VALUE, 8.81, 11, 0]"}
