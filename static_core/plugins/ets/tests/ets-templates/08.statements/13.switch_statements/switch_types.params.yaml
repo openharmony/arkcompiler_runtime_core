@@ -1,0 +1,60 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # List of invalid switch statements
+switch_statements:
+  - type: byte
+    param1: 1
+    param2: 2
+  - type: short
+    param1: 1
+    param2: 2
+  - type: int
+    param1: 1
+    param2: 2
+  - type: long
+    param1: 1
+    param2: 2
+  - type: bigint
+    param1: 1n
+    param2: 2n
+  - type: float
+    param1: 1.0f
+    param2: 2.5f
+  - type: double
+    param1: 1.0
+    param2: 2.5
+  - type: int|null
+    param1: 1
+    param2: "null"
+  - type: int|undefined
+    param1: 1
+    param2: "undefined"
+  - type: Any
+    param1: 1
+    param2: "'abc'"
+  - type: Function
+    param1: () => {}
+    param2: "(a: int): int  => { return a }"
+  - type: Object
+    param1: 1
+    param2: "'abc'"
+  - type: boolean
+    param1: "true"
+    param2: "false"
+  - type: int[]
+    param1: "[0, 1, 2]"
+    param2: "[3, 4, 5]"
+  - type: FixedArray<int>
+    param1: new FixedArray<int>(1, 1)
+    param2: new FixedArray<int>(2, 2)
