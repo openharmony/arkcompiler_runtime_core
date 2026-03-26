@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,7 +38,7 @@ bigint_literals:
         arktest.assertEQ(b, 0x9BD30A3C645943D2E1B00E8AD2n)
         let c = 0x616_3E6_65B_EB7_CA6_3CD_0E0_916_C35n
         arktest.assertEQ(c, 0x616_3E6_65B_EB7_CA6_3CD_0E0_916_C35n)
-        let d = 0x49_960_2D2n
+        let d = -0x49_960_2D2n
         arktest.assertEQ(d, -0x49_960_2D2n)
         let e = -0x9BD30A3C645943D2E1B00E8AD2n
         arktest.assertEQ(e, -0x9BD30A3C645943D2E1B00E8AD2n)

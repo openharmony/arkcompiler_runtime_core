@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,39 +13,41 @@
 
 --- # List of invalid integer literals
 
-incorrect_float_literals:
-  - '0e'
-  - '0.0e'
-  - '0.0e+'
-  - '0.0e-'
-  - '0.0E'
-  - '0.0E+'
-  - '0.0E-'
-  - '.'
-  - '.e'
-  - '.0e'
-  - '.0e+'
-  - '.0e-'
-  - '1e'
-  - '1e+'
-  - '1e-'
-  - '1.0e'
-  - '1.0e+'
-  - '1.0e-'
-  - '55.66.77'
+cases:
+  - {lit: '0e',          exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '0.0e',        exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '0.0e+',       exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '0.0e-',       exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '0.0E',        exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '0.0E+',       exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '0.0E-',       exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '.0e',         exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '.0e+',        exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '.0e-',        exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '1e',          exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '1e+',         exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '1e-',         exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '1.0e',        exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '1.0e+',       exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '1.0e-',       exp_out: "Syntax error ESY0251: Invalid numeric literal."}
+  - {lit: '123.123e_12', exp_out: "Syntax error ESY0251: Invalid numeric literal."}
 
-  - '1__23.123e12'
-  - '_123.123e12'
-  - '123.123_e12'
-  - '123._123e12'
-  - '123_.123e12'
-  - '123.123e_12'
-  - '123.123e12_'
-  - '123.123_e12'
-  - '123.123_e_12'
+  - {lit: '1__23.123e12', exp_out: "Syntax error ESY0254: Invalid numeric separator."}
 
-  - '5__6.78'
-  - '_6.78'
-  - '6.78_'
-  - '6_.78'
-  - '6._78'
+  - {lit: '_123.123e12', exp_out: "Semantic error ESE0143: Unresolved reference _123"}
+  - {lit: '_6.78',       exp_out: "Semantic error ESE0143: Unresolved reference _6"}
+
+  - {lit: '123.123_e12',  exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '123_.123e12',  exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '123.123e12_',  exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '123.123_e12',  exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '123.123_e_12', exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '5__6.78',      exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '6.78_',        exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+  - {lit: '6_.78',        exp_out: "Syntax error ESY0250: Numeric separators are not allowed at the end of numeric literals."}
+
+  - {lit: '.',           exp_out: "Syntax error ESY0227: Unexpected token '.'."}
+  - {lit: '.e',          exp_out: "Syntax error ESY0227: Unexpected token 'e'."}
+  - {lit: '55.66.77',    exp_out: "Syntax error ESY0227: Unexpected token '.77'."}
+  - {lit: '123._123e12', exp_out: "Syntax error ESY0227: Unexpected token '_123e12'."}
+  - {lit: '6._78',       exp_out: "Syntax error ESY0227: Unexpected token '_78'."}

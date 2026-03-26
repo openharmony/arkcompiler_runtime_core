@@ -13,14 +13,27 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Incorrect Floating-point literals
-tags: [negative, compile-only]
-params: {{c.lit}}
-expected_out: "{{c.exp_out}}"
+desc: Undefined literal
 ---*/
 
-let x = {{c.lit}};
-function main(): void {}
-{% endfor %}
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Undefined literal");
+
+    suite.addTest("Implicit type", () => {
+        let x = undefined; // x type is expected to be inferred to Object|undefined type
+        arktest.assertTrue( x === undefined )
+    });
+
+    suite.addTest("Explicit type", () => {
+        let x: undefined = undefined;
+        arktest.assertTrue( x === undefined )
+    });
+
+    suite.addTest("Union type", () => {
+        let y: Object|undefined = undefined;
+        arktest.assertTrue( y === undefined )
+    });
+
+    return suite.run();
+}

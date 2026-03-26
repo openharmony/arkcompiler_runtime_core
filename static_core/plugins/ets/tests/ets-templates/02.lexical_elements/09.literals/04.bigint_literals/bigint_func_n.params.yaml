@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,20 +12,20 @@
 # limitations under the License.
 
 --- # List of invalid bigint functions
-bigint_functions:
-    - 'BigInt()    // missing argument'
-    - 'BigInt(new Object())  // wrong argument type'
-    - 'BigInt(null)  // wrong argument type'
-    - 'BigInt(undefined) // wrong argument type'
+cases:
+    - {func: 'BigInt()    // missing args',             exp_out: "Semantic error ESE0127: No matching call signature for $_invoke()"}
+    - {func: 'BigInt(new Object())  // wrong arg type', exp_out: "Semantic error ESE0127: No matching call signature for $_invoke(Object)"}
+    - {func: 'BigInt(null)  // wrong arg type',         exp_out: "Semantic error ESE0127: No matching call signature for $_invoke(null)"}
+    - {func: 'BigInt(undefined) // wrong arg type',     exp_out: "Semantic error ESE0127: No matching call signature for $_invoke(undefined)"}
 
-    - 'BigInt.asIntN()  // missing arguments'
-    - 'BigInt.asIntN(1n, 0n)  // wrong 1st argument type'
-    - 'BigInt.asIntN("5", 12345n)   // wrong 1st argument type'
-    - 'BigInt.asIntN(32, 0 as byte)  // wrong 2nd argument type'
-    - 'BigInt.asIntN(32, 12345)  // wrong 2nd argument type'
+    - {func: 'BigInt.asIntN()  // missing args',                    exp_out: "Semantic error ESE0127: No matching call signature for asIntN()"}
+    - {func: 'BigInt.asIntN(1n, 0n)  // wrong 1st arg type',        exp_out: "Semantic error ESE0127: No matching call signature for asIntN(bigint, bigint)"}
+    - {func: 'BigInt.asIntN("5", 12345n)   // wrong 1st arg type',  exp_out: 'Semantic error ESE0127: No matching call signature for asIntN(\"5\", bigint)'}
+    - {func: 'BigInt.asIntN(32, 0 as byte)  // wrong 2nd arg type', exp_out: "Semantic error ESE0127: No matching call signature for asIntN(Long, Byte)"}
+    - {func: 'BigInt.asIntN(32, 12345)  // wrong 2nd arg type',     exp_out: "Semantic error ESE0127: No matching call signature for asIntN(Long, Int)"}
 
-    - 'BigInt.asUintN()  // missing arguments'
-    - 'BigInt.asUintN(1n, 0n)  // wrong 1st argument type'
-    - 'BigInt.asUintN("5", 12345n)  // wrong 1st argument type'
-    - 'BigInt.asUintN(32, 0 as short)  // wrong 2nd argument type'
-    - 'BigInt.asUintN(32, 12345)  // wrong 2nd argument type'
+    - {func: 'BigInt.asUintN()  // missing args',                     exp_out: "Semantic error ESE0127: No matching call signature for asUintN()"}
+    - {func: 'BigInt.asUintN(1n, 0n)  // wrong 1st arg type',         exp_out: "Semantic error ESE0127: No matching call signature for asUintN(bigint, bigint)"}
+    - {func: 'BigInt.asUintN("5", 12345n)  // wrong 1st arg type',    exp_out: 'Semantic error ESE0127: No matching call signature for asUintN(\"5\", bigint)'}
+    - {func: 'BigInt.asUintN(32, 0 as short)  // wrong 2nd arg type', exp_out: "Semantic error ESE0127: No matching call signature for asUintN(Long, Short)"}
+    - {func: 'BigInt.asUintN(32, 12345)  // wrong 2nd arg type',      exp_out: "Semantic error ESE0127: No matching call signature for asUintN(Long, Int)"}
