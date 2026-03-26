@@ -1,0 +1,34 @@
+#33449
+ets-common-tests/taskpool/blocked_expand_tasks.ets
+
+# 28002
+ets-common-tests/imported_modules_TL_exec_2/a.ets
+ets-common-tests/imported_modules_TL_exec_1/a.ets
+
+# 24932
+# TypeError: Cannot use type 'void' as value.  [cast_type_lambda.ets:41:16]
+ets-common-tests/lambda/cast_type_lambda.ets
+
+# 249333
+# E/verifier: Cannot link class: Cannot find field 'int_1' in class 'ambient_const_vars.ETSGLOBAL'
+ets-common-tests/exporting-ambient-decl/main.ets
+
+# 25057
+ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
+
+#32560
+ets-common-tests/atomics/base_operation_compare_exchange.ets
+
+#32837
+ets-common-tests/taskpool/asyncrunner_tasks.ets
+
+#32382
+ets-common-tests/taskpool/long_task.ets
+
+# 24986
+ets-common-tests/generics/generics_methods.ets
+ets-common-tests/intrinsics/bigint64array_sort.ets
+ets-common-tests/intrinsics/uint32array_sort.ets
+
+#32560
+ets-common-tests/atomics/base_operation_compare_exchange.ets
