@@ -142,7 +142,7 @@ Example: ```clear_flags: [require_state, can_throw, heap_inv]```
 ### safe_intrinsic
 
 If it is set to ```true```, then the following *unsafe* flags will be cleared:  
-```no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, heap_inv, can_throw```
+```no_dce, no_hoist, no_cse, compiler_barrier, require_state, runtime_call, heap_inv, can_throw```
 
 *Unsafe* means that an intrinsic may violate the conditions, which are necessary  
 to correctly perform some compiler optimizing transformations.

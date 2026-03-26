@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,8 +154,8 @@ BasicBlock *CodeSink::SinkInstruction(Inst *inst, InstVector *stores, bool barri
     // We can't move instruction with REFERENCE input throw SaveState(GC can moved or delete the object)
     // For Bytecode Optimizer, it is not allowed to mix LoadStatic and class initialization (for another LoadStatic),
     // so LoadStatic cannot be sunk
-    if (inst->IsAllocation() || inst->IsControlFlow() || inst->CanThrow() || inst->IsBarrier() || inst->IsSaveState() ||
-        (!GetGraph()->IsBytecodeOptimizer() && InstHasRefInput(inst)) ||
+    if (inst->IsAllocation() || inst->IsControlFlow() || inst->CanThrow() || inst->IsCompilerBarrier() ||
+        inst->IsSaveState() || (!GetGraph()->IsBytecodeOptimizer() && InstHasRefInput(inst)) ||
         (GetGraph()->IsBytecodeOptimizer() && (inst->GetOpcode() == Opcode::LoadStatic))) {
         return nullptr;
     }

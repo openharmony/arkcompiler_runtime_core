@@ -345,7 +345,8 @@ LOCATIONS_BUILDER(void)::VisitMultiArray(GraphVisitor *visitor, Inst *inst)
 
 LOCATIONS_BUILDER(void)::VisitStoreStatic([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
 {
-    if (inst->CastToStoreStatic()->GetNeedBarrier()) {
+    auto *store = inst->CastToStoreStatic();
+    if (store->GetNeedWriteBarrier()) {
         inst->SetFlag(inst_flags::REQUIRE_TMP);
     }
 }

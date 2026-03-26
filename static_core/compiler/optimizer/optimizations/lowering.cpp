@@ -1412,11 +1412,12 @@ void Lowering::LowerConstArrayIndex(Inst *inst, Opcode lowLevelOpcode)
             ASSERT(inst->GetInputsCount() == 2U);
         }
         if (inst->GetOpcode() == Opcode::StoreArray) {
-            newInst->CastToStoreArrayI()->SetNeedBarrier(inst->CastToStoreArray()->GetNeedBarrier());
+            newInst->CastToStoreArrayI()->SetNeedPreWriteBarrier(inst->CastToStoreArray()->GetNeedPreWriteBarrier());
+            newInst->CastToStoreArrayI()->SetNeedPostWriteBarrier(inst->CastToStoreArray()->GetNeedPostWriteBarrier());
         }
 
         if (inst->GetOpcode() == Opcode::LoadArray) {
-            newInst->CastToLoadArrayI()->SetNeedBarrier(inst->CastToLoadArray()->GetNeedBarrier());
+            newInst->CastToLoadArrayI()->SetNeedReadBarrier(inst->CastToLoadArray()->GetNeedReadBarrier());
             newInst->CastToLoadArrayI()->SetIsArray(inst->CastToLoadArray()->IsArray());
         }
         if (inst->GetOpcode() == Opcode::BoundsCheck) {

@@ -145,7 +145,7 @@ end
 
 macro(:"load_field_obj") do |field, klass|
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Load(klass, offset).SetNeedBarrier(true).ref
+  Load(klass, offset).SetNeedReadBarrier(true).ref
 end
 
 ['short', 'long', 'obj'].each do |flavor|
@@ -214,7 +214,7 @@ end
 
 macro(:"store_field_obj") do |field, klass|
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Store(klass, offset, acc).SetNeedBarrier(true).ref
+  Store(klass, offset, acc).SetNeedWriteBarrier(true).ref
 end
 
 ['short', 'long', 'obj'].each do |flavor|

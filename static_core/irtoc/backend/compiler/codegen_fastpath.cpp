@@ -43,49 +43,33 @@ static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, cons
     encoder->LoadRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
-static bool InstHasRuntimeCall(const Inst *inst)
+static bool InstHasRuntimeCall(const Inst *inst, const RuntimeInterface *runtime)
 {
-    switch (inst->GetOpcode()) {
-        case Opcode::Store:
-            if (inst->CastToStore()->GetNeedBarrier()) {
-                return true;
-            }
-            break;
-        case Opcode::StoreI:
-            if (inst->CastToStoreI()->GetNeedBarrier()) {
-                return true;
-            }
-            break;
-        case Opcode::StoreArray:
-            if (inst->CastToStoreArray()->GetNeedBarrier()) {
-                return true;
-            }
-            break;
-        case Opcode::StoreObject:
-            if (inst->CastToStoreObject()->GetNeedBarrier()) {
-                return true;
-            }
-            break;
-        case Opcode::LoadObjectDynamic:
-        case Opcode::StoreObjectDynamic:
-            return true;
-        case Opcode::Cast:
-            if (inst->CastToCast()->IsDynamicCast()) {
-                return true;
-            }
-            break;
-        default:
-            break;
+    if (InstNeedReadBarrier(inst) && runtime->NeedsReadBarrier()) {
+        return true;
+    }
+    if (InstNeedPreWriteBarrier(inst) && runtime->NeedsPreWriteBarrier()) {
+        return true;
+    }
+    if (InstNeedPostWriteBarrier(inst) && runtime->NeedsPostWriteBarrier()) {
+        return true;
+    }
+    auto opcode = inst->GetOpcode();
+    if (opcode == Opcode::LoadObjectDynamic || opcode == Opcode::StoreObjectDynamic) {
+        return true;
+    }
+    if (opcode == Opcode::Cast && inst->CastToCast()->IsDynamicCast()) {
+        return true;
     }
     if (inst->IsRuntimeCall()) {
-        if (!inst->IsIntrinsic()) {
-            return true;
+        if (inst->IsIntrinsic()) {
+            auto id = inst->CastToIntrinsic()->GetIntrinsicId();
+            if (id == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY ||
+                id == RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL) {
+                return false;
+            }
         }
-        auto intrinsicId = inst->CastToIntrinsic()->GetIntrinsicId();
-        if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY &&
-            intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL) {
-            return true;
-        }
+        return true;
     }
     return false;
 }
@@ -98,7 +82,7 @@ static bool HasRuntimeCalls(const Graph &graph)
 {
     for (auto bb : graph.GetBlocksRPO()) {
         for (auto inst : bb->Insts()) {
-            if (InstHasRuntimeCall(inst)) {
+            if (InstHasRuntimeCall(inst, graph.GetRuntime())) {
                 return true;
             }
         }

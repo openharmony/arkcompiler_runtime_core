@@ -731,8 +731,8 @@ static bool IsHeapReadingInst(Inst *inst)
 
 bool Lse::CanEliminateInstruction(Inst *inst)
 {
-    if (inst->IsBarrier()) {
-        COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " was suppressed: a barrier";
+    if (inst->IsCompilerBarrier()) {
+        COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " was suppressed: a compiler barrier";
         return false;
     }
     auto loop = inst->GetBasicBlock()->GetLoop();

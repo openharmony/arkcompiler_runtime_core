@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,7 +275,7 @@ public:
                 return;
             }
         }
-        if (inst->IsBarrier()) {
+        if (inst->IsCompilerBarrier()) {
             candidates_.clear();
             return;
         }
@@ -697,8 +697,8 @@ private:
 
         auto pload = graph_->CreateInstLoadArrayPair(first->GetType(), INVALID_PC, first->GetInput(0).GetInst(),
                                                      first->GetInput(1).GetInst());
-        pload->CastToLoadArrayPair()->SetNeedBarrier(first->CastToLoadArray()->GetNeedBarrier() ||
-                                                     second->CastToLoadArray()->GetNeedBarrier());
+        pload->CastToLoadArrayPair()->SetNeedReadBarrier(first->CastToLoadArray()->GetNeedReadBarrier() ||
+                                                         second->CastToLoadArray()->GetNeedReadBarrier());
         insertAfter->InsertAfter(pload);
         if (first->CanThrow() || second->CanThrow()) {
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -722,8 +722,8 @@ private:
         pload->SetObjField0(first->CastToLoadObject()->GetObjField());
         pload->SetObjField1(second->CastToLoadObject()->GetObjField());
 
-        pload->CastToLoadObjectPair()->SetNeedBarrier(first->CastToLoadObject()->GetNeedBarrier() ||
-                                                      second->CastToLoadObject()->GetNeedBarrier());
+        pload->CastToLoadObjectPair()->SetNeedReadBarrier(first->CastToLoadObject()->GetNeedReadBarrier() ||
+                                                          second->CastToLoadObject()->GetNeedReadBarrier());
         if (first->CanThrow() || second->CanThrow()) {
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
         }
@@ -739,8 +739,8 @@ private:
 
         auto pload = graph_->CreateInstLoadArrayPairI(first->GetType(), INVALID_PC, first->GetInput(0).GetInst(),
                                                       first->CastToLoadArrayI()->GetImm());
-        pload->CastToLoadArrayPairI()->SetNeedBarrier(first->CastToLoadArrayI()->GetNeedBarrier() ||
-                                                      second->CastToLoadArrayI()->GetNeedBarrier());
+        pload->CastToLoadArrayPairI()->SetNeedReadBarrier(first->CastToLoadArrayI()->GetNeedReadBarrier() ||
+                                                          second->CastToLoadArrayI()->GetNeedReadBarrier());
         insertAfter->InsertAfter(pload);
         if (first->CanThrow() || second->CanThrow()) {
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -759,8 +759,10 @@ private:
             std::array<Inst *, 4U> {first->GetInput(0).GetInst(), first->CastToStoreArray()->GetIndex(),
                                     first->CastToStoreArray()->GetStoredValue(),
                                     second->CastToStoreArray()->GetStoredValue()});
-        pstore->CastToStoreArrayPair()->SetNeedBarrier(first->CastToStoreArray()->GetNeedBarrier() ||
-                                                       second->CastToStoreArray()->GetNeedBarrier());
+        pstore->CastToStoreArrayPair()->SetNeedPreWriteBarrier(first->CastToStoreArray()->GetNeedPreWriteBarrier() ||
+                                                               second->CastToStoreArray()->GetNeedPreWriteBarrier());
+        pstore->CastToStoreArrayPair()->SetNeedPostWriteBarrier(first->CastToStoreArray()->GetNeedPostWriteBarrier() ||
+                                                                second->CastToStoreArray()->GetNeedPostWriteBarrier());
         insertAfter->InsertAfter(pstore);
         if (first->CanThrow() || second->CanThrow()) {
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -773,26 +775,29 @@ private:
     {
         ASSERT(first->GetOpcode() == Opcode::StoreObject);
         ASSERT(second->GetOpcode() == Opcode::StoreObject);
-        ASSERT(!first->CastToStoreObject()->GetVolatile());
-        ASSERT(!second->CastToStoreObject()->GetVolatile());
+        auto *store1 = first->CastToStoreObject();
+        auto *store2 = second->CastToStoreObject();
+        ASSERT(!store1->GetVolatile());
+        ASSERT(!store2->GetVolatile());
 
-        auto pstore = graph_->CreateInstStoreObjectPair();
-        pstore->SetType(first->GetType());
-        pstore->SetTypeId0(first->CastToStoreObject()->GetTypeId());
-        pstore->SetTypeId1(second->CastToStoreObject()->GetTypeId());
-        pstore->SetInput(InputOrd::INP0, first->GetInput(InputOrd::INP0).GetInst());
-        pstore->SetInput(InputOrd::INP1, first->GetInput(InputOrd::INP1).GetInst());
-        pstore->SetInput(InputOrd::INP2, second->GetInput(InputOrd::INP1).GetInst());
-        pstore->CastToStoreObjectPair()->SetObjField0(first->CastToStoreObject()->GetObjField());
-        pstore->CastToStoreObjectPair()->SetObjField1(second->CastToStoreObject()->GetObjField());
+        auto *pstore = graph_->CreateInstStoreObjectPair();
+        pstore->SetType(store1->GetType());
+        pstore->SetTypeId0(store1->GetTypeId());
+        pstore->SetTypeId1(store2->GetTypeId());
+        pstore->SetInput(InputOrd::INP0, store1->GetInput(InputOrd::INP0).GetInst());
+        pstore->SetInput(InputOrd::INP1, store1->GetInput(InputOrd::INP1).GetInst());
+        pstore->SetInput(InputOrd::INP2, store2->GetInput(InputOrd::INP1).GetInst());
+        pstore->CastToStoreObjectPair()->SetObjField0(store1->GetObjField());
+        pstore->CastToStoreObjectPair()->SetObjField1(store2->GetObjField());
 
-        pstore->CastToStoreObjectPair()->SetNeedBarrier(first->CastToStoreObject()->GetNeedBarrier() ||
-                                                        second->CastToStoreObject()->GetNeedBarrier());
-        if (first->CanThrow() || second->CanThrow()) {
+        pstore->CastToStoreObjectPair()->SetNeedPreWriteBarrier(store1->GetNeedPreWriteBarrier() ||
+                                                                store2->GetNeedPreWriteBarrier());
+        pstore->CastToStoreObjectPair()->SetNeedPostWriteBarrier(store1->GetNeedPostWriteBarrier() ||
+                                                                 store2->GetNeedPostWriteBarrier());
+        if (store1->CanThrow() || store2->CanThrow()) {
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
         }
         insertAfter->InsertAfter(pstore);
-
         return pstore;
     }
 
@@ -800,17 +805,19 @@ private:
     {
         ASSERT(first->GetOpcode() == Opcode::StoreArrayI);
         ASSERT(second->GetOpcode() == Opcode::StoreArrayI);
-
-        auto pstore = graph_->CreateInstStoreArrayPairI(
-            first->GetType(), INVALID_PC, first->GetInput(0).GetInst(), first->CastToStoreArrayI()->GetStoredValue(),
-            second->CastToStoreArrayI()->GetStoredValue(), first->CastToStoreArrayI()->GetImm());
-        pstore->CastToStoreArrayPairI()->SetNeedBarrier(first->CastToStoreArrayI()->GetNeedBarrier() ||
-                                                        second->CastToStoreArrayI()->GetNeedBarrier());
+        auto *store1 = first->CastToStoreArrayI();
+        auto *store2 = second->CastToStoreArrayI();
+        auto pstore =
+            graph_->CreateInstStoreArrayPairI(first->GetType(), INVALID_PC, first->GetInput(0).GetInst(),
+                                              store1->GetStoredValue(), store2->GetStoredValue(), store1->GetImm());
+        pstore->CastToStoreArrayPairI()->SetNeedPreWriteBarrier(store1->GetNeedPreWriteBarrier() ||
+                                                                store2->GetNeedPreWriteBarrier());
+        pstore->CastToStoreArrayPairI()->SetNeedPostWriteBarrier(store1->GetNeedPostWriteBarrier() ||
+                                                                 store2->GetNeedPostWriteBarrier());
         insertAfter->InsertAfter(pstore);
         if (first->CanThrow() || second->CanThrow()) {
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
         }
-
         return pstore;
     }
 

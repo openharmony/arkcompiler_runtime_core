@@ -77,19 +77,19 @@ scoped_macro(:get_tree_data_ptr) do |tree_str, cache_miss_label|
   strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
   strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
   strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
-  key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  key := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
   If(key, tree_str).NE {
     GotoGlobal(cache_miss_label)
   }
   strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
-  strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  strCached := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
   data_ptr := AddI(Cast(strCached).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
 end
 
 
 scoped_macro(:get_sliced_data_ptr) do |sliced_str, length_packed|
   # According to the specification the parent string must always be LineString.
-  parent := LoadI(sliced_str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+  parent := LoadI(sliced_str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedReadBarrier(true).ref
   uncompressed := is_string_uncompressed_u64(length_packed)
   startIndex := LoadI(sliced_str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
   startIndex := ShrI(startIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u64
@@ -142,12 +142,12 @@ scoped_macro(:try_get_flattened_tree_str) do |str, slowpath|
   strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
   strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
   strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
-  key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  key := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
   If(key, str).NE {
     GotoGlobal(slowpath)
   }
   strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
-  strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  strCached := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
 end  # try_get_flattened_tree_str
 
 scoped_macro(:try_use_cached_flat_str_reject_sliced) do |str, slowpath|

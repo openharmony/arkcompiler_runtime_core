@@ -102,7 +102,11 @@ macro(:ref_is_null) do |obj|
 end
 
 scoped_macro(:store_with_barrier) do |buffer, buffer_uint, offset, obj, sync_type|
-  Store(buffer, offset, obj).SetNeedBarrier(sync_type == :Async).ref
+  if sync_type == :Async
+    Store(buffer, offset, obj).SetNeedWriteBarrier(true).ref
+  else
+    Store(buffer, offset, obj).SetNeedWriteBarrier(false).ref
+  end
   if sync_type == :AsyncManual
     min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
     cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
@@ -144,7 +148,7 @@ def GenerateStringBuilderAppendLong(cgmode)
   convert_long_to_char_array(v, chars, n_digits)
   # 5. Remember array in the buffer
   slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
-  Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
+  Store(buffer, slot_offs, char_array).SetNeedWriteBarrier(true).ref
   # 6. Increment 'index' field
   StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
   # 7. Update 'length' field
@@ -200,7 +204,7 @@ def GenerateStringBuilderAppendBool(cgmode)
   convert_bool_to_char_array(v, chars)
   # 4. Remember array in the buffer
   slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
-  Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
+  Store(buffer, slot_offs, char_array).SetNeedWriteBarrier(true).ref
   # 5. Increment 'index' field
   StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
   # 6. Update 'length' field
@@ -250,7 +254,7 @@ def GenerateStringBuilderAppendChar(cgmode)
   StoreI(chars, ch).Imm(0).u16
   # 4. Remember array in the buffer
   slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
-  Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
+  Store(buffer, slot_offs, char_array).SetNeedWriteBarrier(true).ref
   # 5. Increment 'index' field
   StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
   # 6. Update 'length' field
@@ -529,7 +533,7 @@ Label(:ForEachBufferSlot)
   i := Phi(i1, i2).i32
   dst_data := Phi(dst_data1, dst_data2).ptr
   slot := AddI(ShlI(i).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
-  obj := Load(buffer, slot).SetNeedBarrier(true).ref
+  obj := Load(buffer, slot).SetNeedReadBarrier(true).ref
   klass := load_class(obj)
   klass_flags := LoadI(klass).Imm(Constants::BASE_CLASS_FLAGS_OFFSET).u32
   If(AndI(klass_flags).Imm("ark::Class::STRING_CLASS").u32, 0).EQ.b {

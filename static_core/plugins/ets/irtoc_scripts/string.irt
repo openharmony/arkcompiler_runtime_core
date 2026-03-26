@@ -791,7 +791,7 @@ def GenerateStringStartsWith(cgmode)
   zeroIndex := Cast(0).u32
 
   If(strType, Constants::STRING_TYPE_SLICE).EQ {
-    strParent := LoadI(str_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    strParent := LoadI(str_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedReadBarrier(true).ref
     strStartIndexAndBits := LoadI(str_orig0).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
     strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
   }
@@ -803,7 +803,7 @@ def GenerateStringStartsWith(cgmode)
   pfxType := LoadI(pfxBaseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
 
   If(pfxType, Constants::STRING_TYPE_SLICE).EQ {
-    pfxParent := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    pfxParent := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedReadBarrier(true).ref
     pfxStartIndexAndBits := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
     pfxStartIndex := ShrI(pfxStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
   }
@@ -2645,8 +2645,8 @@ function(:StringConcat2TlabAllStrings,
 
   # It is new object, previous reference value is null, PRE write barrier is not required.
   # Object is allocated in young generation. POST write barrier is not required.
-  StoreI(tree_str, str1).Imm(Constants::TREE_STRING_LEFT_OFFSET).SetNeedBarrier(false).ref
-  StoreI(tree_str, str2).Imm(Constants::TREE_STRING_RIGHT_OFFSET).SetNeedBarrier(false).ref
+  StoreI(tree_str, str1).Imm(Constants::TREE_STRING_LEFT_OFFSET).SetNeedWriteBarrier(false).ref
+  StoreI(tree_str, str2).Imm(Constants::TREE_STRING_RIGHT_OFFSET).SetNeedWriteBarrier(false).ref
 
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -2674,7 +2674,7 @@ function(:StringCharAt,
   baseClass := load_class(strOrig)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_SLICE).EQ {
-    parentStr := LoadI(strOrig).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    parentStr := LoadI(strOrig).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedReadBarrier(true).ref
     startIndexAndFlags := LoadI(strOrig).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).i32
     startIndex := ShrI(startIndexAndFlags).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).i32
     slicedIndex := Add(startIndex, indexOrig).i32
@@ -2768,7 +2768,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, cgmode = :FastPath)
       stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
 
       If(stringType, Constants::STRING_TYPE_SLICE).EQ {
-        strParent := LoadI(str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+        strParent := LoadI(str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedReadBarrier(true).ref
         strStartIndexAndBits := LoadI(str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
         strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
         addedStartIndex := Add(bx6, strStartIndex).u32
@@ -2817,7 +2817,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, cgmode = :FastPath)
 
       # It is new object, previous reference value is null, PRE write barrier is not required.
       # Object is allocated in young generation. POST write barrier is not required.
-      StoreI(result, fromStr).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(false).ref
+      StoreI(result, fromStr).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedWriteBarrier(false).ref
       # hasBackingStoreBit become zero after shift left
       startIndexAndBits := ShlI(resultStartIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
       StoreI(result, startIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32

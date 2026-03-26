@@ -81,8 +81,13 @@ def GenerateArrayFastReverse(sync_type)
 
     elem_a := Load(data, offset_a).ref
     elem_b := Load(data, offset_b).ref
-    Store(data, offset_a, elem_b).SetNeedBarrier(sync_type == :Hybrid).ref
-    Store(data, offset_b, elem_a).SetNeedBarrier(sync_type == :Hybrid).ref
+    if sync_type == :Hybrid
+      Store(data, offset_a, elem_b).SetNeedWriteBarrier(true).ref
+      Store(data, offset_b, elem_a).SetNeedWriteBarrier(true).ref
+    else
+      Store(data, offset_a, elem_b).SetNeedWriteBarrier(false).ref
+      Store(data, offset_b, elem_a).SetNeedWriteBarrier(false).ref
+    end
 
     offset2_a := AddI(offset_a).Imm(EtsConstants::OBJ_PTR_SIZE).u32
     offset2_b := SubI(offset_b).Imm(EtsConstants::OBJ_PTR_SIZE).u32

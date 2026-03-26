@@ -3989,13 +3989,13 @@ void LLVMIrConstructor::VisitStoreArray(GraphVisitor *v, Inst *inst)
     auto ptrElem = ctor->builder_.CreateInBoundsGEP(ltype, ptrData, index);
 
     // Pre
-    if (inst->CastToStoreArray()->GetNeedBarrier()) {
+    if (inst->CastToStoreArray()->GetNeedPreWriteBarrier()) {
         ctor->CreatePreWRB(inst, ptrElem);
     }
     // Write
     ctor->builder_.CreateStore(value, ptrElem);
     // Post
-    if (inst->CastToStoreArray()->GetNeedBarrier()) {
+    if (inst->CastToStoreArray()->GetNeedPostWriteBarrier()) {
         auto indexOffset = ctor->builder_.CreateBinOp(llvm::Instruction::Shl, index,
                                                       ctor->builder_.getInt32(DataType::ShiftByType(dtype, arch)));
         auto offset = ctor->builder_.CreateBinOp(llvm::Instruction::Add, indexOffset, ctor->builder_.getInt32(dataOff));
@@ -4051,13 +4051,13 @@ void LLVMIrConstructor::VisitStore(GraphVisitor *v, Inst *inst)
     auto ptrPlus = ctor->builder_.CreateInBoundsGEP(ctor->builder_.getInt8Ty(), srcPtr, offset);
 
     // Pre
-    if (inst->CastToStore()->GetNeedBarrier()) {
+    if (inst->CastToStore()->GetNeedPreWriteBarrier()) {
         ctor->CreatePreWRB(inst, ptrPlus);
     }
     // Write
     ctor->CreateStoreWithOrdering(value, ptrPlus, ToAtomicOrdering(inst->CastToStore()->GetVolatile()));
     // Post
-    if (inst->CastToStore()->GetNeedBarrier()) {
+    if (inst->CastToStore()->GetNeedPostWriteBarrier()) {
         ctor->CreatePostWRB(inst, srcPtr, offset, value);
     }
 }
@@ -4092,13 +4092,13 @@ void LLVMIrConstructor::VisitStoreI(GraphVisitor *v, Inst *inst)
     auto ptrPlus = ctor->builder_.CreateConstInBoundsGEP1_64(ctor->builder_.getInt8Ty(), srcPtr, index);
 
     // Pre
-    if (inst->CastToStoreI()->GetNeedBarrier()) {
+    if (inst->CastToStoreI()->GetNeedPreWriteBarrier()) {
         ctor->CreatePreWRB(inst, ptrPlus);
     }
     // Write
     ctor->CreateStoreWithOrdering(value, ptrPlus, ToAtomicOrdering(inst->CastToStoreI()->GetVolatile()));
     // Post
-    if (inst->CastToStoreI()->GetNeedBarrier()) {
+    if (inst->CastToStoreI()->GetNeedPostWriteBarrier()) {
         ctor->CreatePostWRB(inst, srcPtr, ctor->builder_.getInt32(index), value);
     }
 }
@@ -4131,13 +4131,13 @@ void LLVMIrConstructor::VisitStoreObject(GraphVisitor *v, Inst *inst)
     auto ptrData = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), obj, dataOff);
 
     // Pre
-    if (inst->CastToStoreObject()->GetNeedBarrier()) {
+    if (inst->CastToStoreObject()->GetNeedPreWriteBarrier()) {
         ctor->CreatePreWRB(inst, ptrData);
     }
     // Write
     ctor->CreateStoreWithOrdering(value, ptrData, ToAtomicOrdering(inst->CastToStoreObject()->GetVolatile()));
     // Post
-    if (inst->CastToStoreObject()->GetNeedBarrier()) {
+    if (inst->CastToStoreObject()->GetNeedPostWriteBarrier()) {
         ctor->CreatePostWRB(inst, obj, ctor->builder_.getInt32(dataOff), value);
     }
 }
@@ -4178,13 +4178,13 @@ void LLVMIrConstructor::VisitStoreResolvedObjectField(GraphVisitor *v, Inst *ins
     auto ptrData = ctor->builder_.CreateInBoundsGEP(ctor->builder_.getInt8Ty(), obj, offset);
 
     // Pre
-    if (inst->CastToStoreResolvedObjectField()->GetNeedBarrier()) {
+    if (inst->CastToStoreResolvedObjectField()->GetNeedPreWriteBarrier()) {
         ctor->CreatePreWRB(inst, ptrData);
     }
     // Write
     ctor->CreateStoreWithOrdering(value, ptrData, LLVMArkInterface::VOLATILE_ORDER);
     // Post
-    if (inst->CastToStoreResolvedObjectField()->GetNeedBarrier()) {
+    if (inst->CastToStoreResolvedObjectField()->GetNeedPostWriteBarrier()) {
         ctor->CreatePostWRB(inst, obj, offset, value);
     }
 }
@@ -4220,7 +4220,7 @@ void LLVMIrConstructor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *v, Ins
     [[maybe_unused]] auto storeInst = inst->CastToStoreResolvedObjectFieldStatic();
 
     ASSERT(!DataType::IsReference(inst->GetType()));
-    ASSERT(!storeInst->GetNeedBarrier());
+    ASSERT(!storeInst->GetNeedWriteBarrier());
 
     auto value = ctor->GetInputValue(inst, 1);
     auto destPtr = ctor->GetInputValue(inst, 0);
@@ -5153,13 +5153,13 @@ void LLVMIrConstructor::VisitStoreStatic(GraphVisitor *v, Inst *inst)
     auto fieldPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), klass, offset);
 
     // Pre
-    if (inst->CastToStoreStatic()->GetNeedBarrier()) {
+    if (inst->CastToStoreStatic()->GetNeedPreWriteBarrier()) {
         ctor->CreatePreWRB(inst, fieldPtr);
     }
     // Write
     ctor->CreateStoreWithOrdering(value, fieldPtr, ToAtomicOrdering(inst->CastToStoreStatic()->GetVolatile()));
     // Post
-    if (inst->CastToStoreStatic()->GetNeedBarrier()) {
+    if (inst->CastToStoreStatic()->GetNeedPostWriteBarrier()) {
         auto barrierType = runtime->GetPostType();
         if (barrierType == mem::BarrierType::POST_INTERREGION_BARRIER) {
             ctor->CreatePostWRB(inst, klass, ctor->builder_.getInt32(offset), value);
@@ -5175,7 +5175,7 @@ void LLVMIrConstructor::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto unresolvedStore = inst->CastToUnresolvedStoreStatic();
 
-    ASSERT(unresolvedStore->GetNeedBarrier());
+    ASSERT(unresolvedStore->GetNeedPreWriteBarrier() && unresolvedStore->GetNeedPostWriteBarrier());
     ASSERT(DataType::IsReference(inst->GetType()));
 
     auto typeId = ctor->builder_.getInt64(unresolvedStore->GetTypeId());

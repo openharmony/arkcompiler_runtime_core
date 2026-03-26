@@ -32,7 +32,7 @@ public:
             PARAMETER(2U, 2U).u64();  // index
             BASIC_BLOCK(2U, -1L)
             {
-                createLoadArray(INST(3U, Opcode::LoadArray).SetNeedBarrier(true).ref(), 1U, 2U, 0U);
+                createLoadArray(INST(3U, Opcode::LoadArray).SetNeedReadBarrier(true).ref(), 1U, 2U, 0U);
                 INST(4U, Opcode::LoadArrayI).u64().Inputs(3U).Imm(0U);
                 INST(5U, Opcode::Return).u64().Inputs(4U);
             }

@@ -456,12 +456,12 @@ function(:StringFlatCheck,
         strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
         strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
         strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
-        key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+        key := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
         If(key, str).NE {
             Goto(:SlowPathEntrypoint)
         }
         strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
-        strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+        strCached := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
 
         Return(strCached).ref
     }

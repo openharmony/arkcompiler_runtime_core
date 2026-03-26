@@ -2331,7 +2331,7 @@ void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bo
 
 void Codegen::CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
 {
-    ASSERT(inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::ANY);
+    ASSERT(DataType::IsReference(inst->GetType()) || DataType::IsAny(inst->GetType()));
     if (!GetRuntime()->NeedsReadBarrier()) {
         // Fallback to load without barrier
         auto type = inst->GetType();
@@ -2882,54 +2882,6 @@ void Codegen::CreateBuiltinIntrinsic(IntrinsicInst *inst)
     FillBuiltin(inst, src, dst);
 }
 
-static bool GetNeedBarrierProperty(const Inst *inst)
-{
-    Opcode op = inst->GetOpcode();
-    if (op == Opcode::LoadObject) {
-        return inst->CastToLoadObject()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreObject) {
-        return inst->CastToStoreObject()->GetNeedBarrier();
-    }
-    if (op == Opcode::LoadObjectPair) {
-        return inst->CastToLoadObjectPair()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreObjectPair) {
-        return inst->CastToStoreObjectPair()->GetNeedBarrier();
-    }
-    if (op == Opcode::LoadArray) {
-        return inst->CastToLoadArray()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreArray) {
-        return inst->CastToStoreArray()->GetNeedBarrier();
-    }
-    if (op == Opcode::LoadArrayI) {
-        return inst->CastToLoadArrayI()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreArrayI) {
-        return inst->CastToStoreArrayI()->GetNeedBarrier();
-    }
-    if (op == Opcode::LoadArrayPair) {
-        return inst->CastToLoadArrayPair()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreArrayPair) {
-        return inst->CastToStoreArrayPair()->GetNeedBarrier();
-    }
-    if (op == Opcode::LoadArrayPairI) {
-        return inst->CastToLoadArrayPairI()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreArrayPairI) {
-        return inst->CastToStoreArrayPairI()->GetNeedBarrier();
-    }
-    if (op == Opcode::LoadStatic) {
-        return inst->CastToLoadStatic()->GetNeedBarrier();
-    }
-    if (op == Opcode::StoreStatic) {
-        return inst->CastToStoreStatic()->GetNeedBarrier();
-    }
-    return false;
-}
-
 /**
  * Returns true if codegen emits call(s) to some library function(s)
  * while processing the instruction.
@@ -2961,7 +2913,7 @@ bool Codegen::InstEncodedWithLibCall(const Inst *inst, Arch arch)
         return false;
     }
 
-    return GetNeedBarrierProperty(inst);
+    return InstNeedGCBarrier(inst);
 }
 
 Reg Codegen::ConvertInstTmpReg(const Inst *inst, DataType::Type type) const

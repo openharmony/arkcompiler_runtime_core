@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -923,67 +923,27 @@ public:
         return *this;
     }
 
-    IrConstructor &SetNeedBarrier(bool needBarrier)
+    IrConstructor &SetNeedPreWriteBarrier(bool needBarrier)
     {
-        auto inst = CurrentInst();
-        switch (inst->GetOpcode()) {
-            case Opcode::Store:
-                inst->CastToStore()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::StoreI:
-                inst->CastToStoreI()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::StoreObject:
-                inst->CastToStoreObject()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::StoreArray:
-                inst->CastToStoreArray()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::StoreArrayI:
-                inst->CastToStoreArrayI()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::StoreArrayPair:
-                inst->CastToStoreArrayPair()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::StoreArrayPairI:
-                inst->CastToStoreArrayPairI()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::Load:
-                inst->CastToLoad()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadI:
-                inst->CastToLoadI()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadObject:
-                inst->CastToLoadObject()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadObjectPair:
-                inst->CastToLoadObjectPair()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadResolvedObjectField:
-                inst->CastToLoadResolvedObjectField()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadResolvedObjectFieldStatic:
-                inst->CastToLoadResolvedObjectFieldStatic()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadArray:
-                inst->CastToLoadArray()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadArrayI:
-                inst->CastToLoadArrayI()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadArrayPair:
-                inst->CastToLoadArrayPair()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadArrayPairI:
-                inst->CastToLoadArrayPairI()->SetNeedBarrier(needBarrier);
-                break;
-            case Opcode::LoadStatic:
-                inst->CastToLoadStatic()->SetNeedBarrier(needBarrier);
-                break;
-            default:
-                UNREACHABLE();
-        }
+        InstSetNeedPreWriteBarrier(CurrentInst(), needBarrier);
+        return *this;
+    }
+
+    IrConstructor &SetNeedPostWriteBarrier(bool needBarrier)
+    {
+        InstSetNeedPostWriteBarrier(CurrentInst(), needBarrier);
+        return *this;
+    }
+
+    IrConstructor &SetNeedWriteBarrier(bool needBarrier)
+    {
+        InstSetNeedWriteBarrier(CurrentInst(), needBarrier);
+        return *this;
+    }
+
+    IrConstructor &SetNeedReadBarrier(bool needBarrier)
+    {
+        InstSetNeedReadBarrier(CurrentInst(), needBarrier);
         return *this;
     }
 
@@ -1355,33 +1315,36 @@ public:
 
     void UpdateSpecialFlagsForReference(Inst *inst)
     {
+        // The code below handles only a subset of stores (e.g. Store/StoreI are not considered)
+        // It might be somehow related to the interpreter implementation using irtoc.
+        // See 29803 for the details.
         if (inst->GetType() == DataType::REFERENCE) {
             if (inst->GetOpcode() == Opcode::StoreArray) {
-                inst->CastToStoreArray()->SetNeedBarrier(true);
+                inst->CastToStoreArray()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreArrayI) {
-                inst->CastToStoreArrayI()->SetNeedBarrier(true);
+                inst->CastToStoreArrayI()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreStatic) {
-                inst->CastToStoreStatic()->SetNeedBarrier(true);
+                inst->CastToStoreStatic()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::UnresolvedStoreStatic) {
-                inst->CastToUnresolvedStoreStatic()->SetNeedBarrier(true);
+                inst->CastToUnresolvedStoreStatic()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreObject) {
-                inst->CastToStoreObject()->SetNeedBarrier(true);
+                inst->CastToStoreObject()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreResolvedObjectField) {
-                inst->CastToStoreResolvedObjectField()->SetNeedBarrier(true);
+                inst->CastToStoreResolvedObjectField()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreResolvedObjectFieldStatic) {
-                inst->CastToStoreResolvedObjectFieldStatic()->SetNeedBarrier(true);
+                inst->CastToStoreResolvedObjectFieldStatic()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreArrayPair) {
-                inst->CastToStoreArrayPair()->SetNeedBarrier(true);
+                inst->CastToStoreArrayPair()->SetNeedWriteBarrier(true);
             }
             if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-                inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
+                inst->CastToStoreArrayPairI()->SetNeedWriteBarrier(true);
             }
         }
     }

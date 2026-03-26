@@ -182,9 +182,16 @@ inline constexpr uint64_t GetFlagsMask(Opcode opcode)
     return INST_FLAGS_TABLE[static_cast<size_t>(opcode)];
 }
 
+// Check if a specified flag is set to 1
 inline constexpr bool HasFlag(Opcode opcode, Flags flag)
 {
     return (GetFlagsMask(opcode) & flag) != 0;
+}
+
+// Check if ALL specified flags are set to 1
+inline constexpr bool HasFlags(Opcode opcode, std::underlying_type_t<Flags> flags)
+{
+    return (GetFlagsMask(opcode) & flags) == flags;
 }
 }  // namespace inst_flags
 
@@ -1020,10 +1027,10 @@ public:
     bool HasSideEffectsFlags() const
     {
         // NOTE (#31054): When adding new instruction flags, update this method accordingly.
-        const uintptr_t forbiddenFlags = inst_flags::CAN_THROW | inst_flags::TERMINATOR | inst_flags::ALLOC |
-                                         inst_flags::CALL | inst_flags::RUNTIME_CALL |
-                                         inst_flags::IMPLICIT_RUNTIME_CALL | inst_flags::STORE | inst_flags::BARRIER |
-                                         inst_flags::REQUIRE_STATE | inst_flags::CAN_DEOPTIMIZE | inst_flags::NO_DCE;
+        const uintptr_t forbiddenFlags =
+            inst_flags::CAN_THROW | inst_flags::TERMINATOR | inst_flags::ALLOC | inst_flags::CALL |
+            inst_flags::RUNTIME_CALL | inst_flags::IMPLICIT_RUNTIME_CALL | inst_flags::STORE |
+            inst_flags::COMPILER_BARRIER | inst_flags::REQUIRE_STATE | inst_flags::CAN_DEOPTIMIZE | inst_flags::NO_DCE;
         return (GetFlagsMask() & forbiddenFlags) != 0;
     }
 
@@ -1066,9 +1073,14 @@ public:
     }
 
     // Returns true if the instruction is a barrier
-    virtual bool IsBarrier() const
+    virtual bool IsCompilerBarrier() const
     {
-        return GetFlag(inst_flags::BARRIER);
+        return GetFlag(inst_flags::COMPILER_BARRIER);
+    }
+
+    bool MayNeedGCBarrier() const
+    {
+        return GetFlag(inst_flags::GC_BARRIER);
     }
 
     // Returns true if opcode can not be moved throught runtime calls (REFERENCE type only)
@@ -2036,26 +2048,73 @@ protected:
 };
 
 /**
- * Mixin for NeedBarrier flag.
+ * Mixin for instructions requiring GC ReadBarrier.
  * @tparam T Base instruction class after which this mixin is injected
  */
 template <typename T>
-class NeedBarrierMixin : public T {
+class NeedReadBarrierMixin : public T {
 public:
     using T::T;
 
-    void SetNeedBarrier(bool v)
+    void SetNeedReadBarrier(bool needBarrier)
     {
-        T::template SetField<NeedBarrierFlag>(v);
+        T::template SetField<NeedReadBarrierFlag>(needBarrier);
     }
-    bool GetNeedBarrier() const
+
+    bool GetNeedReadBarrier() const
     {
-        return T::template GetField<NeedBarrierFlag>();
+        return T::template GetField<NeedReadBarrierFlag>();
     }
 
 protected:
-    using NeedBarrierFlag = typename T::LastField::NextFlag;
-    using LastField = NeedBarrierFlag;
+    using NeedReadBarrierFlag = typename T::LastField::NextFlag;
+    using LastField = NeedReadBarrierFlag;
+};
+
+/**
+ * Mixin for instructions requiring GC (Pre,Post) WriteBarriers.
+ * @tparam T Base instruction class after which this mixin is injected
+ */
+template <typename T>
+class NeedWriteBarrierMixin : public T {
+public:
+    using T::T;
+
+    void SetNeedPreWriteBarrier(bool needBarrier)
+    {
+        T::template SetField<NeedPreWriteBarrierFlag>(needBarrier);
+    }
+
+    void SetNeedPostWriteBarrier(bool needBarrier)
+    {
+        T::template SetField<NeedPostWriteBarrierFlag>(needBarrier);
+    }
+
+    void SetNeedWriteBarrier(bool needBarrier)
+    {
+        SetNeedPreWriteBarrier(needBarrier);
+        SetNeedPostWriteBarrier(needBarrier);
+    }
+
+    bool GetNeedPreWriteBarrier() const
+    {
+        return T::template GetField<NeedPreWriteBarrierFlag>();
+    }
+
+    bool GetNeedPostWriteBarrier() const
+    {
+        return T::template GetField<NeedPostWriteBarrierFlag>();
+    }
+
+    bool GetNeedWriteBarrier() const
+    {
+        return GetNeedPreWriteBarrier() || GetNeedPostWriteBarrier();
+    }
+
+protected:
+    using NeedPreWriteBarrierFlag = typename T::LastField::NextFlag;
+    using NeedPostWriteBarrierFlag = typename NeedPreWriteBarrierFlag::NextFlag;
+    using LastField = NeedPostWriteBarrierFlag;
 };
 
 enum class DynObjectAccessType {
@@ -2383,9 +2442,9 @@ public:
         return T::template GetField<IsVolatileFlag>();
     }
 
-    bool IsBarrier() const override
+    bool IsCompilerBarrier() const override
     {
-        return T::IsBarrier() || GetVolatile();
+        return T::IsCompilerBarrier() || GetVolatile();
     }
 
 protected:
@@ -4480,11 +4539,20 @@ using WithGCBarrierEntrypointInst = WithGCBarrierEntrypointMixin<LimitedInputsIn
 void SetInstGCBarrierEntrypoint(Inst *inst, Inst *entrypoint);
 Inst *GetInstGCBarrierEntrypoint(Inst *inst);
 void ResetInstGCBarrierEntrypoint(Inst *inst);
+bool InstNeedGCBarrier(const Inst *inst);
+bool InstNeedReadBarrier(const Inst *inst);
+bool InstNeedWriteBarrier(const Inst *inst);
+bool InstNeedPreWriteBarrier(const Inst *inst);
+bool InstNeedPostWriteBarrier(const Inst *inst);
+void InstSetNeedReadBarrier(Inst *inst, bool needBarrier);
+void InstSetNeedWriteBarrier(Inst *inst, bool needBarrier);
+void InstSetNeedPreWriteBarrier(Inst *inst, bool needBarrier);
+void InstSetNeedPostWriteBarrier(Inst *inst, bool needBarrier);
 
 /// Load value from array or string
-class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>> {
+class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>> {
 public:
-    using Base = ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
+    using Base = ArrayInstMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     explicit LoadInst(Opcode opcode, bool isArray = true) : Base(opcode)
@@ -4493,7 +4561,7 @@ public:
     }
     explicit LoadInst(Initializer t, bool needBarrier = false, bool isArray = true) : Base(std::move(t))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
         SetIsArray(isArray);
     }
 
@@ -4602,14 +4670,14 @@ public:
     }
 };
 /// Store value into array element
-class StoreInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>> {
+class StoreInst : public NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>> {
 public:
-    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
+    using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
 
     explicit StoreInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -4653,10 +4721,10 @@ public:
 /// Load value from array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadInstI
-    : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>,
+    : public VolatileMixin<ArrayInstMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>>,
       public ImmediateMixin {
 public:
-    using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
+    using Base = VolatileMixin<ArrayInstMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
     using Base::Base;
 
     LoadInstI(Opcode opcode, uint64_t imm, bool isArray = true) : Base(opcode), ImmediateMixin(imm)
@@ -4669,7 +4737,7 @@ public:
     {
         SetIsArray(isArray);
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -4707,10 +4775,10 @@ public:
 
 /// Load value from pointer with offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadMemInstI : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
+class PANDA_PUBLIC_API LoadMemInstI : public VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
                                       public ImmediateMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
+    using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
     LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -4718,7 +4786,7 @@ public:
         : Base(std::move(t)), ImmediateMixin(imm)
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     Inst *GetPointer()
@@ -4755,10 +4823,10 @@ public:
 
 /// Store value into array element, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreInstI : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+class PANDA_PUBLIC_API StoreInstI : public VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
                                     public ImmediateMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
+    using Base = VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -4806,10 +4874,10 @@ public:
 
 /// Store value into pointer by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreMemInstI : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+class PANDA_PUBLIC_API StoreMemInstI : public VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
                                        public ImmediateMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
+    using Base = VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -5309,11 +5377,11 @@ protected:
 /// Load value from instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadObjectInst
-    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>,
+    : public ObjectTypeMixin<VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>>,
       public TypeIdMixin,
       public FieldMixin {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
+    using Base = ObjectTypeMixin<VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
     using Base::Base;
 
     LoadObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
@@ -5321,7 +5389,7 @@ public:
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5358,15 +5426,15 @@ public:
 /// Load value from memory by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadMemInst
-    : public ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>> {
+    : public ScaleMixin<VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>> {
 public:
-    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
+    using Base = ScaleMixin<VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
     using Base::Base;
 
     explicit LoadMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5413,9 +5481,9 @@ public:
 };
 
 /// Store value to dynamic object
-class StoreObjectDynamicInst : public DynObjectAccessMixin<FixedInputsInst<4U>> {
+class StoreObjectDynamicInst : public DynObjectAccessMixin<FixedInputsInst4> {
 public:
-    using Base = DynObjectAccessMixin<FixedInputsInst<4U>>;
+    using Base = DynObjectAccessMixin<FixedInputsInst4>;
     using Base::Base;
 };
 
@@ -5455,17 +5523,17 @@ public:
 /// Load value from resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadResolvedObjectFieldInst
-    : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+    : public VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
       public TypeIdMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
+    using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     LoadResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5501,11 +5569,11 @@ public:
 /// Store value into instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API StoreObjectInst
-    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>,
+    : public ObjectTypeMixin<VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>,
       public TypeIdMixin,
       public FieldMixin {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
+    using Base = ObjectTypeMixin<VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
@@ -5514,7 +5582,7 @@ public:
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5552,17 +5620,17 @@ public:
 
 /// Store value into resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>,
+class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>,
                                                       public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
+    using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
     StoreResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5601,9 +5669,9 @@ public:
 /// Store value in memory by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API StoreMemInst
-    : public ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>> {
+    : public ScaleMixin<VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>>> {
 public:
-    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>;
+    using Base = ScaleMixin<VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>;
     using Base::Base;
 
     static constexpr size_t STORED_INPUT_INDEX = 2;
@@ -5611,7 +5679,7 @@ public:
     explicit StoreMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5650,11 +5718,11 @@ public:
 
 /// Load static field from class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadStaticInst : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
+class PANDA_PUBLIC_API LoadStaticInst : public VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
                                         public TypeIdMixin,
                                         public FieldMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
+    using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
     LoadStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
@@ -5662,7 +5730,7 @@ public:
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     void SetVnObject(VnObject *vnObj) const override;
@@ -5729,17 +5797,17 @@ public:
 /// Load value from resolved static instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadResolvedObjectFieldStaticInst
-    : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
+    : public VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
       public TypeIdMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
+    using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
     LoadResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
         SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5770,11 +5838,11 @@ public:
 
 /// Store value into static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreStaticInst : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+class PANDA_PUBLIC_API StoreStaticInst : public VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
                                          public TypeIdMixin,
                                          public FieldMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
+    using Base = VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
@@ -5782,7 +5850,7 @@ public:
                     bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
         SetVolatile(isVolatile);
     }
 
@@ -5825,16 +5893,16 @@ public:
  * that beneficial.
  */
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API UnresolvedStoreStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API UnresolvedStoreStaticInst : public NeedWriteBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
+    using Base = NeedWriteBarrierMixin<FixedInputsInst2>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 0U;
 
     UnresolvedStoreStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -5861,17 +5929,18 @@ public:
 
 /// Store value into resolved static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>,
-                                                            public TypeIdMixin {
+class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst
+    : public NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>,
+      public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>;
+    using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<2U>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1U;
 
     StoreResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5906,6 +5975,7 @@ public:
     using Base::Base;
 
     NewObjectInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(Base::ValidateInputsCount(index));
@@ -6788,15 +6858,15 @@ public:
 /// Load a pair of consecutive values from array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadArrayPairInst
-    : public NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>,
+    : public NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>,
       public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>;
+    using Base = NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>;
     using Base::Base;
 
     explicit LoadArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -6844,18 +6914,19 @@ public:
 /// Load a pair of consecutive values from object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadObjectPairInst
-    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>>>,
+    : public ObjectTypeMixin<
+          VolatileMixin<NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>>>,
       public TypeIdMixin2,
       public FieldMixin2 {
 public:
     using Base =
-        ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>>>;
+        ObjectTypeMixin<VolatileMixin<NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>>>;
     using Base::Base;
 
     explicit LoadObjectPairInst(Initializer t) : Base(std::move(t))
     {
         SetVolatile(false);
-        SetNeedBarrier(false);
+        SetNeedReadBarrier(false);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -6892,15 +6963,15 @@ public:
 
 /// Store a pair of consecutive values to array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreArrayPairInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<4U>>,
+class PANDA_PUBLIC_API StoreArrayPairInst : public NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<4U>>,
                                             public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<4U>>;
+    using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<4U>>;
     using Base::Base;
 
     explicit StoreArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     Inst *GetIndex()
@@ -6950,18 +7021,18 @@ public:
 /// Store a pair of consecutive values to object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API StoreObjectPairInst
-    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>,
+    : public ObjectTypeMixin<VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>,
       public TypeIdMixin2,
       public FieldMixin2 {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>;
+    using Base = ObjectTypeMixin<VolatileMixin<NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
     explicit StoreObjectPairInst(Initializer t) : Base(std::move(t))
     {
         SetVolatile(false);
-        SetNeedBarrier(false);
+        SetNeedWriteBarrier(false);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -7003,17 +7074,17 @@ public:
 /// Load a pair of consecutive values from array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadArrayPairInstI
-    : public NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>,
+    : public NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>,
       public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>;
+    using Base = NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>;
     using Base::Base;
 
     explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
     LoadArrayPairInstI(Initializer t, uint64_t imm, bool needBarrier = false) : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedReadBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -7052,17 +7123,17 @@ public:
 
 /// Store a pair of consecutive values to array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreArrayPairInstI : public NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>,
+class PANDA_PUBLIC_API StoreArrayPairInstI : public NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>,
                                              public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
+    using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
 
     explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
     StoreArrayPairInstI(Initializer t, uint64_t imm, bool needBarrier = false) : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetNeedBarrier(needBarrier);
+        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -7497,9 +7568,7 @@ inline bool IsPseudoUserOfMultiOutput(Inst *inst)
 constexpr bool InstHasGCBarrierEntrypointInput(Opcode opcode)
 {
     // UnresolvedStoreStaticInst doesn't have GC barrier entrypoint input, see class declaration for more info
-    return (inst_flags::HasFlag(opcode, inst_flags::WRITE_BARRIER) ||
-            inst_flags::HasFlag(opcode, inst_flags::READ_BARRIER)) &&
-           opcode != Opcode::UnresolvedStoreStatic;
+    return inst_flags::HasFlag(opcode, inst_flags::GC_BARRIER) && opcode != Opcode::UnresolvedStoreStatic;
 }
 
 template <typename T>
@@ -7645,9 +7714,9 @@ inline std::ostream &operator<<(std::ostream &os, const Inst &inst)
     return os;
 }
 
-template <typename Callback>
+template <typename Instruction, typename Callback>
 // NOLINTNEXTLINE(readability-function-size)
-auto SwitchOverOpcodes(Inst *inst, Callback &&callback)
+auto SwitchOverOpcodes(Instruction *inst, Callback &&callback)
 {
     switch (inst->GetOpcode()) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

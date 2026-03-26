@@ -243,6 +243,111 @@ void ResetInstGCBarrierEntrypoint(Inst *inst)
     });
 }
 
+bool InstNeedGCBarrier(const Inst *inst)
+{
+    return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<bool> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::LOAD)) {
+            return {typedInst->GetNeedReadBarrier()};
+        }
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            return {typedInst->GetNeedWriteBarrier()};
+        }
+        if constexpr (inst_flags::HasFlag(traits.GetOpcode(), inst_flags::GC_BARRIER)) {
+            // Now only LOAD and STORE are expected to have GC_BARRIER flag.
+            UNREACHABLE();
+        }
+        return {false};
+    });
+}
+
+bool InstNeedReadBarrier(const Inst *inst)
+{
+    return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<bool> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::LOAD)) {
+            return {typedInst->GetNeedReadBarrier()};
+        }
+        return {false};
+    });
+}
+
+bool InstNeedWriteBarrier(const Inst *inst)
+{
+    return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<bool> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            return {typedInst->GetNeedWriteBarrier()};
+        }
+        return {false};
+    });
+}
+
+bool InstNeedPreWriteBarrier(const Inst *inst)
+{
+    return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<bool> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            return {typedInst->GetNeedPreWriteBarrier()};
+        }
+        return {false};
+    });
+}
+
+bool InstNeedPostWriteBarrier(const Inst *inst)
+{
+    return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<bool> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            return {typedInst->GetNeedPostWriteBarrier()};
+        }
+        return {false};
+    });
+}
+
+void InstSetNeedReadBarrier(Inst *inst, bool needBarrier)
+{
+    SwitchOverOpcodes(inst, [needBarrier](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::LOAD)) {
+            typedInst->SetNeedReadBarrier(needBarrier);
+            return {typedInst};
+        }
+        UNREACHABLE();
+        return {};
+    });
+}
+
+void InstSetNeedWriteBarrier(Inst *inst, bool needBarrier)
+{
+    SwitchOverOpcodes(inst, [needBarrier](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            typedInst->SetNeedWriteBarrier(needBarrier);
+            return {typedInst};
+        }
+        UNREACHABLE();
+        return {};
+    });
+}
+
+void InstSetNeedPreWriteBarrier(Inst *inst, bool needBarrier)
+{
+    SwitchOverOpcodes(inst, [needBarrier](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            typedInst->SetNeedPreWriteBarrier(needBarrier);
+            return {typedInst};
+        }
+        UNREACHABLE();
+        return {};
+    });
+}
+
+void InstSetNeedPostWriteBarrier(Inst *inst, bool needBarrier)
+{
+    SwitchOverOpcodes(inst, [needBarrier](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (inst_flags::HasFlags(traits.GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            typedInst->SetNeedPostWriteBarrier(needBarrier);
+            return {typedInst};
+        }
+        UNREACHABLE();
+        return {};
+    });
+}
+
 const ObjectTypeInfo ObjectTypeInfo::INVALID {};
 const ObjectTypeInfo ObjectTypeInfo::UNKNOWN {1};
 
