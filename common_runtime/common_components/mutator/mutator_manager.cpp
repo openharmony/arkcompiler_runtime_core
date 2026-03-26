@@ -56,7 +56,6 @@ void MutatorManager::UnbindMutator(Mutator &mutator) const
 {
     ThreadLocalData *tlData = ThreadLocal::GetThreadLocalData();
     tlData->mutator = nullptr;
-    tlData->buffer = nullptr;
 }
 
 bool MutatorManager::BindMutatorOnly(Mutator *mutator) const
