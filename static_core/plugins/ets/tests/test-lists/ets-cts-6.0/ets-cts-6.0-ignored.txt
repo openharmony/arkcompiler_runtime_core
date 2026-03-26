@@ -775,12 +775,6 @@
 #31411
 13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
 
-#30658 incorrect linkage
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_2.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_3.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_6.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_7.ets
-
 #28972 CTE on string[] type parameter
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_3.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_4.ets
@@ -1393,11 +1387,11 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_9.ets
 
 #31150 cannot create array of enums
-17.experimental_features/03.resizable_array_creation_expressions/expr_8.ets
+17.experimental_features/04.resizable_array_creation_expressions/expr_8.ets
 
 #29160 byte or short types in enums not supported
-17.experimental_features/03.resizable_array_creation_expressions/expr_10.ets
-17.experimental_features/03.resizable_array_creation_expressions/expr_11.ets
+17.experimental_features/04.resizable_array_creation_expressions/expr_10.ets
+17.experimental_features/04.resizable_array_creation_expressions/expr_11.ets
 
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/06.iterable_types/it_11.ets

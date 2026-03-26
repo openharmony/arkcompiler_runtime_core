@@ -14,13 +14,17 @@
  */
 
 /*---
-desc: The type of a nullish-coalescing expression is a normalized union type (see
-  Union Types) formed from the following:\n\u2022 Non-nullish variant of the type
-  of the left-hand-side expression; and\n\u2022 Type of the right-hand-side expression.
-  #30583 - crash, not CTE
----*/
+desc:  >-
+    The type of a nullish-coalescing expression is a normalized union type (see
+    Union Types) formed from the following:
+    - Non-nullish variant of the type of the left-hand-side expression; and
+    - Type of the right-hand-side expression.
 
-type int_nullish = int | null | undefined
+    Type T is a subtype of union type U(U1|...|Un) if for some i there is T which is a subtype of Ui
+    ( Enum <: double = false || Enum <: string = false => false )
+tags: [compile-only, negative]
+expected_out: "#TBD, see issue #33632"
+---*/
 
 enum Enum:double { A = 1.2, B = 0.0}
 
@@ -30,7 +34,5 @@ function main(): void {
 
   let x = lhs[1] ?? rhs;
   arktest.assertFalse(x instanceof double|string)
-  // Type double|string leads to crash (not CTE type error, see #30583). Please keep this as separate case
-  // With Enum|string it works fine and added to normal tests
-  let y: double|string = x
+  let y: double|string = x //CTE
 }

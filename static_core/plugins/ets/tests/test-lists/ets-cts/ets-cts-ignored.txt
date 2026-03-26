@@ -335,9 +335,6 @@
 07.expressions/14.chaining_operator/expression_not_nullish_6.ets
 07.expressions/14.chaining_operator/expression_not_nullish_7.ets
 
-#30939
-07.expressions/15.new_expressions/constructor_param_array_custom_2.ets
-
 #31248
 07.expressions/15.new_expressions/constructor_param_array_custom_n_0.ets
 07.expressions/15.new_expressions/constructor_param_array_custom_n_1.ets
@@ -391,9 +388,10 @@
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
 #32103
+07.expressions/16.instanceof_expression/instanceof_neg_35.ets
 07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
 
-#31769 Tuples and derived types can't be used as instanceof rhs
+#33657
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_0.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_1.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_2.ets
@@ -417,6 +415,9 @@
 
 #33285
 07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
+
+#33632
+07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
 #31967
 07.expressions/21.unary_expressions/05.unary_plus/sign_plus_byte_short_to_int/unary_plus.byte_short.inside_function_const_let.ets
@@ -1189,9 +1190,6 @@
 #26714
 13.modules_and_namespaces/04.import_directives/test.ets
 
-#31411
-13.modules_and_namespaces/04.import_directives/03.selective_binding/import_conflict_neg.ets
-
 #32039 CTE oveload oveloaded function
 13.modules_and_namespaces/04.import_directives/03.selective_binding/original_binding_name.ets
 13.modules_and_namespaces/04.import_directives/03.selective_binding/original_binding_name_neg.ets
@@ -1204,13 +1202,19 @@
 13.modules_and_namespaces/04.import_directives/03.selective_binding/import_example_n_3.ets
 13.modules_and_namespaces/04.import_directives/03.selective_binding/import_example_n_4.ets
 
+#31411 Overload warning on clashing name at external source
+13.modules_and_namespaces/04.import_directives/03.selective_binding/import_conflict_neg.ets
+
 #28972 CTE on string[] type parameter
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_1.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_2.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_3.ets
+13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_4.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_5.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_7.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_6.ets
+13.modules_and_namespaces/11.program_entry_point/main_w_args_0.ets
+13.modules_and_namespaces/11.program_entry_point/main_w_args_1.ets
 13.modules_and_namespaces/11.program_entry_point/main_w_args_2.ets
 13.modules_and_namespaces/11.program_entry_point/main_w_args_3.ets
 13.modules_and_namespaces/11.program_entry_point/main_w_args_n_0.ets
@@ -1907,7 +1911,7 @@
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/overriding2b_3.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/overriding2d_3.ets
 
-#32038   Interface has methods
+#32462
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_4.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_5.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_2.ets
@@ -2079,9 +2083,3 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
-
-#31690 review after merge
-07.expressions/16.instanceof_expression/instanceof_neg_35.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_4.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_0.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_1.ets

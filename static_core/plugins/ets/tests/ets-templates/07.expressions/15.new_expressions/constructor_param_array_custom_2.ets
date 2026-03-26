@@ -29,7 +29,7 @@ desc: >-
 
 class C<T> extends Array<T> {
   j: T
-  constructor(i: Object) { }
+  constructor() { }
   private constructor(j: T) {
     this.j = j
   }

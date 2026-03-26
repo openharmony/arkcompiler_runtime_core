@@ -4,4 +4,4 @@
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer2_9.ets
 
 #24859
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
+17.experimental_features/04.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
