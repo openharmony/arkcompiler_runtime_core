@@ -35,7 +35,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, name, "ii:C{std:core.String}", value, args), ANI_OK);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, name, "ii:C{std.core.String}", value, args), ANI_OK);
         va_end(args);
     }
 
@@ -43,7 +43,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std:core.String}:C{std:core.String}",
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std.core.String}:C{std.core.String}",
                                                            value, args),
                   ANI_OK);
         va_end(args);
@@ -53,7 +53,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std/core/String}:C{std:core.String}",
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std/core/String}:C{std.core.String}",
                                                            value, args),
                   ANI_INVALID_DESCRIPTOR);
         va_end(args);
@@ -97,7 +97,7 @@ public:
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
 
         ani_ref value = nullptr;
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, methodName, "ii:C{std:core.String}", &value, VAL3, VAL4),
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, methodName, "ii:C{std.core.String}", &value, VAL3, VAL4),
                   ANI_OK);
         CheckRefNum(value);
 
@@ -105,7 +105,7 @@ public:
         args[0U].i = VAL3;
         args[1U].i = VAL4;
         ani_ref valueA = nullptr;
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, methodName, "ii:C{std:core.String}", &valueA, args),
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, methodName, "ii:C{std.core.String}", &valueA, args),
                   ANI_OK);
         CheckRefNum(valueA);
     }
@@ -305,7 +305,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.na.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std:core.String}", &value, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
               ANI_OK);
     CheckRefNum(value);
 
@@ -313,7 +313,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std:core.String}", &valueA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std.core.String}", &valueA, args), ANI_OK);
     CheckRefNum(valueA);
 
     ani_ref valueV = nullptr;
@@ -327,7 +327,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.nb.nc.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std:core.String}", &value, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
               ANI_OK);
     CheckRefNum(value);
 
@@ -335,7 +335,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std:core.String}", &valueA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std.core.String}", &valueA, args), ANI_OK);
     CheckRefNum(valueA);
 
     ani_ref valueV = nullptr;
@@ -349,7 +349,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.na.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std:core.String}", &value, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
               ANI_OK);
     CheckRefNum(value);
 
@@ -357,7 +357,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std:core.String}", &valueA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std.core.String}", &valueA, args), ANI_OK);
     CheckRefNum(valueA);
 
     ani_ref valueV = nullptr;
@@ -377,7 +377,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ani_ref value = nullptr;
     const ani_int value1 = VAL3;
     const ani_int value2 = VAL4;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std:core.String}", &value, value1, value2),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, value1, value2),
               ANI_OK);
     CheckRefUp(value);
 
@@ -385,7 +385,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = value1;
     args[1U].i = value2;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std:core.String}", &valueA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std.core.String}", &valueA, args), ANI_OK);
     CheckRefUp(valueA);
 
     ani_ref valueV = nullptr;
@@ -416,11 +416,11 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.B", &clsB), ANI_OK);
 
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(clsA, "funcA", "ii:C{std:core.String}", &valueA, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(clsA, "funcA", "ii:C{std.core.String}", &valueA, VAL3, VAL4),
               ANI_OK);
     CheckRefNum(valueA);
     ani_ref valueB = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(clsB, "funcB", "ii:C{std:core.String}", &valueB, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(clsB, "funcB", "ii:C{std.core.String}", &valueB, VAL3, VAL4),
               ANI_OK);
     CheckRefUp(valueB);
 
@@ -428,10 +428,10 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueAA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(clsA, "funcA", "ii:C{std:core.String}", &valueAA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(clsA, "funcA", "ii:C{std.core.String}", &valueAA, args), ANI_OK);
     CheckRefNum(valueAA);
     ani_ref valueBA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(clsB, "funcB", "ii:C{std:core.String}", &valueBA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(clsB, "funcB", "ii:C{std.core.String}", &valueBA, args), ANI_OK);
     CheckRefUp(valueBA);
 }
 
@@ -440,7 +440,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.A", &cls), ANI_OK);
     ani_ref value = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std:core.String}", &value, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
               ANI_OK);
     CheckRefNum(value);
 
@@ -448,7 +448,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std:core.String}", &valueA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std.core.String}", &valueA, args), ANI_OK);
     CheckRefNum(valueA);
 
     ani_double value2 = 0.0;
@@ -477,7 +477,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.D", &cls), ANI_OK);
 
     ani_ref value = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std:core.String}", &value, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
               ANI_OK);
     CheckRefUp(value);
 
@@ -485,7 +485,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std:core.String}", &valueA, args), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "funcA", "ii:C{std.core.String}", &valueA, args), ANI_OK);
     CheckRefUp(valueA);
 }
 
@@ -511,11 +511,11 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.G", &cls), ANI_OK);
     ani_ref value = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "publicMethod", "ii:C{std:core.String}", &value, VAL3, VAL4),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "publicMethod", "ii:C{std.core.String}", &value, VAL3, VAL4),
               ANI_OK);
     CheckRefNum(value);
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref(cls, "callPrivateMethod", "ii:C{std:core.String}", &value, VAL3, VAL4),
+        env_->Class_CallStaticMethodByName_Ref(cls, "callPrivateMethod", "ii:C{std.core.String}", &value, VAL3, VAL4),
         ANI_OK);
     CheckRefUp(value);
 
@@ -523,11 +523,11 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
     args[0U].i = VAL3;
     args[1U].i = VAL4;
     ani_ref valueA = nullptr;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "publicMethod", "ii:C{std:core.String}", &valueA, args),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "publicMethod", "ii:C{std.core.String}", &valueA, args),
               ANI_OK);
     CheckRefNum(valueA);
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "callPrivateMethod", "ii:C{std:core.String}", &valueA, args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "callPrivateMethod", "ii:C{std.core.String}", &valueA, args),
         ANI_OK);
     CheckRefUp(valueA);
 }
@@ -544,19 +544,19 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_wrong_signature)
 
     ani_ref value {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Ref(env_, cls, "method",
-                                                            "C{std:core.String}:C{std:core.String}", &value, str),
+                                                            "C{std.core.String}:C{std.core.String}", &value, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Ref(env_, cls, "method",
-                                                            "C{std/core/String}:C{std:core.String}", &value, str),
+                                                            "C{std/core/String}:C{std.core.String}", &value, str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std:core.String}:C{std:core.String}", &value, &arg),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std.core.String}:C{std.core.String}", &value, &arg),
         ANI_OK);
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std/core/String}:C{std:core.String}", &value, &arg),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std/core/String}:C{std.core.String}", &value, &arg),
         ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(cls, &value, str);
@@ -572,7 +572,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization0)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "parentStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "parentStaticMethod", ":C{std.core.String}", &refValue),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -590,7 +590,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization0_a)
     ani_value args;
     ani_ref refValue;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "parentStaticMethod", ":C{std:core.String}", &refValue, &args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "parentStaticMethod", ":C{std.core.String}", &refValue, &args),
         ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -606,7 +606,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization1)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "childStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "childStaticMethod", ":C{std.core.String}", &refValue),
               ANI_NOT_FOUND);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -624,7 +624,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization1_a)
     ani_value args;
     ani_ref refValue;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "childStaticMethod", ":C{std:core.String}", &refValue, &args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "childStaticMethod", ":C{std.core.String}", &refValue, &args),
         ANI_NOT_FOUND);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -640,7 +640,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization2)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "grandchildStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "grandchildStaticMethod", ":C{std.core.String}", &refValue),
               ANI_NOT_FOUND);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -657,7 +657,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization2_a)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_value args;
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "grandchildStaticMethod", ":C{std:core.String}", &refValue,
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "grandchildStaticMethod", ":C{std.core.String}", &refValue,
                                                        &args),
               ANI_NOT_FOUND);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
@@ -674,7 +674,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization3)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "parentStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "parentStaticMethod", ":C{std.core.String}", &refValue),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -692,7 +692,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization3_a)
     ani_value args;
     ani_ref refValue;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "parentStaticMethod", ":C{std:core.String}", &refValue, &args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "parentStaticMethod", ":C{std.core.String}", &refValue, &args),
         ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -708,7 +708,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization4)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "childStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "childStaticMethod", ":C{std.core.String}", &refValue),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -726,7 +726,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization4_a)
     ani_value args;
     ani_ref refValue;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "childStaticMethod", ":C{std:core.String}", &refValue, &args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "childStaticMethod", ":C{std.core.String}", &refValue, &args),
         ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -742,7 +742,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization5)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "grandchildStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "grandchildStaticMethod", ":C{std.core.String}", &refValue),
               ANI_NOT_FOUND);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -759,7 +759,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization5_a)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_value args;
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "grandchildStaticMethod", ":C{std:core.String}", &refValue,
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "grandchildStaticMethod", ":C{std.core.String}", &refValue,
                                                        &args),
               ANI_NOT_FOUND);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
@@ -776,7 +776,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization6)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "parentStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "parentStaticMethod", ":C{std.core.String}", &refValue),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -794,7 +794,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization6_a)
     ani_value args;
     ani_ref refValue;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "parentStaticMethod", ":C{std:core.String}", &refValue, &args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "parentStaticMethod", ":C{std.core.String}", &refValue, &args),
         ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -810,7 +810,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization7)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "childStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "childStaticMethod", ":C{std.core.String}", &refValue),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -828,7 +828,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization7_a)
     ani_value args;
     ani_ref refValue;
     ASSERT_EQ(
-        env_->Class_CallStaticMethodByName_Ref_A(cls, "childStaticMethod", ":C{std:core.String}", &refValue, &args),
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "childStaticMethod", ":C{std.core.String}", &refValue, &args),
         ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -844,7 +844,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization8)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "grandchildStaticMethod", ":C{std:core.String}", &refValue),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "grandchildStaticMethod", ":C{std.core.String}", &refValue),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Child"));
@@ -861,7 +861,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization8_a)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Grandchild"));
     ani_value args;
     ani_ref refValue;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "grandchildStaticMethod", ":C{std:core.String}", &refValue,
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "grandchildStaticMethod", ":C{std.core.String}", &refValue,
                                                        &args),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.Parent"));

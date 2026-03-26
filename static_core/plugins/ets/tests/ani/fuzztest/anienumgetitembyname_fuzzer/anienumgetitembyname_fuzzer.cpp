@@ -34,7 +34,7 @@ void AniEnumGetItemByNameFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_enum e {};
-    env->FindEnum("std:core.LogLevel", &e);
+    env->FindEnum("std.core.LogLevel", &e);
     ani_enum_item eItem {};
     std::string input(data, size);
     env->Enum_GetEnumItemByName(e, input.c_str(), &eItem);

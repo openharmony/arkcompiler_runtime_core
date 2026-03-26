@@ -41,7 +41,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Object_CallMethodByName_Int_V(obj, "method", "C{std:core.String}:i", value, args), ANI_OK);
+        ASSERT_EQ(env_->Object_CallMethodByName_Int_V(obj, "method", "C{std.core.String}:i", value, args), ANI_OK);
         va_end(args);
     }
 
@@ -529,13 +529,13 @@ TEST_F(CallObjectMethodIntByNameTest, check_wrong_signature)
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
     ani_int res;
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Int(env_, obj, "method", "C{std:core.String}:i", &res, str), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Int(env_, obj, "method", "C{std.core.String}:i", &res, str), ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Int(env_, obj, "method", "C{std/core/String}:i", &res, str),
               ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Object_CallMethodByName_Int_A(obj, "method", "C{std:core.String}:i", &res, &arg), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int_A(obj, "method", "C{std.core.String}:i", &res, &arg), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Int_A(obj, "method", "C{std/core/String}:i", &res, &arg),
               ANI_INVALID_DESCRIPTOR);
 

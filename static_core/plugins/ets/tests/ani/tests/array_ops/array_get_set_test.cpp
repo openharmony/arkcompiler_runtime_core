@@ -34,7 +34,7 @@ public:
         ASSERT_EQ(env_->Reference_IsNullishValue(extendedArray, &isCorrect), ANI_OK);
         ASSERT_EQ(isCorrect, ANI_FALSE);
         ani_class escompatArray {};
-        ASSERT_EQ(env_->FindClass("std:core.Array", &escompatArray), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.Array", &escompatArray), ANI_OK);
         ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(extendedArray), escompatArray, &isCorrect), ANI_OK);
         ASSERT_EQ(isCorrect, ANI_TRUE);
         *result = static_cast<ani_array>(extendedArray);
@@ -190,7 +190,7 @@ TEST_F(ArrayGetSetTest, ExtendedArrayGet)
     ASSERT_EQ(env_->Reference_IsNullishValue(res, &isCorrect), ANI_OK);
     ASSERT_EQ(isCorrect, ANI_FALSE);
     ani_class coreString {};
-    ASSERT_EQ(env_->FindClass("std:core.String", &coreString), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &coreString), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(res), coreString, &isCorrect), ANI_OK);
     ASSERT_EQ(isCorrect, ANI_TRUE);
     std::string str;
@@ -205,7 +205,7 @@ TEST_F(ArrayGetSetTest, ExtendedArraySet)
     GetExtendedArray(&extendedArray);
 
     ani_class coreInt {};
-    ASSERT_EQ(env_->FindClass("std:core.Int", &coreInt), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Int", &coreInt), ANI_OK);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(coreInt, "<ctor>", "i:", &ctor), ANI_OK);
 

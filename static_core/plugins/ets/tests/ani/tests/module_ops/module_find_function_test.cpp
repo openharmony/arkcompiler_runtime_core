@@ -49,7 +49,7 @@ TEST_F(ModuleFindFunctionTest, find_int_function)
     ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValue", ":i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     CheckFunIntValue(fn, 0);  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "C{std:core.String}:i", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "C{std.core.String}:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     const std::string example {"example"};
     ani_string string = nullptr;
@@ -74,7 +74,7 @@ TEST_F(ModuleFindFunctionTest, find_ref_function)
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":C{std:core.String}", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":C{std.core.String}", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     CheckFunStringValue(fn, "a");
 }
@@ -86,7 +86,7 @@ TEST_F(ModuleFindFunctionTest, invalid_arg_moduleName)
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialBool", ":C{std:core.String}", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialBool", ":C{std.core.String}", &fn), ANI_NOT_FOUND);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_arg_signature)
@@ -102,7 +102,7 @@ TEST_F(ModuleFindFunctionTest, invalid_arg_signature)
 TEST_F(ModuleFindFunctionTest, invalid_arg_module)
 {
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(nullptr, "getInitialStringValue", ":C{std:core.String}", &fn),
+    ASSERT_EQ(env_->Module_FindFunction(nullptr, "getInitialStringValue", ":C{std.core.String}", &fn),
               ANI_INVALID_ARGS);
 }
 
@@ -113,8 +113,8 @@ TEST_F(ModuleFindFunctionTest, invalid_arg_name)
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "", ":C{std:core.String}", &fn), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Module_FindFunction(module, nullptr, ":C{std:core.String}", &fn), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindFunction(module, "", ":C{std.core.String}", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, nullptr, ":C{std.core.String}", &fn), ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_arg_name_in_namespace)
@@ -132,7 +132,7 @@ TEST_F(ModuleFindFunctionTest, invalid_arg_result)
     ani_module module {};
     ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":C{std:core.String}", nullptr),
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":C{std.core.String}", nullptr),
               ANI_INVALID_ARGS);
 }
 
@@ -142,7 +142,7 @@ TEST_F(ModuleFindFunctionTest, invalid_env)
     ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_function fn {};
-    ASSERT_EQ(env_->c_api->Module_FindFunction(nullptr, module, "getInitialStringValue", ":C{std:core.String}", &fn),
+    ASSERT_EQ(env_->c_api->Module_FindFunction(nullptr, module, "getInitialStringValue", ":C{std.core.String}", &fn),
               ANI_INVALID_ARGS);
 }
 
@@ -206,7 +206,7 @@ TEST_F(ModuleFindFunctionTest, find_func_all_Type)
     ASSERT_EQ(env_->Class_FindStaticMethod(kclass, "addIntValue", "ii:i", &staticMethod), ANI_OK);
     ASSERT_NE(staticMethod, nullptr);
     fn = nullptr;
-    ASSERT_EQ(env_->Module_FindFunction(module, "async_f", "i:C{std:core.Promise}", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "async_f", "i:C{std.core.Promise}", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
 

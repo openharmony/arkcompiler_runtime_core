@@ -104,7 +104,7 @@ TEST_F(ReferenceIsUndefinedTest, CheckUndefinedReceivedFromManaged)
 {
     ani_module mod {};
     ASSERT_EQ(env_->FindModule(MODULE_NAME, &mod), ANI_OK);
-    ani_native_function fn {"isUndefined", "X{C{std:core.Object}C{std:core.Null}}:z",
+    ani_native_function fn {"isUndefined", "X{C{std.core.Object}C{std.core.Null}}:z",
                             reinterpret_cast<void *>(IsUndefinedImpl)};
     ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &fn, 1), ANI_OK);
 

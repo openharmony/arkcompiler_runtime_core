@@ -20,7 +20,6 @@ namespace ark::ets::ani::testing {
 
 class MangleDescriptorTest : public AniTest {};
 
-// CC-OFFNXT(G.FUN.01-CPP) solid logic
 TEST_F(MangleDescriptorTest, Format_NewToOld)
 {
     std::optional<PandaString> desc;
@@ -34,18 +33,6 @@ TEST_F(MangleDescriptorTest, Format_NewToOld)
     EXPECT_STREQ(desc.value().c_str(), "La/b;");
 
     desc = Mangle::ConvertDescriptor("a.b.c");
-    ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "La/b/c;");
-
-    desc = Mangle::ConvertDescriptor("a:b");
-    ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "La/b;");
-
-    desc = Mangle::ConvertDescriptor("a:b.c");
-    ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "La/b/c;");
-
-    desc = Mangle::ConvertDescriptor("a.b:c");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "La/b/c;");
 
@@ -118,12 +105,6 @@ TEST_F(MangleDescriptorTest, Format_Wrong)
     ASSERT_FALSE(desc.has_value());
 
     desc = Mangle::ConvertDescriptor("a/b/c");
-    ASSERT_FALSE(desc.has_value());
-
-    desc = Mangle::ConvertDescriptor("a:b:c");
-    ASSERT_FALSE(desc.has_value());
-
-    desc = Mangle::ConvertDescriptor("a/b:c");
     ASSERT_FALSE(desc.has_value());
 }
 

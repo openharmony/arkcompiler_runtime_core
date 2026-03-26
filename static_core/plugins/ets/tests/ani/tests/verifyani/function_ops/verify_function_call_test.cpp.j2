@@ -119,7 +119,7 @@ ani_function A::g_function = nullptr;
 TEST_F(FunctionCall{{ Type }}Test, wrong_env)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(nullptr, function, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
@@ -149,7 +149,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_0)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("@functionModule.ani_verify_test_function_call_{{ type }}.Parent", &cls), ANI_OK);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "{{ type }}Method", "zcbsilfdC{std:core.String}:{{ ret }}", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, reinterpret_cast<ani_function>(method), &result, z_, c_, b_, s_,
@@ -213,7 +213,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_2)
 TEST_F(FunctionCall{{ Type }}Test, wrong_result)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
               ANI_ERROR);
@@ -240,7 +240,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_result)
 TEST_F(FunctionCall{{ Type }}Test, wrong_boolean_arg)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, 0xb1ba, c_, b_, s_, i_, l_, f_, d_, r_),
@@ -268,7 +268,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_boolean_arg)
 TEST_F(FunctionCall{{ Type }}Test, wrong_char_arg)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, 0xb1bab0ba, b_, s_, i_, l_, f_, d_, r_),
@@ -296,7 +296,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_char_arg)
 TEST_F(FunctionCall{{ Type }}Test, wrong_byte_arg)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, c_, 0xb1bab0ba, s_, i_, l_, f_, d_, r_),
@@ -324,7 +324,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_byte_arg)
 TEST_F(FunctionCall{{ Type }}Test, wrong_short_arg)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, c_, b_, 0xb1bab0ba, i_, l_, f_, d_, r_),
@@ -352,7 +352,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_short_arg)
 TEST_F(FunctionCall{{ Type }}Test, wrong_ref_arg)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, c_, b_, s_, i_, l_, f_, d_, nullptr),
@@ -394,7 +394,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_all_args)
 TEST_F(FunctionCall{{ Type }}Test, wrong_return_type)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ wrong_ret }}Function", "zcbsilfdC{std:core.String}:{{ wrong_ret_short }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ wrong_ret }}Function", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
@@ -457,7 +457,7 @@ TEST_F(FunctionCall{{ Type }}Test, cross_thread_function_call)
 
         ani_module module {};
         ASSERT_EQ(env->FindModule("@functionModule.ani_verify_test_function_call_{{ type }}", &module), ANI_OK);
-        ASSERT_EQ(env->Module_FindFunction(module, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function),
+        ASSERT_EQ(env->Module_FindFunction(module, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function),
                   ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
@@ -471,7 +471,7 @@ TEST_F(FunctionCall{{ Type }}Test, cross_thread_function_call)
 TEST_F(FunctionCall{{ Type }}Test, DISABLED_function_call_from_native_function_0)
 {
     std::array functions = {ani_native_function {
-        "bar", "C{std:core.Object}l:", reinterpret_cast<void *>(A::NativeBar<FunctionCall{{ Type }}Test>)}};
+        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<FunctionCall{{ Type }}Test>)}};
     ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);
 
     ani_function function {};
@@ -505,7 +505,7 @@ TEST_F(FunctionCall{{ Type }}Test, function_call_from_native_function_1)
 TEST_F(FunctionCall{{ Type }}Test, function_call_in_local_scope)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
@@ -517,7 +517,7 @@ TEST_F(FunctionCall{{ Type }}Test, function_call_in_local_scope)
 TEST_F(FunctionCall{{ Type }}Test, success)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_OK);
@@ -526,7 +526,7 @@ TEST_F(FunctionCall{{ Type }}Test, success)
 TEST_F(FunctionCall{{ Type }}ATest, wrong_env)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, function, &result, args_.data()), ANI_ERROR);
@@ -555,7 +555,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_0)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("@functionModule.ani_verify_test_function_call_{{ type }}.Parent", &cls), ANI_OK);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "{{ type }}Method", "zcbsilfdC{std:core.String}:{{ ret }}", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, reinterpret_cast<ani_function>(method), &result, args_.data()),
@@ -616,7 +616,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_2)
 TEST_F(FunctionCall{{ Type }}ATest, wrong_result)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, nullptr, args_.data()), ANI_ERROR);
     // clang-format off
@@ -642,7 +642,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_result)
 TEST_F(FunctionCall{{ Type }}ATest, wrong_args)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, nullptr), ANI_ERROR);
@@ -674,7 +674,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_all_args)
 TEST_F(FunctionCall{{ Type }}ATest, wrong_boolean_arg)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     const int fake{{ Type }} = 0xb1ba;
     args_[0].i = fake{{ Type }};
@@ -703,7 +703,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_boolean_arg)
 TEST_F(FunctionCall{{ Type }}ATest, wrong_return_type)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ wrong_ret }}Function", "zcbsilfdC{std:core.String}:{{ wrong_ret_short }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ wrong_ret }}Function", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, args_.data()), ANI_ERROR);
@@ -736,7 +736,7 @@ TEST_F(FunctionCall{{ Type }}ATest, class_from_local_scope)
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "static{{ Type }}Method", "zcbsilfdC{std:core.String}:{{ ret }}", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method),
               ANI_OK);
 
     ani_{{ type }} result;
@@ -800,7 +800,7 @@ TEST_F(FunctionCall{{ Type }}ATest, cross_thread_function_call)
 
         ani_module module {};
         ASSERT_EQ(env->FindModule("@functionModule.ani_verify_test_function_call_{{ type }}", &module), ANI_OK);
-        ASSERT_EQ(env->Module_FindFunction(module, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function),
+        ASSERT_EQ(env->Module_FindFunction(module, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function),
                   ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
@@ -814,7 +814,7 @@ TEST_F(FunctionCall{{ Type }}ATest, cross_thread_function_call)
 TEST_F(FunctionCall{{ Type }}ATest, DISABLED_function_call_from_native_function_0)
 {
     std::array functions = {ani_native_function {
-        "bar", "C{std:core.Object}l:", reinterpret_cast<void *>(A::NativeBar<FunctionCall{{ Type }}ATest>)}};
+        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<FunctionCall{{ Type }}ATest>)}};
     ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);
 
     ani_function function {};
@@ -848,7 +848,7 @@ TEST_F(FunctionCall{{ Type }}ATest, function_call_from_native_function_1)
 TEST_F(FunctionCall{{ Type }}ATest, function_call_in_local_scope)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
@@ -860,7 +860,7 @@ TEST_F(FunctionCall{{ Type }}ATest, function_call_in_local_scope)
 TEST_F(FunctionCall{{ Type }}ATest, success)
 {
     ani_function function {};
-    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std:core.String}:{{ ret }}", &function), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, args_.data()), ANI_OK);

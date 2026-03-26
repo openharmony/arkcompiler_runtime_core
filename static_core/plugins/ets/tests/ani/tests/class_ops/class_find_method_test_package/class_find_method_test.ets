@@ -560,8 +560,8 @@ class FindConstructorWithDefaultParams {
     public constructor(a?: int, b?: int) {}
 }
 
-// Regression test: constructor default value lowering boxes number -> std:core.Double
-// in ANI signature (C{std:core.Double}:), instead of primitive double (d:).
+// Regression test: constructor default value lowering boxes number -> std.core.Double
+// in ANI signature (C{std.core.Double}:), instead of primitive double (d:).
 class FindCtorNumberDefaultParam {
     private p: double;
 

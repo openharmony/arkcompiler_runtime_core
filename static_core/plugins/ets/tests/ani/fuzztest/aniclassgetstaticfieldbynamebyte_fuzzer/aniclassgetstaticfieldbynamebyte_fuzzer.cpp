@@ -34,7 +34,7 @@ void AniClassGetStaticFieldByNameByteFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class cls {};
-    env->FindClass("std:core.String", &cls);
+    env->FindClass("std.core.String", &cls);
     ani_byte res {};
     std::string input(data, size);
     env->Class_GetStaticFieldByName_Byte(cls, input.c_str(), &res);

@@ -33,7 +33,6 @@
 #include "libarkbase/os/thread.h"
 
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
-#include "runtime/include/signature_utils.h"
 
 namespace ark::ets::interop::js {
 
@@ -107,12 +106,7 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, &jsClassDescriptor, nullptr, nullptr));
 
     std::string classDescriptor = GetString(env, jsClassDescriptor);
-    auto normDescrOpt =
-        signature::NormalizePackageSeparators<std::string, '/'>(classDescriptor, 0, classDescriptor.size());
-    if (UNLIKELY(!normDescrOpt.has_value())) {
-        return nullptr;
-    }
-    return ets_proxy::GetETSClass(env, normDescrOpt.value());
+    return ets_proxy::GetETSClass(env, classDescriptor);
 }
 
 static napi_value GetEtsInstance(napi_env env, napi_callback_info info)

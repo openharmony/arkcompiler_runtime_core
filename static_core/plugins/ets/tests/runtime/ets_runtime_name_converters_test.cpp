@@ -17,8 +17,8 @@
 #include <string>
 
 #include "include/class_helper.h"
+#include "include/runtime.h"
 #include "libarkbase/utils/utf.h"
-#include "plugins/ets/runtime/ets_utils.h"
 
 namespace ark::ets::test {
 
@@ -103,14 +103,6 @@ TEST_F(EtsRuntimeNameConvertersTest, GetDescriptor)
     compare("i", "Li;");
 
     compare("std.core.Object", "Lstd/core/Object;");
-
-    auto runtimeName = "std:core.Object";
-    auto descriptor = "Lstd/core/Object;";
-    PandaString classDescriptor;
-    auto res = ClassHelper::GetDescriptor(utf::CStringAsMutf8(runtimeName), &classDescriptor);
-    ASSERT_TRUE(res != nullptr);
-    ASSERT_STREQ(classDescriptor.c_str(), descriptor);
-    ASSERT_STREQ("std.core.Object", ClassHelper::GetName(utf::CStringAsMutf8(classDescriptor.c_str())).c_str());
 
     compare("std.core.Object[]", "[Lstd/core/Object;");
 

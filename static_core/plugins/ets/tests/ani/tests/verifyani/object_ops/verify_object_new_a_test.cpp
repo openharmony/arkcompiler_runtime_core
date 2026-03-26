@@ -41,7 +41,7 @@ public:
         const ani_double dVal = 1.423;
 
         ASSERT_EQ(env_->FindClass("verify_object_new_a_test.CheckCtorTypes", &cls_), ANI_OK);
-        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std:core.Object}:", &ctor_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std.core.Object}:", &ctor_), ANI_OK);
 
         ani_value fFVALue {};
         fFVALue.l = bit_cast<ani_long>(std::numeric_limits<uint64_t>::max());

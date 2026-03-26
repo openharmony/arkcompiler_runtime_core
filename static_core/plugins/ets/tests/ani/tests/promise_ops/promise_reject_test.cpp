@@ -31,7 +31,7 @@ TEST_F(PromiseRejectTest, ResolvePromise)
     ASSERT_EQ(env_->FindClass("std.core.Error", &errorClass), ANI_OK);
 
     ani_method constructor {};
-    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std:core.String}C{std.core.ErrorOptions}:", &constructor),
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &constructor),
               ANI_OK);
 
     std::string rejected = "rejected";

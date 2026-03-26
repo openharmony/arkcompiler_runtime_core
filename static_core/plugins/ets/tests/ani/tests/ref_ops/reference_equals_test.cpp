@@ -33,7 +33,7 @@ public:
         ASSERT_EQ(env_->Class_FindStaticMethod(cls, newClassName, signature, &newMethod), ANI_OK);
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, objectRef), ANI_OK);
 
-        const char *methodSignature = "C{std:core.String}C{std:core.String}:C{std:core.String}";
+        const char *methodSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
         ani_method concat {};
         ASSERT_EQ(env_->Class_FindMethod(cls, "concat", methodSignature, &concat), ANI_OK);
         ASSERT_NE(concat, nullptr);
@@ -203,7 +203,7 @@ TEST_F(ReferenceEqualsTest, CheckEqualityWithNullishValues)
     ani_module mod {};
     ASSERT_EQ(env_->FindModule(MODULE_NAME, &mod), ANI_OK);
     ani_native_function fn {"areReferencesEqual",
-                            "X{C{std:core.Object}C{std:core.Null}}X{C{std:core.Object}C{std:core.Null}}:z",
+                            "X{C{std.core.Object}C{std.core.Null}}X{C{std.core.Object}C{std.core.Null}}:z",
                             reinterpret_cast<void *>(AreReferencesEqualImpl)};
     ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &fn, 1), ANI_OK);
 

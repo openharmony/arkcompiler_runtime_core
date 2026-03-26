@@ -83,7 +83,7 @@ TEST_F(ExampleTest, CallNativeQuickFunction)
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *METHOD_NAME = "quickMethod";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *SIGNATURE = "C{std:core.String}l:C{std:core.String}";
+    static constexpr const char *SIGNATURE = "C{std.core.String}l:C{std.core.String}";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr std::string_view SAMPLE_STRING = "abcd";
 

@@ -18,12 +18,9 @@
 #include <algorithm>
 #include <string>
 
-#include "include/class_linker_extension.h"
-#include "libarkbase/mem/mem.h"
-#include "libarkbase/utils/bit_utils.h"
 #include "libarkbase/utils/utf.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
-#include "runtime/include/class_linker.h"
 
 namespace ark {
 
@@ -329,11 +326,6 @@ public:
 
     std::optional<PandaString> Resolve()
     {
-        auto normNameOpt = signature::NormalizePackageSeparators<PandaString, '.'>(name_, 0, name_.size());
-        if (UNLIKELY(!normNameOpt.has_value())) {
-            return std::nullopt;
-        }
-        name_ = std::move(normNameOpt.value());
         if (std::find(name_.begin(), name_.end(), '/') != name_.end()) {
             return std::nullopt;
         }

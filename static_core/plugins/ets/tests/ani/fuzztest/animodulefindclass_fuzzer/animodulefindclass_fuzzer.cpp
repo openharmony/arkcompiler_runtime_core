@@ -35,7 +35,7 @@ void AniModuleFindClassFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class cls {};
-    std::string clsName = "std:core." + std::string(data, size);
+    std::string clsName = "std.core." + std::string(data, size);
     env->FindClass(clsName.c_str(), &cls);
 }
 }  // namespace OHOS

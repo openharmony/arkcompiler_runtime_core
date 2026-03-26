@@ -35,7 +35,7 @@ void AniModuleFindEnumFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_enum e {};
-    std::string enumName = "std:core." + std::string(data, size);
+    std::string enumName = "std.core." + std::string(data, size);
     env->FindEnum(enumName.c_str(), &e);
 }
 }  // namespace OHOS

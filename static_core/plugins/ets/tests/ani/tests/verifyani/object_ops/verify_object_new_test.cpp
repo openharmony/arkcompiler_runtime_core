@@ -29,14 +29,14 @@ public:
         constexpr ani_long L_VAL = 0xff3229884222;
         constexpr ani_float F_VAL = 0.234;
         constexpr ani_double D_VAL = 1.423;
-        constexpr std::string_view LONG_SIGNATURE = "zC{std:core.String}sC{std:core.String}lfdC{std:core.String}:";
+        constexpr std::string_view LONG_SIGNATURE = "zC{std.core.String}sC{std.core.String}lfdC{std.core.String}:";
 
         ASSERT_EQ(env_->FindClass("verify_object_new_test.CheckCtorTypes", &cls_), ANI_OK);
         ASSERT_EQ(env_->FindClass("verify_object_new_test.A", &clsA_), ANI_OK);
         ASSERT_EQ(env_->FindClass("verify_object_new_test.B", &clsB_), ANI_OK);
         ASSERT_EQ(env_->FindClass("verify_object_new_test.C", &clsC_), ANI_OK);
         ASSERT_EQ(env_->FindClass("verify_object_new_test.CheckUnionType", &checkUnion_), ANI_OK);
-        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std:core.String}:", &ctor_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std.core.String}:", &ctor_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", LONG_SIGNATURE.data(), &ctorRefs_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(clsA_, "<ctor>", ":", &ctorA_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(clsB_, "<ctor>", ":", &ctorB_), ANI_OK);
@@ -726,7 +726,7 @@ TEST_F(ObjectNewTest, cls_undefined)
 TEST_F(ObjectNewTest, DISABLED_arg_union1)
 {
     constexpr std::string_view LONG_SIGNATURE =
-        "X{C{std:core.String}C{verify_object_new_test.A}C{verify_object_new_test.C}}:";
+        "X{C{std.core.String}C{verify_object_new_test.A}C{verify_object_new_test.C}}:";
     ani_method unionMethod {};
     ani_object obj {};
     ASSERT_EQ(env_->Class_FindMethod(checkUnion_, "<ctor>", LONG_SIGNATURE.data(), &unionMethod), ANI_OK);
@@ -738,14 +738,14 @@ TEST_F(ObjectNewTest, DISABLED_arg_union1)
 TEST_F(ObjectNewTest, DISABLED_arg_union2)
 {
     constexpr std::string_view LONG_SIGNATURE =
-        "X{C{std:core.String}C{verify_object_new_test.A}C{verify_object_new_test.C}}:";
+        "X{C{std.core.String}C{verify_object_new_test.A}C{verify_object_new_test.C}}:";
     ani_method unionMethod {};
     ani_object obj {};
     ASSERT_EQ(env_->Class_FindMethod(checkUnion_, "<ctor>", LONG_SIGNATURE.data(), &unionMethod), ANI_OK);
 
     ani_class boolClass {};
     ani_method ctor {};
-    ASSERT_EQ(env_->FindClass("std:core.Boolean", &boolClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Boolean", &boolClass), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(boolClass, "<ctor>", "z:", &ctor), ANI_OK);
     ani_object arg {};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

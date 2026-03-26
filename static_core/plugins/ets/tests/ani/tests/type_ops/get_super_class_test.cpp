@@ -67,7 +67,7 @@ TEST_F(GetSuperClassTest, get_super_class_C)
 
 TEST_F(GetSuperClassTest, try_get_object_superclass)
 {
-    CheckGetSuperClass<false>("std:core.Object");
+    CheckGetSuperClass<false>("std.core.Object");
 }
 
 TEST_F(GetSuperClassTest, ani_invalid_args)

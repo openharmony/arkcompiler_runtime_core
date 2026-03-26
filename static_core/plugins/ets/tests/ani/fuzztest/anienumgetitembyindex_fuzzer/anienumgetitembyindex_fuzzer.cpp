@@ -35,7 +35,7 @@ void AniEnumGetItemByIndexFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_enum e {};
-    env->FindEnum("std:core.LogLevel", &e);
+    env->FindEnum("std.core.LogLevel", &e);
     ani_enum_item eItem {};
     FuzzedDataProvider provider(reinterpret_cast<const uint8_t *>(data), size);
     auto index = provider.ConsumeIntegral<ani_size>();

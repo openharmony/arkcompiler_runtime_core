@@ -39,7 +39,7 @@ protected:
         ASSERT_NE(md, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Module_FindFunction(md, fnName, ":C{std:core.Array}", &fn), ANI_OK);
+        ASSERT_EQ(env_->Module_FindFunction(md, fnName, ":C{std.core.Array}", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *mdResult = md;
@@ -131,7 +131,7 @@ TEST_F(AnyGetPropertyTest, AnyGetByValue_Valid)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass(clsName, &cls), ANI_OK);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std:core.String}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std.core.String}:", &ctor), ANI_OK);
     std::string_view nameStr = "Leechy";
     ani_string strRef {};
     ASSERT_EQ(env_->String_NewUTF8(nameStr.data(), nameStr.size(), &strRef), ANI_OK);
@@ -215,7 +215,7 @@ TEST_F(AnyGetPropertyTest, AnyGetByValue_InvalidKey)
     ani_object res {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &res, ani_int(10U), strRef), ANI_OK);
 
-    const char *invalidClsName = "std:core.Object";
+    const char *invalidClsName = "std.core.Object";
     ani_class dummyCls {};
     ASSERT_EQ(env_->FindClass(invalidClsName, &dummyCls), ANI_OK);
     ani_method dummyCtor {};

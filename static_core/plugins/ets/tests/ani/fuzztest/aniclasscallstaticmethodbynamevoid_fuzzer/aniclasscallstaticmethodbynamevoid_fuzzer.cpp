@@ -35,7 +35,7 @@ void AniClassCallStaticMethodByNameVoidFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class intCls {};
-    env->FindClass("std:core.Int", &intCls);
+    env->FindClass("std.core.Int", &intCls);
 
     std::string input(data, size);
     env->Class_CallStaticMethodByName_Void(intCls, input.c_str(), nullptr);

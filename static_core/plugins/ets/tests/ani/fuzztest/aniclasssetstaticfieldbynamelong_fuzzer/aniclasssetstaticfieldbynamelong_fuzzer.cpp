@@ -34,7 +34,7 @@ void AniClassSetStaticFieldByNameLongFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class cls {};
-    env->FindClass("std:core.String", &cls);
+    env->FindClass("std.core.String", &cls);
     ani_long value {};
     std::string input(data, size);
     env->Class_SetStaticFieldByName_Long(cls, input.c_str(), value);
