@@ -20,15 +20,28 @@ import os
 import re
 import shutil
 import stat
+import sys
 from pathlib import Path
 from typing import Set
+
+try:
+    import jinja2
+except ImportError:
+    CURRENT_OHOS_THIRD_PARTY = os.path.join(
+        os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..', '..')
+        ),
+        'third_party'
+    )
+    sys.path.insert(1, CURRENT_OHOS_THIRD_PARTY)
+    import jinja2  # noqa: E402
 
 
 def load_json_file(file_path: Path) -> dict:
     """Load JSON file; return parsed data"""
     try:
         with os.fdopen(
-            os.open(file_path, os.O_RDONLY, stat.S_IRUSR), "r", encoding="utf-8"
+                os.open(file_path, os.O_RDONLY, stat.S_IRUSR), "r", encoding="utf-8"
         ) as f:
             return json.load(f)
     except json.JSONDecodeError as e:
@@ -55,14 +68,14 @@ def read_hiddable_apis(std_lib_dir: Path, json_file: Path) -> dict:
 
 
 def process_file_with_hiddable_interfaces(
-    source_file: Path,
-    target_file: Path,
-    hiddable_apis: Set[str],
-    api_pattern: re.Pattern,
+        source_file: Path,
+        target_file: Path,
+        hiddable_apis: Set[str],
+        api_pattern: re.Pattern,
 ) -> None:
     """Replace export keyword with empty string if interface is hiddable"""
     with os.fdopen(
-        os.open(source_file, os.O_RDONLY, stat.S_IRUSR), "r", encoding="utf-8"
+            os.open(source_file, os.O_RDONLY, stat.S_IRUSR), "r", encoding="utf-8"
     ) as f:
         lines = f.readlines()
 
@@ -80,18 +93,18 @@ def process_file_with_hiddable_interfaces(
         modified_lines.append(line)
 
     with os.fdopen(
-        os.open(
-            target_file,
-            os.O_RDWR | os.O_CREAT | os.O_TRUNC,
-            stat.S_IWUSR | stat.S_IRUSR,
-        ),
-        "w",
+            os.open(
+                target_file,
+                os.O_RDWR | os.O_CREAT | os.O_TRUNC,
+                stat.S_IWUSR | stat.S_IRUSR,
+            ),
+            "w",
     ) as fout:
         fout.writelines(modified_lines)
 
 
 def copy_files_with_filter(
-    std_lib_dir: Path, target_dir: Path, hiddable_apis: dict
+        std_lib_dir: Path, target_dir: Path, hiddable_apis: dict
 ) -> None:
     """Copy stdlib files; filter interfaces by hiddable_APIs.json"""
 
@@ -124,6 +137,26 @@ def copy_files_with_filter(
             )
 
 
+def validate_templates(template_dir: Path, stdlib_dir: Path):
+    template_mapping = {
+        "Function.ets.j2": stdlib_dir / "std" / "core" / "Function.ets",
+        "DataView.ets.j2": stdlib_dir / "std" / "core" / "DataView.ets",
+        "Tuple.ets.j2": stdlib_dir / "std" / "core" / "Tuple.ets",
+        "typedArray.ets.j2": stdlib_dir / "escompat" / "TypedArrays.ets",
+        "typedUArray.ets.j2": stdlib_dir / "escompat" / "TypedUArrays.ets"
+    }
+    jinja_loader = jinja2.FileSystemLoader(template_dir)
+    jinja_env = jinja2.Environment(
+        loader=jinja_loader,
+        extensions=['jinja2.ext.do']
+    )
+    for temp, source in template_mapping.items():
+        actual = jinja_env.get_template(temp).render()
+        with open(source, 'r', encoding='utf8') as fsource:
+            if actual.strip() != fsource.read().strip():
+                raise RuntimeError(f"Template validation failed on {temp}, {source}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Copy and process standard library files with hiddable interfaces filtering."
@@ -148,13 +181,14 @@ def main():
 
     std_lib_dir = args.std_dir
     escompat_lib_dir = args.escompat_dir
-    arkruntime_lib_dir=args.arkruntime_dir
+    arkruntime_lib_dir = args.arkruntime_dir
     target_dir = args.target_dir
     json_file = args.json_file
 
     if not std_lib_dir or not escompat_lib_dir or not arkruntime_lib_dir or not target_dir or not json_file:
         parser.error("std-dir, escompact-dir, arkruntime-dir, target-dir, and json-files are required.")
-
+    template_dir = escompat_lib_dir.parent.parent / "templates" / "stdlib"
+    validate_templates(template_dir, escompat_lib_dir.parent)
     target_dir.mkdir(parents=True, exist_ok=True)
     hiddable_apis = read_hiddable_apis(std_lib_dir, json_file)
     copy_files_with_filter(std_lib_dir, target_dir, hiddable_apis)
@@ -164,6 +198,7 @@ def main():
 
     arkruntime_target_dir = target_dir / arkruntime_lib_dir.name
     shutil.copytree(arkruntime_lib_dir, arkruntime_target_dir, dirs_exist_ok=True)
+
 
 if __name__ == "__main__":
     main()
