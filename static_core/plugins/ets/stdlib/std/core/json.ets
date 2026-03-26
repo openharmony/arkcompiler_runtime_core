@@ -45,6 +45,77 @@ class JSONAPI {
     public native static getJSONRename(field: reflect.InstanceField): string | undefined
 }
 
+class FieldMetadata {
+    readonly field: reflect.InstanceField
+    readonly ignore: boolean
+    readonly rename: string | undefined
+    readonly name: string
+    
+    constructor(field: reflect.InstanceField, ignore: boolean, rename: string | undefined) {
+        this.field = field
+        this.ignore = ignore
+        this.rename = rename
+        this.name = field.getName()
+    }
+    
+    getValue(obj: object): Any {
+        return this.field.getValue(obj)
+    }
+    
+    getName(): string {
+        return this.rename ?? this.name
+    }
+}
+
+class ClassMetadata {
+    readonly metadata: Array<FieldMetadata>;
+    readonly nameMap: Map<string, FieldMetadata>;
+    
+    constructor(metadata: Array<FieldMetadata>) {
+        this.metadata = metadata;
+        this.nameMap = new Map<string, FieldMetadata>();
+        for (let i = 0; i < metadata.length; i++) {
+            const meta = metadata[i];
+            this.nameMap.set(meta.name, meta);
+        }
+    }
+}
+
+class FieldMetadataCache {
+    private static readonly CACHE_CAPACITY: int = 200;
+    private static readonly cache: ConcurrentLRUCache<Class, ClassMetadata> = new ConcurrentLRUCache<Class, ClassMetadata>(FieldMetadataCache.CACHE_CAPACITY);
+    
+    static getMetadata(cls: Class): Array<FieldMetadata> {
+        const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
+            const fields = reflect.getInstanceFieldsRecursive(c);
+            const metadata = new Array<FieldMetadata>(fields.length);
+            for (let i = 0; i < fields.length; i++) {
+                const field = fields[i];
+                const ignore = JSONAPI.getJSONStringifyIgnore(field);
+                const rename = JSONAPI.getJSONRename(field);
+                metadata[i] = new FieldMetadata(field, ignore, rename);
+            }
+            return new ClassMetadata(metadata);
+        });
+        return classMeta.metadata;
+    }
+    
+    static getMetadataByName(cls: Class, name: string): FieldMetadata | undefined {
+        const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
+            const fields = reflect.getInstanceFieldsRecursive(c);
+            const metadata = new Array<FieldMetadata>(fields.length);
+            for (let i = 0; i < fields.length; i++) {
+                const field = fields[i];
+                const ignore = JSONAPI.getJSONStringifyIgnore(field);
+                const rename = JSONAPI.getJSONRename(field);
+                metadata[i] = new FieldMetadata(field, ignore, rename);
+            }
+            return new ClassMetadata(metadata);
+        });
+        return classMeta.nameMap.get(name);
+    }
+}
+
 // JsonSerializable provides a interface for external classes to override toJSON
 export interface JsonSerializable {
     toJSON(): string
@@ -1376,69 +1447,51 @@ class JSONWriter {
     private getWritableFields(cls: Class, obj: object): Array<[string, Any]> {
         const writableFields = new Array<[string, Any]>()
 
-        const clsFields: Array<reflect.InstanceField> = reflect.getInstanceFieldsRecursive(cls)
-        if (clsFields.length == 0) {
-            return writableFields
-        }
-
-        let hasJsonIgnore: boolean = false
-        let fieldRename : string | undefined = undefined
-
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
                 const fieldName = this.fieldsFilter[fieldIdx]
-                let writableFieldName = fieldName
-                const field = findFieldByName(clsFields, fieldName)
-                if (field === undefined) {
+                const metadata = FieldMetadataCache.getMetadataByName(cls, fieldName)
+                if (metadata === undefined) {
                     continue
                 }
-
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnore(field);
-                if (hasJsonIgnore) {
+                if (metadata.ignore) {
                     continue
                 }
-                fieldRename = JSONAPI.getJSONRename(field);
-                if (fieldRename != undefined) {
-                    if (findFieldByName(clsFields, fieldRename) !== undefined) {
-                        throw new Error('Double usage of `' + fieldRename + '` in ' + cls.getName()
-                            + '. The name also is used by JSONRename in base class')
-                    } else {
-                        writableFieldName = fieldRename
+                let writableFieldName = metadata.getName()
+                if (metadata.rename !== undefined) {
+                    const renamedMetadata = FieldMetadataCache.getMetadataByName(cls, metadata.rename!)
+                    if (renamedMetadata !== undefined) {
+                        throw new Error(`Double usage of \`${metadata.rename}\` in ${cls.getName()}.` +
+                            ' The name also is used by JSONRename in base class')
                     }
                     if (this.checkSameRename(writableFieldName, writableFields)) {
-                        throw new Error('Cannot double rename ' + writableFieldName + ' in keys of ' + cls.getName())
+                        throw new Error(`Cannot double rename ${writableFieldName} in keys of ${cls.getName()}`)
                     }
                 }
-
-                const fieldNameValuePair: [string, Any] = [writableFieldName, field.getValue(obj)]
+                const fieldNameValuePair: [string, Any] = [writableFieldName, metadata.getValue(obj)]
                 writableFields.push(fieldNameValuePair)
             }
         } else {
-            const len = clsFields.length
-            for (let i = 0; i < len; ++i) {
-                const field = clsFields[i]
-                let writableFieldName = field.getName()
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnore(field);
-                if (hasJsonIgnore) {
+            const metadataArray = FieldMetadataCache.getMetadata(cls)
+            for (let i = 0; i < metadataArray.length; i++) {
+                const metadata = metadataArray[i]
+                if (metadata.ignore) {
                     continue
                 }
-
-                fieldRename = JSONAPI.getJSONRename(field);
-                if (fieldRename !== undefined) {
-                    if (findFieldByName(clsFields, fieldRename) !== undefined) {
-                        throw new Error('Double usage of `' + fieldRename + '` in ' + cls.getName()
-                            + '. The name also is used by JSONRename in base class')
-                    } else {
-                        writableFieldName = fieldRename
+                let writableFieldName = metadata.getName()
+                if (metadata.rename !== undefined) {
+                    const renamedMetadata = FieldMetadataCache.getMetadataByName(cls, metadata.rename!)
+                    if (renamedMetadata !== undefined) {
+                        throw new Error(`Double usage of \`${metadata.rename}\` in ${cls.getName()}.` +
+                            ' The name also is used by JSONRename in base class')
                     }
                     if (this.checkSameRename(writableFieldName, writableFields)) {
-                        throw new Error('Cannot double rename ' + writableFieldName + ' in keys of ' + cls.getName())
+                        throw new Error(`Cannot double rename ${writableFieldName} in keys of ${cls.getName()}`)
                     }
                 }
-
-                const fieldNameValuePair: [string, Any] = [writableFieldName, field.getValue(obj)]
-                const index: int = this.findKeyIndex(field.getName(), writableFields)
-                if (fieldRename != undefined || index == -1) {
+                const fieldNameValuePair: [string, Any] = [writableFieldName, metadata.getValue(obj)]
+                const index: int = this.findKeyIndex(metadata.name, writableFields)
+                if (metadata.rename !== undefined || index == -1) {
                     writableFields.push(fieldNameValuePair)
                 } else {
                     writableFields[index] = fieldNameValuePair
@@ -2789,8 +2842,8 @@ class JSONValueParser {
         } else if ((Types.isByteType(type) || type.isEnum()) && this.bigIntMode < 2) {
             return createByteFromJSONValue(value)
         } else {
-            throw new Error(type.getName() + ' is expected, but get ' + Class.of(value.value).getName()
-                + ' with bigIntMode=' + this.bigIntMode)
+            throw new Error(`${type.getName()} is expected, but get ${Class.of(value.value).getName()}
+                 with bigIntMode=${this.bigIntMode}`)
         }
     }
 
@@ -2832,7 +2885,7 @@ class JSONValueParser {
             return this.parseObject(value as JSONObject, type)
         } else {
             const valueType = Class.of(value)
-            throw new Error(type.getName() + ' is expected, but get ' + valueType.getName())
+            throw new Error(`${type.getName()} is expected, but get ${valueType.getName()}`)
         }
     }
 

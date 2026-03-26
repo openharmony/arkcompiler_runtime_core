@@ -279,7 +279,7 @@ cmake --build build --target panda_bins etssdk
 Requires `~/.urunner.env` with ARKCOMPILER_RUNTIME_CORE_PATH, PANDA_BUILD, and WORK_DIR variables.
 
 Always use `--filter` option to filter affected api, to check which tests are affected need to check `../tests/ets_func_tests/std/`. 
-Example: `--filter std/core/json` if changed json api. If changed `Intl` need to use `--filter/std/core/Intl*`.
+Example: `--filter **/std/core/json` if changed json api. If changed `Intl` need to use `--filter **/std/core/Intl*`.
 
 Execute ets_func_tests from `../../../tests/tests-u-runner-2/`:
 ```bash

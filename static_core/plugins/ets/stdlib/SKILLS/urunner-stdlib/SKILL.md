@@ -38,21 +38,21 @@ Or run: `./runner.sh init` for interactive setup.
 From stdlib directory (stdlib/):
 
 Always use `--filter` option to filter affected api, to check which tests are affected need to check `../tests/ets_func_tests/std/`. 
-Example: `--filter std/core/json` if changed json api. If changed `Intl` need to use `--filter/std/core/Intl*`.
+Example: `--filter **/std/core/json` if changed json api. If changed `Intl` need to use `--filter **/std/core/Intl*`.
 
 ```bash
 # Run only affected tests  std/core/json should be changed to affected tests like regex array etc...
 cd ../../../tests/tests-u-runner-2/
-./runner.sh panda-int ets-func-tests --show-progress --force-generate --processes=all --filter std/core/json`
+./runner.sh panda-int ets-func-tests --show-progress --force-generate --processes=all --verbose=short --filter **/std/core/json`
 ```
 
 ```bash
 # Run all stdlib tests
 cd ../../../tests/tests-u-runner-2/
-./runner.sh panda-int ets-func-tests ets-es-checked --show-progress --force-generate --processes=all 
+./runner.sh panda-int ets-func-tests ets-es-checked --show-progress --force-generate --processes=all --verbose=short
 
 # Or with specific options
-./runner.sh panda-int ets-func-tests --show-progress --force-generate
+./runner.sh panda-int ets-func-tests --show-progress --force-generate --verbose=short
 ```
 
 ## Basic Usage
@@ -83,13 +83,13 @@ The stdlib tests are typically run with:
 
 ```bash
 # Run specific test file
-./runner.sh panda-int ets-func-tests --test-file StringCharAtTest.ets
+./runner.sh panda-int ets-func-tests --verbose=short --test-file StringCharAtTest.ets
 
 # Filter by pattern
-./runner.sh panda-int ets-func-tests --filter "String*"
+./runner.sh panda-int ets-func-tests --verbose=short --filter "**/String*"
 
 # Multiple filters
-./runner.sh panda-int ets-func-tests --filter "core/*" --filter "containers/*"
+./runner.sh panda-int ets-func-tests --verbose=short --filter "**/core/*" --filter "**/containers/*"
 ```
 
 ### Test Directory
@@ -117,13 +117,13 @@ The stdlib tests are typically run with:
 
 ```bash
 cd ../../../tests/tests-u-runner-2/
-./runner.sh panda-int ets-func-tests --show-progress
+./runner.sh panda-int ets-func-tests --show-progress --verbose=short
 ```
 
 ### Run Specific Test File
 
 ```bash
-./runner.sh panda-int ets-func-tests --test-file StringGetTest.ets
+./runner.sh panda-int ets-func-tests --verbose=short --test-file StringGetTest.ets
 ```
 
 ### Run With Custom Options
@@ -132,13 +132,14 @@ cd ../../../tests/tests-u-runner-2/
 ./runner.sh panda-int ets-func-tests \
     --show-progress \
     --processes 4 \
+    --verbose=short \
     --force-generate
 ```
 
 ### Run Tests Matching Pattern
 
 ```bash
-./runner.sh panda-int ets-func-tests --filter "String*"
+./runner.sh panda-int ets-func-tests --filter "**String*"
 ```
 
 ## Output and Results
