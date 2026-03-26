@@ -183,3 +183,28 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
 
         self.assertEqual(metadata.expected_out, expected_res)
+
+    @test_utils.parametrized_test_cases([
+        ("ark", ["ark"]),
+        (["ark1", "ark2"], ["ark1", "ark2"]),
+    ])
+    def test_negative_steps(self, neg_steps: str | list[str], expected_neg_steps: list[str]) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'tags': ['negative'],
+            'negative_steps': neg_steps
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.negative_steps, expected_neg_steps)
+
+    @test_utils.parametrized_test_cases([
+        (["negative"], {"step": "ark"}),
+        (["negative"], ["ark", "ark"]),
+        (["compile-only"], ["ark"])
+    ])
+    def test_negative_steps_exceptions(self, tag: list[str], negative_steps: str | list) -> None:
+        with self.assertRaises(InvalidConfiguration):
+            _ = TestMetadata.create_filled_metadata({
+                'tags': tag,
+                'negative_steps': negative_steps
+            }, Path(__file__))

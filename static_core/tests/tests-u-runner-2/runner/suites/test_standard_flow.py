@@ -176,6 +176,10 @@ class TestStandardFlow(ITestFlow, Test):
         return self.metadata.tags.invalid_tags
 
     @property
+    def negative_steps(self) -> list[str]:
+        return self.metadata.negative_steps
+
+    @property
     def has_expected(self) -> bool:
         """ True if test.expected file exists or expected_out is in metadata """
         return super().has_expected or bool(self.metadata.expected_out)

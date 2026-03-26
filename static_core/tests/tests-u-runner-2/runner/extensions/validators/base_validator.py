@@ -53,7 +53,7 @@ class BaseValidator(IValidator):
             test.last_failure_check_passed = BaseValidator._check_last_failure_for_ignored_test(test.last_failure,
                                                                                                 output, error_output)
 
-        step_passed, message = BaseValidator._step_passed(test, return_code, step_fields.step_kind)
+        step_passed, message = BaseValidator._step_passed(test, return_code, step_fields)
         if step_passed:
             return ValidationResult(True, ValidatorFailKind.NONE, message)
         return ValidationResult(False, ValidatorFailKind.STEP_FAILED, message)
@@ -114,20 +114,22 @@ class BaseValidator(IValidator):
         return ValidationResult(False, ValidatorFailKind.STEP_FAILED, "")
 
     @staticmethod
-    def _step_passed(test: "TestStandardFlow", return_code: int, step: str) -> tuple[bool, str]:
-        expected_return_code = 0
-        message = ""
-        if step == StepKind.RUNTIME.value and test.is_negative_runtime:
-            passed = return_code in [1, 255]
-            if not passed:
-                message = f"Return code {return_code} does not match to expected [1, 255]"
-            return passed, message
-        if step == StepKind.COMPILER.value and test.is_negative_compile:
-            expected_return_code = 1
-        passed = return_code == expected_return_code
-        if not passed:
-            message = f"Return code {return_code} does not match to expected one {expected_return_code}"
-        return passed, message
+    def _step_passed(test: "TestStandardFlow", return_code: int, step: StepFields) -> tuple[bool, str]:
+        expected_rc = [0]
+        if test.negative_steps:
+            if step.step_name in test.negative_steps:
+                expected_rc = [1, 255] if step.step_kind == StepKind.RUNTIME.value else [1]
+        else:
+            if step.step_kind == StepKind.RUNTIME.value and test.is_negative_runtime:
+                expected_rc = [1, 255]
+            elif step.step_kind == StepKind.COMPILER.value and test.is_negative_compile:
+                expected_rc = [1]
+
+        if return_code in expected_rc:
+            return True, ""
+        if len(expected_rc) == 1:
+            return False, f"Return code {return_code} does not match to expected one {expected_rc[0]}"
+        return False, f"Return code {return_code} does not match to expected {expected_rc}"
 
     @staticmethod
     def _check_last_failure_for_ignored_test(failure: str, output: str, error_output: str) -> bool:

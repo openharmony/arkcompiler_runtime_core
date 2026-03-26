@@ -112,6 +112,7 @@ class TestMetadata(BaseModel):   # type: ignore[explicit-any]
     arktsconfig: Path | None = None
     expected_out: ExpectedField = Field(default_factory=dict)
     expected_error: ExpectedField = Field(default_factory=dict)
+    negative_steps: list[str] = Field(default_factory=list)
     # Test262 specific metadata keys
     description: str | None = None
     defines: str | None = None
@@ -160,6 +161,12 @@ class TestMetadata(BaseModel):   # type: ignore[explicit-any]
                 update={"arktsconfig": arktsconfig_path if arktsconfig_path.exists() else None})
 
             package = cls.get_package_statement_from_arktsconfig(path, arktsconfig_path)
+
+        negative_steps = parsed_metadata.negative_steps
+        if negative_steps:
+            if not parsed_metadata.tags.negative:
+                raise InvalidConfiguration("Negative tag is not set but negative_steps are defined")
+
         if package is None:
             package = cls.get_package_statement_from_source(path)
 
@@ -244,6 +251,25 @@ class TestMetadata(BaseModel):   # type: ignore[explicit-any]
         if isinstance(value, list):
             return value
         raise ValueError("Expected list of strings")
+
+    @field_validator("negative_steps", mode="before")
+    @classmethod
+    def _normalize_negative_steps_field(cls, value: RawData) -> list[str]:
+        if not value:
+            raise ValueError("negative_steps metadata field is empty")
+
+        if isinstance(value, str):
+            return [value]
+
+        if isinstance(value, list):
+            if len(value) != len(set(value)):
+                raise ValueError("Incorrect format of the negative_steps in test mark-up: "
+                                                 "duplicates in step names")
+
+            if all(isinstance(item, str) for item in value):
+                return value
+
+        raise ValueError("Incorrect format of the negative_steps field in test mark-up")
 
     def get_package_name(self) -> str:
         return self.package if self.package is not None else ""
