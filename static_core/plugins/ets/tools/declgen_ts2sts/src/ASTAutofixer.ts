@@ -3325,10 +3325,17 @@ function mergeReturnTypes(
 
 function getTypeNameKey(type: ts.TypeNode): string {
   if (ts.isTypeReferenceNode(type)) {
-    const getName = (name: ts.EntityName): string =>
-      ts.isIdentifier(name)
-        ? name.escapedText.toString()
-        : `${getName(name.left)}.${name.right.escapedText.toString()}`;
+    const getName = (name: ts.EntityName): string => {
+      if (ts.isIdentifier(name)) {
+        return name.escapedText.toString();
+      } else if (ts.isQualifiedName(name)) {
+        return `${getName(name.left)}.${name.right.escapedText.toString()}`;
+      }
+      if ((name as any).kind !== undefined) {
+        return ts.tokenToString((name as any).kind) || ESObject;
+      }
+      return ESObject;
+    }
     const baseName = getName(type.typeName);
     if (type.typeArguments && type.typeArguments.length > 0) {
       const typeArgs = type.typeArguments.map(arg => getTypeNameKey(arg)).join(', ');
