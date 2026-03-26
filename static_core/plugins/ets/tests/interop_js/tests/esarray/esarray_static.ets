@@ -191,9 +191,15 @@ function testFilter(): boolean {
 
 function testConcat(): boolean {
     let esArr1 = getOrderArray(3);
-    let esArr2 = esArr1.concat(4);
+    let esArr2 = createEmptyArray<number>();
+    esArr2.push(4);
+    esArr2.push(5);
+    esArr2.push(6);
+    let esArr3 = esArr1.concat(esArr2);
+    let esArr4 = esArr1.concat(4);
     arktest.assertEQ(esArr1.toString(), '1,2,3');
-    arktest.assertEQ(esArr2.toString(), '1,2,3,4');
+    arktest.assertEQ(esArr3.toString(), '1,2,3,4,5,6');
+    arktest.assertEQ(esArr4.toString(), '1,2,3,4');
     return true;
 }
 
