@@ -10,24 +10,8 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
-#33401 Verifier rejects arrays with void component type
-03.types/11.type_void_or_undefined/void/generic_void_array.ets
-03.types/11.type_void_or_undefined/void/generic_void_function.ets
-03.types/11.type_void_or_undefined/void/generic_void_class.ets
-
-#31484
-02.lexical_elements/09.literals/08.undefined_literal/undefined_literal_void.ets
-03.types/11.type_void_or_undefined/void/void_subtyping_basic_0.ets
-03.types/11.type_void_or_undefined/void/void_subtyping_basic_2.ets
-03.types/11.type_void_or_undefined/void/void_subtyping_basic_3.ets
-03.types/11.type_void_or_undefined/void/void_subtyping_basic_4.ets
-03.types/11.type_void_or_undefined/void/void_arrow_functions_0.ets
-03.types/11.type_void_or_undefined/void/void_arrow_functions_1.ets
-03.types/11.type_void_or_undefined/void/void_arrow_functions_2.ets
-03.types/11.type_void_or_undefined/void/void_complex_scenarios_1.ets
-
-#31489
-03.types/11.type_void_or_undefined/void/void_array.ets
+#31967
+03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.outside_let_const_selected_values.ets
 
 #25512
 03.types/19.union_types/united_switch_ext_5.ets
