@@ -368,8 +368,6 @@ protected:
     static void VisitCallIndirect(GraphVisitor *visitor, Inst *inst);
     static void VisitCall(GraphVisitor *visitor, Inst *inst);
 
-    static void VisitResolveByName(GraphVisitor *visitor, Inst *inst);
-
     static void VisitLoadGCEntrypoint(GraphVisitor *visitor, Inst *inst);
 
     // Dyn inst.

@@ -17,8 +17,6 @@
 
 static bool PeepholeStringEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStringSubstring(GraphVisitor *v, IntrinsicInst *intrinsic);
-static bool PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
-static bool PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStrictEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeTypeof(GraphVisitor *v, IntrinsicInst *intrinsic);
