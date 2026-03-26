@@ -1,0 +1,30 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+#0
+  - { ptype: [short, int, long, float, double], type: Short, val: "42 as byte", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Int'" }
+
+#1-2
+  - { ptype: [int, long, float, double], type: Int, val: "0x5A as byte", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Long'" }
+  - { ptype: [int, long, float, double], type: Int, val: "(-128).toShort()", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Long'" }
+
+#3-5
+  - { ptype: [long, float, double], type: Long, val: "0o177 as byte", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Float'" }
+  - { ptype: [long, float, double], type: Long, val: "(0x0000).toShort()", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Float'" }
+  - { ptype: [long, float, double], type: Long, val: "0x7AFAFBFB", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Float'" }
+#6-8
+  - { ptype: [float, double], type: Float, val: "127 as byte", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Double'" }
+  - { ptype: [float, double], type: Float, val: "(128).toShort()", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Double'" }
+  - { ptype: [float, double], type: Float, val: "Long.MAX_VALUE", expected: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Double'" }

@@ -1,0 +1,118 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - warning: |-
+          TBD: Warning: expression is always false
+      main: |-
+          arktest.assertFalse('a' == 'b') // different literal values
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          const a: int = 1
+          const b: int = 2
+      main: |-
+          arktest.assertFalse(a == b) // different constant values
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          function foo() {}
+          function bar() {}
+      main: |-
+          arktest.assertFalse(foo == bar) // different references
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          class A {}
+      main: |-
+          arktest.assertFalse(new A == new A) // different references
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          class A {}
+          class B {}
+          let a = new A
+          let b = new B
+      main: |-
+          arktest.assertFalse(a == b) // instances of different classes
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          class A {}
+          let a = new A
+      main: |-
+          arktest.assertFalse(a == undefined) // instance of class and undefined
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          class A {}
+          let a = new A
+      main: |-
+          arktest.assertFalse(a == null) // instance of class and null
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          let a = 'A'
+          let b = c'A'
+      main: |-
+          arktest.assertFalse(a == b) // different types
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          let a = 1n
+          let b = 1
+      main: |-
+          arktest.assertFalse(a == b) // different types
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          enum RGB { Red, Green, Blue }
+          enum YMC { Yellow, Magenta, Cyan }
+          let a = RGB.Red
+          let b = YMC.Yellow
+      main: |-
+          arktest.assertFalse(a == b) // different enumeration types
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          let a: number|boolean|undefined = 1
+          let b: string|null = ""
+      main: |-
+          arktest.assertFalse(a === b) // non-overlapping union types
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      main: |-
+          let a: number|string = 1
+          arktest.assertFalse(a == "") // different types after smart cast
+
+    - warning: |-
+          TBD: Warning: expression is always false
+      decl: |-
+          class A {}
+          let a: A|undefined
+      main: |-
+          if (a instanceof A) {
+              arktest.assertFalse(a == undefined) // instance of class and undefined after smart cast
+          }

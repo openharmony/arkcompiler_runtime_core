@@ -1,0 +1,191 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |-
+      class A {
+        private a: string = 'default'
+        protected foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0293: Property a is not visible here.
+
+  - decl: |-
+      class A {
+        private a: string = 'default'
+        protected foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    literal: "{foo(a: string): string { return a }}"
+    expected: |-
+      Semantic error ESE0139: Signature foo(a: String): String is not visible here.
+    call: |- 
+      foo("a")
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }    
+      class B {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A | B 
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0061: Ambiguous reference to 'A|B'
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0174: Cannot infer type for classLiteralAsVar because
+       class composite needs an explicit target type
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+      type NoClass = string
+    type: |-
+      NoClass
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0065: type String has no property named a
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    literal: "{a: 'a', b: 'b'}"
+    expected: |-
+      Semantic error ESE0065: type A has no property named b
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    literal: "{a: 1}"
+    expected: |-
+      Semantic error ESE0319: Type 'Int' is not compatible with type 'String' at property 'a'
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        b: number
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    literal: "{b: 'b'}"
+    expected: |-
+      Semantic error ESE0319: Type '"b"' is not compatible with type 'Double' at property 'b'
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        constructor(a: string) {
+          this.a = a
+        }
+      }
+    type: |-
+      A
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0291: Type A has no parameterless constructor.
+       Initialization with literals is not supported if the type has no parameterless constructor.
+       Declare the parameterless constructor explicitly or remove parametered constructors!
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        private constructor() {}
+      }
+    type: |-
+      A
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0139: Signature constructor(): void is not visible here.
+
+  - decl: |-
+      class A {
+        readonly a: string
+        private constructor() {
+          this.a = 'default'
+        }
+      }
+    type: |-
+      A
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0139: Signature constructor(): void is not visible here.
+
+  - decl: |-
+      class A {
+        get a (): string {return 'default'}
+      }
+    type: |-
+      A
+    literal: "{a: 'a'}"
+    expected: |-
+      Semantic error ESE0209: Cannot assign to this property because it is readonly.
+
+  - decl: |-
+      class A {
+        b: Base = new Base
+        foo(d: Derived): Base {
+          return new Base
+        }
+      }
+      class Base { b: string = "base"}
+      class Derived extends Base { b: string  = "derived"}
+    type: |-
+      A
+    literal: "{ foo(a: string): string {return a} }"
+    expected: |-
+      Semantic error ESE0319: Type '(p1: String) => String'
+       is not compatible with type '(d: Derived) => Base' at property 'foo'

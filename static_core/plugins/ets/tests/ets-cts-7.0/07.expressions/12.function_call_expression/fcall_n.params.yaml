@@ -1,0 +1,156 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+#0
+    - decl: |-
+          function foo<T extends number>(p: T): number {
+              return p.toString().length
+          }
+      use: |-
+          foo<int>(0.0) // CTE: ESE0127: No matching call signature
+#1
+    - decl: |-
+          function foo<T>(p: T): number {
+              return p.toString().length
+          }
+      use: |-
+          foo<Any>(0.0) // CTE: ESE0010: Value is possibly nullish
+#2
+    - decl: |-
+          function bar(p: string): string {
+              return p + p
+          }
+          let ft = "bar"
+      use: |-
+          ft("A") // CTE: not callable expression
+#3
+    - decl: |-
+          function bar(p: string): string {
+              return p + p
+          }
+          let ft: ((p: string) => string)|null = bar
+      use: |-
+          ft("A") // CTE: not callable expression - smart typing for global variable doesnt't work
+#4
+    - decl: |-
+          function foo() {}
+      use: |-
+          let e = foo() // CTE: void cannot be used as type annotation
+#5
+    - decl: |-
+          function bar(callee: () => void): void {}
+      use: |-
+          bar("A") // CTE: not a function type called
+#6
+    - decl: |-
+          function bar(callee: () => void): void {
+            callee()
+          }
+      use: |-
+          bar((): int => { return 1 }) // CTE: No matching call signature
+#7
+    - decl: |-
+          type LO = (() => void) | Object        
+          function foo(input: LO): Boolean { return true }
+      use: |-
+        foo(null) // CTE: No matching call signature
+#8
+    - decl: |-
+        type LO = (() => void) | Object        
+        function foo(input: LO): Boolean { return true }
+      use: |-
+        foo(undefined) // CTE: No matching call signature
+#9        
+    - decl: |-
+          function bar(callee: () => void): void {
+            callee()
+          }
+      use: |-
+          bar((a: int): void => {}) // CTE: No matching call signature
+#10
+    - decl: |-
+          function bar(callee: (a: int) => void): void {
+            callee(1)
+          }
+      use: |-
+          bar((a: int, b: int): void => {}) // CTE: No matching call signature
+#11
+    - decl: |-
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = null | (s: Object, i: Object, b: Object) => Boolean
+        function getLambdaOrNull(value: Boolean = false): LT {
+          return value ? (s: Object, i: Object, b: Object) => foo(s, i, b) : null
+        }
+      use: |-
+        let lc: LT = getLambdaOrNull()
+        let r = lc.('Hello', 42, true)
+#12
+    - decl: |-
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = null | (s: Object, i: Object, b: Object) => Boolean
+        function getLambdaOrNull(value: Boolean = false): LT {
+          return value ? (s: Object, i: Object, b: Object) => foo(s, i, b) : null
+        }
+      use: |-
+        let lc: LT = getLambdaOrNull()
+        let r = lc('Hello', 42, true)
+#13
+    - decl: |-
+        let calls: int = 0;
+        interface User {
+          name: string;
+          age: number;
+        }
+        type LP = () => User
+      use: |-
+        let value = ((up: LP): User => { return up() }) () { return {name: 'Alice', age: 16 } }
+        arktest.assertEQ('Alice', value.name)
+        arktest.assertTrue(value instanceof User)
+
+    - decl: |-
+        function foo() {}
+      use: |-
+        foo<string>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - decl: |-
+        class IFoo {}
+        function foo(this: IFoo) {}
+      use: |-
+        (new IFoo()).foo<string>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - decl: |-
+        let ac = () => '12'
+      use: |-
+        let ar = ac<number>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - use: |-
+        let ac: Any = () => '12'
+        let ar = ac<number>()
+      expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
+
+    - decl: |-
+        const ac: Any = () => '12'
+      use: |-
+        let ar = ac<number>()
+      expected_out: "Semantic error ESE0289: This expression is not callable."

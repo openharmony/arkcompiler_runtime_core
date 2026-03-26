@@ -1,0 +1,151 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+  # --- Non-constant expressions used where constant is required ---
+
+  # let (mutable) variable is not a constant expression
+  - desc: A mutable variable is not a constant expression.
+    use: |
+      let a: int = 3
+      enum E { V = a }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Post-increment is explicitly excluded by spec
+  - desc: Post-increment operator is not allowed in constant expressions.
+    use: |
+      let a: int = 3
+      enum E { V = a++ }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Pre-increment is explicitly excluded by spec
+  - desc: Pre-increment operator is not allowed in constant expressions.
+    use: |
+      let a: int = 3
+      enum E { V = ++a }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Post-decrement is explicitly excluded by spec
+  - desc: Post-decrement operator is not allowed in constant expressions.
+    use: |
+      let a: int = 3
+      enum E { V = a-- }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Pre-decrement is explicitly excluded by spec
+  - desc: Pre-decrement operator is not allowed in constant expressions.
+    use: |
+      let a: int = 3
+      enum E { V = --a }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Function call is not a constant expression
+  - desc: Function call result is not a constant expression.
+    decl: |
+      function f(): int { return 1 }
+    use: |
+      enum E { V = f() }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Method call is not a constant expression
+  - desc: Method call is not a constant expression.
+    use: |
+      enum E { V = "hello".length }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Constructor call is not a constant expression
+  - desc: Constructor call is not a constant expression.
+    use: |
+      enum E { V = Number(1.0) }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # Runtime value is not a constant expression
+  - desc: Runtime value is not a constant expression.
+    use: |
+      enum E { V = Date.now() }
+    expect: >-
+      Semantic error ESE0342: Type of enumeration constants must be
+      any integer or string type or explicitly defined and they must
+      be of the same type.
+
+  # --- Abrupt completion of constant expressions ---
+
+  # Integer division by zero
+  - desc: >-
+      Division by zero in a constant expression completes abruptly
+      and must cause a compile-time error.
+    use: |
+      enum E { V = 10 / 0 }
+    expect: |-
+      Syntax error ESY0273: Division by zero is not allowed in integer arithmetic.
+
+  # Integer modulo by zero
+  - desc: >-
+      Modulo by zero in a constant expression completes abruptly
+      and must cause a compile-time error.
+    use: |
+      enum E { V = 10 % 0 }
+    expect: |-
+      Syntax error ESY0273: Division by zero is not allowed in integer arithmetic.
+
+  # Division by zero via const reference
+  - desc: >-
+      Division by zero through const reference completes abruptly
+      and must cause a compile-time error.
+    use: |
+      const x: int = 0
+      enum E { V = 1 / x }
+    expect: |-
+      Syntax error ESY0273: Division by zero is not allowed in integer arithmetic.
+
+  # Division by zero in subexpression
+  - desc: >-
+      Division by zero in a subexpression of a constant expression
+      completes abruptly and must cause a compile-time error.
+    use: |
+      enum E { V = 3 + (5 / 0) }
+    expect: |-
+      Syntax error ESY0273: Division by zero is not allowed in integer arithmetic.
+
+  # Modulo by zero in subexpression
+  - desc: >-
+      Modulo by zero in a subexpression of a constant expression
+      completes abruptly and must cause a compile-time error.
+    use: |
+      enum E { V = 3 + (5 % 0) }
+    expect: |-
+      Syntax error ESY0273: Division by zero is not allowed in integer arithmetic.
