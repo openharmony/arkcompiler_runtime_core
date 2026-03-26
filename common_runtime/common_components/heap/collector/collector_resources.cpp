@@ -116,8 +116,9 @@ void CollectorResources::TerminateGCTask()
 void CollectorResources::StopGCThreads()
 {
     if (gcThreadRunning_.load(std::memory_order_acquire) == false) {
-        LOG_COMMON(FATAL) << "[GC] CollectorResources Thread not begin.";
-        UNREACHABLE_CC();
+        // NOTE(ivagin): #33823 Introduce "IsGCRunning" interface for common_runtime
+        // and insert log fatal + unreachable here
+        return;
     }
     {
         // Enter saferegion to avoid blocking gc stw

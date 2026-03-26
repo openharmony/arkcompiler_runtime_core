@@ -144,6 +144,7 @@ public:
     static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);
     static void RequestGC(GCReason reason, bool async, GCType gcType);
     static void WaitForGCFinish();
+    static void StopGCWork();
     static void EnterGCCriticalSection();
     static void ExitGCCriticalSection();
     static bool ForEachObj(HeapVisitor &visitor, bool safe);

@@ -50,7 +50,6 @@ public:
 
 private:
     T *self_;
-    ThreadState oldState_;
     bool hasSwitchState_ {false};
     NO_COPY_SEMANTIC_CC(MutatorStateTransitionScope);
 };

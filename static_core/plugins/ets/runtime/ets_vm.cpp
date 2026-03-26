@@ -486,9 +486,14 @@ void PandaEtsVM::StopGC()
 {
     ASSERT(mm_ != nullptr);
 
+#if defined(ARK_USE_COMMON_RUNTIME)
+    // NOTE(ivagin): #33823 Introduce "IsGCRunning" interface for common_runtime
+    mm_->StopGC();
+#else
     if (GetGC()->IsGCRunning()) {
         mm_->StopGC();
     }
+#endif
 }
 
 void PandaEtsVM::HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred)

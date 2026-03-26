@@ -41,7 +41,6 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
                                                               "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER,
                                                               CoroutinePriority::MEDIUM_PRIORITY);
         ASSERT(scheduleLoopCtx_ != nullptr);
-        scheduleLoopCtx_->LinkToExternalMutator(true);
         AddRunnableCoroutine(scheduleLoopCtx_);
     }
 }
@@ -288,7 +287,6 @@ void StackfulCoroutineWorker::ThreadProc()
         coroManager_->CreateEntrypointlessCoroutine(GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(),
                                                     Coroutine::Type::SCHEDULER, CoroutinePriority::MEDIUM_PRIORITY);
     ASSERT(scheduleLoopCtx_ != nullptr);
-    scheduleLoopCtx_->LinkToExternalMutator(false);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
     AddRunningCoroutine(scheduleLoopCtx_);
@@ -377,9 +375,6 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
 {
     ASSERT(newCoro != nullptr);
     newCoro->SetWorker(this);
-    auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
-    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    newCoro->LinkToExternalMutator((IsMainWorker() || InExclusiveMode()) && !canMigrate, this);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()
@@ -511,6 +506,10 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     EnsureCoroutineSwitchEnabled(from->GetCoroutine());
     LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
                            << to->GetCoroutine()->GetName();
+#if defined(ARK_USE_COMMON_RUNTIME)
+    ASSERT(!from->GetCoroutine()->IsInRunningState());
+    ASSERT(!to->GetCoroutine()->IsInRunningState());
+#endif
     stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
     OnBeforeContextSwitch(from, to);
     stats_.StartInterval(CoroutineTimeStats::CTX_SWITCH);

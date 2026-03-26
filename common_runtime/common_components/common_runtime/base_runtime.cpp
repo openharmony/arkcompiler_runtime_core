@@ -232,6 +232,11 @@ void BaseRuntime::WaitForGCFinish()
     Heap::GetHeap().WaitForGCFinish();
 }
 
+void BaseRuntime::StopGCWork()
+{
+    Heap::GetHeap().StopGCWork();
+}
+
 void BaseRuntime::EnterGCCriticalSection()
 {
     return Heap::GetHeap().MarkGCStart();

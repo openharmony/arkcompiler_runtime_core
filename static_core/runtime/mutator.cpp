@@ -17,6 +17,10 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/interpreter/runtime_interface.h"
 
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#endif
+
 namespace ark {
 
 Mutator::Mutator(PandaVM *vm, MutatorType type) : vm_(vm), type_(type)
@@ -55,7 +59,7 @@ bool Mutator::TestAllFlags() const
 #if !defined(ARK_USE_COMMON_RUNTIME)
     return (fms_.asStruct.flags) != initialMutatorFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
 #else
-    return GetMutator()->HasSuspendRequest();
+    return common_vm::Mutator::HasSuspendRequest();
 #endif
 }
 
@@ -89,7 +93,7 @@ enum MutatorStatus Mutator::GetStatus() const
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     return static_cast<enum MutatorStatus>(fms_.asAtomic.status.load(std::memory_order_acquire));
 #else
-    if (GetMutator()->IsInRunningState()) {
+    if (common_vm::Mutator::IsInRunningState()) {
         return MutatorStatus::RUNNING;
     }
     return MutatorStatus::NATIVE;
@@ -148,10 +152,10 @@ void Mutator::UpdateStatus(enum MutatorStatus status)
     }
 #else
     if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
-        GetMutator()->TransferToNativeIfInRunning();
+        common_vm::Mutator::TransferToNativeIfInRunning();
         GetMutatorLock()->Unlock();
     } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
-        GetMutator()->TransferToRunningIfInNative();
+        common_vm::Mutator::TransferToRunningIfInNative();
         GetMutatorLock()->ReadLock();
     }
 #endif
@@ -234,7 +238,7 @@ void Mutator::SafepointPoll()
         ark::interpreter::RuntimeInterface::Safepoint();
     }
 #else
-    GetMutator()->CheckSafepointIfSuspended();
+    common_vm::Mutator::CheckSafepointIfSuspended();
 #endif
 }
 
@@ -274,9 +278,41 @@ void Mutator::WaitSuspension()
     }
     UpdateStatus(oldStatus);
 #else
-    GetMutator()->WaitSuspension();
+    common_vm::Mutator::WaitSuspension();
 #endif
 }
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+void Mutator::VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor)
+{
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
+    mem::RootManager<EtsLanguageConfig> rootManager(vm);
+    auto *managedThread = ManagedThread::CastFromMutator(this);
+    rootManager.VisitRootsForThread(managedThread, [&visitor](mem::GCRoot root) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        visitor(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
+    });
+}
+
+void Mutator::UpdateReadBarrierEntrypoint(common_vm::GCPhase phase)
+{
+    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
+    auto *gc = static_cast<mem::CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
+    auto *managedThread = ManagedThread::CastFromMutator(this);
+    if (phase >= common_vm::GCPhase::GC_PHASE_PRECOPY) {
+        gc->EnableReadBarrier(managedThread);
+    } else if (phase == common_vm::GCPhase::GC_PHASE_IDLE) {
+        gc->DisableReadBarrier(managedThread);
+    }
+    // Check if a new phase has been added
+    ASSERT(phase == common_vm::GCPhase::GC_PHASE_ENUM || phase == common_vm::GCPhase::GC_PHASE_MARK ||
+           phase == common_vm::GCPhase::GC_PHASE_PRECOPY || phase == common_vm::GCPhase::GC_PHASE_COPY ||
+           phase == common_vm::GCPhase::GC_PHASE_FIX || phase == common_vm::GCPhase::GC_PHASE_IDLE ||
+           phase == common_vm::GCPhase::GC_PHASE_POST_MARK || phase == common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
+           phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB);
+}
+#endif
 
 void Mutator::MakeTSANHappyForThreadState()
 {
@@ -288,58 +324,15 @@ void Mutator::MakeTSANHappyForThreadState()
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-static thread_local common_vm::Mutator *g_SharedExternalMutator = nullptr;
 
 void Mutator::BindMutator()
 {
-    GetMutator()->BindMutator();
-    GetMutator()->SetArkthreadPtr(this);
+    common_vm::Mutator::BindMutator();
 }
 
 void Mutator::UnbindMutator()
 {
-    GetMutator()->UnbindMutator();
-}
-
-bool Mutator::CreateExternalMutatorIfNeeded(bool useSharedMutator, common_vm::Mutator *m)
-{
-    if (m != nullptr) {
-        mutator_ = m;
-        return false;
-    }
-    if (mutator_ != nullptr) {
-        return false;
-    }
-
-    if (useSharedMutator) {
-        if (GetSharedExternalMutator() != nullptr) {
-            mutator_ = GetSharedExternalMutator();
-            return true;
-        }
-        // NOTE(panferovi): replace Mutator::GerCurrent by new interface
-        // that obtain Mutator from JS, when it is implemented
-        mutator_ = common_vm::Mutator::GetCurrent() != nullptr
-                       ? common_vm::Mutator::GetCurrent()
-                       : common_vm::Mutator::CreateAndRegisterNewMutator(nullptr);
-        ASSERT(mutator_ != nullptr);
-        SetSharedExternalMutator(mutator_);
-        return true;
-    }
-
-    mutator_ = common_vm::Mutator::CreateAndRegisterNewMutator(nullptr);
-    return true;
-}
-
-/* static */
-void Mutator::SetSharedExternalMutator(common_vm::Mutator *externalMutator)
-{
-    g_SharedExternalMutator = externalMutator;
-}
-
-/* static */
-common_vm::Mutator *Mutator::GetSharedExternalMutator()
-{
-    return g_SharedExternalMutator;
+    common_vm::Mutator::UnbindMutator();
 }
 
 #endif  // ARK_USE_COMMON_RUNTIME

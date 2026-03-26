@@ -126,8 +126,7 @@ template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::StopGC()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    // Change to a more accurate function, when the function was provided (see #26240).
-    common_vm::BaseRuntime::WaitForGCFinish();
+    common_vm::BaseRuntime::StopGCWork();
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

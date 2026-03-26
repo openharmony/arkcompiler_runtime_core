@@ -119,10 +119,7 @@ public:
         FINISH_CPUPROFILE,
     };
 
-    // Called when a mutator starts and finishes, respectively
-    void Init();
-
-    ~Mutator();
+    virtual ~Mutator();
 
     static Mutator* NewMutator();
 
@@ -131,10 +128,8 @@ public:
     static Mutator* GetMutator() noexcept;
 
     void InitTid();
-    void SetArkthreadPtr(void* threadPtr) { this->thread_ = threadPtr;}
     void SetEcmaVMPtr(void* ecmaVMPtr) { this->ecmavm_ = ecmaVMPtr;}
     uint32_t GetTid() const { return tid_; }
-    void* GetArkthreadPtr() const {return thread_;}
     void* GetEcmaVMPtr() const {return ecmavm_;}
 
     static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
@@ -306,7 +301,8 @@ public:
 
     __attribute__((always_inline)) inline bool TransitionToCpuProfile(bool bySelf);
 
-    void VisitMutatorRoots(const RootVisitor& visitor);
+    virtual void VisitMutatorRoots(const RefFieldVisitor& visitor);
+    virtual void UpdateReadBarrierEntrypoint(common_vm::GCPhase phase);
 
     void DumpMutator() const;
 
@@ -390,27 +386,13 @@ public:
         return obj;
     }
 
-    void RegisterJSThread(JSThread *jsThread)
-    {
-        CHECK_CC(jsThread_ == nullptr);
-        jsThread_ = jsThread;
-    }
-
-    void UnregisterJSThread()
-    {
-        jsThread_ = nullptr;
-    }
-
     static constexpr size_t GetSafepointActiveOffset()
     {
         return MEMBER_OFFSET_CC(Mutator, safepointActive_);
     }
 
-    static Mutator *GetCurrent();
-    static void SetCurrent(Mutator *mutator);
-
-    // This is a temporary impl so we need pass vm from JSThread, or nullptr otherwise
-    static Mutator *CreateAndRegisterNewMutator(void *vm);
+    // Register an externally constructed mutator (e.g. when ark::Mutator inherits common_vm::Mutator)
+    static void RegisterNewMutator(Mutator *mutator);
     // Transfer to Running no matter in Running or Native.
     inline void TransferToRunning();
 
@@ -453,10 +435,6 @@ public:
     void BindMutator();
     // One thread only allow to bind one muatator. So it must be unbinded mutator before bind another one.
     void UnbindMutator();
-    // unify JSThread* and Coroutine*
-    // When register a thread, it must be initialized, i.e. it's safe to visit GC-Root.
-    void RegisterCoroutine(Coroutine *coroutine);
-    void UnregisterCoroutine(Coroutine *coroutine);
 
     void* GetAllocBuffer() const
     {
@@ -466,12 +444,7 @@ public:
 
     void ReleaseAllocBuffer();
 
-    static void DestroyMutator(Mutator *mutator);
-
-    JSThread* GetJSThread() const
-    {
-        return jsThread_;
-    }
+    static void UnregisterMutator(Mutator *mutator);
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
     class TryBindMutatorScope {
@@ -509,8 +482,6 @@ private:
 
     // thread id
     uint32_t tid_ = 0;
-    // thread ptr
-    void* thread_;
     // ecmavm
     void* ecmavm_ = nullptr;
 
@@ -525,11 +496,6 @@ private:
 
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
     void* allocBuffer_ {nullptr};
-
-    // Access jsThread/coroutines must happen in RunningState from the current Mutator, or
-    // in SuspendAll from others.
-    JSThread *jsThread_ {nullptr};
-    std::unordered_set<Coroutine *> coroutines_ {};
 
 };
 
