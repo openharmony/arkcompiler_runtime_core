@@ -1116,7 +1116,7 @@ HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
     AssertKept(fileView, "module_test_008.foo12:{Ustd.core.Null,std.core.String};void;");
     AssertKept(fileView, "module_test_008.foo13:std.core.String;void;");
     AssertKept(fileView, "module_test_008.foo14:{Ustd.core.Array,std.core.String};void;");
-    AssertKept(fileView, "module_test_008.foo15:std.core.Object;void;");
+    AssertKept(fileView, "module_test_008.foo15:Y;void;");
     AssertKept(fileView, "module_test_008.foo16:std.core.Int;void;");
 
     AssertKept(fileView, "module_test_008.fooEx1:{Ustd.core.Int,std.core.String};");
@@ -1133,7 +1133,7 @@ HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
     AssertKept(fileView, "module_test_008.fooEx12:{Ustd.core.Null,std.core.String};");
     AssertKept(fileView, "module_test_008.fooEx13:std.core.String;");
     AssertKept(fileView, "module_test_008.fooEx14:{Ustd.core.Array,std.core.String};");
-    AssertKept(fileView, "module_test_008.fooEx15:std.core.Object;");
+    AssertKept(fileView, "module_test_008.fooEx15:Y;");
     AssertKept(fileView, "module_test_008.fooEx16:std.core.Int;");
 }
 

@@ -19,7 +19,7 @@
         "-keep package module_test_007 {\n    v12:{Ustd.core.Null, std.core.String};\n    }",
         "-keep package module_test_007 {\n    v13:std.core.String;\n    }",
         "-keep package module_test_007 {\n    v14:{Ustd.core.Array, std.core.String};\n    }",
-        "-keep package module_test_007 {\n    v15:std.core.Object;\n    }",
+        "-keep package module_test_007 {\n    v15:Y;\n    }",
         "-keep package module_test_007 {\n    v16:std.core.Int;\n    }"
       ]
     }
