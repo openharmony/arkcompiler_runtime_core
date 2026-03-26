@@ -17,95 +17,185 @@
 desc: subtraction operator with other lower precedence operator
 ---*/
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Subtraction operator precedence")
 
- 	let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255 = 255
+    suite.addTest("cast on result", () => {
+        let res: int, t2 = 2, t255 = 255
 
-	// cast
-	res = (t2 - t255).toByte()
-	arktest.assertEQ(res, 3)
+        res = (t2 - t255).toByte()
+        arktest.assertEQ(res, 3)
+    })
 
-	res = t255.toByte() - t3
-	arktest.assertEQ(res, -4)
+    suite.addTest("cast on operand", () => {
+        let res: int, t3 = 3, t255 = 255
 
-	// shifts
-	res = t4 << t3 - t2
-	arktest.assertEQ(res, 8)
+        res = t255.toByte() - t3
+        arktest.assertEQ(res, -4)
+    })
 
-	res = - t255 >> t3 - t2
-	arktest.assertEQ(res, -128)
+    suite.addTest("left shift", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-	res = - t255 >>> t8 - t3
-	arktest.assertEQ(res, 134217720)
+        res = t4 << t3 - t2
+        arktest.assertEQ(res, 8)
+    })
 
-	// relational
-	arktest.assertFalse(t4 < t8 - t4)
-	arktest.assertFalse(t4 <= t4 - t3)
-	arktest.assertFalse(t2 > t4 - t2)
-	arktest.assertFalse(t4 >= t8 - t2)
-	arktest.assertFalse(t2 == t2 - t4)
-	arktest.assertFalse(t4 != t8 - t4)
+    suite.addTest("right shift", () => {
+        let res: int, t2 = 2, t3 = 3, t255 = 255
 
-	// bitwise
-	res = t255 & t4 - t8
-	arktest.assertEQ(res, 252)
+        res = - t255 >> t3 - t2
+        arktest.assertEQ(res, -128)
+    })
 
-	res = t3 | t4 - t2
-	arktest.assertEQ(res, 3)
+    suite.addTest("unsigned right shift", () => {
+        let res: int, t3 = 3, t8 = 8, t255 = 255
 
-	res = t255 ^ t8 - t2
-	arktest.assertEQ(res, 249)
+        res = - t255 >>> t8 - t3
+        arktest.assertEQ(res, 134217720)
+    })
 
-	// ternary
-	res = t3 <= t4 ? t4 : t3 - t4
-	arktest.assertEQ(res, 4)
+    suite.addTest("relational <", () => {
+        let t4 = 4, t8 = 8
+        arktest.assertFalse(t4 < t8 - t4)
+    })
 
-	res = t4 - t2 > t4 ? t4 : t3
-	arktest.assertEQ(res, 3)
+    suite.addTest("relational <=", () => {
+        let t3 = 3, t4 = 4
+        arktest.assertFalse(t4 <= t4 - t3)
+    })
 
-	// assignments
-	res = t4 += t4 - t3
-	arktest.assertEQ(res, 5)
-	t4 = 4
+    suite.addTest("relational >", () => {
+        let t2 = 2, t4 = 4
+        arktest.assertFalse(t2 > t4 - t2)
+    })
 
-	res = t4 -= t4 - t3
-	arktest.assertEQ(res, 3)
-	t4 = 4
+    suite.addTest("relational >=", () => {
+        let t2 = 2, t4 = 4, t8 = 8
+        arktest.assertFalse(t4 >= t8 - t2)
+    })
 
-	res = t8 *= t2 - t3
-	arktest.assertEQ(res, -8)
-	t8 = 8
+    suite.addTest("equality ==", () => {
+        let t2 = 2, t4 = 4
+        arktest.assertFalse(t2 == t2 - t4)
+    })
 
-	res = t8 /= t4 - t2
-	arktest.assertEQ(res, 4)
-	t8 = 8
+    suite.addTest("equality !=", () => {
+        let t4 = 4, t8 = 8
+        arktest.assertFalse(t4 != t8 - t4)
+    })
 
-	res = t8 %= t3 - t2
-	arktest.assertEQ(res, 0)
-	t8 = 8
+    suite.addTest("bitwise AND", () => {
+        let res: int, t4 = 4, t8 = 8, t255 = 255
 
-	res = t255 &= t2 - t3
-	arktest.assertEQ(res, 255)
-	t255 = 255
+        res = t255 & t4 - t8
+        arktest.assertEQ(res, 252)
+    })
 
-	res = t2 |= t3 - t4
-	arktest.assertEQ(res, -1)
-	t2 = 2
+    suite.addTest("bitwise OR", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-	res = t255 ^= t4 - t8
-	arktest.assertEQ(res, -253)
-	t255 = 255
+        res = t3 | t4 - t2
+        arktest.assertEQ(res, 3)
+    })
 
-	res = t4 <<= t3 - t2
-	arktest.assertEQ(res, 8)
-	t4 = 4
+    suite.addTest("bitwise XOR", () => {
+        let res: int, t2 = 2, t8 = 8, t255 = 255
 
-	res = t255 >>= t4 - t2
-	arktest.assertEQ(res, 63)
-	t255 = 255
+        res = t255 ^ t8 - t2
+        arktest.assertEQ(res, 249)
+    })
 
-	res = t255 >>>= t4 - t2
-	arktest.assertEQ(res, 63)
-	t255 = 255
-    
+    suite.addTest("ternary in branch", () => {
+        let res: int, t3 = 3, t4 = 4
+
+        res = t3 <= t4 ? t4 : t3 - t4
+        arktest.assertEQ(res, 4)
+    })
+
+    suite.addTest("ternary in condition", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t4 - t2 > t4 ? t4 : t3
+        arktest.assertEQ(res, 3)
+    })
+
+    suite.addTest("assignment +=", () => {
+        let res: int, t3 = 3, t4 = 4
+
+        res = t4 += t4 - t3
+        arktest.assertEQ(res, 5)
+    })
+
+    suite.addTest("assignment -=", () => {
+        let res: int, t3 = 3, t4 = 4
+
+        res = t4 -= t4 - t3
+        arktest.assertEQ(res, 3)
+    })
+
+    suite.addTest("assignment *=", () => {
+        let res: int, t2 = 2, t3 = 3, t8 = 8
+
+        res = t8 *= t2 - t3
+        arktest.assertEQ(res, -8)
+    })
+
+    suite.addTest("assignment /=", () => {
+        let res: int, t2 = 2, t4 = 4, t8 = 8
+
+        res = t8 /= t4 - t2
+        arktest.assertEQ(res, 4)
+    })
+
+    suite.addTest("assignment %=", () => {
+        let res: int, t2 = 2, t3 = 3, t8 = 8
+
+        res = t8 %= t3 - t2
+        arktest.assertEQ(res, 0)
+    })
+
+    suite.addTest("assignment &=", () => {
+        let res: int, t2 = 2, t3 = 3, t255 = 255
+
+        res = t255 &= t2 - t3
+        arktest.assertEQ(res, 255)
+    })
+
+    suite.addTest("assignment |=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t2 |= t3 - t4
+        arktest.assertEQ(res, -1)
+    })
+
+    suite.addTest("assignment ^=", () => {
+        let res: int, t4 = 4, t8 = 8, t255 = 255
+
+        res = t255 ^= t4 - t8
+        arktest.assertEQ(res, -253)
+    })
+
+    suite.addTest("assignment <<=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t4 <<= t3 - t2
+        arktest.assertEQ(res, 8)
+    })
+
+    suite.addTest("assignment >>=", () => {
+        let res: int, t2 = 2, t4 = 4, t255 = 255
+
+        res = t255 >>= t4 - t2
+        arktest.assertEQ(res, 63)
+    })
+
+    suite.addTest("assignment >>>=", () => {
+        let res: int, t2 = 2, t4 = 4, t255 = 255
+
+        res = t255 >>>= t4 - t2
+        arktest.assertEQ(res, 63)
+    })
+
+    return suite.run()
 }

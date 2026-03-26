@@ -17,21 +17,57 @@
 desc: relational and logical operations
 ---*/
 
-function main() {
-	let t1 = 1, t2 = 2, t3 = 3, t4 = 4;
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Relational and logical operations")
 
-	arktest.assertTrue(t1 > t2 || t2 >= t3 && t3 < t4 || t4 <= t1 && t4 == t2 || t4 != t1)
-	arktest.assertFalse(t1 > t2 && t2 >= t3 || t3 < t4 && t4 <= t1 || t4 == t2 && t4 != t1)
+    suite.addTest("relational and logical true: >", () => {
+        let t1 = 1, t2 = 2;
+        arktest.assertFalse(t1 > t2)
+    })
 
-	// prefix and postfix added
-	arktest.assertTrue(++t1 <= t2-- && --t2 == t3++ && ++t3 != t4-- || --t4 <= t1++ && ++t4 == t2-- || --t4 != t1++)
-	arktest.assertFalse(++t1 <= t2-- || --t2 == t3++ && ++t3 != t4-- && --t4 <= t1++ || ++t4 == t2-- && --t4 != t1++)
+    suite.addTest("relational and logical true: >= && <", () => {
+        let t2 = 2, t3 = 3, t4 = 4;
+        arktest.assertFalse(t2 >= t3 && t3 < t4)
+    })
 
-	// bitwise xor, unary + and - added
-	arktest.assertTrue(++t1 <= ~t2-- && --t2 == -t3++ && ++t3 != -t4-- 
-                        || --t4 <= ~t1++ && ++t4 == +t2-- || --t4 != -t1++)
-	arktest.assertFalse(++t1 <= -~++t2 && ~++t2 == -t3++ && ++t3 != -t4-- 
-                        || ~+t4++ <= ~t1++ && -t4 == +t2-- || --t4 == -t1++)
+    suite.addTest("relational and logical true: <= && ==", () => {
+        let t1 = 1, t2 = 2, t4 = 4;
+        arktest.assertFalse(t4 <= t1 && t4 == t2)
+    })
 
-    
+    suite.addTest("relational and logical true: !=", () => {
+        let t1 = 1, t4 = 4;
+        arktest.assertTrue(t4 != t1)
+    })
+
+    suite.addTest("relational and logical false: > &&  >=", () => {
+        let t1 = 1, t2 = 2, t3 = 3;
+        arktest.assertFalse(t1 > t2 && t2 >= t3)
+    })
+
+    suite.addTest("relational and logical false: < && <=", () => {
+        let t1 = 1, t3 = 3, t4 = 4;
+        arktest.assertFalse(t3 < t4 && t4 <= t1)
+    })
+
+    suite.addTest("relational and logical false: == && !=", () => {
+        let t1 = 1, t2 = 2, t4 = 4;
+        arktest.assertFalse(t4 == t2 && t4 != t1)
+    })
+
+    suite.addTest("with prefix and postfix", () => {
+        let t1 = 1, t2 = 2, t3 = 3, t4 = 4;
+        arktest.assertTrue(++t1 <= t2-- && --t2 == t3++ && ++t3 != t4-- || --t4 <= t1++ && ++t4 == t2-- || --t4 != t1++)
+        arktest.assertFalse(++t1 <= t2-- || --t2 == t3++ && ++t3 != t4-- && --t4 <= t1++ || ++t4 == t2-- && --t4 != t1++)
+    })
+
+    suite.addTest("with bitwise operators", () => {
+        let t1 = 5, t2 = -3, t3 = 5, t4 = 3;
+        arktest.assertTrue(++t1 <= ~t2-- && --t2 == -t3++ && ++t3 != -t4--
+                            || --t4 <= ~t1++ && ++t4 == +t2-- || --t4 != -t1++)
+        arktest.assertFalse(++t1 <= -~++t2 && ~++t2 == -t3++ && ++t3 != -t4--
+                            || ~+t4++ <= ~t1++ && -t4 == +t2-- || --t4 == -t1++)
+    })
+
+    return suite.run()
 }

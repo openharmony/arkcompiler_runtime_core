@@ -17,54 +17,85 @@
 desc: ternary operator with other lower precedence operators
 ---*/
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Ternary operator precedence")
 
-	let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255 = 255
+    suite.addTest("assignment +=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8
 
-	// assignment
-	res = t2 += t2 < t3 ? t4 : t8
-	arktest.assertEQ(res, 6)
-	t2 = 2
+        res = t2 += t2 < t3 ? t4 : t8
+        arktest.assertEQ(res, 6)
+    })
 
-	res = t2 -= t2 < t3 ? t4 : t8
-	arktest.assertEQ(res, -2)
-	t2 = 2
+    suite.addTest("assignment -=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8
 
-	res = t2 *= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 8)
-	t2 = 2
+        res = t2 -= t2 < t3 ? t4 : t8
+        arktest.assertEQ(res, -2)
+    })
 
-	res = t2 /= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 0)
-	t2 = 2
+    suite.addTest("assignment *=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-	res = t2 %= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 2)
-	t2 = 2
+        res = t2 *= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 8)
+    })
 
-	res = t2 &= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 0)
-	t2 = 2
+    suite.addTest("assignment /=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-	res = t2 |= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 6)
-	t2 = 2
+        res = t2 /= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 0)
+    })
 
-	res = t2 ^= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 6)
-	t2 = 2
+    suite.addTest("assignment %=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-	res = t2 <<= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 32)
-	t2 = 2
+        res = t2 %= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 2)
+    })
 
-	res = t2 >>= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 0)
-	t2 = 2
+    suite.addTest("assignment &=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
 
-	res = t2 >>>= t2 < t3 ? t4 : t3
-	arktest.assertEQ(res, 0)
-	t2 = 2
+        res = t2 &= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 0)
+    })
 
-    
+    suite.addTest("assignment |=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t2 |= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 6)
+    })
+
+    suite.addTest("assignment ^=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t2 ^= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 6)
+    })
+
+    suite.addTest("assignment <<=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t2 <<= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 32)
+    })
+
+    suite.addTest("assignment >>=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t2 >>= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 0)
+    })
+
+    suite.addTest("assignment >>>=", () => {
+        let res: int, t2 = 2, t3 = 3, t4 = 4
+
+        res = t2 >>>= t2 < t3 ? t4 : t3
+        arktest.assertEQ(res, 0)
+    })
+
+    return suite.run()
 }
