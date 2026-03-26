@@ -35,56 +35,130 @@ class Bar implements Foo {
 
 class More extends Bar {}
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Chaining operator precedence")
 
-    	let x: Bar = new Bar();
+    suite.addTest("optional method call", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x?.foo(1), 1)
+    })
 
-	// grouping; member access
-	arktest.assertEQ(x?.foo(1), 1)
-	arktest.assertEQ((new Bar())?.foo(2), 2)
-	arktest.assertEQ(x?.self()?.foo(3), 3)
-	arktest.assertEQ(x.self()?.foo(4), 4)
-	arktest.assertEQ(x?.self().foo(5), 5)
-	arktest.assertEQ(x?.intVal, undefined)
-	arktest.assertEQ(x?.intVal?.toString(), undefined)
-	arktest.assertEQ(x.self().self().bar?.bar?.foo(1), undefined)
-	arktest.assertEQ(x
-		?.self()
-		?.
-		self()
-		.bar
-		?.bar
-		?.foo(1), undefined)
+    suite.addTest("optional on new expression", () => {
+        arktest.assertEQ((new Bar())?.foo(2), 2)
+    })
 
-	// access - lower precedence
-	arktest.assertEQ(x?.row?.[0], undefined)
-	arktest.assertEQ(x.row?.[0]?.foo(1), undefined)
+    suite.addTest("chained optional methods", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x?.self()?.foo(3), 3)
+    })
 
-	// null coalescing
-	arktest.assertEQ((x?.bar??null), null)
-	arktest.assertEQ((x?.bar??x?.foo(1)), 1)
+    suite.addTest("non-optional then optional", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x.self()?.foo(4), 4)
+    })
 
-	// equality
-	arktest.assertTrue((new Bar()?.foo(1)==x?.foo(1)))
-	arktest.assertFalse((x?.foo(1)!=new Bar()?.foo(1)))
-	arktest.assertTrue((x ?. intVal == new Bar() ?. intVal))
+    suite.addTest("optional then non-optional", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x?.self().foo(5), 5)
+    })
 
-	// cast
-	let raised = false;
-	try {
-		let m = new More();
-		arktest.assertFalse((m ?. bar as Bar) instanceof Bar)
-	} catch (e) {
-		arktest.assertTrue(e instanceof ClassCastError)
-		raised = true;
-	}
-	arktest.assertTrue(raised)
+    suite.addTest("optional property", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x?.intVal, undefined)
+    })
 
-	// typeof
-	arktest.assertEQ((typeof x ?. bar), 'undefined')
-	arktest.assertEQ((typeof x ?. self()), 'object')
+    suite.addTest("optional property chain", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x?.intVal?.toString(), undefined)
+    })
 
-	// instanceof
-	arktest.assertTrue((x ?. intVal instanceof undefined))
-    
+    suite.addTest("deep chain", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x.self().self().bar?.bar?.foo(1), undefined)
+    })
+
+    suite.addTest("multiline chain", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x
+            ?.self()
+            ?.
+            self()
+            .bar
+            ?.bar
+            ?.foo(1), undefined)
+    })
+
+    suite.addTest("optional index", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x?.row?.[0], undefined)
+    })
+
+    suite.addTest("optional index method", () => {
+        let x: Bar = new Bar();
+        arktest.assertEQ(x.row?.[0]?.foo(1), undefined)
+    })
+
+    suite.addTest("null coalescing with null", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertEQ((x?.bar??null), null)
+    })
+
+    suite.addTest("null coalescing with fallback", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertEQ((x?.bar??x?.foo(1)), 1)
+    })
+
+    suite.addTest("equality ==", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertTrue((new Bar()?.foo(1)==x?.foo(1)))
+    })
+
+    suite.addTest("equality !=", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertFalse((x?.foo(1)!=new Bar()?.foo(1)))
+    })
+
+    suite.addTest("equality == undefined", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertTrue((x ?. intVal == new Bar() ?. intVal))
+    })
+
+    suite.addTest("cast", () => {
+        let x: Bar = new Bar();
+
+        let raised = false;
+        try {
+            let m = new More();
+            arktest.assertFalse((m ?. bar as Bar) instanceof Bar)
+        } catch (e) {
+            arktest.assertTrue(e instanceof ClassCastError)
+            raised = true;
+        }
+        arktest.assertTrue(raised)
+    })
+
+    suite.addTest("typeof undefined", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertEQ((typeof x ?. bar), 'undefined')
+    })
+
+    suite.addTest("typeof object", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertEQ((typeof x ?. self()), 'object')
+    })
+
+    suite.addTest("instanceof", () => {
+        let x: Bar = new Bar();
+
+        arktest.assertTrue((x ?. intVal instanceof undefined))
+    })
+
+    return suite.run()
 }

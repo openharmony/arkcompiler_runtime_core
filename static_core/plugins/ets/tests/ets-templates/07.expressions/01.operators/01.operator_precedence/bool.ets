@@ -17,57 +17,106 @@
 desc: operators on boolean values
 ---*/
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Operators on boolean values")
 
-	let v = false, vt = true, vf = false;
+    suite.addTest("& | with false operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// & |
-	v = vt | vf & vf
-	arktest.assertTrue(v)
+        v = vt | vf & vf
+        arktest.assertTrue(v)
+    })
 
-	v = vt | vt & vf
-	arktest.assertTrue(v)
+    suite.addTest("& | with true operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// & ^
-	v = vt ^ vf & vf
-	arktest.assertTrue(v)
+        v = vt | vt & vf
+        arktest.assertTrue(v)
+    })
 
-	v = vt ^ vt & vf
-	arktest.assertTrue(v)
+    suite.addTest("& ^ with false operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// ^ |
-	v = vt | vf ^ vt
-	arktest.assertTrue(v)
+        v = vt ^ vf & vf
+        arktest.assertTrue(v)
+    })
 
-	v = vt | vt ^ vt
-	arktest.assertTrue(v)
+    suite.addTest("& ^ with true operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// & ==
-	v = vf & vf == vf
-	arktest.assertFalse(v)
+        v = vt ^ vt & vf
+        arktest.assertTrue(v)
+    })
 
-	v = vf & vt == vf
-	arktest.assertFalse(v)
+    suite.addTest("^ | with false operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// & !=
-	v = vf & vf != vt
-	arktest.assertFalse(v)
+        v = vt | vf ^ vt
+        arktest.assertTrue(v)
+    })
 
-	v = vf & vt != vt
-	arktest.assertFalse(v)
+    suite.addTest("^ | with true operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// | ==
-	v = vt | vf == vf
-	arktest.assertTrue(v)
+        v = vt | vt ^ vt
+        arktest.assertTrue(v)
+    })
 
-	v = vt | vt == vf
-	arktest.assertTrue(v)
+    suite.addTest("& == with false operand", () => {
+        let v = false, vt = true, vf = false;
 
-	// | !=
-	v = vt | vf != vt
-	arktest.assertTrue(v)
+        v = vf & vf == vf
+        arktest.assertFalse(v)
+    })
 
-	v = vt | vt != vt
-	arktest.assertTrue(v)
-    
+    suite.addTest("& == with true operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vf & vt == vf
+        arktest.assertFalse(v)
+    })
+
+    suite.addTest("& != with false operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vf & vf != vt
+        arktest.assertFalse(v)
+    })
+
+    suite.addTest("& != with true operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vf & vt != vt
+        arktest.assertFalse(v)
+    })
+
+    suite.addTest("| == with false operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vt | vf == vf
+        arktest.assertTrue(v)
+    })
+
+    suite.addTest("| == with true operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vt | vt == vf
+        arktest.assertTrue(v)
+    })
+
+    suite.addTest("| != with false operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vt | vf != vt
+        arktest.assertTrue(v)
+    })
+
+    suite.addTest("| != with true operand", () => {
+        let v = false, vt = true, vf = false;
+
+        v = vt | vt != vt
+        arktest.assertTrue(v)
+    })
+
+    return suite.run()
 }

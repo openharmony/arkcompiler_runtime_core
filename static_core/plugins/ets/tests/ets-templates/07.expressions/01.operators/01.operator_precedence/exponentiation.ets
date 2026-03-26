@@ -22,38 +22,58 @@ class IntKeepper {
     y: int = 3;
 }
 
-function main() {
-	let x: number = 0;
-	let a: int[] = [2, 3];
-	// grouping
-	x = (1 + 2)**(2 + 1);
-	arktest.assertEQ(x, 27)
-	// member access
-	let v = new IntKeepper();
-	x = v.x ** v.y;
-	arktest.assertEQ(x, 8)
-	// index
-	x = a[1] ** a[0];
-	arktest.assertEQ(x, 9)
-	// pre/post-fix increment and decrement
-	x = 1;
-	x = ++x ** ++x;
-	arktest.assertEQ(x, 8)
-	x = 3;
-	x = x-- ** x--;
-	arktest.assertEQ(x, 9)
-	// unary -/+
-	x = -3;
-	x = x ** -x;
-	arktest.assertEQ(x, -27)
-	// ** associativity: right-to-left (4**(3**2))
-	x = 4 ** 3 ** 2;
-	arktest.assertEQ(x, 262144)
-	// multiplication has lower precedence
-	x = 2*3**2;
-	arktest.assertEQ(x, 18)
-	x = 11+3**2-19;
-	arktest.assertEQ(x, 1)
-    
-}
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Exponentiation operator precedence")
 
+    suite.addTest("grouping", () => {
+        let x: number = (1 + 2)**(2 + 1);
+        arktest.assertEQ(x, 27)
+    })
+
+    suite.addTest("member access", () => {
+        let v = new IntKeepper();
+        let x: number = v.x ** v.y;
+        arktest.assertEQ(x, 8)
+    })
+
+    suite.addTest("index", () => {
+        let a: int[] = [2, 3];
+        let x: number = a[1] ** a[0];
+        arktest.assertEQ(x, 9)
+    })
+
+    suite.addTest("prefix increment", () => {
+        let x: number = 1;
+        x = ++x ** ++x;
+        arktest.assertEQ(x, 8)
+    })
+
+    suite.addTest("postfix decrement", () => {
+        let x: number = 3;
+        x = x-- ** x--;
+        arktest.assertEQ(x, 9)
+    })
+
+    suite.addTest("unary minus", () => {
+        let x: number = -3;
+        x = x ** -x;
+        arktest.assertEQ(x, -27)
+    })
+
+    suite.addTest("associativity", () => {
+        let x: number = 4 ** 3 ** 2;
+        arktest.assertEQ(x, 262144)
+    })
+
+    suite.addTest("multiplication precedence", () => {
+        let x: number = 2*3**2;
+        arktest.assertEQ(x, 18)
+    })
+
+    suite.addTest("addition and subtraction precedence", () => {
+        let x: number = 11+3**2-19;
+        arktest.assertEQ(x, 1)
+    })
+
+    return suite.run()
+}
