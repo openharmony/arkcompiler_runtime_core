@@ -29,30 +29,11 @@ using OpcodeList = std::vector<Opcode>;
 /**
  * opcodes of using field_id ins
  */
-const OpcodeList FIELD_INST_LIST = {Opcode::STSTATIC,
-                                    Opcode::STSTATIC_64,
-                                    Opcode::STSTATIC_OBJ,
-                                    Opcode::STOBJ,
-                                    Opcode::STOBJ_64,
-                                    Opcode::STOBJ_OBJ,
-                                    Opcode::STOBJ_V,
-                                    Opcode::STOBJ_V_64,
-                                    Opcode::STOBJ_V_OBJ,
-                                    Opcode::LDSTATIC,
-                                    Opcode::LDSTATIC_64,
-                                    Opcode::LDSTATIC_OBJ,
-                                    Opcode::LDOBJ,
-                                    Opcode::LDOBJ_64,
-                                    Opcode::LDOBJ_OBJ,
-                                    Opcode::LDOBJ_V,
-                                    Opcode::LDOBJ_V_64,
-                                    Opcode::LDOBJ_V_OBJ,
-                                    Opcode::ETS_LDOBJ_NAME_OBJ,
-                                    Opcode::ETS_LDOBJ_NAME,
-                                    Opcode::ETS_LDOBJ_NAME_64,
-                                    Opcode::ETS_STOBJ_NAME,
-                                    Opcode::ETS_STOBJ_NAME_64,
-                                    Opcode::ETS_STOBJ_NAME_OBJ};
+const OpcodeList FIELD_INST_LIST = {
+    Opcode::STSTATIC,    Opcode::STSTATIC_64,  Opcode::STSTATIC_OBJ, Opcode::STOBJ,       Opcode::STOBJ_64,
+    Opcode::STOBJ_OBJ,   Opcode::STOBJ_V,      Opcode::STOBJ_V_64,   Opcode::STOBJ_V_OBJ, Opcode::LDSTATIC,
+    Opcode::LDSTATIC_64, Opcode::LDSTATIC_OBJ, Opcode::LDOBJ,        Opcode::LDOBJ_64,    Opcode::LDOBJ_OBJ,
+    Opcode::LDOBJ_V,     Opcode::LDOBJ_V_64,   Opcode::LDOBJ_V_OBJ};
 
 /**
  * opcodes of using type_id ins

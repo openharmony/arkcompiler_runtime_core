@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,23 +176,6 @@ void Codegen::EtsWrapObjectNative(WrapObjectNativeInst *wrapObject)
     GetEncoder()->EncodeAdd(dstReg, SpReg(), Imm(GetStackOffset(location)));
     // don't apply stack ref mask, since it is empty
     ASSERT(GetRuntime()->GetStackReferenceMask() == 0U);
-}
-
-bool Codegen::ResolveCallByNameCodegen(ResolveVirtualInst *resolver)
-{
-    SCOPED_DISASM_STR(this, "Create runtime call to resolve a call by name");
-    ASSERT(resolver->GetOpcode() == Opcode::ResolveByName);
-    ASSERT(resolver->GetCallMethod() != nullptr);
-
-    auto methodReg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
-    auto objectReg = ConvertRegister(resolver->GetSrcReg(0), DataType::REFERENCE);
-    ScopedTmpReg tmpMethodReg(GetEncoder());
-    LoadMethod(tmpMethodReg);
-
-    CallRuntime(resolver, EntrypointId::RESOLVE_CALL_BY_NAME, tmpMethodReg, {}, tmpMethodReg, objectReg,
-                TypedImm(resolver->GetCallMethodId()));
-    GetEncoder()->EncodeMov(methodReg, tmpMethodReg);
-    return true;
 }
 
 }  // namespace ark::compiler

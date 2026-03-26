@@ -20,14 +20,6 @@
 #include "plugins/ets/compiler/optimizer/ir_builder/js_interop/js_interop_inst_builder.h"
 #endif
 
-template <bool IS_ABC_KIT = false>
-void BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
-template <bool IS_ABC_KIT = false>
-IntrinsicInst *CreateStObjByNameIntrinsic(size_t pc, compiler::DataType::Type type);
-template <bool IS_ABC_KIT = false>
-void BuildStObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
-template <bool IS_RANGE>
-void BuildCallByName(const BytecodeInstruction *bcInst);
 virtual void BuildIsNullValue(const BytecodeInstruction *bcInst);
 virtual void BuildNullcheck(const BytecodeInstruction *bcInst);
 template <bool IS_STRICT = false>

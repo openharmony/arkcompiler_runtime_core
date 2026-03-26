@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,7 +127,6 @@ TEST(BuilderTest, SpecialNames)
     ASSERT_EQ(Builder::GetPropertyNamePrefix(), "%%property-");
     ASSERT_EQ(Builder::GetPartialNamePrefix(), "%%partial-");
     ASSERT_EQ(Builder::GetAsyncNamePrefix(), "%%async-");
-    ASSERT_EQ(Builder::GetUnionPropertyNamePrefix(), "%%union_prop-");
     ASSERT_EQ(Builder::GetLambdaPrefix(), "%%lambda-");
     ASSERT_EQ(Builder::GetLambdaInvokePrefix(), "lambda_invoke-");
 }
