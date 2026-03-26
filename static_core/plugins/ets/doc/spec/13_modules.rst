@@ -2229,7 +2229,7 @@ Entry point functions have the following features:
 - Any exported top-level function can be used as an entry point. An entry point
   is selected by the compiler, the execution environment, or both;
 - Entry point function must either have no parameters, or have one parameter of
-  type ``string[]`` that provides access to the arguments of a program command
+  type ``FixedArray<string>`` that provides access to the arguments of a program command
   line;
 - Entry point function return type is either ``void`` (see
   :ref:`Type void or undefined`) or ``int``;
@@ -2291,7 +2291,7 @@ below:
     export function entry(): void {}
 
     // Option 5: top-level exported function with command-line arguments
-    export function entry(cmdLine: string[]): void {}
+    export function entry(cmdLine: FixedArray<string>): void {}
 
 .. index::
    entry point

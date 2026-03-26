@@ -177,8 +177,8 @@ Some of the changes that can make some compiled code not *resolvable*:
   - Adding a new default method or an optional property to the interface may
     cause a conflict during the method resolution.
 
-- Adding a *required property* or *method* without a *default implementation*
-  to an interface can cause a method.
+- Adding a *required property* or a *method* to an interface without supplying
+  a *default implementation* for it.
 
 - Adding an *abstract* method to an existing *exported* *abstract* class.
 

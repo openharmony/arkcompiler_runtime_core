@@ -423,6 +423,8 @@ soft keywords are valid identifiers elsewhere:
 +--------------------+--------------------+
 |      ``keyof``     |    ``type``        |
 +--------------------+--------------------+
+|      ``module``    |                    |
++--------------------+--------------------+
 
 4. The following identifiers are also considered *soft keywords* reserved for
 the future use in |LANG|, or currently used as soft keywords in |TS|:
@@ -636,7 +638,7 @@ last symbol of an integer literal.
    integer
    underscore character
 
-If context allows inferring type, then :ref:`Type Inference for Numeric Literals`
+If context allows inferring type, then :ref:`Type Inference for Constant Expressions`
 is used to determine the type of an integer literal. Otherwise, the type is
 determined as follows:
 

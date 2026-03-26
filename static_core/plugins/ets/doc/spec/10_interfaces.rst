@@ -270,8 +270,8 @@ Interface Members
 .. meta:
     frontend_status: Done
 
-An *interface declaration* can contain *interface members*, i.e., its
-properties (see :ref:`Interface Properties`) and methods (see
+An *interface declaration* contains *interface members* which are either
+properties (see :ref:`Interface Properties`) or methods (see
 :ref:`Interface Method Declarations`).
 
 The syntax of *interface member* is presented below:
@@ -357,8 +357,8 @@ Interface Properties
 .. meta:
     frontend_status: Done
 
-*Interface property* can be defined in the form of a field or an *accessor*
-(a getter or a setter).
+*Interface property* is an *accessor* which can be declared in the form of a
+field declaration, or getter/setter declarations.
 
 The syntax of *interface property* is presented below:
 
