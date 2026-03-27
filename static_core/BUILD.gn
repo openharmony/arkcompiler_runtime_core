@@ -45,7 +45,6 @@ group("ark_packages") {
         "$ark_root/compiler/tools/paoc:ark_aot",
       ]
     }
-    deps += [ "$ark_root/compiler/tools/aptool:ark_aptool" ]
   }
 }
 
