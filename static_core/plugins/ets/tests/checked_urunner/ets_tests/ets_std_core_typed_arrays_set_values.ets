@@ -15,8 +15,8 @@
 
 //! CHECKER       Int8Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt8array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt8array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -30,8 +30,8 @@ function testSetInt8array() {
 
 //! CHECKER       Int8Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt8arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt8arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -39,7 +39,7 @@ function testSetInt8arrayRangeerror() {
     let src = Int8Array.of(1, 2, 3, 4, 5)
     let dst = new Int8Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -49,8 +49,8 @@ function setArray(dst: Int8Array, src: Int8Array) {
 
 //! CHECKER       Int8Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt8arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt8arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -64,8 +64,8 @@ function testSetInt8arrayWithOffset() {
 
 //! CHECKER       Int8Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameInt8array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameInt8array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -78,8 +78,8 @@ function testSetSameInt8array() {
 
 //! CHECKER       Int8Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt8arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt8arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -87,7 +87,7 @@ function testSetInt8arrayWithOffsetRangeerror() {
     let src = Int8Array.of(1, 2, 3, 4, 5)
     let dst = new Int8Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -97,8 +97,8 @@ function setArray(dst: Int8Array, src: Int8Array, offset: int) {
 
 //! CHECKER       Int16Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt16array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt16array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -112,8 +112,8 @@ function testSetInt16array() {
 
 //! CHECKER       Int16Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt16arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt16arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -121,7 +121,7 @@ function testSetInt16arrayRangeerror() {
     let src = Int16Array.of(1, 2, 3, 4, 5)
     let dst = new Int16Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -131,8 +131,8 @@ function setArray(dst: Int16Array, src: Int16Array) {
 
 //! CHECKER       Int16Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt16arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt16arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -146,8 +146,8 @@ function testSetInt16arrayWithOffset() {
 
 //! CHECKER       Int16Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameInt16array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameInt16array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -160,8 +160,8 @@ function testSetSameInt16array() {
 
 //! CHECKER       Int16Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt16arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt16arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -169,7 +169,7 @@ function testSetInt16arrayWithOffsetRangeerror() {
     let src = Int16Array.of(1, 2, 3, 4, 5)
     let dst = new Int16Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -179,8 +179,8 @@ function setArray(dst: Int16Array, src: Int16Array, offset: int) {
 
 //! CHECKER       Int32Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt32array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt32array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -194,8 +194,8 @@ function testSetInt32array() {
 
 //! CHECKER       Int32Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt32arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt32arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -203,7 +203,7 @@ function testSetInt32arrayRangeerror() {
     let src = Int32Array.of(1, 2, 3, 4, 5)
     let dst = new Int32Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -213,8 +213,8 @@ function setArray(dst: Int32Array, src: Int32Array) {
 
 //! CHECKER       Int32Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt32arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt32arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -228,8 +228,8 @@ function testSetInt32arrayWithOffset() {
 
 //! CHECKER       Int32Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameInt32array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameInt32array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -242,8 +242,8 @@ function testSetSameInt32array() {
 
 //! CHECKER       Int32Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetInt32arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetInt32arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -251,7 +251,7 @@ function testSetInt32arrayWithOffsetRangeerror() {
     let src = Int32Array.of(1, 2, 3, 4, 5)
     let dst = new Int32Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -261,8 +261,8 @@ function setArray(dst: Int32Array, src: Int32Array, offset: int) {
 
 //! CHECKER       BigInt64Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBigint64array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBigint64array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -276,8 +276,8 @@ function testSetBigint64array() {
 
 //! CHECKER       BigInt64Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBigint64arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBigint64arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -285,7 +285,7 @@ function testSetBigint64arrayRangeerror() {
     let src = BigInt64Array.of(1, 2, 3, 4, 5)
     let dst = new BigInt64Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -295,8 +295,8 @@ function setArray(dst: BigInt64Array, src: BigInt64Array) {
 
 //! CHECKER       BigInt64Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBigint64arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBigint64arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -310,8 +310,8 @@ function testSetBigint64arrayWithOffset() {
 
 //! CHECKER       BigInt64Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameBigint64array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameBigint64array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -324,8 +324,8 @@ function testSetSameBigint64array() {
 
 //! CHECKER       BigInt64Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBigint64arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBigint64arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -333,7 +333,7 @@ function testSetBigint64arrayWithOffsetRangeerror() {
     let src = BigInt64Array.of(1, 2, 3, 4, 5)
     let dst = new BigInt64Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -343,8 +343,8 @@ function setArray(dst: BigInt64Array, src: BigInt64Array, offset: int) {
 
 //! CHECKER       Float32Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat32array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat32array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -358,8 +358,8 @@ function testSetFloat32array() {
 
 //! CHECKER       Float32Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat32arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat32arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -367,7 +367,7 @@ function testSetFloat32arrayRangeerror() {
     let src = Float32Array.of(1, 2, 3, 4, 5)
     let dst = new Float32Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -377,8 +377,8 @@ function setArray(dst: Float32Array, src: Float32Array) {
 
 //! CHECKER       Float32Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat32arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat32arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -392,8 +392,8 @@ function testSetFloat32arrayWithOffset() {
 
 //! CHECKER       Float32Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameFloat32array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameFloat32array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -406,8 +406,8 @@ function testSetSameFloat32array() {
 
 //! CHECKER       Float32Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat32arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat32arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -415,7 +415,7 @@ function testSetFloat32arrayWithOffsetRangeerror() {
     let src = Float32Array.of(1, 2, 3, 4, 5)
     let dst = new Float32Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -425,8 +425,8 @@ function setArray(dst: Float32Array, src: Float32Array, offset: int) {
 
 //! CHECKER       Float64Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat64array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat64array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -440,8 +440,8 @@ function testSetFloat64array() {
 
 //! CHECKER       Float64Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat64arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat64arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -449,7 +449,7 @@ function testSetFloat64arrayRangeerror() {
     let src = Float64Array.of(1, 2, 3, 4, 5)
     let dst = new Float64Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -459,8 +459,8 @@ function setArray(dst: Float64Array, src: Float64Array) {
 
 //! CHECKER       Float64Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat64arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat64arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -474,8 +474,8 @@ function testSetFloat64arrayWithOffset() {
 
 //! CHECKER       Float64Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameFloat64array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameFloat64array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -488,8 +488,8 @@ function testSetSameFloat64array() {
 
 //! CHECKER       Float64Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetFloat64arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetFloat64arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -497,7 +497,7 @@ function testSetFloat64arrayWithOffsetRangeerror() {
     let src = Float64Array.of(1, 2, 3, 4, 5)
     let dst = new Float64Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -507,8 +507,8 @@ function setArray(dst: Float64Array, src: Float64Array, offset: int) {
 
 //! CHECKER       Uint8Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -522,17 +522,17 @@ function testSetUint8array() {
 
 //! CHECKER       AOT Uint8Array set array intrinsic with RangeError
 //! RUN_PAOC      options:
-//!                "--compiler-regex-with-signature='.*::setArray\\(escompat.Uint8Array, escompat.Uint8Array\\)'"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!                "--compiler-regex-with-signature='.*::setArray\\(std.core.Uint8Array, std.core.Uint8Array\\)'"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
-//! RUN           entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayRangeerror"
+//! RUN           entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayRangeerror"
 
 //! CHECKER       Uint8Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -540,7 +540,7 @@ function testSetUint8arrayRangeerror() {
     let src = Uint8Array.of(1, 2, 3, 4, 5)
     let dst = new Uint8Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -550,17 +550,17 @@ function setArray(dst: Uint8Array, src: Uint8Array) {
 
 //! CHECKER       AOT Uint8Array set array with offset intrinsic
 //! RUN_PAOC      options:
-//!                "--compiler-regex-with-signature='.*::setArray\\(escompat.Uint8Array, escompat.Uint8Array, i32\\)'"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!                "--compiler-regex-with-signature='.*::setArray\\(std.core.Uint8Array, std.core.Uint8Array, i32\\)'"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
-//! RUN           entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayWithOffset"
+//! RUN           entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayWithOffset"
 
 //! CHECKER       Uint8Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -574,8 +574,8 @@ function testSetUint8arrayWithOffset() {
 
 //! CHECKER       Uint8Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameUint8array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameUint8array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -588,8 +588,8 @@ function testSetSameUint8array() {
 
 //! CHECKER       Uint8Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -597,7 +597,7 @@ function testSetUint8arrayWithOffsetRangeerror() {
     let src = Uint8Array.of(1, 2, 3, 4, 5)
     let dst = new Uint8Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -607,8 +607,8 @@ function setArray(dst: Uint8Array, src: Uint8Array, offset: int) {
 
 //! CHECKER       Uint8ClampedArray set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarray"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarray"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -622,8 +622,8 @@ function testSetUint8clampedarray() {
 
 //! CHECKER       Uint8ClampedArray set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -631,7 +631,7 @@ function testSetUint8clampedarrayRangeerror() {
     let src = Uint8ClampedArray.of(1, 2, 3, 4, 5)
     let dst = new Uint8ClampedArray(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -641,8 +641,8 @@ function setArray(dst: Uint8ClampedArray, src: Uint8ClampedArray) {
 
 //! CHECKER       Uint8ClampedArray set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -656,8 +656,8 @@ function testSetUint8clampedarrayWithOffset() {
 
 //! CHECKER       Uint8ClampedArray set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameUint8clampedarray"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameUint8clampedarray"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -670,8 +670,8 @@ function testSetSameUint8clampedarray() {
 
 //! CHECKER       Uint8ClampedArray set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint8clampedarrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -679,7 +679,7 @@ function testSetUint8clampedarrayWithOffsetRangeerror() {
     let src = Uint8ClampedArray.of(1, 2, 3, 4, 5)
     let dst = new Uint8ClampedArray(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -689,8 +689,8 @@ function setArray(dst: Uint8ClampedArray, src: Uint8ClampedArray, offset: int) {
 
 //! CHECKER       Uint16Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint16array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint16array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -704,8 +704,8 @@ function testSetUint16array() {
 
 //! CHECKER       Uint16Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint16arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint16arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -713,7 +713,7 @@ function testSetUint16arrayRangeerror() {
     let src = Uint16Array.of(1, 2, 3, 4, 5)
     let dst = new Uint16Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -723,8 +723,8 @@ function setArray(dst: Uint16Array, src: Uint16Array) {
 
 //! CHECKER       Uint16Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint16arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint16arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -738,8 +738,8 @@ function testSetUint16arrayWithOffset() {
 
 //! CHECKER       Uint16Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameUint16array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameUint16array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -752,8 +752,8 @@ function testSetSameUint16array() {
 
 //! CHECKER       Uint16Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint16arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint16arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -761,7 +761,7 @@ function testSetUint16arrayWithOffsetRangeerror() {
     let src = Uint16Array.of(1, 2, 3, 4, 5)
     let dst = new Uint16Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -771,8 +771,8 @@ function setArray(dst: Uint16Array, src: Uint16Array, offset: int) {
 
 //! CHECKER       Uint32Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint32array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint32array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -786,8 +786,8 @@ function testSetUint32array() {
 
 //! CHECKER       Uint32Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint32arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint32arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -795,7 +795,7 @@ function testSetUint32arrayRangeerror() {
     let src = Uint32Array.of(1, 2, 3, 4, 5)
     let dst = new Uint32Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -805,8 +805,8 @@ function setArray(dst: Uint32Array, src: Uint32Array) {
 
 //! CHECKER       Uint32Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint32arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint32arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -820,8 +820,8 @@ function testSetUint32arrayWithOffset() {
 
 //! CHECKER       Uint32Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameUint32array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameUint32array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -834,8 +834,8 @@ function testSetSameUint32array() {
 
 //! CHECKER       Uint32Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetUint32arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetUint32arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -843,7 +843,7 @@ function testSetUint32arrayWithOffsetRangeerror() {
     let src = Uint32Array.of(1, 2, 3, 4, 5)
     let dst = new Uint32Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 
@@ -853,8 +853,8 @@ function setArray(dst: Uint32Array, src: Uint32Array, offset: int) {
 
 //! CHECKER       BigUint64Array set array intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigUInt64ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -868,8 +868,8 @@ function testSetBiguint64array() {
 
 //! CHECKER       BigUint64Array set array intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64arrayRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64arrayRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigUInt64ArraySetValues "
 //! INST_NOT      /Call.*Array::set/
@@ -877,7 +877,7 @@ function testSetBiguint64arrayRangeerror() {
     let src = BigUint64Array.of(1, 2, 3, 4, 5)
     let dst = new BigUint64Array(4)
     arktest.expectThrow(() => {
- setArray(dst, src) 
+ setArray(dst, src)
 }, expectedRangeErrors)
 }
 
@@ -887,8 +887,8 @@ function setArray(dst: BigUint64Array, src: BigUint64Array) {
 
 //! CHECKER       BigUint64Array set array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64arrayWithOffset"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64arrayWithOffset"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigUInt64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -902,8 +902,8 @@ function testSetBiguint64arrayWithOffset() {
 
 //! CHECKER       BigUint64Array set the same array with offset intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetSameBiguint64array"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetSameBiguint64array"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigUInt64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -916,8 +916,8 @@ function testSetSameBiguint64array() {
 
 //! CHECKER       BigUint64Array set array with offest intrinsic with RangeError
 //! RUN           force_jit: true, options: "--compiler-regex=.*::setArray",
-//!               entry: "ets_escompat_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64arrayWithOffsetRangeerror"
-//! METHOD        "ets_escompat_typed_arrays_set_values.ETSGLOBAL::setArray"
+//!               entry: "ets_std_core_typed_arrays_set_values.ETSGLOBAL::testSetBiguint64arrayWithOffsetRangeerror"
+//! METHOD        "ets_std_core_typed_arrays_set_values.ETSGLOBAL::setArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigUInt64ArraySetValuesWithOffset "
 //! INST_NOT      /Call.*Array::set/
@@ -925,7 +925,7 @@ function testSetBiguint64arrayWithOffsetRangeerror() {
     let src = BigUint64Array.of(1, 2, 3, 4, 5)
     let dst = new BigUint64Array(5)
     arktest.expectThrow(() => {
- setArray(dst, src, 1) 
+ setArray(dst, src, 1)
 }, expectedRangeErrors)
 }
 

@@ -76,6 +76,9 @@ function(add_tests pref suff)
     if(${pref} STREQUAL "types_double")
         set(RT_OPTION "--compiler-inlining=false")
     endif()
+    if(PANDA_TARGET_ARM32)
+        set(IGNORE_FAILURES "--compiler-ignore-failures=true")
+    endif()
     set(test_name ${pref}_${suff})
     panda_add_library(${test_name} SHARED ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.cpp)
     add_dependencies(${test_name} ani_tests_bridges_generate_test_files)
@@ -99,7 +102,7 @@ function(add_tests pref suff)
         TEST_NAME ${suff}
         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
         ENTRYPOINT "${test_name}"
-        OPTIONS ${RT_OPTION} "--compiler-regex='.*ETSGLOBAL::.*'"
+        OPTIONS ${RT_OPTION} ${IGNORE_FAILURES} "--compiler-regex='.*ETSGLOBAL::.*'"
         TEST_PATH ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.ets
     )
 

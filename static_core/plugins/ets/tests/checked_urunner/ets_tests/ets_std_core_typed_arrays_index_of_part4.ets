@@ -17,42 +17,42 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_index_of_part4.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_index_of_part4.ETSGLOBAL::main"
 //! METHOD        "testUint8arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint8Array::lastIndexOf/
+//! INST          /Call.* std.core.Uint8Array::lastIndexOf/
 //! METHOD        "testUint8clampedarrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint8ClampedArray::lastIndexOf/
+//! INST          /Call.* std.core.Uint8ClampedArray::lastIndexOf/
 //! METHOD        "testUint16arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint16Array::lastIndexOf/
+//! INST          /Call.* std.core.Uint16Array::lastIndexOf/
 //! METHOD        "testUint32arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint32Array::lastIndexOf/
+//! INST          /Call.* std.core.Uint32Array::lastIndexOf/
 //! METHOD        "testBiguint64arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigUint64Array::lastIndexOf/
+//! INST          /Call.* std.core.BigUint64Array::lastIndexOf/
 
 
 //! CHECKER       AOT: indexOf() and lastIndexOf()
 //! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_index_of_part4.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_index_of_part4.ETSGLOBAL::main"
 //! METHOD        "testUint8arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint8Array::lastIndexOf/
+//! INST          /Call.* std.core.Uint8Array::lastIndexOf/
 //! METHOD        "testUint8clampedarrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint8ClampedArray::lastIndexOf/
+//! INST          /Call.* std.core.Uint8ClampedArray::lastIndexOf/
 //! METHOD        "testUint16arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint16Array::lastIndexOf/
+//! INST          /Call.* std.core.Uint16Array::lastIndexOf/
 //! METHOD        "testUint32arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint32Array::lastIndexOf/
+//! INST          /Call.* std.core.Uint32Array::lastIndexOf/
 //! METHOD        "testBiguint64arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigUint64Array::lastIndexOf/
+//! INST          /Call.* std.core.BigUint64Array::lastIndexOf/
 
 
 function testUint8arrayLastIndexOf() {

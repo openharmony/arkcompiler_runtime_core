@@ -15,29 +15,29 @@
 
 //! CHECKER       TypedArray of()
 //! RUN           force_jit: true, options: "--compiler-regex=.*test.*ArrayOf.*",
-//!               entry: "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::checkTypedArrayOf"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint8ClampedArrayOfNumber"
+//!               entry: "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::checkTypedArrayOf"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint8ClampedArrayOfNumber"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint8ClampedArrayOfNumber"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint8ClampedArrayOfInt"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint8ClampedArrayOfInt"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint8ClampedArrayOfInt"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint8ClampedArrayOfShort"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint8ClampedArrayOfShort"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint8ClampedArrayOfShort"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint8ArrayOfNumber"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint8ArrayOfNumber"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint8ArrayOfNumber"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint8ArrayOfInt"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint8ArrayOfInt"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint8ArrayOfInt"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint8ArrayOfShort"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint8ArrayOfShort"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint8ArrayOfShort"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint16ArrayOfNumber"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint16ArrayOfNumber"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint16ArrayOfNumber"
-//! METHOD        "ets_escompat_typed_arrays_of_part3.ETSGLOBAL::testUint16ArrayOfInt"
+//! METHOD        "ets_std_core_typed_arrays_of_part3.ETSGLOBAL::testUint16ArrayOfInt"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint16ArrayOfInt"
 
@@ -117,7 +117,7 @@ function testUint16ArrayOfInt() {
 function checkArray(arr: ArrayLike<number>, expected: FixedArray<number>) {
     arktest.assertEQ(arr.length, expected.length, 'Unexpected array length')
     for (let i = 0; i < expected.length; i++) {
-        arktest.assertEQ(arr[i], expected[i], 
+        arktest.assertEQ(arr[i], expected[i],
                          'Error in index: ' + i + ', value: ' + arr[i] + ' expected value: ' + expected[i])
     }
 }

@@ -123,7 +123,7 @@ static ani_status BindTextDecoder(ani_env *env)
 
     std::array methods = {
         ani_native_function {"bindNativeDecoder", "C{std.core.String}i:", reinterpret_cast<void *>(BindNativeDecoder)},
-        ani_native_function {"decode", "C{escompat.Uint8Array}z:C{std.core.String}", reinterpret_cast<void *>(Decode)},
+        ani_native_function {"decode", "C{std.core.Uint8Array}z:C{std.core.String}", reinterpret_cast<void *>(Decode)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -159,7 +159,7 @@ static ani_status BindTextDecoder(ani_env *env)
         },
         ani_native_function {
             "doEncodeInfoUint8Array",
-            "C{std.core.String}C{std.core.String}C{escompat.Uint8Array}:C{std.core.Array}",
+            "C{std.core.String}C{std.core.String}C{std.core.Uint8Array}:C{std.core.Array}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };
@@ -186,7 +186,7 @@ static ani_status BindUtilHelper(ani_env *env)
     const auto methods = std::array {
         ani_native_function {"generateRandomUUID", "z:C{std.core.String}",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)},
-        ani_native_function {"generateRandomBinaryUUID", "z:C{escompat.Uint8Array}",
+        ani_native_function {"generateRandomBinaryUUID", "z:C{std.core.Uint8Array}",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomBinaryUUID)},
         ani_native_function {"getErrorString", "i:C{std.core.String}",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGetErrorString)}};
@@ -208,7 +208,7 @@ static ani_boolean AniUtilsIsUndefined(ani_env *env, ani_object aniObj)
 static ani_boolean AniUtilsIsTypeArray(ani_env *env, ani_object aniObj)
 {
     ani_class cls {};
-    env->FindClass("escompat.Uint8Array", &cls);
+    env->FindClass("std.core.Uint8Array", &cls);
     ani_boolean isTypeArray = ANI_FALSE;
     env->Object_InstanceOf(aniObj, cls, &isTypeArray);
     return isTypeArray;
@@ -273,8 +273,8 @@ static ani_status BindStringDecoder(ani_env *env)
     std::array methods = {
         ani_native_function {"bindNativeStringDecoder",
                              "C{std.core.String}:", reinterpret_cast<void *>(BindNativeStringDecoder)},
-        ani_native_function {"doWrite", "C{escompat.Uint8Array}:C{std.core.String}", reinterpret_cast<void *>(DoWrite)},
-        ani_native_function {"doEnd", "C{escompat.Uint8Array}:C{std.core.String}", reinterpret_cast<void *>(DoEnd)},
+        ani_native_function {"doWrite", "C{std.core.Uint8Array}:C{std.core.String}", reinterpret_cast<void *>(DoWrite)},
+        ani_native_function {"doEnd", "C{std.core.Uint8Array}:C{std.core.String}", reinterpret_cast<void *>(DoEnd)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

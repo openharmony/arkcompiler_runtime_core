@@ -461,7 +461,7 @@ extern "C" EtsBoolean StdSystemAtomicFlagGet(EtsAtomicFlag *instance)
     return instance->GetValue();
 }
 
-extern "C" EtsInt EtsEscompatUint8ClampedArrayToUint8Clamped(EtsDouble val)
+extern "C" EtsInt EtsStdCoreUint8ClampedArrayToUint8Clamped(EtsDouble val)
 {
     // Convert the double value to uint8_t with clamping
     if (val <= 0 || std::isnan(val)) {

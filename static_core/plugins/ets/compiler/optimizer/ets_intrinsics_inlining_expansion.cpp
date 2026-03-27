@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void Inlining::ExpandIntrinsicEscompatArrayGet(CallInst *callInst)
     auto *runtime = GetGraph()->GetRuntime();
     auto *arrayClass = runtime->GetEscompatArrayClass();
     auto *actualLengthField = runtime->GetEscompatArrayActualLength(arrayClass);
-    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+    auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto *actualLength = GetGraph()->CreateInstLoadObject(
         DataType::INT32, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(actualLengthField), callInst->GetCallMethod()},
@@ -74,7 +74,7 @@ void Inlining::ExpandIntrinsicEscompatArraySet(CallInst *callInst)
     auto *runtime = GetGraph()->GetRuntime();
     auto *arrayClass = runtime->GetEscompatArrayClass();
     auto *actualLengthField = runtime->GetEscompatArrayActualLength(arrayClass);
-    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+    auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto *actualLength = GetGraph()->CreateInstLoadObject(
         DataType::INT32, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(actualLengthField), callInst->GetCallMethod()},

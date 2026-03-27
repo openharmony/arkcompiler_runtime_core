@@ -14,83 +14,83 @@
  */
 
 //! CHECKER       JIT: copyWithin()
-//! RUN           force_jit: true,  options: "--compiler-regex=escompat.*Array::copyWithin",
-//!               entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
-//! METHOD        "escompat.Int8Array::copyWithin"
+//! RUN           force_jit: true,  options: "--compiler-regex=std.core.*Array::copyWithin",
+//!               entry: "ets_std_core_typed_arrays_copy_within.ETSGLOBAL::main"
+//! METHOD        "std.core.Int8Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.Int8ArrayCopyWithinImpl/
-//! METHOD        "escompat.Int16Array::copyWithin"
+//! METHOD        "std.core.Int16Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.Int16ArrayCopyWithinImpl/
-//! METHOD        "escompat.Int32Array::copyWithin"
+//! METHOD        "std.core.Int32Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.Int32ArrayCopyWithinImpl/
-//! METHOD        "escompat.BigInt64Array::copyWithin"
+//! METHOD        "std.core.BigInt64Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.BigInt64ArrayCopyWithinImpl/
 //!
-//! METHOD        "escompat.Float32Array::copyWithin"
+//! METHOD        "std.core.Float32Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.Float32ArrayCopyWithinImpl/
-//! METHOD        "escompat.Float64Array::copyWithin"
+//! METHOD        "std.core.Float64Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.Float64ArrayCopyWithinImpl/
 //!
-//! METHOD        "escompat.Uint8Array::copyWithin"
+//! METHOD        "std.core.Uint8Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.UInt8ArrayCopyWithinImpl/
-//! METHOD        "escompat.Uint8ClampedArray::copyWithin"
+//! METHOD        "std.core.Uint8ClampedArray::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.UInt8ClampedArrayCopyWithinImpl/
-//! METHOD        "escompat.Uint16Array::copyWithin"
+//! METHOD        "std.core.Uint16Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.UInt16ArrayCopyWithinImpl/
-//! METHOD        "escompat.Uint32Array::copyWithin"
+//! METHOD        "std.core.Uint32Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.UInt32ArrayCopyWithinImpl/
-//! METHOD        "escompat.BigUint64Array::copyWithin"
+//! METHOD        "std.core.BigUint64Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.BigUInt64ArrayCopyWithinImpl/
 
 //! CHECKER       AOT: copyWithin()
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_copy_within.ETSGLOBAL::main"
 //! METHOD        "testInt8arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int8Array::copyWithin/
+//! INST          /Call.* std.core.Int8Array::copyWithin/
 //! METHOD        "testInt16arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int16Array::copyWithin/
+//! INST          /Call.* std.core.Int16Array::copyWithin/
 //! METHOD        "testInt32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int32Array::copyWithin/
+//! INST          /Call.* std.core.Int32Array::copyWithin/
 //! METHOD        "testBigint64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigInt64Array::copyWithin/
+//! INST          /Call.* std.core.BigInt64Array::copyWithin/
 //!
 //! METHOD        "testFloat32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float32Array::copyWithin/
+//! INST          /Call.* std.core.Float32Array::copyWithin/
 //! METHOD        "testFloat64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float64Array::copyWithin/
+//! INST          /Call.* std.core.Float64Array::copyWithin/
 //!
 //! METHOD        "testUint8arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint8Array::copyWithin/
+//! INST          /Call.* std.core.Uint8Array::copyWithin/
 //! METHOD        "testUint8clampedarrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint8ClampedArray::copyWithin/
+//! INST          /Call.* std.core.Uint8ClampedArray::copyWithin/
 //! METHOD        "testUint16arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint16Array::copyWithin/
+//! INST          /Call.* std.core.Uint16Array::copyWithin/
 //! METHOD        "testUint32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Uint32Array::copyWithin/
+//! INST          /Call.* std.core.Uint32Array::copyWithin/
 //! METHOD        "testBiguint64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigUint64Array::copyWithin/
+//! INST          /Call.* std.core.BigUint64Array::copyWithin/
 
 
 function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {

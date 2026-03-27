@@ -421,23 +421,23 @@ void PromiseInteropRejectIntrinsic(EtsObject *value, EtsLong deferred)
     PromiseInteropReject(value, deferred);
 }
 
-EtsEscompatArrayBuffer *InteropTransferHelperTransferArrayBufferToStaticImplIntrinsic(ESValue *object)
+EtsStdCoreArrayBuffer *InteropTransferHelperTransferArrayBufferToStaticImplIntrinsic(ESValue *object)
 {
     return TransferArrayBufferToStatic(object);
 }
 
-EtsObject *InteropTransferHelperTransferArrayBufferToDynamicImplIntrinsic(EtsEscompatArrayBuffer *object)
+EtsObject *InteropTransferHelperTransferArrayBufferToDynamicImplIntrinsic(EtsStdCoreArrayBuffer *object)
 {
     return TransferArrayBufferToDynamic(object);
 }
 
-EtsObject *InteropTransferHelperCreateDynamicTypedArrayIntrinsic(EtsEscompatArrayBuffer *object, int32_t typedArrayType,
+EtsObject *InteropTransferHelperCreateDynamicTypedArrayIntrinsic(EtsStdCoreArrayBuffer *object, int32_t typedArrayType,
                                                                  double length, double byteOffset)
 {
     return CreateDynamicTypedArray(object, typedArrayType, length, byteOffset);
 }
 
-EtsObject *InteropTransferHelperCreateDynamicDataViewIntrinsic(EtsEscompatArrayBuffer *object, double length,
+EtsObject *InteropTransferHelperCreateDynamicDataViewIntrinsic(EtsStdCoreArrayBuffer *object, double length,
                                                                double byteOffset)
 {
     return CreateDynamicDataView(object, length, byteOffset);

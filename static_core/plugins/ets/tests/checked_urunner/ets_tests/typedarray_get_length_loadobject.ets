@@ -21,11 +21,11 @@
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -56,11 +56,11 @@ function testInt8ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -92,11 +92,11 @@ function testUint8ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -127,11 +127,11 @@ function testUint8ClampedArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -162,11 +162,11 @@ function testInt16ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -197,11 +197,11 @@ function testUint16ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -232,11 +232,11 @@ function testInt32ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -267,13 +267,13 @@ function testUint32ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 1
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -304,13 +304,13 @@ function testFloat32ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayIterableCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayIterableCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 3
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -341,11 +341,11 @@ function testFloat64ArrayIterableCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -377,11 +377,11 @@ function testInt8ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -414,11 +414,11 @@ function testUint8ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArray"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -450,11 +450,11 @@ function testUint8ClampedArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -486,11 +486,11 @@ function testInt16ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -522,11 +522,11 @@ function testUint16ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -559,11 +559,11 @@ function testInt32ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -595,13 +595,13 @@ function testUint32ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 1
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -635,13 +635,13 @@ function testFloat32ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayFixedarrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayFixedarrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 3
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
@@ -675,11 +675,11 @@ function testFloat64ArrayFixedarrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayFixedlengthCtor"
@@ -710,11 +710,11 @@ function testInt8ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayFixedlengthCtor"
@@ -744,11 +744,11 @@ function testUint8ArrayFixedlengthCtor() : int {
 //! RUN_PAOC        options:"--compiler-regex='.*typedarray_get_length_loadobject.*testInt16ArrayFixedlengthCtor.*'",
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayFixedlengthCtor"
@@ -778,11 +778,11 @@ function testInt16ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayFixedlengthCtor"
@@ -812,11 +812,11 @@ function testUint16ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayFixedlengthCtor"
@@ -846,11 +846,11 @@ function testInt32ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayFixedlengthCtor"
@@ -880,13 +880,13 @@ function testUint32ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 1
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayFixedlengthCtor"
@@ -916,13 +916,13 @@ function testFloat32ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayFixedlengthCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayFixedlengthCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 3
 //! PASS_AFTER_NEXT "ChecksElimination"
 //! PASS_AFTER_NEXT "ChecksElimination"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 0
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 0
 //! INST_COUNT      "BoundsCheck D", 0
 //! INST_COUNT      "BoundsCheck", 0
 //! RUN             options:"", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayFixedlengthCtor"
@@ -952,11 +952,11 @@ function testFloat64ArrayFixedlengthCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -987,11 +987,11 @@ function testInt8ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1025,11 +1025,11 @@ function testUint8ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1062,11 +1062,11 @@ function testUint8ClampedArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1099,11 +1099,11 @@ function testInt16ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1137,11 +1137,11 @@ function testUint16ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1174,11 +1174,11 @@ function testInt32ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint32Array_typedarray_ctor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1211,13 +1211,13 @@ function testUint32ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 1
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 2
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1250,13 +1250,13 @@ function testFloat32ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayTypedArrayCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayTypedArrayCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 3
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 2
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1289,11 +1289,11 @@ function testFloat64ArrayTypedArrayCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt8ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int8Array\.lengthInt/, 5
+//! INST_COUNT      /LoadObject.*std\.core\.Int8Array\.lengthInt/, 5
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1327,11 +1327,11 @@ function testInt8ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1366,11 +1366,11 @@ function testUint8ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint8ClampedArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint8ClampedArray\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint8ClampedArray\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1404,11 +1404,11 @@ function testUint8ClampedArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt16ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int16Array\.lengthInt/, 5
+//! INST_COUNT      /LoadObject.*std\.core\.Int16Array\.lengthInt/, 5
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1442,11 +1442,11 @@ function testInt16ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint16ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint16Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint16Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1480,11 +1480,11 @@ function testUint16ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testInt32ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 5
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 5
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1518,11 +1518,11 @@ function testInt32ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testUint32ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Uint32Array\.lengthInt/, 4
+//! INST_COUNT      /LoadObject.*std\.core\.Uint32Array\.lengthInt/, 4
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1556,13 +1556,13 @@ function testUint32ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 1
 //! INST_COUNT      "BoundsCheck D", 2
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 3
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Float32Array\.lengthInt/, 3
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -1596,13 +1596,13 @@ function testFloat32ArrayArrayBufferCtor() : int {
 //!                 entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayArrayBufferCtor"
 //! METHOD          "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64ArrayArrayBufferCtor"
 //! PASS_BEFORE     "Peepholes"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 1
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 1
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 2
 //! INST_COUNT      "BoundsCheck D", 3
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 3
+//! INST_COUNT      /LoadObject.*std\.core\.Int32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*std\.core\.Float64Array\.lengthInt/, 3
 //! PASS_AFTER      "ChecksElimination"
 //! INST_COUNT      "BoundsCheck D", 2
 //! INST_COUNT      "BoundsCheck", 2

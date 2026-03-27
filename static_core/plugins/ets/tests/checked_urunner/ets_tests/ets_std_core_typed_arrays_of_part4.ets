@@ -16,20 +16,20 @@
 //! CHECKER       TypedArray of()
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex=.*test.*ArrayOf.*",
-//!               entry: "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::checkTypedArrayOf"
-//! METHOD        "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfNumber"
+//!               entry: "ets_std_core_typed_arrays_of_part4.ETSGLOBAL::checkTypedArrayOf"
+//! METHOD        "ets_std_core_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfNumber"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint32ArrayOfNumber"
-//! METHOD        "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfInt"
+//! METHOD        "ets_std_core_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfInt"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint32ArrayOfInt"
-//! METHOD        "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfLong"
+//! METHOD        "ets_std_core_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfLong"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint32ArrayOfLong"
-//! METHOD        "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::testBigUint64ArrayOfInt"
+//! METHOD        "ets_std_core_typed_arrays_of_part4.ETSGLOBAL::testBigUint64ArrayOfInt"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigUint64ArrayOfInt"
-//! METHOD        "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::testBigUint64ArrayOfLong"
+//! METHOD        "ets_std_core_typed_arrays_of_part4.ETSGLOBAL::testBigUint64ArrayOfLong"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigUint64ArrayOfLong"
 

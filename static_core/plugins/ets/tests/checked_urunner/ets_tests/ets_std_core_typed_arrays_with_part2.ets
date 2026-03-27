@@ -19,60 +19,60 @@ const expectedRangeErrors = (e: Error): boolean => {
 
 //! CHECKER       AOT: TypedArray.with()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex=.*::test.*", entry: "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::main"
-//! RUN           entry: "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*", entry: "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::main"
+//! RUN           entry: "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testI32Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testI32Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testU32Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testU32Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testI64Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testI64Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testU64Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testU64Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testF32Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testF32Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testF64Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testF64Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
 
 //! CHECKER       JIT: TypedArray.with()
-//! RUN           force_jit: true, options: "--compiler-regex=.*::test.*", entry: "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex=.*::test.*", entry: "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testI32Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testI32Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testU32Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testU32Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testI64Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testI64Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testU64Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testU64Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testF32Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testF32Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with_part2.ETSGLOBAL::testF64Array"
+//! METHOD        "ets_std_core_typed_arrays_with_part2.ETSGLOBAL::testF64Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 
 function testI32Array() {
     let src  = new Int32Array([-2147483648, -20543, 0, 20543, 2147483647])

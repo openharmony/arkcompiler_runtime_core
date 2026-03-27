@@ -18,7 +18,7 @@
  */
 
 
-package escompat;
+package std.core
 
 // initialized in _initializerBlock_.ets
 const hexChars: char[];

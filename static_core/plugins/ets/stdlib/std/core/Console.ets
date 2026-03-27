@@ -708,7 +708,7 @@ export final class Console {
         Console.setColumnMap(innerLength, initialMap, columnMap, innerValue, keys, keyLength.toInt(), index);
     }
 
-    private static setColumnMap(innerLength: int, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>, 
+    private static setColumnMap(innerLength: int, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>,
     keys:Array<string>, keyLength: int, i: int): void {
         for (let j = 0; j < innerLength; j++) {
             let innerKey = keys[j];
@@ -1085,11 +1085,11 @@ class DataFrame {
             return true
         }
         const valType = Class.of(val as object)
-        return Types.isPrimitiveType(valType) || Types.isCharType(valType)
+        return reflect.internals.Types.isPrimitiveType(valType) || reflect.internals.Types.isCharType(valType)
     }
 
     public static isElementaryType(type: Class): boolean {
-        return Types.isPrimitiveType(type) || Types.isCharType(type) || type === Class.of(null)
+        return reflect.internals.Types.isPrimitiveType(type) || reflect.internals.Types.isCharType(type) || type === Class.of(null)
     }
 
     /**

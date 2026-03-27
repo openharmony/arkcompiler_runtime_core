@@ -17,50 +17,50 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_index_of_part3.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_index_of_part3.ETSGLOBAL::main"
 //! METHOD        "testInt8arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int8Array::lastIndexOf/
+//! INST          /Call.* std.core.Int8Array::lastIndexOf/
 //! METHOD        "testInt16arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int16Array::lastIndexOf/
+//! INST          /Call.* std.core.Int16Array::lastIndexOf/
 //! METHOD        "testInt32arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int32Array::lastIndexOf/
+//! INST          /Call.* std.core.Int32Array::lastIndexOf/
 //! METHOD        "testBigint64arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigInt64Array::lastIndexOf/
+//! INST          /Call.* std.core.BigInt64Array::lastIndexOf/
 //!
 //! METHOD        "testFloat32arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float32Array::lastIndexOf/
+//! INST          /Call.* std.core.Float32Array::lastIndexOf/
 //! METHOD        "testFloat64arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float64Array::lastIndexOf/
+//! INST          /Call.* std.core.Float64Array::lastIndexOf/
 
 
 //! CHECKER       AOT: indexOf() and lastIndexOf()
 //! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_index_of_part3.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_index_of_part3.ETSGLOBAL::main"
 //! METHOD        "testInt8arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int8Array::lastIndexOf/
+//! INST          /Call.* std.core.Int8Array::lastIndexOf/
 //! METHOD        "testInt16arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int16Array::lastIndexOf/
+//! INST          /Call.* std.core.Int16Array::lastIndexOf/
 //! METHOD        "testInt32arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int32Array::lastIndexOf/
+//! INST          /Call.* std.core.Int32Array::lastIndexOf/
 //! METHOD        "testBigint64arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigInt64Array::lastIndexOf/
+//! INST          /Call.* std.core.BigInt64Array::lastIndexOf/
 //!
 //! METHOD        "testFloat32arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float32Array::lastIndexOf/
+//! INST          /Call.* std.core.Float32Array::lastIndexOf/
 //! METHOD        "testFloat64arrayLastIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float64Array::lastIndexOf/
+//! INST          /Call.* std.core.Float64Array::lastIndexOf/
 
 function testInt8arrayLastIndexOf() {
     let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])

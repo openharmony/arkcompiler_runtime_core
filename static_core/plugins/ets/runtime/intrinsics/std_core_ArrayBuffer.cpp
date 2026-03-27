@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,10 +36,10 @@ constexpr size_t THREE_BYTES = 3;
 namespace ark::ets::intrinsics {
 
 /// @brief Creates a new ArrayBuffer with specified size and optional initial data
-static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
-                                                           const uint8_t *data = nullptr)
+static EtsHandle<EtsStdCoreArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
+                                                          const uint8_t *data = nullptr)
 {
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength));
+    EtsHandle<EtsStdCoreArrayBuffer> newBuffer(coro, EtsStdCoreArrayBuffer::Create(coro, byteLength));
     if (UNLIKELY(newBuffer.GetPtr() == nullptr)) {
         return newBuffer;
     }
@@ -117,14 +117,14 @@ extern "C" EtsInt EtsStringBytesLength(EtsString *strObj, EtsString *encodingObj
 }
 
 /// @brief Creates ArrayBuffer from encoded string
-extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *strObj, EtsString *encodingObj)
+extern "C" EtsStdCoreArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *strObj, EtsString *encodingObj)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     PandaVector<uint8_t> bytes = ConvertEtsStringToBytes(strObj, encodingObj, coro, ctx);
     auto byteLength = static_cast<EtsInt>(bytes.size());
     [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer =
+    EtsHandle<EtsStdCoreArrayBuffer> newBuffer =
         CreateArrayBuffer(coro, byteLength, byteLength > 0 ? bytes.data() : nullptr);
     if (newBuffer.GetPtr() == nullptr) {
         ASSERT(coro->HasPendingException());
@@ -133,41 +133,41 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *st
     return newBuffer.GetPtr();
 }
 
-extern "C" void EtsEscompatArrayBufferSetValues(EtsEscompatArrayBuffer *arrayBuffer, EtsEscompatArrayBuffer *other,
-                                                EtsInt begin)
+extern "C" void EtsStdCoreArrayBufferSetValues(EtsStdCoreArrayBuffer *arrayBuffer, EtsStdCoreArrayBuffer *other,
+                                               EtsInt begin)
 {
     arrayBuffer->SetValues(other, begin);
 }
 
-extern "C" EtsByte EtsEscompatArrayBufferAt(EtsEscompatArrayBuffer *arrayBuffer, EtsInt pos)
+extern "C" EtsByte EtsStdCoreArrayBufferAt(EtsStdCoreArrayBuffer *arrayBuffer, EtsInt pos)
 {
     return arrayBuffer->At(pos);
 }
 
-extern "C" void EtsEscompatArrayBufferSet(EtsEscompatArrayBuffer *arrayBuffer, EtsInt pos, EtsByte val)
+extern "C" void EtsStdCoreArrayBufferSet(EtsStdCoreArrayBuffer *arrayBuffer, EtsInt pos, EtsByte val)
 {
     arrayBuffer->Set(pos, val);
 }
 
-extern "C" ObjectHeader *EtsEscompatArrayBufferAllocateNonMovable(EtsInt length)
+extern "C" ObjectHeader *EtsStdCoreArrayBufferAllocateNonMovable(EtsInt length)
 {
-    return EtsEscompatArrayBuffer::AllocateNonMovableArray(length)->GetCoreType();
+    return EtsStdCoreArrayBuffer::AllocateNonMovableArray(length)->GetCoreType();
 }
 
-extern "C" EtsLong EtsEscompatArrayBufferGetAddress(ObjectHeader *byteArray)
+extern "C" EtsLong EtsStdCoreArrayBufferGetAddress(ObjectHeader *byteArray)
 {
     ASSERT(byteArray != nullptr);
-    return EtsEscompatArrayBuffer::GetAddress(reinterpret_cast<EtsByteArray *>(byteArray));
+    return EtsStdCoreArrayBuffer::GetAddress(reinterpret_cast<EtsByteArray *>(byteArray));
 }
 
 /// @brief Creates new ArrayBuffer from slice of existing buffer
-extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArrayBuffer *obj, EtsInt offset,
-                                                                 EtsInt length)
+extern "C" EtsStdCoreArrayBuffer *EtsArrayBufferFromBufferSlice(EtsStdCoreArrayBuffer *obj, EtsInt offset,
+                                                                EtsInt length)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsEscompatArrayBuffer> original(coro, obj);
+    EtsHandle<EtsStdCoreArrayBuffer> original(coro, obj);
     if (original->WasDetached()) {
         ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8("ArrayBuffer was detached"));
@@ -187,7 +187,7 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArra
         return nullptr;
     }
 
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer = CreateArrayBuffer(coro, length);
+    EtsHandle<EtsStdCoreArrayBuffer> newBuffer = CreateArrayBuffer(coro, length);
     if (newBuffer.GetPtr() == nullptr) {
         ASSERT(coro->HasPendingException());
         return nullptr;
@@ -203,7 +203,7 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArra
  * This function validates the input buffer and indices, extracts the requested bytes,
  * determines the encoding, and then converts the byte sequence into the desired string.
  */
-extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, EtsString *encodingObj, EtsInt start,
+extern "C" EtsString *EtsArrayBufferToString(EtsStdCoreArrayBuffer *buffer, EtsString *encodingObj, EtsInt start,
                                              EtsInt end)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -217,7 +217,7 @@ extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, Ets
     }
 
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatArrayBuffer> buf(coro, buffer);
+    EtsHandle<EtsStdCoreArrayBuffer> buf(coro, buffer);
     EtsInt byteLength = buf->GetByteLength();
 
     auto vi = helpers::encoding::ValidateIndices(byteLength, start, end);
@@ -257,7 +257,7 @@ extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, Ets
     return EtsString::CreateFromUtf8(output.data(), output.size());
 }
 
-extern "C" EtsObject *EtsArrayBufferRegisterWeakRef(EtsEscompatArrayBuffer *buffer, EtsLong finalizer,
+extern "C" EtsObject *EtsArrayBufferRegisterWeakRef(EtsStdCoreArrayBuffer *buffer, EtsLong finalizer,
                                                     EtsLong finalizerData)
 {
     using FinalizerCallback = void (*)(void *);

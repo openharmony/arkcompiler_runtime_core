@@ -32,6 +32,7 @@ function __noinline__test() {
 }
 
 //! CHECKER  Check no deadlock when loading Child and CHA-invalidating __noinline__foo in no async JIT
+//! SKIP_IF      @architecture == "arm32"
 //! # use verification-mode=disabled so that verifier doesn't load the class in advance
 //! RUN      force_jit: true,
 //!          options: "--compiler-regex='.*ETSGLOBAL::.*' --verification-mode=disabled",

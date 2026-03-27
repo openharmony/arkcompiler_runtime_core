@@ -26,10 +26,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@static_overload("add")
+@overload("add")
 @async function addWithAsync(a: i32, b: i32): i32;
 
-@static_overload("add")
+@overload("add")
 @promise function addReturnsPromise(a: i32, b: i32): i32;
 
 function addSync(a: i32, b: i32): i32;
@@ -52,11 +52,11 @@ interface IBase {
 
     Set(a: String): void;
 
-    @static_overload("make")
-    MakeWithCallback();
+    @overload("make")
+    @async MakeWithCallback();
 
-    @static_overload("make")
-    MakeReturnsPromise();
+    @overload("make")
+    @promise MakeReturnsPromise();
 
     MakeSync();
 }

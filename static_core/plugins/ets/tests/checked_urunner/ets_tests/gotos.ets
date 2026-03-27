@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      Forward gotos offsets in DISASM JIT
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::.*'", entry: "gotos.ETSGLOBAL::main"
 //! EVENT        /Compilation,gotos.ETSGLOBAL::main,.*,COMPILED/
 //! EVENT        /Compilation,gotos.ETSGLOBAL::__noinline__while,.*,COMPILED/

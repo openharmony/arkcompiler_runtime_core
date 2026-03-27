@@ -96,7 +96,7 @@ std::array<uint8_t, UUID_BINARY_LEN> GenUuid4Binary(ani_env *env)
                                   GenRandUint<uint32_t>(), GenRandUint<uint16_t>());
     if ((charsWritten < 0) || (charsWritten > UUID_STR_LEN_NO_DASH)) {
         stdlib::ThrowNewError(env, "std.core.RuntimeError", "generateRandomBinaryUUID failed",
-                              "C{escompat.Uint8Array}:");
+                              "C{std.core.Uint8Array}:");
         return {};
     }
 
@@ -119,7 +119,7 @@ template <class... Args>
 ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 {
     ani_class arrayClass;
-    if (env->FindClass("escompat.Uint8Array", &arrayClass) != ANI_OK) {
+    if (env->FindClass("std.core.Uint8Array", &arrayClass) != ANI_OK) {
         return nullptr;
     }
     ani_method arrayCtor;

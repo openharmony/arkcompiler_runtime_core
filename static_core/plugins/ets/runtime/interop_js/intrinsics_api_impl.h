@@ -101,11 +101,11 @@ EtsString *JSONStringify(JSValue *jsvalue);
 EtsString *CompilerConvertLocalToString(void *value);
 EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value);
 JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyValue);
-EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object);
-EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffer);
-EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
+EtsStdCoreArrayBuffer *TransferArrayBufferToStatic(ESValue *object);
+EtsObject *TransferArrayBufferToDynamic(EtsStdCoreArrayBuffer *staticArrayBuffer);
+EtsObject *CreateDynamicTypedArray(EtsStdCoreArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
                                    double byteOffset);
-EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
+EtsObject *CreateDynamicDataView(EtsStdCoreArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
 void SetInteropRuntimeLinker(EtsRuntimeLinker *linker);
 EtsRuntimeLinker *GetInteropRuntimeLinker();
 EtsBoolean IsJSInteropRef(EtsObject *value);

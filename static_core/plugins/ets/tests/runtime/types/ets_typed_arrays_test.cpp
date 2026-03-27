@@ -21,25 +21,25 @@
 
 namespace ark::ets::test {
 
-class EtsEscompatTypedArrayBaseTest : public EtsMirrorClassTestBase {
+class EtsCoreTypedArrayBaseTest : public EtsMirrorClassTestBase {
 public:
     static std::vector<MirrorFieldInfo> GetMembers()
     {
         return std::vector<MirrorFieldInfo> {
-            MIRROR_FIELD_INFO(EtsEscompatTypedArrayBase, buffer_, "buffer"),
-            MIRROR_FIELD_INFO(EtsEscompatTypedArrayBase, name_, "name"),
-            MIRROR_FIELD_INFO(EtsEscompatTypedArrayBase, bytesPerElement_, "BYTES_PER_ELEMENT"),
-            MIRROR_FIELD_INFO(EtsEscompatTypedArrayBase, byteOffset_, "byteOffset"),
-            MIRROR_FIELD_INFO(EtsEscompatTypedArrayBase, byteLength_, "byteLength"),
-            MIRROR_FIELD_INFO(EtsEscompatTypedArrayBase, lengthInt_, "lengthInt")};
+            MIRROR_FIELD_INFO(EtsCoreTypedArrayBase, buffer_, "buffer"),
+            MIRROR_FIELD_INFO(EtsCoreTypedArrayBase, name_, "name"),
+            MIRROR_FIELD_INFO(EtsCoreTypedArrayBase, bytesPerElement_, "BYTES_PER_ELEMENT"),
+            MIRROR_FIELD_INFO(EtsCoreTypedArrayBase, byteOffset_, "byteOffset"),
+            MIRROR_FIELD_INFO(EtsCoreTypedArrayBase, byteLength_, "byteLength"),
+            MIRROR_FIELD_INFO(EtsCoreTypedArrayBase, lengthInt_, "lengthInt")};
     }
 };
 
-TEST_F(EtsEscompatTypedArrayBaseTest, MemoryLayout)
+TEST_F(EtsCoreTypedArrayBaseTest, MemoryLayout)
 {
     static constexpr std::array TYPED_ARRAYS = {
-        "Lescompat/Int8Array;",     "Lescompat/Int16Array;",   "Lescompat/Int32Array;",
-        "Lescompat/BigInt64Array;", "Lescompat/Float32Array;", "Lescompat/Float64Array;",
+        "Lstd/core/Int8Array;",     "Lstd/core/Int16Array;",   "Lstd/core/Int32Array;",
+        "Lstd/core/BigInt64Array;", "Lstd/core/Float32Array;", "Lstd/core/Float64Array;",
     };
     auto *linker = GetClassLinker();
     for (const auto &desc : TYPED_ARRAYS) {

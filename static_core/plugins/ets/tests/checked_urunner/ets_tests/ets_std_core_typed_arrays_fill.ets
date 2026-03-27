@@ -15,24 +15,24 @@
 
 //! CHECKER       Array fill intrinsic
 //! RUN           force_jit: true,
-//!               options:"--compiler-regex=.*testFill.*", entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testMain"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt8Array"
+//!               options:"--compiler-regex=.*testFill.*", entry: "ets_std_core_typed_arrays_fill.ETSGLOBAL::testMain"
+//! METHOD        "ets_std_core_typed_arrays_fill.ETSGLOBAL::testFillInt8Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int8ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt16Array"
+//! METHOD        "ets_std_core_typed_arrays_fill.ETSGLOBAL::testFillInt16Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int16ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt32Array"
+//! METHOD        "ets_std_core_typed_arrays_fill.ETSGLOBAL::testFillInt32Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int32ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillFloat32Array"
+//! METHOD        "ets_std_core_typed_arrays_fill.ETSGLOBAL::testFillFloat32Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Float32ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillFloat64Array"
+//! METHOD        "ets_std_core_typed_arrays_fill.ETSGLOBAL::testFillFloat64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Float64ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/

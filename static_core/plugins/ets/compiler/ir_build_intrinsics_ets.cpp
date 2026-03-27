@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,7 @@ void InstBuilder::BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction
 
     auto *runtime = GetGraph()->GetRuntime();
     auto *arrayClass = runtime->GetEscompatArrayClass();
-    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+    auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto buffer = GetGraph()->CreateInstLoadObject(
         DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), GetGraph()->GetMethod()},
@@ -102,7 +102,7 @@ void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction
 
     auto *runtime = GetGraph()->GetRuntime();
     auto *arrayClass = runtime->GetEscompatArrayClass();
-    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+    auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto buffer = GetGraph()->CreateInstLoadObject(
         DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), GetGraph()->GetMethod()},
@@ -119,7 +119,7 @@ void InstBuilder::BuildEscompatArrayGetBufferIntrinsic(const BytecodeInstruction
 
     auto *runtime = GetGraph()->GetRuntime();
     auto *arrayClass = runtime->GetEscompatArrayClass();
-    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+    auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto buffer = GetGraph()->CreateInstLoadObject(
         DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), GetGraph()->GetMethod()},
@@ -325,11 +325,11 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
 
     // TypedArray helpers
     auto *typedArrayClass = runtime->GetClass(calleeMethod);
-    auto *bufferField = runtime->GetEscompatTypedArrayBuffer(typedArrayClass);
-    auto *byteOffsetField = UNSIGNED ? runtime->GetEscompatUnsignedTypedArrayByteOffsetInt(typedArrayClass)
-                                     : runtime->GetEscompatTypedArrayByteOffset(typedArrayClass);
+    auto *bufferField = runtime->GetStdCoreTypedArrayBuffer(typedArrayClass);
+    auto *byteOffsetField = UNSIGNED ? runtime->GetStdCoreUnsignedTypedArrayByteOffsetInt(typedArrayClass)
+                                     : runtime->GetStdCoreTypedArrayByteOffset(typedArrayClass);
     if (needBoundCheck) {
-        auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
+        auto *lengthIntField = runtime->GetStdCoreTypedArrayLengthInt(typedArrayClass);
         auto *loadLengthInst = graph->CreateInstLoadObject(
             DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(lengthIntField), calleeMethod},
             lengthIntField, runtime->IsFieldVolatile(lengthIntField));
@@ -338,9 +338,9 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     }
 
     // ArrayBuffer helpers
-    auto *arrayBufferClass = runtime->GetEscompatArrayBufferClass();
+    auto *arrayBufferClass = runtime->GetStdCoreArrayBufferClass();
     // .data field (FixedArray<byte>)
-    auto *dataField = runtime->GetEscompatArrayBufferManagedData(arrayBufferClass);
+    auto *dataField = runtime->GetStdCoreArrayBufferManagedData(arrayBufferClass);
     // offset to real data inside .data (FixedArray<byte>)
     auto arrayDataOffset = runtime->GetArrayDataOffset(graph->GetArch());
 

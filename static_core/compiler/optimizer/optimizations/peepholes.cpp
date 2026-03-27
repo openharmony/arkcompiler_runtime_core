@@ -2770,7 +2770,7 @@ void Peepholes::VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst)
 
 // Find TypedArray constructor Call follows by NewObject instruction.
 // 4.ref NewObject  ... -> (v5,v6,...)
-// 5.void CallStatic escompat.TypedArray::<ctor> v4, v2, ...
+// 5.void CallStatic std.core.TypedArray::<ctor> v4, v2, ...
 // Note: Support part of constructors for now, more cases will be supported in the future.
 CallInst *Peepholes::FindTypeArrayCtorCall(Inst *newObject)
 {
@@ -2852,33 +2852,33 @@ bool Peepholes::CheckGetLengthLoad([[maybe_unused]] Inst *inst)
 // Case 1
 // 1.i64 Constant   0x5 -> (v3,...)
 // 2.ref NewObject  ... -> (v3,v4,...)
-// 3.void CallStatic escompat.TypedArray::<ctor> v2, v1, ...
+// 3.void CallStatic std.core.TypedArray::<ctor> v2, v1, ...
 // 4.ref NullCheck  v2p, ... -> (v5,...)
-// 5.i32 LoadObject escompat.TypedArray.lengthInt v4 -> (v6)
+// 5.i32 LoadObject std.core.TypedArray.lengthInt v4 -> (v6)
 // 6.    USE      v5
 // ===>
 // 1.i64 Constant   0x5 -> (v3,...)
 // 2.ref NewObject  ... -> (v3,v4,...)
-// 3.void CallStatic escompat.TypedArray::<ctor> v2, v1, ...
+// 3.void CallStatic std.core.TypedArray::<ctor> v2, v1, ...
 // 4.ref NullCheck  v2p, ... -> (v5,...)
-// 5.i32 LoadObject escompat.TypedArray.lengthInt v4 -> (v6)
+// 5.i32 LoadObject std.core.TypedArray.lengthInt v4 -> (v6)
 // 6.    USE      v1
 
 // Case 2
 // 1.i64 Constant   0x5 -> (v3,...)
 // 2.ref NewArray (size=5) ..., v1, ... -> (v4,...)
 // 3.ref NewObject  ... -> (v4,v5,...)
-// 4.void CallStatic escompat.TypedArray::<ctor> v3, v2, ...
+// 4.void CallStatic std.core.TypedArray::<ctor> v3, v2, ...
 // 5.ref NullCheck  v3p, ... -> (v6,...)
-// 6.i32 LoadObject escompat.TypedArray.lengthInt v5 -> (v7)
+// 6.i32 LoadObject std.core.TypedArray.lengthInt v5 -> (v7)
 // 7.    USE      v6
 // ===>
 // 1.i64 Constant   0x5 -> (v3,...)
 // 2.ref NewArray (size=5) ..., v1, ... -> (v4,...)
 // 3.ref NewObject  ... -> (v4,v5,...)
-// 4.void CallStatic escompat.TypedArray::<ctor> v3, v2, ...
+// 4.void CallStatic std.core.TypedArray::<ctor> v3, v2, ...
 // 5.ref NullCheck  v3p, ... -> (v6,...)
-// 6.i32 LoadObject escompat.TypedArray.lengthInt v5 -> (v7)
+// 6.i32 LoadObject std.core.TypedArray.lengthInt v5 -> (v7)
 // 7.    USE      v1
 bool Peepholes::TryOptimizeGetLengthLoadObject(Inst *inst)
 {

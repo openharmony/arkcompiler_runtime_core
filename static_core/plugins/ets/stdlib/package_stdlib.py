@@ -142,8 +142,8 @@ def validate_templates(template_dir: Path, stdlib_dir: Path):
         "Function.ets.j2": stdlib_dir / "std" / "core" / "Function.ets",
         "DataView.ets.j2": stdlib_dir / "std" / "core" / "DataView.ets",
         "Tuple.ets.j2": stdlib_dir / "std" / "core" / "Tuple.ets",
-        "typedArray.ets.j2": stdlib_dir / "escompat" / "TypedArrays.ets",
-        "typedUArray.ets.j2": stdlib_dir / "escompat" / "TypedUArrays.ets"
+        "typedArray.ets.j2": stdlib_dir / "std" / "core" / "TypedArrays.ets",
+        "typedUArray.ets.j2": stdlib_dir / "std" / "core" / "TypedUArrays.ets"
     }
     jinja_loader = jinja2.FileSystemLoader(template_dir)
     jinja_env = jinja2.Environment(

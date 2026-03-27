@@ -46,7 +46,7 @@ namespace ark::ets::intrinsics {
 template <typename T>
 static void *GetNativeData(T *array)
 {
-    auto *arrayBuffer = static_cast<EtsEscompatArrayBuffer *>(&*array->GetBuffer());
+    auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*array->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "ArrayBuffer was detached");
@@ -56,7 +56,7 @@ static void *GetNativeData(T *array)
 }
 
 template <typename T>
-static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::ElementType val)
+static void EtsCoreTypedArraySet(T *thisArray, EtsInt pos, typename T::ElementType val)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
@@ -82,7 +82,7 @@ static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::Eleme
 }
 
 template <typename T>
-typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
+typename T::ElementType EtsCoreTypedArrayGet(T *thisArray, EtsInt pos)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
@@ -114,7 +114,7 @@ typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
 }
 
 template <typename T>
-typename T::ElementType EtsEscompatTypedArrayGetUnsafe(T *thisArray, EtsInt pos)
+typename T::ElementType EtsCoreTypedArrayGetUnsafe(T *thisArray, EtsInt pos)
 {
     ASSERT(pos >= 0 && pos < thisArray->GetLengthInt());
 
@@ -127,24 +127,24 @@ typename T::ElementType EtsEscompatTypedArrayGetUnsafe(T *thisArray, EtsInt pos)
         data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()));
 }
 
-extern "C" void EtsEscompatInt8ArraySetInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsInt val)
+extern "C" void EtsStdCoreInt8ArraySetInt(ark::ets::EtsStdCoreInt8Array *thisArray, EtsInt pos, EtsInt val)
 {
-    EtsEscompatTypedArraySet(thisArray, pos, val);
+    EtsCoreTypedArraySet(thisArray, pos, val);
 }
 
-extern "C" void EtsEscompatInt8ArraySetByte(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsByte val)
+extern "C" void EtsStdCoreInt8ArraySetByte(ark::ets::EtsStdCoreInt8Array *thisArray, EtsInt pos, EtsByte val)
 {
-    EtsEscompatTypedArraySet(thisArray, pos, val);
+    EtsCoreTypedArraySet(thisArray, pos, val);
 }
 
-extern "C" EtsDouble EtsEscompatInt8ArrayGet(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
+extern "C" EtsDouble EtsStdCoreInt8ArrayGet(ark::ets::EtsStdCoreInt8Array *thisArray, EtsInt pos)
 {
-    return EtsEscompatTypedArrayGet(thisArray, pos);
+    return EtsCoreTypedArrayGet(thisArray, pos);
 }
 
-extern "C" EtsByte EtsEscompatInt8ArrayGetUnsafe(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
+extern "C" EtsByte EtsStdCoreInt8ArrayGetUnsafe(ark::ets::EtsStdCoreInt8Array *thisArray, EtsInt pos)
 {
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
 }
 
 // We can just copy the backing buffer if the types are the same, or if we are converting e.g. Int16 <-> Uint16, as
@@ -156,28 +156,28 @@ struct CompatibleElements : std::false_type {
 };
 
 template <>
-struct CompatibleElements<EtsEscompatInt8Array, EtsEscompatUInt8Array> : std::true_type {
+struct CompatibleElements<EtsStdCoreInt8Array, EtsStdCoreUInt8Array> : std::true_type {
 };
 
 template <>
-struct CompatibleElements<EtsEscompatUInt8Array, EtsEscompatInt8Array> : std::true_type {
+struct CompatibleElements<EtsStdCoreUInt8Array, EtsStdCoreInt8Array> : std::true_type {
 };
 
 template <>
-struct CompatibleElements<EtsEscompatInt16Array, EtsEscompatUInt16Array> : std::true_type {
+struct CompatibleElements<EtsStdCoreInt16Array, EtsStdCoreUInt16Array> : std::true_type {
 };
 
 template <>
-struct CompatibleElements<EtsEscompatUInt16Array, EtsEscompatInt16Array> : std::true_type {
+struct CompatibleElements<EtsStdCoreUInt16Array, EtsStdCoreInt16Array> : std::true_type {
 };
 
 template <>
-struct CompatibleElements<EtsEscompatUInt32Array, EtsEscompatInt32Array> : std::true_type {
+struct CompatibleElements<EtsStdCoreUInt32Array, EtsStdCoreInt32Array> : std::true_type {
 };
 
 template <typename T, typename S = T,
           typename = std::enable_if_t<std::disjunction_v<std::is_same<T, S>, CompatibleElements<T, S>>>>
-static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt pos)
+static void EtsCoreTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt pos)
 {
     auto *dstData = GetNativeData(thisArray);
     if (UNLIKELY(dstData == nullptr)) {
@@ -321,31 +321,31 @@ private:
 };
 
 template <>
-auto ArrayElement<EtsEscompatInt32Array>::ToTyped(EtsInt value) -> Type
+auto ArrayElement<EtsStdCoreInt32Array>::ToTyped(EtsInt value) -> Type
 {
     return value;
 }
 
 template <>
-auto ArrayElement<EtsEscompatUInt8ClampedArray>::ToTyped(EtsInt value) -> Type
+auto ArrayElement<EtsStdCoreUInt8ClampedArray>::ToTyped(EtsInt value) -> Type
 {
-    if (!(value > ark::ets::EtsEscompatUInt8ClampedArray::MIN)) {
-        return ark::ets::EtsEscompatUInt8ClampedArray::MIN;
+    if (!(value > ark::ets::EtsStdCoreUInt8ClampedArray::MIN)) {
+        return ark::ets::EtsStdCoreUInt8ClampedArray::MIN;
     }
-    if (value > ark::ets::EtsEscompatUInt8ClampedArray::MAX) {
-        return ark::ets::EtsEscompatUInt8ClampedArray::MAX;
+    if (value > ark::ets::EtsStdCoreUInt8ClampedArray::MAX) {
+        return ark::ets::EtsStdCoreUInt8ClampedArray::MAX;
     }
     return static_cast<uint8_t>(value);
 }
 
 template <>
-auto ArrayElement<EtsEscompatFloat32Array>::ToTyped(EtsDouble value) -> Type
+auto ArrayElement<EtsStdCoreFloat32Array>::ToTyped(EtsDouble value) -> Type
 {
     return static_cast<Type>(value);
 }
 
 template <>
-auto ArrayElement<EtsEscompatFloat64Array>::ToTyped(EtsDouble value) -> Type
+auto ArrayElement<EtsStdCoreFloat64Array>::ToTyped(EtsDouble value) -> Type
 {
     return value;
 }
@@ -381,33 +381,33 @@ private:
 };
 
 template <>
-class ArrayElement<EtsEscompatBigInt64Array> final : public BigInt64ArrayElement<EtsEscompatBigInt64Array> {
+class ArrayElement<EtsStdCoreBigInt64Array> final : public BigInt64ArrayElement<EtsStdCoreBigInt64Array> {
 private:
     static Type ToTyped(const EtsBigInt *bigint)
     {
         ASSERT(bigint != nullptr);
         return GetLong(bigint);
     }
-    friend BigInt64ArrayElement<EtsEscompatBigInt64Array>;
+    friend BigInt64ArrayElement<EtsStdCoreBigInt64Array>;
 };
 
 template <>
-class ArrayElement<EtsEscompatBigUInt64Array> final : public BigInt64ArrayElement<EtsEscompatBigUInt64Array> {
+class ArrayElement<EtsStdCoreBigUInt64Array> final : public BigInt64ArrayElement<EtsStdCoreBigUInt64Array> {
 private:
     static Type ToTyped(const EtsBigInt *bigint)
     {
         ASSERT(bigint != nullptr);
         return GetULong(bigint);
     }
-    friend BigInt64ArrayElement<EtsEscompatBigUInt64Array>;
+    friend BigInt64ArrayElement<EtsStdCoreBigUInt64Array>;
 };
 
 }  // namespace unbox
 }  // namespace
 
 template <typename T>
-static void EtsEscompatTypedArraySetValuesFromFixedArray(T *thisArray, void *dstData, EtsObjectArray *srcData,
-                                                         uint32_t actualLength)
+static void EtsCoreTypedArraySetValuesFromFixedArray(T *thisArray, void *dstData, EtsObjectArray *srcData,
+                                                     uint32_t actualLength)
 {
     using ElementType = typename T::ElementType;
 
@@ -438,8 +438,8 @@ static void EtsEscompatTypedArraySetValuesFromFixedArray(T *thisArray, void *dst
 
 /// Slow path, because methods of `srcArray` might be overriden
 template <typename T>
-static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *dstData, EtsEscompatArray *srcArray,
-                                                            EtsCoroutine *coro)
+static void EtsCoreTypedArraySetValuesFromArraySlowPath(T *thisArray, void *dstData, EtsEscompatArray *srcArray,
+                                                        EtsCoroutine *coro)
 {
     using ElementType = typename T::ElementType;
 
@@ -489,7 +489,7 @@ static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *
 }
 
 template <typename T>
-static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompatArray *srcArray)
+static void EtsCoreTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompatArray *srcArray)
 {
     ASSERT(thisArray != nullptr);
     ASSERT(srcArray != nullptr);
@@ -502,39 +502,39 @@ static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompa
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (LIKELY(srcArray->IsExactlyEscompatArray(coro))) {
         // Fast path in case of `srcArray` being exactly `std.core.Array`
-        EtsEscompatTypedArraySetValuesFromFixedArray(thisArray, dstData, srcArray->GetDataFromEscompatArray(),
-                                                     srcArray->GetActualLengthFromEscompatArray());
+        EtsCoreTypedArraySetValuesFromFixedArray(thisArray, dstData, srcArray->GetDataFromEscompatArray(),
+                                                 srcArray->GetActualLengthFromEscompatArray());
     } else {
-        EtsEscompatTypedArraySetValuesFromArraySlowPath(thisArray, dstData, srcArray, coro);
+        EtsCoreTypedArraySetValuesFromArraySlowPath(thisArray, dstData, srcArray, coro);
     }
 }
 
-extern "C" void EtsEscompatInt8ArraySetValues(ark::ets::EtsEscompatInt8Array *thisArray,
-                                              ark::ets::EtsEscompatInt8Array *srcArray)
+extern "C" void EtsStdCoreInt8ArraySetValues(ark::ets::EtsStdCoreInt8Array *thisArray,
+                                             ark::ets::EtsStdCoreInt8Array *srcArray)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
 }
 
-extern "C" void EtsEscompatInt8ArraySetValuesFromUnsigned(ark::ets::EtsEscompatInt8Array *thisArray,
-                                                          ark::ets::EtsEscompatUInt8Array *srcArray)
+extern "C" void EtsStdCoreInt8ArraySetValuesFromUnsigned(ark::ets::EtsStdCoreInt8Array *thisArray,
+                                                         ark::ets::EtsStdCoreUInt8Array *srcArray)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
 }
 
-extern "C" void EtsEscompatInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatInt8Array *thisArray,
-                                                        ark::ets::EtsEscompatInt8Array *srcArray, EtsInt pos)
+extern "C" void EtsStdCoreInt8ArraySetValuesWithOffset(ark::ets::EtsStdCoreInt8Array *thisArray,
+                                                       ark::ets::EtsStdCoreInt8Array *srcArray, EtsInt pos)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
 }
 
-extern "C" void EtsEscompatInt8ArraySetValuesFromArray(ark::ets::EtsEscompatInt8Array *thisArray,
-                                                       ark::ets::EtsEscompatArray *srcArray)
+extern "C" void EtsStdCoreInt8ArraySetValuesFromArray(ark::ets::EtsStdCoreInt8Array *thisArray,
+                                                      ark::ets::EtsEscompatArray *srcArray)
 {
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
 }
 
 template <typename T, typename V>
-static void EtsEscompatTypedArrayFillInternal(T *thisArray, V val, EtsInt begin, EtsInt end)
+static void EtsCoreTypedArrayFillInternal(T *thisArray, V val, EtsInt begin, EtsInt end)
 {
     static_assert(sizeof(V) == sizeof(typename T::ElementType));
     auto *data = GetNativeData(thisArray);
@@ -555,471 +555,469 @@ static void EtsEscompatTypedArrayFillInternal(T *thisArray, V val, EtsInt begin,
     }
 }
 
-extern "C" void EtsEscompatInt8ArrayFillInternal(ark::ets::EtsEscompatInt8Array *thisArray, EtsByte val, EtsInt begin,
+extern "C" void EtsStdCoreInt8ArrayFillInternal(ark::ets::EtsStdCoreInt8Array *thisArray, EtsByte val, EtsInt begin,
+                                                EtsInt end)
+{
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
+}
+
+extern "C" void EtsStdCoreInt16ArraySetInt(ark::ets::EtsStdCoreInt16Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" void EtsStdCoreInt16ArraySetShort(ark::ets::EtsStdCoreInt16Array *thisArray, EtsInt pos, EtsShort val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsStdCoreInt16ArrayGet(ark::ets::EtsStdCoreInt16Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsShort EtsStdCoreInt16ArrayGetUnsafe(ark::ets::EtsStdCoreInt16Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreInt16ArraySetValues(ark::ets::EtsStdCoreInt16Array *thisArray,
+                                              ark::ets::EtsStdCoreInt16Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreInt16ArraySetValuesFromUnsigned(ark::ets::EtsStdCoreInt16Array *thisArray,
+                                                          ark::ets::EtsStdCoreUInt16Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreInt16ArraySetValuesWithOffset(ark::ets::EtsStdCoreInt16Array *thisArray,
+                                                        ark::ets::EtsStdCoreInt16Array *srcArray, EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreInt16ArraySetValuesFromArray(ark::ets::EtsStdCoreInt16Array *thisArray,
+                                                       ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreInt16ArrayFillInternal(ark::ets::EtsStdCoreInt16Array *thisArray, EtsShort val, EtsInt begin,
                                                  EtsInt end)
 {
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
-extern "C" void EtsEscompatInt16ArraySetInt(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos, EtsInt val)
+extern "C" void EtsStdCoreInt32ArraySetInt(ark::ets::EtsStdCoreInt32Array *thisArray, EtsInt pos, EtsInt val)
 {
-    EtsEscompatTypedArraySet(thisArray, pos, val);
+    EtsCoreTypedArraySet(thisArray, pos, val);
 }
 
-extern "C" void EtsEscompatInt16ArraySetShort(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos, EtsShort val)
+extern "C" EtsDouble EtsStdCoreInt32ArrayGet(ark::ets::EtsStdCoreInt32Array *thisArray, EtsInt pos)
 {
-    EtsEscompatTypedArraySet(thisArray, pos, val);
+    return EtsCoreTypedArrayGet(thisArray, pos);
 }
 
-extern "C" EtsDouble EtsEscompatInt16ArrayGet(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos)
+extern "C" EtsInt EtsStdCoreInt32ArrayGetUnsafe(ark::ets::EtsStdCoreInt32Array *thisArray, EtsInt pos)
 {
-    return EtsEscompatTypedArrayGet(thisArray, pos);
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
 }
 
-extern "C" EtsShort EtsEscompatInt16ArrayGetUnsafe(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos)
+extern "C" void EtsStdCoreInt32ArraySetValues(ark::ets::EtsStdCoreInt32Array *thisArray,
+                                              ark::ets::EtsStdCoreInt32Array *srcArray)
 {
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
 }
 
-extern "C" void EtsEscompatInt16ArraySetValues(ark::ets::EtsEscompatInt16Array *thisArray,
-                                               ark::ets::EtsEscompatInt16Array *srcArray)
+extern "C" void EtsStdCoreInt32ArraySetValuesWithOffset(ark::ets::EtsStdCoreInt32Array *thisArray,
+                                                        ark::ets::EtsStdCoreInt32Array *srcArray, EtsInt pos)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
 }
 
-extern "C" void EtsEscompatInt16ArraySetValuesFromUnsigned(ark::ets::EtsEscompatInt16Array *thisArray,
-                                                           ark::ets::EtsEscompatUInt16Array *srcArray)
+extern "C" void EtsStdCoreInt32ArraySetValuesFromArray(ark::ets::EtsStdCoreInt32Array *thisArray,
+                                                       ark::ets::EtsEscompatArray *srcArray)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
 }
 
-extern "C" void EtsEscompatInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatInt16Array *thisArray,
-                                                         ark::ets::EtsEscompatInt16Array *srcArray, EtsInt pos)
+extern "C" void EtsStdCoreInt32ArrayFillInternal(ark::ets::EtsStdCoreInt32Array *thisArray, EtsInt val, EtsInt begin,
+                                                 EtsInt end)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
-extern "C" void EtsEscompatInt16ArraySetValuesFromArray(ark::ets::EtsEscompatInt16Array *thisArray,
-                                                        ark::ets::EtsEscompatArray *srcArray)
+extern "C" void EtsStdCoreBigInt64ArraySetLong(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsInt pos, EtsLong val)
 {
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+    EtsCoreTypedArraySet(thisArray, pos, val);
 }
 
-extern "C" void EtsEscompatInt16ArrayFillInternal(ark::ets::EtsEscompatInt16Array *thisArray, EtsShort val,
-                                                  EtsInt begin, EtsInt end)
+extern "C" EtsLong EtsStdCoreBigInt64ArrayGet(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsInt pos)
 {
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
+    return EtsCoreTypedArrayGet(thisArray, pos);
 }
 
-extern "C" void EtsEscompatInt32ArraySetInt(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos, EtsInt val)
+extern "C" EtsLong EtsStdCoreBigInt64ArrayGetUnsafe(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsInt pos)
 {
-    EtsEscompatTypedArraySet(thisArray, pos, val);
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
 }
 
-extern "C" EtsDouble EtsEscompatInt32ArrayGet(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos)
+extern "C" void EtsStdCoreBigInt64ArraySetValues(ark::ets::EtsStdCoreBigInt64Array *thisArray,
+                                                 ark::ets::EtsStdCoreBigInt64Array *srcArray)
 {
-    return EtsEscompatTypedArrayGet(thisArray, pos);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
 }
 
-extern "C" EtsInt EtsEscompatInt32ArrayGetUnsafe(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos)
+extern "C" void EtsStdCoreBigInt64ArraySetValuesWithOffset(ark::ets::EtsStdCoreBigInt64Array *thisArray,
+                                                           ark::ets::EtsStdCoreBigInt64Array *srcArray, EtsInt pos)
 {
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
 }
 
-extern "C" void EtsEscompatInt32ArraySetValues(ark::ets::EtsEscompatInt32Array *thisArray,
-                                               ark::ets::EtsEscompatInt32Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatInt32Array *thisArray,
-                                                         ark::ets::EtsEscompatInt32Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatInt32ArraySetValuesFromArray(ark::ets::EtsEscompatInt32Array *thisArray,
-                                                        ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatInt32ArrayFillInternal(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt val, EtsInt begin,
-                                                  EtsInt end)
-{
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
-}
-
-extern "C" void EtsEscompatBigInt64ArraySetLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos, EtsLong val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsLong EtsEscompatBigInt64ArrayGet(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsLong EtsEscompatBigInt64ArrayGetUnsafe(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatBigInt64ArraySetValues(ark::ets::EtsEscompatBigInt64Array *thisArray,
-                                                  ark::ets::EtsEscompatBigInt64Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatBigInt64ArraySetValuesWithOffset(ark::ets::EtsEscompatBigInt64Array *thisArray,
-                                                            ark::ets::EtsEscompatBigInt64Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatBigInt64ArraySetValuesFromArray(ark::ets::EtsEscompatBigInt64Array *thisArray,
-                                                           ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatBigInt64ArrayFillInternal(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsLong val,
-                                                     EtsInt begin, EtsInt end)
-{
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
-}
-
-extern "C" void EtsEscompatFloat32ArraySetFloat(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos, EtsFloat val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsDouble EtsEscompatFloat32ArrayGet(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsFloat EtsEscompatFloat32ArrayGetUnsafe(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatFloat32ArraySetValues(ark::ets::EtsEscompatFloat32Array *thisArray,
-                                                 ark::ets::EtsEscompatFloat32Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatFloat32ArraySetValuesWithOffset(ark::ets::EtsEscompatFloat32Array *thisArray,
-                                                           ark::ets::EtsEscompatFloat32Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatFloat32ArraySetValuesFromArray(ark::ets::EtsEscompatFloat32Array *thisArray,
+extern "C" void EtsStdCoreBigInt64ArraySetValuesFromArray(ark::ets::EtsStdCoreBigInt64Array *thisArray,
                                                           ark::ets::EtsEscompatArray *srcArray)
 {
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
 }
 
-extern "C" void EtsEscompatFloat32ArrayFillInternal(ark::ets::EtsEscompatFloat32Array *thisArray, EtsFloat val,
+extern "C" void EtsStdCoreBigInt64ArrayFillInternal(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsLong val,
                                                     EtsInt begin, EtsInt end)
 {
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
-extern "C" void EtsEscompatFloat32ArrayFillInternalInt(ark::ets::EtsEscompatFloat32Array *thisArray, int32_t val,
-                                                       EtsInt begin, EtsInt end)
+extern "C" void EtsStdCoreFloat32ArraySetFloat(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsInt pos, EtsFloat val)
 {
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
+    EtsCoreTypedArraySet(thisArray, pos, val);
 }
 
-extern "C" void EtsEscompatFloat64ArraySetDouble(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos,
-                                                 EtsDouble val)
+extern "C" EtsDouble EtsStdCoreFloat32ArrayGet(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsInt pos)
 {
-    EtsEscompatTypedArraySet(thisArray, pos, val);
+    return EtsCoreTypedArrayGet(thisArray, pos);
 }
 
-extern "C" EtsDouble EtsEscompatFloat64ArrayGet(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
+extern "C" EtsFloat EtsStdCoreFloat32ArrayGetUnsafe(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsInt pos)
 {
-    return EtsEscompatTypedArrayGet(thisArray, pos);
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
 }
 
-extern "C" EtsDouble EtsEscompatFloat64ArrayGetUnsafe(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
+extern "C" void EtsStdCoreFloat32ArraySetValues(ark::ets::EtsStdCoreFloat32Array *thisArray,
+                                                ark::ets::EtsStdCoreFloat32Array *srcArray)
 {
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
 }
 
-extern "C" void EtsEscompatFloat64ArraySetValues(ark::ets::EtsEscompatFloat64Array *thisArray,
-                                                 ark::ets::EtsEscompatFloat64Array *srcArray)
+extern "C" void EtsStdCoreFloat32ArraySetValuesWithOffset(ark::ets::EtsStdCoreFloat32Array *thisArray,
+                                                          ark::ets::EtsStdCoreFloat32Array *srcArray, EtsInt pos)
 {
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
 }
 
-extern "C" void EtsEscompatFloat64ArraySetValuesWithOffset(ark::ets::EtsEscompatFloat64Array *thisArray,
-                                                           ark::ets::EtsEscompatFloat64Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatFloat64ArraySetValuesFromArray(ark::ets::EtsEscompatFloat64Array *thisArray,
-                                                          ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatFloat64ArrayFillInternal(ark::ets::EtsEscompatFloat64Array *thisArray, EtsDouble val,
-                                                    EtsInt begin, EtsInt end)
-{
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
-}
-
-extern "C" void EtsEscompatFloat64ArrayFillInternalInt(ark::ets::EtsEscompatFloat64Array *thisArray, int64_t val,
-                                                       EtsInt begin, EtsInt end)
-{
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
-}
-
-extern "C" void EtsEscompatUInt8ClampedArraySetInt(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos,
-                                                   EtsInt val)
-{
-    if (val > ark::ets::EtsEscompatUInt8ClampedArray::MAX) {
-        val = ark::ets::EtsEscompatUInt8ClampedArray::MAX;
-    } else if (val < ark::ets::EtsEscompatUInt8ClampedArray::MIN) {
-        val = ark::ets::EtsEscompatUInt8ClampedArray::MIN;
-    }
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsDouble EtsEscompatUInt8ClampedArrayGet(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsInt EtsEscompatUInt8ClampedArrayGetUnsafe(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatUInt8ClampedArraySetValues(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
-                                                      ark::ets::EtsEscompatUInt8ClampedArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUInt8ClampedArraySetValuesWithOffset(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
-                                                                ark::ets::EtsEscompatUInt8ClampedArray *srcArray,
-                                                                EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatUint8ClampedArraySetValuesFromArray(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
-                                                               ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatUInt8ClampedArrayFillInternal(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt val,
-                                                         EtsInt begin, EtsInt end)
-{
-    using ElementType = ark::ets::EtsEscompatUInt8ClampedArray::ElementType;
-    EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
-}
-
-extern "C" void EtsEscompatUInt8ArraySetInt(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos, EtsInt val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsDouble EtsEscompatUInt8ArrayGet(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsInt EtsEscompatUInt8ArrayGetUnsafe(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatUInt8ArraySetValues(ark::ets::EtsEscompatUInt8Array *thisArray,
-                                               ark::ets::EtsEscompatUInt8Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUint8ArraySetValuesFromSigned(ark::ets::EtsEscompatUInt8Array *thisArray,
-                                                         ark::ets::EtsEscompatInt8Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatUInt8Array *thisArray,
-                                                         ark::ets::EtsEscompatUInt8Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatUint8ArraySetValuesFromArray(ark::ets::EtsEscompatUInt8Array *thisArray,
-                                                        ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatUInt8ArrayFillInternal(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt val, EtsInt begin,
-                                                  EtsInt end)
-{
-    using ElementType = ark::ets::EtsEscompatUInt8Array::ElementType;
-    EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
-}
-
-extern "C" void EtsEscompatUInt16ArraySetInt(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos, EtsInt val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsDouble EtsEscompatUInt16ArrayGet(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsInt EtsEscompatUInt16ArrayGetUnsafe(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatUInt16ArraySetValues(ark::ets::EtsEscompatUInt16Array *thisArray,
-                                                ark::ets::EtsEscompatUInt16Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUint16ArraySetValuesFromSigned(ark::ets::EtsEscompatUInt16Array *thisArray,
-                                                          ark::ets::EtsEscompatInt16Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatUInt16Array *thisArray,
-                                                          ark::ets::EtsEscompatUInt16Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatUint16ArraySetValuesFromArray(ark::ets::EtsEscompatUInt16Array *thisArray,
+extern "C" void EtsStdCoreFloat32ArraySetValuesFromArray(ark::ets::EtsStdCoreFloat32Array *thisArray,
                                                          ark::ets::EtsEscompatArray *srcArray)
 {
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
 }
 
-extern "C" void EtsEscompatUInt16ArrayFillInternal(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt val,
+extern "C" void EtsStdCoreFloat32ArrayFillInternal(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsFloat val,
                                                    EtsInt begin, EtsInt end)
 {
-    using ElementType = ark::ets::EtsEscompatUInt16Array::ElementType;
-    EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
-extern "C" void EtsEscompatUInt32ArraySetInt(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos, EtsInt val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" void EtsEscompatUInt32ArraySetLong(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos, EtsLong val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsDouble EtsEscompatUInt32ArrayGet(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsLong EtsEscompatUInt32ArrayGetUnsafe(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatUInt32ArraySetValues(ark::ets::EtsEscompatUInt32Array *thisArray,
-                                                ark::ets::EtsEscompatUInt32Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUint32ArraySetValuesFromSigned(ark::ets::EtsEscompatUInt32Array *thisArray,
-                                                          ark::ets::EtsEscompatInt32Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatUInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatUInt32Array *thisArray,
-                                                          ark::ets::EtsEscompatUInt32Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatUint32ArraySetValuesFromArray(ark::ets::EtsEscompatUInt32Array *thisArray,
-                                                         ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatUInt32ArrayFillInternal(ark::ets::EtsEscompatUInt32Array *thisArray, EtsLong val,
-                                                   EtsInt begin, EtsInt end)
-{
-    using ElementType = ark::ets::EtsEscompatUInt32Array::ElementType;
-    EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
-}
-
-extern "C" void EtsEscompatBigUInt64ArraySetInt(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos, EtsInt val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" void EtsEscompatBigUInt64ArraySetLong(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos,
-                                                 EtsLong val)
-{
-    EtsEscompatTypedArraySet(thisArray, pos, val);
-}
-
-extern "C" EtsLong EtsEscompatBigUInt64ArrayGet(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGet(thisArray, pos);
-}
-
-extern "C" EtsLong EtsEscompatBigUInt64ArrayGetUnsafe(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos)
-{
-    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
-}
-
-extern "C" void EtsEscompatBigUInt64ArraySetValues(ark::ets::EtsEscompatBigUInt64Array *thisArray,
-                                                   ark::ets::EtsEscompatBigUInt64Array *srcArray)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
-}
-
-extern "C" void EtsEscompatBigUInt64ArraySetValuesWithOffset(ark::ets::EtsEscompatBigUInt64Array *thisArray,
-                                                             ark::ets::EtsEscompatBigUInt64Array *srcArray, EtsInt pos)
-{
-    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, pos);
-}
-
-extern "C" void EtsEscompatBigUint64ArraySetValuesFromArray(ark::ets::EtsEscompatBigUInt64Array *thisArray,
-                                                            ark::ets::EtsEscompatArray *srcArray)
-{
-    EtsEscompatTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
-}
-
-extern "C" void EtsEscompatBigUInt64ArrayFillInternal(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsLong val,
+extern "C" void EtsStdCoreFloat32ArrayFillInternalInt(ark::ets::EtsStdCoreFloat32Array *thisArray, int32_t val,
                                                       EtsInt begin, EtsInt end)
 {
-    EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
+}
+
+extern "C" void EtsStdCoreFloat64ArraySetDouble(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsInt pos, EtsDouble val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsStdCoreFloat64ArrayGet(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsDouble EtsStdCoreFloat64ArrayGetUnsafe(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreFloat64ArraySetValues(ark::ets::EtsStdCoreFloat64Array *thisArray,
+                                                ark::ets::EtsStdCoreFloat64Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreFloat64ArraySetValuesWithOffset(ark::ets::EtsStdCoreFloat64Array *thisArray,
+                                                          ark::ets::EtsStdCoreFloat64Array *srcArray, EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreFloat64ArraySetValuesFromArray(ark::ets::EtsStdCoreFloat64Array *thisArray,
+                                                         ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreFloat64ArrayFillInternal(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsDouble val,
+                                                   EtsInt begin, EtsInt end)
+{
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
+}
+
+extern "C" void EtsStdCoreFloat64ArrayFillInternalInt(ark::ets::EtsStdCoreFloat64Array *thisArray, int64_t val,
+                                                      EtsInt begin, EtsInt end)
+{
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
+}
+
+extern "C" void EtsStdCoreUInt8ClampedArraySetInt(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsInt pos,
+                                                  EtsInt val)
+{
+    if (val > ark::ets::EtsStdCoreUInt8ClampedArray::MAX) {
+        val = ark::ets::EtsStdCoreUInt8ClampedArray::MAX;
+    } else if (val < ark::ets::EtsStdCoreUInt8ClampedArray::MIN) {
+        val = ark::ets::EtsStdCoreUInt8ClampedArray::MIN;
+    }
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsStdCoreUInt8ClampedArrayGet(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsInt EtsStdCoreUInt8ClampedArrayGetUnsafe(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreUInt8ClampedArraySetValues(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray,
+                                                     ark::ets::EtsStdCoreUInt8ClampedArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUInt8ClampedArraySetValuesWithOffset(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray,
+                                                               ark::ets::EtsStdCoreUInt8ClampedArray *srcArray,
+                                                               EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreUint8ClampedArraySetValuesFromArray(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray,
+                                                              ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreUInt8ClampedArrayFillInternal(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsInt val,
+                                                        EtsInt begin, EtsInt end)
+{
+    using ElementType = ark::ets::EtsStdCoreUInt8ClampedArray::ElementType;
+    EtsCoreTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
+}
+
+extern "C" void EtsStdCoreUInt8ArraySetInt(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsStdCoreUInt8ArrayGet(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsInt EtsStdCoreUInt8ArrayGetUnsafe(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreUInt8ArraySetValues(ark::ets::EtsStdCoreUInt8Array *thisArray,
+                                              ark::ets::EtsStdCoreUInt8Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUint8ArraySetValuesFromSigned(ark::ets::EtsStdCoreUInt8Array *thisArray,
+                                                        ark::ets::EtsStdCoreInt8Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUInt8ArraySetValuesWithOffset(ark::ets::EtsStdCoreUInt8Array *thisArray,
+                                                        ark::ets::EtsStdCoreUInt8Array *srcArray, EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreUint8ArraySetValuesFromArray(ark::ets::EtsStdCoreUInt8Array *thisArray,
+                                                       ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreUInt8ArrayFillInternal(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsInt val, EtsInt begin,
+                                                 EtsInt end)
+{
+    using ElementType = ark::ets::EtsStdCoreUInt8Array::ElementType;
+    EtsCoreTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
+}
+
+extern "C" void EtsStdCoreUInt16ArraySetInt(ark::ets::EtsStdCoreUInt16Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsStdCoreUInt16ArrayGet(ark::ets::EtsStdCoreUInt16Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsInt EtsStdCoreUInt16ArrayGetUnsafe(ark::ets::EtsStdCoreUInt16Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreUInt16ArraySetValues(ark::ets::EtsStdCoreUInt16Array *thisArray,
+                                               ark::ets::EtsStdCoreUInt16Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUint16ArraySetValuesFromSigned(ark::ets::EtsStdCoreUInt16Array *thisArray,
+                                                         ark::ets::EtsStdCoreInt16Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUInt16ArraySetValuesWithOffset(ark::ets::EtsStdCoreUInt16Array *thisArray,
+                                                         ark::ets::EtsStdCoreUInt16Array *srcArray, EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreUint16ArraySetValuesFromArray(ark::ets::EtsStdCoreUInt16Array *thisArray,
+                                                        ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreUInt16ArrayFillInternal(ark::ets::EtsStdCoreUInt16Array *thisArray, EtsInt val, EtsInt begin,
+                                                  EtsInt end)
+{
+    using ElementType = ark::ets::EtsStdCoreUInt16Array::ElementType;
+    EtsCoreTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
+}
+
+extern "C" void EtsStdCoreUInt32ArraySetInt(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" void EtsStdCoreUInt32ArraySetLong(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsInt pos, EtsLong val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsStdCoreUInt32ArrayGet(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsLong EtsStdCoreUInt32ArrayGetUnsafe(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreUInt32ArraySetValues(ark::ets::EtsStdCoreUInt32Array *thisArray,
+                                               ark::ets::EtsStdCoreUInt32Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUint32ArraySetValuesFromSigned(ark::ets::EtsStdCoreUInt32Array *thisArray,
+                                                         ark::ets::EtsStdCoreInt32Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreUInt32ArraySetValuesWithOffset(ark::ets::EtsStdCoreUInt32Array *thisArray,
+                                                         ark::ets::EtsStdCoreUInt32Array *srcArray, EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreUint32ArraySetValuesFromArray(ark::ets::EtsStdCoreUInt32Array *thisArray,
+                                                        ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreUInt32ArrayFillInternal(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsLong val, EtsInt begin,
+                                                  EtsInt end)
+{
+    using ElementType = ark::ets::EtsStdCoreUInt32Array::ElementType;
+    EtsCoreTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
+}
+
+extern "C" void EtsStdCoreBigUInt64ArraySetInt(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" void EtsStdCoreBigUInt64ArraySetLong(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsInt pos, EtsLong val)
+{
+    EtsCoreTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsLong EtsStdCoreBigUInt64ArrayGet(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsLong EtsStdCoreBigUInt64ArrayGetUnsafe(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsInt pos)
+{
+    return EtsCoreTypedArrayGetUnsafe(thisArray, pos);
+}
+
+extern "C" void EtsStdCoreBigUInt64ArraySetValues(ark::ets::EtsStdCoreBigUInt64Array *thisArray,
+                                                  ark::ets::EtsStdCoreBigUInt64Array *srcArray)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsStdCoreBigUInt64ArraySetValuesWithOffset(ark::ets::EtsStdCoreBigUInt64Array *thisArray,
+                                                            ark::ets::EtsStdCoreBigUInt64Array *srcArray, EtsInt pos)
+{
+    EtsCoreTypedArraySetValuesImpl(thisArray, srcArray, pos);
+}
+
+extern "C" void EtsStdCoreBigUint64ArraySetValuesFromArray(ark::ets::EtsStdCoreBigUInt64Array *thisArray,
+                                                           ark::ets::EtsEscompatArray *srcArray)
+{
+    EtsCoreTypedArraySetValuesFromArrayImpl(thisArray, srcArray);
+}
+
+extern "C" void EtsStdCoreBigUInt64ArrayFillInternal(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsLong val,
+                                                     EtsInt begin, EtsInt end)
+{
+    EtsCoreTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
 /*
  * Typed Arrays: Reverse Implementation
  */
 template <typename T>
-static inline T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
+static inline T *EtsCoreTypedArrayReverseImpl(T *thisArray)
 {
     auto *arrData = GetNativeData(thisArray);
     if (UNLIKELY(arrData == nullptr)) {
@@ -1044,13 +1042,13 @@ static inline T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define REVERSE_CALL_DECL(Type)                                                     \
-    /* CC-OFFNXT(G.PRE.02) name part */                                             \
-    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArrayReverse( \
-        ark::ets::EtsEscompat##Type##Array *thisArray)                              \
-    {                                                                               \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                      \
-        return EtsEscompatTypedArrayReverseImpl(thisArray);                         \
+#define REVERSE_CALL_DECL(Type)                                                   \
+    /* CC-OFFNXT(G.PRE.02) name part */                                           \
+    extern "C" ark::ets::EtsStdCore##Type##Array *EtsStdCore##Type##ArrayReverse( \
+        ark::ets::EtsStdCore##Type##Array *thisArray)                             \
+    {                                                                             \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                    \
+        return EtsCoreTypedArrayReverseImpl(thisArray);                           \
     }  // namespace ark::ets::intrinsics
 
 REVERSE_CALL_DECL(Int8)
@@ -1072,8 +1070,8 @@ REVERSE_CALL_DECL(BigUInt64)
  * Typed Arrays: reversed alloc data implementation: needs for toReversed().
  */
 template <typename ElementType>
-static ALWAYS_INLINE inline void TypedArrayReverseCopyBuffer(EtsEscompatArrayBuffer *dstBuf,
-                                                             EtsEscompatArrayBuffer *srcBuf, EtsInt byteOffset,
+static ALWAYS_INLINE inline void TypedArrayReverseCopyBuffer(EtsStdCoreArrayBuffer *dstBuf,
+                                                             EtsStdCoreArrayBuffer *srcBuf, EtsInt byteOffset,
                                                              EtsInt srcLength)
 {
     ASSERT(srcBuf != nullptr);
@@ -1092,14 +1090,14 @@ static ALWAYS_INLINE inline void TypedArrayReverseCopyBuffer(EtsEscompatArrayBuf
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define REVERSE_COPY_BUFFER_CALL_DECL(Type)                                                                  \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                      \
-    extern "C" void EtsEscompat##Type##ArrayReverseCopyBuffer(                                               \
-        EtsEscompatArrayBuffer *dstBuf, EtsEscompatArrayBuffer *srcBuf, EtsInt byteOffset, EtsInt srcLength) \
-    {                                                                                                        \
-        using ElementType = EtsEscompat##Type##Array::ElementType;                                           \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                               \
-        TypedArrayReverseCopyBuffer<ElementType>(dstBuf, srcBuf, byteOffset, srcLength);                     \
+#define REVERSE_COPY_BUFFER_CALL_DECL(Type)                                                                \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                    \
+    extern "C" void EtsStdCore##Type##ArrayReverseCopyBuffer(                                              \
+        EtsStdCoreArrayBuffer *dstBuf, EtsStdCoreArrayBuffer *srcBuf, EtsInt byteOffset, EtsInt srcLength) \
+    {                                                                                                      \
+        using ElementType = EtsStdCore##Type##Array::ElementType;                                          \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                             \
+        TypedArrayReverseCopyBuffer<ElementType>(dstBuf, srcBuf, byteOffset, srcLength);                   \
     }  // namespace ark::ets::intrinsics
 
 REVERSE_COPY_BUFFER_CALL_DECL(Int8)
@@ -1131,7 +1129,7 @@ static inline int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
 }
 
 template <typename T>
-void EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt count)
+void EtsCoreTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt count)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
@@ -1161,28 +1159,28 @@ void EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt sta
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_COPY_WITHIN(Type)                                                                    \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                   \
-    extern "C" void EtsEscompat##Type##ArrayCopyWithinImpl(ark::ets::EtsEscompat##Type##Array *thisArray, \
-                                                           EtsInt target, EtsInt start, EtsInt end)       \
-    {                                                                                                     \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
-        EtsEscompatTypedArrayCopyWithinImpl(thisArray, target, start, end);                               \
+#define ETS_STD_CORE_COPY_WITHIN(Type)                                                                                 \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                                \
+    extern "C" void EtsStdCore##Type##ArrayCopyWithinImpl(ark::ets::EtsStdCore##Type##Array *thisArray, EtsInt target, \
+                                                          EtsInt start, EtsInt end)                                    \
+    {                                                                                                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                         \
+        EtsCoreTypedArrayCopyWithinImpl(thisArray, target, start, end);                                                \
     }  // namespace ark::ets::intrinsics
 
-ETS_ESCOMPAT_COPY_WITHIN(Int8)
-ETS_ESCOMPAT_COPY_WITHIN(Int16)
-ETS_ESCOMPAT_COPY_WITHIN(Int32)
-ETS_ESCOMPAT_COPY_WITHIN(BigInt64)
-ETS_ESCOMPAT_COPY_WITHIN(Float32)
-ETS_ESCOMPAT_COPY_WITHIN(Float64)
-ETS_ESCOMPAT_COPY_WITHIN(UInt8)
-ETS_ESCOMPAT_COPY_WITHIN(UInt16)
-ETS_ESCOMPAT_COPY_WITHIN(UInt32)
-ETS_ESCOMPAT_COPY_WITHIN(BigUInt64)
-ETS_ESCOMPAT_COPY_WITHIN(UInt8Clamped)
+ETS_STD_CORE_COPY_WITHIN(Int8)
+ETS_STD_CORE_COPY_WITHIN(Int16)
+ETS_STD_CORE_COPY_WITHIN(Int32)
+ETS_STD_CORE_COPY_WITHIN(BigInt64)
+ETS_STD_CORE_COPY_WITHIN(Float32)
+ETS_STD_CORE_COPY_WITHIN(Float64)
+ETS_STD_CORE_COPY_WITHIN(UInt8)
+ETS_STD_CORE_COPY_WITHIN(UInt16)
+ETS_STD_CORE_COPY_WITHIN(UInt32)
+ETS_STD_CORE_COPY_WITHIN(BigUInt64)
+ETS_STD_CORE_COPY_WITHIN(UInt8Clamped)
 
-#undef ETS_ESCOMPAT_COPY_WITHIN
+#undef ETS_STD_CORE_COPY_WITHIN
 
 template <typename T>
 bool Cmp(const typename T::ElementType &left, const typename T::ElementType &right)
@@ -1199,7 +1197,7 @@ bool Cmp(const typename T::ElementType &left, const typename T::ElementType &rig
 }
 
 template <typename T>
-T *EtsEscompatTypedArraySortWrapper(T *thisArray, bool withNaN = false)
+T *EtsCoreTypedArraySortWrapper(T *thisArray, bool withNaN = false)
 {
     using ElementType = typename T::ElementType;
 
@@ -1210,7 +1208,7 @@ T *EtsEscompatTypedArraySortWrapper(T *thisArray, bool withNaN = false)
         return thisArray;
     }
 
-    auto *arrayBuffer = static_cast<EtsEscompatArrayBuffer *>(&*thisArray->GetBuffer());
+    auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*thisArray->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
         auto coro = EtsCoroutine::GetCurrent();
         [[maybe_unused]] EtsHandleScope scope(coro);
@@ -1232,50 +1230,49 @@ T *EtsEscompatTypedArraySortWrapper(T *thisArray, bool withNaN = false)
 }
 
 template <typename T>
-T *EtsEscompatTypedArraySortWithNaN(T *thisArray)
+T *EtsCoreTypedArraySortWithNaN(T *thisArray)
 {
-    return EtsEscompatTypedArraySortWrapper(thisArray, true);
+    return EtsCoreTypedArraySortWrapper(thisArray, true);
 }
 
 template <typename T>
-T *EtsEscompatTypedArraySort(T *thisArray)
+T *EtsCoreTypedArraySort(T *thisArray)
 {
-    return EtsEscompatTypedArraySortWrapper(thisArray);
+    return EtsCoreTypedArraySortWrapper(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatInt8Array *EtsEscompatInt8ArraySort(ark::ets::EtsEscompatInt8Array *thisArray)
+extern "C" ark::ets::EtsStdCoreInt8Array *EtsStdCoreInt8ArraySort(ark::ets::EtsStdCoreInt8Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatInt16Array *EtsEscompatInt16ArraySort(ark::ets::EtsEscompatInt16Array *thisArray)
+extern "C" ark::ets::EtsStdCoreInt16Array *EtsStdCoreInt16ArraySort(ark::ets::EtsStdCoreInt16Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatInt32Array *EtsEscompatInt32ArraySort(ark::ets::EtsEscompatInt32Array *thisArray)
+extern "C" ark::ets::EtsStdCoreInt32Array *EtsStdCoreInt32ArraySort(ark::ets::EtsStdCoreInt32Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatBigInt64Array *EtsEscompatBigInt64ArraySort(
-    ark::ets::EtsEscompatBigInt64Array *thisArray)
+extern "C" ark::ets::EtsStdCoreBigInt64Array *EtsStdCoreBigInt64ArraySort(ark::ets::EtsStdCoreBigInt64Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatFloat32Array *EtsEscompatFloat32ArraySort(ark::ets::EtsEscompatFloat32Array *thisArray)
+extern "C" ark::ets::EtsStdCoreFloat32Array *EtsStdCoreFloat32ArraySort(ark::ets::EtsStdCoreFloat32Array *thisArray)
 {
-    return EtsEscompatTypedArraySortWithNaN(thisArray);
+    return EtsCoreTypedArraySortWithNaN(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatFloat64Array *EtsEscompatFloat64ArraySort(ark::ets::EtsEscompatFloat64Array *thisArray)
+extern "C" ark::ets::EtsStdCoreFloat64Array *EtsStdCoreFloat64ArraySort(ark::ets::EtsStdCoreFloat64Array *thisArray)
 {
-    return EtsEscompatTypedArraySortWithNaN(thisArray);
+    return EtsCoreTypedArraySortWithNaN(thisArray);
 }
 
 template <typename Array, typename = std::enable_if_t<std::is_floating_point_v<typename Array::ElementType>>>
-static bool EtsEscompatTypedArrayContainsNaN(Array *array, EtsInt pos)
+static bool EtsCoreTypedArrayContainsNaN(Array *array, EtsInt pos)
 {
     using ElementType = typename Array::ElementType;
     auto length = array->GetLengthInt();
@@ -1288,47 +1285,47 @@ static bool EtsEscompatTypedArrayContainsNaN(Array *array, EtsInt pos)
     return std::any_of(span.begin(), span.end(), [](ElementType elem) { return elem != elem; });
 }
 
-extern "C" EtsBoolean EtsEscompatFloat32ArrayContainsNaN(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
+extern "C" EtsBoolean EtsStdCoreFloat32ArrayContainsNaN(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsInt pos)
 {
-    return ToEtsBoolean(EtsEscompatTypedArrayContainsNaN(thisArray, pos));
+    return ToEtsBoolean(EtsCoreTypedArrayContainsNaN(thisArray, pos));
 }
 
-extern "C" EtsBoolean EtsEscompatFloat64ArrayContainsNaN(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
+extern "C" EtsBoolean EtsStdCoreFloat64ArrayContainsNaN(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsInt pos)
 {
-    return ToEtsBoolean(EtsEscompatTypedArrayContainsNaN(thisArray, pos));
+    return ToEtsBoolean(EtsCoreTypedArrayContainsNaN(thisArray, pos));
 }
 
-extern "C" ark::ets::EtsEscompatUInt8ClampedArray *EtsEscompatUInt8ClampedArraySort(
-    ark::ets::EtsEscompatUInt8ClampedArray *thisArray)
+extern "C" ark::ets::EtsStdCoreUInt8ClampedArray *EtsStdCoreUInt8ClampedArraySort(
+    ark::ets::EtsStdCoreUInt8ClampedArray *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatUInt8Array *EtsEscompatUInt8ArraySort(ark::ets::EtsEscompatUInt8Array *thisArray)
+extern "C" ark::ets::EtsStdCoreUInt8Array *EtsStdCoreUInt8ArraySort(ark::ets::EtsStdCoreUInt8Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatUInt16Array *EtsEscompatUInt16ArraySort(ark::ets::EtsEscompatUInt16Array *thisArray)
+extern "C" ark::ets::EtsStdCoreUInt16Array *EtsStdCoreUInt16ArraySort(ark::ets::EtsStdCoreUInt16Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatUInt32Array *EtsEscompatUInt32ArraySort(ark::ets::EtsEscompatUInt32Array *thisArray)
+extern "C" ark::ets::EtsStdCoreUInt32Array *EtsStdCoreUInt32ArraySort(ark::ets::EtsStdCoreUInt32Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
-extern "C" ark::ets::EtsEscompatBigUInt64Array *EtsEscompatBigUInt64ArraySort(
-    ark::ets::EtsEscompatBigUInt64Array *thisArray)
+extern "C" ark::ets::EtsStdCoreBigUInt64Array *EtsStdCoreBigUInt64ArraySort(
+    ark::ets::EtsStdCoreBigUInt64Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsCoreTypedArraySort(thisArray);
 }
 
 #define INVALID_INDEX (-1)
 
 template <typename T, typename Pred>
-static EtsInt EtsEscompatArrayIndexOf(T *thisArray, EtsInt fromIndex, Pred pred)
+static EtsInt EtsCoreTypedArrayIndexOf(T *thisArray, EtsInt fromIndex, Pred pred)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
@@ -1355,16 +1352,16 @@ static EtsInt EtsEscompatArrayIndexOf(T *thisArray, EtsInt fromIndex, Pred pred)
 }
 
 template <typename T, typename SE>
-static EtsInt EtsEscompatArrayIndexOfLong(T *thisArray, SE searchElement, EtsInt fromIndex)
+static EtsInt EtsCoreTypedArrayIndexOfLong(T *thisArray, SE searchElement, EtsInt fromIndex)
 {
     using ElementType = typename T::ElementType;
-    return EtsEscompatArrayIndexOf(
+    return EtsCoreTypedArrayIndexOf(
         thisArray, fromIndex,
         [element = static_cast<ElementType>(searchElement)](ElementType e) { return e == element; });
 }
 
 template <typename T>
-static EtsInt EtsEscompatArrayIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex)
+static EtsInt EtsCoreTypedArrayIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex)
 {
     if (std::isnan(searchElement)) {
         return INVALID_INDEX;
@@ -1398,50 +1395,50 @@ static EtsInt EtsEscompatArrayIndexOfNumber(T *thisArray, double searchElement, 
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_INDEX_OF_NUMBER(Type)                                                                 \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                    \
-    extern "C" EtsInt EtsEscompat##Type##ArrayIndexOfNumber(ark::ets::EtsEscompat##Type##Array *thisArray, \
-                                                            EtsDouble searchElement, EtsInt fromIndex)     \
-    {                                                                                                      \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                             \
-        return EtsEscompatArrayIndexOfNumber(thisArray, searchElement, fromIndex);                         \
+#define ETS_STD_CORE_INDEX_OF_NUMBER(Type)                                                               \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                  \
+    extern "C" EtsInt EtsStdCore##Type##ArrayIndexOfNumber(ark::ets::EtsStdCore##Type##Array *thisArray, \
+                                                           EtsDouble searchElement, EtsInt fromIndex)    \
+    {                                                                                                    \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                           \
+        return EtsCoreTypedArrayIndexOfNumber(thisArray, searchElement, fromIndex);                      \
     }  // namespace ark::ets::intrinsics
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_INDEX_OF_LONG(Type)                                                                 \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                  \
-    extern "C" EtsInt EtsEscompat##Type##ArrayIndexOfLong(ark::ets::EtsEscompat##Type##Array *thisArray, \
-                                                          EtsLong searchElement, EtsInt fromIndex)       \
-    {                                                                                                    \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                           \
-        return EtsEscompatArrayIndexOfLong(thisArray, searchElement, fromIndex);                         \
+#define ETS_STD_CORE_INDEX_OF_LONG(Type)                                                               \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                \
+    extern "C" EtsInt EtsStdCore##Type##ArrayIndexOfLong(ark::ets::EtsStdCore##Type##Array *thisArray, \
+                                                         EtsLong searchElement, EtsInt fromIndex)      \
+    {                                                                                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                         \
+        return EtsCoreTypedArrayIndexOfLong(thisArray, searchElement, fromIndex);                      \
     }  // namespace ark::ets::intrinsics
 
-ETS_ESCOMPAT_INDEX_OF_NUMBER(Int8)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(Int16)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(Int32)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(BigInt64)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(Float32)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(Float64)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt8)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt16)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt32)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(BigUInt64)
-ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt8Clamped)
-ETS_ESCOMPAT_INDEX_OF_LONG(Int8)
-ETS_ESCOMPAT_INDEX_OF_LONG(Int16)
-ETS_ESCOMPAT_INDEX_OF_LONG(Int32)
-ETS_ESCOMPAT_INDEX_OF_LONG(BigInt64)
-ETS_ESCOMPAT_INDEX_OF_LONG(Float32)
-ETS_ESCOMPAT_INDEX_OF_LONG(Float64)
-ETS_ESCOMPAT_INDEX_OF_LONG(UInt8)
-ETS_ESCOMPAT_INDEX_OF_LONG(UInt16)
-ETS_ESCOMPAT_INDEX_OF_LONG(UInt32)
-ETS_ESCOMPAT_INDEX_OF_LONG(BigUInt64)
-ETS_ESCOMPAT_INDEX_OF_LONG(UInt8Clamped)
+ETS_STD_CORE_INDEX_OF_NUMBER(Int8)
+ETS_STD_CORE_INDEX_OF_NUMBER(Int16)
+ETS_STD_CORE_INDEX_OF_NUMBER(Int32)
+ETS_STD_CORE_INDEX_OF_NUMBER(BigInt64)
+ETS_STD_CORE_INDEX_OF_NUMBER(Float32)
+ETS_STD_CORE_INDEX_OF_NUMBER(Float64)
+ETS_STD_CORE_INDEX_OF_NUMBER(UInt8)
+ETS_STD_CORE_INDEX_OF_NUMBER(UInt16)
+ETS_STD_CORE_INDEX_OF_NUMBER(UInt32)
+ETS_STD_CORE_INDEX_OF_NUMBER(BigUInt64)
+ETS_STD_CORE_INDEX_OF_NUMBER(UInt8Clamped)
+ETS_STD_CORE_INDEX_OF_LONG(Int8)
+ETS_STD_CORE_INDEX_OF_LONG(Int16)
+ETS_STD_CORE_INDEX_OF_LONG(Int32)
+ETS_STD_CORE_INDEX_OF_LONG(BigInt64)
+ETS_STD_CORE_INDEX_OF_LONG(Float32)
+ETS_STD_CORE_INDEX_OF_LONG(Float64)
+ETS_STD_CORE_INDEX_OF_LONG(UInt8)
+ETS_STD_CORE_INDEX_OF_LONG(UInt16)
+ETS_STD_CORE_INDEX_OF_LONG(UInt32)
+ETS_STD_CORE_INDEX_OF_LONG(BigUInt64)
+ETS_STD_CORE_INDEX_OF_LONG(UInt8Clamped)
 
 template <typename T1, typename T2>
-static EtsInt EtsEscompatArrayLastIndexOfLong(T1 *thisArray, T2 searchElement, EtsInt fromIndex)
+static EtsInt EtsCoreTypedArrayLastIndexOfLong(T1 *thisArray, T2 searchElement, EtsInt fromIndex)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
@@ -1486,7 +1483,7 @@ static EtsInt EtsEscompatArrayLastIndexOfLong(T1 *thisArray, T2 searchElement, E
 }
 
 template <typename T>
-static EtsInt EtsEscompatArrayLastIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex)
+static EtsInt EtsCoreTypedArrayLastIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex)
 {
     if (std::isnan(searchElement)) {
         return INVALID_INDEX;
@@ -1534,47 +1531,47 @@ static EtsInt EtsEscompatArrayLastIndexOfNumber(T *thisArray, double searchEleme
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Type)                                                                \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                        \
-    extern "C" EtsInt EtsEscompat##Type##ArrayLastIndexOfNumber(ark::ets::EtsEscompat##Type##Array *thisArray, \
-                                                                EtsDouble searchElement, EtsInt fromIndex)     \
-    {                                                                                                          \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                                 \
-        return EtsEscompatArrayLastIndexOfNumber(thisArray, searchElement, fromIndex);                         \
+#define ETS_STD_CORE_LAST_INDEX_OF_NUMBER(Type)                                                              \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                      \
+    extern "C" EtsInt EtsStdCore##Type##ArrayLastIndexOfNumber(ark::ets::EtsStdCore##Type##Array *thisArray, \
+                                                               EtsDouble searchElement, EtsInt fromIndex)    \
+    {                                                                                                        \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                               \
+        return EtsCoreTypedArrayLastIndexOfNumber(thisArray, searchElement, fromIndex);                      \
     }  // namespace ark::ets::intrinsics
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Type)                                                                \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                      \
-    extern "C" EtsInt EtsEscompat##Type##ArrayLastIndexOfLong(ark::ets::EtsEscompat##Type##Array *thisArray, \
-                                                              EtsLong searchElement, EtsInt fromIndex)       \
-    {                                                                                                        \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                               \
-        return EtsEscompatArrayLastIndexOfLong(thisArray, searchElement, fromIndex);                         \
+#define ETS_STD_CORE_LAST_INDEX_OF_LONG(Type)                                                              \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                    \
+    extern "C" EtsInt EtsStdCore##Type##ArrayLastIndexOfLong(ark::ets::EtsStdCore##Type##Array *thisArray, \
+                                                             EtsLong searchElement, EtsInt fromIndex)      \
+    {                                                                                                      \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                             \
+        return EtsCoreTypedArrayLastIndexOfLong(thisArray, searchElement, fromIndex);                      \
     }  // namespace ark::ets::intrinsics
 
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Int8)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Int16)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Int32)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(BigInt64)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Float32)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Float64)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt8)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt16)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt32)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(BigUInt64)
-ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt8Clamped)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Int8)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Int16)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Int32)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(BigInt64)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Float32)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Float64)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt8)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt16)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt32)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(BigUInt64)
-ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt8Clamped)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(Int8)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(Int16)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(Int32)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(BigInt64)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(Float32)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(Float64)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(UInt8)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(UInt16)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(UInt32)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(BigUInt64)
+ETS_STD_CORE_LAST_INDEX_OF_NUMBER(UInt8Clamped)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(Int8)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(Int16)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(Int32)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(BigInt64)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(Float32)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(Float64)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(UInt8)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(UInt16)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(UInt32)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(BigUInt64)
+ETS_STD_CORE_LAST_INDEX_OF_LONG(UInt8Clamped)
 
 #undef INVALID_INDEX
 
@@ -1768,68 +1765,68 @@ static ark::ets::EtsString *TypedArrayJoin(T *thisArray, ark::ets::EtsString *se
     return TypedArrayJoinUtf16(data, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatInt8ArrayJoin(ark::ets::EtsEscompatInt8Array *thisArray,
+extern "C" ark::ets::EtsString *EtsStdCoreInt8ArrayJoin(ark::ets::EtsStdCoreInt8Array *thisArray,
+                                                        ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsStdCoreUint8ArrayJoin(ark::ets::EtsStdCoreUInt8Array *thisArray,
                                                          ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatUint8ArrayJoin(ark::ets::EtsEscompatUInt8Array *thisArray,
+extern "C" ark::ets::EtsString *EtsStdCoreUint8ClampedArrayJoin(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray,
+                                                                ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsStdCoreInt16ArrayJoin(ark::ets::EtsStdCoreInt16Array *thisArray,
+                                                         ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsStdCoreUint16ArrayJoin(ark::ets::EtsStdCoreUInt16Array *thisArray,
                                                           ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatUint8ClampedArrayJoin(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
-                                                                 ark::ets::EtsString *separator)
+extern "C" ark::ets::EtsString *EtsStdCoreInt32ArrayJoin(ark::ets::EtsStdCoreInt32Array *thisArray,
+                                                         ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatInt16ArrayJoin(ark::ets::EtsEscompatInt16Array *thisArray,
+extern "C" ark::ets::EtsString *EtsStdCoreUint32ArrayJoin(ark::ets::EtsStdCoreUInt32Array *thisArray,
                                                           ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatUint16ArrayJoin(ark::ets::EtsEscompatUInt16Array *thisArray,
-                                                           ark::ets::EtsString *separator)
+extern "C" ark::ets::EtsString *EtsStdCoreBigInt64ArrayJoin(ark::ets::EtsStdCoreBigInt64Array *thisArray,
+                                                            ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatInt32ArrayJoin(ark::ets::EtsEscompatInt32Array *thisArray,
-                                                          ark::ets::EtsString *separator)
-{
-    return TypedArrayJoin(thisArray, separator);
-}
-
-extern "C" ark::ets::EtsString *EtsEscompatUint32ArrayJoin(ark::ets::EtsEscompatUInt32Array *thisArray,
-                                                           ark::ets::EtsString *separator)
-{
-    return TypedArrayJoin(thisArray, separator);
-}
-
-extern "C" ark::ets::EtsString *EtsEscompatBigInt64ArrayJoin(ark::ets::EtsEscompatBigInt64Array *thisArray,
+extern "C" ark::ets::EtsString *EtsStdCoreBigUint64ArrayJoin(ark::ets::EtsStdCoreBigUInt64Array *thisArray,
                                                              ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatBigUint64ArrayJoin(ark::ets::EtsEscompatBigUInt64Array *thisArray,
-                                                              ark::ets::EtsString *separator)
+extern "C" ark::ets::EtsString *EtsStdCoreFloat32ArrayJoin(ark::ets::EtsStdCoreFloat32Array *thisArray,
+                                                           ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatFloat32ArrayJoin(ark::ets::EtsEscompatFloat32Array *thisArray,
-                                                            ark::ets::EtsString *separator)
-{
-    return TypedArrayJoin(thisArray, separator);
-}
-
-extern "C" ark::ets::EtsString *EtsEscompatFloat64ArrayJoin(ark::ets::EtsEscompatFloat64Array *thisArray,
-                                                            ark::ets::EtsString *separator)
+extern "C" ark::ets::EtsString *EtsStdCoreFloat64ArrayJoin(ark::ets::EtsStdCoreFloat64Array *thisArray,
+                                                           ark::ets::EtsString *separator)
 {
     return TypedArrayJoin(thisArray, separator);
 }
@@ -1974,7 +1971,7 @@ uint32_t CastNumberUnsignedHelper(double val)
 }
 
 template <typename T1, typename T2>
-static void EtsEscompatArrayOfImpl(T1 *thisArray, T2 *src)
+static void EtsCoreTypedArrayOfImpl(T1 *thisArray, T2 *src)
 {
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
@@ -1987,7 +1984,7 @@ static void EtsEscompatArrayOfImpl(T1 *thisArray, T2 *src)
 }
 
 template <typename T1, typename T2>
-static void EtsEscompatArrayOfImplNumber(T1 *thisArray, T2 *src)
+static void EtsCoreTypedArrayOfImplNumber(T1 *thisArray, T2 *src)
 {
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
@@ -2003,7 +2000,7 @@ static void EtsEscompatArrayOfImplNumber(T1 *thisArray, T2 *src)
 }
 
 template <typename T1, typename T2>
-static void EtsEscompatArrayOfImplNumberUnsigned(T1 *thisArray, T2 *src)
+static void EtsCoreTypedArrayOfImplNumberUnsigned(T1 *thisArray, T2 *src)
 {
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
@@ -2034,7 +2031,7 @@ static int Clamp(double val)
 }
 
 template <typename T1, typename T2>
-static void EtsEscompatArrayOfImplClamped(T1 *thisArray, T2 *src)
+static void EtsCoreTypedArrayOfImplClamped(T1 *thisArray, T2 *src)
 {
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
@@ -2049,62 +2046,62 @@ static void EtsEscompatArrayOfImplClamped(T1 *thisArray, T2 *src)
     }
 }
 
-extern "C" void EtsEscompatInt8ArrayOfInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt8ArrayOfInt(ark::ets::EtsStdCoreInt8Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt8ArrayOfNumber(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt8ArrayOfNumber(ark::ets::EtsStdCoreInt8Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumber(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt8ArrayOfByte(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt8ArrayOfByte(ark::ets::EtsStdCoreInt8Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsByte *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt16ArrayOfInt(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt16ArrayOfInt(ark::ets::EtsStdCoreInt16Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt16ArrayOfNumber(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt16ArrayOfNumber(ark::ets::EtsStdCoreInt16Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumber(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt16ArrayOfShort(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt16ArrayOfShort(ark::ets::EtsStdCoreInt16Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt32ArrayOfInt(ark::ets::EtsEscompatInt32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt32ArrayOfInt(ark::ets::EtsStdCoreInt32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatInt32ArrayOfNumber(ark::ets::EtsEscompatInt32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreInt32ArrayOfNumber(ark::ets::EtsStdCoreInt32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumber(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatBigInt64ArrayOfInt(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreBigInt64ArrayOfInt(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
 template <typename T, typename ToLong>
-void EtsEscompatArrayOfBigIntImpl(T *thisArray, EtsTypedObjectArray<EtsBigInt> *src, ToLong toLong)
+void EtsCoreTypedArrayOfBigIntImpl(T *thisArray, EtsTypedObjectArray<EtsBigInt> *src, ToLong toLong)
 {
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
@@ -2117,144 +2114,141 @@ void EtsEscompatArrayOfBigIntImpl(T *thisArray, EtsTypedObjectArray<EtsBigInt> *
     std::generate_n(dst, src->GetLength(), [idx = 0, src, toLong]() mutable { return toLong(src->Get(idx++)); });
 }
 
-extern "C" void EtsEscompatBigInt64ArrayOfBigInt(ark::ets::EtsEscompatBigInt64Array *thisArray, ark::ObjectHeader *src)
+extern "C" void EtsStdCoreBigInt64ArrayOfBigInt(ark::ets::EtsStdCoreBigInt64Array *thisArray, ark::ObjectHeader *src)
 {
     // The method fills the typed array from a FixedArray<bigint> and in contrast to
-    // EtsEscompatBigInt64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
+    // EtsStdCoreBigInt64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
     // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
-    EtsEscompatArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
-                                 [](EtsBigInt *bigint) { return unbox::GetLong(bigint); });
+    EtsCoreTypedArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
+                                  [](EtsBigInt *bigint) { return unbox::GetLong(bigint); });
 }
 
-extern "C" void EtsEscompatBigInt64ArrayOfLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreBigInt64ArrayOfLong(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatBigInt64ArrayOfNumber(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreBigInt64ArrayOfNumber(ark::ets::EtsStdCoreBigInt64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumber(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatFloat32ArrayOfInt(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreFloat32ArrayOfInt(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatFloat32ArrayOfFloat(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreFloat32ArrayOfFloat(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsFloat *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatFloat32ArrayOfNumber(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreFloat32ArrayOfNumber(ark::ets::EtsStdCoreFloat32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatFloat64ArrayOfInt(ark::ets::EtsEscompatFloat64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreFloat64ArrayOfInt(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatFloat64ArrayOfNumber(ark::ets::EtsEscompatFloat64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreFloat64ArrayOfNumber(ark::ets::EtsStdCoreFloat64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint8ClampedArrayOfNumber(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
-                                                     EtsCharArray *src)
+extern "C" void EtsStdCoreUint8ClampedArrayOfNumber(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplClamped(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplClamped(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint8ClampedArrayOfInt(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint8ClampedArrayOfInt(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplClamped(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplClamped(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint8ClampedArrayOfShort(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
-                                                    EtsCharArray *src)
+extern "C" void EtsStdCoreUint8ClampedArrayOfShort(ark::ets::EtsStdCoreUInt8ClampedArray *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplClamped(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplClamped(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint8ArrayOfNumber(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint8ArrayOfNumber(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumberUnsigned(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumberUnsigned(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint8ArrayOfInt(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint8ArrayOfInt(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint8ArrayOfShort(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint8ArrayOfShort(ark::ets::EtsStdCoreUInt8Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint16ArrayOfNumber(ark::ets::EtsEscompatUInt16Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint16ArrayOfNumber(ark::ets::EtsStdCoreUInt16Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumberUnsigned(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumberUnsigned(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint16ArrayOfInt(ark::ets::EtsEscompatUInt16Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint16ArrayOfInt(ark::ets::EtsStdCoreUInt16Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint32ArrayOfNumber(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint32ArrayOfNumber(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImplNumberUnsigned(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImplNumberUnsigned(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint32ArrayOfInt(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint32ArrayOfInt(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsUint *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatUint32ArrayOfLong(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreUint32ArrayOfLong(ark::ets::EtsStdCoreUInt32Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatBigUint64ArrayOfInt(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreBigUint64ArrayOfInt(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatBigUint64ArrayOfLong(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsCharArray *src)
+extern "C" void EtsStdCoreBigUint64ArrayOfLong(ark::ets::EtsStdCoreBigUInt64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+    EtsCoreTypedArrayOfImpl(thisArray, srcAddress);
 }
 
-extern "C" void EtsEscompatBigUint64ArrayOfBigInt(ark::ets::EtsEscompatBigUInt64Array *thisArray,
-                                                  ark::ObjectHeader *src)
+extern "C" void EtsStdCoreBigUint64ArrayOfBigInt(ark::ets::EtsStdCoreBigUInt64Array *thisArray, ark::ObjectHeader *src)
 {
     // The method fills the typed array from a FixedArray<bigint> and in contrast to
-    // EtsEscompatBigUint64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
+    // EtsStdCoreBigUint64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
     // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
-    EtsEscompatArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
-                                 [](EtsBigInt *bigint) { return unbox::GetULong(bigint); });
+    EtsCoreTypedArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
+                                  [](EtsBigInt *bigint) { return unbox::GetULong(bigint); });
 }
 }  // namespace ark::ets::intrinsics

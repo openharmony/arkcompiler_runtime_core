@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,7 +164,7 @@ function testNoSeamlessForClass(func: ESValue, arg: Object, className: String): 
 function testDirectTransferStaticToDynamic(): void {
     let buffer = new ArrayBuffer(100);
     testNoSeamlessForClass(testDirectTransfer, buffer, 'Lstd/core/ArrayBuffer;');
-    testNoSeamlessForClass(testDirectTransfer, new Uint8Array(buffer), 'Lescompat/Uint8Array;');
+    testNoSeamlessForClass(testDirectTransfer, new Uint8Array(buffer), 'Lstd/core/Uint8Array;');
     testNoSeamlessForClass(testDirectTransfer, new DataView(buffer), 'Lstd/core/DataView;');
 }
 

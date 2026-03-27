@@ -71,11 +71,11 @@ public:
 
     static std::vector<MirrorFieldInfo> GetMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, managedData_, "data"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, weakRef_, "weakRef"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, nativeData_, "dataAddress"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, byteLength_, "_byteLength"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, isResizable_, "isResizable")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsStdCoreArrayBuffer, managedData_, "data"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreArrayBuffer, weakRef_, "weakRef"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreArrayBuffer, nativeData_, "dataAddress"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreArrayBuffer, byteLength_, "_byteLength"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreArrayBuffer, isResizable_, "isResizable")};
     }
 
 private:
@@ -99,10 +99,10 @@ TEST_F(EtsArrayBufferTest, ReallocateToNonMovable)
 
     auto *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::Create(coro, EXPECTED_LEN));
+    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, EtsStdCoreArrayBuffer::Create(coro, EXPECTED_LEN));
     ASSERT_NE(handle.GetPtr(), nullptr);
 
-    ASSERT_FALSE(EtsEscompatArrayBuffer::IsNonMovableArray(coro, handle.GetPtr()));
+    ASSERT_FALSE(EtsStdCoreArrayBuffer::IsNonMovableArray(coro, handle.GetPtr()));
     ASSERT_EQ(handle->GetByteLength(), EXPECTED_LEN);
 
     auto data = Span<uint8_t>(handle->GetData<uint8_t *>(), EXPECTED_LEN);
@@ -112,9 +112,9 @@ TEST_F(EtsArrayBufferTest, ReallocateToNonMovable)
     data[1U] = 2U;
     data[2U] = 3U;
 
-    EtsEscompatArrayBuffer::ReallocateNonMovableArray(coro, handle.GetPtr(), EXPECTED_LEN);
+    EtsStdCoreArrayBuffer::ReallocateNonMovableArray(coro, handle.GetPtr(), EXPECTED_LEN);
 
-    ASSERT_TRUE(EtsEscompatArrayBuffer::IsNonMovableArray(coro, handle.GetPtr()));
+    ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNonMovableArray(coro, handle.GetPtr()));
     ASSERT_EQ(handle->GetByteLength(), EXPECTED_LEN);
 
     // Validate ArrayBuffer after data reallocation.

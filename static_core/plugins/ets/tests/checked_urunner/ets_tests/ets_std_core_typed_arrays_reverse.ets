@@ -15,89 +15,89 @@
 
 //! CHECKER       JIT: reverse() and toReversed()
 //! RUN           force_jit: true,  options: "--compiler-regex=.*::test.*Array",
-//!               entry: "ets_escompat_typed_arrays_reverse.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_reverse.ETSGLOBAL::main"
 //!
 //! METHOD        "testIu8Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArrayReverse "
-//! INST          /Call.* escompat.Int8Array::toReversed /
+//! INST          /Call.* std.core.Int8Array::toReversed /
 //! INST          "Intrinsic.UInt8ArrayReverse "
-//! INST          /Call.* escompat.Uint8Array::toReversed /
+//! INST          /Call.* std.core.Uint8Array::toReversed /
 //!
 //! METHOD        "testIu16Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArrayReverse "
-//! INST          /Call.* escompat.Int16Array::toReversed /
+//! INST          /Call.* std.core.Int16Array::toReversed /
 //! INST          "Intrinsic.UInt16ArrayReverse "
-//! INST          /Call.* escompat.Uint16Array::toReversed /
+//! INST          /Call.* std.core.Uint16Array::toReversed /
 //!
 //! METHOD        "testIu32Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArrayReverse "
-//! INST          /Call.* escompat.Int32Array::toReversed /
+//! INST          /Call.* std.core.Int32Array::toReversed /
 //! INST          "Intrinsic.UInt32ArrayReverse "
-//! INST          /Call.* escompat.Uint32Array::toReversed /
+//! INST          /Call.* std.core.Uint32Array::toReversed /
 //!
 //! METHOD        "testIu64Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayReverse "
-//! INST          /Call.* escompat.BigInt64Array::toReversed /
+//! INST          /Call.* std.core.BigInt64Array::toReversed /
 //! INST          "Intrinsic.BigUInt64ArrayReverse "
-//! INST          /Call.* escompat.BigUint64Array::toReversed /
+//! INST          /Call.* std.core.BigUint64Array::toReversed /
 //!
 //! METHOD        "testF32Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArrayReverse "
-//! INST          /Call.* escompat.Float32Array::toReversed /
+//! INST          /Call.* std.core.Float32Array::toReversed /
 //!
 //! METHOD        "testF64Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArrayReverse "
-//! INST          /Call.* escompat.Float64Array::toReversed /
+//! INST          /Call.* std.core.Float64Array::toReversed /
 
 
 //! CHECKER       AOT: reverse() and toReversed()
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex=.*::test.*Array",
-//!               entry: "ets_escompat_typed_arrays_reverse.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_reverse.ETSGLOBAL::main"
 //!
 //! METHOD        "testIu8Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArrayReverse "
-//! INST          /Call.* escompat.Int8Array::toReversed /
+//! INST          /Call.* std.core.Int8Array::toReversed /
 //! INST          "Intrinsic.UInt8ArrayReverse "
-//! INST          /Call.* escompat.Uint8Array::toReversed /
+//! INST          /Call.* std.core.Uint8Array::toReversed /
 //!
 //! METHOD        "testIu16Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArrayReverse "
-//! INST          /Call.* escompat.Int16Array::toReversed /
+//! INST          /Call.* std.core.Int16Array::toReversed /
 //! INST          "Intrinsic.UInt16ArrayReverse "
-//! INST          /Call.* escompat.Uint16Array::toReversed /
+//! INST          /Call.* std.core.Uint16Array::toReversed /
 //!
 //! METHOD        "testIu32Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArrayReverse "
-//! INST          /Call.* escompat.Int32Array::toReversed /
+//! INST          /Call.* std.core.Int32Array::toReversed /
 //! INST          "Intrinsic.UInt32ArrayReverse "
-//! INST          /Call.* escompat.Uint32Array::toReversed /
+//! INST          /Call.* std.core.Uint32Array::toReversed /
 //!
 //! METHOD        "testIu64Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayReverse "
-//! INST          /Call.* escompat.BigInt64Array::toReversed /
+//! INST          /Call.* std.core.BigInt64Array::toReversed /
 //! INST          "Intrinsic.BigUInt64ArrayReverse "
-//! INST          /Call.* escompat.BigUint64Array::toReversed /
+//! INST          /Call.* std.core.BigUint64Array::toReversed /
 //!
 //! METHOD        "testF32Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArrayReverse "
-//! INST          /Call.* escompat.Float32Array::toReversed /
+//! INST          /Call.* std.core.Float32Array::toReversed /
 //!
 //! METHOD        "testF64Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArrayReverse "
-//! INST          /Call.* escompat.Float64Array::toReversed /
+//! INST          /Call.* std.core.Float64Array::toReversed /
 
 function testIu8Array() {
     let inp = Int8Array.of(-128, -42, -14, 0, 16, 48, 127)

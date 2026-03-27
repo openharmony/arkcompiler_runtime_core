@@ -14,106 +14,107 @@
  */
 
 //! CHECKER       JIT Test cpp intrinsics
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part3.ETSGLOBAL::main",
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, entry: "ets_std_core_typed_arrays_set_get_part3.ETSGLOBAL::main",
 //!               options: "--compiler-encode-intrinsics=false --compiler-regex='.*test.*ArrayGetUnsafe'"
 //!
 //! METHOD        "testInt8ArrayGetUnsafe"
-//! METHOD        "escompat_Int8Array::at"
+//! METHOD        "std_core_Int8Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testInt16ArrayGetUnsafe"
-//! METHOD        "escompat_Int16Array::at"
+//! METHOD        "std_core_Int16Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testInt32ArrayGetUnsafe"
-//! METHOD        "escompat_Int32Array::at"
+//! METHOD        "std_core_Int32Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testFloat32ArrayGetUnsafe"
-//! METHOD        "escompat_Float32Array::at"
+//! METHOD        "std_core_Float32Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testFloat64ArrayGetUnsafe"
-//! METHOD        "escompat_Float64Array::at"
+//! METHOD        "std_core_Float64Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 
 //! CHECKER       JIT Test IR intrinsics
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part3.ETSGLOBAL::main",
-//!               options: "--compiler-regex='(.*test.*ArrayGetUnsafe)|(escompat\.*Array::at)'"
+//! RUN           force_jit: true, entry: "ets_std_core_typed_arrays_set_get_part3.ETSGLOBAL::main",
+//!               options: "--compiler-regex='(.*test.*ArrayGetUnsafe)|(std\.core\.*Array::at)'"
 //!
 //! METHOD        "testInt8ArrayGetUnsafe"
-//! METHOD        "escompat_Int8Array::at"
+//! METHOD        "std_core_Int8Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Int8ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testInt16ArrayGetUnsafe"
-//! METHOD        "escompat_Int16Array::at"
+//! METHOD        "std_core_Int16Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Int16ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testInt32ArrayGetUnsafe"
-//! METHOD        "escompat_Int32Array::at"
+//! METHOD        "std_core_Int32Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Int32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testFloat32ArrayGetUnsafe"
-//! METHOD        "escompat_Float32Array::at"
+//! METHOD        "std_core_Float32Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Float32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testFloat64ArrayGetUnsafe"
-//! METHOD        "escompat_Float64Array::at"
+//! METHOD        "std_core_Float64Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Float64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testBigInt64ArrayGetUnsafe"
-//! METHOD        "escompat_BigInt64Array::at"
+//! METHOD        "std_core_BigInt64Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 

@@ -18,7 +18,7 @@
  */
 
 
-package escompat;
+package std.core;
 
 /**
  * Defines Cloneable interface
@@ -41,8 +41,8 @@ export interface Cloneable {
 }
 
 /**
- * deepcopy can be used to copy a instance deeply, like builtins types, class with 
- * default constructor. If the instance is or contain a class without default 
+ * deepcopy can be used to copy a instance deeply, like builtins types, class with
+ * default constructor. If the instance is or contain a class without default
  * constructor, `Cloneable` can be used to help to implement copying deeply. At the
  * same time, DeepCopy supports cloning of subclasses that inherit from the parent
  * class provided that the clone method needs to be overridden and if the clone method
@@ -62,9 +62,7 @@ export function deepcopy<T>(src: T | null | undefined, depth: int = -1): T | nul
 }
 
 type Types = reflect.internals.Types
-
-type EntryType = [reflect.InstanceField, Any]
-type NullishEntryType = EntryType | null | undefined
+type ObjectEntryType = [reflect.InstanceField, Any] | null | undefined
 
 class DeepCloner {
 	private maxDepth: int
@@ -173,8 +171,8 @@ class DeepCloner {
 		return false
 	}
 
-	private getObjectEntries(obj: Object): NullishEntryType[] {
-		const entries = new Array<NullishEntryType>()
+	private getObjectEntries(obj: Object): ObjectEntryType[] {
+		const entries = new Array<ObjectEntryType>()
 
 		let cls = Class.of(obj)
 	    const classHierarchy = new Array<Class>()
@@ -188,7 +186,7 @@ class DeepCloner {
 	        const currentCls = classHierarchy[i]
 	        const clsFields = currentCls.getInstanceFields()
 	        for (const field of clsFields) {
-	            const entry: NullishEntryType = [field, field.getValue(obj)]
+	            const entry: ObjectEntryType = [field, field.getValue(obj)]
 	            entries.push(entry)
 	        }
 	    }
