@@ -37,7 +37,6 @@ ark_unittest("arkbase_common_tests") {
     "bit_table_test.cpp",
     "bit_utils_test.cpp",
     "bit_vector_test.cpp",
-    "bloom_filter_test.cpp",
     "code_allocator_test.cpp",
     "dfx_test.cpp",
     "expected_test.cpp",

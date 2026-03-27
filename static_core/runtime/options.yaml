@@ -983,10 +983,10 @@ options:
   default: ""
   description: Specify the location the collected code coverage information.
 
-- name: use-boot-class-filter
+- name: use-boot-class-index
   type: bool
   default: true
-  description: Whether to use boot class bloom filter to speedup app class lookup.
+  description: Whether to use boot class index to speed up class lookup in boot panda files.
 
 - name: enable-class-linker-trace
   type: bool

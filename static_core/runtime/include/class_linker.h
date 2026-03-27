@@ -24,13 +24,13 @@
 #include "compiler/aot/aot_manager.h"
 #include "libarkbase/mem/arena_allocator.h"
 #include "libarkbase/os/mutex.h"
-#include "libarkbase/utils/bloom_filter.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class.h"
+#include "runtime/include/class_index.h"
 #include "runtime/include/field.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/imtable_builder.h"
@@ -344,6 +344,8 @@ public:
     void TryReLinkAotCodeForBoot(const panda_file::File *pf, const compiler::AotPandaFile *aotPfile,
                                  panda_file::SourceLang language);
 
+    void BuildBootClassIndex();
+
 private:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     struct ClassInfo {
@@ -414,11 +416,7 @@ private:
 
     static bool LayoutFields(Class *klass, Span<Field> fields, bool isStatic, ClassLinkerErrorHandler *errorHandler);
 
-    void AddBootClassFilter(const panda_file::File *bootPandaFile);
-
-    enum class FilterResult : uint8_t { DISABLED = 0, POSSIBLY_HAS, IMPOSSIBLY_HAS };
-
-    FilterResult LookupInFilter(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler);
+    void BuildBootClassIndexLocked() REQUIRES(bootPandaFilesLock_);
 
     Class *BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Span<Method> methods, Span<Field> fields,
                           Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
@@ -427,6 +425,7 @@ private:
     mem::InternalAllocatorPtr allocator_;
 
     PandaVector<const panda_file::File *> bootPandaFiles_ GUARDED_BY(bootPandaFilesLock_);
+    ClassIndex bootClassIndex_;
 
     struct PandaFileLoadData {
         ClassLinkerContext *context;
@@ -448,13 +447,6 @@ private:
 
     bool isInitialized_ {false};
     bool isTraceEnabled_ {false};
-
-    // there are currently about 400 framework abc
-    static constexpr size_t NUM_BOOT_CLASSES = 400000;
-    static constexpr double_t FILTER_RATE = 0.01;
-
-    BloomFilter bootClassFilter_ GUARDED_BY(bootClassFilterLock_);
-    mutable os::memory::Mutex bootClassFilterLock_;
 
     NO_COPY_SEMANTIC(ClassLinker);
     NO_MOVE_SEMANTIC(ClassLinker);
