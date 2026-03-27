@@ -1,3 +1,7 @@
+#33931
+ets_func_tests/std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
+ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
+
 #33648
 ets_func_tests/std/containers/concurrency/blocking_queue/blocking_queue_push_and_pop.ets
 ets_func_tests/std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
