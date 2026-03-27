@@ -462,6 +462,33 @@ function testToISOStringInvalidDate() {
     arktest.expectThrow((): void => { d.toISOString(); });
 }
 
+function testToStringBasic() {
+    let date = new Date(1975, 7, 19, 23, 15, 30);
+    let str = date.toString();
+    arktest.assertTrue(str.length > 0, 'toString should not be empty');
+    arktest.assertTrue(str.includes('1975'), 'toString should contain year');
+    arktest.assertTrue(str.includes('Aug'), 'toString should contain month');
+
+    let utcDate = new Date(Date.UTC(2025, 0, 15, 10, 30, 0));
+    arktest.assertEQ(utcDate.toUTCString(), 'Wed, 15 Jan 2025 10:30:00 GMT');
+}
+
+function testToStringWithFixedTimestamp() {
+    let date = new Date(Date.UTC(2025, 5, 15, 12, 0, 0));
+    arktest.assertEQ(date.toUTCString(), 'Sun, 15 Jun 2025 12:00:00 GMT');
+    arktest.assertEQ(date.toISOString(), '2025-06-15T12:00:00.000Z');
+
+    let date2 = new Date(Date.UTC(2000, 0, 1, 0, 0, 0));
+    arktest.assertEQ(date2.toUTCString(), 'Sat, 01 Jan 2000 00:00:00 GMT');
+    arktest.assertEQ(date2.toISOString(), '2000-01-01T00:00:00.000Z');
+}
+
+
+function testToStringInvalidDate() {
+    let invalidDate = new Date(99999999999999999 as long);
+    arktest.assertEQ(invalidDate.toString(), 'Invalid Date');
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite('DateTest');
     myTestsuite.addTest('testDateToUTCString', testDateToUTCString);
@@ -498,5 +525,8 @@ function main() {
     myTestsuite.addTest('testDateToLocaleTimeStringAndLocaleString0001', testDateToLocaleTimeStringAndLocaleString0001);
     myTestsuite.addTest('testInvalidDate0002', testInvalidDate0002);
     myTestsuite.addTest('testToISOStringInvalidDate', testToISOStringInvalidDate);
+    myTestsuite.addTest('testToStringBasic', testToStringBasic);
+    myTestsuite.addTest('testToStringWithFixedTimestamp', testToStringWithFixedTimestamp);
+    myTestsuite.addTest('testToStringInvalidDate', testToStringInvalidDate);
     return myTestsuite.run();
 }
