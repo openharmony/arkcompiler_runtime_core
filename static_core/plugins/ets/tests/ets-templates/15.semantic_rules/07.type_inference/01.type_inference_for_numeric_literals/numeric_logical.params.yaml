@@ -29,6 +29,9 @@ cases:
   - { use: "-0x7FFF_FFFF|2", use_type: "int", expected_type: int }
   - { use: "-0x8000_0000|-1", use_type: "long", expected_type: long }
   - { use: "-0x7FFF_FFFF_FFFF_FFFF|2", use_type: "long", expected_type: long }
+  - { use: "128|-120", use_type: "byte", expected_type: byte }
+  - { use: "32768|-50", use_type: "short", expected_type: short }
+  - { use: "0x8000_0000|-33", use_type: "int", expected_type: int }
   # bitwise and
   - { use: "16&1", use_type: "int", expected_type: int }
   - { use: "127&1", use_type: "int", expected_type: int }
@@ -46,6 +49,9 @@ cases:
   - { use: "-0x7FFF_FFFF&1", use_type: "int", expected_type: int }
   - { use: "-0x8000_0000&1", use_type: "long", expected_type: long }
   - { use: "-0x7FFF_FFFF_FFFF_FFFF&1", use_type: "long", expected_type: long }
+  - { use: "128&1", use_type: "byte", expected_type: byte }
+  - { use: "32768&1", use_type: "short", expected_type: short }
+  - { use: "0x8000_0000&1", use_type: "int", expected_type: int }
   # bitwise xor
   - { use: "16^1", use_type: "int", expected_type: int }
   - { use: "126^1", use_type: "int", expected_type: int }
@@ -63,3 +69,6 @@ cases:
   - { use: "-0x8001^1", use_type: "int", expected_type: int }
   - { use: "-0x8000_0000^1", use_type: "long", expected_type: long }
   - { use: "-0x8000_0000_0001^1", use_type: "long", expected_type: long }
+  - { use: "128^129", use_type: "byte", expected_type: byte }
+  - { use: "32768^32769", use_type: "short", expected_type: short }
+  - { use: "0x8000_0000^0x8000_0001", use_type: "int", expected_type: int }

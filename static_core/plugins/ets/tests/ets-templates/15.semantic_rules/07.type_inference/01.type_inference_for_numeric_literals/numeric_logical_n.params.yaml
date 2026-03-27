@@ -13,18 +13,8 @@
 ---
 cases:
   # bitwise or
-  - { use: "128|-120", overflow_type: "byte", expected: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Byte'" }
-  - { use: "32768|-50", overflow_type: "short", expected: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Short'" }
-  - { use: "0x8000_0000|-33", overflow_type: "int", expected: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Int'" }
   - { use: "0x8000_0000_0000_0000|-1", overflow_type: "long", expected: "Syntax error ESY0262: Number is too large." }
   # # bitwise and
-  - { use: "128&1", overflow_type: "byte", expected: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Byte'"  }
-  - { use: "32768&1", overflow_type: "short", expected: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Short'" }
-  - { use: "0x8000_0000&1", overflow_type: "int", expected: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Int'" }
   - { use: "0x8000_0000_0000_0000&1", overflow_type: "long", expected: "Syntax error ESY0262: Number is too large." }
   # # bitwise xor
-  - { use: "128^129", overflow_type: "byte", expected: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Byte'"  }
-  - { use: "32768^32769", overflow_type: "short", expected: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Short'" }
-  - { use: "0x8000_0000^0x8000_0001", overflow_type: "int", expected: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Int'" }
   - { use: "0x8000_0000_0000_0000^0x8000_0000_0000_0001", overflow_type: "long", expected: "Syntax error ESY0262: Number is too large." }
-  
