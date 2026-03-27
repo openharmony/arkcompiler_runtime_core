@@ -103,11 +103,10 @@ class VmbRunner:
             log.warning('Excluding bench unit: %s', bu.name)
             bu.status = BUStatus.SKIPPED
             return
+        self.hooks.run_before_unit(bu)
         try:
-            self.hooks.run_before_unit(bu)
             timer_unit.start()
             self.platform.run_unit(bu)  # do actual work
-            self.hooks.run_after_unit(bu)
             if BUStatus.PASS == bu.status:
                 log.passed('%s: %f', bu.name, bu.result.get_avg_time())
             elif BUStatus.COMPILATION_FAILED == bu.status:
@@ -125,12 +124,13 @@ class VmbRunner:
         except KeyboardInterrupt as e:
             raise KeyboardInterrupt() from e
         finally:
-            if not (self.dry_run or self.skip_cleanup):
-                self.platform.cleanup(bu)
             timer_unit.finish()
             elapsed = timer_unit.elapsed.total_seconds()
             bu.result.full_time = elapsed
             log.debug('%s total time: %d nano seconds', bu.name, timer_unit.elapsed_ns)
+            self.hooks.run_after_unit(bu)
+            if not (self.dry_run or self.skip_cleanup):
+                self.platform.cleanup(bu)
 
     def run_suite_batch(self, bench_units: List[BenchUnit]) -> List[BenchUnit]:
         tests_per_batch = self.tests_per_batch if self.tests_per_batch > 0 else 5
