@@ -17,6 +17,7 @@ import {util} from "@ohos.util"
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part2");
+    suite.addTest('Testing xml Global reference storage', testXmlPullParserGlobalReference);
     suite.addTest('Testing XML PullParser with attributeWithTagCallbackFunction as function.', testXmlPullParserParseOptions0011)
     suite.addTest("Testing XML PullParser with attributeValueCallbackFunction as function throw error.", testXmlPullParserParseOptions0010)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as undefined.", testXmlPullParserParseOptions0009)
@@ -534,4 +535,19 @@ function testXmlPullParserParseOptions0011() {
         attributeWithTagCallbackFunction:attrWithTag
     };
     xmlParser.parseXml(options);
+}
+
+function testXmlPullParserGlobalReference() {
+    let strXml =
+    '<?xml version="1.0" encoding="utf-8"?>' +
+      '<column name="Giana"><value integer="1"/></column>' +
+      '<column name="category"><value Boolean="true"/></column>' +
+      '<column name="day"><value Boolean="3"/></column>';
+    let textEncoder = new util.TextEncoder();
+    let uint8 = textEncoder.encodeInto(strXml);
+    arktest.expectNoThrow( () => {
+        for (let i = 0; i < 30000; i++) {
+            let pullParse = new xml.XmlPullParser(uint8.buffer, 'UTF-8');
+        }
+    })
 }

@@ -21,6 +21,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "libarkbase/os/mutex.h"
 
 namespace ark::ets::sdk::util {
 
@@ -87,7 +88,6 @@ private:
         explicit ParseInfoClassCache(ani_env *env);
         ~ParseInfoClassCache() = default;
         ani_object New() const;
-        void InitFieldCache();
         ani_class GetCachedClass();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -97,14 +97,19 @@ private:
         PARSE_INFO_FIELD_LIST(FIELD_SETTER)
 #undef FIELD_SETTER
     private:
+        static void EnsureInitialized(ani_env *env);
+        static void InitFieldCache(ani_env *env);
+
         ani_env *env_ {};
-        ani_class cachedClass_ {};
-        ani_method constructor_ {};
+        static ark::os::memory::Mutex initMutex_;
+        static bool initFlag_;
+        static ani_class cachedClass_;
+        static ani_method constructor_;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CACHED_FIELD(cache, _func, _item, _type, _typeName) \
     /* CC-OFFNXT(G.PRE.09) member defination */             \
-    ani_field cache##_ {};
+    static ani_field cache##_;
         PARSE_INFO_FIELD_LIST(CACHED_FIELD)
 #undef CACHED_FIELD
     };
@@ -176,9 +181,13 @@ private:
     TagEnum DealLtGroup();
     void DealWhiteSpace(unsigned char c);
 
+    static void EnsureEnumTypeClassInitialized(ani_env *env);
+
     [[maybe_unused]] ani_env *env_ {};
     ParseInfoClassCache infoClass_;
-    ani_enum enumTypeClass_ {};
+    static ark::os::memory::Mutex enumTypeMutex_;
+    static bool enumTypeInitFlag_;
+    static ani_enum enumTypeClass_;
     bool bDoctype_ {};
     bool bIgnoreNS_ {};
     bool bStartDoc_ {true};

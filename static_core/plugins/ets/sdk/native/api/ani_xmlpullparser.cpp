@@ -67,14 +67,44 @@ std::map<std::string, std::string> &GetDefaultEntities()
     return defaultEntities;
 }
 
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+ark::os::memory::Mutex XmlPullParser::ParseInfoClassCache::initMutex_;
+bool XmlPullParser::ParseInfoClassCache::initFlag_ = false;
+ani_class XmlPullParser::ParseInfoClassCache::cachedClass_ {};
+ani_method XmlPullParser::ParseInfoClassCache::constructor_ {};
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_PARSE_INFO_FIELD(_cache, _func, _item, _type, _typeName) \
+    /* CC-OFFNXT(G.PRE.09) macro expansion */                           \
+    ani_field XmlPullParser::ParseInfoClassCache::_cache##_ {};
+PARSE_INFO_FIELD_LIST(DEFINE_PARSE_INFO_FIELD)
+#undef DEFINE_PARSE_INFO_FIELD
+
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+ark::os::memory::Mutex XmlPullParser::enumTypeMutex_;
+bool XmlPullParser::enumTypeInitFlag_ = false;
+ani_enum XmlPullParser::enumTypeClass_ {};
+
 XmlPullParser::ParseInfoClassCache::ParseInfoClassCache(ani_env *env) : env_(env)
 {
+    EnsureInitialized(env);
+}
+
+void XmlPullParser::ParseInfoClassCache::EnsureInitialized(ani_env *env)
+{
+    if (initFlag_) {
+        return;
+    }
+    os::memory::LockHolder lh(initMutex_);
+    if (initFlag_) {
+        return;
+    }
     ani_class result {};
     ANI_FATAL_IF_ERROR(env->FindClass("@ohos.xml.xml.ParseInfoImpl", &result));
     ANI_FATAL_IF_ERROR(
         env->GlobalReference_Create(static_cast<ani_ref>(result), reinterpret_cast<ani_ref *>(&cachedClass_)));
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(cachedClass_, "<ctor>", nullptr, &constructor_));
-    InitFieldCache();
+    InitFieldCache(env);
+    initFlag_ = true;
 }
 
 ani_class XmlPullParser::ParseInfoClassCache::GetCachedClass()
@@ -90,12 +120,12 @@ ani_object XmlPullParser::ParseInfoClassCache::New() const
     return object;
 }
 
-void XmlPullParser::ParseInfoClassCache::InitFieldCache()
+void XmlPullParser::ParseInfoClassCache::InitFieldCache(ani_env *env)
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CACHE_LIST_TO_MAP(cache, _func, _item, _type, _typeName) \
     /* CC-OFFNXT(G.PRE.09) function defination */                \
-    ANI_FATAL_IF_ERROR(env_->Class_FindField(cachedClass_, #cache, &cache##_));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(cachedClass_, #cache, &cache##_));
     PARSE_INFO_FIELD_LIST(CACHE_LIST_TO_MAP)
 #undef CACHE_LIST_TO_MAP
 }
@@ -140,21 +170,32 @@ ani_boolean XmlPullParser::ReleaseNative([[maybe_unused]] ani_env *env, [[maybe_
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     CHECK_NON_NULL_PARSER_AND_RETURN(pointer, false);
-    ANI_FATAL_IF_ERROR(env->GlobalReference_Delete(static_cast<ani_ref>(that->enumTypeClass_)));
-    ANI_FATAL_IF_ERROR(env->GlobalReference_Delete(static_cast<ani_ref>(that->infoClass_.GetCachedClass())));
     delete that;
     return static_cast<ani_boolean>(true);
 }
 
 XmlPullParser::XmlPullParser(ani_env *env, std::string strXml) : env_(env), infoClass_(env), strXml_(std::move(strXml))
 {
+    EnsureEnumTypeClassInitialized(env);
+}
+
+XmlPullParser::~XmlPullParser() = default;
+
+void XmlPullParser::EnsureEnumTypeClassInitialized(ani_env *env)
+{
+    if (enumTypeInitFlag_) {
+        return;
+    }
+    os::memory::LockHolder lh(enumTypeMutex_);
+    if (enumTypeInitFlag_) {
+        return;
+    }
     ani_enum eTypeCache {};
     ANI_FATAL_IF_ERROR(env->FindEnum("@ohos.xml.xml.EventType", &eTypeCache));
     ANI_FATAL_IF_ERROR(
         env->GlobalReference_Create(static_cast<ani_ref>(eTypeCache), reinterpret_cast<ani_ref *>(&enumTypeClass_)));
+    enumTypeInitFlag_ = true;
 }
-
-XmlPullParser::~XmlPullParser() = default;
 
 // CC-OFFNXT(G.FUN.01-CPP) options of parse
 ani_boolean XmlPullParser::ParseXml(ani_env *env, [[maybe_unused]] ani_class self, ani_long pointer,
