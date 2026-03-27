@@ -1,3 +1,7 @@
+#33931
+ets_func_tests/std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
+ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
+
 #33648
 ets_func_tests/std/debug/CountInstancesOfClass.ets
 
