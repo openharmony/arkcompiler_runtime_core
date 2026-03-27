@@ -20,4 +20,5 @@ tags:
 - not-a-test
 ---*/
 
-export default let u: String|Number|undefined|null = undefined;
+let u: String|Number|undefined|null = undefined;
+export default u

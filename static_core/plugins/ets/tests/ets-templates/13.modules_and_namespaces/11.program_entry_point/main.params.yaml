@@ -130,7 +130,7 @@ cases:
           export function main(): void {
               arktest.assertTrue(true)
           }
-          export function main2(args: string[]): void {
+          export function main2(args: FixedArray<string>): void {
               arktest.assertTrue(false)
           }
           export overload main { main, main2 }
@@ -145,7 +145,7 @@ cases:
               let a: number = entry();
               arktest.assertEQ(a, 10);
           }
-    
+
     # Class initialization and function entry verification
     - use: |-
           class P {

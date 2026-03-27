@@ -474,6 +474,7 @@
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_6.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_7.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_8.ets
+07.expressions/16.instanceof_expression/instanceof_neg_35.ets
 
 #33188
 07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_0.ets
@@ -940,26 +941,6 @@
 
 #31411 Overload warning on clashing name at external source
 13.modules_and_namespaces/04.import_directives/03.selective_binding/import_conflict_neg.ets
-
-#28972 CTE on string[] type parameter
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_1.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_2.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_3.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_4.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_5.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_7.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_6.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_0.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_1.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_2.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_3.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_n_0.ets
-13.modules_and_namespaces/11.program_entry_point/main_w_args_n_1.ets
-
-#29063 runtime complains on invalid signature
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_0.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_n_0.ets
-13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_n_2.ets
 
 #32456 Initializer in ambient const declaration
 14.ambient_declarations/bad_ambient_declarations_3.ets

@@ -18,7 +18,7 @@ cases:
     - cmd_line_args: >-
           "a, b c", "D E, F"
       use: |-
-          function main(args: string[]) {
+          function main(args: FixedArray<string>) {
               arktest.assertEQ(args[0], 'a, b c')
               arktest.assertEQ(args[1], 'D E, F')
           }
@@ -26,7 +26,7 @@ cases:
     - cmd_line_args: >-
           "a, `b c", "D E, `F"
       use: |-
-          function main(args: string[]) {
+          function main(args: FixedArray<string>) {
               arktest.assertEQ(args[0], 'a, `b c')
               arktest.assertEQ(args[1], 'D E, `F')
           }
@@ -34,7 +34,7 @@ cases:
     - cmd_line_args: >-
           "a, \"b\" c", "D 'E', F"
       use: |-
-          function main(args: string[]) {
+          function main(args: FixedArray<string>) {
               arktest.assertEQ(args[0], 'a, "b" c')
               arktest.assertEQ(args[1], 'D \'E\', F')
           }
@@ -42,7 +42,7 @@ cases:
     - cmd_line_args: >-
           'a, "b-''c''-d", e', 'D, ''E-"F"-G'', H'
       use: |-
-          function main(args: string[]) {
+          function main(args: FixedArray<string>) {
               arktest.assertEQ(args[0], 'a, "b-\'c\'-d", e')
               arktest.assertEQ(args[1], 'D, \'E-"F"-G\', H')
           }
