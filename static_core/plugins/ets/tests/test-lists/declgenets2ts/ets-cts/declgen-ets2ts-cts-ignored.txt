@@ -1053,6 +1053,7 @@
 07.expressions/18.typeof_expression/tof_vars_6.ets
 07.expressions/18.typeof_expression/tof_vars_9.ets
 07.expressions/35.lambda_expression/01.lambda_signature/negative_3.ets
+07.expressions/35.lambda_expression/01.lambda_signature/negative_4.ets
 07.expressions/35.lambda_expression/01.lambda_signature/negative_5.ets
 07.expressions/35.lambda_expression/01.lambda_signature/negative_6.ets
 07.expressions/36.constant_expression/check_annotation/constant_bitwise_expression_15.ets

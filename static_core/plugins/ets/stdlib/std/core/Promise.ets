@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,9 @@ export class PromiseStatus{
 }
 
 /**
- * Base class for Promise.allSettled return type.
- */
-class PromiseSettledResultBase {
-    status: string = "";
-}
-
-/**
  * The class describes fulfillment result of Promise.allSettled's argument.
  */
-export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
+export class PromiseFulfilledResult<T> {
     constructor(){}
 
     constructor(value: T) {
@@ -49,13 +42,14 @@ export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
         this.value = value;
     }
 
+    status: string = "";
     value: T;
 }
 
 /**
  * The class describes rejection result of Promise.allSettled's argument.
  */
-export class PromiseRejectedResult extends PromiseSettledResultBase {
+export class PromiseRejectedResult {
     constructor(){
         this.reason =  new Error();
     }
@@ -65,10 +59,12 @@ export class PromiseRejectedResult extends PromiseSettledResultBase {
         this.reason = reason;
     }
 
+    status: string = "";
     reason: Error;
 }
 
 export type PromiseSettledResult<T> = PromiseFulfilledResult<T>|PromiseRejectedResult
+export type MaybePromiseSettledResult<T> = undefined|PromiseFulfilledResult<T>|PromiseRejectedResult
 
 /**
  * Class represents a result of an asynchronous operation in the future.
@@ -350,7 +346,7 @@ export final class Promise<out T> implements PromiseLike<T> {
             let resolvedCnt = new Int32Array(new ArrayBuffer(4));
             Atomics.store(resolvedCnt, 0, 0);
             const values: Array<Awaited<U>> = new Array<Awaited<U>>(promises.length);
-            
+
             if (promises.length === 0) {
                 resolve(values);
                 return;
@@ -365,7 +361,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                         if (oldValue + 1 === promises.length) {
                             resolve(values);
                         }
-                    }, 
+                    },
                     (error: Error): void => {
                         reject(error);
                     }
@@ -400,10 +396,11 @@ export final class Promise<out T> implements PromiseLike<T> {
         return new Promise<PromiseSettledResult<Awaited<U>>[]>(
             (resolve: (value: PromiseSettledResult<Awaited<U>>[]) => void, _reject: (error: Error) => void): void => {
                 let settledCnt = 0;
-                const results: PromiseSettledResultBase[] = new PromiseSettledResultBase[promises.length](new PromiseSettledResultBase());
+                const results = new Array<MaybePromiseSettledResult<Awaited<U>>>(promises.length, () => undefined);
 
                 const getResults = (): PromiseSettledResult<Awaited<U>>[] => {
-                    return (results as Object) as PromiseSettledResult<Awaited<U>>[];
+                    // Exploit the type erasure: `results` don't carry their full type
+                    return results as Object as PromiseSettledResult<Awaited<U>>[];
                 };
 
                 if (promises.length === 0) {
@@ -546,7 +543,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                             resolve(value);
                             settled = true;
                         }
-                    }, 
+                    },
                     (error: Error): void => {
                         if (!settled) {
                             reject(error);
