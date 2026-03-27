@@ -305,7 +305,7 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "ciast"
     ids: "63-64"
 
@@ -380,7 +380,7 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "weibt"
     ids: "74-80"
 
@@ -476,6 +476,6 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "mot"
     ids: "86-100"
