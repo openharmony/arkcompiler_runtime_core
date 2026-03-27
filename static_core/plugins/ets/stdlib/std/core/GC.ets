@@ -37,8 +37,7 @@ export namespace GC {
     export enum Cause {
         YOUNG = 0,
         THRESHOLD = 1,
-        MIXED = 2,
-        FULL = 3
+        FULL = 2
     }
 
     export const NOT_IN_PLACE_MODE: boolean = false;
