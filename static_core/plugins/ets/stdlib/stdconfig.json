@@ -4,9 +4,6 @@
         "paths": {
             "std": [
                 "ets/stdlib/std"
-            ],
-            "escompat": [
-                "ets/stdlib/escompat"
             ]
         }
     }
