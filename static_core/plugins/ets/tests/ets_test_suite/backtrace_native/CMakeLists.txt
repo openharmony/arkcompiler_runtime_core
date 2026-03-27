@@ -21,8 +21,8 @@ if (PANDA_LLVM_BACKEND)
     return()
 endif()
 
-# NOTE: Disable compiler because mix-stack not support JIT/AOT.
-if (PANDA_COMPILER_ENABLE)
+# NOTE: Only enable the test in Debug mode (without compilation optimization).
+if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     return()
 endif()
 
