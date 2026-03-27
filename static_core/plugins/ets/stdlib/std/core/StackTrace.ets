@@ -27,6 +27,8 @@ package std.core;
  * @since 24
  */
 export class StackTraceElement {
+    private static readonly NATIVE_METHOD_LINE_NUMBER: int = -2;
+
     private className: String = ""
     private methodName: String = ""
     private sourceFileName: String = ""
@@ -45,8 +47,9 @@ export class StackTraceElement {
      */
     public override toString(): String {
         return "\tat " + this.className + "." + this.methodName +
-             // NOTE(@sandee, #24492): Extraction of column number is not implemented  
-             " (" + this.sourceFileName + ":" + this.lineNumber + ":" + this.colNumber + ")"
+             // NOTE(@sandee, #24492): Extraction of column number is not implemented
+             ((this.lineNumber !== StackTraceElement.NATIVE_METHOD_LINE_NUMBER) ?
+             " (" + this.sourceFileName + ":" + this.lineNumber + ":" + this.colNumber + ")" : " (Native Method)")
     }
 }
 
