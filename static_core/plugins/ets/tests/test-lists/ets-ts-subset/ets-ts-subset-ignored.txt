@@ -6,3 +6,6 @@ std/core/PromiseAllSettledRejectIgnoredDeferred.ets
 std/core/PromiseAllSettledReject.ets
 ### Issue 20584
 std/core/PromiseAllSettledRejectIgnored.ets
+### Issue 33858 TS_NODE_DAIL
+std/core/PromiseIterableUndefinedRegression.ets
+std/core/PromiseAllSettledAwaitedResolveTest.ets

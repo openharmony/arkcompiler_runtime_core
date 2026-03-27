@@ -34,10 +34,8 @@ class CIter1 implements Iterator<string> {
         this.base = base;
     }
     next(): IteratorResult<string> {
-        return {
-            done: this.index >= this.base.data1.length,
-            value: this.index >= this.base.data1.length ? undefined : this.base.data1[this.index++]
-        }
+        return new IteratorResult<string>(this.index >= this.base.data1.length,
+            this.index >= this.base.data1.length ? undefined : this.base.data1[this.index++]);
     }
 }
 
@@ -48,10 +46,8 @@ class CIter2 implements Iterator<int> {
         this.base = base;
     }
     next(): IteratorResult<int> {
-        return {
-            done: this.index >= this.base.data2.length,
-            value: this.index >= this.base.data2.length ? undefined : this.base.data2[this.index++]
-        }
+        return new IteratorResult<int>(this.index >= this.base.data2.length,
+            this.index >= this.base.data2.length ? undefined : this.base.data2[this.index++]);
     }
 }
 

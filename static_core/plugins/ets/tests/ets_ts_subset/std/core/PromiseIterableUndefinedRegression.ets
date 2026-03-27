@@ -40,22 +40,19 @@ class AllUndefIterator implements Iterator<string | undefined | PromiseLike<stri
     next(): IteratorResult<string | undefined | PromiseLike<string | undefined>> {
         if (this.idx == 0) {
             this.idx++;
-            return { done: false, value: 'a' } as IteratorResult<string | undefined | PromiseLike<string | undefined>>;
+            return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(false, 'a');
         }
         if (this.idx == 1) {
             this.idx++;
             // Regression: a valid element value is undefined (done=false).
-            return { done: false, value: undefined } as IteratorResult<
-                string | undefined | PromiseLike<string | undefined>
-            >;
+            return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(false, undefined);
         }
         if (this.idx == 2) {
             this.idx++;
-            return { done: false, value: Promise.resolve<string | undefined>('b') } as IteratorResult<
-                string | undefined | PromiseLike<string | undefined>
-            >;
+            return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(false,
+                Promise.resolve<string | undefined>('b'));
         }
-        return { done: true, value: undefined } as IteratorResult<string | undefined | PromiseLike<string | undefined>>;
+        return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(true, undefined);
     }
 }
 
@@ -101,17 +98,14 @@ class AllSettledUndefIterator implements Iterator<number | undefined | PromiseLi
     next(): IteratorResult<number | undefined | PromiseLike<number | undefined>> {
         if (this.idx == 0) {
             this.idx++;
-            return { done: false, value: Promise.resolve<number | undefined>(10) } as IteratorResult<
-                number | undefined | PromiseLike<number | undefined>
-            >;
+            return new IteratorResult<number | undefined | PromiseLike<number | undefined>>(false,
+                Promise.resolve<number | undefined>(10));
         }
         if (this.idx == 1) {
             this.idx++;
-            return { done: false, value: undefined } as IteratorResult<
-                number | undefined | PromiseLike<number | undefined>
-            >;
+            return new IteratorResult<number | undefined | PromiseLike<number | undefined>>(false, undefined);
         }
-        return { done: true, value: undefined } as IteratorResult<number | undefined | PromiseLike<number | undefined>>;
+        return new IteratorResult<number | undefined | PromiseLike<number | undefined>>(true, undefined);
     }
 }
 
@@ -174,17 +168,14 @@ class AnyUndefFirstIterator implements Iterator<string | undefined | PromiseLike
     next(): IteratorResult<string | undefined | PromiseLike<string | undefined>> {
         if (this.idx == 0) {
             this.idx++;
-            return { done: false, value: undefined } as IteratorResult<
-                string | undefined | PromiseLike<string | undefined>
-            >;
+            return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(false, undefined);
         }
         if (this.idx == 1) {
             this.idx++;
-            return { done: false, value: Promise.resolve<string | undefined>('x') } as IteratorResult<
-                string | undefined | PromiseLike<string | undefined>
-            >;
+            return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(false,
+                Promise.resolve<string | undefined>('x'));
         }
-        return { done: true, value: undefined } as IteratorResult<string | undefined | PromiseLike<string | undefined>>;
+        return new IteratorResult<string | undefined | PromiseLike<string | undefined>>(true, undefined);
     }
 }
 
@@ -223,17 +214,14 @@ class RaceUndefFirstIterator implements Iterator<number | undefined | PromiseLik
     next(): IteratorResult<number | undefined | PromiseLike<number | undefined>> {
         if (this.idx == 0) {
             this.idx++;
-            return { done: false, value: undefined } as IteratorResult<
-                number | undefined | PromiseLike<number | undefined>
-            >;
+            return new IteratorResult<number | undefined | PromiseLike<number | undefined>>(false, undefined);
         }
         if (this.idx == 1) {
             this.idx++;
-            return { done: false, value: Promise.resolve<number | undefined>(123) } as IteratorResult<
-                number | undefined | PromiseLike<number | undefined>
-            >;
+            return new IteratorResult<number | undefined | PromiseLike<number | undefined>>(false,
+                Promise.resolve<number | undefined>(123));
         }
-        return { done: true, value: undefined } as IteratorResult<number | undefined | PromiseLike<number | undefined>>;
+        return new IteratorResult<number | undefined | PromiseLike<number | undefined>>(true, undefined);
     }
 }
 

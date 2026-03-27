@@ -102,8 +102,8 @@ cases:
       Checking the implementation of interface readonly field.
     check_variants:
       - {check_type: "C", data_type: "int",
-        init_value: "{data: 5}", check_value: "5",
-        cv_decl_data: "class C {readonly data: int = 0}"}
+        init_value: "new C(5)", check_value: "5",
+        cv_decl_data: "class C {readonly data: int; constructor(v: int) { this.data = v } }"}
     decl_variants:
       - |-
         [cv_decl_data]
@@ -180,8 +180,8 @@ cases:
       Checking the implementation of interface readonly field.
     check_variants:
       - {check_type: "C", data_type: "int",
-        init_value: "{data: 5}", check_value: "5",
-        cv_decl_data: "class C {readonly data: int = 0}"}
+        init_value: "new C(5)", check_value: "5",
+        cv_decl_data: "class C {readonly data: int;\n constructor(a: int) {this.data = a} }"}
     decl_variants:
       - |-
         [cv_decl_data]
