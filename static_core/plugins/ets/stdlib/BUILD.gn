@@ -26,8 +26,6 @@ action("copy_stdlib") {
   args = [
     "--std-dir",
     rebase_path("std"),
-    "--escompat-dir",
-    rebase_path("escompat"),
     "--arkruntime-dir",
     rebase_path("arkruntime"),
     "--target-dir",

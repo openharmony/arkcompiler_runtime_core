@@ -18,7 +18,7 @@
  */
 
 
-package escompat;
+package std.core;
 
 /**
  * Defines NaN
