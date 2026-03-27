@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,16 @@
  */
 
 /*---
-desc: Verify whether this can be used as a left-hand side value.
+desc: Verify whether this cannot be used as a left-hand side value.
 tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE0025: Invalid left-hand side of assignment expression"
+    - "Syntax error ESY0072: Invalid left-hand side in assignment expression."
 ---*/
 
 class MyClass {
+  static foo(input: MyClass): MyClass {  return input }
   method(): void {
-    this = new MyClass();
+    this = MyClass.foo(this)
   }
-}
-
-function main(): void {
-  let obj: MyClass = new MyClass();
 }

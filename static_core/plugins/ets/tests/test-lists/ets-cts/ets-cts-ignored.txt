@@ -592,6 +592,9 @@
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
+#33717
+07.expressions/32.assignment/03.left_hand_side_expressions/lhs_class_this_via_extension_n.ets
+
 #30582
 07.expressions/35.lambda_expression/01.lambda_signature/positive_0.ets
 07.expressions/35.lambda_expression/01.lambda_signature/positive_1.ets
