@@ -196,6 +196,7 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/ets_string_helpers.cpp",
   "runtime/intrinsics/helpers/ets_to_string_cache.cpp",
   "runtime/intrinsics/helpers/json_helper.cpp",
+  "runtime/intrinsics/helpers/regexp_preparser.cpp",
   "runtime/main_worker_external_scheduler.cpp",
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",

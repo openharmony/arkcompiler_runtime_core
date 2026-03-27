@@ -48,9 +48,7 @@
          let re = RegExp(test, 'g')
          arktest.assertFalse(re.test(test))
          test = '\\u{110000}'
-         re = RegExp(test, 'g')
-         arktest.assertFalse(re.test(test))
-
+         arktest.expectThrow(() => { RegExp(test, 'g') }, (e) => e instanceof SyntaxError)
      })
 
 
