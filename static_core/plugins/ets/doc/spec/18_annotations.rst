@@ -793,11 +793,11 @@ The annotation ``@Target`` has a single field ``targets`` of type
    :linenos:
 
     // short form:
-    @Target([AnnotationTargets.FUNCTION, AnnotationTargets.CLASS_METHOD])
+    @Target(["FUNCTION", "CLASS_METHOD"])
     @interface SpecialCall {/*some fields*/}
 
     // long form:
-    @Target({targets: [AnnotationTargets.PARAMETER]})
+    @Target({targets: ["PARAMETER"]})
     @interface SpecialParameter {/*some fields*/}
 
 If the annotation is present in the declaration of annotation ``X``, then
@@ -807,7 +807,7 @@ Otherwise, a :index:`compile-time error` occurs.
 If no annotation is present in the declaration of annotation ``X``, then
 the usage of ``X`` is not restricted.
 
-An ``AnnotationTargets`` enumeration contains constants for the following
+An ``AnnotationTargets`` union type contains string literals for the following
 targets:
 
 .. index::
@@ -822,35 +822,35 @@ targets:
 
 -  Targets for :ref:`Top-Level Declarations`:
 
-    - CLASS;
-    - ENUMERATION;
-    - FUNCTION;
-    - FUNCTION_WITH_RECEIVER;
-    - INTERFACE;
-    - NAMESPACE;
-    - TYPE_ALIAS;
-    - VARIABLE.
+    - ``"CLASS"``;
+    - ``"ENUMERATION"``;
+    - ``"FUNCTION"``;
+    - ``"FUNCTION_WITH_RECEIVER"``;
+    - ``"INTERFACE"``;
+    - ``"NAMESPACE"``;
+    - ``"TYPE_ALIAS"``;
+    - ``"VARIABLE"``;
 
 -  Targets for :ref:`Class Members`:
 
-    - CLASS_FIELD;
-    - CLASS_METHOD;
-    - CLASS_GETTER;
-    - CLASS_SETTER.
+    - ``"CLASS_FIELD"``;
+    - ``"CLASS_METHOD"``;
+    - ``"CLASS_GETTER"``;
+    - ``"CLASS_SETTER"``;
 
 -  Targets for :ref:`Interface Members`:
 
-    - INTERFACE_METHOD;
-    - INTERFACE_GETTER;
-    - INTERFACE_SETTER.
+    - ``"INTERFACE_METHOD"``;
+    - ``"INTERFACE_GETTER"``;
+    - ``"INTERFACE_SETTER"``;
 
 -  Other targets:
 
-    - LAMBDA for :ref:`Lambda Expressions` and
+    - ``"LAMBDA"`` for :ref:`Lambda Expressions` and
       :ref:`Lambda Expressions with Receiver`;
-    - PARAMETER for function, method, and lambda parameter;
-    - STRUCT (see :ref:`Keyword struct and ArkUI`);
-    - TYPE (see :ref:`Using Types`).
+    - ``"PARAMETER"`` for function, method, and lambda parameter;
+    - ``"STRUCT"`` (see :ref:`Keyword struct and ArkUI`);
+    - ``"TYPE"`` (see :ref:`Using Types`).
 
 .. index::
    class
@@ -882,7 +882,7 @@ than once in an ``@Target`` annotation:
 .. code-block:: typescript
    :linenos:
 
-    @Target([AnnotationTargets.CLASS, AnnotationTargets.INTERFACE, AnnotationTargets.CLASS])
+    @Target(["CLASS", "INTERFACE", "CLASS"]) // Compile-time error
     @interface Anno {}
 
 |

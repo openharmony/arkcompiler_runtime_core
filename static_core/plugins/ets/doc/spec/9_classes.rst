@@ -510,92 +510,15 @@ If a class is not *abstract*, then the following conditions must be met:
 
 - Methods of a superinterface have implementation bodies
   that can be defined either in the class itself, or in its superclass
-  or superinterface (see :ref:`Implementing Interface Methods`
-  for detail);
+  or superinterface (see :ref:`Overriding in Classes` for detail);
 
 - Required properties of superinterfaces are implemented
   (see :ref:`Implementing Required Interface Properties`).
 
+- Otherwise, a :index:`compile-time error` occurs.
+
 An optional property from a superinterface can be implemented or implicitly
 defined (see :ref:`Implementing Optional Interface Properties`).
-
-|
-
-.. _Implementing Interface Methods:
-
-Implementing Interface Methods
-==============================
-
-If superinterfaces have one or more *override-compatible* methods ``m`` with
-default implementation (see :ref:`Default Interface Method Declarations`),
-then:
-
--  Class that implements the interfaces must have
-   a method (either defined or inherited from a
-   superclass) to override  ``m`` (see
-   :ref:`Override-Compatible Signatures`);
-
--  Single interface method with default implementation
-   must be present that overrides all other methods; or
-
-- All interface methods must refer to the same default implementation
-  that is used as the current class method.
-
-Otherwise, a :index:`compile-time error` occurs.
-
-.. index::
-   interface method
-   overriding
-   abstract class
-   abstract method
-   class method
-   superinterface
-   implementation
-   class
-   override-compatible signature
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I1 { foo () {} }
-    interface I2 { foo () {} }
-    class C1 implements I1, I2 {
-       foo () {} // OK, foo() from C1 overrides both foo() from I1 and foo() from I2
-    }
-
-    class C2 implements I1, I2 {
-       // compile-time error as foo() from I1 and foo() from I2 have different method bodies
-    }
-
-    interface I3 extends I1 {}
-    interface I4 extends I1 {}
-    class C3 implements I3, I4 {
-       // OK, as foo() from I3 and foo() from I4 refer to the same method
-    }
-
-    interface I5 extends I1 { foo() {} } // override method from I1
-    class C4 implements I1, I5 {
-       // compile-time error as foo() from I1 and foo() from I5 have different method bodies
-    }
-
-The situation where a method inherited from
-a superclass overrides a method with default
-implementation inherited from a superinterface
-is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-       foo () { console.log ("I.foo") }
-    }
-    class C1 {
-       foo () { console.log ("C1.foo") }
-    }
-    class C2 extends C1 implements I {} // OK
-
-    (new C2).foo()      // output: C1.foo
-    (new C2 as I).foo() // output: C1.foo
 
 |
 
@@ -1697,7 +1620,7 @@ Field Initialization
 
 All fields except :ref:`Fields with Late Initialization` are initialized by
 using the default value (see :ref:`Default Values for Types`) or a field
-initializer (see below) if present. Otherwise, a field can be initialized as
+initializer (see below) if present. Otherwise, a field must be initialized as
 follows:
 
 - Static field, by a static initialization block (see
@@ -2174,8 +2097,7 @@ A :index:`compile-time error` occurs if:
 
 A non-static method declared in a class can do the following:
 
-- Implement a method inherited from a superinterface or superinterfaces
-  (see :ref:`Implementing Interface Methods`);
+- Implement a method inherited from a superinterface or superinterfaces;
 - Override a method inherited from a superclass (see :ref:`Overriding in Classes`);
 - Act as method declaration of a new method.
 

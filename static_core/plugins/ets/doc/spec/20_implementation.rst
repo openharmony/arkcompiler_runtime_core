@@ -78,32 +78,32 @@ A simple implementation stores every module in a single file.
 
 |
 
-.. _Getting Type Via Reflection:
+.. _Getting Runtime Type Via Reflection:
 
-Getting Type Via Reflection
-***************************
+Getting Runtime Type Via Reflection
+***********************************
 
 .. meta:
     frontend_status: None
 
 The |LANG| standard library (see :ref:`Standard Library`) provides a
-pseudogeneric static method ``Type.from<T>()`` to be processed by the compiler
+pseudogeneric static method ``Class.from<T>()`` to be processed by the compiler
 in a specific way during compilation. A call to this method allows getting a
-value of type ``Type`` that represents type ``T`` at runtime.
+value of type ``Class`` that represents type ``T`` at runtime.
 
 .. code-block:: typescript
    :linenos:
 
-    let type_of_int: Type = Type.from<int>()
-    let type_of_string: Type = Type.from<string>()
-    let type_of_number: Type = Type.from<number>()
-    let type_of_Object: Type = Type.from<Object>()
+    let type_of_int: Class = Class.from<int>()
+    let type_of_string: Class = Class.from<string>()
+    let type_of_number: Class = Class.from<number>()
+    let type_of_Object: Class = Class.from<Object>()
 
     class UserClass {}
-    let type_of_user_class: Type = Type.from<UserClass>()
+    let type_of_user_class: Class = Class.from<UserClass>()
 
     interface SomeInterface {}
-    let type_of_interface: Type = Type.from<SomeInterface>()
+    let type_of_interface: Class = Class.from<SomeInterface>()
 
 .. index::
    pseudogeneric static method
@@ -119,14 +119,14 @@ value of type ``Type`` that represents type ``T`` at runtime.
    type
 
 If type ``T`` used as type argument is affected by :ref:`Type Erasure`, then
-the function returns value of type ``Type`` for *effective type* of ``T``
+the function returns value of type ``Class`` for *effective type* of ``T``
 but not for ``T`` itself:
 
 .. code-block:: typescript
    :linenos:
 
-    let type_of_array1: Type = Type.from<int[]>() // value of Type for Array<> 
-    let type_of_array2: Type = Type.from<Array<number>>() // the same Type value
+    let type_of_array1: Class = Class.from<int[]>() // value of Class for Array<> 
+    let type_of_array2: Class = Class.from<Array<number>>() // the same Class value
 
 .. index::
    type argument

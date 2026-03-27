@@ -182,13 +182,17 @@ The syntax of *namespace declarations* is presented below:
 
     namespaceDeclaration:
         'namespace' qualifiedName
-        '{' (topDeclaration | topLevelStatements | exportDirective)* '}'
+        '{' (topDeclaration | topLevelStatements | staticBlock | exportDirective)* '}'
         ;
 
+Namespaces can have *top-level statements* or a *static block*
+which constitute a namespace initializer. The initializer is executed
+only if at least one of the exported namespace members is used in the program
+(see :ref:`Static Initialization` for detail).
 
-Namespaces like modules can have top-level statements which act as namespace
-initializers, and are called only if at least one of the exported namespace
-members is used in the program (see :ref:`Static Initialization` for detail).
+*Static block* is to be deprecated in one of the future versions of |LANG|, 
+using *top-level statements* is recommended instead. Only one *static block*
+is allowed in a namespace. Otherwise, a :index:`compile-time error` occurs.
 
 The usage of namespaces is represented in the example below:
 
@@ -1167,8 +1171,7 @@ functions (see :ref:`Function Declarations`,
 overloads (see :ref:`Explicit Function Overload`),
 namespaces (see :ref:`Namespace Declarations`),
 or other declarations (see :ref:`Ambient Declarations`, :ref:`Annotations`,
-:ref:`Accessor Declarations`, :ref:`Functions with Receiver`,
-:ref:`Accessors with Receiver`).
+:ref:`Accessor Declarations`, :ref:`Functions with Receiver`).
 Top-level declarations can be exported.
 
 The syntax of *top-level declarations* is presented below:
@@ -1188,7 +1191,6 @@ The syntax of *top-level declarations* is presented below:
         | annotationDeclaration
         | accessorDeclaration
         | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
         )
         ;
 

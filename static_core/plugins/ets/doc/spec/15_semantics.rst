@@ -2346,7 +2346,7 @@ following table:
       * - A name of a numeric type
         - The same numeric type
       * - ``"object"``
-        - ``Object - boolean - string - bigint - char - all numeric types``
+        - ``(Object - all types for which typeof is not equal to "object") | null``
 
 At a **node that joins two CFG branches**, namely
 ``C``:sub:`1` ``= ( l``:sub:`1`, ``s``:sub:`1` ``)``, and
@@ -2736,7 +2736,7 @@ Otherwise, a :index:`compile-time error` occurs.
          // a superinterface are not accessible in the derived class, and such
          // a declaration attempt has nothing to override. 
       private_member() {}
-         // Will be a correct method declaration which is nto related to 
+         // Will be a correct method declaration which is not related to 
          // private methods with the same name and signature from a supoer class
          // or superinterfaces
    }
@@ -2745,19 +2745,18 @@ If an *instance method* is defined or inherited by a subclass with the same name
 *instance method* in a superclass or superinterface, then the following semantic rules are
 applied:
 
+- If signatures are not *override-compatible* (see
+  :ref:`Override-Compatible Signatures`), and
+  if signatures formed by using *effective
+  signature types* of original signatures
+  are *override-compatible* after type erasure,
+  then a :index:`compile-time error` occurs.
+
 - If signatures are *override-compatible* (see
-  :ref:`Override-Compatible Signatures`), then the subclass method *overrides*
-  the superclass or superinterface method *in* the subclass.
+  :ref:`Override-Compatible Signatures`), then the method of subinterface overrides
+  the method of superinterface *in* the subinterface.
 
-- If signatures formed using *effective signature types*
-  of original signatures are *override-compatible*, then
-  a :index:`compile-time error` occurs.
-
-- Otherwise, :ref:`Implicit Method Overloading` is used and the method is
-  inherited by the class.
-
-.. note::
-   A single method in a subclass can override several methods of a superclass.
+- Otherwise, :ref:`Implicit Method Overloading` is used.
 
 .. index::
    context
@@ -2769,6 +2768,8 @@ applied:
    overriding
    override-compatibility
 
+Overriding methods from a superclass is represented in the example below:
+
 .. code-block:: typescript
    :linenos:
 
@@ -2778,25 +2779,46 @@ applied:
    }
    class Derived extends Base {
       override method_1() {} // overriding
-      override method_2(p: string) {} // compile-time error
+      override method_2(p: string) {} // compile-time error, not override-compatible
    }
+
+Overriding a method from a superinterface by a method from a superclass is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
-   interface Itf {
+   interface I {
       m(): void
    }
 
    class Base {
       m() { }
    }
-   class Derived extends Base implements Itf {
-      // method m inherited from Base overrides m defined in Itf
+   class Derived extends Base implements I {
+      // method 'm' inherited from 'Base' overrides 'm' defined in 'I'
    }
 
+A single method in a subclass can override several methods of a superclass:
+
+.. code-block:: typescript
+   :linenos:
+
+    class B {}
+    class C {
+        foo(a: A) {}
+        foo(b: B) {}
+    }
+    class D extends C {
+        foo(o: Object) { console.log("foo in D")}
+    }
+
+    let c: C = new D()
+    c.foo(new A()) // output: foo in D
+    c.foo(new B()) // output: foo in D
+
+
 If more than one method of the subclass overrides the same method of the
-superclass a :index:`compile-time error` occurs.
+superclass a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -2809,7 +2831,6 @@ superclass a :index:`compile-time error` occurs.
         foo (p: I) {}
      }
 
-
 |
 
 .. _Overriding in Interfaces:
@@ -2820,20 +2841,21 @@ Overriding in Interfaces
 .. meta:
     frontend_status: Done
 
-If a method is defined in a subinterface with the same name as the method in
-the superinterface, then the following semantic rules apply:
+If a method is defined in a subinterface with the same name as an accessible
+method in the superinterface, then the following semantic rules apply:
 
 - If signatures are not *override-compatible* (see
-  :ref:`Override-Compatible Signatures`) and signatures formed by using
-  *effective signature types* of original signatures are *override-compatible*, then a
-  :index:`compile-time error` occurs.
+  :ref:`Override-Compatible Signatures`), and
+  if signatures formed by using *effective
+  signature types* of original signatures
+  are *override-compatible* after type erasure,
+  then a :index:`compile-time error` occurs.
 
 - If signatures are *override-compatible* (see
   :ref:`Override-Compatible Signatures`), then the method of subinterface overrides
   the method of superinterface *in* the subinterface.
 
-- Otherwise, the superinterface method is inherited by the subinterface and
-  overloading (see :ref:`Overloading`) occurs.
+- Otherwise, :ref:`Implicit Method Overloading` is used.
 
 .. code-block:: typescript
    :linenos:
@@ -2871,11 +2893,17 @@ the superinterface, then the following semantic rules apply:
    interface Base {
       method_1()
       method_2(p: number)
+      method_3(): string
+      method_4(a: Array<string>)
       private foo() {} // private method with implementation body
    }
    interface Derived extends Base {
       method_1()           // overriding
       method_2(p: string)  // overloading
+      method_3(): number // compile-time error, bad overriding, return type mismatch
+      method_4(a: Array<number>)  // compile-time error, original signatures are
+                                  // not override-compatible, but effective
+                                  // signatures after type erasure are compatible.
       foo(p: number): void // it is just a new method declaration
                            // Base.foo() is not accessible here at all
    }
@@ -2944,10 +2972,11 @@ only if **all** of the following conditions are met:
 2. Each parameter type ``T``:sub:`i` is a supertype of ``U``:sub:`i`
    for ``i`` in ``1..n`` (contravariance).
 3. If return type ``T``:sub:`m+1` is ``this``, then ``U``:sub:`n+1` is ``this``,
-   or any of superinterfaces or superclass of the current type. Otherwise,
-   return type ``T``:sub:`m+1` is a subtype of ``U``:sub:`n+1` (covariance).
-4. Number of type parameters of either method is the same, i.e., ``k = j``.
-5. Constraints of ``W``:sub:`1`, ... ``W``:sub:`j` are to be contravariant
+   or any of superinterfaces or superclass of the current type.
+4. If return type ``T``:sub:`m+1` is not ``this``, then it must be a subtype
+   of ``U``:sub:`n+1` (covariance).
+5. Number of type parameters of either method is the same, i.e., ``k = j``.
+6. Constraints of ``W``:sub:`1`, ... ``W``:sub:`j` are to be contravariant
    (see :ref:`Invariance, Covariance and Contravariance`) to the appropriate
    constraints of ``V``:sub:`1`, ... ``V``:sub:`k`.
 

@@ -158,7 +158,7 @@ details):
 
     type FuncType = (p: string) => void
     let f1: FuncType = (p: string): number => { return 0 } // compile-time error in ArkTS
-    let f1: FuncType = (p: string): string => { return "" } // compile-time error in ArkTS
+    let f2: FuncType = (p: string): string => { return "" } // compile-time error in ArkTS
 
 .. index::
    function type
@@ -184,7 +184,8 @@ with object literals only.
 .. code-block:: typescript
    :linenos:
 
-    function foo<T>(t: T, part_t: Partial<T>) {
+    class T { i: number = 1 }
+    function foo(t: T, part_t: Partial<T>) {
         part_t = t // compile-time error in ArkTS
     }
 
@@ -298,25 +299,6 @@ The two situations are represented by the following examples:
 
 |
 
-.. _Type void Compatibility:
-
-Type ``void`` Compatibility
----------------------------
-
-.. meta:
-    frontend_status: Done
-
-|TS| allows using type ``void`` in union types. |LANG| allows no ``void``
-in union types. This situation is represented by the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   type UnionWithVoid = void | number
-     // Such type is OK in Typescript, but causes a compile-time error in ArkTS
-
-|
-
 .. _Invariant Array Assignment:
 
 Invariant Array Assignment
@@ -332,18 +314,18 @@ Invariant Array Assignment
    :linenos:
 
     // Typescript
-    let a: Object[] = [1, 2, 3]
-    let b = [1, 2, 3] // type of 'b' is inferred as number[]
-    a = b // That works well for the Typescript
+    let a1: Object[] = [1, 2, 3]
+    let b1 = [1, 2, 3] // type of 'b' is inferred as number[]
+    a1 = b1 // That works well for the Typescript
 
     // ArkTS
-    let a: Object[] = [1, 2, 3]
-    let b = [1, 2, 3] // type of 'b' is inferred as double[]
-    a = b // compile-time error
+    let a2: Object[] = [1, 2, 3]
+    let b2 = [1, 2, 3] // type of 'b' is inferred as double[]
+    a2 = b2 // compile-time error
 
-    let a: Object[] = ["a", "b", "c"]
-    let b: string[] = ["a", "b", "c"]
-    a = b // compile-time error
+    let a3: Object[] = ["a", "b", "c"]
+    let b3: string[] = ["a", "b", "c"]
+    a3 = b3 // compile-time error
 
 .. index::
    covariant array assignment
@@ -392,13 +374,13 @@ listed explicitly in the ``extends`` clause of a class. |LANG| allows it because
    :linenos:
 
     // TypeScript reports an error while ArkTS compiles with no issues
-    class A {
+    class A1 {
        override toString() {       // compile-time error
            return super.toString() // compile-time error
        }
     }
 
-    class A extends Object { // That is the form supported by TypeScript
+    class A2 extends Object { // That is the form supported by TypeScript
        override toString() {
            return super.toString()
        }
@@ -518,15 +500,15 @@ become non-distinguishable:
    :linenos:
 
     // TypeScript accepts such code, while ArkTS reports a compile-time error
-    // as signatures of foo() from the 1st namespace A is identical to the signature
+    // as signature of foo() from the 1st namespace A is identical to the signature
     // of foo() from the 2nd namespace A
     namespace A {
-       function foo() { console.log ("foo() from the 1st namespace A declaration") }
-       export function bar () { foo() }
+       function foo(): void { console.log ("foo() from the 1st namespace A declaration") }
+       export function bar(): void { foo() }
     }
     namespace A {
-       function foo() { console.log ("foo() from the 2nd namespace A declaration") }
-       export function bar_bar() { foo() }
+       function foo(): void { console.log ("foo() from the 2nd namespace A declaration") }
+       export function bar_bar(): void { foo() }
     }
 
 |
@@ -720,13 +702,14 @@ use of a field.
     }
 
     class Base2 extends Base1 {
-        static override field: number = Base3.init_in_base_2()
+        static  field: number = Base2.init_in_base_2()
         private static init_in_base_2() {
            console.log ("Base2 static field initialization")
            return 777
         }
     }
-    console.log (Base1.field, Base3.field)
+    console.log (Base1.field)
+    console.log( Base2.field)
     /* ArkTS output:
         Base1 static field initialization
         321
@@ -751,34 +734,6 @@ a static field is initialized.
         static field: string // ArkTS reports a compile-time error
     }
     console.log (AClass.field) // TypeScript output is 'undefined'
-
-
-
-|
-
-.. _Differences in Overriding Properties:
-
-Differences in Overriding Properties
-------------------------------------
-
-|LANG| handles fields and properties (i.e., pairs of accessors) differently.
-Thus, mixing fields and properties is not allowed in |LANG|, while in |TS|
-the object model is different and allows such a mix.
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        num: number = 1
-    }
-    interface I {
-        num: number
-    }
-    class D extends C implements I {
-        num: number = 2 // compile-time error in ArkTS, conflict in overriding
-        // accepts such situation in TypeScript
-    }
-
 
 |
 
@@ -862,59 +817,6 @@ non-exported in the case of aliasing. |TS| allows such declarations.
     export type A = B
     // compile-time error in ArkTS as B is not exported
     // acceptable situation in TypeScript
-
-|
-
-.. _TS Definite Assignment Assertion:
-
-|TS| Definite Assignment Assertion
-----------------------------------
-
-.. meta:
-    frontend_status: None
-
-|TS| supports *definite assignment assertion* ('``!:``') both in classes and
-interfaces. |LANG| does not use the term *definite assignment assertions* for
-'``!:``' but has a similar notion called *late initialization*. |LANG| allows
-it in classes only.
-
-The following code is valid in |TS| for both `class A` and `interface I`.
-In |LANG|, `interface I` causes a compile-time error:
-
-.. code-block:: typescript
-   :linenos:
-
-   class A {
-      f !: number
-   }
-
-   interface I {
-      field!: number
-   }
-
-|
-
-.. _TS Tuple Length Property:
-
-|TS| Tuple Length Property
---------------------------
-
-.. meta:
-    frontend_status: Done
-
-Tuples have the property '``length``' in |TS| but not in |LANG|.
-The following code is valid in |TS| but causes a compile-time error in |LANG|:
-
-.. code-block:: typescript
-   :linenos:
-
-   let tuple : [number, string]  = [1, "" ]
-
-   for (let index = 0; index < tuple.length; index++ ) {
-      let element: Object = tuple[index]
-      // do something with the element
-   }
-
 
 |
 

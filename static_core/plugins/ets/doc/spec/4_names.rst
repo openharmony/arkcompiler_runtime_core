@@ -138,8 +138,7 @@ A declaration introduces a named entity in an appropriate *declaration scope*
 - :ref:`Annotations`;
 - :ref:`Ambient Declarations`;
 - :ref:`Accessor Declarations`;
-- :ref:`Functions with Receiver`;
-- :ref:`Accessors with Receiver`.
+- :ref:`Functions with Receiver`.
 
 Each declaration in the declaration scope (see :ref:`Scopes`)
 must be *distinguishable*.

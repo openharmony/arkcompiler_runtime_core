@@ -840,9 +840,9 @@ Ambient Accessor Declarations
 .. meta:
     frontend_status: None
     
-*Ambient accessor declaration* is an ambient version of
-:ref:`Accessor Declarations` or :ref:`Accessors with Receiver`. The syntax of
-an *ambient accessor declaration* is presented below:
+*Ambient accessor declaration* is an ambient version of 
+:ref:`Accessor Declarations`. The syntax of an *ambient accessor declaration*
+is presented below:
 
 .. code-block:: abnf
 
@@ -861,7 +861,7 @@ declaration is not specified.
     declare get name(): string // OK
     declare get age() // compile-time error, return type must be specified
 
-See :ref:`Accessor Declarations` and :ref:`Accessors with Receiver` for details.
+See :ref:`Accessor Declarations` for details.
 
 .. raw:: pdf
 
