@@ -908,9 +908,13 @@
 11.enumerations/01.enumeration_base_type/enum_int_3.ets
 11.enumerations/01.enumeration_base_type/enum_int_4.ets
 11.enumerations/01.enumeration_base_type/enum_int_5.ets
+11.enumerations/01.enumeration_base_type/enum_str_1.ets
+11.enumerations/01.enumeration_base_type/enum_str_2.ets
+11.enumerations/01.enumeration_base_type/enum_str_3.ets
 
 #33805
 11.enumerations/01.enumeration_base_type/enum_int_n_17.ets
+11.enumerations/01.enumeration_base_type/enum_str_n_11.ets
 
 #33639
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_4.ets
@@ -921,6 +925,16 @@
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_16.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_18.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_19.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_3.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_4.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_5.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_6.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_7.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_8.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_9.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_10.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_11.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_12.ets
 
 #33806
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_0.ets

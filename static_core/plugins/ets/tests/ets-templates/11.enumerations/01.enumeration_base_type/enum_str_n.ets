@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,29 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for c in cases %}
+
+{% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
+
+{% set logic_data -%}
+{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
+{% endset -%}
+
 /*---
-desc: A string value for enumeration constants must be set explicitly
+desc: {{c.desc}}
+tags: [compile-only, negative]
+expected_out: {{c.stdout[decl_id]}}
 ---*/
 
-{{c.decl}}
+//#4097 (urunner2) note: use this after declgen run support
+//test suffix: "{{c.test_suffix}}_{{decl_id}}"
+
+{{decl}}
 
 function main() {
-    {{c.use|indent}}
+{{logic_data}}
 }
-{%- endfor %}
+
+{% endfor %}
+{% endfor %}
