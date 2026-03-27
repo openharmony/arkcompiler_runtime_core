@@ -33,3 +33,15 @@ class B extends Base {
 export function __noinline__createB(v: int): Base {
     return new B(v);
 }
+
+class C extends Base {
+  y: int;
+  constructor(v: int) {
+    super();
+    this.y = v;
+  }
+}
+
+export function __noinline__createC(v: int): Base {
+    return new C(v);
+}
