@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+    The transitive closure of the direct superinterface relationship results in the superinterface relationship.
 ---*/
 
-{{c.decl}}
-{% endfor %}
+interface I {
+  foo() { return 2 }
+}
+interface II extends I {}
+class C implements II {
+  foo() { return 3 }
+}
+function boo(i: I) {
+  return i.foo()
+}
+
+function main() {
+  let i1: I = {}
+  let i2: II = {}
+  let i3: C = new C()
+  arktest.assertEQ(boo(i1), 2)
+  arktest.assertEQ(boo(i2), 2)
+  arktest.assertEQ(boo(i3), 3)
+}

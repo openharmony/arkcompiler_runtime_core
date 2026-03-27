@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,11 +17,12 @@ limitations under the License.
 
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+    Declaring sub-interface methods with override-compatible signatures.
+    {{c.descr}}
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
 ---*/
 
-{{c.decl}}
+  {{c.decl}}
+
 {% endfor %}

@@ -1,0 +1,65 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# List of types
+types:
+    - type: byte
+      error: |-
+        "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: short
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: int
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: long
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: float
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: double
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: char
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: boolean
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: ColorEnum
+      decl: |-
+        enum ColorEnum { Red, Green, Blue }
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: Boolean | String
+      error: |-
+          "Semantic error ESE0179: Interface expected here."
+    - type: FuncOp
+      decl: |-
+        type FuncOp = () => void
+      error: |-
+          "Semantic error ESE0179: Interface expected here."
+    - type: C
+      decl: |-
+        class C {}
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: Object
+      error: |-
+          "Semantic error ESE0378: Interfaces cannot extend classes, only other interfaces."
+    - type: Any
+      error: |-
+          "Semantic error ESE0179: Interface expected here."

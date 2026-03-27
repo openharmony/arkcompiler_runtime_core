@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
+{% for i in identifiers %}
 /*---
-desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+desc: Empty interface declaration without type parameters
+tags: [compile-only, negative]
+expected_out: "{{i.error}}"
+params: interface {{i.id}}
 ---*/
 
-{{c.decl}}
+interface A {}
+
+interface {{i.id}} extends A {
+}
+
 {% endfor %}

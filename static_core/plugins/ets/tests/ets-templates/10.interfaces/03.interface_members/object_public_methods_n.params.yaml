@@ -1,0 +1,58 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - doc: Object public method
+    error: |-
+      "TBD Error #33880"
+    decl: |-
+      interface I {
+        toString(): string;
+      }
+  - doc: Object public method with updated param list
+    error: |-
+      "TBD Error #33880"
+    decl: |-
+      interface I {
+        toString(i: int): string;
+      }
+  - doc: Object public method configured to be have no params
+    error: |-
+      "Semantic error ESE0130: Function bar is already declared.'"
+    decl: |-
+      interface I {
+        bar(): int
+        bar(): void
+      }
+  - doc: Different return value type
+    error: |-
+      "TBD Error #33880"
+    decl: |-
+      interface I {
+        hasOwnProperty(key: string): int
+      }
+  - doc: No return value
+    error: |-
+      "TBD Error #33880"
+    decl: |-
+      interface I {
+        toString(): void;
+      }
+  - doc: Static public method
+    error: |-
+      "TBD Error #33880"
+    decl: |-
+      interface I {
+        entries(o: Object): [string, Any] | null | undefined[] 
+      }

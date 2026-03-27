@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,19 @@
 
 /*---
 desc: Issue 24685. Passing default value to interface method param gives AssertionError
-tags: []
 ---*/
 
 interface MyInterface {
-    someMethod(value: number = 123.0)
+    someMethod(value: number = 123.0): number {
+      return value
+    }
+}
+
+function main() {
+    let i: MyInterface = {}
+    let j: MyInterface = { someMethod(value: number = 321) { return value; } }
+    arktest.assertEQ(i.someMethod(2), 2)
+    arktest.assertEQ(i.someMethod(), 123)
+    arktest.assertEQ(j.someMethod(4), 4)
+    arktest.assertEQ(j.someMethod(), 321)
 }

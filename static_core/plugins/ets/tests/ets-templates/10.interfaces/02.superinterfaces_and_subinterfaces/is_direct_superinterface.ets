@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,11 +17,14 @@ limitations under the License.
 
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
+    All direct superinterfaces of the parameterized interface type I <T1 ,..., Tn >
+    are types J <U1 𝜃 ,..., Uk 𝜃>, if:
+    • Ti (1 ≤ 𝑖 ≤ 𝑛) is the type of a generic interface declaration I <F1 ,..., Fn > (𝑛 > 0);
+    • J <U1 ,..., Uk > is a direct superinterface of I <F1 ,..., Fn >; and
+    • 𝜃 is a substitution [F1 := T1 ,..., Fn := Tn ].
     {{c.doc}}
 ---*/
 
 {{c.decl}}
+
 {% endfor %}

@@ -13,15 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
+{% for im in interface_members %}
 /*---
-desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+desc: The body of an interface may declare members of the interface, that is, fields and methods.
+tags: [compile-only, negative]
+expected_out: {{im.error}}
 ---*/
 
-{{c.decl}}
+interface A {
+  {{im.decl}}
+}
+
 {% endfor %}

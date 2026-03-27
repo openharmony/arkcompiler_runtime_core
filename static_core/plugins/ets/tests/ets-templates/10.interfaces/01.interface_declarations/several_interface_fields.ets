@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,11 +15,18 @@ limitations under the License.
 
 /*---
 desc: Several interface fields at the same time
-tags: [compile-only]
 ---*/
 
 interface Name {
-  {% for item in default_value %}
-    {{item.type}}Field: {{item.type}};
+  {% for item in default_value %}{{item.type}}Field: {{item.type}}
+  {% endfor %}
+}
+
+function main() {
+  let i: Name = {
+    {% for item in default_value %}{% if default_value[0] != item %},{% endif %}
+    {{item.type}}Field: {{item.value}}{% endfor %}
+  }
+  {% for item in default_value %}arktest.assertEQ(i.{{item.type}}Field, {{item.value}})
   {% endfor %}
 }

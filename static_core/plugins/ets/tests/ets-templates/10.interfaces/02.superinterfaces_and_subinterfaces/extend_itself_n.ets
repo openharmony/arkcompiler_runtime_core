@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,11 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Interface extends itself.
-assert: It is a compile-time error if an interface depends on itself.
+desc: A compile-time error occurs if an interface depends on itself.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0310: Cyclic inheritance involving A."
 ---*/
 
-interface A extends A {
-
-}
+interface A extends A { }
