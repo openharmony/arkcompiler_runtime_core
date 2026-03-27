@@ -720,7 +720,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_017, TestSize.Level1)
                                        "buildName2");
     AddElement<abckit_wrapper::Method>("function_demo.math1:f64;f64;std.core.Double;f64;", "math1");
     AddElement<abckit_wrapper::Method>("function_demo.math1:f64;f64;std.core.Double;f64;", "math1");
-    AddElement<abckit_wrapper::Method>("function_demo.add1:f64;f64;std.core.Object;", "add1");
+    AddElement<abckit_wrapper::Method>("function_demo.add1:f64;f64;Y;", "add1");
     AddElement<abckit_wrapper::Method>("function_demo.buildName3:std.core.String;std.core.Array;std.core.String;",
                                        "buildName3");
     AddElement<abckit_wrapper::Method>("function_demo.buildName1:std.core.String;std.core.String;std.core.String;",
@@ -953,7 +953,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_021, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("function_error_demo.processFile:std.core.String;void;", "processFile");
     AddElement<abckit_wrapper::Class>("function_error_demo.UnknownError", "UnknownError");
     AddElement<abckit_wrapper::Field>("function_error_demo.UnknownError.error", "error");
-    AddElement<abckit_wrapper::Method>("function_error_demo.getArrayElement:std.core.Array;i32;std.core.Object;",
+    AddElement<abckit_wrapper::Method>("function_error_demo.getArrayElement:std.core.Array;i32;Y;",
                                        "getArrayElement");
 
     this->VerifyObfuscated();
@@ -1065,28 +1065,28 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_024, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("generics_demo1.c2", "c2");
     AddElement<abckit_wrapper::Field>("generics_demo1.array", "array");
     AddElement<abckit_wrapper::Field>("generics_demo1.c1", "c1");
-    AddElement<abckit_wrapper::Method>("generics_demo1.foo:std.core.Object;std.core.Object;void;", "foo");
+    AddElement<abckit_wrapper::Method>("generics_demo1.foo:Y;Y;void;", "foo");
     AddElement<abckit_wrapper::Method>("generics_demo1.loggingIdentity1:std.core.Array;std.core.Array;",
                                        "loggingIdentity1");
     AddElement<abckit_wrapper::Class>("generics_demo1.ClsA", "ClsA");
-    AddElement<abckit_wrapper::Method>("generics_demo1.ClsA.method:generics_demo1.ClsA;std.core.Object;void;",
+    AddElement<abckit_wrapper::Method>("generics_demo1.ClsA.method:generics_demo1.ClsA;Y;void;",
                                        "method");
     AddElement<abckit_wrapper::Class>("generics_demo1.InOutX", "InOutX");
     AddElement<abckit_wrapper::Field>("generics_demo1.InOutX.fldT2", "fldT2");
     AddElement<abckit_wrapper::Field>("generics_demo1.InOutX.fldT3", "fldT3");
-    AddElement<abckit_wrapper::Method>("generics_demo1.InOutX.bar1:generics_demo1.InOutX;std.core.Object;", "bar1");
-    AddElement<abckit_wrapper::Method>("generics_demo1.InOutX.foo:generics_demo1.InOutX;std.core.Object;void;", "foo");
+    AddElement<abckit_wrapper::Method>("generics_demo1.InOutX.bar1:generics_demo1.InOutX;Y;", "bar1");
+    AddElement<abckit_wrapper::Method>("generics_demo1.InOutX.foo:generics_demo1.InOutX;Y;void;", "foo");
     AddElement<abckit_wrapper::Method>(
-        "generics_demo1.InOutX.method:generics_demo1.InOutX;std.core.Object;std.core.Object;", "method");
+        "generics_demo1.InOutX.method:generics_demo1.InOutX;Y;Y;", "method");
     AddElement<abckit_wrapper::Class>("generics_demo1.Y", "Y");
     AddElement<abckit_wrapper::Field>("generics_demo1.Y.f1", "f1");
     AddElement<abckit_wrapper::Field>("generics_demo1.Y.f2", "f2");
     AddElement<abckit_wrapper::Class>("generics_demo1.C2", "C2");
     AddElement<abckit_wrapper::Method>(
-        "generics_demo1.C2.foo:generics_demo1.C2;std.core.Object;std.core.Object;std.core.Object;void;", "foo");
+        "generics_demo1.C2.foo:generics_demo1.C2;Y;Y;Y;void;", "foo");
     AddElement<abckit_wrapper::Class>("generics_demo1.X", "X");
     AddElement<abckit_wrapper::Method>(
-        "generics_demo1.X.tag:generics_demo1.X;std.core.Object;std.core.Object;std.core.String;", "tag");
+        "generics_demo1.X.tag:generics_demo1.X;Y;Y;std.core.String;", "tag");
 
     this->VerifyObfuscated();
 }
@@ -1174,12 +1174,12 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_026, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("generics_extends.H.foo:generics_extends.H;void;", "foo");
     AddElement<abckit_wrapper::Class>("generics_extends.Base2", "Base2");
     AddElement<abckit_wrapper::Method>(
-        "generics_extends.Base2.bar:generics_extends.Base2;std.core.Object;std.core.Object;", "bar");
+        "generics_extends.Base2.bar:generics_extends.Base2;Y;Y;", "bar");
     AddElement<abckit_wrapper::Class>("generics_extends.Derived1", "Derived1");
     AddElement<abckit_wrapper::Method>(
         "generics_extends.Derived1.foo:generics_extends.Derived1;generics_extends.SomeType;void;", "foo");
     AddElement<abckit_wrapper::Class>("generics_extends.G2", "G2");
-    AddElement<abckit_wrapper::Method>("generics_extends.G2.foo:generics_extends.G2;std.core.Object;void;", "foo");
+    AddElement<abckit_wrapper::Method>("generics_extends.G2.foo:generics_extends.G2;Y;void;", "foo");
     AddElement<abckit_wrapper::Class>("generics_extends.Derived", "Derived");
     AddElement<abckit_wrapper::Class>("generics_extends.B2", "B2");
     AddElement<abckit_wrapper::Method>("generics_extends.B2.foo:generics_extends.B2;std.core.String;void;", "foo");
@@ -1190,7 +1190,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_026, TestSize.Level1)
     AddElement<abckit_wrapper::Class>("generics_extends.Base", "Base");
     AddElement<abckit_wrapper::Class>("generics_extends.Interface", "Interface");
     AddElement<abckit_wrapper::Method>(
-        "generics_extends.Interface.foo:generics_extends.Interface;std.core.Object;void;", "foo");
+        "generics_extends.Interface.foo:generics_extends.Interface;Y;void;", "foo");
     AddElement<abckit_wrapper::Class>("generics_extends.B1", "B1");
     AddElement<abckit_wrapper::Field>("generics_extends.B1.f1", "f1");
     AddElement<abckit_wrapper::Field>("generics_extends.B1.f2", "f2");
@@ -1297,7 +1297,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_029, TestSize.Level1)
                                        "buildName");
     AddElement<abckit_wrapper::Method>("lambda_demo.math3:f64;f64;std.core.Array;f64;", "math3");
     AddElement<abckit_wrapper::Method>("lambda_demo.foo1:std.core.Array;std.core.String;", "foo1");
-    AddElement<abckit_wrapper::Method>("lambda_demo.identity:std.core.Object;std.core.Object;", "identity");
+    AddElement<abckit_wrapper::Method>("lambda_demo.identity:Y;Y;", "identity");
     AddElement<abckit_wrapper::Method>("lambda_demo.memB:std.core.String;", "memB");
     AddElement<abckit_wrapper::Class>("lambda_demo.C1", "C1");
     AddElement<abckit_wrapper::Field>("lambda_demo.C1.field1", "field1");
