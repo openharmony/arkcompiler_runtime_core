@@ -26,13 +26,13 @@ const genericSubsetByRefStaticCallFromSts = getFunction('genericSubsetByRefStati
 function checkSubsetByRefStatic() {
     const res = SubsetByRefStatic.get(jsArrInt);
 
-    ASSERT_TRUE(!checkArray(res) && res[0] === jsArrInt[0]);
+    ASSERT_TRUE(checkArray(res) && res[0] === jsArrInt[0]);
 }
 
 function checkGenericSubsetByRefStaticCallFromSts() {
     const res = genericSubsetByRefStaticCallFromSts(jsArrInt);
 
-    ASSERT_TRUE(!checkArray(res) && res[0] === jsArrInt[0]);
+    ASSERT_TRUE(checkArray(res) && res[0] === jsArrInt[0]);
 }
 
 checkSubsetByRefStatic();

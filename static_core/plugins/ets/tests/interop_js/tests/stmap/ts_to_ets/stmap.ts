@@ -43,7 +43,9 @@ namespace st {
     }
 }
 
-const STValue = globalThis.gtest.etsVm.STValue;
+const etsVm = globalThis.gtest.etsVm;
+let STValue = etsVm.STValue;
+const testMapProto = etsVm.getFunction('Ltest_stmap/ETSGLOBAL;', 'testMapProto');
 
 export function returnMap(): st.Map<string, number> {
     return STValue.newSTMap();
@@ -146,3 +148,21 @@ export function checkValuesMethod(map: st.Map<string, number>): boolean {
     }
     return values.length === 2 && values.includes(1) && values.includes(2);
 }
+
+export function createEmptyMap(): Map<number, number> {
+    return new Map<number, number>;
+}
+
+function main(): void {
+    let res = false;
+    try {
+        testMapProto(new Map<number, number>());
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Value is not assignable');
+        res = res && e.message.includes('Lstd/core/Map;');
+    }
+    ASSERT_TRUE(res);
+}
+
+main()

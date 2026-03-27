@@ -90,4 +90,14 @@ TEST_F(TsToEtsSTMapTest, testCheckValuesMethod)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCheckValuesMethod"));
 }
 
+TEST_F(TsToEtsSTMapTest, testInstanceOfMap)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInstanceOfMap"));
+}
+
+TEST_F(TsToEtsSTMapTest, test_stMap)
+{
+    ASSERT_TRUE(RunJsTestSuite("stmap.ts"));
+}
+
 }  // namespace ark::ets::interop::js::testing

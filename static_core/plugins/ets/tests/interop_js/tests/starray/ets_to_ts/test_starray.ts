@@ -115,15 +115,15 @@ const testUserArrayAge = etsVm.getFunction('Lstarray/ETSGLOBAL;', 'testUserArray
 const returnUserArray = etsVm.getFunction('Lstarray/ETSGLOBAL;', 'returnUserArray');
 const esFuncArrayTest = etsVm.getFunction('Lstarray/ETSGLOBAL;', 'esFuncArrayTest');
 
-function isInstatnceofArray(val: st.Array<string>): boolean {
+function isInstanceofArray(val: st.Array<string>): boolean {
     return val instanceof Array;
 }
 
-function testInstatnceof(): void {
+function testInstanceof(): void {
     let val1 = customLengthArray(0);
-    ASSERT_TRUE(!isInstatnceofArray(val1));
+    ASSERT_TRUE(isInstanceofArray(val1));
     let val2 = STValue.newSTArray();
-    ASSERT_TRUE(!isInstatnceofArray(val2));
+    ASSERT_TRUE(isInstanceofArray(val2));
 }
 
 function testSameObject(): void {
@@ -598,7 +598,7 @@ function testIsSTMap(): void {
 }
 
 testSameObject();
-testInstatnceof();
+testInstanceof();
 testGetSetLength();
 testGetterSetterByIndex();
 testShiftUnshift();

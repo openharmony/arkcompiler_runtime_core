@@ -44,7 +44,7 @@ function testPrimitiveTypes(etsVm: any): void {
 function testArrayAndObjectTypes(etsVm: any): void {
     etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefNumberArray")();
     const arr = nativeGetRef();
-    ASSERT_TRUE(!(arr instanceof Array));
+    ASSERT_TRUE((arr instanceof Array));
     ASSERT_EQ(arr.length, 5);
     ASSERT_EQ(arr[2], 3);
 
@@ -57,13 +57,13 @@ function testArrayAndObjectTypes(etsVm: any): void {
 function testMapAndSetTypes(etsVm: any): void {
     etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefMap")();
     const map = nativeGetRef();
-    ASSERT_TRUE(!(map instanceof Map));
+    ASSERT_TRUE((map instanceof Map));
     ASSERT_EQ(map.get("a"), 10);
     ASSERT_EQ(map.get("b"), 20);
 
     etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefSet")();
     const set = nativeGetRef();
-    ASSERT_TRUE(!(set instanceof Set));
+    ASSERT_TRUE((set instanceof Set));
     ASSERT_TRUE(set.has("x"));
     ASSERT_TRUE(set.has("y"));
 }

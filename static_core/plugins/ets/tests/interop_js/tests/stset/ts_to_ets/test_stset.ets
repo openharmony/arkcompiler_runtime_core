@@ -91,3 +91,10 @@ function testCheckClearMethod(): boolean {
     checkClearMethod.invoke(set);
     return set.size === 0;
 }
+
+function testInstanceOfSet(): boolean {
+    let dynamicSet = module.getProperty('createEmptySet');
+    return !(dynamicSet instanceof Set);
+}
+
+export function testSetProto(m: Set<number>): void { }

@@ -70,7 +70,7 @@ function isInstanceOfMap(val: st.Map<string, number>): boolean {
 
 function testInstanceOf(): void {
     let val1 = STValue.newSTMap();
-    ASSERT_TRUE(!isInstanceOfMap(val1));
+    ASSERT_TRUE(isInstanceOfMap(val1));
 }
 
 function testGetSize(): void {

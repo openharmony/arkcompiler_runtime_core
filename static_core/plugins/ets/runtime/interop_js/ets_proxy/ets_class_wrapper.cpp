@@ -132,8 +132,7 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
     }
 
     // Check if object is subtype of js builtin class
-    if (LIKELY(HasBuiltin())) {
-        ASSERT(jsBuiltinMatcher_ != nullptr);
+    if (LIKELY(HasBuiltin()) && LIKELY(jsBuiltinMatcher_ != nullptr)) {
         auto res = jsBuiltinMatcher_(ctx, jsValue, false);
         if (res == nullptr && !ctx->SanityJSExceptionPending() && !ctx->SanityETSExceptionPending()) {
             InteropCtx::ThrowJSTypeError(env, std::string("Value is not assignable to ") + etsClass_->GetDescriptor());

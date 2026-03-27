@@ -102,7 +102,9 @@ namespace st {
     }
 }
 
-const STValue = globalThis.gtest.etsVm.STValue;
+const etsVm = globalThis.gtest.etsVm;
+let STValue = etsVm.STValue;
+const testArrayProto = etsVm.getFunction('Ltest_starray/ETSGLOBAL;', 'testArrayProto');
 
 export function returnArray(): st.Array<string> {
     return STValue.newSTArray();
@@ -111,3 +113,20 @@ export function returnArray(): st.Array<string> {
 export function consumeArray(arr: st.Array<string>): boolean {
     return arr[0] === '1' && arr[1] === '2';
 }
+
+export function createEmptyArray(): Array {
+    return new Array();
+}
+
+function main(): void {
+    let res = false;
+    try {
+        testArrayProto([1, 2, 3]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Value is not assignable');
+        res = res && e.message.includes('Lstd/core/Array;');
+    }
+    ASSERT_TRUE(res);
+}
+main()
