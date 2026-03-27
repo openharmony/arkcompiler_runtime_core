@@ -81,8 +81,9 @@ napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info)
 
     ani_class superClass = nullptr;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Type_GetSuperClass(currentType, &superClass));
-
-    if (superClass == nullptr) {
+    ani_boolean isUndefined {};
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsUndefined(superClass, &isUndefined));
+    if (isUndefined == ANI_TRUE) {
         napi_value jsNull;
         NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
         return jsNull;
