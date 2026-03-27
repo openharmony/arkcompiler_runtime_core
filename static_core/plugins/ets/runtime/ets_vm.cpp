@@ -208,6 +208,20 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
     return true;
 }
 
+void PandaEtsVM::InitializeANI(const RuntimeOptions &options)
+{
+    const EtsVmOptions *etsVmOptions = GetEtsVmOptions(options);
+    bool isVerifyANI = etsVmOptions == nullptr ? false : etsVmOptions->IsVerifyANI();
+    isVerifyANI |= options.WasSetVerifyAni();
+    if (isVerifyANI) {
+        bool useWorkaround =
+            etsVmOptions == nullptr ? false : etsVmOptions->IsVerifyANIWorkaroundNoCrashIfInvalidUsage();
+        aniVerifier_ = MakePandaUnique<ani::verify::ANIVerifier>();
+        aniVerifier_->SetVerifyOptions(useWorkaround);
+        c_api = ani::verify::GetVerifyVMAPI();
+    }
+}
+
 // CC-OFFNXT(G.FUD.05) solid logic
 PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
                        common_vm::VMInterface *vmIface)
@@ -216,14 +230,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     ASSERT(runtime_ != nullptr);
     ASSERT(mm_ != nullptr);
 
-    const EtsVmOptions *etsVmOptions = GetEtsVmOptions(options);
-    bool isVerifyANI = etsVmOptions == nullptr ? false : etsVmOptions->IsVerifyANI();
-    if (isVerifyANI) {
-        aniVerifier_ = MakePandaUnique<ani::verify::ANIVerifier>();
-        aniVerifier_->SetVerifyOptions(etsVmOptions->IsVerifyANIWorkaroundNoCrashIfInvalidUsage());
-        c_api = ani::verify::GetVerifyVMAPI();
-    }
-
+    InitializeANI(options);
     auto heapManager = mm_->GetHeapManager();
     auto allocator = heapManager->GetInternalAllocator();
 

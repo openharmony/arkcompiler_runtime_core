@@ -425,6 +425,8 @@ private:
         randomEngine_.emplace(rd());
     }
 
+    void InitializeANI(const RuntimeOptions &options);
+
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
                         common_vm::VMInterface *vmIface);
 
