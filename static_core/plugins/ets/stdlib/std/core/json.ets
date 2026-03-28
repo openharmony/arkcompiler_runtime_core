@@ -240,6 +240,72 @@ export class JSON {
     private static readonly NON_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
+    private static scanEscapeInfo(str: String): FixedArray<int> {
+        const len = str.getLength()
+        let needsEscaping = false
+        let hasSurrogates = false
+        let extraLength = 0
+        for (let i = 0; i < len; ++i) {
+            const ch = str.charAt(i)
+            const code = ch.toInt()
+            
+            // Check for ASCII characters that need escaping
+            if (code < 128) {
+                switch (ch) {
+                    case c'"':
+                    case c'\\':
+                        needsEscaping = true
+                        extraLength += 1  // \" or \\
+                        break
+                    case c'\b':
+                    case c'\f':
+                    case c'\n':
+                    case c'\r':
+                    case c'\t':
+                        needsEscaping = true
+                        extraLength += 1  // \b, \f, \n, \r, \t
+                        break
+                    default:
+                        if (code < 0x20 || code == 0x7F) {
+                            needsEscaping = true
+                            extraLength += 5  // \uXXXX
+                        }
+                        break
+                }
+            }
+            
+            // Check for surrogate characters
+            if (code >= 0xD800 && code <= 0xDFFF) {
+                hasSurrogates = true
+                if (Char.isHighSurrogate(ch)) {
+                    if (i + 1 < len && Char.isLowSurrogate(str.charAt(i + 1))) {
+                        // Valid surrogate pair - skip the low surrogate in next iteration
+                        i++
+                        // No extra length needed
+                    } else {
+                        // Lone high surrogate -> \uXXXX
+                        needsEscaping = true
+                        extraLength += 5
+                    }
+                } else if (Char.isLowSurrogate(ch)) {
+                    // Lone low surrogate -> \uXXXX
+                    needsEscaping = true
+                    extraLength += 5
+                }
+            }
+        }
+        const result = new FixedArray<int>(3)
+        result[0] = needsEscaping ? 1 : 0
+        result[1] = hasSurrogates ? 1 : 0
+        result[2] = extraLength
+        return result
+    }
+
+    private static needsEscaping(str: String): boolean {
+        const info = JSON.scanEscapeInfo(str)
+        return info[0] != 0
+    }
+
     /**
      * Converts String to JSON format
      *
@@ -248,60 +314,97 @@ export class JSON {
      * @returns String - JSON representation of byte
      */
     public static stringify(d: String): String {
+        // Scan once to get escaping requirements
+        const info = JSON.scanEscapeInfo(d)
+        const needsEscaping = info[0]
+        const hasSurrogates = info[1]
+        
+        // Fast path: if string contains no characters that need escaping, simply quote it.
+        if (!needsEscaping) {
+            let sb = new StringBuilder('"')
+            sb.append(d)
+            sb.append('"')
+            return sb.toString()
+        }
+        
         let sb = new StringBuilder('"')
         let len = d.getLength()
+        const escapeTable = EscapeStringBuilder.escapeTable
 
-        let prevChar: char = c'\0'
-        for (let i = 0; i < len; ++i) {
-            let currChar = d.charAt(i)
-
-            if (Char.isHighSurrogate(currChar)) {
-                if (i != 0 && Char.isHighSurrogate(prevChar)) {
-                    JSON.appendCharHex(sb, prevChar)
-                }
-            } else if (Char.isLowSurrogate(currChar)) {
-                if (i != 0 && Char.isHighSurrogate(prevChar)) {
-                    sb.append(prevChar)
-                    sb.append(currChar)
-                } else {
-                    JSON.appendCharHex(sb, currChar)
-                }
-            } else {
-                if (i != 0 && Char.isHighSurrogate(prevChar)) {
-                    JSON.appendCharHex(sb, prevChar)
-                }
-
-                let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, currChar, JSON.ESCAPED_CHARS.length)
-                if (escapedCharIndex != -1) {
-                    sb.append(c'\\')
-                    sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
-                } else if ((currChar.compareTo(c'\x1f') <= 0) && (currChar.compareTo(c'\x00') >= 0)) {
-                    if (currChar.compareTo(c'\x0f') <= 0) {
-                        sb.append('\\u000')
-                    } else {
-                        sb.append('\\u00')
+        if (!hasSurrogates) {
+            // No surrogate characters - use chunk copying
+            let begin = 0
+            for (let i = 0; i < len; ++i) {
+                const ch = d.charAt(i)
+                const code = ch.toInt()
+                if (code < 128) {
+                    const escaped = escapeTable[code]
+                     if (escaped !== undefined && escaped.length > 0) {
+                        if (begin < i) {
+                            sb.append(d.substring(begin, i))
+                        }
+                        sb.append(escaped)
+                        begin = i + 1
                     }
-                    sb.append(currChar.toInt().toString(16))
-                } else {
-                    sb.append(currChar)
                 }
             }
+            if (begin < len) {
+                sb.append(d.substring(begin))
+            }
+        } else {
+            // String contains surrogate characters - use original logic with surrogate handling
+            let prevChar: char = c'\0'
+            for (let i = 0; i < len; ++i) {
+                let currChar = d.charAt(i)
+                const code = currChar.toInt()
 
-            prevChar = currChar
-        }
+                if (Char.isHighSurrogate(currChar)) {
+                    if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                        JSON.appendCharHex(sb, prevChar)
+                    }
+                } else if (Char.isLowSurrogate(currChar)) {
+                    if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                        sb.append(prevChar)
+                        sb.append(currChar)
+                    } else {
+                        JSON.appendCharHex(sb, currChar)
+                    }
+                } else {
+                    if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                        JSON.appendCharHex(sb, prevChar)
+                    }
 
-        if (len > 0) {
-            if (Char.isHighSurrogate(prevChar)) {
-                JSON.appendCharHex(sb, prevChar)
+                    // Handle ASCII characters via escape table
+                    if (code < 128) {
+                        const escaped = escapeTable[code]
+                        if (escaped !== undefined && escaped.length > 0) {
+                            sb.append(escaped)
+                        } else {
+                            sb.append(currChar)
+                        }
+                    } else {
+                        // Non-ASCII, non-surrogate character
+                        sb.append(currChar)
+                    }
+                }
+
+                prevChar = currChar
+            }
+
+            if (len > 0) {
+                if (Char.isHighSurrogate(prevChar)) {
+                    JSON.appendCharHex(sb, prevChar)
+                }
             }
         }
 
-        sb.append(c'"')
+        sb.append('"')
         return sb.toString()
     }
 
     private static appendCharHex(buffer: StringBuilder, chr: char): StringBuilder {
-        buffer.append('\\u').append(chr.toInt().toString(16))
+        const hex = chr.toInt().toString(16).padStart(4, '0')
+        buffer.append('\\u').append(hex)
         return buffer
     }
 
@@ -537,12 +640,6 @@ export class JSON {
         }
         if (obj instanceof JSValue) {
             return JSON.stringifyJSValue(obj as JSValue)
-        }
-        // NOTE(ivan-tyulyandin): #33711 remove stringifyFast and use managed JSONWriter
-        // stringifyFast C++ code may return nullptr and lead to NPE
-        const json = JSON.stringifyFast(obj)
-        if (json !== undefined) {
-            return json
         }
         return new JSONWriter().write(obj)
     }
@@ -1891,7 +1988,7 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
 }
 
 class EscapeStringBuilder {
-    private static escapeTable: FixedArray<string> = EscapeStringBuilder.createEscapeTable()
+    public static escapeTable: FixedArray<string> = EscapeStringBuilder.createEscapeTable()
     private static controlCharsRange: int = 32
     private static delCode: int = 127
 
