@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicInt } from "std/concurrency"
+import { AtomicInt } from 'std/concurrency'
 
 function nonconcurrentLoadStoreTest() {
     let atomicInt = new AtomicInt(1);

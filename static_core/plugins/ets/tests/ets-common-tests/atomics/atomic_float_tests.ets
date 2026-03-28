@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicFloat } from "std/concurrency"
+import { AtomicFloat } from 'std/concurrency'
 
 function nonconcurrentLoadStoreTest() {
     let atomicFloat = new AtomicFloat(1);
