@@ -85,21 +85,21 @@ class DeepCloner {
 			// because source string instance can't be changed through the cloned reference
 			return src as T
 		} else if (src instanceof Boolean) {
-			return Boolean.valueOf(src) as T
+			return new Boolean(src) as T
 		} else if (src instanceof Byte) {
-			return Byte.valueOf(src) as T
+			return new Byte(src) as T
 		} else if (src instanceof Char) {
-			return Char.valueOf(src) as T
+			return new Char(src) as T
 		} else if (src instanceof Short) {
-			return Short.valueOf(src) as T
+			return new Short(src) as T
 		} else if (src instanceof Int) {
-			return Int.valueOf(src) as T
+			return new Int(src) as T
 		} else if (src instanceof Long) {
-			return Long.valueOf(src) as T
+			return new Long(src) as T
 		} else if (src instanceof Float) {
-			return Float.valueOf(src) as T
+			return new Float(src) as T
 		} else if (src instanceof Double) {
-			return Double.valueOf(src) as T
+			return new Double(src) as T
 		} else if (src instanceof BaseEnum) {
 			return src as T
 		} else if (src instanceof Date) {

@@ -1945,7 +1945,7 @@ export final class String extends Object implements Comparable<String>, Iterable
             let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
             let args = new containers.UndefinableObjectArray(2)
-            args.pushBack(Double.valueOf(p))
+            args.pushBack(new Double(p))
             args.pushBack(this)
             let replacement = replacer(searchValue, args.toArray() as Object[])
             result = result + preserved + replacement

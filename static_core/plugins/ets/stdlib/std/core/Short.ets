@@ -48,19 +48,6 @@ export final class Short extends Integral implements Comparable<Short> {
     }
 
     /**
-     * Returns boxed representation of the primitive
-     * @param { short } value value to box
-     * @returns { short } boxed value
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static valueOf(value: short): Short {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Short(value);
-    }
-
-    /**
      * Minimal value that this type can have as an shortegral
      * @type { short } MIN_VALUE
      * @static
@@ -372,7 +359,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public add(other: Short): Short {
-        return Short.valueOf((this.value + other.toShort()).toShort())
+        return new Short((this.value + other.toShort()).toShort())
     }
 
     /**
@@ -384,7 +371,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public sub(other: Short): Short {
-        return Short.valueOf((this.value - other.toShort()).toShort())
+        return new Short((this.value - other.toShort()).toShort())
     }
 
     /**
@@ -396,7 +383,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public mul(other: Short): Short {
-        return Short.valueOf((this.value * other.toShort()).toShort())
+        return new Short((this.value * other.toShort()).toShort())
     }
 
     /**
@@ -408,7 +395,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public div(other: Short): Short {
-        return Short.valueOf((this.value / other.toShort()).toShort())
+        return new Short((this.value / other.toShort()).toShort())
     }
 
     /**

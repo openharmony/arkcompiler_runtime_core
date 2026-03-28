@@ -42,18 +42,6 @@ export final class Long extends Integral implements Comparable<Long> {
     }
 
     /**
-     * Returns boxed representation of the primitive
-     *
-     * @param value value to box
-     *
-     * @returns boxed value
-     */
-    public static valueOf(value: long): Long {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Long(value);
-    }
-
-    /**
      * Minimal value that this type can have as a long
      */
     public static MIN_VALUE: long = -9223372036854775808;
@@ -339,7 +327,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the addition
      */
     public add(other: Long): Long {
-        return Long.valueOf((this.value + other.toLong()) as long)
+        return new Long((this.value + other.toLong()) as long)
     }
 
     /**
@@ -350,7 +338,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the subtraction
      */
     public sub(other: Long): Long {
-        return Long.valueOf((this.value - other.toLong()) as long)
+        return new Long((this.value - other.toLong()) as long)
     }
 
     /**
@@ -361,7 +349,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the multiplication
      */
     public mul(other: Long): Long {
-        return Long.valueOf((this.value * other.toLong()) as long)
+        return new Long((this.value * other.toLong()) as long)
     }
 
     /**
@@ -372,7 +360,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the division
      */
     public div(other: Long): Long {
-        return Long.valueOf((this.value / other.toLong()) as long)
+        return new Long((this.value / other.toLong()) as long)
     }
 
     /**

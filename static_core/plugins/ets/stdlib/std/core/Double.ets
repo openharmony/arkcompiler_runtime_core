@@ -113,20 +113,6 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * Returns boxed representation of the primitive
      *
-     * @param { double } value value to box
-     * @returns { Double } return current double value
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static valueOf(value: double): Double {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Double(value);
-    }
-
-    /**
-     * Returns boxed representation of the primitive
-     *
      * @returns { number } boxed value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -664,7 +650,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public add(other: Double): Double {
-        return Double.valueOf((this.value + other.toDouble()) as double)
+        return new Double((this.value + other.toDouble()) as double)
     }
 
     /**
@@ -676,7 +662,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public sub(other: Double): Double {
-        return Double.valueOf((this.value - other.toDouble()) as double)
+        return new Double((this.value - other.toDouble()) as double)
     }
 
     /**
@@ -688,7 +674,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public mul(other: Double): Double {
-        return Double.valueOf((this.value * other.toDouble()) as double)
+        return new Double((this.value * other.toDouble()) as double)
     }
 
     /**
@@ -700,7 +686,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public div(other: Double): Double {
-        return Double.valueOf((this.value / other.toDouble()) as double)
+        return new Double((this.value / other.toDouble()) as double)
     }
 
     /**

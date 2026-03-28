@@ -38,18 +38,6 @@ export final class Int extends Integral implements Comparable<Int> {
     }
 
     /**
-     * Returns boxed representation of the primitive
-     *
-     * @param value value to box
-     *
-     * @returns boxed value
-     */
-    public static valueOf(value: int): Int {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Int(value);
-    }
-
-    /**
      * Minimal value that this type can have as an integral
      */
     public static readonly MIN_VALUE: int = -2147483648;
@@ -302,7 +290,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the addition
      */
     public add(other: Int): Int {
-        return Int.valueOf((this.value + other.toInt()) as int)
+        return new Int(this.value + other.toInt()) 
     }
 
     /**
@@ -313,7 +301,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the subtraction
      */
     public sub(other: Int): Int {
-        return Int.valueOf((this.value - other.toInt()) as int)
+        return new Int(this.value - other.toInt())
     }
 
     /**
@@ -324,7 +312,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the multiplication
      */
     public mul(other: Int): Int {
-        return Int.valueOf((this.value * other.toInt()) as int)
+        return new Int(this.value * other.toInt())
     }
 
     /**
@@ -335,7 +323,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the division
      */
     public div(other: Int): Int {
-        return Int.valueOf((this.value / other.toInt()) as int)
+        return new Int(this.value / other.toInt())
     }
 
     /**

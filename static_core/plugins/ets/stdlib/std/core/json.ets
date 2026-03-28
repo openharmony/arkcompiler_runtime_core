@@ -3673,7 +3673,7 @@ function createCharFromJSONValue(json: JSONValue): Char {
     if (json instanceof JSONString) {
         let str = (json as JSONString).value
         if (str.getLength() == 1) {
-            return Char.valueOf(str.charAt(0))
+            return new Char(str.charAt(0))
         }
     }
     throw new JSONTypeError('Cannot create Char from JSON', {cause: json as Object} as ErrorOptions)
@@ -3709,7 +3709,7 @@ function createIntFromJSONValue(json: JSONValue): Int {
     if (json instanceof JSONNumber) {
         let num = (json as JSONNumber).value
         if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
-            return Int.valueOf(Double.toInt(num))
+            return new Int(Double.toInt(num))
         }
     }
     throw new JSONTypeError('Cannot create Int from JSON', {cause: json as Object} as ErrorOptions)
@@ -3762,7 +3762,7 @@ function createFloatFromJSONValue(json: JSONValue): Float {
  */
 function createDoubleFromJSONValue(json: JSONValue): Double {
     if (json instanceof JSONNumber) {
-        return Double.valueOf((json as JSONNumber).value)
+        return new Double((json as JSONNumber).value)
     }
     throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
 }
