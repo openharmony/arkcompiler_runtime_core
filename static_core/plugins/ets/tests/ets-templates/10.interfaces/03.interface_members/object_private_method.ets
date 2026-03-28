@@ -13,15 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+    A compile-time error occurs if the method explicitly declared by the interface
+    has the same name as the Object’s public method.
+    Object private static method used
 ---*/
 
-{{c.decl}}
-{% endfor %}
+interface I {
+  generateKeyArray(length: Number): string[] {
+    return ["asd"]
+  }
+}
+
+function main() {
+  let i: I = {}
+  arktest.assertEQ(i.generateKeyArray(1)[0], "asd")
+}

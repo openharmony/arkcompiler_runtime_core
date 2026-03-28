@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,18 @@
 /*---
 desc: Declaring abstract method in interface with semicolon.
 assert: An abstract method of an interface does not have a body represented by a block of code.
-tags: [compile-only]
 ---*/
 
 interface A {
   m(): int;
+}
+
+class C implements A {
+  m() {
+    return 4
+  }
+}
+
+function main() {
+  arktest.assertEQ(new C().m(), 4)
 }

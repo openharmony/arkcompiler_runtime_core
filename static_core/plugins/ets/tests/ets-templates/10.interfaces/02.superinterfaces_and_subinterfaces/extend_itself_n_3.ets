@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+desc: A compile-time error occurs if an interface depends on itself.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0184: Type parameter 'T' has circular constraint dependency."
 ---*/
 
-{{c.decl}}
-{% endfor %}
+interface A<T extends T> { }

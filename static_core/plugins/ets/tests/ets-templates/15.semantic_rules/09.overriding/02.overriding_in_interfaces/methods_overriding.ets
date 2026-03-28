@@ -13,15 +13,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+desc: Override inheritance methods.
+assert: The interface inherits, from the interfaces it extends, all members of those interfaces, except for methods that it overrides.
 ---*/
 
-{{c.decl}}
-{% endfor %}
+interface A {
+  m(): int { return 5; }
+}
+
+interface B extends A {
+  m(): int { return 10; }
+}
+
+class C implements B {
+  public bar(): int {
+    return this.m();
+  }
+}
+
+function main(): void {
+  let x: C = new C();
+  arktest.assertEQ(x.bar(), 10)
+}

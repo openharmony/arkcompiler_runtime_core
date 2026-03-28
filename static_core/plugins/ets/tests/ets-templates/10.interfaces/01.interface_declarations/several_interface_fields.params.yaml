@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,11 @@
 
 --- # List of default values for primitive types
 default_value:
-  - {type: byte}
-  - {type: short}
-  - {type: int}
-  - {type: long}
-  - {type: float}
-  - {type: double}
-  - {type: char}
-  - {type: boolean}
+  - {type: byte, value: 1}
+  - {type: short, value: 2}
+  - {type: int, value: 3}
+  - {type: long, value: 4}
+  - {type: float, value: 5.1f}
+  - {type: number, value: 6.2}
+  - {type: char, value: c'A'}
+  - {type: boolean, value: "true"}

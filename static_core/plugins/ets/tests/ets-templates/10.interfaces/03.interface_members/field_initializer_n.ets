@@ -13,15 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+    Interface member initialization is prohibited.
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0180: Interface member initialization is prohibited."
 ---*/
 
-{{c.decl}}
-{% endfor %}
+interface A {
+  x: int = 7
+}

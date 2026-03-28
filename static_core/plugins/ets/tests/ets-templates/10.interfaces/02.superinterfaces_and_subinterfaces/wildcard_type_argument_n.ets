@@ -13,15 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+    Use wildcard in type arguments.
+    If a typeReference has type arguments, it must denote a well-formed parameterized type
+    (link to parameterized types), and none of the type arguments may be wildcard type arguments,
+    or a compile-time error occurs.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0179: Interface expected here."
 ---*/
 
-{{c.decl}}
-{% endfor %}
+interface A<T> { }
+
+interface B extends A<? super Boolean> { }

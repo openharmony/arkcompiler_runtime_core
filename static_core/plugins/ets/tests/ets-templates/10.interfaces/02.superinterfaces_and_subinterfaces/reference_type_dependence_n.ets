@@ -13,15 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    An interface can be declared direct extension of one or more other interfaces.
-    If so, the interface inherits all members from the interfaces it extends.
-    Inherited members can be optionally overridden or hidden.
-    {{c.doc}}
+    Declaring subinterface with direct dependence from superclass
+    An interface I depends on a reference type T if any of the following is true. I directly depends on T.
+tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0233: Unexpected token. A constructor, method, accessor, or property was expected.
 ---*/
 
-{{c.decl}}
-{% endfor %}
+class A {
+  interface B{}
+}

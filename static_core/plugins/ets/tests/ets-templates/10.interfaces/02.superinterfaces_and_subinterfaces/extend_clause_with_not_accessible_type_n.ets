@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,14 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Declaring subinterface.
-assert: Each typeReference in the extends clause of an interface declaration must name an accessible interface type (link to access control), or a compile-time error occurs.
+desc: >-
+    Declaring subinterface. Each typeReference in the extends clause of an interface declaration
+    must name an accessible interface type (link to access control), or a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "TBD: issue #33800"
 ---*/
 
 interface A {
   x: int = 1;
-  
 }
 
 interface B {
