@@ -134,13 +134,12 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromResizableBuffer)
 {
     ani_class boxedIntClass {};
     ASSERT_EQ(env_->FindClass("std.core.Int", &boxedIntClass), ANI_OK);
-    ani_ref maxByteLength {};
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(boxedIntClass, "valueOf", "i:C{std.core.Int}", &maxByteLength,
-                                                     static_cast<ani_int>(EXPECTED_SIZE)),
-              ANI_OK);
-
+    ani_object maxByteLength {};
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(boxedIntClass, "<ctor>", "i:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Object_New(boxedIntClass, ctor, &maxByteLength, static_cast<ani_int>(EXPECTED_SIZE)), ANI_OK);
     auto array = static_cast<ani_arraybuffer>(
-        CallEtsFunction<ani_ref>("arraybuffer_get_info_test", "GetArrayBuffer", maxByteLength));
+        CallEtsFunction<ani_ref>("arraybuffer_get_info_test", "GetArrayBuffer", static_cast<ani_ref>(maxByteLength)));
     ASSERT_NE(array, nullptr);
 
     void *data = nullptr;

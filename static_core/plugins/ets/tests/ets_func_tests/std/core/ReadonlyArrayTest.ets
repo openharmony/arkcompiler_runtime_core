@@ -106,7 +106,7 @@ function findIndexFuncArg3ReadonlyArray() {
 
 function mapFuncArg3ReadonlyArray() {
     let mappingFunc = (v: Number, index: int, arr: ReadonlyArray<Number>): Number =>
-        (index < 4) && (index < arr.length) ? Number.valueOf(arr[index] * arr[index]) : Number.valueOf(0);
+        (index < 4) && (index < arr.length) ? new Number(arr[index] * arr[index]) : new Number(0);
 
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
     let res0 = arrEmpty.map<Number>(mappingFunc);
@@ -117,7 +117,7 @@ function mapFuncArg3ReadonlyArray() {
     let res = arr.map<Number>(mappingFunc);
     arktest.assertEQ(res.length, arr.length);
     for (let i: int = 0; i < res.length; ++i) {
-        const expected = i < 4 ? Number.valueOf(arr[i] * arr[i]) : Number.valueOf(0);
+        const expected = i < 4 ? new Number(arr[i] * arr[i]) : new Number(0);
         arktest.assertEQ(res[i], expected);
     }
 }
@@ -151,7 +151,7 @@ function filterFuncArg3ReadonlyArray() {
 
 function reduceFunc(a: Number, b: Number, index: int, arr: ReadonlyArray<Number>): Number {
     if (index < 0 || index >= arr.length) {
-        return Number.valueOf(-1);
+        return new Number(-1);
     }
     return a + b + arr[index];
 }

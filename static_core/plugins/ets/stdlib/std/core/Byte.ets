@@ -52,20 +52,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
-     * Returns boxed representation of the primitive
-     *
-     * @param { byte } value value to box
-     * @returns { Byte }
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static valueOf(value: byte): Byte {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Byte(value);
-    }
-
-    /**
      * Minimal value that this type can have as an integral
      *
      * @type {byte}
