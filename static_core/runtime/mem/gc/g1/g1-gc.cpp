@@ -123,22 +123,9 @@ void G1GC<LanguageConfig>::InitGCBits(ark::ObjectHeader *objHeader)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::PreStartupImp()
-{
-    GenerationalGC<LanguageConfig>::DisableTenuredGC();
-}
-
-template <class LanguageConfig>
-size_t G1GC<LanguageConfig>::AdujustStartupLimit(size_t startupLimit)
+size_t G1GC<LanguageConfig>::AdjustStartupLimit(size_t startupLimit)
 {
     return GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(startupLimit);
-}
-
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::PostForkCallback(size_t restoreLimit)
-{
-    GenerationalGC<LanguageConfig>::RestoreTenuredGC();
-    GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(restoreLimit);
 }
 
 template <class LanguageConfig>
@@ -2807,7 +2794,6 @@ void G1GC<LanguageConfig>::PostponeGCEnd()
     ASSERT(!this->IsPostponeEnabled() || (regionGarbageRateThreshold_ == 0 && this->GetFastGCFlag()));
     regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
     this->SetFastGCFlag(false);
-    GenerationalGC<LanguageConfig>::RestoreTenuredGC();
     GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(origionSize_);
     GC::PostponeGCEnd();
 }

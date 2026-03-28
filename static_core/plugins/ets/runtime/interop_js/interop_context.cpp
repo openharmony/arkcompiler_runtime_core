@@ -77,15 +77,19 @@ static void AppStateCallback(int state, int64_t timeStamp)
     etsVm->GetGC()->SetFastGCFlag(appState.GetState() == AppState::State::SENSITIVE_START);
     switch (static_cast<AppState::State>(state)) {
         case AppState::State::SENSITIVE_START:
-            etsVm->GetGC()->PostponeGCStart();
+            if (!etsVm->IsPostFork()) {
+                etsVm->GetGC()->PostponeGCStart();
+            }
             break;
         case AppState::State::COLD_START_FINISHED:
             LOG(INFO, GC) << "App cold start finished";
             [[fallthrough]];
         case AppState::State::SENSITIVE_END:
-            etsVm->GetGC()->PostponeGCEnd();
-            etsVm->GetGC()->Trigger(
-                MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
+            if (!etsVm->IsPostFork()) {
+                etsVm->GetGC()->PostponeGCEnd();
+                etsVm->GetGC()->Trigger(
+                    MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
+            }
             break;
         default:
             break;

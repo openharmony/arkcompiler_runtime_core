@@ -404,6 +404,13 @@ public:
     /// @brief print stack and exit the program
     void HandleUncaughtException() override;
 
+    void PostForkStart() override;
+    void PostForkEnd() override;
+    bool IsPostFork() const override
+    {
+        return isPostFork_;
+    };
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
@@ -457,6 +464,9 @@ private:
     std::unique_ptr<common_vm::VMInterface> vmIface_;
 
     size_t preForkWorkerCount_ = 0;
+
+    std::atomic<bool> isPostFork_ {false};
+    size_t originSize_ = 0;
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

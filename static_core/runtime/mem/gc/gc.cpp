@@ -604,47 +604,7 @@ void GC::PostZygoteFork()
     CreateWorker();
 }
 
-class GC::PostForkGCTask : public GCTask {
-public:
-    PostForkGCTask(GCTaskCause gcReason, uint64_t gcTargetTime, size_t restoreLimit)
-        : GCTask(gcReason, gcTargetTime), restoreLimit_(restoreLimit)
-    {
-    }
-
-    void Run(mem::GC &gc) override
-    {
-        LOG(DEBUG, GC) << "Runing PostForkGCTask";
-        gc.GetPandaVm()->GetGCTrigger()->RestoreMinTargetFootprint();
-        gc.PostForkCallback(restoreLimit_);
-        GCTask::Run(gc);
-    }
-
-    ~PostForkGCTask() override = default;
-
-    NO_COPY_SEMANTIC(PostForkGCTask);
-    NO_MOVE_SEMANTIC(PostForkGCTask);
-
-private:
-    // For g1gc, it saves young space original size.
-    size_t restoreLimit_ {0};
-};
-
-void GC::PreStartup()
-{
-    // Add a delay GCTask.
-    if ((!Runtime::GetCurrent()->IsZygote()) && (!gcSettings_.RunGCInPlace())) {
-        // divide 4 to temporarily set target footprint to a high value to disable GC during App startup.
-        size_t startupLimit = Runtime::GetOptions().GetHeapSizeLimit() / 4;
-        GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(startupLimit);
-        PreStartupImp();
-        size_t originSize = AdujustStartupLimit(startupLimit);
-        constexpr uint64_t DISABLE_GC_DURATION_NS = 3000ULL;
-        auto task = MakePandaUnique<PostForkGCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE,
-                                                    time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS, originSize);
-        AddGCTask(true, std::move(task));
-        LOG(DEBUG, GC) << "Add PostForkGCTask";
-    }
-}
+void GC::PreStartup() {}
 
 #ifdef SAFEPOINT_TIME_CHECKER_ENABLED
 namespace {
@@ -784,6 +744,9 @@ size_t GC::GetNativeBytesFromMallinfoAndRegister() const
 
 bool GC::WaitForGC(GCTask task)
 {
+    if (task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE) {
+        this->GetPandaVm()->PostForkEnd();
+    }
     // NOTE(maksenov): Notify only about pauses (#4681)
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorStartEvent();
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which

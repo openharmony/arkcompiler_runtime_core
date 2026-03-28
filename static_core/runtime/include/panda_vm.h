@@ -241,6 +241,15 @@ public:
         return false;
     }
 
+    virtual void PostForkStart() {};
+
+    virtual void PostForkEnd() {};
+
+    virtual bool IsPostFork() const
+    {
+        return false;
+    };
+
     NO_MOVE_SEMANTIC(PandaVM);
     NO_COPY_SEMANTIC(PandaVM);
 

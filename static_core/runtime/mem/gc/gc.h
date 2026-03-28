@@ -384,8 +384,6 @@ public:
         extensionData_ = data;
     }
 
-    virtual void PostForkCallback([[maybe_unused]] size_t restoreLimit) {}
-
     size_t GetSmartGCInitHeapMemSize()
     {
         return smartGCInitHeapMemSize_;
@@ -511,10 +509,6 @@ public:
     bool GetFastGCFlag() const;
     void SetFastGCFlag(bool fastGC);
 
-protected:
-    /// @brief Runs all phases
-    void RunPhases(GCTask &task);
-
     /**
      * Add task to GC Queue to be run by a GC worker (or run in place)
      * @return false if the task is discarded. Otherwise true.
@@ -523,14 +517,18 @@ protected:
      */
     bool AddGCTask(bool isManaged, PandaUniquePtr<GCTask> task);
 
-    virtual void InitializeImpl() = 0;
-    virtual void PreRunPhasesImpl() = 0;
-    virtual void RunPhasesImpl(GCTask &task) = 0;
-    virtual void PreStartupImp() {}
-    virtual size_t AdujustStartupLimit(size_t startupLimit)
+    virtual size_t AdjustStartupLimit(size_t startupLimit)
     {
         return startupLimit;
     }
+
+protected:
+    /// @brief Runs all phases
+    void RunPhases(GCTask &task);
+
+    virtual void InitializeImpl() = 0;
+    virtual void PreRunPhasesImpl() = 0;
+    virtual void RunPhasesImpl(GCTask &task) = 0;
 
     inline bool IsTracingEnabled() const
     {
@@ -786,7 +784,6 @@ private:
     GCExtensionData *extensionData_ {nullptr};
 
     GCWorkersTaskPool *workersTaskPool_ {nullptr};
-    class PostForkGCTask;
 
     friend class ecmascript::EcmaReferenceProcessor;
     friend class ark::mem::test::MemStatsGenGCTest;
