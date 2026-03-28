@@ -28,9 +28,9 @@ EtsString *CreateNewStringFromCharCode(EtsObjectArray *charCodes, size_t actualL
     }
 
     // allocator may trig gc and move the 'charCodes' array, need to hold it
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle arrayHandle(coroutine, charCodes);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle arrayHandle(executionCtx, charCodes);
 
     auto isCompressed = [actualLength](EtsObjectArray *codes) -> bool {
         if (!Runtime::GetOptions().IsRuntimeCompressedStringsEnabled()) {
@@ -69,19 +69,19 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
 {
     ASSERT(charCodes != nullptr);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (LIKELY(charCodes->IsExactlyEscompatArray(coro))) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (LIKELY(charCodes->IsExactlyEscompatArray(executionCtx))) {
         // Fast path, `charCodes` is exactly `std.core.Array`
         return CreateNewStringFromCharCode(charCodes->GetDataFromEscompatArray(),
                                            charCodes->GetActualLengthFromEscompatArray());
     }
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle arrayHandle(coro, charCodes);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle arrayHandle(executionCtx, charCodes);
 
     EtsInt uncheckedActualLength = 0;
-    if (UNLIKELY(!arrayHandle->GetLength(coro, &uncheckedActualLength))) {
-        ASSERT(coro->HasPendingException());
+    if (UNLIKELY(!arrayHandle->GetLength(executionCtx, &uncheckedActualLength))) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     if (UNLIKELY(uncheckedActualLength == 0)) {
@@ -93,8 +93,8 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
     copiedChars.reserve(actualLength);
 
     // Returns `true` if there are no errors being thrown, `false` otherwise
-    auto charCodesExtractor = [coro, actualLength, &arrayHandle](bool &isCompressed,
-                                                                 PandaVector<uint16_t> &outputChars) {
+    auto charCodesExtractor = [executionCtx, actualLength, &arrayHandle](bool &isCompressed,
+                                                                         PandaVector<uint16_t> &outputChars) {
         if (!Runtime::GetOptions().IsRuntimeCompressedStringsEnabled()) {
             isCompressed = false;
             return true;
@@ -103,15 +103,15 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
         // By default string is considered to be compressed
         isCompressed = true;
         for (size_t i = 0; i < actualLength; ++i) {
-            auto optElement = arrayHandle->GetRef(coro, i);
+            auto optElement = arrayHandle->GetRef(executionCtx, i);
             if (UNLIKELY(!optElement)) {
-                ASSERT(coro->HasPendingException());
+                ASSERT(executionCtx->GetMT()->HasPendingException());
                 return false;
             }
             if (UNLIKELY(*optElement == nullptr)) {
                 PandaStringStream ss;
                 ss << "element at index " << i << " is undefined";
-                ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError, ss.str());
+                ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError, ss.str());
                 return false;
             }
             uint16_t codeValue = EtsString::CodeToChar(EtsBoxPrimitive<EtsInt>::FromCoreType(*optElement)->GetValue());
@@ -132,7 +132,7 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
 
     bool compress = false;
     if (UNLIKELY(!charCodesExtractor(compress, copiedChars))) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 

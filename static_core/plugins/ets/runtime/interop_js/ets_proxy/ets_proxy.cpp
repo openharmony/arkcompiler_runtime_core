@@ -28,8 +28,8 @@ namespace ark::ets::interop::js::ets_proxy {
 
 napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     std::ostringstream classDescriptorBuilder;
     classDescriptorBuilder << "L" << packageName << (packageName.empty() ? "ETSGLOBAL;" : "/ETSGLOBAL;");
@@ -58,12 +58,13 @@ napi_value GetETSFunction(napi_env env, std::string_view packageName, std::strin
 
 napi_value GetETSClassImpl(napi_env env, std::string_view classDescriptor)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
-    EtsClass *etsKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data(), true, ctx->LinkerCtx());
+    EtsClass *etsKlass =
+        executionCtx->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data(), true, ctx->LinkerCtx());
     if (UNLIKELY(etsKlass == nullptr)) {
-        ctx->ForwardEtsException(coro);
+        ctx->ForwardEtsException(executionCtx);
         return nullptr;
     }
 
@@ -71,12 +72,12 @@ napi_value GetETSClassImpl(napi_env env, std::string_view classDescriptor)
     // initialize the class to ensure top-level statements are executed.
     // ** ClassLinker::InitializeClass() is a run-once method. **
     if (UNLIKELY(etsKlass->IsModule())) {
-        coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsKlass);
+        executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, etsKlass);
     }
 
     EtsClassWrapper *etsClassWrapper = EtsClassWrapper::Get(ctx, etsKlass);
     if (UNLIKELY(etsClassWrapper == nullptr)) {
-        ctx->ForwardEtsException(coro);
+        ctx->ForwardEtsException(executionCtx);
         return nullptr;
     }
 
@@ -85,16 +86,16 @@ napi_value GetETSClassImpl(napi_env env, std::string_view classDescriptor)
 
 napi_value CreateEtsRecordInstance(napi_env env)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
     EtsClass *etsClass = PlatformTypes()->coreRecord;
     EtsObject *etsInstance = etsClass->CreateInstance();
     if (UNLIKELY(etsInstance == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         InteropCtx::ThrowJSError(env, "Failed to create ETS record instance");
         return nullptr;
     }
@@ -117,9 +118,9 @@ napi_value GetETSInstance(napi_env env, std::string_view classDescriptor)
 
 napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
     return GetETSClassImpl(env, classDescriptor);
 }
@@ -131,10 +132,10 @@ static void FillExportedClasses(napi_env env, EtsClass *globalClass, napi_value 
         return;
     }
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
     ClassLinkerContext *ctxForLoad = globalClass->GetLoadContext();
-    auto *classLinker = coro->GetPandaVM()->GetClassLinker();
+    auto *classLinker = executionCtx->GetPandaVM()->GetClassLinker();
 
     for (const std::string &clsDesc : exportedClasses) {
         EtsClass *exportedKlass = classLinker->GetClass(clsDesc.c_str(), true, ctxForLoad);
@@ -162,8 +163,8 @@ static void FillExportedClasses(napi_env env, EtsClass *globalClass, napi_value 
 
 static void CopyNamedProperties(napi_env env, napi_value from, napi_value to)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ScopedNativeCodeThread etsNativeScope(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
     napi_value keys;
     NAPI_CHECK_FATAL(napi_get_property_names(env, from, &keys));
     uint32_t len;
@@ -185,8 +186,8 @@ static void ProcessModuleRecursive(napi_env env, EtsClass *globalClass, napi_val
     }
     visitedModules.insert(globalClass);
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
     napi_value globalProxy = EtsClassWrapper::Get(ctx, globalClass)->GetJsCtor(env);
     FillExportedClasses(env, globalClass, moduleObject);
@@ -197,7 +198,7 @@ static void ProcessModuleRecursive(napi_env env, EtsClass *globalClass, napi_val
         return;
     }
 
-    auto *classLinker = coro->GetPandaVM()->GetClassLinker();
+    auto *classLinker = executionCtx->GetPandaVM()->GetClassLinker();
     auto *ctxForLoad = globalClass->GetLoadContext();
 
     for (const auto &clsDesc : exportedClasses) {
@@ -214,17 +215,18 @@ static void ProcessModuleRecursive(napi_env env, EtsClass *globalClass, napi_val
 
 napi_value GetETSModule(napi_env env, const std::string &moduleName)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    if (coro == nullptr) {
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    if (executionCtx == nullptr) {
         return InteropCtx::CreateJSTypeError(env, "Static context not loaded", "");
     }
-    ScopedManagedCodeThread managedScope(coro);
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
     std::string descriptor = "L" + moduleName + "/ETSGLOBAL;";
-    EtsClass *globalClass = coro->GetPandaVM()->GetClassLinker()->GetClass(descriptor.c_str(), true, ctx->LinkerCtx());
+    EtsClass *globalClass =
+        executionCtx->GetPandaVM()->GetClassLinker()->GetClass(descriptor.c_str(), true, ctx->LinkerCtx());
     if (globalClass == nullptr) {
-        ctx->ForwardEtsException(coro);
+        ctx->ForwardEtsException(executionCtx);
         return nullptr;
     }
 

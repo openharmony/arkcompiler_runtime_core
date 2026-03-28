@@ -16,26 +16,27 @@
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets::intrinsics::helpers {
 
-static void ThrowEtsInvalidType(EtsCoroutine *coroutine, const char *classSignature)
+static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, const char *classSignature)
 {
     PandaString message = "Invalid operand type: " + PandaString(classSignature);
-    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message);
 }
 
-bool CheckPrimitiveReciever(EtsCoroutine *coro, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
+bool CheckPrimitiveReciever(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
                             Value *argValue)
 {
     if (!argClass->IsBoxed()) {
-        ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
         return false;
     }
 
     bool checked = false;
-    auto *linkExt = coro->GetPandaVM()->GetEtsClassLinkerExtension();
+    auto *linkExt = executionCtx->GetPandaVM()->GetEtsClassLinkerExtension();
 
     switch (argClass->GetBoxedType()) {
         case EtsClass::BoxedType::BOOLEAN:
@@ -63,23 +64,23 @@ bool CheckPrimitiveReciever(EtsCoroutine *coro, EtsObject *arg, EtsClass *argCla
             checked = CheckAndUnpackBoxedType<EtsShort>(linkExt, arg, paramClass, argValue, ClassRoot::I16);
             break;
         default:
-            ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+            ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
             return false;
     }
 
     if (!checked) {
-        ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
         return false;
     }
 
     return true;
 }
 
-bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass, Value *argValue)
+bool CheckReceiverType(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *paramClass, Value *argValue)
 {
     if (arg == nullptr) {
         if (paramClass->IsPrimitive()) {
-            ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
                               "undefined argument is not allowed for primitive reciever");
             return false;
         }
@@ -95,18 +96,18 @@ bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass,
     }
 
     if (paramClass->IsPrimitive()) {
-        return CheckPrimitiveReciever(coro, arg, argClass, paramClass, argValue);
+        return CheckPrimitiveReciever(executionCtx, arg, argClass, paramClass, argValue);
     }
 
-    ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+    ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
     return false;
 }
 
-EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Value *args)
+EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsExecutionContext *executionCtx, Value *args)
 {
-    Value result = method->GetPandaMethod()->Invoke(coro, args);
+    Value result = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args);
 
-    if (coro->HasPendingException()) {
+    if (executionCtx->GetMT()->HasPendingException()) {
         return nullptr;
     }
 
@@ -117,7 +118,7 @@ EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Va
 
     EtsClass *resolvedType = method->ResolveReturnType();
     if (resolvedType->IsPrimitive() && !resolvedType->IsVoid()) {
-        return GetBoxedValue(coro, result, method->GetReturnValueType());
+        return GetBoxedValue(executionCtx, result, method->GetReturnValueType());
     }
 
     // If the expected return value is not a
@@ -125,11 +126,11 @@ EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Va
     return EtsObject::FromCoreType((result.GetAs<ObjectHeader *>()));
 }
 
-EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisObj, EtsMethod *method)
+EtsMethod *ValidateAndResolveInstanceMethod(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsMethod *method)
 {
     // For instance methods, thisObj validation is required
     if (thisObj == nullptr) {
-        ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
                           "Instance method invocation requires non-null 'thisObj'");
         return nullptr;
     }
@@ -139,31 +140,32 @@ EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisO
         PandaOStringStream ss;
         ss << "Object type [" << thisObj->GetClass()->GetRuntimeClass()->GetName()
            << "] is not compatible with method owner type [" << method->GetClass()->GetRuntimeClass()->GetName() << ']';
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, ss.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, ss.str());
         return nullptr;
     }
 
     // Resolve virtual method - this is instance-method specific
     EtsMethod *resolved = thisObj->GetClass()->ResolveVirtualMethod(method);
     if (resolved == nullptr) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Virtual method resolution failed");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+                          "Virtual method resolution failed");
         return nullptr;
     }
     return resolved;
 }
 
-bool ValidateInstanceField(EtsCoroutine *coro, EtsObject *thisObj, EtsField *field)
+bool ValidateInstanceField(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsField *field)
 {
     // For instance methods, thisObj validation is required
     if (thisObj == nullptr) {
-        ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
                           "Instance field manipulation requires non-null 'thisObj'");
         return false;
     }
 
     // Validate that thisObj is subtype of method owner
     if (!field->GetDeclaringClass()->IsAssignableFrom(thisObj->GetClass())) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
                           "Object type is not compatible with field owner type");
         return false;
     }
@@ -172,56 +174,57 @@ bool ValidateInstanceField(EtsCoroutine *coro, EtsObject *thisObj, EtsField *fie
 }
 
 // CC-OFFNXT(G.FUD.05) big switch vase
-bool ResolveAndSetPrimitive(EtsCoroutine *coro, const PrimitiveFieldInfo &info)
+bool ResolveAndSetPrimitive(EtsExecutionContext *executionCtx, const PrimitiveFieldInfo &info)
 {
     EtsClass::BoxedType argType = info.argClass->GetBoxedType();
     switch (info.fieldType) {
         case EtsType::BOOLEAN:
             if (argType == EtsClass::BoxedType::BOOLEAN) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsBoolean>(),
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsBoolean>(),
                                                 info.field);
             }
             break;
         case EtsType::BYTE:
             if (argType == EtsClass::BoxedType::BYTE) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsByte>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsByte>(), info.field);
             }
             break;
         case EtsType::CHAR:
             if (argType == EtsClass::BoxedType::CHAR) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsChar>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsChar>(), info.field);
             }
             break;
         case EtsType::DOUBLE:
             if (argType == EtsClass::BoxedType::DOUBLE) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsDouble>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsDouble>(), info.field);
             }
             break;
         case EtsType::FLOAT:
             if (argType == EtsClass::BoxedType::FLOAT) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsFloat>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsFloat>(), info.field);
             }
             break;
         case EtsType::INT:
             if (argType == EtsClass::BoxedType::INT) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsInt>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsInt>(), info.field);
             }
             break;
         case EtsType::LONG:
             if (argType == EtsClass::BoxedType::LONG) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsLong>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsLong>(), info.field);
             }
             break;
         case EtsType::SHORT:
             if (argType == EtsClass::BoxedType::SHORT) {
-                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsShort>(),
-                                                info.field);
+                return ReflectFieldSetPrimitive(executionCtx, info.thisObj,
+                                                GetUnboxedValue(executionCtx, info.arg).GetAs<EtsShort>(), info.field);
                 return true;
             }
             break;
@@ -233,7 +236,7 @@ bool ResolveAndSetPrimitive(EtsCoroutine *coro, const PrimitiveFieldInfo &info)
     return false;
 }
 
-Value GetPrimitiveValue(EtsCoroutine *coro, EtsObject *thisObj, EtsType fieldType, EtsField *field)
+Value GetPrimitiveValue(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsType fieldType, EtsField *field)
 {
     switch (fieldType) {
         case EtsType::BOOLEAN:
@@ -257,7 +260,8 @@ Value GetPrimitiveValue(EtsCoroutine *coro, EtsObject *thisObj, EtsType fieldTyp
         case EtsType::UNKNOWN:
             break;
     }
-    ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Failed to resolve primitive field type");
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+                      "Failed to resolve primitive field type");
     return Value(0);
 }
 

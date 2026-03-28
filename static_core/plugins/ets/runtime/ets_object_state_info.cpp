@@ -16,10 +16,20 @@
 #include <atomic>
 
 #include "plugins/ets/runtime/ets_object_state_info.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_mark_word.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets {
+
+static EtsObjectStateTable *GetCurrentObjectStateTable()
+{
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
+    auto *table = EtsExecutionContext::FromMT(mThread)->GetPandaVM()->GetEtsObjectStateTable();
+    ASSERT(table != nullptr);
+    return table;
+}
 
 bool EtsObjectStateInfo::DeflateInternal()
 {
@@ -54,10 +64,7 @@ bool EtsObjectStateInfo::TryAddNewInfo(EtsObject *obj, uint32_t hash, uint32_t i
         return false;
     }
     // Creating of new info and writing `hash` and `index` in it.
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *table = co->GetPandaVM()->GetEtsObjectStateTable();
-    ASSERT(table != nullptr);
+    auto *table = GetCurrentObjectStateTable();
     auto *info = table->CreateInfo(obj);
     LOG_IF(info == nullptr, FATAL, RUNTIME) << "Couldn't create new info. Out of memory?";
     info->SetEtsHash(hash);
@@ -86,9 +93,7 @@ bool EtsObjectStateInfo::TryReadEtsHash(const EtsObject *obj, uint32_t *hash)
     // The state can be changed only in GC.
     ASSERT(markWord.GetState() == EtsMarkWord::STATE_USE_INFO);
     // We need to get EtsObjectStateInfo from table
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *table = co->GetPandaVM()->GetEtsObjectStateTable();
+    auto *table = GetCurrentObjectStateTable();
     auto id = markWord.GetInfoId();
     auto *info = table->LookupInfo(id);
     LOG_IF(info == nullptr || info->GetEtsObject() != obj, FATAL, RUNTIME)
@@ -150,9 +155,7 @@ bool EtsObjectStateInfo::TryResetInteropIndex(EtsObject *obj, uint32_t index)
     // The state can be changed only in GC.
     ASSERT(markWord.GetState() == EtsMarkWord::STATE_USE_INFO);
     // We need to find current interop index
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *table = co->GetPandaVM()->GetEtsObjectStateTable();
+    auto *table = GetCurrentObjectStateTable();
     auto id = markWord.GetInfoId();
     auto *info = table->LookupInfo(id);
     LOG_IF(info == nullptr || info->GetEtsObject() != obj, FATAL, RUNTIME)

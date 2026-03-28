@@ -26,12 +26,12 @@
 
 namespace ark::ets {
 
-class EtsCoroutine;
+class EtsExecutionContext;
 
 // Private inheritance, because need to disallow implicit conversion to core type
 class EtsObject : private ObjectHeader {
 public:
-    PANDA_PUBLIC_API static EtsObject *Create(EtsCoroutine *etsCoroutine, EtsClass *klass);
+    PANDA_PUBLIC_API static EtsObject *Create(EtsExecutionContext *executionCtx, EtsClass *klass);
     PANDA_PUBLIC_API static EtsObject *CreateNonMovable(EtsClass *klass);
 
     PANDA_PUBLIC_API static EtsObject *Create(EtsClass *klass);

@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
@@ -404,7 +405,7 @@ public:
             return "called from incorrect the native scope";
         }
         auto *pandaEnv = PandaAniEnv::FromAniEnv(venv_->GetEnv());
-        ASSERT(pandaEnv == EtsCoroutine::GetCurrent()->GetPandaAniEnv());
+        ASSERT(pandaEnv == EtsExecutionContext::GetCurrent()->GetPandaAniEnv());
         if (UNLIKELY(checkPendingError && pandaEnv->HasPendingException())) {
             return "has unhandled an error";
         }

@@ -18,7 +18,7 @@
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include "regexp_executor.h"
 
-#include "runtime/coroutines/coroutine_scopes.h"
+#include "runtime/execution/coroutines/coroutine_scopes.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"

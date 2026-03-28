@@ -14,68 +14,11 @@
  */
 package std.concurrency;
 
-export class Waiter {
-    public static okStatus: string = "ok";
-    public static notEqualStatus: string = "not-equal";
-    public static timeOutStatus: string = "timed-out";
-
-    public wait(val: long, getCurrentValue: () => long, timeout?: int): string {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        let check = getCurrentValue();
-        if (val != check) {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-            return Waiter.notEqualStatus;
-        }
-        if(!(timeout == undefined)) {
-            if (timeout! <= 0) {
-                ConcurrencyHelpers.mutexUnlock(this.mutex);
-                return Waiter.timeOutStatus;
-            }
-            setTimeout((waiter: Waiter) => {
-                waiter.notify(Waiter.timeOutStatus);
-            }, timeout, this);
-        }
-        let job = new CompletableJob<string>();
-        this.promiseQueue.push(job);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return job.Await();
-    }
-
-    public notify(val: string): boolean {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        let res = this.promiseQueue.poll();
-        if(res == undefined) {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-            return false;
-        }
-        res!.finish(val);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return true;
-    }
-
-    public notifyAll(val: string): int {
-        let count = 0;
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        for (let i: int = 0; i < this.promiseQueue.size; i++) {
-            let res = this.promiseQueue.poll();
-            if(res == null) {
-                break;
-            }
-            res!.finish(val);
-            count++;
-        }
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return count;
-    }
-
-    private mutex: Object = ConcurrencyHelpers.mutexCreate();
-    private promiseQueue: containers.BlockingQueue<CompletableJob<string>> = new containers.LinkedBlockingQueue<CompletableJob<string>>();
-}
-
 /**
  * Basic atomic operations
  */
 export namespace Atomics {
+    const INFINITY: int = Int.MAX_VALUE;
 
     /**
      * Checks if atomics implementation uses hardware atomic instructions instead of locks
@@ -100,9 +43,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt();
         if (typedArray instanceof Int8Array) {
@@ -131,9 +72,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function add(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
@@ -154,9 +93,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -185,9 +122,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function and(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
@@ -211,9 +146,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, expectedValue: long, replacementValue: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -245,9 +178,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function compareExchange(typedArray: BigInt64Array | BigUint64Array, index: int, expectedValue: bigint, replacementValue: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
@@ -270,9 +201,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -302,9 +231,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function exchange(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
@@ -324,9 +251,7 @@ export namespace Atomics {
      * @returns { long } current value
      */
     export function load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -354,9 +279,7 @@ export namespace Atomics {
      * @returns { bigint } current value
      */
     export function load(typedArray: BigInt64Array, index: int): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         return new BigInt(buffer.atomicLoadI64(index, byteOffset))
@@ -370,9 +293,7 @@ export namespace Atomics {
      * @returns { bigint } current value
      */
     export function load(typedArray: BigUint64Array, index: int): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         return BigInt.fromULong(buffer.atomicLoadU64(index, byteOffset))
@@ -387,9 +308,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -418,9 +337,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function or(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
@@ -441,9 +358,7 @@ export namespace Atomics {
      * @returns { long } new value
      */
     export function store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -472,9 +387,7 @@ export namespace Atomics {
      * @returns { bigint } new value
      */
     export function store(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
@@ -495,9 +408,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -526,9 +437,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function sub(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
@@ -549,9 +458,7 @@ export namespace Atomics {
      * @returns { long } current value before the operation
      */
     export function xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
@@ -580,9 +487,7 @@ export namespace Atomics {
      * @returns { bigint } current value before the operation
      */
     export function xor(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
@@ -595,9 +500,9 @@ export namespace Atomics {
     }
 
     /**
-     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     * If "typedArray[index] == value" suspends the current thread until it is notified by Atomics.notify.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[index] == value".
      *
      * @param typedArray typed array of values
      * @param { int } index index of current value in the typedArray
@@ -605,17 +510,18 @@ export namespace Atomics {
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
     export function wait(typedArray: Int32Array, index: int, value: long): string {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return 'not-equal';
         }
         return waitImpl(typedArray, index, value.toLong());
     }
 
     /**
-     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify
+     * If "typedArray[index] == value" suspends the current thread until it is notified by Atomics.notify
      * or until the given timeout passes.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[index] == value".
      *
      * @param typedArray typed array of values
      * @param { int } index index of current value in the typedArray
@@ -624,16 +530,17 @@ export namespace Atomics {
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
     export function wait(typedArray: Int32Array, index: int, value: long, timeout: int): string {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return 'not-equal';
         }
         return waitImpl(typedArray, index, value.toLong(), timeout);
     }
 
     /**
-     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     * If "typedArray[index] == value" suspends the current thread until it is notified by Atomics.notify.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[index] == value".
      *
      * @param typedArray typed array of values
      * @param { int } index index of current value in the typedArray
@@ -641,17 +548,18 @@ export namespace Atomics {
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
     export function wait(typedArray: BigInt64Array, index: int, value: bigint): string {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return 'not-equal';
         }
         return waitImpl(typedArray, index, value.getLong());
     }
 
     /**
-     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     * If "typedArray[index] == value" suspends the current thread until it is notified by Atomics.notify.
      * or until the given timeout passes.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[index] == value".
      *
      * @param typedArray typed array of values
      * @param { int } index index of current value in the typedArray
@@ -660,16 +568,36 @@ export namespace Atomics {
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
     export function wait(typedArray: BigInt64Array, index: int, value: bigint, timeout: int): string {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return 'not-equal';
         }
         return waitImpl(typedArray, index, value.getLong(), timeout);
     }
 
     /**
-     * Creates a coroutine that will sleep if "typedArray[offset] == value" until it is notified by Atomics.notify
+     * Creates a promise that will be pending if "typedArray[index] == value" until it is notified by Atomics.notify
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     * Note: An Atomics.notify call will resolve this promise even if "typedArray[index] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { long } value value to compare current value with
+     * @returns { Promise<string> } that will be resolved after the coroutine get notified
+     *    or rejected if exception were thrown
+     */
+    export function waitAsync(typedArray: Int32Array, index: int, value: long): Promise<string> {
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return Promise.resolve('not-equal');
+        }
+        return asyncWaitImpl(typedArray, index, value.toLong()) as Promise<string>;
+    }
+
+    /**
+     * Creates a promise that will be pending if "typedArray[index] == value" until it is notified by Atomics.notify
+     *
+     * Note: An Atomics.notify call will resolve this promise even if "typedArray[index] == value".
      *
      * @param typedArray typed array of values
      * @param { int } index index of current value in the typedArray
@@ -677,18 +605,40 @@ export namespace Atomics {
      * @returns { Promise<string> } that will be resolved after the coroutine get notified
      *    or rejected if exception were thrown
      */
-    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: int, value: bigint): Promise<string> {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+    export function waitAsync(typedArray: BigInt64Array, index: int, value: bigint): Promise<string> {
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return Promise.resolve('not-equal');
         }
         return asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
     }
 
     /**
-     * Creates a coroutine that will sleep if "typedArray[offset] == value" until it is notified by Atomics.notify
+     * Creates a promise that will be pending if "typedArray[index] == value" until it is notified by Atomics.notify
      * or until the given timeout passes.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     * Note: An Atomics.notify call will resolve this promise even if "typedArray[index] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { long } value value to compare current value with
+     * @param { int } timeout timeout in ms
+     * @returns { Promise<string> } that will be resolved after the coroutine get notified
+     *    or rejected if exception were thrown
+     */
+    export function waitAsync(typedArray: Int32Array, index: int, value: long, timeout: int): Promise<string> {
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return Promise.resolve('not-equal');
+        }
+        return asyncWaitImpl(typedArray, index, value.toLong(), timeout) as Promise<string>;
+    }
+
+    /**
+     * Creates a promise that will be pending if "typedArray[index] == value" until it is notified by Atomics.notify
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will resolve this promise even if "typedArray[index] == value".
      *
      * @param typedArray typed array of values
      * @param { int } index index of current value in the typedArray
@@ -697,9 +647,10 @@ export namespace Atomics {
      * @returns { Promise<string> } that will be resolved after the coroutine get notified
      *    or rejected if exception were thrown
      */
-    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: int, value: bigint, timeout: int): Promise<string> {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+    export function waitAsync(typedArray: BigInt64Array, index: int, value: bigint, timeout: int): Promise<string> {
+        validateIndex(typedArray, index);
+        if (Atomics.load(typedArray, index) != value) {
+            return Promise.resolve('not-equal');
         }
         return asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
     }
@@ -713,9 +664,7 @@ export namespace Atomics {
      * @returns { int } number of notified threads
      */
     export function notify(typedArray: Int32Array | BigInt64Array, index: int): int {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         return notifyImpl(typedArray, index)
     }
 
@@ -728,97 +677,71 @@ export namespace Atomics {
      * @returns { int } number of notified threads
      */
     export function notify(typedArray: Int32Array | BigInt64Array, index: int, count: int): int {
-        if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Atomics:: Index out of bounds")
-        }
+        validateIndex(typedArray, index);
         return notifyImpl(typedArray, index, count)
     }
 
     function waitImpl(typedArray: Int32Array | BigInt64Array, index: int, value: long, timeout?: int): string {
-        // Getting correct waiter
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
+        if (timeout === undefined) {
+            timeout = INFINITY;
+        } else if (timeout < 0) {
+            timeout = 0;
+        }
         if (typedArray instanceof Int32Array) {
-            let offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
-            let waiter = getWaiter(buffer, offset);
-            return waiter!.wait(value, () => { return buffer.atomicLoadI32(index, typedArray.byteOffset.toInt()).toLong(); }, timeout)
+            let offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, index)
+            return waitImplInt32(buffer, offset, value.toInt(), timeout);
         } else {
-            let offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
-            let waiter = getWaiter(buffer, offset);
-            return waiter!.wait(value, () => { return buffer.atomicLoadI64(index, typedArray.byteOffset.toInt()).toLong(); }, timeout)
+            let offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT, typedArray.length, index)
+            return waitImplInt64(buffer, offset, value, timeout);
         }
     }
 
+    native function waitImplInt32(buffer: ArrayBuffer, index: int, value: int, timeout: int): string;
+    native function waitImplInt64(buffer: ArrayBuffer, index: int, value: long, timeout: int): string;
+
     function asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: int, value: long, timeout?: int): Promise<string> {
-        let resolver: (((v: String) => void) | undefined) = undefined;
-        let rejecter: (((error: Error) => void) | undefined) = undefined;
-        let p = new Promise<String>((res, rej) => {
-            resolver = res
-            rejecter = rej;
-        })
-        let cb = () => {
-            try {
-                let v = waitImpl(typedArray, index, value, timeout)
-                resolver!(v)
-            } catch (e) {
-                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                rejecter!(e as Error)
-            }
+        let buffer = typedArray.buffer;
+        let byteOffset = typedArray.byteOffset.toInt();
+        if (timeout === undefined) {
+            timeout = INFINITY;
+        } else if (timeout < 0) {
+            timeout = 0;
         }
-        launch(cb)
-        return p;
+        if (typedArray instanceof Int32Array) {
+            let offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, index)
+            return asyncWaitImplInt32(buffer, offset, value.toInt(), timeout);
+        } else {
+            let offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT, typedArray.length, index)
+            return asyncWaitImplInt64(buffer, offset, value, timeout);
+        }
     }
+
+    native function asyncWaitImplInt32(buffer: ArrayBuffer, index: int, value: int, timeout: int): Promise<string>;
+    native function asyncWaitImplInt64(buffer: ArrayBuffer, index: int, value: long, timeout: int): Promise<string>;
 
     function notifyImpl(typedArray: Int32Array | BigInt64Array, index: int, count?: int): int {
         let buffer = typedArray.buffer
         let offset = 0;
         let byteOffset = typedArray.byteOffset.toInt()
+        let icount: int = 0;
+        if (count === undefined) {
+            icount = INFINITY;
+        } else {
+            icount = count;
+        }
         if (typedArray instanceof Int32Array) {
-            offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
+            offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, index)
+            return notifyImplInt32(buffer, offset, icount);
         } else {
-            offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
+            offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT, typedArray.length, index)
+            return notifyImplInt64(buffer, offset, icount);
         }
-        let waiter = getWaiter(buffer, offset);
-        let notified = 0;
-        if (count == undefined) {
-            notified = waiter!.notifyAll(Waiter.okStatus);
-        } else {
-            for(let i = 0; i < count; i++) {
-                if (waiter!.notify(Waiter.okStatus)) {
-                    notified++;
-                }
-            }
-        }
-        return notified;
     }
 
-    let globalWaitingTable: containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>> = new containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>>();
-    let globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
-
-    function getWaiter(buffer: ArrayBuffer, byteOffset: int): Waiter {
-        let waiterTable = globalWaitingTable.get(buffer);
-        if (waiterTable instanceof undefined) {
-            ConcurrencyHelpers.mutexLock(globalWaitingTableMutex)
-            waiterTable = globalWaitingTable.get(buffer)
-            if (waiterTable instanceof undefined) {
-                waiterTable = new containers.ConcurrentHashMap<int, Waiter>()
-                globalWaitingTable.set(buffer, waiterTable!)
-            }
-            ConcurrencyHelpers.mutexUnlock(globalWaitingTableMutex)
-        }
-
-        let waiter = waiterTable!.get(byteOffset)
-        if (waiter instanceof undefined) {
-            ConcurrencyHelpers.mutexLock(globalWaitingTableMutex)
-            waiter = waiterTable!.get(byteOffset)
-            if (waiter instanceof undefined) {
-                waiter = new Waiter()
-                waiterTable!.set(byteOffset, waiter!)
-            }
-            ConcurrencyHelpers.mutexUnlock(globalWaitingTableMutex)
-        }
-        return waiter as Waiter;
-    }
+    native function notifyImplInt32(buffer: ArrayBuffer, index: int, count: int): int;
+    native function notifyImplInt64(buffer: ArrayBuffer, index: int, count: int): int;
 
     // https://tc39.es/ecma262/multipage/structured-data.html#sec-validateatomicaccess
     function index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: int): int {
@@ -826,5 +749,51 @@ export namespace Atomics {
             throw new RangeError("Atomics:: Index out of bounds")
         }
         return startByteOffset + (index * elementSize)
+    }
+
+    function validateIndex(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int) {
+        if (typedArray instanceof Int8Array) {
+            let notUnionTypedArray = typedArray as Int8Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let notUnionTypedArray = typedArray as Int16Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let notUnionTypedArray = typedArray as Int32Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let notUnionTypedArray = typedArray as BigInt64Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let notUnionTypedArray = typedArray as Uint8Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let notUnionTypedArray = typedArray as Uint16Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let notUnionTypedArray = typedArray as Uint32Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let notUnionTypedArray = typedArray as BigUint64Array;
+            if (index < 0 || index >= notUnionTypedArray.length) {
+                throw new RangeError("Atomics:: Index out of bounds")
+            }
+        } else {
+            throw new Error("Unhandled array type!");
+        }
     }
 }

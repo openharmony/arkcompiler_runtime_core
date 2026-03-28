@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "runtime/execution/job_execution_context.h"
+#include "include/managed_thread.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
@@ -22,14 +24,14 @@
 namespace ark::ets {
 
 /*static*/
-EtsMutex *EtsMutex::Create(EtsCoroutine *coro)
+EtsMutex *EtsMutex::Create(EtsExecutionContext *executionCtx)
 {
-    EtsHandleScope scope(coro);
-    auto *klass = PlatformTypes(coro)->coreMutex;
-    auto hMutex = EtsHandle<EtsMutex>(coro, EtsMutex::FromEtsObject(EtsObject::Create(coro, klass)));
-    auto *waitersList = EtsWaitersList::Create(coro);
+    EtsHandleScope scope(executionCtx);
+    auto *klass = PlatformTypes(executionCtx)->coreMutex;
+    auto hMutex = EtsHandle<EtsMutex>(executionCtx, EtsMutex::FromEtsObject(EtsObject::Create(executionCtx, klass)));
+    auto *waitersList = EtsWaitersList::Create(executionCtx);
     ASSERT(hMutex.GetPtr() != nullptr);
-    hMutex->SetWaitersList(coro, waitersList);
+    hMutex->SetWaitersList(executionCtx, waitersList);
     return hMutex.GetPtr();
 }
 
@@ -66,10 +68,10 @@ void EtsMutex::Lock()
     if (waiters_.fetch_add(1, std::memory_order_acq_rel) == 0) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *coroManager = coro->GetCoroutineManager();
-    auto awaitee = EtsWaitersList::Node(coroManager);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    auto awaitee = EtsWaitersList::Node(jobManager);
     SuspendCoroutine(&awaitee);
 }
 
@@ -90,14 +92,14 @@ bool EtsMutex::IsHeld()
 }
 
 /*static*/
-EtsEvent *EtsEvent::Create(EtsCoroutine *coro)
+EtsEvent *EtsEvent::Create(EtsExecutionContext *executionCtx)
 {
-    EtsHandleScope scope(coro);
-    auto *klass = PlatformTypes(coro)->coreEvent;
-    auto hEvent = EtsHandle<EtsEvent>(coro, EtsEvent::FromEtsObject(EtsObject::Create(coro, klass)));
-    auto *waitersList = EtsWaitersList::Create(coro);
+    EtsHandleScope scope(executionCtx);
+    auto *klass = PlatformTypes(executionCtx)->coreEvent;
+    auto hEvent = EtsHandle<EtsEvent>(executionCtx, EtsEvent::FromEtsObject(EtsObject::Create(executionCtx, klass)));
+    auto *waitersList = EtsWaitersList::Create(executionCtx);
     ASSERT(hEvent.GetPtr() != nullptr);
-    hEvent->SetWaitersList(coro, waitersList);
+    hEvent->SetWaitersList(executionCtx, waitersList);
     return hEvent.GetPtr();
 }
 
@@ -108,10 +110,10 @@ void EtsEvent::Wait()
     if (IsFireState(state)) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *coroManager = coro->GetCoroutineManager();
-    auto awaitee = EtsWaitersList::Node(coroManager);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    auto awaitee = EtsWaitersList::Node(jobManager);
     SuspendCoroutine(&awaitee);
 }
 
@@ -128,14 +130,14 @@ void EtsEvent::Fire()
 }
 
 /* static */
-EtsCondVar *EtsCondVar::Create(EtsCoroutine *coro)
+EtsCondVar *EtsCondVar::Create(EtsExecutionContext *executionCtx)
 {
-    EtsHandleScope scope(coro);
-    auto *klass = PlatformTypes(coro)->coreCondVar;
-    auto hCondVar = EtsHandle<EtsCondVar>(coro, EtsCondVar::FromEtsObject(EtsObject::Create(klass)));
-    auto *waitersList = EtsWaitersList::Create(coro);
+    EtsHandleScope scope(executionCtx);
+    auto *klass = PlatformTypes(executionCtx)->coreCondVar;
+    auto hCondVar = EtsHandle<EtsCondVar>(executionCtx, EtsCondVar::FromEtsObject(EtsObject::Create(klass)));
+    auto *waitersList = EtsWaitersList::Create(executionCtx);
     ASSERT(hCondVar.GetPtr() != nullptr);
-    hCondVar->SetWaitersList(coro, waitersList);
+    hCondVar->SetWaitersList(executionCtx, waitersList);
     return hCondVar.GetPtr();
 }
 
@@ -144,10 +146,10 @@ void EtsCondVar::Wait(EtsHandle<EtsMutex> &mutex)
     ASSERT(mutex->IsHeld());
     waiters_++;
     mutex->Unlock();
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *coroManager = coro->GetCoroutineManager();
-    auto awaitee = EtsWaitersList::Node(coroManager);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    auto awaitee = EtsWaitersList::Node(jobManager);
     SuspendCoroutine(&awaitee);
     mutex->Lock();
 }
@@ -171,9 +173,9 @@ void EtsCondVar::NotifyAll([[maybe_unused]] EtsMutex *mutex)
 }
 
 /* static */
-EtsQueueSpinlock *EtsQueueSpinlock::Create(EtsCoroutine *coro)
+EtsQueueSpinlock *EtsQueueSpinlock::Create(EtsExecutionContext *executionCtx)
 {
-    auto *klass = PlatformTypes(coro)->coreQueueSpinlock;
+    auto *klass = PlatformTypes(executionCtx)->coreQueueSpinlock;
     return EtsQueueSpinlock::FromEtsObject(EtsObject::Create(klass));
 }
 
@@ -187,7 +189,7 @@ void EtsQueueSpinlock::Acquire(Guard *waiter)
     // Atomic with release order reason: to guarantee happens-before with waiter constructor
     oldTail->next_.store(waiter, std::memory_order_release);
     auto spinWait = SpinWait();
-    ScopedNativeCodeThread nativeCode(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeCode(ManagedThread::GetCurrent());
     // Atomic with acquire order reason: to guarantee happens-before for critical sections
     while (!waiter->isOwner_.load(std::memory_order_acquire)) {
         spinWait();
@@ -243,10 +245,10 @@ void EtsRWLock::ReadLock()
     } while (!state_.compare_exchange_weak(oldState, newState, std::memory_order_acq_rel, std::memory_order_relaxed));
 
     if (!State::HasReadLock(newState)) {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *coroManager = coro->GetCoroutineManager();
-        auto readAwaitee = EtsWaitersList::Node(coroManager);
-        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetReaders(coro), &readAwaitee);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+        auto readAwaitee = EtsWaitersList::Node(jobManager);
+        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetReaders(executionCtx), &readAwaitee);
     }
 }
 
@@ -261,10 +263,10 @@ void EtsRWLock::WriteLock()
     } while (!state_.compare_exchange_weak(oldState, newState, std::memory_order_acq_rel, std::memory_order_relaxed));
 
     if (!State::HasWriteLock(newState) || State::HasWriteLock(oldState)) {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *coroManager = coro->GetCoroutineManager();
-        auto writeAwaitee = EtsWaitersList::Node(coroManager);
-        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetWriters(coro), &writeAwaitee);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+        auto writeAwaitee = EtsWaitersList::Node(jobManager);
+        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetWriters(executionCtx), &writeAwaitee);
     }
 }
 
@@ -287,11 +289,11 @@ void EtsRWLock::Unlock()
         return;
     }
     if (State::HasWriteLock(newState)) {
-        EtsSyncPrimitive<EtsRWLock>::ResumeCoroutine(GetWriters(EtsCoroutine::GetCurrent()));
+        EtsSyncPrimitive<EtsRWLock>::ResumeCoroutine(GetWriters(EtsExecutionContext::GetCurrent()));
         return;
     }
     for (auto readers = State::GetReaders(newState); readers != 0; --readers) {
-        EtsSyncPrimitive<EtsRWLock>::ResumeCoroutine(GetReaders(EtsCoroutine::GetCurrent()));
+        EtsSyncPrimitive<EtsRWLock>::ResumeCoroutine(GetReaders(EtsExecutionContext::GetCurrent()));
     }
 }
 

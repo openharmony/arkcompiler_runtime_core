@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "libarkbase/utils/utils.h"
 #include "get_test_class.h"
 #include "ets_coroutine.h"
@@ -57,8 +58,7 @@ public:
     void SetUp() override
     {
         coroutine_ = EtsCoroutine::GetCurrent();
-        auto *env = coroutine_->GetPandaAniEnv();
-
+        auto *env = EtsExecutionContext::FromMT(coroutine_)->GetPandaAniEnv();
         s_ = new ani::ScopedManagedCodeFix(env);
     }
 

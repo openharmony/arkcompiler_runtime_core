@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <array>
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/gc_task.h"
@@ -101,7 +102,7 @@ public:
     {
         auto *coro = EtsCoroutine::GetCurrent();
         auto *obj = AllocObjectInYoung();
-        EtsHandleScope arrayScope(coro);
+        EtsHandleScope hs(EtsExecutionContext::FromMT(coro));
         VMHandle<ObjectHeader> hObj(EtsCoroutine::GetCurrent(), obj);
         while (hObj.GetPtr() == obj) {
             AllocObjectInYoung();
@@ -164,6 +165,7 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
 {
     // Initialize
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread managedScope(coro);
     static constexpr size_t EVENT_COUNT = 10U;
     TestEvent<EVENT_COUNT> event;
@@ -171,18 +173,19 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
     {
         auto *objectClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
         static constexpr size_t ARRAY_SIZE = 1024U;
-        EtsHandleScope arrayScope(coro);
+        EtsHandleScope arrayScope(executionCtx);
         std::array<EtsHandle<EtsObject>, EVENT_COUNT> arrayHandles;
         for (auto &handle : arrayHandles) {
-            handle = EtsHandle<EtsObject>(coro, EtsObjectArray::Create(objectClass, ARRAY_SIZE)->AsObject());
-            ASSERT_NE(vm_->RegisterFinalizerForObject(coro, handle, TestEvent<EVENT_COUNT>::Finalize, &event), nullptr);
+            handle = EtsHandle<EtsObject>(executionCtx, EtsObjectArray::Create(objectClass, ARRAY_SIZE)->AsObject());
+            ASSERT_NE(vm_->RegisterFinalizerForObject(executionCtx, handle, TestEvent<EVENT_COUNT>::Finalize, &event),
+                      nullptr);
         }
 
-        auto handle = EtsHandle<EtsObject>(coro, EtsObject::Create(objectClass));
+        auto handle = EtsHandle<EtsObject>(executionCtx, EtsObject::Create(objectClass));
         auto finWeakRef = vm_->RegisterFinalizerForObject(
-            coro, handle, [](void *) { ASSERT_TRUE(false); }, nullptr);
+            executionCtx, handle, [](void *) { ASSERT_TRUE(false); }, nullptr);
         ASSERT_NE(finWeakRef, nullptr);
-        ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), true);
+        ASSERT_EQ(vm_->UnregisterFinalizerForObject(executionCtx, finWeakRef), true);
 
         // Trigger GC
         TriggerGC();
@@ -203,16 +206,17 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
 TEST_F(EtsFinalizableWeakRefTest, UnregisterFinalizerTwiceTest)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread managedScope(coro);
-    EtsHandleScope handleScope(coro);
+    EtsHandleScope hs(EtsExecutionContext::FromMT(coro));
 
     auto *objectClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
-    auto handle = EtsHandle<EtsObject>(coro, EtsObject::Create(objectClass));
+    auto handle = EtsHandle<EtsObject>(executionCtx, EtsObject::Create(objectClass));
     auto finWeakRef = vm_->RegisterFinalizerForObject(
-        coro, handle, [](void *) {}, nullptr);
+        executionCtx, handle, [](void *) {}, nullptr);
     ASSERT_NE(finWeakRef, nullptr);
-    ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), true);
-    ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), false);
+    ASSERT_EQ(vm_->UnregisterFinalizerForObject(executionCtx, finWeakRef), true);
+    ASSERT_EQ(vm_->UnregisterFinalizerForObject(executionCtx, finWeakRef), false);
 }
 
 }  // namespace ark::ets::test

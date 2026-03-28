@@ -14,7 +14,6 @@
  */
 
 #include <cctype>
-#include "ets_coroutine.h"
 #include "ets_handle.h"
 #include "ets_handle_scope.h"
 #include "intrinsics.h"
@@ -40,7 +39,7 @@ extern "C" EtsClass *ReflectFieldGetTypeInternal(EtsLong etsFieldPtr)
     // do not expose primitive types and string types except std.sore.String
     auto fieldType = reinterpret_cast<EtsField *>(etsFieldPtr)->GetType();
     if (fieldType == nullptr) {
-        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         return nullptr;
     }
 
@@ -49,74 +48,74 @@ extern "C" EtsClass *ReflectFieldGetTypeInternal(EtsLong etsFieldPtr)
 
 extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsObject *thisObj, EtsObject *arg)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     auto *reflectField = EtsReflectField::FromEtsObject(EtsObject::FromCoreType(thisField));
     ASSERT(reflectField != nullptr);
     auto *field = reflectField->GetEtsField();
     ASSERT(field != nullptr);
-    EtsHandle thisObjH(coro, thisObj);
-    EtsHandle argH(coro, arg);
+    EtsHandle thisObjH(executionCtx, thisObj);
+    EtsHandle argH(executionCtx, arg);
     EtsClass *fieldType = field->GetType();
     if (fieldType == nullptr) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
     bool isFieldPrimitive = fieldType->IsPrimitive();
 
     if (argH.GetPtr() == nullptr) {
         if (isFieldPrimitive) {
-            ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
                               "undefined argument is not allowed for primitive reciever");
             return;
         }
-        helpers::ReflectFieldSetReference(coro, thisObjH.GetPtr(), argH.GetPtr(), field);
+        helpers::ReflectFieldSetReference(executionCtx, thisObjH.GetPtr(), argH.GetPtr(), field);
         return;
     }
 
     EtsClass *argType = argH->GetClass();
     if (fieldType->IsAssignableFrom(argType)) {
         ASSERT(!fieldType->IsPrimitive());
-        helpers::ReflectFieldSetReference(coro, thisObjH.GetPtr(), argH.GetPtr(), field);
+        helpers::ReflectFieldSetReference(executionCtx, thisObjH.GetPtr(), argH.GetPtr(), field);
     } else if (!(fieldType->IsPrimitive() && argType->IsBoxed() &&
                  helpers::ResolveAndSetPrimitive(
-                     coro, {thisObjH.GetPtr(), argH.GetPtr(), argType, fieldType->GetEtsType(), field}))) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError,
+                     executionCtx, {thisObjH.GetPtr(), argH.GetPtr(), argType, fieldType->GetEtsType(), field}))) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
                           "Value is not assignable to the provided field");
     }
 }
 
 extern "C" EtsObject *ReflectFieldGetValueInternal(ark::ObjectHeader *thisField, EtsObject *thisObj)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     auto *reflectField = EtsReflectField::FromEtsObject(EtsObject::FromCoreType(thisField));
     ASSERT(reflectField != nullptr);
     auto *field = reflectField->GetEtsField();
     ASSERT(field != nullptr);
 
-    EtsHandle thisObjH(coro, thisObj);
+    EtsHandle thisObjH(executionCtx, thisObj);
 
-    if (!field->IsStatic() && !helpers::ValidateInstanceField(coro, thisObj, field)) {
-        ASSERT(coro->HasPendingException());
+    if (!field->IsStatic() && !helpers::ValidateInstanceField(executionCtx, thisObj, field)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
     EtsClass *fieldType = field->GetType();
     if (fieldType == nullptr) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     if (fieldType->IsPrimitive()) {
         EtsType fieldEtsType = fieldType->GetEtsType();
-        Value val = helpers::GetPrimitiveValue(coro, thisObjH.GetPtr(), fieldEtsType, field);
-        return GetBoxedValue(coro, val, fieldEtsType);
+        Value val = helpers::GetPrimitiveValue(executionCtx, thisObjH.GetPtr(), fieldEtsType, field);
+        return GetBoxedValue(executionCtx, val, fieldEtsType);
     }
 
     return helpers::ReflectFieldGetReference(thisObjH.GetPtr(), field);

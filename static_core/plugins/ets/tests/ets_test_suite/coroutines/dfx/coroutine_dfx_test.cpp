@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 
 #include "runtime/include/class.h"
 #include "runtime/include/object_header.h"
-#include "runtime/coroutines/stackful_coroutine_manager.h"
+#include "runtime/execution/coroutines/stackful/stackful_coroutine_manager.h"
 
 namespace ark::ets::test {
 
@@ -57,14 +57,14 @@ TEST_F(EtsCoroutineDFXTest, PrintStackTest)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     auto etsVm = coroutine->GetPandaVM();
-    auto *coroutineManager = static_cast<StackfulCoroutineManager *>(etsVm->GetCoroutineManager());
+    auto *coroutineManager = static_cast<StackfulCoroutineManager *>(etsVm->GetJobManager());
 
     CallEtsFunction<ani_int>("coroutine_dfx_test", "startWaitCoro");
-    coroutineManager->Schedule();
+    coroutineManager->ExecuteJobs();
     auto coroInfo = coroutineManager->GetAllWorkerFullStatus()->OutputInfo();
     ASSERT_TRUE(coroInfo.find("Status: BLOCKED") != coroInfo.npos);
-    ASSERT_TRUE(coroInfo.find("coroutine_dfx_test.ETSGLOBAL::waiter") !=
-                coroInfo.npos);  // check if it contains stack with wainter()
+    ASSERT_TRUE(coroInfo.find("coroutine_dfx_test.ETSGLOBAL::%%async-waiter") !=
+                coroInfo.npos);  // check if it contains stack with waiter()
     CallEtsFunction<ani_int>("coroutine_dfx_test", "notify");
 }
 

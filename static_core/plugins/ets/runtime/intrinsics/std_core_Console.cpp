@@ -98,9 +98,6 @@ void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *dat
     auto lvl = static_cast<ConsoleLevel>(level);
     ASSERT(lvl >= ConsoleLevel::ENUM_BEGIN && lvl <= ConsoleLevel::ENUM_END);
 
-    auto thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<coretypes::String> dH(thread, data->GetCoreType());
     auto res = PandaString(data->GetUtf8());
 
 #ifdef PANDA_TARGET_OHOS

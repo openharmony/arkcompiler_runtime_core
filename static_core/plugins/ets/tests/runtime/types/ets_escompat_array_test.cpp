@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,9 +99,9 @@ TEST_F(EtsEscompatArrayTest, EtsEscompatArrayCreate)
     auto *coro = EtsCoroutine::GetCurrent();
     ScopedManagedCodeThread s(coro);
 
-    auto *array = EtsEscompatArray::Create(coro, ARRAY_LENGTH);
+    auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
     ASSERT_NE(array, nullptr);
-    ASSERT_TRUE(array->IsExactlyEscompatArray(coro));
+    ASSERT_TRUE(array->IsExactlyEscompatArray(EtsExecutionContext::FromMT(coro)));
 
     ASSERT_EQ(array->GetActualLengthFromEscompatArray(), ARRAY_LENGTH);
 
@@ -111,7 +111,7 @@ TEST_F(EtsEscompatArrayTest, EtsEscompatArrayCreate)
     ASSERT_GE(dataArray->GetLength(), ARRAY_LENGTH);
 
     EtsInt length = 0;
-    ASSERT_TRUE(array->GetLength(coro, &length));
+    ASSERT_TRUE(array->GetLength(EtsExecutionContext::FromMT(coro), &length));
     ASSERT_FALSE(coro->HasPendingException());
     ASSERT_EQ(length, ARRAY_LENGTH);
 }
@@ -119,13 +119,14 @@ TEST_F(EtsEscompatArrayTest, EtsEscompatArrayCreate)
 TEST_F(EtsEscompatArrayTest, GetRef)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread s(coro);
-    EtsHandleScope sh(coro);
+    EtsHandleScope hs(executionCtx);
 
-    EtsHandle array(coro, EtsEscompatArray::Create(coro, ARRAY_LENGTH));
+    EtsHandle array(executionCtx, EtsEscompatArray::Create(executionCtx, ARRAY_LENGTH));
     ASSERT_NE(array.GetPtr(), nullptr);
 
-    EtsHandle dataArray(coro, array->GetDataFromEscompatArray());
+    EtsHandle dataArray(executionCtx, array->GetDataFromEscompatArray());
     for (size_t i = 0; i < ARRAY_LENGTH; ++i) {
         const auto sampleString = std::to_string(i);
         auto *str = EtsString::CreateFromUtf8(sampleString.c_str(), sampleString.size());
@@ -133,7 +134,7 @@ TEST_F(EtsEscompatArrayTest, GetRef)
         dataArray->Set(i, str->AsObject());
 
         // Check that `GetRef` works correctly
-        auto result = array->GetRef(coro, i);
+        auto result = array->GetRef(executionCtx, i);
         ASSERT_TRUE(result.has_value());
         CheckObjectIsString(coro, *result, sampleString);
     }
@@ -142,13 +143,14 @@ TEST_F(EtsEscompatArrayTest, GetRef)
 TEST_F(EtsEscompatArrayTest, EscompatArrayGet)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread s(coro);
-    EtsHandleScope sh(coro);
+    EtsHandleScope hs(executionCtx);
 
-    EtsHandle array(coro, EtsEscompatArray::Create(coro, ARRAY_LENGTH));
+    EtsHandle array(executionCtx, EtsEscompatArray::Create(executionCtx, ARRAY_LENGTH));
     ASSERT_NE(array.GetPtr(), nullptr);
 
-    EtsHandle dataArray(coro, array->GetDataFromEscompatArray());
+    EtsHandle dataArray(executionCtx, array->GetDataFromEscompatArray());
     for (size_t i = 0; i < ARRAY_LENGTH; ++i) {
         const auto sampleString = std::to_string(i);
         auto *str = EtsString::CreateFromUtf8(sampleString.c_str(), sampleString.size());
@@ -164,13 +166,14 @@ TEST_F(EtsEscompatArrayTest, EscompatArrayGet)
 TEST_F(EtsEscompatArrayTest, GetRefWithError)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread s(coro);
-    EtsHandleScope sh(coro);
+    EtsHandleScope hs(executionCtx);
 
-    EtsHandle array(coro, EtsEscompatArray::Create(coro, ARRAY_LENGTH));
+    EtsHandle array(executionCtx, EtsEscompatArray::Create(executionCtx, ARRAY_LENGTH));
     ASSERT_NE(array.GetPtr(), nullptr);
 
-    auto result = array->GetRef(coro, ARRAY_LENGTH);
+    auto result = array->GetRef(executionCtx, ARRAY_LENGTH);
     ASSERT_FALSE(result.has_value());
     ASSERT_TRUE(coro->HasPendingException());
 }
@@ -178,17 +181,18 @@ TEST_F(EtsEscompatArrayTest, GetRefWithError)
 TEST_F(EtsEscompatArrayTest, SetRef)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread s(coro);
-    EtsHandleScope sh(coro);
+    EtsHandleScope hs(executionCtx);
 
-    EtsHandle array(coro, EtsEscompatArray::Create(coro, ARRAY_LENGTH));
+    EtsHandle array(executionCtx, EtsEscompatArray::Create(executionCtx, ARRAY_LENGTH));
     ASSERT_NE(array.GetPtr(), nullptr);
 
-    EtsHandle dataArray(coro, array->GetDataFromEscompatArray());
+    EtsHandle dataArray(executionCtx, array->GetDataFromEscompatArray());
     for (size_t i = 0; i < ARRAY_LENGTH; ++i) {
         const auto sampleString = std::to_string(i);
         auto *expectedString = EtsString::CreateFromUtf8(sampleString.c_str(), sampleString.size())->AsObject();
-        ASSERT_TRUE(array->SetRef(coro, i, expectedString));
+        ASSERT_TRUE(array->SetRef(executionCtx, i, expectedString));
         ASSERT_FALSE(coro->HasPendingException());
 
         auto *result = dataArray->Get(i);
@@ -200,13 +204,14 @@ TEST_F(EtsEscompatArrayTest, SetRef)
 TEST_F(EtsEscompatArrayTest, EscompatArraySet)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread s(coro);
-    EtsHandleScope sh(coro);
+    EtsHandleScope hs(executionCtx);
 
-    EtsHandle array(coro, EtsEscompatArray::Create(coro, ARRAY_LENGTH));
+    EtsHandle array(executionCtx, EtsEscompatArray::Create(executionCtx, ARRAY_LENGTH));
     ASSERT_NE(array.GetPtr(), nullptr);
 
-    EtsHandle dataArray(coro, array->GetDataFromEscompatArray());
+    EtsHandle dataArray(EtsExecutionContext::FromMT(coro), array->GetDataFromEscompatArray());
     for (size_t i = 0; i < ARRAY_LENGTH; ++i) {
         const auto sampleString = std::to_string(i);
         auto *expectedString = EtsString::CreateFromUtf8(sampleString.c_str(), sampleString.size())->AsObject();
@@ -222,13 +227,14 @@ TEST_F(EtsEscompatArrayTest, EscompatArraySet)
 TEST_F(EtsEscompatArrayTest, SetRefWithError)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
     ScopedManagedCodeThread s(coro);
-    EtsHandleScope sh(coro);
+    EtsHandleScope hs(executionCtx);
 
-    EtsHandle array(coro, EtsEscompatArray::Create(coro, ARRAY_LENGTH));
+    EtsHandle array(executionCtx, EtsEscompatArray::Create(executionCtx, ARRAY_LENGTH));
     ASSERT_NE(array.GetPtr(), nullptr);
 
-    auto result = array->SetRef(coro, ARRAY_LENGTH, nullptr);
+    auto result = array->SetRef(executionCtx, ARRAY_LENGTH, nullptr);
     ASSERT_FALSE(result);
     ASSERT_TRUE(coro->HasPendingException());
 }

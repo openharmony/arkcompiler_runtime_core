@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,16 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H_
 
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/include/managed_thread.h"
 #include "runtime/handle_scope.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 namespace ark::ets {
 
 class EtsHandleScope : public HandleScope<ObjectHeader *> {
 public:
-    inline explicit EtsHandleScope(EtsCoroutine *coroutine) : HandleScope<ObjectHeader *>(coroutine) {};
+    inline explicit EtsHandleScope(EtsExecutionContext *executionCtx)
+        : HandleScope<ObjectHeader *>(executionCtx->GetMT()) {};
 };
 
 }  // namespace ark::ets

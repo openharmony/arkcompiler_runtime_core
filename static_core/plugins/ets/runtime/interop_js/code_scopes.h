@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,11 +23,11 @@ namespace ark::ets::interop::js {
 /// @brief RAII-style class for registering interop call stack information
 class ScopedInteropCallStackRecord {
 public:
-    explicit ScopedInteropCallStackRecord(EtsCoroutine *coro, char const *descr = nullptr);
+    explicit ScopedInteropCallStackRecord(EtsExecutionContext *executionCtx, char const *descr = nullptr);
     ~ScopedInteropCallStackRecord();
 
 private:
-    EtsCoroutine *coro_;
+    EtsExecutionContext *executionCtx_;
 
     NO_COPY_SEMANTIC(ScopedInteropCallStackRecord);
     NO_MOVE_SEMANTIC(ScopedInteropCallStackRecord);
@@ -36,11 +36,11 @@ private:
 /// @brief RAII-style class for switching from ETS state to JS
 class InteropETSToJSCodeScope {
 public:
-    explicit InteropETSToJSCodeScope(EtsCoroutine *coro, char const *descr = nullptr);
+    explicit InteropETSToJSCodeScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);
     ~InteropETSToJSCodeScope();
 
 private:
-    EtsCoroutine *coro_;
+    EtsExecutionContext *executionCtx_;
 
     NO_COPY_SEMANTIC(InteropETSToJSCodeScope);
     NO_MOVE_SEMANTIC(InteropETSToJSCodeScope);
@@ -49,11 +49,11 @@ private:
 /// @brief RAII-style class for switching from JS state to ETS
 class InteropJSToETSCodeScope {
 public:
-    explicit InteropJSToETSCodeScope(EtsCoroutine *coro, char const *descr = nullptr);
+    explicit InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);
     ~InteropJSToETSCodeScope();
 
 private:
-    EtsCoroutine *coro_;
+    EtsExecutionContext *executionCtx_;
 
     NO_COPY_SEMANTIC(InteropJSToETSCodeScope);
     NO_MOVE_SEMANTIC(InteropJSToETSCodeScope);
@@ -61,10 +61,10 @@ private:
 
 // CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INTEROP_CODE_SCOPE_JS_TO_ETS(coro) InteropJSToETSCodeScope codeScope(coro, __PRETTY_FUNCTION__)
+#define INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx) InteropJSToETSCodeScope codeScope(executionCtx, __PRETTY_FUNCTION__)
 // CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INTEROP_CODE_SCOPE_ETS_TO_JS(coro) InteropETSToJSCodeScope codeScope(coro, __PRETTY_FUNCTION__)
+#define INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx) InteropETSToJSCodeScope codeScope(executionCtx, __PRETTY_FUNCTION__)
 
 }  // namespace ark::ets::interop::js
 

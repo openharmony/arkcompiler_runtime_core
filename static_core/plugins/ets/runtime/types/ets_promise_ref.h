@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,11 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace ark::ets {
+namespace ark {
+class ManagedThread;
+}  // namespace ark
 
-class EtsCoroutine;
+namespace ark::ets {
 
 namespace test {
 class EtsPromiseTest;
@@ -34,7 +36,7 @@ public:
     NO_COPY_SEMANTIC(EtsPromiseRef);
     NO_MOVE_SEMANTIC(EtsPromiseRef);
 
-    PANDA_PUBLIC_API static EtsPromiseRef *Create(EtsCoroutine *etsCoroutine);
+    PANDA_PUBLIC_API static EtsPromiseRef *Create(EtsExecutionContext *executionCtx);
 
     EtsObject *AsObject()
     {
@@ -46,15 +48,15 @@ public:
         return this;
     }
 
-    EtsObject *GetTarget(EtsCoroutine *coro) const
+    EtsObject *GetTarget(EtsExecutionContext *executionCtx) const
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromiseRef, target_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromiseRef, target_));
         return EtsObject::FromCoreType(obj);
     }
 
-    void SetTarget(EtsCoroutine *coro, EtsObject *t)
+    void SetTarget(EtsExecutionContext *executionCtx, EtsObject *t)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromiseRef, target_), t->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromiseRef, target_), t->GetCoreType());
     }
 
 private:

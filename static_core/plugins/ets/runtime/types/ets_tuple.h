@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #include <cstdint>
 #include <memory>
 
+#include "runtime/include/managed_thread.h"
 #include "libarkbase/macros.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {
@@ -43,8 +43,8 @@ public:
     {
         ASSERT(index < N);
 
-        auto coro = EtsCoroutine::GetCurrent();
-        auto res = ObjectAccessor::GetObject(coro, this, this->GetElementOffset(index));
+        auto mThread = ManagedThread::GetCurrent();
+        auto res = ObjectAccessor::GetObject(mThread, this, this->GetElementOffset(index));
 
         return EtsObject::FromCoreType(res);
     }
@@ -53,8 +53,8 @@ public:
     {
         ASSERT(index < N);
 
-        auto coro = EtsCoroutine::GetCurrent();
-        ObjectAccessor::SetObject(coro, this, this->GetElementOffset(index), element->GetCoreType());
+        auto mThread = ManagedThread::GetCurrent();
+        ObjectAccessor::SetObject(mThread, this, this->GetElementOffset(index), element->GetCoreType());
     }
 
     size_t GetSize() const

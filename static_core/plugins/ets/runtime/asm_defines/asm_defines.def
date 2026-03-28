@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 // NOLINTBEGIN(readability-identifier-naming)
-DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
-DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetTlsNullValueOffset())
-DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetTlsAniEnvOffset())
-DEFINE_VALUE(ETS_COROUTINE_LOCAL_STORAGE_OFFSET, ark::ets::EtsCoroutine::GetLocalStorageOffset())
+DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetTlsPromiseClassPointerOffset())
+DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetTlsNullValueOffset())
+DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetTlsAniEnvOffset())
+DEFINE_VALUE(ETS_COROUTINE_LOCAL_STORAGE_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetLocalStorageOffset())
 
 DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
 DEFINE_VALUE(ETS_CLASS_FLAGS_OFFSET, ark::ets::EtsClass::GetFlagsOffset())

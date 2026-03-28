@@ -30,9 +30,9 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     auto *interopDynamicFunction = PlatformTypes()->interopDynamicFunction;
     if (UNLIKELY(interopDynamicFunction == nullptr)) {
         // just throw exception
-        auto coro = EtsCoroutine::GetCurrent();
+        auto executionCtx = EtsExecutionContext::GetCurrent();
         InteropCtx::ThrowETSError(
-            coro, "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found.");
+            executionCtx, "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found.");
         return;
     }
     interopDynamicFunction->GetRuntimeClass()->SetXRefClass();
@@ -41,7 +41,7 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     // Get and store interop create dynamic function method
     auto *createDynamicFunctionMethod = interopDynamicFunction->GetStaticMethod("CreateDynamicFunction", nullptr);
     if (UNLIKELY(createDynamicFunctionMethod == nullptr)) {
-        InteropCtx::ThrowETSError(EtsCoroutine::GetCurrent(),
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(),
                                   "Interop: CreateDynamicFunction() of Lstd/interop/js/DynamicFunction; is not found.");
         return;
     }
@@ -50,13 +50,13 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
 
 napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     size_t argc;
     napi_value athis;
@@ -69,20 +69,20 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto *sharedRef = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
     ASSERT(sharedRef != nullptr);
 
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr && etsThis->GetClass()->IsFunction());
-    EtsMethod *method = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreFunctionUnsafeCall);
+    EtsMethod *method = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreFunctionUnsafeCall);
 
-    return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
+    return CallETSInstance(executionCtx, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
 }
 
 napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(ctx == InteropCtx::Current(coro));
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(ctx == InteropCtx::Current(executionCtx));
     auto env = ctx->GetJSEnv();
-    [[maybe_unused]] EtsHandleScope s(coro);
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
 
     ASSERT(obj->GetClass() == klass_);
 
@@ -92,7 +92,7 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 
         ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         if (LIKELY(storage->HasReference(obj, env))) {
-            jsValue = JSValue::CreateRefValue(coro, ctx, storage->GetJsObject(obj, env), napi_function);
+            jsValue = JSValue::CreateRefValue(executionCtx, ctx, storage->GetJsObject(obj, env), napi_function);
         } else {
             napi_value jsFn;
             auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference **uninitializedRef) {
@@ -102,21 +102,21 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
                 return jsFn;
             };
 
-            EtsHandle<EtsObject> objHandle(coro, obj);
+            EtsHandle<EtsObject> objHandle(executionCtx, obj);
             ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, objHandle, jsFn, preInitCallback);
             if (UNLIKELY(sharedRef == nullptr)) {
                 ASSERT(InteropCtx::SanityJSExceptionPending());
                 return nullptr;
             }
-            jsValue = JSValue::CreateRefValue(coro, ctx, jsFn, napi_function);
+            jsValue = JSValue::CreateRefValue(executionCtx, ctx, jsFn, napi_function);
         }
     }
     if (UNLIKELY(jsValue == nullptr)) {
         return nullptr;
     }
 
-    EtsHandle<JSValue> jsValueHandle(coro, jsValue);
-    return JSValue::GetNapiValue(coro, ctx, jsValueHandle);
+    EtsHandle<JSValue> jsValueHandle(executionCtx, jsValue);
+    return JSValue::GetNapiValue(executionCtx, ctx, jsValueHandle);
 }
 
 EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
@@ -130,14 +130,16 @@ EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
         return functionDynamicObject;
     }
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    HandleScope<ObjectHeader *> scope(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    HandleScope<ObjectHeader *> scope(executionCtx->GetMT());
 
-    auto ret = interopCreateDynamicFunctionMethod_->GetPandaMethod()->Invoke(coro, {}).GetAs<ObjectHeader *>();
+    auto ret = interopCreateDynamicFunctionMethod_->GetPandaMethod()
+                   ->Invoke(executionCtx->GetMT(), {})
+                   .GetAs<ObjectHeader *>();
     // storage->CreateJSObjectRefwithWrap will trigger XGC if needed
     // after that, the ptr `ret` will be valid
     // so a handle is created to keep the object valid
-    EtsHandle<EtsObject> functionDynamicObject(coro, EtsObject::FromCoreType(ret));
+    EtsHandle<EtsObject> functionDynamicObject(executionCtx, EtsObject::FromCoreType(ret));
 
     // Put it into SharedReferenceStorage
     storage->CreateJSObjectRefwithWrap(ctx, functionDynamicObject, jsFun);

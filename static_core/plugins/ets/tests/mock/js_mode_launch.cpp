@@ -24,7 +24,7 @@ namespace ark::ets::test {
 static int64_t GetCoroId([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine() == coro);
+    ASSERT(PandaAniEnv::FromAniEnv(env)->GetExecutionContext()->GetMT() == coro);
     return reinterpret_cast<ani_long>(coro);
 }
 
@@ -48,7 +48,7 @@ protected:
 
         Runtime::Create(options);
 
-        ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
+        ani_env *env = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
         ani_class jsCoroutineClass {};
         ASSERT_EQ(env->FindClass("js_mode_launch.JSCoroutine", &jsCoroutineClass), ANI_OK);
         ani_native_function fn {"getCoroutineId", ":l", reinterpret_cast<void *>(GetCoroId)};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ extern "C" EtsString *EscompatDateGetTimezoneName(int64_t ms)
 
 extern "C" int64_t ChronoGetCpuTime()
 {
-    // NOTE(ipetrov, #15499): Need to change approach when coroutine can migrate to other thread
+    // NOTE(ipetrov, #15499): Need to change approach when coroutine can migrate to other executionCtx
     return ark::os::time::GetClockTimeInThreadCpuTime();
 }
 

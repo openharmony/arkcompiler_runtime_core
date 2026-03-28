@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "ets_interop_js_gtest.h"
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
@@ -36,8 +37,8 @@ class SharedReferenceStorage1GTest : public js::testing::EtsInteropTest {
 public:
     void SetUp() override
     {
-        coroutine_ = EtsCoroutine::GetCurrent();
-        coroutine_->ManagedCodeBegin();
+        executionCtx_ = EtsExecutionContext::GetCurrent();
+        executionCtx_->GetMT()->ManagedCodeBegin();
         storage_ = SharedReferenceStorage::GetCurrent();
         ASSERT_NE(storage_, nullptr);
         SetClassesPandasmSources();
@@ -45,7 +46,7 @@ public:
 
     void TearDown() override
     {
-        coroutine_->ManagedCodeEnd();
+        executionCtx_->GetMT()->ManagedCodeEnd();
     }
 
     EtsClass *GetTestClass(std::string className)
@@ -62,7 +63,7 @@ public:
         className.insert(0, 1, 'L');
         className.push_back(';');
 
-        EtsClass *klass = coroutine_->GetPandaVM()->GetClassLinker()->GetClass(className.c_str());
+        EtsClass *klass = executionCtx_->GetPandaVM()->GetClassLinker()->GetClass(className.c_str());
         ASSERT(klass);
         return klass;
     }
@@ -118,9 +119,9 @@ public:
 
     SharedReference *CreateReference(EtsObject *etsObject, napi_value &jsObj)
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] EtsHandleScope s(coro);
-        EtsHandle<EtsObject> objHandle(coro, etsObject);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(executionCtx);
+        EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
 
         NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
         SharedReference *ref = storage_->CreateJSObjectRef(InteropCtx::Current(), objHandle, jsObj);
@@ -129,9 +130,9 @@ public:
 
     SharedReference *CreateReferenceEts(EtsObject *etsObject, napi_value &jsObj)
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] EtsHandleScope s(coro);
-        EtsHandle<EtsObject> objHandle(coro, etsObject);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(executionCtx);
+        EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
 
         NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
         SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), objHandle, jsObj);
@@ -161,7 +162,7 @@ public:
     size_t CheckObjectReindex([[maybe_unused]] const SharedReferenceStorage *const storage, SharedReference *ref,
                               size_t index)
     {
-        return SharedReferenceStorageVerifier::CheckObjectReindex(storage_, ref, index, coroutine_->GetPandaVM());
+        return SharedReferenceStorageVerifier::CheckObjectReindex(storage_, ref, index, executionCtx_->GetPandaVM());
     }
 
     size_t CheckJsObjectType(SharedReference *ref, size_t index)
@@ -176,7 +177,7 @@ public:
 
 protected:
     SharedReferenceStorage *storage_ {nullptr};              // NOLINT(misc-non-private-member-variables-in-classes)
-    EtsCoroutine *coroutine_ = nullptr;                      // NOLINT(misc-non-private-member-variables-in-classes)
+    EtsExecutionContext *executionCtx_ = nullptr;            // NOLINT(misc-non-private-member-variables-in-classes)
     std::unordered_map<std::string, const char *> sources_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 

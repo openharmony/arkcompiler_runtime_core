@@ -118,10 +118,10 @@ template <bool IS_STATIC>
 /*static*/
 napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info cinfo, FindMethodFunc &findMethodFunc)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
     size_t argc;
     napi_value jsThis;
     void *data;
@@ -129,7 +129,7 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
 
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
     auto [etsMethod, errorMessage, etsClassWrapper] = findMethodFunc(data, argc);
 
     ASSERT(nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);
@@ -143,17 +143,17 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     if constexpr (IS_STATIC) {
         EtsClass *etsClass = etsMethod->GetClass();
         ASSERT(method->GetClass() == etsClass->GetRuntimeClass());
-        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsClass))) {
-            ctx->ForwardEtsException(coro);
+        if (UNLIKELY(!executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, etsClass))) {
+            ctx->ForwardEtsException(executionCtx);
             return nullptr;
         }
-        return CallETSStatic(coro, ctx, method, *jsArgs);
+        return CallETSStatic(executionCtx, ctx, method, *jsArgs);
     }
 
     EtsObject *etsThis = etsClassWrapper->UnwrapEtsProxy(ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
         }
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
@@ -165,9 +165,9 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
         napi_value result;
         napi_get_undefined(env, &result);
         std::fill(newJsArgs->begin() + argc, newJsArgs->end(), result);
-        return CallETSInstance(coro, ctx, method, *newJsArgs, etsThis);
+        return CallETSInstance(executionCtx, ctx, method, *newJsArgs, etsThis);
     }
-    return CallETSInstance(coro, ctx, method, *jsArgs, etsThis);
+    return CallETSInstance(executionCtx, ctx, method, *jsArgs, etsThis);
 }
 
 static std::tuple<EtsMethod *, const char *> FindSuitableMethod(const EtsMethodSet *methodSet, uint32_t parametersNum)
@@ -201,8 +201,8 @@ template <bool IS_STATIC>
 /*static*/
 napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_info cinfo)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
     FindMethodFunc findMethodFunc = [&](void *data, size_t argc) {
         auto lazyLink = reinterpret_cast<LazyEtsMethodWrapperLink *>(data);

@@ -15,11 +15,11 @@
 
 #include <atomic>
 #include <thread>
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "libarkbase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/include/runtime.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 
 namespace ark::ets::intrinsics::taskpool {
 
@@ -35,17 +35,17 @@ extern "C" EtsInt GenerateTaskId()
 
 extern "C" EtsInt GetTaskId()
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto id = coro->GetTaskpoolTaskId();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto id = executionCtx->GetTaskpoolTaskId();
     return id;
 }
 
 extern "C" void SetTaskId(EtsInt taskId)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    coro->SetTaskpoolTaskId(taskId);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    executionCtx->SetTaskpoolTaskId(taskId);
 }
 
 extern "C" EtsInt GenerateGroupId()

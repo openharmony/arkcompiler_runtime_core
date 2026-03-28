@@ -49,8 +49,8 @@ extern "C" bool arkts_napi_scope_open(ani_env *env, napi_env *result)
         LOG(WARNING, RUNTIME) << "Cannot open napi scope, " << optCoro.Error();
         return false;
     }
-    auto *coro = ark::ets::PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine();
-    if (UNLIKELY(coro != optCoro.Value())) {
+    auto *executionCtx = ark::ets::PandaAniEnv::FromAniEnv(env)->GetExecutionContext();
+    if (UNLIKELY(executionCtx->GetMT() != optCoro.Value())) {
         LOG(WARNING, RUNTIME) << "Cannot open napi scope, input ani_env is taken from another coroutine";
         return false;
     }
@@ -60,7 +60,7 @@ extern "C" bool arkts_napi_scope_open(ani_env *env, napi_env *result)
         LOG(WARNING, RUNTIME) << "Cannot open napi scope, coroutine cannot interop";
         return false;
     }
-    if (UNLIKELY(!ark::ets::interop::js::OpenETSToJSScope(coro, nullptr))) {
+    if (UNLIKELY(!ark::ets::interop::js::OpenETSToJSScope(executionCtx, nullptr))) {
         return false;
     }
     *result = localJsEnv;

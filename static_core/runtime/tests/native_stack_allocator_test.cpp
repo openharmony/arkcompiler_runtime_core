@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
+#include "runtime/execution/coroutines/native_stack_allocator/native_stack_allocator.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 #include "gtest/gtest.h"

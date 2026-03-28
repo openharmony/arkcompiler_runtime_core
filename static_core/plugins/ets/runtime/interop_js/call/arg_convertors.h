@@ -138,7 +138,7 @@ template <typename FStore>
 }
 
 template <typename RestParamsArray>
-static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, ProtoReader &protoReader,
+static ObjectHeader **DoPackRestParameters(EtsExecutionContext *executionCtx, InteropCtx *ctx, ProtoReader &protoReader,
                                            Span<napi_value> jsargv)
 {
     const size_t numRestParams = jsargv.size();
@@ -169,7 +169,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
         UNREACHABLE();
     };
 
-    VMHandle<RestParamsArray> restArgsArray(coro, objArr->GetCoreType());
+    VMHandle<RestParamsArray> restArgsArray(executionCtx->GetMT(), objArr->GetCoreType());
     for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
         auto jsVal = jsargv[restArgIdx];
         auto store = [&convertValue, restArgIdx, &restArgsArray](auto val) {
@@ -178,8 +178,8 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
         auto klass = protoReader.GetClass()->GetComponentType();
         auto klassCb = [klass]() { return klass; };
         if (UNLIKELY(!ConvertArgToEts(ctx, klass->GetType(), store, klassCb, jsVal))) {
-            if (coro->HasPendingException()) {
-                ctx->ForwardEtsException(coro);
+            if (executionCtx->GetMT()->HasPendingException()) {
+                ctx->ForwardEtsException(executionCtx);
             }
             ASSERT(ctx->SanityJSExceptionPending());
             return nullptr;
@@ -189,17 +189,17 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 }
 
 // CC-OFFNXT(G.FMT.06-CPP, huge_depth) solid logic
-[[maybe_unused]] static ObjectHeader **PackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, ProtoReader &protoReader,
-                                                          Span<napi_value> jsargv)
+[[maybe_unused]] static ObjectHeader **PackRestParameters(EtsExecutionContext *executionCtx, InteropCtx *ctx,
+                                                          ProtoReader &protoReader, Span<napi_value> jsargv)
 {
     INTEROP_TRACE();
     if (!protoReader.GetClass()->IsArrayClass()) {
-        ASSERT(protoReader.GetClass() == PlatformTypes(coro)->escompatArray->GetRuntimeClass());
+        ASSERT(protoReader.GetClass() == PlatformTypes(executionCtx)->escompatArray->GetRuntimeClass());
         const size_t numRestParams = jsargv.size();
 
-        EtsHandle<EtsEscompatArray> restArgsArray(coro, EtsEscompatArray::Create(coro, numRestParams));
+        EtsHandle<EtsEscompatArray> restArgsArray(executionCtx, EtsEscompatArray::Create(executionCtx, numRestParams));
         if (UNLIKELY(restArgsArray.GetPtr() == nullptr)) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
         for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
@@ -207,9 +207,10 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
             auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {
                 restArgsArray->EscompatArraySetUnsafe(restArgIdx, EtsObject::FromCoreType(val));
             };
-            if (UNLIKELY(!ConvertRefArgToEts(ctx, PlatformTypes(coro)->coreObject->GetRuntimeClass(), store, jsVal))) {
-                if (coro->HasPendingException()) {
-                    ctx->ForwardEtsException(coro);
+            if (UNLIKELY(!ConvertRefArgToEts(ctx, PlatformTypes(executionCtx)->coreObject->GetRuntimeClass(), store,
+                                             jsVal))) {
+                if (executionCtx->GetMT()->HasPendingException()) {
+                    ctx->ForwardEtsException(executionCtx);
                 }
                 ASSERT(ctx->SanityJSExceptionPending());
                 return nullptr;
@@ -221,23 +222,23 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
     panda_file::Type restParamsItemType = protoReader.GetClass()->GetComponentType()->GetType();
     switch (restParamsItemType.GetId()) {
         case panda_file::Type::TypeId::U1:
-            return DoPackRestParameters<EtsBooleanArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsBooleanArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::I8:
-            return DoPackRestParameters<EtsByteArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsByteArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::I16:
-            return DoPackRestParameters<EtsShortArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsShortArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::U16:
-            return DoPackRestParameters<EtsCharArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsCharArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::I32:
-            return DoPackRestParameters<EtsIntArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsIntArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::I64:
-            return DoPackRestParameters<EtsLongArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsLongArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::F32:
-            return DoPackRestParameters<EtsFloatArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsFloatArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::F64:
-            return DoPackRestParameters<EtsDoubleArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsDoubleArray>(executionCtx, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::REFERENCE:
-            return DoPackRestParameters<EtsObjectArray>(coro, ctx, protoReader, jsargv);
+            return DoPackRestParameters<EtsObjectArray>(executionCtx, ctx, protoReader, jsargv);
         default:
             UNREACHABLE();
     }
@@ -280,7 +281,7 @@ template <typename FRead>
         return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath
-    VMHandle<ObjectHeader> handle(EtsCoroutine::GetCurrent(), ref);
+    VMHandle<ObjectHeader> handle(ManagedThread::GetCurrent(), ref);
     auto refconv = JSRefConvertResolve(ctx, klass);
     if (refconv == nullptr) {
         return false;

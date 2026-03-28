@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "mem/refstorage/global_object_storage.h"
 #include "plugins/ets/runtime/ets_call_stack.h"
 #include "runtime/include/value.h"
@@ -31,15 +32,9 @@
 
 namespace ark::ets {
 
-// ExternalIfaceTable contains std::function, which cannot be trivially constructed even for nullptr
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-ExternalIfaceTable EtsCoroutine::emptyExternalIfaceTable_ = ExternalIfaceTable();
-
-EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type,
-                           CoroutinePriority priority)
-    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo), type,
-                priority)
+EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Job *job,
+                           CoroutineContext *context)
+    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, job, context), executionCtx_(this)
 {
     ASSERT(vm != nullptr);
 }
@@ -49,61 +44,34 @@ PandaEtsVM *EtsCoroutine::GetPandaVM() const
     return static_cast<PandaEtsVM *>(GetVM());
 }
 
-CoroutineManager *EtsCoroutine::GetCoroutineManager() const
-{
-    return GetPandaVM()->GetCoroutineManager();
-}
-
 void EtsCoroutine::Initialize()
 {
-    auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
-    auto aniEnv = PandaAniEnv::Create(this, allocator);
-    if (!aniEnv) {
-        LOG(FATAL, RUNTIME) << "Cannot create PandaAniEnv: " << aniEnv.Error();
-    }
-    aniEnv_ = aniEnv.Value();
-    // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
-    if (Runtime::GetCurrent()->IsInitialized()) {
-        promiseClassPtr_ = PlatformTypes(GetPandaVM())->corePromise->GetRuntimeClass();
-        SetupNullValue(GetPandaVM()->GetNullValue());
-        GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
-            ToUintPtr(GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension()->GetPlatformTypes()));
-        // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
-        // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
-        auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-        SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::LINE_STRING));
-        SetArrayU16ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U16));
-        SetArrayU8ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U8));
-    }
-    ASSERT(promiseClassPtr_ != nullptr || !HasManagedEntrypoint());
-
+    executionCtx_.Initialize();
     Coroutine::Initialize();
 }
 
-void EtsCoroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
-                                CoroutinePriority priority)
+void EtsCoroutine::ReInitialize(Job *job, CoroutineContext *context)
 {
-    aniEnv_->ReInitialize();
-    Coroutine::ReInitialize(std::move(name), context, std::move(epInfo), priority);
+    executionCtx_.ReInitialize();
+    Coroutine::ReInitialize(job, context);
 }
 
 void EtsCoroutine::CleanUp()
 {
-    taskpoolTaskid_ = INVALID_TASKPOOL_TASK_ID;
-    aniEnv_->CleanUp();
+    executionCtx_.CleanUp();
     Coroutine::CleanUp();
     // add the required local storage entries cleanup here!
 }
 
 void EtsCoroutine::FreeInternalMemory()
 {
-    aniEnv_->FreeInternalMemory();
+    executionCtx_.GetPandaAniEnv()->FreeInternalMemory();
     ManagedThread::FreeInternalMemory();
 }
 
 void EtsCoroutine::RequestCompletion(Value returnValue)
 {
-    auto *completionObjRef = GetCompletionEvent()->ReleaseReturnValueObject();
+    auto *completionObjRef = GetJob()->GetCompletionEvent()->ReleaseReturnValueObject();
     if (completionObjRef == nullptr) {
         Coroutine::RequestCompletion(returnValue);
         return;
@@ -133,8 +101,8 @@ void EtsCoroutine::RequestJobCompletion(mem::Reference *jobRef, Value returnValu
         Coroutine::RequestCompletion(returnValue);
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(this);
-    EtsHandle<EtsJob> hjob(this, job);
+    [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
+    EtsHandle<EtsJob> hjob(GetExecutionCtx(), job);
     EtsObject *retObject = nullptr;
     if (!HasPendingException()) {
         panda_file::Type returnType = GetReturnType();
@@ -152,7 +120,7 @@ void EtsCoroutine::RequestJobCompletion(mem::Reference *jobRef, Value returnValu
     if (HasPendingException()) {
         // An exception may occur while boxin primitive return value in GetReturnValueAsObject
         auto *exc = GetException();
-        if (!HasAbortFlag()) {
+        if (!GetJob()->HasAbortFlag()) {
             ClearException();
         }
         LOG(INFO, COROUTINES) << "Coroutine \"" << GetName()
@@ -176,8 +144,8 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
         Coroutine::RequestCompletion(returnValue);
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(this);
-    EtsHandle<EtsPromise> hpromise(this, promise);
+    [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
+    EtsHandle<EtsPromise> hpromise(GetExecutionCtx(), promise);
     EtsObject *retObject = nullptr;
     if (!HasPendingException()) {
         panda_file::Type returnType = GetReturnType();
@@ -218,7 +186,7 @@ EtsObject *EtsCoroutine::GetValueFromPromiseSync(EtsPromise *promise)
 
 panda_file::Type EtsCoroutine::GetReturnType()
 {
-    Method *entrypoint = GetManagedEntrypoint();
+    Method *entrypoint = GetJob()->GetManagedEntrypoint();
     ASSERT(entrypoint != nullptr);
     return entrypoint->GetReturnType();
 }
@@ -226,25 +194,26 @@ panda_file::Type EtsCoroutine::GetReturnType()
 // The result will be used to resolve a promise, so this function perfoms a "box" operation on ark::Value
 EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Value returnValue)
 {
+    auto *executionCtx = GetExecutionCtx();
     switch (returnType.GetId()) {
         case panda_file::Type::TypeId::VOID:
             return nullptr;  // a representation of ets "undefined"
         case panda_file::Type::TypeId::U1:
-            return EtsBoxPrimitive<EtsBoolean>::Create(this, returnValue.GetAs<EtsBoolean>());
+            return EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, returnValue.GetAs<EtsBoolean>());
         case panda_file::Type::TypeId::I8:
-            return EtsBoxPrimitive<EtsByte>::Create(this, returnValue.GetAs<EtsByte>());
+            return EtsBoxPrimitive<EtsByte>::Create(executionCtx, returnValue.GetAs<EtsByte>());
         case panda_file::Type::TypeId::I16:
-            return EtsBoxPrimitive<EtsShort>::Create(this, returnValue.GetAs<EtsShort>());
+            return EtsBoxPrimitive<EtsShort>::Create(executionCtx, returnValue.GetAs<EtsShort>());
         case panda_file::Type::TypeId::U16:
-            return EtsBoxPrimitive<EtsChar>::Create(this, returnValue.GetAs<EtsChar>());
+            return EtsBoxPrimitive<EtsChar>::Create(executionCtx, returnValue.GetAs<EtsChar>());
         case panda_file::Type::TypeId::I32:
-            return EtsBoxPrimitive<EtsInt>::Create(this, returnValue.GetAs<EtsInt>());
+            return EtsBoxPrimitive<EtsInt>::Create(executionCtx, returnValue.GetAs<EtsInt>());
         case panda_file::Type::TypeId::F32:
-            return EtsBoxPrimitive<EtsFloat>::Create(this, returnValue.GetAs<EtsFloat>());
+            return EtsBoxPrimitive<EtsFloat>::Create(executionCtx, returnValue.GetAs<EtsFloat>());
         case panda_file::Type::TypeId::F64:
-            return EtsBoxPrimitive<EtsDouble>::Create(this, returnValue.GetAs<EtsDouble>());
+            return EtsBoxPrimitive<EtsDouble>::Create(executionCtx, returnValue.GetAs<EtsDouble>());
         case panda_file::Type::TypeId::I64:
-            return EtsBoxPrimitive<EtsLong>::Create(this, returnValue.GetAs<EtsLong>());
+            return EtsBoxPrimitive<EtsLong>::Create(executionCtx, returnValue.GetAs<EtsLong>());
         case panda_file::Type::TypeId::REFERENCE:
             return EtsObject::FromCoreType(returnValue.GetAs<ObjectHeader *>());
         default:
@@ -254,23 +223,13 @@ EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Val
     return nullptr;
 }
 
-ExternalIfaceTable *EtsCoroutine::GetExternalIfaceTable()
-{
-    auto *worker = GetWorker();
-    auto *table = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::EXTERNAL_IFACES, ExternalIfaceTable *>();
-    if (table != nullptr) {
-        return table;
-    }
-    return &emptyExternalIfaceTable_;
-}
-
 void EtsCoroutine::UpdateCachedObjects()
 {
     // update the interop context pointer
     auto *worker = GetWorker();
     ASSERT(worker != nullptr);
-    auto *ptr = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
-    GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
+    auto *ptr = worker->GetLocalStorage().Get<JobWorkerThread::DataIdx::INTEROP_CTX_PTR, void *>();
+    executionCtx_.GetLocalStorage().Set<EtsExecutionContext::DataIdx::INTEROP_CTX_PTR>(ptr);
 
     if (GetType() == Coroutine::Type::MUTATOR) {
         ASSERT_MANAGED_CODE();
@@ -303,8 +262,7 @@ void EtsCoroutine::OnContextSwitchedTo()
 void EtsCoroutine::OnChildCoroutineCreated(Coroutine *child)
 {
     Coroutine::OnChildCoroutineCreated(child);
-    auto etsChild = static_cast<EtsCoroutine *>(child);
-    etsChild->SetTaskpoolTaskId(GetTaskpoolTaskId());
+    EtsCoroutine::CastFromThread(child)->GetExecutionCtx()->SetTaskpoolTaskId(executionCtx_.GetTaskpoolTaskId());
 }
 
 void EtsCoroutine::HandleUncaughtException()
@@ -333,7 +291,7 @@ void EtsCoroutine::ProcessUnhandledFailedJobs()
         if (umanager->HasFailedJobObjects()) {
             {
                 [[maybe_unused]] ScopedManagedCodeThread sc(this);
-                umanager->ListFailedJobs(this);
+                umanager->ListFailedJobs(EtsExecutionContext::FromMT(this));
             }
             if (HasPendingException()) {
                 HandleUncaughtException();
@@ -353,11 +311,11 @@ void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
         Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
     if (listPromises) {
         ASSERT_NATIVE_CODE();
-        if (umanager->HasRejectedPromiseObjects(this, listAllObjects)) {
+        if (umanager->HasRejectedPromiseObjects(&executionCtx_, listAllObjects)) {
             LOG(DEBUG, COROUTINES) << "Start processing unhandled promises in " << GetName();
             {
                 [[maybe_unused]] ScopedManagedCodeThread sc(this);
-                umanager->ListRejectedPromises(this, listAllObjects);
+                umanager->ListRejectedPromises(&executionCtx_, listAllObjects);
             }
             if (HasPendingException()) {
                 HandleUncaughtException();
@@ -368,13 +326,15 @@ void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
 
 bool EtsCoroutine::IsContextSwitchRisky() const
 {
-    auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
-    return (callStk != nullptr && callStk->Current() != nullptr);
+    auto *callStk =
+        executionCtx_.GetLocalStorage().Get<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
+    return callStk != nullptr && callStk->Current() != nullptr;
 }
 
 void EtsCoroutine::PrintCallStack() const
 {
-    auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
+    auto *callStk =
+        executionCtx_.GetLocalStorage().Get<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
     if (callStk == nullptr) {
         Coroutine::PrintCallStack();
         return;
@@ -398,16 +358,6 @@ void EtsCoroutine::PrintCallStack() const
     }
     ASSERT(istkIt == istk.rend() || !istkIt->isStaticFrame);
     printIstkFrames(nullptr);
-}
-
-void EtsCoroutine::SetTaskpoolTaskId(int32_t taskid)
-{
-    taskpoolTaskid_ = taskid;
-}
-
-int32_t EtsCoroutine::GetTaskpoolTaskId() const
-{
-    return taskpoolTaskid_;
 }
 
 }  // namespace ark::ets

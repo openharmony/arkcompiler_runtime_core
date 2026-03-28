@@ -65,24 +65,24 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
  */
 extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean isRunGcInPlace)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     bool runGcInPlace = (isRunGcInPlace == 1) ? true : Runtime::GetOptions().IsRunGcInPlace("ets");
 
     GCTaskCause reason = GCCauseFromInt(cause);
-    auto *gc = coroutine->GetVM()->GetGC();
+    auto *gc = executionCtx->GetPandaVM()->GetGC();
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError, eMsg.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError, eMsg.str());
         return -1;
     }
     auto &gcTaskTracker = GCTaskTracker::InitIfNeededAndGet(gc);
     auto task = MakePandaUnique<GCTask>(reason);
     uint32_t id = task->GetId();
     if (callback != nullptr) {
-        auto *callbackRef = coroutine->GetPandaVM()->GetGlobalObjectStorage()->Add(callback->GetCoreType(),
-                                                                                   mem::Reference::ObjectType::GLOBAL);
+        auto *callbackRef = executionCtx->GetPandaVM()->GetGlobalObjectStorage()->Add(
+            callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
         gcTaskTracker.SetCallbackForTask(id, callbackRef);
         // Run GC in place, because need to run callback in managed part
         runGcInPlace = true;
@@ -97,7 +97,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     }
     // Run GC in GC-thread
     if ((reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) && gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalStateError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalStateError,
                           "Calling GC threshold not in place after calling postponeGCStart");
         return -1;
     }
@@ -116,15 +116,15 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
  */
 extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
 {
-    ManagedThread *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     if (gcId <= 0) {
         return;
     }
     auto id = static_cast<uint64_t>(gcId);
     ASSERT(GCTaskTracker::IsInitialized());
-    ScopedNativeCodeThread s(thread);
-    while (GCTaskTracker::InitIfNeededAndGet(thread->GetVM()->GetGC()).HasId(id)) {
+    ScopedNativeCodeThread s(executionCtx->GetMT());
+    while (GCTaskTracker::InitIfNeededAndGet(executionCtx->GetPandaVM()->GetGC()).HasId(id)) {
         constexpr uint64_t WAIT_TIME_MS = 2U;
         os::thread::NativeSleep(WAIT_TIME_MS);
     }
@@ -132,9 +132,9 @@ extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
 
 extern "C" EtsBoolean StdGCIsScheduledGCTriggered()
 {
-    auto thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
-    auto *vm = thread->GetVM();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *vm = executionCtx->GetPandaVM();
     auto *trigger = vm->GetGCTrigger();
 
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
@@ -146,16 +146,16 @@ extern "C" EtsBoolean StdGCIsScheduledGCTriggered()
 
 extern "C" void StdGCPostponeGCStart()
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *gc = coroutine->GetVM()->GetGC();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *gc = executionCtx->GetPandaVM()->GetGC();
     if (!gc->IsPostponeGCSupported()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreUnsupportedOperationError,
                           "GC postpone is not supported for this GC type");
         return;
     }
     if (gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalStateError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalStateError,
                           "Calling postponeGCStart without calling postponeGCEnd");
         return;
     }
@@ -164,16 +164,16 @@ extern "C" void StdGCPostponeGCStart()
 
 extern "C" void StdGCPostponeGCEnd()
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *gc = coroutine->GetVM()->GetGC();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *gc = executionCtx->GetPandaVM()->GetGC();
     if (!gc->IsPostponeGCSupported()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreUnsupportedOperationError,
                           "GC postpone is not supported for this GC type");
         return;
     }
     if (!gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalStateError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalStateError,
                           "Calling postponeGCEnd without calling postponeGCStart");
         return;
     }
@@ -183,17 +183,17 @@ extern "C" void StdGCPostponeGCEnd()
 template <class ResArrayType>
 [[nodiscard]] static ResArrayType *StdGCAllocatePinnedPrimitiveTypeArray(EtsLong length)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     if (length < 0) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreNegativeArraySizeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNegativeArraySizeError,
                           "The value must be non negative");
         return nullptr;
     }
-    auto *vm = coroutine->GetVM();
+    auto *vm = executionCtx->GetPandaVM();
     if (!vm->GetGC()->IsPinningSupported()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreUnsupportedOperationError,
                           "Object pinning does not support with current GC");
         return nullptr;
     }
@@ -202,7 +202,7 @@ template <class ResArrayType>
     if (array == nullptr) {
         PandaStringStream ss;
         ss << "Could not allocate array of " << length << " elements";
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreOutOfMemoryError, ss.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreOutOfMemoryError, ss.str());
         return nullptr;
     }
 
@@ -270,13 +270,13 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
 extern "C" void StdGCPinObject(EtsObject *obj)
 {
     ASSERT(obj != nullptr);
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
-    auto *vm = coroutine->GetVM();
+    auto *vm = executionCtx->GetPandaVM();
     auto *gc = vm->GetGC();
     if (!gc->IsPinningSupported()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreUnsupportedOperationError,
                           "Object pinning does not support with current gc");
         return;
     }
@@ -306,27 +306,27 @@ extern "C" EtsLong StdGetObjectSize(EtsObject *obj)
 // Another call may reset the counter.  In this case the last counter will be used to trigger the GC.
 extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     if (counter < 0) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError,
                           "counter for allocation is negative");
         return;
     }
     GCTaskCause reason = GCCauseFromInt(cause);
 
-    auto *vm = coroutine->GetVM();
+    auto *vm = executionCtx->GetPandaVM();
     auto *gc = vm->GetGC();
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError, eMsg.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError, eMsg.str());
         return;
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreUnsupportedOperationError,
                           "VM is running with unsupported GC trigger");
         return;
     }
@@ -336,51 +336,51 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
 
 extern "C" EtsLong StdGetFreeHeapSize()
 {
-    const auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return static_cast<EtsLong>(coroutine->GetPandaVM()->GetHeapManager()->GetFreeMemory());
+    const auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    return static_cast<EtsLong>(executionCtx->GetPandaVM()->GetHeapManager()->GetFreeMemory());
 }
 
 extern "C" EtsLong StdGetUsedHeapSize()
 {
-    const auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return static_cast<EtsLong>(coroutine->GetPandaVM()->GetMemStats()->GetFootprintHeap());
+    const auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    return static_cast<EtsLong>(executionCtx->GetPandaVM()->GetMemStats()->GetFootprintHeap());
 }
 
 extern "C" EtsLong StdGetReservedHeapSize()
 {
-    const auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return static_cast<EtsLong>(coroutine->GetPandaVM()->GetHeapManager()->GetMaxMemory());
+    const auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    return static_cast<EtsLong>(executionCtx->GetPandaVM()->GetHeapManager()->GetMaxMemory());
 }
 
 extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     if (size < 0) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreNegativeArraySizeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNegativeArraySizeError,
                           "The value must be non negative");
         return;
     }
 
     ScopedNativeCodeThread s(ManagedThread::GetCurrent());
-    coroutine->GetVM()->GetGC()->RegisterNativeAllocation(ClampToSizeT(size));
+    executionCtx->GetPandaVM()->GetGC()->RegisterNativeAllocation(ClampToSizeT(size));
 }
 
 extern "C" void StdGCRegisterNativeFree(EtsLong size)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     if (size < 0) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreNegativeArraySizeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNegativeArraySizeError,
                           "The value must be non negative");
         return;
     }
 
     ScopedNativeCodeThread s(ManagedThread::GetCurrent());
-    coroutine->GetVM()->GetGC()->RegisterNativeFree(ClampToSizeT(size));
+    executionCtx->GetPandaVM()->GetGC()->RegisterNativeFree(ClampToSizeT(size));
 }
 
 }  // namespace ark::ets::intrinsics

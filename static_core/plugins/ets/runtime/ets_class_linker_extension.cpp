@@ -17,11 +17,12 @@
 #include "common_interfaces/objects/string/base_string-inl.h"
 #include "runtime/include/method.h"
 #include "runtime/include/thread_scopes.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "runtime/include/managed_thread.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -106,7 +107,7 @@ void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, co
                                  << helpers::ToUnderlying(error);
         UNREACHABLE();
     }
-    ThrowEtsException(EtsCoroutine::GetCurrent(), errCls, message);
+    ThrowEtsException(EtsExecutionContext::GetCurrent(), errCls, message);
 }
 
 void EtsClassLinkerExtension::InitializeClassRoots()
@@ -251,10 +252,10 @@ bool EtsClassLinkerExtension::InitializeStringClass([[maybe_unused]] Class *clas
 
 bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
-    auto *coroutine = ets::EtsCoroutine::GetCurrent();
+    auto *mThread = ManagedThread::GetCurrent();
     langCtx_ = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    ASSERT(coroutine != nullptr);
-    heapManager_ = coroutine->GetVM()->GetHeapManager();
+    ASSERT(mThread != nullptr);
+    heapManager_ = mThread->GetVM()->GetHeapManager();
 
     auto *objectClass = GetClassLinker()->GetClass(langCtx_.GetObjectClassDescriptor(), false, GetBootContext());
     if (objectClass == nullptr) {
@@ -693,7 +694,7 @@ Class *EtsClassLinkerExtension::CacheClass(std::string_view descriptor, bool for
         LOG(ERROR, CLASS_LINKER) << "Cannot create class " << descriptor;
         return nullptr;
     }
-    if (forceInit && !GetClassLinker()->InitializeClass(EtsCoroutine::GetCurrent(), cls)) {
+    if (forceInit && !GetClassLinker()->InitializeClass(ManagedThread::GetCurrent(), cls)) {
         LOG(ERROR, CLASS_LINKER) << "Cannot initialize class " << descriptor;
         return nullptr;
     }
@@ -752,22 +753,23 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 {
     InitializeBuiltinSpecialClasses();
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    plaformTypes_ =
-        PandaUniquePtr<EtsPlatformTypes>(Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(coro));
+    auto *mThread = ManagedThread::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(mThread);
+    plaformTypes_ = PandaUniquePtr<EtsPlatformTypes>(
+        Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(executionCtx));
 
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
-    coro->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
-    coro->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
-    coro->SetStringClassPtr(GetClassRoot(ClassRoot::LINE_STRING));
-    coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
-    coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
+    executionCtx->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
+    executionCtx->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
+    mThread->SetStringClassPtr(GetClassRoot(ClassRoot::LINE_STRING));
+    mThread->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
+    mThread->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
 }
 
 void EtsClassLinkerExtension::InitializeFinish()
 {
-    plaformTypes_->InitializeClasses(EtsCoroutine::GetCurrent());
+    plaformTypes_->InitializeClasses(EtsExecutionContext::GetCurrent());
 }
 
 ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)

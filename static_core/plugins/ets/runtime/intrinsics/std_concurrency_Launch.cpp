@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "coroutines/coroutine_worker_group.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_priority.h"
+#include "runtime/execution/job_worker_group.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -35,17 +37,18 @@
 
 namespace ark::ets::intrinsics {
 
-static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> func)
+static EtsMethod *ResolveInvokeMethod(EtsExecutionContext *executionCtx, VMHandle<EtsObject> func)
 {
     if (func.GetPtr() == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, coro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return nullptr;
     }
     if (!func->GetClass()->IsFunction()) {
-        ThrowEtsException(coro, PlatformTypes()->escompatTypeError, "Method have to be instance of std.core.Function");
+        ThrowEtsException(executionCtx, PlatformTypes()->escompatTypeError,
+                          "Method have to be instance of std.core.Function");
     }
-    auto *method = func->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreFunctionUnsafeCall);
+    auto *method = func->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreFunctionUnsafeCall);
     ASSERT(method != nullptr);
 
     return method;
@@ -53,65 +56,68 @@ static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> fu
 
 template <typename CoroResult>
 // CC-OFFNXT(huge_method) solid logic
-ObjectHeader *Launch(EtsObject *func, bool abortFlag, CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::AnyId(),
+ObjectHeader *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id groupId = JobWorkerThreadGroup::AnyId(),
                      bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     if (func == nullptr) {
-        ThrowNullPointerException(ctx, coro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return nullptr;
     }
-    if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(coro, PlatformTypes(coro)->coreInvalidCoroutineOperationError,
+
+    auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    if (jobMan->IsJobSwitchDisabled()) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot launch coroutines in the current context!");
         return nullptr;
     }
-    if (groupId == CoroutineWorkerGroup::InvalidId()) {
+    if (groupId == JobWorkerThreadGroup::InvalidId()) {
         ThrowRuntimeException("Cannot launch with invalid group id!");
         return nullptr;
     }
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    VMHandle<EtsObject> function(coro, func->GetCoreType());
-    EtsMethod *method = ResolveInvokeMethod(coro, function);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> function(executionCtx->GetMT(), func->GetCoreType());
+    EtsMethod *method = ResolveInvokeMethod(executionCtx, function);
     if (method == nullptr) {
         return nullptr;
     }
 
     // create the coro and put it to the ready queue
-    EtsHandle<CoroResult> coroResultHandle(coro, CoroResult::Create(coro));
+    EtsHandle<CoroResult> coroResultHandle(executionCtx, CoroResult::Create(executionCtx));
     if (UNLIKELY(coroResultHandle.GetPtr() == nullptr)) {
         return nullptr;
     }
 
-    PandaEtsVM *etsVm = coro->GetPandaVM();
-    auto *coroManager = coro->GetCoroutineManager();
-    auto ref = etsVm->GetGlobalObjectStorage()->Add(coroResultHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, coroManager);
+    PandaEtsVM *etsVm = executionCtx->GetPandaVM();
+    auto *ref = etsVm->GetGlobalObjectStorage()->Add(coroResultHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
+    auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, jobMan);
 
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
-    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    auto argArray = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, 0U);
     if (UNLIKELY(argArray == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return nullptr;
     }
+
     auto realArgs = PandaVector<Value> {Value(function->GetCoreType()), Value(argArray->GetCoreType())};
+    groupId = postToMain ? JobWorkerThreadGroup::FromDomain(jobMan, JobWorkerThreadDomain::MAIN) : groupId;
 
-    groupId = postToMain ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN) : groupId;
-
-    LaunchResult launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
-                                                                    groupId, EtsCoroutine::LAUNCH, abortFlag);
+    auto epInfo = Job::ManagedEntrypointInfo {evt, method->GetPandaMethod(), std::move(realArgs)};
+    auto *job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::LAUNCH, Job::Type::MUTATOR,
+                                  abortFlag);
+    auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         // Launch failed. The exception in the current coro should be already set by Launch(),
         // just return null as the result and clean up the allocated resources.
-        ASSERT(coro->HasPendingException());
-        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
+            jobMan->DestroyJob(job);
         }
         etsVm->GetGlobalObjectStorage()->Remove(ref);
         return nullptr;
@@ -125,39 +131,43 @@ EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsBoolean abortFlag, EtsLon
 {
     ASSERT(groupId->GetLength() == 2U);
     return static_cast<EtsJob *>(
-        Launch<EtsJob>(func, abortFlag != 0U, CoroutineWorkerGroup::FromTuple({groupId->Get(0), groupId->Get(1)})));
+        Launch<EtsJob>(func, abortFlag != 0U, JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)})));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    EtsHandleScope scope(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    EtsHandleScope scope(executionCtx);
 
-    VMHandle<EtsObject> hCallback(coro, callback->GetCoreType());
+    VMHandle<EtsObject> hCallback(executionCtx->GetMT(), callback->GetCoreType());
     ASSERT(hCallback.GetPtr() != nullptr);
 
-    auto *method = ResolveInvokeMethod(coro, hCallback);
-    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    auto *method = ResolveInvokeMethod(executionCtx, hCallback);
+    auto argArray = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, 0U);
     if (UNLIKELY(argArray == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
     auto args = PandaVector<Value> {Value(hCallback->GetCoreType()), Value(argArray->GetCoreType())};
-    auto *coroMan = coro->GetCoroutineManager();
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
-
-    [[maybe_unused]] LaunchResult launched = coroMan->Launch(
-        evt, method->GetPandaMethod(), std::move(args),
-        ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
-        EtsCoroutine::TIMER_CALLBACK, true);
-    ASSERT(launched == LaunchResult::OK);
+    auto *jobExecCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
+    auto *jobMan = jobExecCtx->GetManager();
+    auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, jobMan);
+    auto epInfo = Job::ManagedEntrypointInfo {evt, method->GetPandaMethod(), std::move(args)};
+    auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(jobExecCtx->GetWorker()->GetId());
+    auto *job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::TIMER_CALLBACK,
+                                  Job::Type::MUTATOR, true);
+    auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
+    if (UNLIKELY(launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        jobMan->DestroyJob(job);
+    }
 }
 
-static PandaVector<CoroutineWorker::Id> ConvertEtsHintToNativeHint(EtsObject *compatArray)
+static PandaVector<JobWorkerThread::Id> ConvertEtsHintToNativeHint(EtsObject *compatArray)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> hCompatArray(coro, compatArray);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> hCompatArray(executionCtx, compatArray);
 
     EtsField *actualLengthField = hCompatArray->GetClass()->GetFieldIDByName("actualLength", nullptr);
     ASSERT(actualLengthField != nullptr);
@@ -167,23 +177,23 @@ static PandaVector<CoroutineWorker::Id> ConvertEtsHintToNativeHint(EtsObject *co
     ASSERT(bufferField != nullptr);
     EtsObjectArray *etsBuffer = EtsObjectArray::FromEtsObject(hCompatArray->GetFieldObject(bufferField));
     ASSERT(etsBuffer != nullptr);
-    EtsHandle<EtsObjectArray> hEtsBuffer(coro, etsBuffer);
+    EtsHandle<EtsObjectArray> hEtsBuffer(executionCtx, etsBuffer);
     ASSERT(static_cast<size_t>(actualLength) <= hEtsBuffer->GetLength());
 
-    PandaVector<CoroutineWorker::Id> hint;
+    PandaVector<JobWorkerThread::Id> hint;
     hint.reserve(actualLength);
     for (int i = 0; i < actualLength; i++) {
-        hint.emplace_back(GetUnboxedValue(coro, hEtsBuffer->Get(i)).GetAs<int32_t>());
+        hint.emplace_back(GetUnboxedValue(executionCtx, hEtsBuffer->Get(i)).GetAs<int32_t>());
     }
     return hint;
 }
 
 EtsLongArray *WorkerGroupGenerateGroupIdImpl(EtsInt domain, EtsObject *etsHint)
 {
-    auto domainId = static_cast<CoroutineWorkerDomain>(domain);
+    auto domainId = static_cast<JobWorkerThreadDomain>(domain);
     auto hint = ConvertEtsHintToNativeHint(etsHint);
-    auto groupId = CoroutineWorkerGroup::FromDomain(EtsCoroutine::GetCurrent()->GetCoroutineManager(), domainId, hint);
-    const auto [lower, upper] = CoroutineWorkerGroup::ToTuple(groupId);
+    auto groupId = JobWorkerThreadGroup::FromDomain(JobExecutionContext::GetCurrent()->GetManager(), domainId, hint);
+    const auto [lower, upper] = JobWorkerThreadGroup::ToTuple(groupId);
     auto *array = EtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>::Create(2U);
     array->Set(0, lower);
     array->Set(1, upper);

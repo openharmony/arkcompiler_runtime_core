@@ -17,50 +17,56 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ASYNC_CONTEXT_INL_H
 
 #include "plugins/ets/runtime/types/ets_async_context.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 namespace ark::ets {
 
-void EtsAsyncContext::SetReturnValue(EtsCoroutine *coro, EtsPromise *returnValue)
+void EtsAsyncContext::SetReturnValue(EtsExecutionContext *executionCtx, EtsPromise *returnValue)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, returnValue_), returnValue->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, returnValue_),
+                              returnValue->GetCoreType());
 }
 
-EtsPromise *EtsAsyncContext::GetReturnValue(EtsCoroutine *coro) const
+EtsPromise *EtsAsyncContext::GetReturnValue(EtsExecutionContext *executionCtx) const
 {
     return EtsPromise::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, returnValue_)));
+        ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, returnValue_)));
 }
 
-void EtsAsyncContext::SetAwaitee(EtsCoroutine *coro, EtsPromise *awaitee)
+void EtsAsyncContext::SetAwaitee(EtsExecutionContext *executionCtx, EtsPromise *awaitee)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, awaitee_), awaitee->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, awaitee_),
+                              awaitee->GetCoreType());
 }
 
-EtsPromise *EtsAsyncContext::GetAwaitee(EtsCoroutine *coro) const
+EtsPromise *EtsAsyncContext::GetAwaitee(EtsExecutionContext *executionCtx) const
 {
-    return EtsPromise::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, awaitee_)));
+    return EtsPromise::FromCoreType(
+        ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, awaitee_)));
 }
 
-void EtsAsyncContext::SetRefValues(EtsCoroutine *coro, EtsObjectArray *refValues)
+void EtsAsyncContext::SetRefValues(EtsExecutionContext *executionCtx, EtsObjectArray *refValues)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, refValues_), refValues->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, refValues_),
+                              refValues->GetCoreType());
 }
 
-EtsObjectArray *EtsAsyncContext::GetRefValues(EtsCoroutine *coro) const
+EtsObjectArray *EtsAsyncContext::GetRefValues(EtsExecutionContext *executionCtx) const
 {
     return EtsObjectArray::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, refValues_)));
+        ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, refValues_)));
 }
 
-void EtsAsyncContext::SetPrimValues(EtsCoroutine *coro, EtsLongArray *primValues)
+void EtsAsyncContext::SetPrimValues(EtsExecutionContext *executionCtx, EtsLongArray *primValues)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, primValues_), primValues->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, primValues_),
+                              primValues->GetCoreType());
 }
 
-EtsLongArray *EtsAsyncContext::GetPrimValues(EtsCoroutine *coro) const
+EtsLongArray *EtsAsyncContext::GetPrimValues(EtsExecutionContext *executionCtx) const
 {
     return EtsLongArray::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, primValues_)));
+        ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, primValues_)));
 }
 
 void EtsAsyncContext::SetRefCount(EtsLong refCount)
@@ -83,15 +89,16 @@ EtsLong EtsAsyncContext::GetPrimCount() const
     return ObjectAccessor::GetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, primCount_));
 }
 
-void EtsAsyncContext::SetFrameOffsets(EtsCoroutine *coro, EtsShortArray *frameOffsets)
+void EtsAsyncContext::SetFrameOffsets(EtsExecutionContext *executionCtx, EtsShortArray *frameOffsets)
 {
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, frameOffsets_), frameOffsets->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, frameOffsets_),
+                              frameOffsets->GetCoreType());
 }
 
-EtsShortArray *EtsAsyncContext::GetFrameOffsets(EtsCoroutine *coro) const
+EtsShortArray *EtsAsyncContext::GetFrameOffsets(EtsExecutionContext *executionCtx) const
 {
     return EtsShortArray::FromCoreType(
-        ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsAsyncContext, frameOffsets_)));
+        ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsAsyncContext, frameOffsets_)));
 }
 
 void EtsAsyncContext::SetCompiledCode(EtsLong compiledCode)

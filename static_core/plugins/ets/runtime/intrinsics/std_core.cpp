@@ -16,6 +16,9 @@
 #include <algorithm>
 #include <unordered_set>
 
+#include "runtime/execution/job_execution_context.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "include/managed_thread.h"
 #include "runtime/mem/heap_manager.h"
 #include "runtime/runtime_helpers.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -44,12 +47,12 @@ namespace ark::ets::intrinsics {
 
 extern "C" EtsInt CountInstancesOfClass(EtsClass *cls)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
     if (cls == nullptr) {
         return EtsInt(0);
     }
-    auto *heapMgr = coro->GetPandaVM()->GetHeapManager();
+    auto *heapMgr = executionCtx->GetPandaVM()->GetHeapManager();
     return static_cast<EtsInt>(heapMgr->CountInstancesOfClass(cls->GetRuntimeClass()));
 }
 
@@ -62,12 +65,12 @@ extern "C" EtsArray *StdCoreStackTraceLines()
 
     auto ctx = runtime->GetLanguageContext(panda_file::SourceLang::ETS);
 
-    auto thread = ManagedThread::GetCurrent();
-    auto walker = StackWalker::Create(thread);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto walker = StackWalker::Create(executionCtx->GetMT());
 
     std::vector<std::string> lines;
 
-    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
         Method *method = stack.GetMethod();
         auto *source = method->GetClassSourceFile().data;
         auto lineNum = method->GetLineNumFromBytecodeOffset(stack.GetBytecodePc());
@@ -81,15 +84,14 @@ extern "C" EtsArray *StdCoreStackTraceLines()
         lines.push_back(ss.str());
     }
 
-    auto coroutine = Coroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
     auto *arr = ark::coretypes::Array::Create(klass, lines.size());
 
-    VMHandle<coretypes::Array> arrayHandle(coroutine, arr);
+    VMHandle<coretypes::Array> arrayHandle(executionCtx->GetMT(), arr);
 
     for (ark::ArraySizeT i = 0; i < (ark::ArraySizeT)lines.size(); i++) {
         auto *str = coretypes::String::CreateFromMUtf8(utf::CStringAsMutf8(lines[i].data()), lines[i].length(), ctx,
-                                                       thread->GetVM());
+                                                       executionCtx->GetPandaVM());
         arrayHandle.GetPtr()->Set(i, str);
     }
 
@@ -195,7 +197,7 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
 {
     ASSERT(name != nullptr);
     ASSERT(name->AsObject()->IsStringClass());
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     if (shouldVerifyPermission) {
         ASSERT(fileName != nullptr);
         ASSERT(fileName->AsObject()->IsStringClass());
@@ -208,15 +210,15 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
 
     auto nameStr = name->GetMutf8();
     if (nameStr.empty()) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, "The native library path is empty");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "The native library path is empty");
         return;
     }
     PandaString fileNameStr = fileName != nullptr ? fileName->GetMutf8() : "";
     LOG(INFO, RUNTIME) << "load library name is " << nameStr.c_str()
                        << "; shouldVerifyPermission: " << shouldVerifyPermission
                        << "; fileName: " << fileNameStr.c_str();
-    ScopedNativeCodeThread snct(coroutine);
-    auto env = coroutine->GetPandaAniEnv();
+    ScopedNativeCodeThread snct(executionCtx->GetMT());
+    auto env = executionCtx->GetPandaAniEnv();
 #ifdef PANDA_BUILD_LINUX_PANDA_RUNTIME
     bool loadSuccess = false;
     for (const auto &libraryName : GetLibraryLoadCandidates(nameStr)) {
@@ -227,16 +229,16 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
         }
     }
 #else
-    bool loadSuccess = coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr),
-                                                                  shouldVerifyPermission, fileNameStr);
+    bool loadSuccess = executionCtx->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr),
+                                                                     shouldVerifyPermission, fileNameStr);
 #endif
     if (!loadSuccess) {
-        ScopedManagedCodeThread smct(coroutine);
+        ScopedManagedCodeThread smct(executionCtx->GetMT());
 
         PandaStringStream ss;
         ss << "Cannot load native library " << nameStr;
 
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreExceptionInInitializerError, ss.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreExceptionInInitializerError, ss.str());
     }
 }
 
@@ -260,16 +262,17 @@ extern "C" void LoadLibraryWithPermissionCheck(ark::ets::EtsString *name, ark::e
 
 extern "C" void StdSystemScheduleCoroutine()
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(coro, PlatformTypes(coro)->coreInvalidCoroutineOperationError,
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    if (executionCtx->GetManager()->IsJobSwitchDisabled()) {
+        ThrowEtsException(EtsExecutionContext::FromMT(executionCtx),
+                          PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot switch coroutines in the current context!");
         return;
     }
 
-    ScopedNativeCodeThread nativeScope(coro);
-    coro->GetCoroutineManager()->Schedule();
+    ScopedNativeCodeThread nativeScope(executionCtx);
+    executionCtx->GetManager()->ExecuteJobs();
 }
 
 extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
@@ -294,14 +297,14 @@ extern "C" int32_t StdSystemGetCoroutineId()
 
 extern "C" EtsBoolean StdSystemIsMainWorker()
 {
-    return static_cast<EtsBoolean>(EtsCoroutine::GetCurrent()->GetWorker()->IsMainWorker());
+    return static_cast<EtsBoolean>(JobExecutionContext::GetCurrent()->GetWorker()->IsMainWorker());
 }
 
 extern "C" EtsBoolean StdSystemWorkerHasExternalScheduler()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    return static_cast<EtsBoolean>(coro->GetWorker()->IsExternalSchedulingEnabled());
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    return static_cast<EtsBoolean>(executionCtx->GetWorker()->IsExternalSchedulingEnabled());
 }
 
 extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
@@ -309,17 +312,17 @@ extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
     if (UNLIKELY(scaler == 0)) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *vm = coro->GetPandaVM();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *vm = executionCtx->GetPandaVM();
     auto *runtime = vm->GetRuntime();
+    auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
     if (scaler > 0) {
-        coro->GetManager()->CreateWorkers(scaler, runtime, vm);
+        jobManager->CreateGeneralWorkers(scaler, runtime, vm);
         return;
     }
-    ScopedNativeCodeThread nativeScope(coro);
-    auto *coroutine = Coroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    coroutine->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
+    ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
+    jobManager->FinalizeGeneralWorkers(std::abs(scaler), runtime, vm);
 }
 
 static Class *GetTaskPoolClass()
@@ -339,8 +342,8 @@ extern "C" void StdSystemStopTaskpool()
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("stopAllWorkers", ":V");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
-    method->GetPandaMethod()->Invoke(coro, nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    method->GetPandaMethod()->Invoke(executionCtx->GetMT(), nullptr);
 }
 
 extern "C" void StdSystemIncreaseTaskpoolWorkersToN(int32_t workersNum)
@@ -354,9 +357,9 @@ extern "C" void StdSystemIncreaseTaskpoolWorkersToN(int32_t workersNum)
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("increaseWorkersToN", "I:V");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     std::array args = {Value(workersNum)};
-    method->GetPandaMethod()->Invoke(coro, args.data());
+    method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
 }
 
 extern "C" void StdSystemSetTaskPoolTriggerShrinkInterval(int32_t interval)
@@ -368,9 +371,9 @@ extern "C" void StdSystemSetTaskPoolTriggerShrinkInterval(int32_t interval)
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("setTaskPoolTriggerShrinkInterval", "I:V");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     std::array args = {Value(interval)};
-    method->GetPandaMethod()->Invoke(coro, args.data());
+    method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
 }
 
 extern "C" void StdSystemSetTaskPoolIdleThreshold(int32_t threshold)
@@ -382,9 +385,9 @@ extern "C" void StdSystemSetTaskPoolIdleThreshold(int32_t threshold)
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("setTaskPoolIdleThreshold", "I:V");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     std::array args = {Value {threshold}};
-    method->GetPandaMethod()->Invoke(coro, args.data());
+    method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
 }
 
 extern "C" void StdSystemSetTaskPoolBlockedWorkerThreshold(int32_t thresholdMs)
@@ -412,8 +415,8 @@ extern "C" EtsInt StdSystemGetTaskPoolWorkersNum()
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("getTaskPoolWorkersNum", ":I");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
-    ark::Value res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ark::Value res = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), nullptr);
     return res.GetAs<int>();
 }
 
@@ -426,9 +429,9 @@ extern "C" void StdSystemSetTaskPoolWorkersLimit(int32_t threshold)
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("setTaskPoolWorkersLimit", "I:V");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     std::array args = {Value {threshold}};
-    method->GetPandaMethod()->Invoke(coro, args.data());
+    method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
 }
 
 extern "C" void StdSystemRetriggerTaskPoolShrink()
@@ -440,8 +443,8 @@ extern "C" void StdSystemRetriggerTaskPoolShrink()
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("retriggerTaskPoolShrink", ":V");
     ASSERT(method != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
-    method->GetPandaMethod()->Invoke(coro, nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    method->GetPandaMethod()->Invoke(executionCtx->GetMT(), nullptr);
 }
 
 extern "C" void StdSystemRetriggerTaskPoolBlockedExpandMonitor()
@@ -476,8 +479,8 @@ extern "C" EtsInt EtsStdCoreUint8ClampedArrayToUint8Clamped(EtsDouble val)
 extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetManager()->GetConfig().enableExternalTimer);
-    return ToEtsBoolean(FromEtsBoolean(extTimerOption) && coro->GetWorker()->IsExternalSchedulingEnabled());
+    auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetCoroutineManager()->GetConfig().enableExternalTimer);
+    return ToEtsBoolean((extTimerOption != 0U) && coro->GetWorker()->IsExternalSchedulingEnabled());
 }
 
 extern "C" void StdSystemDumpUhandledFailedJobs()

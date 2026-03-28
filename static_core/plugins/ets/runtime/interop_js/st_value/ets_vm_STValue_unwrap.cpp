@@ -272,7 +272,7 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
 napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] napi_callback_info info)
 {
     ASSERT_SCOPED_NATIVE_CODE();
-    INTEROP_CODE_SCOPE_JS_TO_ETS(EtsCoroutine::GetCurrent());
+    INTEROP_CODE_SCOPE_JS_TO_ETS(EtsExecutionContext::GetCurrent());
 
     auto *aniEnv = GetAniEnv();
     auto coro = InteropCtx::Current();

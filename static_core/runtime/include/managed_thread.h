@@ -75,6 +75,7 @@ public:
         THREAD_TYPE_MANAGED,
         THREAD_TYPE_MT_MANAGED,
         THREAD_TYPE_COROUTINE,
+        THREAD_TYPE_WORKER_THREAD,
     };
     enum ThreadState : uint8_t { NATIVE_CODE = 0, MANAGED_CODE = 1 };
 

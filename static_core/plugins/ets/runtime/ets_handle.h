@@ -16,8 +16,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H_
 
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/mem/vm_handle.h"
 #include "runtime/handle_scope-inl.h"
 
@@ -27,8 +27,8 @@ template <typename T>
 class EtsHandle : public VMHandle<T> {
 public:
     inline explicit EtsHandle() : VMHandle<T>() {}
-    explicit EtsHandle(EtsCoroutine *coroutine, T *etsObj)
-        : VMHandle<T>(ManagedThread::CastFromMutator(coroutine), GetObjectHeader(etsObj))
+    explicit EtsHandle(EtsExecutionContext *executionCtx, T *etsObj)
+        : VMHandle<T>(executionCtx->GetMT(), GetObjectHeader(etsObj))
     {
     }
 

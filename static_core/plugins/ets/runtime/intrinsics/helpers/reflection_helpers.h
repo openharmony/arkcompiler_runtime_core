@@ -16,9 +16,9 @@
 #ifndef PANDA_PLUGINS_ETS_REFLECTION_HELPERS_
 #define PANDA_PLUGINS_ETS_REFLECTION_HELPERS_
 
+#include "runtime/include/managed_thread.h"
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -36,12 +36,12 @@ struct PrimitiveFieldInfo {
     EtsField *field = nullptr;
 };
 
-bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass, Value *argValue);
-EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Value *args);
-EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisObj, EtsMethod *method);
-bool CheckPrimitiveReciever(EtsCoroutine *coro, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
+bool CheckReceiverType(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *paramClass, Value *argValue);
+EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsExecutionContext *executionCtx, Value *args);
+EtsMethod *ValidateAndResolveInstanceMethod(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsMethod *method);
+bool CheckPrimitiveReciever(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
                             Value *argValue);
-bool ValidateInstanceField(EtsCoroutine *coro, EtsObject *thisObj, EtsField *field);
+bool ValidateInstanceField(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsField *field);
 
 template <typename T>
 bool CheckAndUnpackBoxedType(EtsClassLinkerExtension *linkExt, EtsObject *arg, EtsClass *paramClass, Value *argValue,
@@ -54,26 +54,27 @@ bool CheckAndUnpackBoxedType(EtsClassLinkerExtension *linkExt, EtsObject *arg, E
     return true;
 }
 
-inline void ReflectFieldSetReference(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *arg, EtsField *field)
+inline void ReflectFieldSetReference(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsObject *arg,
+                                     EtsField *field)
 {
-    EtsHandle argH(coro, arg);
-    EtsHandle thisObjH(coro, thisObj);
+    EtsHandle argH(executionCtx, arg);
+    EtsHandle thisObjH(executionCtx, thisObj);
     if (field->IsStatic()) {
         field->GetDeclaringClass()->SetStaticFieldObject(field, arg);
-    } else if (ValidateInstanceField(coro, thisObj, field)) {
+    } else if (ValidateInstanceField(executionCtx, thisObj, field)) {
         thisObjH->SetFieldObject(field, argH.GetPtr());
     }
 }
 
 template <typename T>
-bool ReflectFieldSetPrimitive(EtsCoroutine *coro, EtsObject *thisObj, T primVal, EtsField *field)
+bool ReflectFieldSetPrimitive(EtsExecutionContext *executionCtx, EtsObject *thisObj, T primVal, EtsField *field)
 {
-    EtsHandle thisObjH(coro, thisObj);
+    EtsHandle thisObjH(executionCtx, thisObj);
     if (field->IsStatic()) {
         field->GetDeclaringClass()->SetStaticFieldPrimitive<T>(field, primVal);
         return true;
     }
-    if (ValidateInstanceField(coro, thisObjH.GetPtr(), field)) {
+    if (ValidateInstanceField(executionCtx, thisObjH.GetPtr(), field)) {
         thisObjH->template SetFieldPrimitive<T>(field, primVal);
         return true;
     }
@@ -97,8 +98,8 @@ Value ReflectFieldGetPrimitive(EtsObject *thisObj, EtsField *field)
     return Value(thisObj->GetFieldPrimitive<T>(field));
 }
 
-bool ResolveAndSetPrimitive(EtsCoroutine *coro, const PrimitiveFieldInfo &info);
-Value GetPrimitiveValue(EtsCoroutine *coro, EtsObject *thisObj, EtsType fieldType, EtsField *field);
+bool ResolveAndSetPrimitive(EtsExecutionContext *executionCtx, const PrimitiveFieldInfo &info);
+Value GetPrimitiveValue(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsType fieldType, EtsField *field);
 
 EtsBoolean IsLiteralInitializedInterface(EtsObject *target);
 

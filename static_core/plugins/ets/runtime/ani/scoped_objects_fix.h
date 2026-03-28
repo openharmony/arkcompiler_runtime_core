@@ -35,9 +35,9 @@ public:
     explicit ManagedCodeAccessor(PandaAniEnv *env) : env_(env) {}
     ~ManagedCodeAccessor() = default;
 
-    EtsCoroutine *GetCoroutine() const
+    EtsExecutionContext *GetExecutionContext() const
     {
-        return env_->GetEtsCoroutine();
+        return env_->GetExecutionContext();
     }
 
     PandaAniEnv *GetPandaEnv()
@@ -70,7 +70,7 @@ public:
     bool IsNull(ani_ref ref)
     {
         ASSERT(!IsUndefined(ref));
-        return ToInternalType(ref)->GetCoreType() == GetCoroutine()->GetNullValue();
+        return ToInternalType(ref)->GetCoreType() == GetExecutionContext()->GetNullValue();
     }
 
     bool IsNullishValue(ani_ref ref)
@@ -80,7 +80,7 @@ public:
 
     ani_status GetNullRef(ani_ref *result)
     {
-        EtsObject *nullObject = EtsObject::FromCoreType(GetCoroutine()->GetNullValue());
+        EtsObject *nullObject = EtsObject::FromCoreType(GetExecutionContext()->GetNullValue());
         return AddLocalRef(nullObject, result);
     }
 
@@ -388,11 +388,11 @@ public:
     explicit ScopedManagedCodeFix(PandaAniEnv *env)
         : ManagedCodeAccessor(env), alreadyInManaged_(ManagedThread::IsManagedScope())
     {
-        ASSERT(env == EtsCoroutine::GetCurrent()->GetPandaAniEnv());
+        ASSERT(env == EtsExecutionContext::GetCurrent()->GetPandaAniEnv());
 
 #ifndef NDEBUG
         if (alreadyInManaged_) {
-            auto stack = StackWalker::Create(GetCoroutine());
+            auto stack = StackWalker::Create(GetExecutionContext()->GetMT());
             if (stack.HasFrame()) {
                 ASSERT(!stack.GetMethod()->IsCriticalNative());
             }
@@ -403,7 +403,7 @@ public:
             return;
         }
 
-        GetCoroutine()->ManagedCodeBegin();
+        GetExecutionContext()->GetMT()->ManagedCodeBegin();
     }
     explicit ScopedManagedCodeFix(ani_env *env) : ScopedManagedCodeFix(PandaAniEnv::FromAniEnv(env)) {}
 
@@ -414,13 +414,13 @@ public:
         }
 
         if (!alreadyInManaged_) {
-            GetCoroutine()->ManagedCodeEnd();
+            GetExecutionContext()->GetMT()->ManagedCodeEnd();
         }
     }
 
     bool HasPendingException()
     {
-        return exceptionData_ || GetCoroutine()->HasPendingException();
+        return exceptionData_ || GetExecutionContext()->GetMT()->HasPendingException();
     }
 
     NO_COPY_SEMANTIC(ScopedManagedCodeFix);
@@ -430,7 +430,7 @@ private:
     bool IsAccessFromManagedAllowed()
     {
 #ifndef NDEBUG
-        auto stack = StackWalker::Create(GetCoroutine());
+        auto stack = StackWalker::Create(GetExecutionContext()->GetMT());
         if (stack.HasFrame()) {
             auto method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
             ASSERT(method != nullptr);

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "ets_panda_file_items.h"
 #include "include/language_context.h"
 #include "include/mem/panda_containers.h"
@@ -361,7 +362,7 @@ EtsString *EtsClass::GetName()
 
     name = EtsString::CreateFromMUtf8(GetRuntimeClass()->GetName().c_str());
     if (name == nullptr) {
-        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        ASSERT(ManagedThread::GetCurrent()->HasPendingException());
         return nullptr;
     }
     return name;
@@ -660,9 +661,10 @@ void EtsClass::SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObj
 
 EtsObject *EtsClass::CreateInstance()
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    const auto throwCreateInstanceErr = [coro, this](std::string_view msg) {
-        ets::ThrowEtsException(coro, PlatformTypes(coro)->escompatError, PandaString(msg) + " " + GetDescriptor());
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    const auto throwCreateInstanceErr = [executionCtx, this](std::string_view msg) {
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
+                               PandaString(msg) + " " + GetDescriptor());
     };
 
     if (UNLIKELY(!GetRuntimeClass()->IsInstantiable() || IsArrayClass())) {
@@ -682,8 +684,8 @@ EtsObject *EtsClass::CreateInstance()
         return nullptr;
     }
 
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    if (UNLIKELY(!IsInitialized() && !linker->InitializeClass(coro, this))) {
+    EtsClassLinker *linker = executionCtx->GetPandaVM()->GetClassLinker();
+    if (UNLIKELY(!IsInitialized() && !linker->InitializeClass(executionCtx, this))) {
         return nullptr;
     }
     EtsObject *obj = EtsObject::Create(this);
@@ -691,10 +693,10 @@ EtsObject *EtsClass::CreateInstance()
         return nullptr;
     }
 
-    LocalObjectHandle objHandle(coro, obj);
+    LocalObjectHandle objHandle(executionCtx->GetMT(), obj);
     std::array<Value, 1> args {Value(obj->GetCoreType())};
-    ctor->GetPandaMethod()->Invoke(coro, args.data());
-    if (UNLIKELY(coro->HasPendingException())) {
+    ctor->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return nullptr;
     }
     return objHandle.GetPtr();
@@ -705,9 +707,9 @@ EtsClass *EtsClass::ResolveStringClass()
     ASSERT(IsStringClass());
     auto *coreClass = GetRuntimeClass();
     if (coreClass->IsLineStringClass() || coreClass->IsSlicedStringClass() || coreClass->IsTreeStringClass()) {
-        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-        ASSERT(coroutine != nullptr);
-        const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
+        auto *mThread = ManagedThread::GetCurrent();
+        ASSERT(mThread != nullptr);
+        const EtsPlatformTypes *ptypes = PlatformTypes(mThread);
         return ptypes->coreString;
     }
     return this;

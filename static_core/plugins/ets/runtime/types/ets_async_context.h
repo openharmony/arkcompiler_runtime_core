@@ -24,7 +24,7 @@
 
 namespace ark::ets {
 
-class EtsCoroutine;
+class EtsExecutionContext;
 
 namespace test {
 class EtsAsyncContextTest;
@@ -32,31 +32,31 @@ class EtsAsyncContextTest;
 
 class EtsAsyncContext final : public EtsObject {
 public:
-    static EtsAsyncContext *Create(EtsCoroutine *coro);
+    static EtsAsyncContext *Create(EtsExecutionContext *executionCtx);
 
-    inline void SetReturnValue(EtsCoroutine *coro, EtsPromise *returnValue);
-    inline void SetAwaitee(EtsCoroutine *coro, EtsPromise *awaitee);
-    inline void SetRefValues(EtsCoroutine *coro, EtsObjectArray *refValues);
-    inline void SetPrimValues(EtsCoroutine *coro, EtsLongArray *primValues);
+    inline void SetReturnValue(EtsExecutionContext *executionCtx, EtsPromise *returnValue);
+    inline void SetAwaitee(EtsExecutionContext *executionCtx, EtsPromise *awaitee);
+    inline void SetRefValues(EtsExecutionContext *executionCtx, EtsObjectArray *refValues);
+    inline void SetPrimValues(EtsExecutionContext *executionCtx, EtsLongArray *primValues);
     inline void SetRefCount(EtsLong refCount);
     inline void SetPrimCount(EtsLong primCount);
-    inline void SetFrameOffsets(EtsCoroutine *coro, EtsShortArray *frameOffsets);
+    inline void SetFrameOffsets(EtsExecutionContext *executionCtx, EtsShortArray *frameOffsets);
     inline void SetCompiledCode(EtsLong compiledCode);
     inline void SetAwaitId(EtsLong awaitId);
 
-    inline EtsPromise *GetReturnValue(EtsCoroutine *coro) const;
-    inline EtsPromise *GetAwaitee(EtsCoroutine *coro) const;
-    inline EtsObjectArray *GetRefValues(EtsCoroutine *coro) const;
-    inline EtsLongArray *GetPrimValues(EtsCoroutine *coro) const;
+    inline EtsPromise *GetReturnValue(EtsExecutionContext *executionCtx) const;
+    inline EtsPromise *GetAwaitee(EtsExecutionContext *executionCtx) const;
+    inline EtsObjectArray *GetRefValues(EtsExecutionContext *executionCtx) const;
+    inline EtsLongArray *GetPrimValues(EtsExecutionContext *executionCtx) const;
     inline EtsLong GetRefCount() const;
     inline EtsLong GetPrimCount() const;
-    inline EtsShortArray *GetFrameOffsets(EtsCoroutine *coro) const;
+    inline EtsShortArray *GetFrameOffsets(EtsExecutionContext *executionCtx) const;
     inline EtsLong GetCompiledCode() const;
     inline EtsLong GetAwaitId() const;
 
-    void AddReference(EtsCoroutine *coro, uint32_t idx, EtsObject *ref);
-    void AddPrimitive(EtsCoroutine *coro, uint32_t idx, EtsLong primitive);
-    EtsShort GetVregOffset(EtsCoroutine *coro, uint32_t idx) const;
+    void AddReference(EtsExecutionContext *executionCtx, uint32_t idx, EtsObject *ref);
+    void AddPrimitive(EtsExecutionContext *executionCtx, uint32_t idx, EtsLong primitive);
+    EtsShort GetVregOffset(EtsExecutionContext *executionCtx, uint32_t idx) const;
 
     EtsObject *AsObject()
     {

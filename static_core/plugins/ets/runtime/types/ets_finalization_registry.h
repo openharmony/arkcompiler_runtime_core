@@ -33,14 +33,14 @@ public:
     NO_MOVE_SEMANTIC(EtsFinalizationRegistry);
     ~EtsFinalizationRegistry() = delete;
 
-    CoroutineWorkerDomain GetWorkerDomain() const
+    JobWorkerThreadDomain GetWorkerDomain() const
     {
-        return static_cast<CoroutineWorkerDomain>(workerDomain_);
+        return static_cast<JobWorkerThreadDomain>(workerDomain_);
     }
 
-    CoroutineWorker::Id GetWorkerId() const
+    JobWorkerThread::Id GetWorkerId() const
     {
-        return static_cast<CoroutineWorker::Id>(workerId_);
+        return static_cast<JobWorkerThread::Id>(workerId_);
     }
 
     EtsFinalizationRegistry *GetNextFinReg()

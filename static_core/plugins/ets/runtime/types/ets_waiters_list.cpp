@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 namespace ark::ets {
 
 /*static*/
-EtsWaitersList *EtsWaitersList::Create(EtsCoroutine *coro)
+EtsWaitersList *EtsWaitersList::Create(EtsExecutionContext *executionCtx)
 {
-    EtsClass *klass = PlatformTypes(coro)->coreWaitersList;
-    EtsObject *etsObject = EtsObject::Create(coro, klass);
+    EtsClass *klass = PlatformTypes(executionCtx)->coreWaitersList;
+    EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
     return reinterpret_cast<EtsWaitersList *>(etsObject);
 }
 

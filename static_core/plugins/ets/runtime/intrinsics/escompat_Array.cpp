@@ -24,12 +24,12 @@
 #endif
 #include <optional>
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/include/coretypes/string.h"
 #include "intrinsics.h"
 #include "interpreter/runtime_interface.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/utils/utils.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -109,24 +109,24 @@ extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, Et
     if (actualLength <= fromIndex) {
         return -1;
     }
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
-    EtsHandle<EtsObject> valueHandle(coro, value);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, buffer);
+    EtsHandle<EtsObject> valueHandle(executionCtx, value);
 
     auto count = actualLength - fromIndex;
     static constexpr std::size_t CHUNK_SIZE = 1U << 9U;
     auto iterCount = count / CHUNK_SIZE;
     auto remainder = count % CHUNK_SIZE;
 
-    auto processChunk = [fromIndex, &bufferHandle, &valueHandle, coro](std::size_t iter,
-                                                                       std::size_t size) -> std::optional<EtsInt> {
+    auto processChunk = [fromIndex, &bufferHandle, &valueHandle,
+                         executionCtx](std::size_t iter, std::size_t size) -> std::optional<EtsInt> {
         auto startOffset = iter * CHUNK_SIZE;
         auto endOffset = startOffset + size;
         for (size_t j = startOffset; j < endOffset; ++j) {
             auto currentIndex = fromIndex + j;
             auto element = bufferHandle.GetPtr()->Get(currentIndex);
-            if (EtsReferenceEquals<true>(coro, element, valueHandle.GetPtr())) {
+            if (EtsReferenceEquals<true>(executionCtx, element, valueHandle.GetPtr())) {
                 return currentIndex;
             }
         }
@@ -156,6 +156,7 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
     }
     auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
 
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     EtsInt startIndex = 0;
 
     if (fromIndex >= 0) {
@@ -168,23 +169,22 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
         return -1;
     }
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
-    EtsHandle<EtsObject> valueHandle(coro, value);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, buffer);
+    EtsHandle<EtsObject> valueHandle(executionCtx, value);
 
     auto count = startIndex + 1;
     constexpr std::size_t CHUNK_SIZE = 1U << 9U;
     auto iterCount = count / CHUNK_SIZE;
     auto remainder = count % CHUNK_SIZE;
 
-    auto processChunk = [startIndex, &bufferHandle, &valueHandle, coro](std::size_t iter,
-                                                                        std::size_t size) -> std::optional<EtsInt> {
+    auto processChunk = [startIndex, &bufferHandle, &valueHandle,
+                         executionCtx](std::size_t iter, std::size_t size) -> std::optional<EtsInt> {
         auto startOffset = iter * CHUNK_SIZE;
         for (size_t j = 0; j < size; ++j) {
             auto currentIndex = startIndex - (startOffset + j);
             auto element = bufferHandle.GetPtr()->Get(currentIndex);
-            if (EtsReferenceEquals<true>(coro, element, valueHandle.GetPtr())) {
+            if (EtsReferenceEquals<true>(executionCtx, element, valueHandle.GetPtr())) {
                 return currentIndex;
             }
         }
@@ -219,10 +219,10 @@ extern "C" void EtsEscompatArrayFillImpl(ObjectHeader *bufferHeader, int32_t len
 {
     ASSERT(bufferHeader != nullptr);
     auto *buffer = EtsObjectArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
-    EtsHandle<EtsObject> valueHandle(coro, value);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, buffer);
+    EtsHandle<EtsObject> valueHandle(executionCtx, value);
     auto startInd = NormalizeIndex(start, length);
     auto endInd = NormalizeIndex(end, length);
     if (endInd <= startInd) {
@@ -307,10 +307,10 @@ static auto GetSwap([[maybe_unused]] mem::GCBarrierSet *readBarrierSet)
 static constexpr size_t SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD = 50000UL;
 
 template <typename T>
-static void RefReverse(ManagedThread *thread, EtsHandle<EtsObjectArray> &buffer, int32_t length)
+static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArray> &buffer, int32_t length)
 {
     auto *arr = buffer->GetData<T>();
-    auto *barrierSet = thread->GetBarrierSet();
+    auto *barrierSet = executionCtx->GetMT()->GetBarrierSet();
     auto swap = GetSwap<T>(barrierSet);
     bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
 
@@ -321,14 +321,15 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsObjectArray> &buffer,
         }
         swap(aPtr, bPtr);
     };
-    auto putSafepoint = [&usePreBarrier, barrierSet, &arr, thread](size_t dstStart, size_t dstEndMirror, size_t count) {
+    auto putSafepoint = [&usePreBarrier, barrierSet, &arr, executionCtx](size_t dstStart, size_t dstEndMirror,
+                                                                         size_t count) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
             static constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
             const uint32_t size = count * sizeof(T);
             barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(T), size);
             barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(T) - size, size);
         }
-        ark::interpreter::RuntimeInterface::Safepoint(thread);
+        ark::interpreter::RuntimeInterface::Safepoint(executionCtx->GetMT());
         usePreBarrier = barrierSet->IsPreBarrierEnabled();
     };
     auto halfLength = static_cast<size_t>(length) / 2;
@@ -355,21 +356,22 @@ extern "C" void EtsEscompatArrayReverse(ObjectHeader *bufferHeader, int32_t leng
 {
     ASSERT(bufferHeader != nullptr);
     auto *buffer = EtsObjectArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, buffer);
 
-    RefReverse<ObjectPointerType>(coro, bufferHandle, length);
+    RefReverse<ObjectPointerType>(executionCtx, bufferHandle, length);
 }
 
 struct ElementComputeResult {
-    explicit ElementComputeResult(EtsCoroutine *c) : coro(c), ptypes(PlatformTypes(c)) {};
+    explicit ElementComputeResult(EtsExecutionContext *executionCtx)
+        : executionCtx(executionCtx), ptypes(PlatformTypes(executionCtx)) {};
     NO_COPY_SEMANTIC(ElementComputeResult);
     DEFAULT_MOVE_SEMANTIC(ElementComputeResult);
     ~ElementComputeResult() = default;
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    EtsCoroutine *coro {};
+    EtsExecutionContext *executionCtx {};
     const EtsPlatformTypes *ptypes {};
     size_t intCount = 0;
     size_t doubleCount = 0;
@@ -385,7 +387,7 @@ static constexpr std::string_view TRUE_STRING = "true";
 static constexpr std::string_view FALSE_STRING = "false";
 
 // Might trigger GC
-static ark::ets::EtsString *GetObjStr(EtsCoroutine *coro, EtsClass *cls, EtsObject *element)
+static ark::ets::EtsString *GetObjStr(EtsExecutionContext *executionCtx, EtsClass *cls, EtsObject *element)
 {
     auto *toStrMethod = cls->GetInstanceMethod("toString", ":Lstd/core/String;");
     if (toStrMethod == nullptr) {
@@ -393,8 +395,8 @@ static ark::ets::EtsString *GetObjStr(EtsCoroutine *coro, EtsClass *cls, EtsObje
     }
 
     Value args(element->GetCoreType());
-    Value result = toStrMethod->GetPandaMethod()->Invoke(coro, &args);
-    if (UNLIKELY(coro->HasPendingException())) {
+    Value result = toStrMethod->GetPandaMethod()->Invoke(executionCtx->GetMT(), &args);
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return nullptr;
     }
     auto *resultObject = EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());
@@ -428,7 +430,7 @@ static constexpr size_t MaxChars()
 static bool ComputeElementCharSize(ElementComputeResult &res, EtsObject *element)
 {
     const int booleanUtf8Size = 5;
-    if (ets::EtsReferenceNullish(res.coro, element)) {
+    if (ets::EtsReferenceNullish(res.executionCtx, element)) {
         return true;
     }
 
@@ -456,13 +458,13 @@ static bool ComputeElementCharSize(ElementComputeResult &res, EtsObject *element
     } else if (elementCls == res.ptypes->coreBoolean) {
         res.utf8Size += booleanUtf8Size;
     } else {
-        auto *objStr = GetObjStr(res.coro, elementCls, element);
+        auto *objStr = GetObjStr(res.executionCtx, elementCls, element);
         if (UNLIKELY(objStr == nullptr)) {
-            ASSERT(res.coro->HasPendingException());
+            ASSERT(res.executionCtx->GetMT()->HasPendingException());
             return false;
         }
         updateStringSize(objStr);
-        res.toStringResults.emplace_back(res.coro, objStr);
+        res.toStringResults.emplace_back(res.executionCtx, objStr);
     }
     return true;
 }
@@ -540,7 +542,7 @@ static bool ComputeCharSize(ElementComputeResult &res, EtsHandle<EtsObjectArray>
     for (size_t index = 0; index < actualLength; index++) {
         auto *element = bufferHandle->Get(index);
         if (UNLIKELY(!ComputeElementCharSize(res, element))) {
-            ASSERT(res.coro->HasPendingException());
+            ASSERT(res.executionCtx->GetMT()->HasPendingException());
             return false;
         }
     }
@@ -583,7 +585,7 @@ static ark::ets::EtsString *EtsEscompatArrayJoinUtf8String(EtsHandle<EtsObjectAr
 static void ProcessUtf8Element(ElementComputeResult &res, EtsObject *element, PandaVector<char> &outputBuffer,
                                size_t &pos)
 {
-    if (ets::EtsReferenceNullish(res.coro, element)) {
+    if (ets::EtsReferenceNullish(res.executionCtx, element)) {
         return;
     }
 
@@ -657,7 +659,7 @@ static ark::ets::EtsString *EtsEscompatArrayJoinUtf8(ElementComputeResult &res, 
 static void ProcessUtf16Element(ElementComputeResult &res, EtsObject *element, PandaVector<EtsChar> &outputBuffer,
                                 size_t &pos)
 {
-    if (ets::EtsReferenceNullish(res.coro, element)) {
+    if (ets::EtsReferenceNullish(res.executionCtx, element)) {
         return;
     }
 
@@ -727,19 +729,19 @@ static ark::ets::EtsString *EtsEscompatArrayJoinUtf16(ElementComputeResult &res,
 extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(ObjectHeader *buffer, EtsInt actualLength,
                                                              ark::ets::EtsString *separator)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsHandle<EtsString> separatorHandle(coro, separator);
-    EtsHandle<EtsObjectArray> bufferHandle(coro, EtsObjectArray::FromCoreType(buffer));
+    EtsHandle<EtsString> separatorHandle(executionCtx, separator);
+    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, EtsObjectArray::FromCoreType(buffer));
     ASSERT(actualLength > 0);
     // Sanity check that actual length is less or equal to capacity
     ASSERT(static_cast<size_t>(actualLength) <= bufferHandle->GetLength());
 
-    ElementComputeResult res(coro);
+    ElementComputeResult res(executionCtx);
 
     if (UNLIKELY(!ComputeCharSize(res, bufferHandle, actualLength, separatorHandle))) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     ark::interpreter::RuntimeInterface::Safepoint();
@@ -782,9 +784,9 @@ extern "C" void EtsEscompatArrayUnshiftInternal(ObjectHeader *arrayHeader, EtsIn
     [[maybe_unused]] auto error1 = memmove_s(dst, dstLen, valuesSrc, valuesSrcLen);
     ASSERT(error1 == 0);
 
-    auto *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
-    auto *barrierSet = thread->GetBarrierSet();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *barrierSet = executionCtx->GetMT()->GetBarrierSet();
     if (barrierSet != nullptr) {
         barrierSet->PostBarrier(buffer, EtsArray::GetDataOffset(), arraySrcLen + valuesSrcLen);
     }
@@ -792,12 +794,12 @@ extern "C" void EtsEscompatArrayUnshiftInternal(ObjectHeader *arrayHeader, EtsIn
 
 extern "C" EtsBoolean EtsEscompatArrayIsPlatformArray(EtsObject *obj)
 {
-    return ToEtsBoolean(EtsEscompatArray::IsExactlyEscompatArray(obj, EtsCoroutine::GetCurrent()));
+    return ToEtsBoolean(EtsEscompatArray::IsExactlyEscompatArray(obj, EtsExecutionContext::GetCurrent()));
 }
 
 extern "C" ObjectHeader *EtsEscompatArrayGetBuffer(EtsObject *obj)
 {
-    ASSERT(EtsEscompatArray::IsExactlyEscompatArray(obj, EtsCoroutine::GetCurrent()));
+    ASSERT(EtsEscompatArray::IsExactlyEscompatArray(obj, EtsExecutionContext::GetCurrent()));
     auto *array = EtsEscompatArray::FromEtsObject(obj);
     return array->GetDataFromEscompatArray()->GetCoreType();
 }

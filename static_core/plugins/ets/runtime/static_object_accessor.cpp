@@ -16,7 +16,6 @@
 #include <array>
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/static_object_accessor.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -37,8 +36,8 @@ bool StaticObjectAccessor::HasProperty([[maybe_unused]] common_vm::Mutator *muta
 common_vm::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common_vm::Mutator *mutator,
                                                         const common_vm::BaseObject *obj, const char *name)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
     if (etsObj == nullptr) {
         return nullptr;
@@ -48,14 +47,14 @@ common_vm::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common_
     if (field == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<common_vm::BoxedValue>(GetPropertyValue(coro, etsObj, field));
+    return reinterpret_cast<common_vm::BoxedValue>(GetPropertyValue(executionCtx, etsObj, field));
 }
 
 bool StaticObjectAccessor::SetProperty([[maybe_unused]] common_vm::Mutator *mutator, common_vm::BaseObject *obj,
                                        const char *name, common_vm::BoxedValue value)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     auto *etsObj = reinterpret_cast<EtsObject *>(obj);
     if (etsObj == nullptr) {
         return false;
@@ -67,7 +66,7 @@ bool StaticObjectAccessor::SetProperty([[maybe_unused]] common_vm::Mutator *muta
         return false;
     }
 
-    return SetPropertyValue(coro, etsObj, field, reinterpret_cast<EtsObject *>(value));
+    return SetPropertyValue(executionCtx, etsObj, field, reinterpret_cast<EtsObject *>(value));
 }
 
 bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common_vm::Mutator *mutator,
@@ -81,8 +80,8 @@ bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common_vm::Mutator *
 common_vm::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common_vm::Mutator *mutator,
                                                             const common_vm::BaseObject *obj, const uint32_t index)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
     if (etsObj == nullptr) {
         return nullptr;
@@ -90,15 +89,15 @@ common_vm::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] com
     EtsObject *etsObject = const_cast<EtsObject *>(etsObj);  // NOLINT(modernize-use-auto)
     EtsMethod *method = etsObj->GetClass()->GetDirectMethod(GET_INDEX_METHOD, "I:LY;");
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObject)), ark::Value(index)};
-    ark::Value value = method->GetPandaMethod()->Invoke(coro, args.data());
+    ark::Value value = method->GetPandaMethod()->Invoke(mThread, args.data());
     return reinterpret_cast<common_vm::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
 }
 
 bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common_vm::Mutator *mutator, common_vm::BaseObject *obj,
                                            uint32_t index, const common_vm::BoxedValue value)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
     auto *etsObj = reinterpret_cast<EtsObject *>(obj);
     if (etsObj == nullptr) {
         return false;
@@ -107,8 +106,8 @@ bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common_vm::Mutator *
 
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObj)), ark::Value(index),
                      ark::Value(reinterpret_cast<ObjectHeader *>(value))};
-    method->GetPandaMethod()->Invoke(coro, args.data());
-    if (UNLIKELY(coro->HasPendingException())) {
+    method->GetPandaMethod()->Invoke(mThread, args.data());
+    if (UNLIKELY(mThread->HasPendingException())) {
         return false;  // NOLINT(readability-simplify-boolean-expr)
     }
     return true;

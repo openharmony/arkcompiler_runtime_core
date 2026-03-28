@@ -14,31 +14,31 @@
  */
 
 #include "plugins/ets/runtime/types/ets_reflect_field.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_typeapi.h"
 
 namespace ark::ets {
 
-EtsReflectField *EtsReflectField::Create(EtsCoroutine *etsCoroutine, bool isStatic)
+EtsReflectField *EtsReflectField::Create(EtsExecutionContext *executionCtx, bool isStatic)
 {
-    EtsClass *klass = isStatic ? PlatformTypes(etsCoroutine)->coreReflectStaticField
-                               : PlatformTypes(etsCoroutine)->coreReflectInstanceField;
-    EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
+    EtsClass *klass = isStatic ? PlatformTypes(executionCtx)->coreReflectStaticField
+                               : PlatformTypes(executionCtx)->coreReflectInstanceField;
+    EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
     return EtsReflectField::FromEtsObject(etsObject);
 }
 
 /* static */
-EtsReflectField *EtsReflectField::CreateFromEtsField(EtsCoroutine *coro, EtsField *field)
+EtsReflectField *EtsReflectField::CreateFromEtsField(EtsExecutionContext *executionCtx, EtsField *field)
 {
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     ASSERT(field != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto reflectField = EtsHandle<EtsReflectField>(coro, EtsReflectField::Create(coro, field->IsStatic()));
+    auto reflectField =
+        EtsHandle<EtsReflectField>(executionCtx, EtsReflectField::Create(executionCtx, field->IsStatic()));
     if (UNLIKELY(reflectField.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 

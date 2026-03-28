@@ -17,20 +17,17 @@ import { launch } from "std/concurrency"
 
 function create_7000_coro_test() {
     const coro_to_create = 7000;
-    let arr = new Int32Array(new ArrayBuffer(16384))
+    let j = new CompletableJob<void>();
 
-    let wait_func = (arr: Int32Array) => {Atomics.wait(arr, 0, 0);}
-    let mainWaitJob = launch() {
-        wait_func(arr)
-    };
-    let awaitIt = ()=>{ mainWaitJob.Await(); }
+    let wait_func = () => { j.Await() }
+    let mainWaitJob = launch(wait_func);
+    let awaitIt = () => { mainWaitJob.Await(); }
 
     for (let i = 1; i < coro_to_create; ++ i) {
         launch(awaitIt);
     }
 
-    Atomics.store(arr, 0, 1);
-    Atomics.notify(arr, 0);
+    j.finish();
 }
 
 function main() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "plugins/ets/runtime/interop_js/stack_info.h"
 
+#include "ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "runtime/coroutines/stackful_coroutine.h"
+#include "runtime/execution/coroutines/stackful/stackful_coroutine.h"
 #include "interop_js/napi_impl/napi_impl.h"
 
 #include <cstddef>
@@ -39,14 +41,17 @@ napi_status __attribute__((weak)) napi_get_stackinfo(napi_env env, NapiStackInfo
 
 namespace ark::ets::interop::js {
 
-StackInfoManagerOhos::StackInfoManagerOhos(InteropCtx *ctx, EtsCoroutine *coro) : StackInfoManagerBase {ctx, coro} {}
+StackInfoManagerOhos::StackInfoManagerOhos(InteropCtx *ctx, EtsExecutionContext *executionCtx)
+    : StackInfoManagerBase {ctx, executionCtx}
+{
+}
 
 // NOLINTNEXTLINE(modernize-use-equals-default)
 StackInfoManagerOhos::~StackInfoManagerOhos() {}
 
 void StackInfoManagerOhos::InitStackInfoIfNeeded()
 {
-    ASSERT(EtsCoroutine::GetCurrent() == mainCoro_);
+    ASSERT(EtsExecutionContext::GetCurrent() == mainExecCtx_);
     if (LIKELY(!mainStackInfo_)) {
         mainStackInfo_ = std::make_unique<NapiStackInfo>();
         auto env = ctx_->GetJSEnv();
@@ -59,14 +64,15 @@ void StackInfoManagerOhos::UpdateStackInfoIfNeeded()
     if (UNLIKELY(!mainStackInfo_)) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (coro == mainCoro_) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (executionCtx == mainExecCtx_) {
         napi_set_stackinfo(ctx_->GetJSEnv(), mainStackInfo_.get());
     } else {
         void *stackAddr = nullptr;
         size_t stackSize {};
         size_t guardSize {};
-        ASSERT(coro != nullptr);
+        ASSERT(executionCtx != nullptr);
+        auto *coro = EtsCoroutine::CastFromThread(executionCtx->GetMT());
         coro->GetContext<StackfulCoroutineContext>()->RetrieveStackInfo(stackAddr, stackSize, guardSize);
         NapiStackInfo currentStackinfo {reinterpret_cast<size_t>(stackAddr), stackSize};
         napi_set_stackinfo(ctx_->GetJSEnv(), &currentStackinfo);

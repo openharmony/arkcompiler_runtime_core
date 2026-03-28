@@ -26,7 +26,7 @@ EtsString *StdCoreFloatToString(float number, int radix)
     if (UNLIKELY(radix != helpers::DECIMAL || cache == nullptr)) {
         return helpers::FpToString(number, radix);
     }
-    return FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number);
+    return FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), number);
 }
 
 extern "C" EtsBoolean StdCoreFloatIsNan(float v)

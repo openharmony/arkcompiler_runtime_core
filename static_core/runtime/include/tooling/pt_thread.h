@@ -17,7 +17,7 @@
 
 #include <cstdint>
 #include "libarkbase/macros.h"
-#include "runtime/coroutines/coroutine.h"
+#include "runtime/execution/coroutines/coroutine.h"
 #include "runtime/include/managed_thread.h"
 
 namespace ark::tooling {

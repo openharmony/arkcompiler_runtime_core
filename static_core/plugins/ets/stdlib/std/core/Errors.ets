@@ -479,9 +479,9 @@ export class IllegalLockStateError extends Error {
  * @syscap SystemCapability.Utils.Lang
  * @since 24
  */
-export class InvalidCoroutineOperationError extends Error {
+export class InvalidJobOperationError extends Error {
     /**
-     * Constructs a new InvalidCoroutineOperationError instance with provided message and error specific information
+     * Constructs a new InvalidJobOperationError instance with provided message and error specific information
      *
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
@@ -489,7 +489,7 @@ export class InvalidCoroutineOperationError extends Error {
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
-        super("InvalidCoroutineOperationError", message, options)
+        super("InvalidJobOperationError", message, options)
     }
 }
 

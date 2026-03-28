@@ -66,8 +66,8 @@ constexpr size_t UNICODE_ESC_LEN = 6U;  // \uXXXX
 
 static void ThrowRegExpSyntaxError(const PandaString &msg)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ThrowEtsException(coro, PlatformTypes(coro)->coreSyntaxError, msg);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreSyntaxError, msg);
 }
 
 static void ValidateAndMarkRegExpFlag(char c, uint32_t bit, uint32_t &seenMask)

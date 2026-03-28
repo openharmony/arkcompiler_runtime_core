@@ -77,7 +77,7 @@
 #include "libarkbase/trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
-#include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
+#include "runtime/execution/coroutines/native_stack_allocator/native_stack_allocator.h"
 #ifdef PANDA_OHOS_GET_PARAMETER
 #include "syspara/parameters.h"
 #endif

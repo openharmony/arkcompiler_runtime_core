@@ -61,7 +61,7 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
 
 ani_status EtsMethod::Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result)
 {
-    Value res = GetPandaMethod()->Invoke(s.GetCoroutine(), args);
+    Value res = GetPandaMethod()->Invoke(s.GetExecutionContext()->GetMT(), args);
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
     if (GetReturnValueType() == EtsType::VOID) {
         // Return any value, will be ignored

@@ -15,17 +15,17 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_COROUTINE_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_COROUTINE_H
 
-#include "runtime/coroutines/coroutine_context.h"
-#include "plugins/ets/runtime/ets_ani_env.h"
-#include "plugins/ets/runtime/external_iface_table.h"
-#include "runtime/coroutines/coroutine.h"
-#include "runtime/coroutines/coroutine_manager.h"
-#include "runtime/coroutines/local_storage.h"
+#include "runtime/execution/coroutines/coroutine_context.h"
+#include "runtime/execution/coroutines/coroutine.h"
+#include "runtime/execution/coroutines/coroutine_manager.h"
 #include "runtime/include/panda_vm.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 namespace ark::ets {
 class PandaEtsVM;
 class EtsReference;
+class EtsObject;
+class EtsPromise;
 
 /// @brief The eTS coroutine. It is aware of the native interface and reference storage existance.
 class EtsCoroutine : public Coroutine {
@@ -33,34 +33,24 @@ public:
     NO_COPY_SEMANTIC(EtsCoroutine);
     NO_MOVE_SEMANTIC(EtsCoroutine);
 
-    enum class DataIdx { ETS_PLATFORM_TYPES_PTR, INTEROP_CTX_PTR, INTEROP_CALL_STACK_PTR, LAST_ID };
-    using LocalStorage = StaticLocalStorage<DataIdx>;
-
     /**
-     * @brief EtsCoroutine factory: the preferrable way to create a coroutine. See CoroutineManager::CoroutineFactory
-     * for details.
+     * @brief EtsCoroutine factory: the preferrable way to create a coroutine. See
+     * CoroutineManager::CoroutineFactory for details.
      *
      * Since C++ requires function type to exactly match the formal parameter type, we have to make this factory a
      * template. The sole purpose for this is to be able to return both Coroutine* and EtsCoroutine*
      */
     template <class T>
-    static T *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR,
-                     CoroutinePriority priority = CoroutinePriority::MEDIUM_PRIORITY)
+    static T *Create(Runtime *runtime, PandaVM *vm, Job *job, CoroutineContext *context)
     {
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
-        auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
-                                               context, std::move(epInfo), type, priority);
+        auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, job, context);
         ASSERT(co != nullptr);
         co->Initialize();
         return co;
     }
 
-    ~EtsCoroutine() override
-    {
-        auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
-        allocator->Delete(aniEnv_);
-    }
+    ~EtsCoroutine() override = default;
 
     static EtsCoroutine *CastFromThread(ManagedThread *thread)
     {
@@ -77,33 +67,14 @@ public:
         return nullptr;
     }
 
-    ExternalIfaceTable *GetExternalIfaceTable();
-
-    void SetPromiseClass(void *promiseClass)
+    EtsExecutionContext *GetExecutionCtx()
     {
-        promiseClassPtr_ = promiseClass;
+        return &executionCtx_;
     }
 
-    void SetJobClass(void *jobClass)
+    static constexpr uint32_t GetExecutionContextOffset()
     {
-        jobClassPtr_ = jobClass;
-    }
-
-    static constexpr uint32_t GetTlsPromiseClassPointerOffset()
-    {
-        return MEMBER_OFFSET(EtsCoroutine, promiseClassPtr_);
-    }
-
-    // Returns a unique object representing "null" reference
-    ALWAYS_INLINE ObjectHeader *GetNullValue() const
-    {
-        return nullValue_;
-    }
-
-    // For mainthread initializer
-    void SetupNullValue(ObjectHeader *obj)
-    {
-        nullValue_ = obj;
+        return MEMBER_OFFSET(EtsCoroutine, executionCtx_);
     }
 
     ALWAYS_INLINE EtsReference *GetAsyncContext() const
@@ -116,32 +87,10 @@ public:
         asyncContext_ = ctxRef;
     }
 
-    static constexpr uint32_t GetTlsNullValueOffset()
-    {
-        return MEMBER_OFFSET(EtsCoroutine, nullValue_);
-    }
-
-    static constexpr uint32_t GetTlsAniEnvOffset()
-    {
-        return MEMBER_OFFSET(EtsCoroutine, aniEnv_);
-    }
-
-    static constexpr uint32_t GetLocalStorageOffset()
-    {
-        return MEMBER_OFFSET(EtsCoroutine, localStorage_);
-    }
-
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
-    PANDA_PUBLIC_API CoroutineManager *GetCoroutineManager() const;
-
-    PandaAniEnv *GetPandaAniEnv() const
-    {
-        return aniEnv_;
-    }
 
     void Initialize() override;
-    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
-                      CoroutinePriority priority) override;
+    void ReInitialize(Job *job, CoroutineContext *context) override;
     void CleanUp() override;
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
@@ -150,16 +99,6 @@ public:
 
     /// @brief traverse current unhandled failed jobs with custom handler
     void ProcessUnhandledFailedJobs();
-
-    LocalStorage &GetLocalStorage()
-    {
-        return localStorage_;
-    }
-
-    const LocalStorage &GetLocalStorage() const
-    {
-        return localStorage_;
-    }
 
     // event handlers
     void OnContextSwitchedTo() override;
@@ -173,10 +112,6 @@ public:
 
     void PrintCallStack() const override;
 
-    void SetTaskpoolTaskId(int32_t taskid);
-
-    int32_t GetTaskpoolTaskId() const;
-
     static constexpr CoroutinePriority ASYNC_CALL = CoroutinePriority::HIGH_PRIORITY;
     static constexpr CoroutinePriority PROMISE_CALLBACK = CoroutinePriority::HIGH_PRIORITY;
     static constexpr CoroutinePriority TIMER_CALLBACK = CoroutinePriority::MEDIUM_PRIORITY;
@@ -184,11 +119,13 @@ public:
 
 protected:
     // we would like everyone to use the factory to create a EtsCoroutine
-    explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type,
-                          CoroutinePriority priority);
+    explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Job *job,
+                          CoroutineContext *context);
 
 private:
+    EtsExecutionContext executionCtx_;
+    EtsReference *asyncContext_ {nullptr};
+
     panda_file::Type GetReturnType();
     EtsObject *GetReturnValueAsObject(panda_file::Type returnType, Value returnValue);
     EtsObject *GetValueFromPromiseSync(EtsPromise *promise);
@@ -198,27 +135,8 @@ private:
 
     void ProcessUnhandledRejectedPromises(bool listAllObjects);
 
-    PandaAniEnv *aniEnv_ {nullptr};
-    void *promiseClassPtr_ {nullptr};
-    void *jobClassPtr_ {nullptr};
-
-    ObjectHeader *nullValue_ {};
-
-    EtsReference *asyncContext_ {nullptr};
-
-    static ExternalIfaceTable emptyExternalIfaceTable_;
-
-    LocalStorage localStorage_;
-
-    static_assert(std::is_pointer_v<decltype(aniEnv_)>,
-                  "we load a raw pointer in compiled code, please don't change the type!");
-
     // Allocator calls our protected ctor
     friend class mem::Allocator;
-
-    // NOTE(atlantiswang, #32562): this member variable should be moved to the coroutine's local storage
-    static constexpr int32_t INVALID_TASKPOOL_TASK_ID = 0;
-    int32_t taskpoolTaskid_ {INVALID_TASKPOOL_TASK_ID};
 };
 }  // namespace ark::ets
 

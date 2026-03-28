@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_WAITERS_LIST_H
 
 #include "libarkbase/macros.h"
-#include "runtime/coroutines/coroutine_events.h"
+#include "runtime/execution/job_events.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
@@ -34,7 +34,7 @@ class EtsWaitersList : public EtsObject {
 public:
     class Node {
     public:
-        explicit Node(CoroutineManager *coroManager) : event_(coroManager) {}
+        explicit Node(JobManager *jobManager) : event_(jobManager) {}
 
         GenericEvent &GetEvent()
         {
@@ -72,7 +72,7 @@ public:
         return reinterpret_cast<EtsWaitersList *>(waitersList);
     }
 
-    static EtsWaitersList *Create(EtsCoroutine *coro);
+    static EtsWaitersList *Create(EtsExecutionContext *executionCtx);
 
 private:
     class SpinWait {

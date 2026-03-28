@@ -62,6 +62,7 @@ components:
   - name: irtoc
   - name: hotreload
   - name: profiler
+  - name: execution
   - name: coroutines
   - name: atomics
   - name: es2panda

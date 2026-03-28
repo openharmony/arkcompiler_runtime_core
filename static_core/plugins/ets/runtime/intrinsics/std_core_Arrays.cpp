@@ -15,6 +15,7 @@
 
 #include "ets_class_root.h"
 #include "ets_vm.h"
+#include "runtime/include/managed_thread.h"
 #include "intrinsics.h"
 #include "interpreter/runtime_interface.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -60,8 +61,8 @@ static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t 
     }
 
     if (errmsg != nullptr) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreArrayIndexOutOfBoundsError, errmsg);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreArrayIndexOutOfBoundsError, errmsg);
     }
 }
 
@@ -226,9 +227,9 @@ static void CopyBackward(T *src, T *dst, size_t length, Copy copy, PutSP putSafe
 }
 
 template <typename T>
-static void PostWrite(ManagedThread *thread, ObjectArrayHandle<T> dstArray, size_t start, size_t length)
+static void PostWrite(ManagedThread *mThread, ObjectArrayHandle<T> dstArray, size_t start, size_t length)
 {
-    auto *barrierSet = thread->GetBarrierSet();
+    auto *barrierSet = mThread->GetBarrierSet();
     if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
         const uint32_t size = length * sizeof(T);
         barrierSet->PostBarrier(dstArray.GetBasePtr(), ObjectArrayHandle<T>::GetElementOffset(start), size);
@@ -236,7 +237,8 @@ static void PostWrite(ManagedThread *thread, ObjectArrayHandle<T> dstArray, size
 }
 
 template <typename T, bool NEED_PRE_WRITE_BARRIER = true>
-static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, ObjectArrayHandle<T> dstArray, int32_t length)
+static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, ObjectArrayHandle<T> dstArray,
+                    int32_t length)
 {
     auto *src = srcArray.GetStartPtr();
     auto *dst = dstArray.GetStartPtr();
@@ -244,7 +246,7 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
     auto copy = GetCopy<T>();
 
     if constexpr (NEED_PRE_WRITE_BARRIER) {
-        auto *barrierSet = thread->GetBarrierSet();
+        auto *barrierSet = mThread->GetBarrierSet();
         bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
         auto copyWithBarriers = [&copy, &usePreBarrier, barrierSet](T *srcPtr, T *dstPtr) {
             if (usePreBarrier) {
@@ -253,9 +255,9 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
             copy(srcPtr, dstPtr);
         };
         auto putSafepoint = [&usePreBarrier, barrierSet, srcArray, dstArray,
-                             thread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
-            PostWrite<T>(thread, dstArray, start, count);
-            ark::interpreter::RuntimeInterface::Safepoint(thread);
+                             mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
+            PostWrite<T>(mThread, dstArray, start, count);
+            ark::interpreter::RuntimeInterface::Safepoint(mThread);
             usePreBarrier = barrierSet->IsPreBarrierEnabled();
             // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
@@ -268,9 +270,9 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
             CopyForward(src, dst, length, copyWithBarriers, putSafepoint);
         }
     } else {
-        auto putSafepoint = [srcArray, dstArray, thread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
-            PostWrite<T>(thread, dstArray, start, count);
-            ark::interpreter::RuntimeInterface::Safepoint(thread);
+        auto putSafepoint = [srcArray, dstArray, mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
+            PostWrite<T>(mThread, dstArray, start, count);
+            ark::interpreter::RuntimeInterface::Safepoint(mThread);
             // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
             srcPtr = srcArray.GetStartPtr();
@@ -287,10 +289,10 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
 template <bool NEED_PRE_WRITE_BARRIER = true, bool CHECKED = true>
 void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart, int32_t srcEnd)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    auto srcArray = EtsHandle(coroutine, src);
-    auto dstArray = EtsHandle(coroutine, dst);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    auto srcArray = EtsHandle(executionCtx, src);
+    auto dstArray = EtsHandle(executionCtx, dst);
 
     auto srcLen = static_cast<int32_t>(srcArray->GetLength());
     auto dstLen = static_cast<int32_t>(dstArray->GetLength());
@@ -298,7 +300,7 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
     if constexpr (CHECKED) {
         const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
         if (errmsg != nullptr) {
-            ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreArrayIndexOutOfBoundsError, errmsg);
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreArrayIndexOutOfBoundsError, errmsg);
             return;
         }
     }
@@ -308,7 +310,8 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
         return;
     }
 
-    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(coroutine, {srcArray, srcStart}, {dstArray, dstStart}, length);
+    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(executionCtx->GetMT(), {srcArray, srcStart},
+                                                       {dstArray, dstStart}, length);
 }
 
 extern "C" void StdCoreObjectCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,

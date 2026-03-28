@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "libarkbase/macros.h"
 
 namespace ark::ets {
-class EtsCoroutine;
+class EtsExecutionContext;
 }  // namespace ark::ets
 
 namespace ark::ets::interop::js {
@@ -34,16 +34,16 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esValue, void **res
 PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result);
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool OpenJSToETSScope(EtsCoroutine *coro, char const *descr = nullptr);
+PANDA_PUBLIC_API bool OpenJSToETSScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool CloseJSToETSScope(EtsCoroutine *coro);
+PANDA_PUBLIC_API bool CloseJSToETSScope(EtsExecutionContext *executionCtx);
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool OpenETSToJSScope(EtsCoroutine *coro, char const *descr = nullptr);
+PANDA_PUBLIC_API bool OpenETSToJSScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool CloseETSToJSScope(EtsCoroutine *coro);
+PANDA_PUBLIC_API bool CloseETSToJSScope(EtsExecutionContext *executionCtx);
 
 /// Experimental API, only for internal usage in runtime.
 PANDA_PUBLIC_API bool CloseETSToJSScope(napi_env env, size_t nValues, napi_value *values, ani_ref *result);

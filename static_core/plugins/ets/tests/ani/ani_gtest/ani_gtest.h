@@ -150,7 +150,8 @@ public:
         ScopedManagedCodeFix s(pandaEnv);
 
         EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-        EtsClass *klass = classLinker->GetClass(desc.value().c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
+        EtsClass *klass =
+            classLinker->GetClass(desc.value().c_str(), true, GetClassLinkerContext(s.GetExecutionContext()->GetMT()));
         ASSERT(klass);
 
         return klass->IsInitialized();
@@ -273,9 +274,9 @@ private:
     }
     // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
-    static ClassLinkerContext *GetClassLinkerContext(ark::ets::EtsCoroutine *coroutine)
+    static ClassLinkerContext *GetClassLinkerContext(ark::ManagedThread *mThread)
     {
-        auto stack = StackWalker::Create(coroutine);
+        auto stack = StackWalker::Create(mThread);
         if (!stack.HasFrame()) {
             return nullptr;
         }

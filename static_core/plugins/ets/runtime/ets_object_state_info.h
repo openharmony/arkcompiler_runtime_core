@@ -25,7 +25,6 @@
 namespace ark::ets {
 
 class EtsObject;
-class EtsCoroutine;
 class PandaEtsVM;
 
 class EtsObjectStateInfo {

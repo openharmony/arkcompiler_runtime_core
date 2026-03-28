@@ -15,19 +15,18 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
-#include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/job_queue.h"
-#include "runtime/coroutines/stackful_coroutine.h"
-#include "runtime/coroutines/coroutine_events.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_events.h"
 #include "runtime/include/mem/panda_containers.h"
 
 namespace ark::ets::intrinsics {
@@ -36,47 +35,48 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 {
     PandaVector<Value> args {Value(outsidePromise), Value(internalPromise)};
 
-    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(EtsCoroutine::GetCurrent(),
+    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(ManagedThread::GetCurrent(),
                                                                                     args.data());
 }
 
-static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
+static void EnsureCapacity(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &hpromise)
 {
     ASSERT(hpromise.GetPtr() != nullptr);
     ASSERT(hpromise->IsLocked());
-    int queueLength = hpromise->GetCallbackQueue(coro) == nullptr ? 0 : hpromise->GetCallbackQueue(coro)->GetLength();
+    int queueLength =
+        hpromise->GetCallbackQueue(executionCtx) == nullptr ? 0 : hpromise->GetCallbackQueue(executionCtx)->GetLength();
     if (hpromise->GetQueueSize() != queueLength) {
         return;
     }
     auto newQueueLength = queueLength * 2U + 1U;
-    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
+    auto *objectClass = PlatformTypes(executionCtx)->coreObject;
     auto *newCallbackQueue = EtsObjectArray::Create(objectClass, newQueueLength);
     if (hpromise->GetQueueSize() != 0) {
-        hpromise->GetCallbackQueue(coro)->CopyDataTo(newCallbackQueue);
+        hpromise->GetCallbackQueue(executionCtx)->CopyDataTo(newCallbackQueue);
     }
-    hpromise->SetCallbackQueue(coro, newCallbackQueue);
+    hpromise->SetCallbackQueue(executionCtx, newCallbackQueue);
     auto *newWorkerDomainQueue = EtsIntArray::Create(newQueueLength);
     if (hpromise->GetQueueSize() != 0) {
-        auto *workerDomainQueueData = hpromise->GetWorkerDomainQueue(coro)->GetData<EtsCoroutine *>();
+        auto *workerDomainQueueData = hpromise->GetWorkerDomainQueue(executionCtx)->GetData<EtsInt *>();
         [[maybe_unused]] auto err =
-            memcpy_s(newWorkerDomainQueue->GetData<CoroutineWorkerDomain>(), newQueueLength * sizeof(EtsInt),
-                     workerDomainQueueData, queueLength * sizeof(CoroutineWorkerDomain));
+            memcpy_s(newWorkerDomainQueue->GetData<JobWorkerThreadDomain>(), newQueueLength * sizeof(EtsInt),
+                     workerDomainQueueData, queueLength * sizeof(JobWorkerThreadDomain));
         ASSERT(err == EOK);
     }
-    hpromise->SetWorkerDomainQueue(coro, newWorkerDomainQueue);
+    hpromise->SetWorkerDomainQueue(executionCtx, newWorkerDomainQueue);
 }
 
 void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLinked)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     if (promise == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, coro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsPromise> hpromise(coro, promise);
-    EtsHandle<EtsObject> hvalue(coro, value);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    EtsHandle<EtsObject> hvalue(executionCtx, value);
 
     if (wasLinked == 0) {
         /* When the value is still a Promise, the lock must be unlocked first. */
@@ -85,14 +85,14 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLink
             hpromise->Unlock();
             return;
         }
-        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
+        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
             auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-            EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+            EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
             hpromise->Unlock();
             SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
             return;
         }
-        hpromise->Resolve(coro, hvalue.GetPtr());
+        hpromise->Resolve(executionCtx, hvalue.GetPtr());
         hpromise->Unlock();
     } else {
         /* When the value is still a Promise, the lock must be unlocked first. */
@@ -101,65 +101,67 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLink
             hpromise->Unlock();
             return;
         }
-        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
+        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
             auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-            EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+            EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
             hpromise->ChangeStateToPendingFromLinked();
             hpromise->Unlock();
             SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
             return;
         }
-        hpromise->Resolve(coro, hvalue.GetPtr());
+        hpromise->Resolve(executionCtx, hvalue.GetPtr());
         hpromise->Unlock();
     }
 }
 
 void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinked)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     if (promise == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, coro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsPromise> hpromise(coro, promise);
-    EtsHandle<EtsObject> herror(coro, error);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    EtsHandle<EtsObject> herror(executionCtx, error);
     EtsMutex::LockHolder lh(hpromise);
     if ((!hpromise->IsPending() && wasLinked == 0) || (!hpromise->IsLinked() && wasLinked != 0)) {
         return;
     }
-    hpromise->Reject(coro, herror.GetPtr());
+    hpromise->Reject(executionCtx, herror.GetPtr());
 }
 
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *jobExecCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
+    ASSERT(jobExecCtx != nullptr);
     auto workerDomain =
-        coro->GetWorker()->IsMainWorker() ? CoroutineWorkerDomain::MAIN : CoroutineWorkerDomain::GENERAL;
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsPromise> hpromise(coro, promise);
-    EtsHandle<EtsObject> hcallback(coro, callback);
+        jobExecCtx->GetWorker()->IsMainWorker() ? JobWorkerThreadDomain::MAIN : JobWorkerThreadDomain::GENERAL;
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    EtsHandle<EtsObject> hcallback(executionCtx, callback);
     EtsMutex::LockHolder lh(hpromise);
     if (hpromise->IsPending() || hpromise->IsLinked()) {
-        EnsureCapacity(coro, hpromise);
-        hpromise->SubmitCallback(coro, hcallback.GetPtr(), workerDomain);
+        EnsureCapacity(executionCtx, hpromise);
+        hpromise->SubmitCallback(executionCtx, hcallback.GetPtr(), workerDomain);
         return;
     }
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        coro->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(hpromise.GetPtr(), coro);
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(hpromise.GetPtr(), executionCtx);
     }
     ASSERT(hpromise->GetQueueSize() == 0);
-    ASSERT(hpromise->GetCallbackQueue(coro) == nullptr);
-    ASSERT(hpromise->GetWorkerDomainQueue(coro) == nullptr);
-    auto groupId = workerDomain == CoroutineWorkerDomain::MAIN
-                       ? CoroutineWorkerGroup::FromDomain(coro->GetCoroutineManager(), CoroutineWorkerDomain::MAIN)
-                       : CoroutineWorkerGroup::AnyId();
-    EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), groupId);
+    ASSERT(hpromise->GetCallbackQueue(executionCtx) == nullptr);
+    ASSERT(hpromise->GetWorkerDomainQueue(executionCtx) == nullptr);
+    auto groupId = workerDomain == JobWorkerThreadDomain::MAIN
+                       ? JobWorkerThreadGroup::FromDomain(jobExecCtx->GetManager(), JobWorkerThreadDomain::MAIN)
+                       : JobWorkerThreadGroup::AnyId();
+    EtsPromise::LaunchCallback(executionCtx, hcallback.GetPtr(), groupId);
 }
 
-static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsPromise> &promiseHandle)
+static EtsObject *AwaitProxyPromise(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &promiseHandle)
 {
     /**
      * This is a backed by JS equivalent promise.
@@ -167,7 +169,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      * JS mode:
      *      - add a callback to JQ, that will:
      *          - resolve the promise with some value OR reject it
-     *          - unblock the coro via event
+     *          - unblock the executionCtx via event
      *          - schedule();
      *      - create a blocker event and link it to the promise
      *      - block current coroutine on the event
@@ -182,51 +184,46 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
     // will get here after the JS callback is called
     if (promiseHandle->IsResolved()) {
         LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been resolved.";
-        return promiseHandle->GetValue(currentCoro);
+        return promiseHandle->GetValue(executionCtx);
     }
     // rejected
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        currentCoro->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(),
-                                                                                      currentCoro);
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(),
+                                                                                       executionCtx);
     }
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
-    auto *exc = promiseHandle->GetValue(currentCoro);
+    auto *exc = promiseHandle->GetValue(executionCtx);
     ASSERT(exc != nullptr);
-    currentCoro->SetException(exc->GetCoreType());
+    executionCtx->GetMT()->SetException(exc->GetCoreType());
     return nullptr;
 }
 
 EtsObject *EtsAwaitPromise(EtsPromise *promise)
 {
-    EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
+    JobExecutionContext *executionCtx = JobExecutionContext::GetCurrent();
+    EtsExecutionContext *etsCtx = EtsExecutionContext::FromMT(executionCtx);
     if (promise == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, currentCoro);
+        ThrowNullPointerException(ctx, executionCtx);
         return nullptr;
     }
-    if (currentCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(currentCoro, PlatformTypes(currentCoro)->coreInvalidCoroutineOperationError,
+    if (executionCtx->GetManager()->IsJobSwitchDisabled()) {
+        ThrowEtsException(etsCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot await in the current context!");
         return nullptr;
     }
-    auto *refStorage = currentCoro->GetPandaAniEnv()->GetEtsReferenceStorage();
-    auto *ctxRef = currentCoro->GetAsyncContext();
-    if (ctxRef != nullptr) {
-        auto *asyncCtx = EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(ctxRef));
-        asyncCtx->SetAwaitee(currentCoro, promise);
-    }
 
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
-    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+    [[maybe_unused]] EtsHandleScope scope(etsCtx);
+    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
 
     {
-        ScopedNativeCodeThread n(currentCoro);
-        currentCoro->GetManager()->Schedule();
+        ScopedNativeCodeThread n(executionCtx);
+        executionCtx->GetManager()->ExecuteJobs();
     }
 
     /* CASE 1. This is a converted JS promise */
     if (promiseHandle->IsProxy()) {
-        return AwaitProxyPromise(currentCoro, promiseHandle);
+        return AwaitProxyPromise(etsCtx, promiseHandle);
     }
 
     /* CASE 2. This is a native ETS promise */
@@ -241,22 +238,21 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
      *          if resolved: return Promise.value
      *          if rejected: throw Promise.value
      *      JS mode: NOTE!
-     *          - suspend coro, create resolved JS promise and put it to the Q, on callback resume the coro
-     *            and possibly throw
+     *          - suspend executionCtx, create resolved JS promise and put it to the Q, on callback resume the
+     * executionCtx and possibly throw
      *          - JQ::put(current_coro, promise)
      *
      */
     if (promiseHandle->IsResolved()) {
         LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
-        return promiseHandle->GetValue(currentCoro);
+        return promiseHandle->GetValue(etsCtx);
     }
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        currentCoro->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(),
-                                                                                      currentCoro);
+        etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
     }
     LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
-    auto *exc = promiseHandle->GetValue(currentCoro);
-    currentCoro->SetException(exc->GetCoreType());
+    auto *exc = promiseHandle->GetValue(etsCtx);
+    executionCtx->SetException(exc->GetCoreType());
     return nullptr;
 }
 }  // namespace ark::ets::intrinsics

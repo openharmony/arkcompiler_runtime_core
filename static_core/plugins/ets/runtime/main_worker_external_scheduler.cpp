@@ -14,7 +14,8 @@
  */
 
 #include "plugins/ets/runtime/main_worker_external_scheduler.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/execution/job_manager.h"
+#include "runtime/execution/job_execution_context.h"
 
 namespace ark::ets {
 
@@ -33,7 +34,7 @@ void MainWorkerExternalScheduler::PostImpl(int64_t delayMs)
         }
     } else {
         auto schedFunc = []([[maybe_unused]] void *param) {
-            EtsCoroutine::GetCurrent()->GetCoroutineManager()->Schedule();
+            JobExecutionContext::GetCurrent()->GetManager()->ExecuteJobs();
         };
         poster_(schedFunc, nullptr, "ScheduleCoroutine", delayMs);
     }
@@ -43,9 +44,9 @@ static void ScheduleWrapper(void *param)
 {
     auto *needTriggerScheduler = static_cast<std::atomic<bool> *>(param);
     *needTriggerScheduler = true;
-    auto *coroMan = EtsCoroutine::GetCurrent()->GetCoroutineManager();
-    ASSERT(EtsCoroutine::GetCurrent() == coroMan->GetMainThread());
-    coroMan->Schedule();
+    auto *jobMan = JobExecutionContext::GetCurrent()->GetManager();
+    ASSERT(JobExecutionContext::GetCurrent() == jobMan->GetMainThread());
+    jobMan->ExecuteJobs();
 }
 
 }  // namespace ark::ets

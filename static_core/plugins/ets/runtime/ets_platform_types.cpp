@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "ets_class_linker_extension.h"
+#include "include/managed_thread.h"
 #include "include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -124,7 +125,7 @@ static EtsClass *GetTypeEntryClass(EtsPlatformTypes *ptypes, std::string_view de
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
-EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
+EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsExecutionContext *executionCtx)
 {
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     [[maybe_unused]] size_t orderOffset = 0;
@@ -184,10 +185,10 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     }
 }
 
-void EtsPlatformTypes::InitializeClasses(EtsCoroutine *coro)
+void EtsPlatformTypes::InitializeClasses(EtsExecutionContext *executionCtx)
 {
-    ASSERT(coro != nullptr);
-    ScopedManagedCodeThread sj(coro);
+    ASSERT(executionCtx != nullptr);
+    ScopedManagedCodeThread sj(executionCtx->GetMT());
 
     auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     for (auto iter : entryTable_) {
@@ -195,7 +196,7 @@ void EtsPlatformTypes::InitializeClasses(EtsCoroutine *coro)
         ASSERT(idx < sizeof(EtsPlatformTypes));
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         EtsClass *klass = *(reinterpret_cast<EtsClass **>(this) + idx);
-        if (klass != nullptr && !classLinker->InitializeClass(coro, klass)) {
+        if (klass != nullptr && !classLinker->InitializeClass(executionCtx, klass)) {
             LOG(FATAL, RUNTIME) << "Cannot initialize a platform class " << klass->GetDescriptor();
         }
     }

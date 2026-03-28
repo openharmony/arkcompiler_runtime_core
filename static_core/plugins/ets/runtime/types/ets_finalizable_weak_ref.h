@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,8 @@
 
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/include/managed_thread.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 namespace ark::ets {
 
@@ -56,7 +57,7 @@ public:
         FinalizerArg argPtr_;
     };
 
-    static EtsFinalizableWeakRef *Create(EtsCoroutine *etsCoroutine);
+    static EtsFinalizableWeakRef *Create(EtsExecutionContext *executionCtx);
 
     static EtsFinalizableWeakRef *FromCoreType(ObjectHeader *finalizableWeakRef)
     {
@@ -107,16 +108,16 @@ public:
         return MEMBER_OFFSET(EtsFinalizableWeakRef, next_);
     }
 
-    void SetPrev(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef)
+    void SetPrev(EtsExecutionContext *executionCtx, EtsFinalizableWeakRef *weakRef)
     {
         auto *prev = weakRef != nullptr ? weakRef->GetCoreType() : nullptr;
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsFinalizableWeakRef, prev_), prev);
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsFinalizableWeakRef, prev_), prev);
     }
 
-    void SetNext(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef)
+    void SetNext(EtsExecutionContext *executionCtx, EtsFinalizableWeakRef *weakRef)
     {
         auto *next = weakRef != nullptr ? weakRef->GetCoreType() : nullptr;
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsFinalizableWeakRef, next_), next);
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsFinalizableWeakRef, next_), next);
     }
 
 private:

@@ -17,6 +17,7 @@
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/integrate/ark_vm_api.h"
+#include "runtime/execution/job_execution_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/main_worker_external_scheduler.h"
 #include "runtime/include/runtime.h"
@@ -32,13 +33,13 @@ extern "C" arkvm_status ARKVM_RegisterExternalScheduler(arkvm_external_scheduler
     if (mutator == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
-    auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
-    if (coroutine == nullptr || coroutine != coroutine->GetCoroutineManager()->GetMainThread()) {
+    auto *executionCtx = ark::JobExecutionContext::GetCurrent();
+    if (executionCtx == nullptr || executionCtx != executionCtx->GetManager()->GetMainThread()) {
         return ARKVM_INVALID_CONTEXT;
     }
 
     auto mainPoster = ark::MakePandaUnique<ark::ets::MainWorkerExternalScheduler>(poster);
-    coroutine->GetWorker()->SetCallbackPoster(std::move(mainPoster));
+    executionCtx->GetWorker()->SetCallbackPoster(std::move(mainPoster));
     return ARKVM_OK;
 }
 
@@ -53,12 +54,12 @@ extern "C" arkvm_status ARKVM_RunScheduler(arkvm_schedule_mode mode)
     if (mutator == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
-    auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
-    if (coroutine == nullptr) {
+    auto *executionCtx = ark::JobExecutionContext::GetCurrent();
+    if (executionCtx == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
 
-    coroutine->GetCoroutineManager()->Schedule();
+    executionCtx->GetManager()->ExecuteJobs();
     return ARKVM_OK;
 }
 

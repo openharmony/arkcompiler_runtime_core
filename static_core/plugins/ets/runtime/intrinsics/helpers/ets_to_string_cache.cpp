@@ -16,6 +16,7 @@
 #include <charconv>
 #include "ets_class_linker_extension.h"
 #include "ets_to_string_cache.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "libarkbase/mem/mem.h"
@@ -23,19 +24,19 @@
 namespace ark::ets::detail {
 
 template <typename T>
-ToStringResult EtsToStringCacheElement<T>::TryStore(EtsCoroutine *coro, EtsString *string, T number)
+ToStringResult EtsToStringCacheElement<T>::TryStore(EtsExecutionContext *executionCtx, EtsString *string, T number)
 {
-    ASSERT(coro != nullptr);
-    SetString(coro, string);
+    ASSERT(executionCtx != nullptr);
+    SetString(executionCtx, string);
     SetNumber(number);
     return ToStringResult::STORE_UPDATE;
 }
 
 /* static */
 template <typename T>
-EtsClass *EtsToStringCacheElement<T>::GetClass(EtsCoroutine *coro)
+EtsClass *EtsToStringCacheElement<T>::GetClass(EtsExecutionContext *executionCtx)
 {
-    auto *pt = PlatformTypes(coro);
+    auto *pt = PlatformTypes(executionCtx);
     if constexpr (std::is_same_v<T, EtsDouble>) {
         return pt->coreDoubleToStringCacheElement;
     } else if constexpr (std::is_same_v<T, EtsFloat>) {
@@ -49,20 +50,21 @@ EtsClass *EtsToStringCacheElement<T>::GetClass(EtsCoroutine *coro)
 
 /* static */
 template <typename T>
-EtsToStringCacheElement<T> *EtsToStringCacheElement<T>::Create(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle,
-                                                               T number, EtsClass *klass)
+EtsToStringCacheElement<T> *EtsToStringCacheElement<T>::Create(EtsExecutionContext *executionCtx,
+                                                               EtsHandle<EtsString> &stringHandle, T number,
+                                                               EtsClass *klass)
 {
-    auto *instance = FromCoreType(EtsObject::Create(coro, klass)->GetCoreType());
-    instance->SetString(coro, stringHandle.GetPtr());
+    auto *instance = FromCoreType(EtsObject::Create(executionCtx, klass)->GetCoreType());
+    instance->SetString(executionCtx, stringHandle.GetPtr());
     instance->SetNumber(number);
     return instance;
 }
 
 template <typename T>
-void EtsToStringCacheElement<T>::SetString(EtsCoroutine *coro, EtsString *string)
+void EtsToStringCacheElement<T>::SetString(EtsExecutionContext *executionCtx, EtsString *string)
 {
     ASSERT(string != nullptr);
-    ObjectAccessor::SetObject(coro, this, GetStringOffset(), string->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, GetStringOffset(), string->GetCoreType());
 }
 
 template <typename T>
@@ -126,46 +128,48 @@ uint32_t EtsToStringCache<T, Derived, Hash>::GetIndex(T number)
 
 template <typename T, typename Derived, typename Hash>
 std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::FinishUpdate(
-    EtsCoroutine *coro, T number, EtsToStringCacheElement<T> *elem)
+    EtsExecutionContext *executionCtx, T number, EtsToStringCacheElement<T> *elem)
 {
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsToStringCacheElement<T>> elemHandle(coro, elem);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsToStringCacheElement<T>> elemHandle(executionCtx, elem);
     // may trigger GC
     auto *string = ToString(number);
     ASSERT(string != nullptr);
     ASSERT(elemHandle.GetPtr() != nullptr);
-    auto storeRes = elemHandle->TryStore(coro, string, number);
+    auto storeRes = elemHandle->TryStore(executionCtx, string, number);
     return {string, storeRes};
 }
 
 template <typename T, typename Derived, typename Hash>
-std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOrCacheImpl(EtsCoroutine *coro, T number)
+std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOrCacheImpl(
+    EtsExecutionContext *executionCtx, T number)
 {
     EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     auto index = GetIndex(number);
     auto *elem = Base::Get(index);
     if (UNLIKELY(elem == nullptr)) {
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        EtsHandle<EtsString> string(coro, ToString(number));
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
+        EtsHandle<EtsString> string(executionCtx, ToString(number));
         ASSERT(string.GetPtr() != nullptr);
         // may trigger GC
-        StoreToCache(coro, string, number, index);
+        StoreToCache(executionCtx, string, number, index);
         ASSERT(string.GetPtr() != nullptr);
         return {string.GetPtr(), ToStringResult::STORE_NEW};
     }
     auto cachedNumber = elem->GetNumber();
     if (LIKELY(cachedNumber == number)) {
-        return {elem->GetString(coro), ToStringResult::LOAD_CACHED};
+        return {elem->GetString(executionCtx), ToStringResult::LOAD_CACHED};
     }
-    return FinishUpdate(coro, number, elem);
+    return FinishUpdate(executionCtx, number, elem);
 }
 
 template <typename T, typename Derived, typename Hash>
-EtsString *EtsToStringCache<T, Derived, Hash>::CacheAndGetNoCheck(EtsCoroutine *coro, T number, ObjectHeader *elem)
+EtsString *EtsToStringCache<T, Derived, Hash>::CacheAndGetNoCheck(EtsExecutionContext *executionCtx, T number,
+                                                                  ObjectHeader *elem)
 {
     ASSERT(elem != nullptr);
     EVENT_ETS_CACHE("Fastpath: create string from number with cache");
-    return FinishUpdate(coro, number, Elem::FromCoreType(elem)).first;
+    return FinishUpdate(executionCtx, number, Elem::FromCoreType(elem)).first;
 }
 
 /* static */
@@ -178,9 +182,9 @@ EtsString *EtsToStringCache<T, Derived, Hash>::GetNoCache(T number)
 
 /* static */
 template <typename T, typename Derived, typename Hash>
-Derived *EtsToStringCache<T, Derived, Hash>::Create(EtsCoroutine *coro)
+Derived *EtsToStringCache<T, Derived, Hash>::Create(EtsExecutionContext *executionCtx)
 {
-    auto *etsClass = Elem::GetClass(coro);
+    auto *etsClass = Elem::GetClass(executionCtx);
     if (etsClass == nullptr) {
         return nullptr;
     }
@@ -188,13 +192,13 @@ Derived *EtsToStringCache<T, Derived, Hash>::Create(EtsCoroutine *coro)
 }
 
 template <typename T, typename Derived, typename Hash>
-void EtsToStringCache<T, Derived, Hash>::StoreToCache(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle, T number,
-                                                      uint32_t index)
+void EtsToStringCache<T, Derived, Hash>::StoreToCache(EtsExecutionContext *executionCtx,
+                                                      EtsHandle<EtsString> &stringHandle, T number, uint32_t index)
 {
     auto *arrayClass = Base::GetCoreType()->template ClassAddr<Class>();
     auto *elemClass = arrayClass->GetComponentType();
     ASSERT(elemClass->GetObjectSize() == Elem::GetNumberOffset() + sizeof(T));
-    auto *elem = Elem::Create(coro, stringHandle, number, EtsClass::FromRuntimeClass(elemClass));
+    auto *elem = Elem::Create(executionCtx, stringHandle, number, EtsClass::FromRuntimeClass(elemClass));
     Base::Set(index, elem);
 }
 

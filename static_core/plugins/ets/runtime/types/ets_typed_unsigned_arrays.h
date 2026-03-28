@@ -114,12 +114,12 @@ public:
             ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, name_)));
     }
 
-    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsInt byteOffset, EtsObject *buffer,
-                    EtsString *name)
+    void Initialize(EtsExecutionContext *executionCtx, EtsInt lengthInt, EtsInt bytesPerElement, EtsInt byteOffset,
+                    EtsObject *buffer, EtsString *name)
     {
         ASSERT(buffer != nullptr);
-        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, name_),
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, name_),
                                   name != nullptr ? name->GetCoreType() : nullptr);
         bytesPerElement_ = bytesPerElement;
         byteOffset_ = byteOffset;

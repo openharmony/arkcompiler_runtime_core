@@ -18,6 +18,7 @@
 #include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_error.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/refstorage/reference.h"
 
@@ -26,51 +27,57 @@ namespace ark::ets::intrinsics {
 EtsAsyncContext *EtsAsyncContextInit()
 {
     // NOTE(panferovi): create new coroutine here and set AsyncContext to it
-    auto *newCoro = EtsCoroutine::GetCurrent();
-    auto *refStorage = newCoro->GetPandaAniEnv()->GetEtsReferenceStorage();
-    auto *asyncCtx = EtsAsyncContext::Create(newCoro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *refStorage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *asyncCtx = EtsAsyncContext::Create(executionCtx);
     if (UNLIKELY(asyncCtx == nullptr)) {
-        ASSERT(newCoro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     auto *ctxRef = refStorage->NewEtsRef(asyncCtx, mem::Reference::ObjectType::LOCAL);
-    newCoro->SetAsyncContext(ctxRef);
-    ASSERT(Coroutine::GetCurrent() == newCoro);
+    EtsCoroutine::CastFromThread(executionCtx->GetMT())->SetAsyncContext(ctxRef);
+    ASSERT(Coroutine::GetCurrent() == executionCtx->GetMT());
     return asyncCtx;
 }
 
 EtsAsyncContext *EtsAsyncContextCurrent()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *refStorage = coro->GetPandaAniEnv()->GetEtsReferenceStorage();
-    auto *ctxRef = coro->GetAsyncContext();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *refStorage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *ctxRef = EtsCoroutine::CastFromThread(executionCtx->GetMT())->GetAsyncContext();
     return ctxRef == nullptr ? nullptr : EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(ctxRef));
 }
 
 EtsPromise *EtsAsyncContextResolve(EtsAsyncContext *asyncCtx, EtsObject *val)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *returnValue = asyncCtx->GetReturnValue(coro);
-    returnValue->Resolve(coro, val);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *returnValue = asyncCtx->GetReturnValue(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, returnValue);
+    EtsHandle<EtsObject> hval(executionCtx, val);
+    EtsMutex::LockHolder lh(hpromise);
+    hpromise->Resolve(executionCtx, hval.GetPtr());
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    return returnValue;
+    return hpromise.GetPtr();
 }
 
 EtsPromise *EtsAsyncContextReject(EtsAsyncContext *asyncCtx, EtsError *err)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *returnValue = asyncCtx->GetReturnValue(coro);
-    returnValue->Reject(coro, err);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *returnValue = asyncCtx->GetReturnValue(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, returnValue);
+    EtsHandle<EtsError> herr(executionCtx, err);
+    EtsMutex::LockHolder lh(hpromise);
+    hpromise->Reject(executionCtx, herr.GetPtr());
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    return returnValue;
+    return hpromise.GetPtr();
 }
 
 EtsObject *EtsAsyncContextResult(EtsAsyncContext *asyncCtx)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *returnValue = asyncCtx->GetReturnValue(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *returnValue = asyncCtx->GetReturnValue(executionCtx);
     ASSERT(returnValue->IsResolved() || returnValue->IsRejected());
-    return returnValue->GetValue(coro);
+    return returnValue->GetValue(executionCtx);
 }
 
 }  // namespace ark::ets::intrinsics

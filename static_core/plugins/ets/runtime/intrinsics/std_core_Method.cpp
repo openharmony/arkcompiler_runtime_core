@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include <cctype>
-#include "ets_coroutine.h"
 #include "handle_scope.h"
 #include "include/mem/panda_containers.h"
 #include "libarkbase/macros.h"
@@ -35,7 +34,8 @@ namespace ark::ets::intrinsics {
 
 namespace {
 // NOTE: requires parent handle scope
-EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth, EtsObject *recv, EtsArray *args)
+EtsObject *TypeAPIMethodInvokeImplementation(EtsExecutionContext *executionCtx, EtsMethod *meth, EtsObject *recv,
+                                             EtsArray *args)
 {
     if (meth->IsAbstract()) {
         ASSERT(recv != nullptr);
@@ -71,7 +71,7 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
     }
 
     ASSERT(meth->GetPandaMethod()->GetNumArgs() == realArgs.size());
-    auto res = meth->GetPandaMethod()->Invoke(coro, realArgs.data());
+    auto res = meth->GetPandaMethod()->Invoke(executionCtx->GetMT(), realArgs.data());
     if (res.IsReference()) {
         return EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     }
@@ -84,7 +84,7 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
     // CC-OFFNXT(G.FMT.14-CPP) project code style
     return EtsPrimitiveTypeEnumToComptimeConstant(meth->GetReturnValueType(), [&](auto type) -> EtsObject * {
         using T = EtsTypeEnumToCppType<decltype(type)::value>;
-        return EtsBoxPrimitive<T>::Create(coro, res.GetAs<T>());
+        return EtsBoxPrimitive<T>::Create(executionCtx, res.GetAs<T>());
     });
 }
 
@@ -100,31 +100,31 @@ EtsMethod *GetEtsMethod(ObjectHeader *methodTypeObj)
 extern "C" {
 EtsObject *TypeAPIMethodInvoke(ObjectHeader *methodTypeObj, EtsObject *recv, EtsArray *args)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope {coro};
-    VMHandle<EtsObject> recvHandle {coro, recv->GetCoreType()};
-    VMHandle<EtsArray> argsHandle {coro, args->GetCoreType()};
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope {executionCtx};
+    EtsHandle<EtsObject> recvHandle {executionCtx, recv};
+    EtsHandle<EtsArray> argsHandle {executionCtx, args};
     // this method shouldn't trigger gc, because class is loaded,
     // however static analyzer blames this line
     auto *meth = GetEtsMethod(methodTypeObj);
     ASSERT(meth != nullptr);
-    return TypeAPIMethodInvokeImplementation(coro, meth, recvHandle.GetPtr(), argsHandle.GetPtr());
+    return TypeAPIMethodInvokeImplementation(executionCtx, meth, recvHandle.GetPtr(), argsHandle.GetPtr());
 }
 
 EtsObject *TypeAPIMethodInvokeConstructor(ObjectHeader *methodTypeObj, EtsArray *args)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope {coro};
-    VMHandle<EtsArray> argsHandle {coro, args->GetCoreType()};
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope {executionCtx};
+    EtsHandle<EtsArray> argsHandle {executionCtx, args};
 
     auto *meth = GetEtsMethod(methodTypeObj);
     ASSERT(meth != nullptr);
     ASSERT(meth->IsConstructor());
     auto klass = meth->GetClass()->GetRuntimeClass();
-    auto initedObj = ObjectHeader::Create(coro, klass);
+    auto initedObj = ObjectHeader::Create(executionCtx->GetMT(), klass);
     ASSERT(initedObj->ClassAddr<Class>() == klass);
-    VMHandle<EtsObject> ret {coro, initedObj};
-    TypeAPIMethodInvokeImplementation(coro, meth, ret.GetPtr(), argsHandle.GetPtr());
+    VMHandle<EtsObject> ret {executionCtx->GetMT(), initedObj};
+    TypeAPIMethodInvokeImplementation(executionCtx, meth, ret.GetPtr(), argsHandle.GetPtr());
     return ret.GetPtr();
 }
 }

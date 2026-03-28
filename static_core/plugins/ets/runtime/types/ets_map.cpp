@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,15 @@
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 
 namespace ark::ets {
+
+class EtsExecutionContext;
+
 static constexpr int NUMERIC_INT_MAX = std::numeric_limits<int>::max();
 static constexpr int NUMERIC_INT_MIN = std::numeric_limits<int>::min();
 
-[[maybe_unused]] static bool Compare(EtsCoroutine *coro, EtsObject *a, EtsObject *b)
+[[maybe_unused]] static bool Compare(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b)
 {
-    return ark::ets::intrinsics::helpers::SameValueZero(coro, a, b);
+    return ark::ets::intrinsics::helpers::SameValueZero(executionCtx, a, b);
 }
 
 template <typename T>

@@ -24,8 +24,6 @@
 
 namespace ark::ets {
 
-class EtsCoroutine;
-
 namespace test {
 class EtsErrorOptionsTest;
 }  // namespace test
@@ -62,10 +60,10 @@ public:
         }
     }
 
-    inline static EtsErrorOptions *Create(EtsCoroutine *etsCoroutine)
+    inline static EtsErrorOptions *Create(EtsExecutionContext *executionCtx)
     {
-        EtsClass *klass = PlatformTypes(etsCoroutine)->coreErrorOptionsImpl;
-        EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
+        EtsClass *klass = PlatformTypes(executionCtx)->coreErrorOptionsImpl;
+        EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
         return reinterpret_cast<EtsErrorOptions *>(etsObject);
     }
 

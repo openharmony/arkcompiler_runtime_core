@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,16 +87,16 @@ public:
         return ObjectAccessor::GetPrimitive<EtsInt>(this, GetInitialCapacityOffset());
     }
 
-    MapIdx GetFirstIdx(EtsCoroutine *coro)
+    MapIdx GetFirstIdx(EtsExecutionContext *executionCtx)
     {
-        return GetNextIdx(coro, (0 - 1));
+        return GetNextIdx(executionCtx, (0 - 1));
     }
 
-    MapIdx GetNextIdx(EtsCoroutine *coro, MapIdx curIdx)
+    MapIdx GetNextIdx(EtsExecutionContext *executionCtx, MapIdx curIdx)
     {
         const EtsInt numEntries = GetNumEntries();
         if (curIdx < numEntries) {
-            EtsIntArray *buckets = GetBuckets(coro);
+            EtsIntArray *buckets = GetBuckets(executionCtx);
             while (++curIdx < numEntries) {
                 if (buckets->Get(MAP_IDX_FACTOR * curIdx + 1) != 0) {
                     return curIdx;
@@ -106,30 +106,30 @@ public:
         return MAP_IDX_END;
     }
 
-    EtsObject *GetKey(EtsCoroutine *coro, EtsInt idx)
+    EtsObject *GetKey(EtsExecutionContext *executionCtx, EtsInt idx)
     {
-        EtsObjectArray *data = GetData(coro);
+        EtsObjectArray *data = GetData(executionCtx);
         return data->Get(MAP_IDX_FACTOR * idx + 0);
     }
 
-    EtsObject *GetValue(EtsCoroutine *coro, EtsInt idx)
+    EtsObject *GetValue(EtsExecutionContext *executionCtx, EtsInt idx)
     {
-        EtsObjectArray *data = GetData(coro);
+        EtsObjectArray *data = GetData(executionCtx);
         return data->Get(MAP_IDX_FACTOR * idx + 1);
     }
 
     static uint32_t GetHashCode(EtsObject *key);
 
 private:
-    EtsObjectArray *GetData(EtsCoroutine *coro)
+    EtsObjectArray *GetData(EtsExecutionContext *executionCtx)
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetDataOffset());
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, GetDataOffset());
         return reinterpret_cast<EtsObjectArray *>(obj);
     }
 
-    EtsIntArray *GetBuckets(EtsCoroutine *coro)
+    EtsIntArray *GetBuckets(EtsExecutionContext *executionCtx)
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetBucketsOffset());
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, GetBucketsOffset());
         return reinterpret_cast<EtsIntArray *>(obj);
     }
 

@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_UTILS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_UTILS_H
 
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
 #include <string>
@@ -33,16 +33,16 @@ static constexpr std::string_view INDEXED_INT_SET_METHOD_SIGNATURE = "ILY;:V";
 
 bool IsEtsGlobalClassName(const std::string &descriptor);
 
-EtsObject *GetBoxedValue(EtsCoroutine *coro, Value value, EtsType type);
+EtsObject *GetBoxedValue(EtsExecutionContext *executionCtx, Value value, EtsType type);
 
-Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj);
+Value GetUnboxedValue(EtsExecutionContext *executionCtx, EtsObject *obj);
 
-EtsObject *GetPropertyValue(EtsCoroutine *coro, const EtsObject *etsObj, EtsField *field);
-bool SetPropertyValue(EtsCoroutine *coro, EtsObject *etsObj, EtsField *field, EtsObject *valToSet);
+EtsObject *GetPropertyValue(EtsExecutionContext *executionCtx, const EtsObject *etsObj, EtsField *field);
+bool SetPropertyValue(EtsExecutionContext *executionCtx, EtsObject *etsObj, EtsField *field, EtsObject *valToSet);
 
 class LambdaUtils {
 public:
-    PANDA_PUBLIC_API static void InvokeVoid(EtsCoroutine *coro, EtsObject *lambda);
+    PANDA_PUBLIC_API static void InvokeVoid(ManagedThread *mThread, EtsObject *lambda);
 
     NO_COPY_SEMANTIC(LambdaUtils);
     NO_MOVE_SEMANTIC(LambdaUtils);

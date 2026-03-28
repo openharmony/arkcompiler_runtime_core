@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,6 @@ namespace test {
 class EtsTypeAPITest;
 }  // namespace test
 
-class EtsCoroutine;
-
 class EtsTypeAPIField : public ObjectHeader {
 public:
     EtsTypeAPIField() = delete;
@@ -38,7 +36,7 @@ public:
     NO_COPY_SEMANTIC(EtsTypeAPIField);
     NO_MOVE_SEMANTIC(EtsTypeAPIField);
 
-    static EtsTypeAPIField *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
+    static EtsTypeAPIField *Create(EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent());
 
     EtsObject *AsObject()
     {

@@ -107,9 +107,9 @@ static void ProcessFinalizationRegistryCleanup()
 {
     auto *vm = static_cast<ark::ets::PandaEtsVM *>(GetPandaVM());
     auto *referenceProcessor = static_cast<mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor());
-    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
+    auto *executionCtx = ark::ets::EtsExecutionContext::GetCurrent();
     referenceProcessor->ProcessClearedReferences();
-    vm->GetFinalizationRegistryManager()->StartCleanupCoroIfNeeded(coro);
+    vm->GetFinalizationRegistryManager()->LaunchCleanupJobIfNeeded(executionCtx);
 }
 
 class StaticVMInterface : public common_vm::VMInterface {

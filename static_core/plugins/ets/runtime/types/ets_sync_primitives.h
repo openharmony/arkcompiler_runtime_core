@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 
+#include "runtime/execution/job_execution_context.h"
 #include "libarkbase/mem/object_pointer.h"
 #include "libarkbase/macros.h"
 #include "runtime/include/thread_scopes.h"
@@ -57,15 +58,15 @@ public:
         return this;
     }
 
-    EtsWaitersList *GetWaitersList(EtsCoroutine *coro)
+    EtsWaitersList *GetWaitersList(EtsExecutionContext *executionCtx)
     {
         return EtsWaitersList::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsSyncPrimitive, waitersList_)));
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsSyncPrimitive, waitersList_)));
     }
 
-    void SetWaitersList(EtsCoroutine *coro, EtsWaitersList *waitersList)
+    void SetWaitersList(EtsExecutionContext *executionCtx, EtsWaitersList *waitersList)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsSyncPrimitive, waitersList_),
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsSyncPrimitive, waitersList_),
                                   waitersList->GetCoreType());
     }
 
@@ -76,16 +77,16 @@ public:
      */
     static ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList *waiters, EtsWaitersList::Node *awaitee)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro != nullptr);
-        auto *coroManager = coro->GetCoroutineManager();
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
+        auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
         auto &event = awaitee->GetEvent();
         // Need to lock event before PushBack
-        // to avoid use-after-free in CoroutineEvent::Happen method
+        // to avoid use-after-free in JobEvent::Happen method
         event.Lock();
         waiters->PushBack(awaitee);
-        ScopedNativeCodeThread nativeCode(coro);
-        coroManager->Await(&event);
+        ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
+        jobManager->Await(&event);
     }
 
     /**
@@ -100,12 +101,12 @@ public:
 
     void SuspendCoroutine(EtsWaitersList::Node *awaitee)
     {
-        SuspendCoroutine(GetWaitersList(EtsCoroutine::GetCurrent()), awaitee);
+        SuspendCoroutine(GetWaitersList(EtsExecutionContext::GetCurrent()), awaitee);
     }
 
     void ResumeCoroutine()
     {
-        ResumeCoroutine(GetWaitersList(EtsCoroutine::GetCurrent()));
+        ResumeCoroutine(GetWaitersList(EtsExecutionContext::GetCurrent()));
     }
 
 private:
@@ -154,7 +155,7 @@ public:
     /// This method should be used to make sure that mutex is locked by current coroutine.
     bool IsHeld();
 
-    static EtsMutex *Create(EtsCoroutine *coro);
+    static EtsMutex *Create(EtsExecutionContext *executionCtx);
 
 private:
     std::atomic<uint32_t> waiters_;
@@ -178,7 +179,7 @@ public:
      */
     void Fire();
 
-    static EtsEvent *Create(EtsCoroutine *coro);
+    static EtsEvent *Create(EtsExecutionContext *executionCtx);
 
 private:
     static constexpr uint32_t STATE_BIT = 1U;
@@ -227,7 +228,7 @@ public:
      */
     void NotifyAll([[maybe_unused]] EtsMutex *mutex);
 
-    static EtsCondVar *Create(EtsCoroutine *coro);
+    static EtsCondVar *Create(EtsExecutionContext *executionCtx);
 
 private:
     EtsInt waiters_;
@@ -272,7 +273,7 @@ public:
         return this;
     }
 
-    static EtsQueueSpinlock *Create(EtsCoroutine *coro);
+    static EtsQueueSpinlock *Create(EtsExecutionContext *executionCtx);
 
     /// This method should be used to make sure that spinlock is acquired by current coroutine.
     bool IsHeld() const;
@@ -337,14 +338,16 @@ public:
     class State;
 
 private:
-    EtsWaitersList *GetReaders(EtsCoroutine *coro)
+    EtsWaitersList *GetReaders(EtsExecutionContext *executionCtx)
     {
-        return EtsWaitersList::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsRWLock, readers_)));
+        return EtsWaitersList::FromCoreType(
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsRWLock, readers_)));
     }
 
-    EtsWaitersList *GetWriters(EtsCoroutine *coro)
+    EtsWaitersList *GetWriters(EtsExecutionContext *executionCtx)
     {
-        return EtsWaitersList::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsRWLock, writers_)));
+        return EtsWaitersList::FromCoreType(
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsRWLock, writers_)));
     }
 
     ObjectPointer<EtsObject> rLock_;

@@ -21,6 +21,7 @@
 #include "ani_options.h"
 #include "compiler/compiler_logger.h"
 #include "compiler/compiler_options.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
@@ -53,11 +54,12 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
         return ANI_ERROR;
     }
 
-    auto coroutine = ark::ets::EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *mThread = ark::ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
 #ifdef PANDA_ETS_INTEROP_JS
     if (aniOptions.IsInteropMode()) {
-        bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniOptions.GetInteropEnv());
+        bool created = ark::ets::interop::js::CreateMainInteropContext(ark::ets::EtsExecutionContext::FromMT(mThread),
+                                                                       aniOptions.GetInteropEnv());
         if (!created) {
             LOG(ERROR, ANI) << "Cannot create interop context";
             ark::Runtime::Destroy();
@@ -66,7 +68,7 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     }
 #endif /* PANDA_ETS_INTEROP_JS */
 
-    *result = coroutine->GetPandaVM();
+    *result = ark::ets::EtsExecutionContext::FromMT(mThread)->GetPandaVM();
     ASSERT(*result != nullptr);
 
     // NOTE:
@@ -87,14 +89,15 @@ extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLe
         *result = 0;
         return ANI_OK;
     }
-    // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
-    auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
-    if (coroutine != nullptr) {
+    // After verifying that the current thread is attached to VM, it is valid to get current ManagedThread
+    auto *mThread = ark::ManagedThread::GetCurrent();
+    if (mThread != nullptr) {
         if (vmsBufferLength < 1) {
             return ANI_INVALID_ARGS;
         }
 
-        vmsBuffer[0] = coroutine->GetPandaVM();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        vmsBuffer[0] = ark::ets::EtsExecutionContext::FromMT(mThread)->GetPandaVM();
         *result = 1;
     } else {
         *result = 0;
@@ -141,14 +144,14 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
         LOG(ERROR, ANI) << "Cannot get environment, thread is not attached to VM";
         return ANI_ERROR;
     }
-    // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(coro == nullptr)) {
-        LOG(ERROR, ANI) << "Cannot get environment, no current coroutine exists";
+    // After verifying that the current thread is attached to VM, it is valid to get current EtsExecutionContext
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(executionCtx == nullptr)) {
+        LOG(ERROR, ANI) << "Cannot get environment, no current execution context exists";
         return ANI_ERROR;
     }
-    ani_env *env = coro->GetPandaAniEnv();
-    // Each EtsCoroutine must have a valid ani_env
+    ani_env *env = executionCtx->GetPandaAniEnv();
+    // Each EtsExecutionContext must have a valid ani_env
     ASSERT(env != nullptr);
     *result = env;
     return ANI_OK;
@@ -192,8 +195,8 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
 
     auto *runtime = Runtime::GetCurrent();
     auto *etsVM = PandaEtsVM::FromAniVM(vm);
-    auto *coroMan = etsVM->GetCoroutineManager();
-    auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
+    auto *jobMan = etsVM->GetJobManager();
+    auto *exclusiveCoro = jobMan->AttachExclusiveWorker(runtime, etsVM);
     if (exclusiveCoro == nullptr) {
         LOG(ERROR, ANI) << "Cannot attach current thread, reached the limit of EAWorkers";
         return ANI_ERROR;
@@ -202,19 +205,18 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
     ASSERT(exclusiveCoro == Coroutine::GetCurrent());
 
     if (interopEnabled) {
-        auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+        auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
         if (jsEnv == nullptr) {
             jsEnv = ifaceTable->CreateJSRuntime();
             ASSERT(jsEnv != nullptr);
         }
-        ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+        ifaceTable->CreateInteropCtx(EtsExecutionContext::FromMT(exclusiveCoro), jsEnv);
     }
-    *result = EtsCoroutine::CastFromThread(exclusiveCoro)->GetPandaAniEnv();
+    *result = EtsExecutionContext::FromMT(exclusiveCoro)->GetPandaAniEnv();
 
 #ifdef PANDA_USE_FFRT
     ffrt_this_task_set_legacy_mode(true);
 #endif
-
     return ANI_OK;
 }
 
@@ -237,11 +239,11 @@ static ani_status DetachCurrentThread(ani_vm *vm)
     }
 
     auto *etsVM = PandaEtsVM::FromAniVM(vm);
-    auto *coroMan = etsVM->GetCoroutineManager();
+    auto *jobMan = etsVM->GetJobManager();
 
-    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
     auto *jsEnv = ifaceTable->GetJSEnv();
-    auto result = coroMan->DestroyExclusiveWorker();
+    auto result = jobMan->DetachExclusiveWorker();
     if (jsEnv != nullptr) {
         ifaceTable->CleanUpJSEnv(jsEnv);
     }

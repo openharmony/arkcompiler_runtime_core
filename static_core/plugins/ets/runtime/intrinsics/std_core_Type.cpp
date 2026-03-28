@@ -32,7 +32,7 @@
 #include "libarkfile/modifiers.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -59,7 +59,7 @@ static EtsByte GetRefTypeKind(const EtsClass *refType)
 
     if (refType->IsBoxed()) {
         const auto *runtimeClass = refType;
-        auto ptypes = PlatformTypes(EtsCoroutine::GetCurrent());
+        auto ptypes = PlatformTypes(EtsExecutionContext::GetCurrent());
         if (runtimeClass == ptypes->coreBoolean) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
         } else if (runtimeClass == ptypes->coreByte) {
@@ -138,11 +138,11 @@ EtsClass *TypeAPIGetClass(EtsString *td, EtsRuntimeLinker *contextLinker)
     auto typeDesc = td->GetMutf8();
     auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(typeDesc.c_str(), true,
                                                                        contextLinker->GetClassLinkerContext());
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    if (coro->HasPendingException()) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    if (executionCtx->GetMT()->HasPendingException()) {
         ASSERT(klass == nullptr);
-        coro->ClearException();
+        executionCtx->GetMT()->ClearException();
     }
     // Note that Type API does not initialize the class
     return klass;
@@ -188,9 +188,9 @@ EtsBoolean TypeAPIIsValueType(EtsString *td, EtsRuntimeLinker *contextLinker)
 
 EtsString *TypeAPIGetNullTypeDescriptor()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    const auto *nullObject = EtsObject::FromCoreType(coro->GetNullValue());
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    const auto *nullObject = EtsObject::FromCoreType(executionCtx->GetNullValue());
     return EtsString::CreateFromMUtf8(nullObject->GetClass()->GetDescriptor());
 }
 
@@ -225,15 +225,15 @@ static EtsTypeAPIField *CreateField(EtsField *field, EtsTypeAPIType *fieldType, 
     ASSERT(ownerType != nullptr);
     ASSERT(ownerType->GetRuntimeTypeDescriptor()->GetMutf8() == field->GetDeclaringClass()->GetDescriptor());
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    EtsHandle fieldTypeHandle(coroutine, fieldType);
-    EtsHandle ownerTypeHandle(coroutine, ownerType);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle fieldTypeHandle(executionCtx, fieldType);
+    EtsHandle ownerTypeHandle(executionCtx, ownerType);
 
     // Make the instance of Type API Field
-    auto *apiField = EtsTypeAPIField::Create(coroutine);
+    auto *apiField = EtsTypeAPIField::Create(executionCtx);
     ASSERT(apiField != nullptr);
-    EtsHandle<EtsTypeAPIField> typeapiField(coroutine, apiField);
+    EtsHandle<EtsTypeAPIField> typeapiField(executionCtx, apiField);
     ASSERT(typeapiField.GetPtr() != nullptr);
 
     // Set field's type, field's owner class type and name
@@ -266,7 +266,7 @@ static EtsTypeAPIField *CreateField(EtsField *field, EtsTypeAPIType *fieldType, 
 static ObjectHeader *GetFieldPtr(EtsField *field)
 {
     return (field != nullptr)
-               ? EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), reinterpret_cast<EtsLong>(field))
+               ? EtsBoxPrimitive<EtsLong>::Create(EtsExecutionContext::GetCurrent(), reinterpret_cast<EtsLong>(field))
                      ->GetCoreType()
                : nullptr;
 }
@@ -359,7 +359,7 @@ EtsObject *TypeAPIGetStaticFieldValue(EtsTypeAPIType *ownerType, EtsString *name
                 using T = EtsTypeEnumToCppType<decltype(type)::value>;
                 auto val = ownerCls->GetRuntimeClass()->GetFieldPrimitive<T>(*field->GetCoreType());
                 // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-                return EtsBoxPrimitive<T>::Create(EtsCoroutine::GetCurrent(), val);
+                return EtsBoxPrimitive<T>::Create(EtsExecutionContext::GetCurrent(), val);
             });
     }
 
@@ -368,9 +368,9 @@ EtsObject *TypeAPIGetStaticFieldValue(EtsTypeAPIType *ownerType, EtsString *name
 
 void TypeAPISetStaticFieldValue(EtsTypeAPIType *ownerType, EtsString *name, EtsObject *v)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    EtsHandle valuePtr(coroutine, v);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle valuePtr(executionCtx, v);
     auto fieldName = name->GetMutf8();
 
     auto *ownerCls = TypeAPIGetClass(ownerType->GetRuntimeTypeDescriptor(), ownerType->GetContextLinker());
@@ -428,11 +428,11 @@ static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> 
     ASSERT(ownerTypeHandle.GetPtr() != nullptr);
     ASSERT(method != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *apiMethod = EtsTypeAPIMethod::Create(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *apiMethod = EtsTypeAPIMethod::Create(executionCtx);
     ASSERT(apiMethod != nullptr);
-    EtsHandle<EtsTypeAPIMethod> typeapiMethod(coroutine, apiMethod);
+    EtsHandle<EtsTypeAPIMethod> typeapiMethod(executionCtx, apiMethod);
     ASSERT(typeapiMethod.GetPtr() != nullptr);
 
     // Set Type
@@ -482,10 +482,10 @@ static EtsMethod *GetEtsMethod(EtsTypeAPIType *methodType)
 
 EtsTypeAPIMethod *TypeAPIGetMethod(ObjectHeader *methodTypeObj, EtsTypeAPIType *ownerType)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsTypeAPIType> methodTypeHandle(coro, EtsTypeAPIType::FromCoreType(methodTypeObj));
-    EtsHandle ownerTypeHandle(coro, ownerType);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsTypeAPIType> methodTypeHandle(executionCtx, EtsTypeAPIType::FromCoreType(methodTypeObj));
+    EtsHandle ownerTypeHandle(executionCtx, ownerType);
 
     auto *method = GetEtsMethod(methodTypeHandle.GetPtr());
     ASSERT(method != nullptr);
@@ -527,17 +527,17 @@ EtsString *TypeAPIGetArrayElementType(EtsClass *cls)
 
 static EtsObject *MakeObjectsArray(EtsString *elemTd, EtsRuntimeLinker *contextLinker, EtsLong len)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     auto *elementClass = TypeAPIGetClass(elemTd, contextLinker);
     ASSERT(elementClass != nullptr);
-    EtsHandle arrayHandle(coro, EtsObjectArray::Create(elementClass, len));
+    EtsHandle arrayHandle(executionCtx, EtsObjectArray::Create(elementClass, len));
     ASSERT(arrayHandle.GetPtr() != nullptr);
     for (EtsLong i = 0; i < len; ++i) {
         auto *element = elementClass->CreateInstance();
         if (element == nullptr) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
         arrayHandle->Set(i, element);
@@ -608,8 +608,8 @@ static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPI
 {
     ASSERT(paramTypeHandle.GetPtr() != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsTypeAPIParameter> typeapiParameter(coroutine, EtsTypeAPIParameter::Create(coroutine));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    EtsHandle<EtsTypeAPIParameter> typeapiParameter(executionCtx, EtsTypeAPIParameter::Create(executionCtx));
     ASSERT(typeapiParameter.GetPtr() != nullptr);
 
     // Set parameter's Type
@@ -617,7 +617,7 @@ static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPI
 
     // NOTE(shumilov-petr): It's a temporary solution, extra type info dumping required
     auto name = std::to_string(i);
-    EtsHandle<EtsString> pnameHandle(coroutine, EtsString::CreateFromUtf8(name.data(), name.size()));
+    EtsHandle<EtsString> pnameHandle(executionCtx, EtsString::CreateFromUtf8(name.data(), name.size()));
     typeapiParameter.GetPtr()->SetName(pnameHandle.GetPtr());
 
     // Set specific attributes
@@ -639,9 +639,9 @@ static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPI
 
 EtsTypeAPIParameter *TypeAPIGetParameter(ObjectHeader *functionType, EtsLong i, EtsTypeAPIType *paramType)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsTypeAPIType> paramTypeHandle(coro, paramType);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsTypeAPIType> paramTypeHandle(executionCtx, paramType);
 
     // The resolved `function` might be used for attributes resolution in future implementation
     auto *function = GetEtsMethod(EtsTypeAPIType::FromCoreType(functionType));
@@ -682,30 +682,30 @@ EtsString *TypeAPIGetFunctionObjectNameFromAnnotation(EtsObject *functionObj)
 {
     static constexpr std::string_view ANNO_NAME = "Lstd/core/NamedFunctionObject;";
 
-    auto *thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     auto *etsClass = functionObj->GetClass();
     auto *runtimeClass = etsClass->GetRuntimeClass();
     const panda_file::File &pf = *runtimeClass->GetPandaFile();
     panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
-    VMHandle<EtsString> retStrHandle;
-    cda.EnumerateAnnotations([&pf, &retStrHandle, &thread](panda_file::File::EntityId annId) {
+    EtsHandle<EtsString> retStrHandle;
+    cda.EnumerateAnnotations([&pf, &retStrHandle, &executionCtx](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
         const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
         if (className == ANNO_NAME) {
             const auto value = ada.GetElement(0).GetScalarValue();
             const auto id = value.Get<panda_file::File::EntityId>();
             auto stringData = pf.GetStringData(id);
-            retStrHandle = VMHandle<EtsString>(
-                thread, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data))->GetCoreType());
+            retStrHandle = EtsHandle<EtsString>(
+                executionCtx, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data)));
         }
     });
 
     if (retStrHandle.GetPtr() == nullptr) {
         auto *emptyString = EtsString::CreateNewEmptyString();
         ASSERT(emptyString != nullptr);
-        retStrHandle = VMHandle<EtsString>(thread, emptyString->GetCoreType());
+        retStrHandle = EtsHandle<EtsString>(executionCtx, emptyString);
     }
 
     return retStrHandle.GetPtr();

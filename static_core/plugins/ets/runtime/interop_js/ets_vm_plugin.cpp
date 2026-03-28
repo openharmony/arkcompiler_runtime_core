@@ -265,7 +265,7 @@ static bool AddOptions(logger::Options *loggerOptions, ark::RuntimeOptions *runt
 
     bool res = ets::CreateRuntime(addOpts);
     if (res) {
-        res = ark::ets::interop::js::CreateMainInteropContext(EtsCoroutine::GetCurrent(), env);
+        res = ark::ets::interop::js::CreateMainInteropContext(EtsExecutionContext::GetCurrent(), env);
     }
     napi_value napiRes;
     NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));

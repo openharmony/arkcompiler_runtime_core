@@ -23,17 +23,17 @@
 
 namespace ark::ets {
 
-EtsAsyncContext *EtsAsyncContext::Create(EtsCoroutine *coro)
+EtsAsyncContext *EtsAsyncContext::Create(EtsExecutionContext *executionCtx)
 {
-    EtsHandleScope scope(coro);
-    auto *klass = PlatformTypes(coro)->arkruntimeAsyncContext;
+    EtsHandleScope scope(executionCtx);
+    auto *klass = PlatformTypes(executionCtx)->arkruntimeAsyncContext;
     auto *ctx = EtsAsyncContext::FromEtsObject(EtsObject::Create(klass));
     if (UNLIKELY(ctx == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
-    auto *frame = coro->GetCurrentFrame();
+    auto *frame = executionCtx->GetMT()->GetCurrentFrame();
     ASSERT(frame != nullptr);
     auto *method = frame->GetMethod();
     ASSERT(method != nullptr);
@@ -41,55 +41,55 @@ EtsAsyncContext *EtsAsyncContext::Create(EtsCoroutine *coro)
     ASSERT(frameSize <= frame->GetSize());
     ASSERT(frameSize <= static_cast<uint32_t>(std::numeric_limits<EtsShort>::max()));
 
-    EtsHandle<EtsAsyncContext> asyncCtx(coro, ctx);
-    auto *returnValue = EtsPromise::Create(coro);
+    EtsHandle<EtsAsyncContext> asyncCtx(executionCtx, ctx);
+    auto *returnValue = EtsPromise::Create(executionCtx);
     if (UNLIKELY(returnValue == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetReturnValue(coro, returnValue);
+    asyncCtx->SetReturnValue(executionCtx, returnValue);
 
-    auto *refValues = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, frameSize);
+    auto *refValues = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, frameSize);
     if (UNLIKELY(refValues == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetRefValues(coro, refValues);
+    asyncCtx->SetRefValues(executionCtx, refValues);
 
     auto *primValues = EtsLongArray::Create(frameSize);
     if (UNLIKELY(primValues == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetPrimValues(coro, primValues);
+    asyncCtx->SetPrimValues(executionCtx, primValues);
 
     asyncCtx->SetRefCount(0);
     asyncCtx->SetPrimCount(0);
 
     auto *frameOffsets = EtsShortArray::Create(frameSize);
     if (UNLIKELY(frameOffsets == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetFrameOffsets(coro, frameOffsets);
+    asyncCtx->SetFrameOffsets(executionCtx, frameOffsets);
 
     return asyncCtx.GetPtr();
 }
 
-void EtsAsyncContext::AddReference(EtsCoroutine *coro, uint32_t idx, EtsObject *ref)
+void EtsAsyncContext::AddReference(EtsExecutionContext *executionCtx, uint32_t idx, EtsObject *ref)
 {
-    GetRefValues(coro)->Set(idx, ref);
+    GetRefValues(executionCtx)->Set(idx, ref);
 }
 
-void EtsAsyncContext::AddPrimitive(EtsCoroutine *coro, uint32_t idx, EtsLong primitive)
+void EtsAsyncContext::AddPrimitive(EtsExecutionContext *executionCtx, uint32_t idx, EtsLong primitive)
 {
-    GetPrimValues(coro)->Set(idx, primitive);
+    GetPrimValues(executionCtx)->Set(idx, primitive);
 }
 
-EtsShort EtsAsyncContext::GetVregOffset(EtsCoroutine *coro, uint32_t idx) const
+EtsShort EtsAsyncContext::GetVregOffset(EtsExecutionContext *executionCtx, uint32_t idx) const
 {
     ASSERT(idx < 0U + GetRefCount() + GetPrimCount());
-    return GetFrameOffsets(coro)->Get(idx);
+    return GetFrameOffsets(executionCtx)->Get(idx);
 }
 
 }  // namespace ark::ets

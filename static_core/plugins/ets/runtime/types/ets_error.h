@@ -39,9 +39,9 @@ public:
     EtsError() = delete;
     ~EtsError() = delete;
 
-    static EtsError *Create(EtsCoroutine *coro, EtsClass *klass)
+    static EtsError *Create(EtsExecutionContext *executionCtx, EtsClass *klass)
     {
-        return FromEtsObject(EtsObject::Create(coro, klass));
+        return FromEtsObject(EtsObject::Create(executionCtx, klass));
     }
 
     static EtsError *FromEtsObject(EtsObject *object)
@@ -59,28 +59,29 @@ public:
         return this;
     }
 
-    void SetName(EtsCoroutine *coro, EtsString *name)
+    void SetName(EtsExecutionContext *executionCtx, EtsString *name)
     {
         ASSERT(name != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, name_), name->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsError, name_), name->GetCoreType());
     }
 
-    void SetMessage(EtsCoroutine *coro, EtsString *msg)
+    void SetMessage(EtsExecutionContext *executionCtx, EtsString *msg)
     {
         ASSERT(msg != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, message_), msg->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsError, message_), msg->GetCoreType());
     }
 
-    void SetStack(EtsCoroutine *coro, EtsString *stack)
+    void SetStack(EtsExecutionContext *executionCtx, EtsString *stack)
     {
         ASSERT(stack != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, stack_), stack->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsError, stack_), stack->GetCoreType());
     }
 
-    void SetStackLines(EtsCoroutine *coro, EtsTypedObjectArray<EtsStackTraceElement> *stackLines)
+    void SetStackLines(EtsExecutionContext *executionCtx, EtsTypedObjectArray<EtsStackTraceElement> *stackLines)
     {
         ASSERT(stackLines != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, stackLines_), stackLines->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsError, stackLines_),
+                                  stackLines->GetCoreType());
     }
 
 private:
@@ -111,26 +112,26 @@ public:
     EtsOutOfMemoryError() = delete;
     ~EtsOutOfMemoryError() = delete;
 
-    static EtsOutOfMemoryError *Create(EtsCoroutine *coro)
+    static EtsOutOfMemoryError *Create(EtsExecutionContext *executionCtx)
     {
-        [[maybe_unused]] EtsHandleScope scope(coro);
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
         auto oomH = EtsHandle<EtsOutOfMemoryError>(
-            coro, FromError(EtsError::Create(coro, PlatformTypes(coro)->coreOutOfMemoryError)));
+            executionCtx, FromError(EtsError::Create(executionCtx, PlatformTypes(executionCtx)->coreOutOfMemoryError)));
 
         ASSERT(oomH.GetPtr() != nullptr);
         auto *name = EtsString::CreateFromMUtf8(OOM_ERROR_NAME.data());
-        oomH->SetName(coro, name);
+        oomH->SetName(executionCtx, name);
 
         auto *message = EtsString::CreateFromMUtf8(DEFAULT_OOM_MSG.data());
-        oomH->SetMessage(coro, message);
+        oomH->SetMessage(executionCtx, message);
 
         auto *stack = EtsString::CreateFromMUtf8(DEFAULT_OOM_STACK.data());
-        oomH->SetStack(coro, stack);
+        oomH->SetStack(executionCtx, stack);
 
         auto *stackLines =
-            EtsTypedObjectArray<EtsStackTraceElement>::Create(PlatformTypes(coro)->coreStackTraceElement, 0U);
-        oomH->SetStackLines(coro, stackLines);
+            EtsTypedObjectArray<EtsStackTraceElement>::Create(PlatformTypes(executionCtx)->coreStackTraceElement, 0U);
+        oomH->SetStackLines(executionCtx, stackLines);
 
         return oomH.GetPtr();
     }

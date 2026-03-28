@@ -19,7 +19,7 @@ namespace ark::ets::intrinsics {
 
 void AsyncWorkNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)
 {
-    ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
+    ani_env *env = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
     auto *nativeCb = reinterpret_cast<void (*)(ani_env *, void *)>(nativeCbPtr);
     if (static_cast<bool>(needNativeScope)) {
         ScopedNativeCodeThread sn(ManagedThread::GetCurrent());

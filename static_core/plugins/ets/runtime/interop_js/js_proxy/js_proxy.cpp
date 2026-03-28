@@ -164,8 +164,8 @@ JSProxy *JSProxy::CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMe
 /*static*/
 JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     ASSERT(functionInterface != nullptr);
     Class *interfaceCls = functionInterface->GetRuntimeClass();
     ASSERT(interfaceCls->IsInterface());
@@ -174,7 +174,7 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
     auto descriptor = MakeProxyDescriptor(interfaceCls->GetDescriptor());
 
     // use `Object` as the base class for the proxy function
-    Class *objectClass = PlatformTypes(coro)->coreObject->GetRuntimeClass();
+    Class *objectClass = PlatformTypes(executionCtx)->coreObject->GetRuntimeClass();
     ASSERT(objectClass != nullptr);
     // get the proxy function class if it is already created
     // otherwise, create the class
@@ -218,7 +218,7 @@ JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<
     Class *proxyCls = classLinker->BuildClass(descriptor, true, accessFlags, proxyMethods, fields, baseClass,
                                               interfacesSpan, context, false);
     if (UNLIKELY(proxyCls == nullptr)) {
-        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         classLinker->GetAllocator()->Delete<Method>(proxyMethods.Data());
         classLinker->GetAllocator()->Delete<Class *>(interfacesSpan.Data());
         return nullptr;

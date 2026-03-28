@@ -29,17 +29,17 @@ namespace {
 /* make sure the class the intrinsic being called from belongs to the boot context */
 bool EnsureBootContext()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (coro != nullptr) {
-        auto ctx = StackWalker::Create(coro).GetMethod()->GetClass()->GetLoadContext();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (executionCtx != nullptr) {
+        auto ctx = StackWalker::Create(executionCtx->GetMT()).GetMethod()->GetClass()->GetLoadContext();
         if (ctx != nullptr && ctx->IsBootContext()) {
             return true;
         }
     }
 
-    auto *errorClass = PlatformTypes(coro)->coreIllegalStateError;
+    auto *errorClass = PlatformTypes(executionCtx)->coreIllegalStateError;
     auto msg = "Unsafe intrinsics: cannot ensure the boot context!";
-    ThrowEtsException(coro, errorClass, msg);
+    ThrowEtsException(executionCtx, errorClass, msg);
     return false;
 }
 
@@ -192,9 +192,9 @@ extern "C" void UnsafeMemoryWriteNumber(EtsLong addr, EtsDouble val)
 
 extern "C" int UnsafeMemoryStringGetSizeInBytes(EtsString *str)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    EtsHandle<EtsString> handle(coroutine, str);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsString> handle(executionCtx, str);
 
     if (!EnsureBootContext()) {
         return -1;
@@ -217,9 +217,9 @@ extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s);
 extern "C" int UnsafeMemoryWriteString(EtsLong addrEts, EtsString *str)
 {
     /* we need the scope because EnsureBootContext() will most likely trigger GC */
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    EtsHandle<EtsString> handle(coroutine, str);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsString> handle(executionCtx, str);
 
     if (!EnsureBootContext()) {
         return -1;

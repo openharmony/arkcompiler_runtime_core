@@ -63,7 +63,7 @@ EtsString *StdCoreDoubleToString(double number, int radix)
     if (UNLIKELY(radix != helpers::DECIMAL || cache == nullptr)) {
         return helpers::FpToString(number, radix);
     }
-    return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number);
+    return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), number);
 }
 
 bool IsNegativeNan(double x)
@@ -109,7 +109,7 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
     digit = (digit >= 0) ? std::floor(digit) : std::ceil(digit);
     // Check range
     if (UNLIKELY(digit > helpers::MAX_FRACTION || digit < helpers::MIN_FRACTION)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError,
                           "toExponential argument must be between 0 and 100");
         return nullptr;
     }
@@ -185,7 +185,7 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION + 1)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError,
                           "toPrecision argument must be between 1 and 100");
         return nullptr;
     }
@@ -200,7 +200,7 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError,
                           "toFixed argument must be between 0 and 100");
         return nullptr;
     }

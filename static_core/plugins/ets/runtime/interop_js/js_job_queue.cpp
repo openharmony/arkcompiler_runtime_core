@@ -28,7 +28,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
-#include "runtime/coroutines/stackful_coroutine.h"
+#include "runtime/execution/coroutines/stackful/stackful_coroutine.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/mem/refstorage/reference.h"
@@ -37,8 +37,8 @@
 namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     JsJobQueue::JsCallback *jsCallback = nullptr;
     [[maybe_unused]] napi_status status =
@@ -47,10 +47,10 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 
     bool hasException = false;
     {
-        ScopedManagedCodeThread managedScope(coro);
+        ScopedManagedCodeThread managedScope(executionCtx->GetMT());
         jsCallback->Run();
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(jsCallback);
-        hasException = coro->HasPendingException();
+        hasException = executionCtx->GetMT()->HasPendingException();
     }
     if (hasException) {
         napi_throw_error(env, nullptr, "EtsVM internal error");
@@ -62,10 +62,10 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 
 void JsJobQueue::Post(EtsObject *callback)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
 
-    auto *ctx = InteropCtx::Current(coro);
+    auto *ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return;
@@ -86,7 +86,7 @@ void JsJobQueue::Post(EtsObject *callback)
     ASSERT(status == napi_ok);
     (void)status;
 
-    auto *jsCallback = JsCallback::Create(coro, callback);
+    auto *jsCallback = JsCallback::Create(executionCtx, callback);
     napi_value thenCallback;
     status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
     if (status != napi_ok) {
@@ -103,10 +103,10 @@ void JsJobQueue::Post(EtsObject *callback)
 
 static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callback_info info, bool isResolved)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    PandaEtsVM *vm = coro->GetPandaVM();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    PandaEtsVM *vm = executionCtx->GetPandaVM();
+    auto ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     mem::Reference *promiseRef = nullptr;
     size_t argc = 1;
@@ -118,9 +118,9 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
     ASSERT(promiseRef != nullptr);
 
     {
-        ScopedManagedCodeThread managedScope(coro);
-        EtsHandleScope hScope(coro);
-        EtsHandle<EtsPromise> promiseHandle(coro,
+        ScopedManagedCodeThread managedScope(executionCtx->GetMT());
+        EtsHandleScope hScope(executionCtx);
+        EtsHandle<EtsPromise> promiseHandle(executionCtx,
                                             EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
@@ -128,7 +128,8 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
             auto etsVal = JSConvertAny::UnwrapWithNullCheck(ctx, env, value).value();
             ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), etsVal, ark::ets::ToEtsBoolean(false));
         } else {
-            auto refconv = JSRefConvertResolve<true>(ctx, PlatformTypes(coro)->escompatError->GetRuntimeClass());
+            auto refconv =
+                JSRefConvertResolve<true>(ctx, PlatformTypes(executionCtx)->escompatError->GetRuntimeClass());
             ASSERT(refconv != nullptr);
             bool isInstanceof = false;
             EtsObject *error = nullptr;
@@ -163,10 +164,10 @@ static napi_value OnJsPromiseRejected(napi_env env, [[maybe_unused]] napi_callba
 
 void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    PandaEtsVM *vm = coro->GetPandaVM();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    PandaEtsVM *vm = executionCtx->GetPandaVM();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return;
@@ -182,7 +183,7 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
     }
 
     mem::Reference *promiseRef = vm->GetGlobalObjectStorage()->Add(etsPromise, mem::Reference::ObjectType::GLOBAL);
-    ScopedNativeCodeThread nativeScope(coro);
+    ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
     std::array<napi_value, 2U> thenCallback {};
 
     status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback[0]);
@@ -204,15 +205,15 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 
 void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     CreatePromiseLink(source, EtsPromise::FromEtsObject(target));
 }
 
 /* static */
-JsJobQueue::JsCallback *JsJobQueue::JsCallback::Create(EtsCoroutine *coro, const EtsObject *callback)
+JsJobQueue::JsCallback *JsJobQueue::JsCallback::Create(EtsExecutionContext *executionCtx, const EtsObject *callback)
 {
-    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
+    auto *refStorage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
     auto *jsCallbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(jsCallbackRef != nullptr);
     auto *jsCallback = Runtime::GetCurrent()->GetInternalAllocator()->New<JsCallback>(jsCallbackRef);
@@ -221,18 +222,18 @@ JsJobQueue::JsCallback *JsJobQueue::JsCallback::Create(EtsCoroutine *coro, const
 
 void JsJobQueue::JsCallback::Run()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *refStorage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
     auto *callback = EtsObject::FromCoreType(refStorage->Get(jsCallbackRef_));
-    LambdaUtils::InvokeVoid(coro, callback);
+    LambdaUtils::InvokeVoid(executionCtx->GetMT(), callback);
 }
 
 JsJobQueue::JsCallback::~JsCallback()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *refStorage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
     refStorage->Remove(jsCallbackRef_);
 }
 

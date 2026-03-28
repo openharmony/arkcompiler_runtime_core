@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,9 @@
  */
 
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
-#include "runtime/coroutines/stackful_coroutine.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/coroutines/stackful/stackful_coroutine.h"
+#include "runtime/execution/coroutines/stackful/stackful_coroutine_worker.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 
@@ -72,7 +74,7 @@ bool EventLoop::RunEventLoop(EventLoopRunMode mode)
         return false;
     }
 
-    InteropCtx::Current(EtsCoroutine::GetCurrent())->UpdateInteropStackInfoIfNeeded();
+    InteropCtx::Current(EtsExecutionContext::GetCurrent())->UpdateInteropStackInfoIfNeeded();
     auto *loop = GetEventLoop();
     switch (mode) {
         case EventLoopRunMode::RUN_DEFAULT:
@@ -204,8 +206,8 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
 {
     auto *callbackQueue = reinterpret_cast<ThreadSafeCallbackQueue *>(async->data);
     ASSERT(callbackQueue != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
-    ScopedInteropCallStackRecord codeScope(coro, __PRETTY_FUNCTION__);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ScopedInteropCallStackRecord codeScope(executionCtx, __PRETTY_FUNCTION__);
     callbackQueue->ExecuteAllCallbacks();
 }
 
@@ -280,7 +282,7 @@ bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
 
 PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()
 {
-    [[maybe_unused]] auto *w = Coroutine::GetCurrent()->GetContext<StackfulCoroutineContext>()->GetWorker();
+    [[maybe_unused]] auto *w = JobExecutionContext::GetCurrent()->GetWorker();
     ASSERT(w->IsMainWorker() || w->InExclusiveMode());
     auto poster = MakePandaUnique<EventLoopCallbackPoster>();
     ASSERT(poster != nullptr);

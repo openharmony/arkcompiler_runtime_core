@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include "ets_platform_types.h"
 #include "include/class.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
@@ -214,8 +213,8 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
         return klass;
     }
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (coro == nullptr || !coro->IsManagedCode()) {
+    auto *mThread = ManagedThread::GetCurrent();
+    if (mThread == nullptr || !mThread->IsManagedCode()) {
         // Do not invoke managed code from non-managed threads (e.g. JIT or AOT).
         ReportClassNotFound(descriptor, errorHandler);
         return nullptr;
@@ -224,7 +223,7 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
     auto clsName = ClassHelper::GetName(descriptor);
     auto etsClsName = EtsString::CreateFromMUtf8(clsName.c_str());
     if (UNLIKELY(etsClsName == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(mThread->HasPendingException());
         return nullptr;
     }
     const auto *runtimeLinker = GetRuntimeLinker();
@@ -233,9 +232,9 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
     std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(nullptr)};
 
     // Valid to use method from base class because `loadClass` is final.
-    auto *loadClass = PlatformTypes(coro)->coreRuntimeLinkerLoadClass;
-    auto res = loadClass->GetPandaMethod()->Invoke(coro, args.data());
-    if (!coro->HasPendingException()) {
+    auto *loadClass = PlatformTypes(mThread)->coreRuntimeLinkerLoadClass;
+    auto res = loadClass->GetPandaMethod()->Invoke(mThread, args.data());
+    if (!mThread->HasPendingException()) {
         return Class::FromClassObject(res.GetAs<ObjectHeader *>());
     }
 

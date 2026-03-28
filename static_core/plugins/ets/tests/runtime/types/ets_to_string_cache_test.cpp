@@ -14,6 +14,7 @@
  */
 
 #include "ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "types/ets_string.h"
 #include "intrinsics/helpers/ets_to_string_cache.h"
 #include "intrinsics/helpers/ets_intrinsics_helpers.h"
@@ -77,7 +78,7 @@ public:
     {
         ASSERT(Runtime::GetCurrent() != nullptr);
         ASSERT(PandaEtsVM::GetCurrent() != nullptr);
-        mainCoro_ = EtsCoroutine::CastFromThread(PandaEtsVM::GetCurrent()->GetCoroutineManager()->GetMainThread());
+        mainCoro_ = EtsCoroutine::CastFromThread(JobExecutionContext::GetCurrent()->GetManager()->GetMainThread());
         ASSERT(mainCoro_ != nullptr);
     }
     void TestMainLoop(double value, [[maybe_unused]] bool needCheck)
@@ -85,7 +86,7 @@ public:
         auto *thread = ManagedThread::GetCurrent();
         auto *cache = DoubleToStringCache::FromCoreType(thread->GetDoubleToStringCache());
         auto *etsCoro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] auto [str, result] = cache->GetOrCacheImpl(etsCoro, value);
+        [[maybe_unused]] auto [str, result] = cache->GetOrCacheImpl(EtsExecutionContext::FromMT(etsCoro), value);
 #ifndef NDEBUG
         // don't always check to increase pressure
         if (needCheck) {
@@ -120,7 +121,7 @@ public:
         // NOTE: In the main place of use (in initialization VM), during execution method
         // "EtsToStringCacheElement<T>::GetClass" GC is not started
         PandaVM::GetCurrent()->GetMutatorLock()->WriteLock();
-        auto *klass = detail::EtsToStringCacheElement<T>::GetClass(EtsCoroutine::GetCurrent());
+        auto *klass = detail::EtsToStringCacheElement<T>::GetClass(EtsExecutionContext::GetCurrent());
         std::vector<MirrorFieldInfo> members {
             MirrorFieldInfo("string", detail::EtsToStringCacheElement<T>::GetStringOffset()),
             MirrorFieldInfo("number", detail::EtsToStringCacheElement<T>::GetNumberOffset())};
@@ -147,7 +148,7 @@ TEST_F(EtsToStringCacheTest, BitcastTestCached)
     for (uint32_t i = 0; i < TEST_ARRAY_SIZE; i++) {
         auto longValue = (static_cast<uint64_t>(dis(engine)) << BITS_PER_UINT32) | dis(engine);
         auto value = bit_cast<double>(longValue);
-        auto *str = cache->GetOrCache(etsCoro, value);
+        auto *str = cache->GetOrCache(EtsExecutionContext::FromMT(etsCoro), value);
         ASSERT(!str->IsUtf16());
         auto res = str->GetMutf8();
 

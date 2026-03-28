@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,11 @@ public:
     EtsBoxPrimitive() = delete;
     ~EtsBoxPrimitive() = delete;
 
-    static EtsBoxPrimitive *Create(EtsCoroutine *coro, T value);
+    static EtsBoxPrimitive *Create(EtsExecutionContext *executionCtx, T value);
 
-    static Class *GetBoxClass(EtsCoroutine *coro);
+    static Class *GetBoxClass(EtsExecutionContext *executionCtx);
 
-    static EtsClass *GetEtsBoxClass(EtsCoroutine *coro);
+    static EtsClass *GetEtsBoxClass(EtsExecutionContext *executionCtx);
 
     static T Unbox(EtsObject *obj)
     {

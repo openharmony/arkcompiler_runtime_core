@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,20 +25,20 @@ public:
     using Node = EtsFinalizableWeakRef;
     using List = EtsFinalizableWeakRefList;
 
-    void Push(EtsCoroutine *coro, Node *weakRef)
+    void Push(EtsExecutionContext *executionCtx, Node *weakRef)
     {
         ASSERT(weakRef != nullptr);
         auto *head = GetHead();
         if (head == nullptr) {
-            SetHead(coro, weakRef);
+            SetHead(executionCtx, weakRef);
             return;
         }
-        head->SetPrev(coro, weakRef);
-        weakRef->SetNext(coro, head);
-        SetHead(coro, weakRef);
+        head->SetPrev(executionCtx, weakRef);
+        weakRef->SetNext(executionCtx, head);
+        SetHead(executionCtx, weakRef);
     }
 
-    bool Unlink(EtsCoroutine *coro, Node *weakRef)
+    bool Unlink(EtsExecutionContext *executionCtx, Node *weakRef)
     {
         ASSERT(weakRef != nullptr);
         auto *prev = weakRef->GetPrev();
@@ -47,27 +47,27 @@ public:
             return false;
         }
         if (prev != nullptr) {
-            prev->SetNext(coro, next);
+            prev->SetNext(executionCtx, next);
         }
         if (next != nullptr) {
-            next->SetPrev(coro, prev);
+            next->SetPrev(executionCtx, prev);
         }
         if (weakRef == GetHead()) {
-            SetHead(coro, next);
+            SetHead(executionCtx, next);
         }
-        weakRef->SetPrev(coro, nullptr);
-        weakRef->SetNext(coro, nullptr);
+        weakRef->SetPrev(executionCtx, nullptr);
+        weakRef->SetNext(executionCtx, nullptr);
         return true;
     }
 
-    void UnlinkClearedReferences(EtsCoroutine *coro)
+    void UnlinkClearedReferences(EtsExecutionContext *executionCtx)
     {
         auto *weakRef = GetHead();
         while (weakRef != nullptr) {
             if (weakRef->GetReferent() == nullptr) {
                 // Finalizer of the cleared reference must be enqueued
                 ASSERT(weakRef->ReleaseFinalizer().IsEmpty());
-                Unlink(coro, weakRef);
+                Unlink(executionCtx, weakRef);
             }
             weakRef = weakRef->GetNext();
         }
@@ -123,11 +123,11 @@ private:
         return GetNext();
     }
 
-    void SetHead(EtsCoroutine *coro, Node *weakRef)
+    void SetHead(EtsExecutionContext *executionCtx, Node *weakRef)
     {
         ASSERT(GetPrev() == nullptr);
         ASSERT(GetReferent() == nullptr);
-        return SetNext(coro, weakRef);
+        return SetNext(executionCtx, weakRef);
     }
 };
 

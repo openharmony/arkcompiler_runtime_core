@@ -21,23 +21,22 @@ let arr = new Int32Array(s, 0, 1);
 
 let N = 5
 
-function testMain() {
-    let corArrayTmp = new Array<Job<int>>>();
+async function testMain(): Promise<void> {
+    let corArrayTmp = new Array<Job<Promise<int>>>();
     setUpBarrier(N)
     for (let i = 0; i < N; i++) {
         let job = launch(task)
         corArrayTmp.push(job);
     }
     for (let i = 0; i < N; i++) {
-        corArrayTmp[i].Await();
+        await corArrayTmp[i].Await();
     }
+    console.log('asdasdasd')
 }
 
-function task(): Int {
+async function task(): Promise<Int> {
     heavyComputation()
-    console.log("task completed, waiting")
-    wait()
-    console.log("wait completed")
+    await wait();
     return 1
 }
 
@@ -49,7 +48,7 @@ function setUpBarrier(nTasks: int) {
     }
 }
 
-function wait() {
+async function wait(): Promise<void> {
     try {
         Atomics.sub(arr, 0, 1)
         Atomics.notify(arr, 0)
@@ -57,7 +56,7 @@ function wait() {
         // wait until is 0
         let cur = Atomics.load(arr, 0)
         while (cur != 0) {
-            Atomics.wait(arr, 0, cur)
+            await Atomics.waitAsync(arr, 0, cur)
             cur = Atomics.load(arr, 0)
         }
     } catch (e) {
@@ -76,6 +75,6 @@ function heavyComputation(): Int {
 
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics skipped_cyclic_barrier tests')
-    suite.addTest('Function testMain', testMain)
+    suite.addAsyncTest('Function testMain', testMain)
     return suite.run()
 }

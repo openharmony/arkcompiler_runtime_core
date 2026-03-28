@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,60 +24,65 @@ namespace ark::ets {
 
 constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
 
-class EtsCoroutine;
+class EtsExecutionContext;
 class EtsObject;
 class EtsClass;
 class EtsString;
 
 // Generic comparator for ets reference types
 template <bool IS_STRICT = false>
-inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2);
+inline bool EtsReferenceEquals(EtsExecutionContext *executionCtx, EtsObject *ref1, EtsObject *ref2);
 
-inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref);
+inline bool EtsReferenceNullish(EtsExecutionContext *executionCtx, EtsObject *ref);
 
 // Comparison slowpath for value-typed references
-bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2);
+bool EtsValueTypedEquals(EtsExecutionContext *executionCtx, EtsObject *obj1, EtsObject *obj2);
 
 bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2);
 
 // Obtain owner class of method in ets frames
-inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth);
+inline EtsClass *GetMethodOwnerClassInFrames(EtsExecutionContext *executionCtx, uint32_t depth);
 
 // Compute typeof
-EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj);
+EtsString *EtsGetTypeof(EtsExecutionContext *executionCtx, EtsObject *obj);
 
-bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
+bool EtsGetIstrue(EtsExecutionContext *executionCtx, EtsObject *obj);
 
-EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name);
+EtsObject *EtsLdbyname(ManagedThread *mThread, EtsObject *thisObj, panda_file::File::StringData name);
 
-bool EtsStbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name, EtsObject *value);
+bool EtsStbyname(ManagedThread *mThread, EtsObject *thisObj, panda_file::File::StringData name, EtsObject *value);
 
-EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t index);
+EtsObject *EtsLdbyidx(ManagedThread *mThread, EtsObject *thisObj, uint32_t index);
 
-bool EtsStbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t idx, EtsObject *value);
+bool EtsStbyidx(ManagedThread *mThread, EtsObject *thisObj, uint32_t idx, EtsObject *value);
 
-bool EtsStbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *key, EtsObject *value);
+bool EtsStbyval(ManagedThread *mThread, EtsObject *thisObj, EtsObject *key, EtsObject *value);
 
-EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj);
+EtsObject *EtsLdbyval(ManagedThread *mThread, EtsObject *thisObj, EtsObject *valObj);
 
-bool EtsIsinstance(EtsCoroutine *coro, EtsObject *lhsObj, EtsObject *rhsObj);
+bool EtsIsinstance(ManagedThread *mThread, EtsObject *lhsObj, EtsObject *rhsObj);
 
-EtsObject *EtsCall(EtsCoroutine *coro, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+EtsObject *EtsCall(ManagedThread *mThread, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
 
-EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name,
+EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, panda_file::File::StringData name,
                        Span<VMHandle<ObjectHeader>> args);
-EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, EtsObject *funcObj,
+                       Span<VMHandle<ObjectHeader>> args);
 
-EtsObject *EtsCallObject(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+EtsObject *EtsCallObject(ManagedThread *mThread, EtsObject *thisObj, EtsObject *funcObj,
+                         Span<VMHandle<ObjectHeader>> args);
 
-EtsObject *EtsCallNew(EtsCoroutine *coro, EtsObject *ctor, Span<VMHandle<ObjectHeader>> args);
+EtsObject *EtsCallNew(ManagedThread *mThread, EtsObject *ctor, Span<VMHandle<ObjectHeader>> args);
 
-bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name);
-bool EtsHasPropertyByIdx([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] uint32_t idx);
-bool EtsHasPropertyByValue([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
+bool EtsHasPropertyByName([[maybe_unused]] EtsExecutionContext *executionCtx, EtsObject *thisObj,
+                          [[maybe_unused]] EtsString *name);
+bool EtsHasPropertyByIdx([[maybe_unused]] EtsExecutionContext *executionCtx, EtsObject *thisObj,
+                         [[maybe_unused]] uint32_t idx);
+bool EtsHasPropertyByValue([[maybe_unused]] EtsExecutionContext *executionCtx, EtsObject *thisObj,
                            [[maybe_unused]] EtsObject *property, bool isOwn);
 
-bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name);
+bool EtsHasOwnPropertyByName([[maybe_unused]] EtsExecutionContext *executionCtx, EtsObject *thisObj,
+                             [[maybe_unused]] EtsString *name);
 
 template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField);
@@ -124,7 +129,8 @@ private:
     const uint8_t *instAddress_ {};
 };
 
-Method *GetMethodByName(EtsCoroutine *coro, ETSStubCacheInfo const &cache, Method *rawMethod, ark::Class *klass);
+Method *GetMethodByName(EtsExecutionContext *executionCtx, ETSStubCacheInfo const &cache, Method *rawMethod,
+                        ark::Class *klass);
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_STUBS_H

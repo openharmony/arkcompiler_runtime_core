@@ -286,9 +286,9 @@ EtsObject *JSRuntimeInstantiateIntrinsic(EtsObject *callable, EtsObjectArray *ar
 
 EtsLong JSRuntimeXgcStartIntrinsic()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *gc = coro->GetPandaVM()->GetGC();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *gc = executionCtx->GetPandaVM()->GetGC();
     auto &gcTaskTracker = ets::intrinsics::GCTaskTracker::InitIfNeededAndGet(gc);
     auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos());
     ASSERT(task != nullptr);

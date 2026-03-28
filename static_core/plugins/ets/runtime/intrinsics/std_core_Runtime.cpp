@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "intrinsics/helpers/ets_intrinsics_helpers.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "libarkbase/utils/logger.h"
+#include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -53,7 +55,7 @@ EtsLong StdRuntimeGetHashCodeByValue(EtsObject *source)
 
 EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
 {
-    return ToEtsBoolean(ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), a, b));
+    return ToEtsBoolean(ark::ets::intrinsics::helpers::SameValueZero(EtsExecutionContext::GetCurrent(), a, b));
 }
 
 EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)
@@ -65,7 +67,7 @@ ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
 {
     if (UNLIKELY(!cls->IsArrayClass())) {
         // should not appear for the optimized version of intrinsic, which is always inlined
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatError, "class is not an array");
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatError, "class is not an array");
         return nullptr;
     }
     return coretypes::Array::Create(cls->GetRuntimeClass(), length);

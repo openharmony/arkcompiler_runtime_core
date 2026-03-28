@@ -34,17 +34,17 @@ static ALWAYS_INLINE inline arch::ArgReader<RUNTIME_ARCH> CreateProxyBridgeArgRe
 
 class CallJSHandler {
 public:
-    ALWAYS_INLINE CallJSHandler(EtsCoroutine *coro, Method *method, uint8_t *args, uint8_t *inStackArgs)
-        : coro_(coro),
-          ctx_(InteropCtx::Current(coro_)),
+    ALWAYS_INLINE CallJSHandler(EtsExecutionContext *executionCtx, Method *method, uint8_t *args, uint8_t *inStackArgs)
+        : executionCtx_(executionCtx),
+          ctx_(InteropCtx::Current(executionCtx_)),
           protoReader_(method, ctx_->GetClassLinker(), ctx_->LinkerCtx()),
           argReader_(CreateProxyBridgeArgReader(args, inStackArgs))
     {
     }
 
-    ALWAYS_INLINE inline EtsCoroutine *Coro()
+    ALWAYS_INLINE inline EtsExecutionContext *ExecCtx()
     {
-        return coro_;
+        return executionCtx_;
     }
 
     ALWAYS_INLINE ObjectHeader *SetupArgreader(bool isInstance)
@@ -83,7 +83,7 @@ public:
     static ALWAYS_INLINE uint64_t HandleImpl(Method *method, uint8_t *args, uint8_t *inStackArgs)
     {
         INTEROP_TRACE();
-        CallJSHandler st(EtsCoroutine::GetCurrent(), method, args, inStackArgs);
+        CallJSHandler st(EtsExecutionContext::GetCurrent(), method, args, inStackArgs);
         return st.Handle<IS_NEWCALL, ArgSetup>();
     }
 
@@ -95,10 +95,10 @@ public:
     ~CallJSHandler() = default;
 
 private:
-    static uint64_t __attribute__((noinline)) ForwardException(InteropCtx *ctx, EtsCoroutine *coro)
+    static uint64_t __attribute__((noinline)) ForwardException(InteropCtx *ctx, EtsExecutionContext *executionCtx)
     {
         if (NapiIsExceptionPending(ctx->GetJSEnv())) {
-            ctx->ForwardJSException(coro);
+            ctx->ForwardJSException(executionCtx);
         }
         ASSERT(ctx->SanityETSExceptionPending());
         return 0;
@@ -124,7 +124,7 @@ private:
     NO_COPY_SEMANTIC(CallJSHandler);
     NO_MOVE_SEMANTIC(CallJSHandler);
 
-    EtsCoroutine *const coro_;
+    EtsExecutionContext *const executionCtx_;
     InteropCtx *const ctx_;
 
     ProtoReader protoReader_;
@@ -138,28 +138,28 @@ template <bool IS_NEWCALL, typename ArgSetup>
 ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
 {
     INTEROP_TRACE();
-    [[maybe_unused]] InteropETSToJSCodeScope codeScope(coro_, __PRETTY_FUNCTION__);
+    [[maybe_unused]] InteropETSToJSCodeScope codeScope(executionCtx_, __PRETTY_FUNCTION__);
     napi_env env = ctx_->GetJSEnv();
     NapiScope jsHandleScope(env);
 
     if (UNLIKELY(!ArgSetup()(ctx_, this))) {
-        return ForwardException(ctx_, coro_);
+        return ForwardException(ctx_, executionCtx_);
     }
 
     std::optional<napi_value> jsRes = ConvertArgsAndCall<IS_NEWCALL>();
     if (UNLIKELY(!jsRes.has_value())) {
-        return ForwardException(ctx_, coro_);
+        return ForwardException(ctx_, executionCtx_);
     }
     std::optional<Value> etsRes = ConvertRetval<IS_NEWCALL>(jsRes.value());
     if (UNLIKELY(!etsRes.has_value())) {
-        return ForwardException(ctx_, coro_);
+        return ForwardException(ctx_, executionCtx_);
     }
     return static_cast<uint64_t>(etsRes.value().GetAsLong());
 }
 
 class ArrayView final {
 public:
-    static std::optional<ArrayView> Create(EtsCoroutine *coro, EtsHandle<EtsObject> &ref)
+    static std::optional<ArrayView> Create(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &ref)
     {
         auto *klass = ref->GetClass();
         bool isFixedArray = klass->IsArrayClass();
@@ -169,12 +169,12 @@ public:
         } else {
             auto *array = EtsEscompatArray::FromEtsObject(ref.GetPtr());
             EtsInt result = 0;
-            if (UNLIKELY(!array->GetLength(coro, &result))) {
+            if (UNLIKELY(!array->GetLength(executionCtx, &result))) {
                 ASSERT(InteropCtx::SanityETSExceptionPending());
                 return {};
             }
             if (UNLIKELY(result < 0)) {
-                InteropCtx::ThrowETSError(coro, "cannot work with arrays of negative length");
+                InteropCtx::ThrowETSError(executionCtx, "cannot work with arrays of negative length");
                 return {};
             }
             length = static_cast<size_t>(result);
@@ -187,12 +187,12 @@ public:
         return length_;
     }
 
-    std::optional<EtsObject *> Get(EtsCoroutine *coro, size_t index)
+    std::optional<EtsObject *> Get(EtsExecutionContext *executionCtx, size_t index)
     {
         if (isFixedArray_) {
             return EtsObjectArray::FromEtsObject(ref_.GetPtr())->Get(index);
         }
-        return EtsEscompatArray::FromEtsObject(ref_.GetPtr())->GetRef(coro, index);
+        return EtsEscompatArray::FromEtsObject(ref_.GetPtr())->GetRef(executionCtx, index);
     }
 
 private:
@@ -213,8 +213,8 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
 {
     INTEROP_TRACE();
     auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
-    EtsHandle<EtsObject> arrayReference(coro_, EtsObject::FromCoreType(ref));
-    auto optArrayView = ArrayView::Create(coro_, arrayReference);
+    EtsHandle<EtsObject> arrayReference(executionCtx_, EtsObject::FromCoreType(ref));
+    auto optArrayView = ArrayView::Create(executionCtx_, arrayReference);
     if (UNLIKELY(!optArrayView.has_value())) {
         ASSERT(InteropCtx::SanityETSExceptionPending());
         return {};
@@ -226,7 +226,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
         allJsArgs[i] = jsargs[i];
     }
     for (size_t i = 0; i < arrayLength; ++i) {
-        auto optEtsArg = optArrayView->Get(coro_, i);
+        auto optEtsArg = optArrayView->Get(executionCtx_, i);
         if (!optEtsArg.has_value()) {
             ASSERT(InteropCtx::SanityETSExceptionPending());
             return {};
@@ -248,7 +248,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
     auto jsargs = ctx_->GetTempArgs<napi_value>(numNonRest);
 
     // scope is required to ConvertRefArgToJS
-    HandleScope<ObjectHeader *> scope(coro_);
+    HandleScope<ObjectHeader *> scope(executionCtx_->GetMT());
     for (uint32_t argIdx = 0; argIdx < numNonRest; ++argIdx, protoReader_.Advance()) {
         if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsargs[argIdx], readVal))) {
             return std::nullopt;
@@ -278,7 +278,7 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
     INTEROP_TRACE();
     napi_value handlerResult {};
     napi_env env = ctx_->GetJSEnv();
-    ScopedNativeCodeThread nativeScope(coro_);
+    ScopedNativeCodeThread nativeScope(executionCtx_->GetMT());
     std::string_view methodName(EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName());
 
     if (methodName.rfind(GETTER_BEGIN, 0) == 0) {
@@ -326,7 +326,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span
     napi_value jsRetval;
     napi_status jsStatus;
     {
-        ScopedNativeCodeThread nativeScope(coro_);
+        ScopedNativeCodeThread nativeScope(executionCtx_->GetMT());
         if constexpr (IS_NEWCALL) {
             jsStatus = napi_new_instance(env, jsFn_, jsargs.size(), jsargs.data(), &jsRetval);
         } else {
@@ -350,7 +350,7 @@ ALWAYS_INLINE inline std::optional<Value> CallJSHandler::ConvertRetval(napi_valu
 
     if constexpr (IS_NEWCALL) {
         INTEROP_TRACE();
-        ASSERT(protoReader_.GetClass() == PlatformTypes(coro_)->interopJSValue->GetRuntimeClass());
+        ASSERT(protoReader_.GetClass() == PlatformTypes(executionCtx_)->interopJSValue->GetRuntimeClass());
         auto res = JSConvertJSValue::Unwrap(ctx_, env, jsRet);
         if (UNLIKELY(!res.has_value())) {
             return std::nullopt;
@@ -402,9 +402,9 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSQNameBase(Method *method, ui
             napi_env env = ctx->GetJSEnv();
 
             napi_value jsVal = JSConvertJSValue::Wrap(
-                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
             auto qnameStr =
-                st->ReadFixedRefArg<coretypes::String>(PlatformTypes(st->Coro())->coreString->GetRuntimeClass());
+                st->ReadFixedRefArg<coretypes::String>(PlatformTypes(st->ExecCtx())->coreString->GetRuntimeClass());
 
             auto res = ResolveQualifiedReceiverTarget(env, jsVal, qnameStr);
             if (UNLIKELY(!res.has_value())) {
@@ -450,7 +450,7 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSBase(Method *method, uint8_t
             napi_env env = ctx->GetJSEnv();
 
             napi_value jsVal = JSConvertJSValue::Wrap(
-                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
 
             auto classQnameOffset = GetClassQnameOffset(ctx, st->GetMethod());
             auto qnameStart = st->ReadFixedArg<panda_file::Type::TypeId::I32, int32_t>() + classQnameOffset;
@@ -500,9 +500,9 @@ extern "C" uint64_t JSRuntimeCallJSByValue(Method *method, uint8_t *args, uint8_
             napi_env env = ctx->GetJSEnv();
 
             napi_value jsFn = JSConvertJSValue::Wrap(
-                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
             napi_value jsThis = JSConvertJSValue::Wrap(
-                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
 
             st->SetupJSCallee(jsThis, jsFn);
             return true;
@@ -643,11 +643,11 @@ static std::optional<uint32_t> GetQnameCount(Class *klass)
 
 static uint8_t InitCallJSClass(bool isNewCall)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto ctx = InteropCtx::Current(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto ctx = InteropCtx::Current(executionCtx);
     ASSERT(ctx != nullptr);
-    auto *classInFrame = GetMethodOwnerClassInFrames(coro, 0);
+    auto *classInFrame = GetMethodOwnerClassInFrames(executionCtx, 0);
     ASSERT(classInFrame != nullptr);
     auto *klass = classInFrame->GetRuntimeClass();
     ASSERT(klass != nullptr);

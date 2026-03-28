@@ -33,6 +33,7 @@
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10) project code style
 __attribute__((weak)) napi_status napi_load_module_with_module_request(
+    // CC-OFFNXT(G.FMT.06) project code style
     [[maybe_unused]] napi_env env, [[maybe_unused]] const char *request_name, [[maybe_unused]] napi_value *result,
     [[maybe_unused]] const char *abcFilePath = nullptr);
 // NOLINTEND(readability-identifier-naming)
@@ -512,10 +513,10 @@ private:
         std::vector<napi_value> napiArgs = {MakeJsArg(env, args)...};
         Span<napi_value> jsargv(napiArgs);
 
-        auto coro = EtsCoroutine::GetCurrent();
-        auto ctx = InteropCtx::Current(coro);
-        INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-        ScopedManagedCodeThread managedCode(coro);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        auto ctx = InteropCtx::Current(executionCtx);
+        INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+        ScopedManagedCodeThread managedCode(executionCtx->GetMT());
 
         auto methodRes = ResolveEntryPoint(ctx, qualifiedName);
         if (UNLIKELY(!methodRes)) {
@@ -523,7 +524,7 @@ private:
             return std::nullopt;
         }
 
-        auto res = CallETSStatic(coro, ctx, methodRes.Value(), jsargv);
+        auto res = CallETSStatic(executionCtx, ctx, methodRes.Value(), jsargv);
         if (!res) {
             return std::nullopt;
         }

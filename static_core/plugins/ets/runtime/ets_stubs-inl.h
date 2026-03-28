@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs.h"
+#include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "libarkfile/proto_data_accessor-inl.h"
@@ -29,10 +30,10 @@ namespace ark::ets {
 static constexpr const char *GETTER_PREFIX = "%%get-";
 static constexpr const char *SETTER_PREFIX = "%%set-";
 
-ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
+ALWAYS_INLINE inline bool EtsReferenceNullish(EtsExecutionContext *executionCtx, EtsObject *ref)
 {
-    ASSERT(coro != nullptr);
-    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
+    ASSERT(executionCtx != nullptr);
+    return ref == nullptr || ref == EtsObject::FromCoreType(executionCtx->GetNullValue());
 }
 
 ALWAYS_INLINE inline bool IsValueNaN(EtsObject *ref)
@@ -50,17 +51,17 @@ ALWAYS_INLINE inline bool IsValueNaN(EtsObject *ref)
 }
 
 template <bool IS_STRICT>
-ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2)
+ALWAYS_INLINE inline bool EtsReferenceEquals(EtsExecutionContext *executionCtx, EtsObject *ref1, EtsObject *ref2)
 {
     if (UNLIKELY(ref1 == ref2)) {
         return !IsValueNaN(ref1);
     }
 
-    if (EtsReferenceNullish(coro, ref1) || EtsReferenceNullish(coro, ref2)) {
+    if (EtsReferenceNullish(executionCtx, ref1) || EtsReferenceNullish(executionCtx, ref2)) {
         if constexpr (IS_STRICT) {
             return false;
         } else {
-            return EtsReferenceNullish(coro, ref1) && EtsReferenceNullish(coro, ref2);
+            return EtsReferenceNullish(executionCtx, ref1) && EtsReferenceNullish(executionCtx, ref2);
         }
     }
 
@@ -69,23 +70,23 @@ ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1
     if (LIKELY(!(ref1->GetClass()->IsValueTyped() && ref2->GetClass()->IsValueTyped()))) {
         return false;
     }
-    return EtsValueTypedEquals(coro, ref1, ref2);
+    return EtsValueTypedEquals(executionCtx, ref1, ref2);
 }
 
-ALWAYS_INLINE inline EtsString *EtsReferenceTypeof(EtsCoroutine *coro, EtsObject *ref)
+ALWAYS_INLINE inline EtsString *EtsReferenceTypeof(EtsExecutionContext *executionCtx, EtsObject *ref)
 {
-    return EtsGetTypeof(coro, ref);
+    return EtsGetTypeof(executionCtx, ref);
 }
 
-ALWAYS_INLINE inline bool EtsIstrue(EtsCoroutine *coro, EtsObject *obj)
+ALWAYS_INLINE inline bool EtsIstrue(EtsExecutionContext *executionCtx, EtsObject *obj)
 {
-    return EtsGetIstrue(coro, obj);
+    return EtsGetIstrue(executionCtx, obj);
 }
 
 // CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
-inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
+inline EtsClass *GetMethodOwnerClassInFrames(EtsExecutionContext *executionCtx, uint32_t depth)
 {
-    auto stack = StackWalker::Create(coro);
+    auto stack = StackWalker::Create(executionCtx->GetMT());
     for (uint32_t i = 0; i < depth && stack.HasFrame(); ++i) {
         stack.NextFrame();
     }
@@ -99,32 +100,35 @@ inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
     return EtsClass::FromRuntimeClass(method->GetClass());
 }
 
-ALWAYS_INLINE inline void IsValidByType(EtsCoroutine *coro, ark::Class *argClass, Field *metaField, bool isGetter)
+ALWAYS_INLINE inline void IsValidByType(EtsExecutionContext *executionCtx, ark::Class *argClass, Field *metaField,
+                                        bool isGetter)
 {
     auto sourceClass = isGetter ? argClass : metaField->ResolveTypeClass();
     auto targetClass = isGetter ? metaField->ResolveTypeClass() : argClass;
     if (UNLIKELY(!targetClass->IsAssignableFrom(sourceClass))) {
         auto errorMsg = targetClass->GetName() + " cannot be cast to " + sourceClass->GetName();
-        ThrowEtsException(coro, PlatformTypes(coro)->coreClassCastError, errorMsg);
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreClassCastError, errorMsg);
     }
 }
 
-ALWAYS_INLINE inline void IsValidAccessorByName(EtsCoroutine *coro, Field *metaField, Method *resolved, bool isGetter)
+ALWAYS_INLINE inline void IsValidAccessorByName(EtsExecutionContext *executionCtx, Field *metaField, Method *resolved,
+                                                bool isGetter)
 {
     auto pf = resolved->GetPandaFile();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, resolved->GetFileId()));
     auto argClass = classLinker->GetClass(*pf, pda.GetReferenceType(0), resolved->GetClass()->GetLoadContext());
-    IsValidByType(coro, argClass, metaField, isGetter);
+    IsValidByType(executionCtx, argClass, metaField, isGetter);
 }
 
-ALWAYS_INLINE inline void IsValidFieldByName(EtsCoroutine *coro, Field *metaField, Field *resolved, bool isGetter)
+ALWAYS_INLINE inline void IsValidFieldByName(EtsExecutionContext *executionCtx, Field *metaField, Field *resolved,
+                                             bool isGetter)
 {
     auto pf = resolved->GetPandaFile();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto argClass = classLinker->GetClass(*pf, panda_file::FieldDataAccessor::GetTypeId(*pf, resolved->GetFileId()),
                                           resolved->GetClass()->GetLoadContext());
-    IsValidByType(coro, argClass, metaField, isGetter);
+    IsValidByType(executionCtx, argClass, metaField, isGetter);
 }
 
 template <bool IS_GETTER>
@@ -133,7 +137,7 @@ inline void LookUpException(ark::Class *klass, Field *rawField)
     auto type = IS_GETTER ? "getter" : "setter";
     auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and " +
                     ark::ConvertToString(type) + " with name " + utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedFieldError, errorMsg);
+    ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedFieldError, errorMsg);
 }
 
 inline void LookUpException(ark::Class *klass, ark::Method *rawMethod)
@@ -141,7 +145,7 @@ inline void LookUpException(ark::Class *klass, ark::Method *rawMethod)
     auto rawMethodName = (rawMethod == nullptr) ? "null" : utf::Mutf8AsCString(rawMethod->GetName().data);
     auto errorMsg =
         "Class " + ark::ConvertToString(klass->GetName()) + " does not have method with name " + rawMethodName;
-    ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedMethodError, errorMsg);
+    ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedMethodError, errorMsg);
 }
 
 template <bool IS_GETTER>
@@ -165,7 +169,7 @@ ALWAYS_INLINE Field *GetFieldByName(InterpreterCache::Entry *entry, ark::Method 
             continue;
         }
         if (field->GetTypeId() == panda_file::Type::TypeId::REFERENCE) {
-            IsValidFieldByName(EtsCoroutine::GetCurrent(), rawField, field, IS_GETTER);
+            IsValidFieldByName(EtsExecutionContext::GetCurrent(), rawField, field, IS_GETTER);
         }
         *entry = {address, method, static_cast<void *>(field)};
         return field;
@@ -197,7 +201,7 @@ ALWAYS_INLINE inline ark::Method *GetAccessorByName(InterpreterCache::Entry *ent
             continue;
         }
         if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-            IsValidAccessorByName(EtsCoroutine::GetCurrent(), rawField, callee, IS_GETTER);
+            IsValidAccessorByName(EtsExecutionContext::GetCurrent(), rawField, callee, IS_GETTER);
         }
         auto mUint = reinterpret_cast<uint64_t>(callee);
         *entry = {address, method, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
@@ -363,14 +367,14 @@ ALWAYS_INLINE inline bool MethodIsSupertypeOf(ClassLinker *linker, Method *super
 
 // CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
 // CC-OFFNXT(G.FUD.06) perf critical
-ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro, const ark::Class *klass,
+ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsExecutionContext *executionCtx, const ark::Class *klass,
                                                              Method *lookupTarget)
 {
     auto linker = Runtime::GetCurrent()->GetClassLinker();
 
     // CC-OFFNXT(C_RULE_ID_POINTER_DECLARE_FOLLOW_NAME) project code style
     // CC-OFFNXT(G.FMT.14-CPP,G.FMT.10-CPP) project code style
-    auto lookupFromIndex = [coro, linker, klass, lookupTarget](size_t from) -> Method * {
+    auto lookupFromIndex = [executionCtx, linker, klass, lookupTarget](size_t from) -> Method * {
         auto methods = klass->GetVTable();
         for (size_t idx = from; idx < methods.size(); ++idx) {
             auto vmethod = methods[idx];
@@ -384,7 +388,7 @@ ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro,
                 ASSERT(vmethod->GetVTableIndex() == idx);
                 return vmethod;
             }
-            if (UNLIKELY(coro->HasPendingException())) {
+            if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
                 return nullptr;
             }
         }
@@ -405,10 +409,11 @@ ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro,
     return matched;
 }
 
-ALWAYS_INLINE inline Method *ResolveCompatibleVMethod(EtsCoroutine *coro, ark::Class *klass, Method *lookupTarget)
+ALWAYS_INLINE inline Method *ResolveCompatibleVMethod(EtsExecutionContext *executionCtx, ark::Class *klass,
+                                                      Method *lookupTarget)
 {
     for (Class *t = klass; t != nullptr; t = t->GetBase()) {
-        Method *resolved = ResolveCompatibleVMethodInClass(coro, t, lookupTarget);
+        Method *resolved = ResolveCompatibleVMethodInClass(executionCtx, t, lookupTarget);
         if (resolved != nullptr) {
             return resolved;
         }
@@ -416,14 +421,14 @@ ALWAYS_INLINE inline Method *ResolveCompatibleVMethod(EtsCoroutine *coro, ark::C
     return nullptr;
 }
 
-ALWAYS_INLINE inline Method *GetMethodByName(EtsCoroutine *coro, ETSStubCacheInfo const &cache, Method *rawMethod,
-                                             ark::Class *klass)
+ALWAYS_INLINE inline Method *GetMethodByName(EtsExecutionContext *executionCtx, ETSStubCacheInfo const &cache,
+                                             Method *rawMethod, ark::Class *klass)
 {
     Method *callee = GetMethodFromCache(cache, klass);
     if (callee != nullptr) {
         return callee;
     }
-    callee = ResolveCompatibleVMethod(coro, klass, rawMethod);
+    callee = ResolveCompatibleVMethod(executionCtx, klass, rawMethod);
     if (callee != nullptr) {
         cache.UpdateItem(callee);
         return callee;

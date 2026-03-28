@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -36,10 +36,10 @@ constexpr size_t THREE_BYTES = 3;
 namespace ark::ets::intrinsics {
 
 /// @brief Creates a new ArrayBuffer with specified size and optional initial data
-static EtsHandle<EtsStdCoreArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
+static EtsHandle<EtsStdCoreArrayBuffer> CreateArrayBuffer(EtsExecutionContext *executionCtx, EtsInt byteLength,
                                                           const uint8_t *data = nullptr)
 {
-    EtsHandle<EtsStdCoreArrayBuffer> newBuffer(coro, EtsStdCoreArrayBuffer::Create(coro, byteLength));
+    EtsHandle<EtsStdCoreArrayBuffer> newBuffer(executionCtx, EtsStdCoreArrayBuffer::Create(executionCtx, byteLength));
     if (UNLIKELY(newBuffer.GetPtr() == nullptr)) {
         return newBuffer;
     }
@@ -79,8 +79,8 @@ static size_t ByteLength(const PandaString &string, const PandaString &encoding)
  *   - Latin1/Binary
  *   - Hex (must be even length)
  */
-static PandaVector<uint8_t> ConvertEtsStringToBytes(EtsString *strObj, EtsString *encodingObj, EtsCoroutine *coro,
-                                                    const LanguageContext &ctx)
+static PandaVector<uint8_t> ConvertEtsStringToBytes(EtsString *strObj, EtsString *encodingObj,
+                                                    EtsExecutionContext *executionCtx, const LanguageContext &ctx)
 {
     PandaVector<uint8_t> strBuf;
     PandaVector<uint8_t> encodingBuf;
@@ -90,7 +90,7 @@ static PandaVector<uint8_t> ConvertEtsStringToBytes(EtsString *strObj, EtsString
     size_t siz = ByteLength(input, encoding);
     auto res = helpers::encoding::ConvertStringToBytes(input, encoding, siz);
     if (std::holds_alternative<helpers::Err<PandaString>>(res)) {
-        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8(std::get<helpers::Err<PandaString>>(res).Message().c_str()));
         return PandaVector<uint8_t> {};
     }
@@ -100,7 +100,7 @@ static PandaVector<uint8_t> ConvertEtsStringToBytes(EtsString *strObj, EtsString
 /// @brief Calculates byte length of string when encoded
 extern "C" EtsInt EtsStringBytesLength(EtsString *strObj, EtsString *encodingObj)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     PandaVector<uint8_t> strBuf;
     PandaVector<uint8_t> encodingBuf;
@@ -109,7 +109,7 @@ extern "C" EtsInt EtsStringBytesLength(EtsString *strObj, EtsString *encodingObj
         encodingObj != nullptr ? PandaString(encodingObj->ConvertToStringView(&encodingBuf)) : "utf8";
     auto res = helpers::encoding::CalculateStringBytesLength(input, encoding);
     if (std::holds_alternative<helpers::Err<PandaString>>(res)) {
-        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8(std::get<helpers::Err<PandaString>>(res).Message().c_str()));
         return -1;
     }
@@ -119,15 +119,15 @@ extern "C" EtsInt EtsStringBytesLength(EtsString *strObj, EtsString *encodingObj
 /// @brief Creates ArrayBuffer from encoded string
 extern "C" EtsStdCoreArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *strObj, EtsString *encodingObj)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    PandaVector<uint8_t> bytes = ConvertEtsStringToBytes(strObj, encodingObj, coro, ctx);
+    PandaVector<uint8_t> bytes = ConvertEtsStringToBytes(strObj, encodingObj, executionCtx, ctx);
     auto byteLength = static_cast<EtsInt>(bytes.size());
-    [[maybe_unused]] EtsHandleScope s(coro);
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
     EtsHandle<EtsStdCoreArrayBuffer> newBuffer =
-        CreateArrayBuffer(coro, byteLength, byteLength > 0 ? bytes.data() : nullptr);
+        CreateArrayBuffer(executionCtx, byteLength, byteLength > 0 ? bytes.data() : nullptr);
     if (newBuffer.GetPtr() == nullptr) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     return newBuffer.GetPtr();
@@ -164,12 +164,12 @@ extern "C" EtsLong EtsStdCoreArrayBufferGetAddress(ObjectHeader *byteArray)
 extern "C" EtsStdCoreArrayBuffer *EtsArrayBufferFromBufferSlice(EtsStdCoreArrayBuffer *obj, EtsInt offset,
                                                                 EtsInt length)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsStdCoreArrayBuffer> original(coro, obj);
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsStdCoreArrayBuffer> original(executionCtx, obj);
     if (original->WasDetached()) {
-        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8("ArrayBuffer was detached"));
         return nullptr;
     }
@@ -177,19 +177,19 @@ extern "C" EtsStdCoreArrayBuffer *EtsArrayBufferFromBufferSlice(EtsStdCoreArrayB
 
     EtsInt origByteLength = original->GetByteLength();
     if (offset < 0 || offset > origByteLength) {
-        ThrowException(ctx, coro, ctx.GetIndexOutOfBoundsExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIndexOutOfBoundsExceptionClassDescriptor(),
                        utf::CStringAsMutf8("Offset is out of bounds"));
         return nullptr;
     }
     if (length < 0 || length > origByteLength - offset) {
-        ThrowException(ctx, coro, ctx.GetIndexOutOfBoundsExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIndexOutOfBoundsExceptionClassDescriptor(),
                        utf::CStringAsMutf8("Length is out of bounds"));
         return nullptr;
     }
 
-    EtsHandle<EtsStdCoreArrayBuffer> newBuffer = CreateArrayBuffer(coro, length);
+    EtsHandle<EtsStdCoreArrayBuffer> newBuffer = CreateArrayBuffer(executionCtx, length);
     if (newBuffer.GetPtr() == nullptr) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     std::copy_n(std::next(reinterpret_cast<uint8_t *>(original->GetData()), offset), length,
@@ -206,23 +206,23 @@ extern "C" EtsStdCoreArrayBuffer *EtsArrayBufferFromBufferSlice(EtsStdCoreArrayB
 extern "C" EtsString *EtsArrayBufferToString(EtsStdCoreArrayBuffer *buffer, EtsString *encodingObj, EtsInt start,
                                              EtsInt end)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
 
     auto vb = helpers::encoding::ValidateBuffer(buffer);
     if (std::holds_alternative<helpers::Err<PandaString>>(vb)) {
-        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8(std::get<helpers::Err<PandaString>>(vb).Message().c_str()));
         return nullptr;
     }
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsStdCoreArrayBuffer> buf(coro, buffer);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsStdCoreArrayBuffer> buf(executionCtx, buffer);
     EtsInt byteLength = buf->GetByteLength();
 
     auto vi = helpers::encoding::ValidateIndices(byteLength, start, end);
     if (std::holds_alternative<helpers::Err<PandaString>>(vi)) {
-        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8(std::get<helpers::Err<PandaString>>(vi).Message().c_str()));
         return nullptr;
     }
@@ -250,7 +250,7 @@ extern "C" EtsString *EtsArrayBufferToString(EtsStdCoreArrayBuffer *buffer, EtsS
         output = helpers::encoding::ConvertLatinEncoding(bytes);
     } else {
         PandaString errMsg = "Unsupported encoding: " + encoding;
-        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+        ThrowException(ctx, executionCtx->GetMT(), ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8(errMsg.c_str()));
         return nullptr;
     }
@@ -262,18 +262,19 @@ extern "C" EtsObject *EtsArrayBufferRegisterWeakRef(EtsStdCoreArrayBuffer *buffe
 {
     using FinalizerCallback = void (*)(void *);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsObject> bufferHandle(coro, buffer);
-    return coro->GetPandaVM()->RegisterFinalizerForObject(
-        coro, bufferHandle, reinterpret_cast<FinalizerCallback>(finalizer), reinterpret_cast<void *>(finalizerData));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsObject> bufferHandle(executionCtx, buffer);
+    return executionCtx->GetPandaVM()->RegisterFinalizerForObject(executionCtx, bufferHandle,
+                                                                  reinterpret_cast<FinalizerCallback>(finalizer),
+                                                                  reinterpret_cast<void *>(finalizerData));
 }
 
 extern "C" EtsLong EtsArrayBufferUnregisterWeakRef(EtsObject *weakRef)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *finalizableWeakRef = EtsFinalizableWeakRef::FromEtsObject(weakRef);
-    if (LIKELY(coro->GetPandaVM()->UnregisterFinalizerForObject(coro, finalizableWeakRef))) {
+    if (LIKELY(executionCtx->GetPandaVM()->UnregisterFinalizerForObject(executionCtx, finalizableWeakRef))) {
         auto finalizer = finalizableWeakRef->ReleaseFinalizer();
         return reinterpret_cast<EtsLong>(finalizer.GetFinalizerArg());
     }

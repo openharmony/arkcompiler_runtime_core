@@ -24,11 +24,11 @@ bool ForEachFrameInUnionStack(const std::function<void(const void *frame, bool i
     if (UNLIKELY(mutator == nullptr)) {
         return false;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(coro == nullptr)) {
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
         return false;
     }
-    auto *ctx = interop::js::InteropCtx::Current(coro);
+    auto *ctx = interop::js::InteropCtx::Current(execCtx);
     if (UNLIKELY(ctx == nullptr)) {
         return false;
     }
@@ -41,11 +41,11 @@ bool UnionStackIsEmpty(bool *isEmpty)
     if (UNLIKELY(mutator == nullptr)) {
         return false;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(coro == nullptr)) {
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
         return false;
     }
-    auto *ctx = interop::js::InteropCtx::Current(coro);
+    auto *ctx = interop::js::InteropCtx::Current(execCtx);
     if (UNLIKELY(ctx == nullptr)) {
         return false;
     }

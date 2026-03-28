@@ -30,10 +30,11 @@ namespace ark::ets::intrinsics::caseconversion {
 
 namespace {
 
-std::string_view LanguageTagToStringView(EtsString *langTag, EtsCoroutine *coroutine, PandaVector<uint8_t> *buf)
+std::string_view LanguageTagToStringView(EtsString *langTag, EtsExecutionContext *executionCtx,
+                                         PandaVector<uint8_t> *buf)
 {
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> langTagHandle(coroutine, reinterpret_cast<ObjectHeader *>(langTag));
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<coretypes::String> langTagHandle(executionCtx->GetMT(), reinterpret_cast<ObjectHeader *>(langTag));
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(langTagHandle, ctx);
 
@@ -106,14 +107,14 @@ icu::UnicodeString IcuToUpperCase(icu::UnicodeString &str, const icu::Locale &lo
     return str.toUpper(locale);
 }
 
-UErrorCode ParseSingleBCP47LanguageTag(EtsString *langTag, EtsCoroutine *coroutine, icu::Locale &locale)
+UErrorCode ParseSingleBCP47LanguageTag(EtsString *langTag, EtsExecutionContext *executionCtx, icu::Locale &locale)
 {
     if (langTag == nullptr) {
         locale = icu::Locale::getDefault();
         return U_ZERO_ERROR;
     }
     PandaVector<uint8_t> buf;
-    std::string_view locTag = LanguageTagToStringView(langTag, coroutine, &buf);
+    std::string_view locTag = LanguageTagToStringView(langTag, executionCtx, &buf);
     icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
     UErrorCode status = U_ZERO_ERROR;
     locale = icu::Locale::forLanguageTag(sp, status);
@@ -140,14 +141,14 @@ EtsString *ConvertStringCase(EtsString *thisStr, const icu::Locale &locale, Fast
         return EtsString::CreateNewEmptyString();
     }
     // We can convert a LineString directly
-    auto *string = thisStr->GetCoreType();
+    auto *string = thisStr;
     if (string->IsLineString() && string->IsUtf8() && LocaleAllowsFastLatinConversion(locale)) {
         return fastCnvt(string->GetDataUtf8(), string->GetLength());
     }
 
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> strHandle(coroutine, string);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<coretypes::String> strHandle(executionCtx->GetMT(), string->GetCoreType());
     return ConvertStringCase(strHandle, locale, fastCnvt, icuCnvt);
 }
 
@@ -159,15 +160,15 @@ EtsString *ConvertStringCase(EtsString *thisStr, EtsString *langTag, FastCnvt fa
     }
 
     ASSERT(langTag != nullptr);
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
     icu::Locale locale;
-    VMHandle<coretypes::String> langTagHandle(coroutine, langTag->GetCoreType());
-    VMHandle<coretypes::String> thisStrHandle(coroutine, thisStr->GetCoreType());
-    auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, coroutine, locale);
+    VMHandle<coretypes::String> langTagHandle(executionCtx->GetMT(), langTag->GetCoreType());
+    VMHandle<coretypes::String> thisStrHandle(executionCtx->GetMT(), thisStr->GetCoreType());
+    auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, executionCtx, locale);
     if (UNLIKELY(U_FAILURE(localeParseStatus))) {
         auto message = "Language tag '" + ConvertToString(langTagHandle.GetPtr()) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return ConvertStringCase(thisStrHandle, locale, fastCnvt, icuCnvt);

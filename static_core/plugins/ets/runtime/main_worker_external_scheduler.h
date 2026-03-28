@@ -20,7 +20,7 @@
 
 namespace ark::ets {
 
-/// @brief This class is used to schedule coroutines of the main worker from the external scheduler.
+/// @brief This class is used to schedule jobs of the main worker from the external scheduler.
 class MainWorkerExternalScheduler : public CallbackPoster {
 public:
     /**

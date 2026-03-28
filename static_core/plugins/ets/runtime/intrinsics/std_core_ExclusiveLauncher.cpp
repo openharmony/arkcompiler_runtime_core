@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_launch.h"
+#include "runtime/execution/job_priority.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -34,20 +36,6 @@ namespace ark::ets::intrinsics {
 
 static constexpr EtsInt INVALID_WORKER_ID = -1;
 
-EtsObject *CreateMainWorker()
-{
-    auto *pandaVM = PandaEtsVM::GetCurrent();
-    auto *classLinker = pandaVM->GetClassLinker();
-    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/core/EAWorker;");
-    auto *ext = classLinker->GetEtsClassLinkerExtension();
-    auto *klass = ets::EtsClass::FromRuntimeClass(ext->GetClass(mutf8Name));
-    if (klass == nullptr) {
-        LOG(ERROR, COROUTINES) << "Load EAWorker failed";
-        return nullptr;
-    }
-    return EtsObject::Create(EtsCoroutine::GetCurrent(), klass);
-}
-
 void SetCurrentWorkerPriority(int priority)
 {
     QosHelper::SetCurrentWorkerPriority(static_cast<Priority>(priority));
@@ -55,47 +43,48 @@ void SetCurrentWorkerPriority(int priority)
 
 static void RunExclusiveTask(mem::Reference *taskRef, mem::GlobalObjectStorage *refStorage)
 {
-    ScopedManagedCodeThread managedCode(EtsCoroutine::GetCurrent());
+    ScopedManagedCodeThread managedCode(ManagedThread::GetCurrent());
     auto *taskObj = EtsObject::FromCoreType(refStorage->Get(taskRef));
     refStorage->Remove(taskRef);
-    LambdaUtils::InvokeVoid(EtsCoroutine::GetCurrent(), taskObj);
+    LambdaUtils::InvokeVoid(ManagedThread::GetCurrent(), taskObj);
 }
 
-static Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limitIsReached, bool &jsEnvEmpty)
+static JobExecutionContext *TryCreateEAWorker(PandaEtsVM *etsVM, bool needInterop, bool &limitIsReached,
+                                              bool &jsEnvEmpty)
 {
     auto *runtime = Runtime::GetCurrent();
-    auto *coroMan = etsVM->GetCoroutineManager();
-    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *jobMan = etsVM->GetJobManager();
+    auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
     if (needInterop && !ifaceTable->AreInteropInterfacesAvailable()) {
         jsEnvEmpty = true;
         LOG(ERROR, COROUTINES) << "Cannot create EAWorker support interop without JsEnv";
         return nullptr;
     }
-    auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
-    // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
-    if (exclusiveCoro == nullptr) {
+    auto *eaExecCtx = jobMan->AttachExclusiveWorker(runtime, etsVM);
+    // eaExecCtx == nullptr means that we reached the limit of eaworkers count or memory resources
+    if (eaExecCtx == nullptr) {
         limitIsReached = true;
         LOG(ERROR, COROUTINES) << "The limit of Exclusive Workers has been reached";
         return nullptr;
     }
 
-    return exclusiveCoro;
+    return eaExecCtx;
 }
 
 static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 100 * 1000U;
 
-void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
+void RunTaskOnEAWorker(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
 {
     RunExclusiveTask(taskRef, etsVM->GetGlobalObjectStorage());
     if (needInterop) {
         auto *w = Coroutine::GetCurrent()->GetWorker();
         while (w->IsExternalSchedulingEnabled()) {
             w->ProcessAsyncWork();
-            auto *coroMan = Coroutine::GetCurrent()->GetManager();
-            TimerEvent timerEvt(coroMan, 0);
+            auto *jobMan = JobExecutionContext::GetCurrent()->GetManager();
+            TimerEvent timerEvt(jobMan, 0);
             timerEvt.Lock();
-            timerEvt.SetExpirationTime(coroMan->GetCurrentTime() + ASYNC_WORK_WAITING_TIME);
-            coroMan->Await(&timerEvt);
+            timerEvt.SetExpirationTime(jobMan->GetCurrentTime() + ASYNC_WORK_WAITING_TIME);
+            jobMan->Await(&timerEvt);
         }
     }
 }
@@ -113,10 +102,10 @@ bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
     return false;
 }
 
-static bool PrepareInteropEnv(PandaEtsVM *etsVM, Coroutine *exclusiveCoro)
+static bool PrepareInteropEnv(PandaEtsVM *etsVM, JobExecutionContext *eaExecCtx)
 {
-    auto *coroMan = etsVM->GetCoroutineManager();
-    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *coroMan = etsVM->GetJobManager();
+    auto *ifaceTable = EtsExecutionContext::FromMT(coroMan->GetMainThread())->GetExternalIfaceTable();
     void *jsEnv = nullptr;
     jsEnv = ifaceTable->CreateJSRuntime();
     if (jsEnv == nullptr) {
@@ -124,58 +113,58 @@ static bool PrepareInteropEnv(PandaEtsVM *etsVM, Coroutine *exclusiveCoro)
         return false;
     }
 
-    ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+    ifaceTable->CreateInteropCtx(EtsExecutionContext::FromMT(eaExecCtx), jsEnv);
     return true;
 }
 
 static void HandleInteropEnvError()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = JobExecutionContext::GetCurrent();
     auto *method = PlatformTypes()->coreEAWorkerHandleInteropEnvError;
     if (method == nullptr) {
         LOG(ERROR, COROUTINES) << "EAWorker handleInteropEnvError method is not found";
-        coro->GetManager()->DestroyExclusiveWorker();
+        executionCtx->GetManager()->DetachExclusiveWorker();
         return;
     }
-    method->GetPandaMethod()->Invoke(coro, nullptr);
-    coro->GetManager()->DestroyExclusiveWorker();
+    method->GetPandaMethod()->Invoke(executionCtx, nullptr);
+    executionCtx->GetManager()->DetachExclusiveWorker();
 }
 
 void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
 {
-    auto *coroMan = etsVM->GetCoroutineManager();
+    auto *jobMan = etsVM->GetJobManager();
     if (supportInterop) {
-        auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+        auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
         auto *jsEnv = ifaceTable->GetJSEnv();
-        coroMan->DestroyExclusiveWorker();
+        jobMan->DetachExclusiveWorker();
         ifaceTable->CleanUpJSEnv(jsEnv);
     } else {
-        coroMan->DestroyExclusiveWorker();
+        jobMan->DetachExclusiveWorker();
     }
 }
 
-static void SetupAndRunExclusiveWorker(PandaEtsVM *etsVM, Coroutine *eaCoro, bool supportInterop,
+static void SetupAndRunExclusiveWorker(PandaEtsVM *etsVM, JobExecutionContext *eaExecCtx, bool supportInterop,
                                        mem::Reference *taskRef)
 {
     bool res = true;
     if (supportInterop) {
-        res = PrepareInteropEnv(etsVM, eaCoro);
+        res = PrepareInteropEnv(etsVM, eaExecCtx);
     }
     if (!res) {
         HandleInteropEnvError();
         etsVM->GetGlobalObjectStorage()->Remove(taskRef);
         return;
     }
-    RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
+    RunTaskOnEAWorker(etsVM, supportInterop, taskRef);
     DestroyExclusiveWorker(etsVM, supportInterop);
 }
 
 EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *etsVM = coro->GetPandaVM();
-    if (etsVM->GetCoroutineManager()->IsExclusiveWorkersLimitReached()) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *etsVM = executionCtx->GetPandaVM();
+    if (etsVM->GetJobManager()->IsExclusiveWorkersLimitReached()) {
         ThrowCoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
         return INVALID_WORKER_ID;
     }
@@ -189,21 +178,21 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
 
     {
         PandaVector<uint8_t> nameBuf;
-        EtsHandleScope handleScope(coro);
-        EtsHandle<EtsString> nameHandle(coro, name);
+        EtsHandleScope handleScope(executionCtx);
+        EtsHandle<EtsString> nameHandle(executionCtx, name);
         PandaString nameStr(nameHandle->ConvertToStringView(&nameBuf));
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         auto event = os::memory::Event();
         auto t = std::thread([&jsEnvEmpty, &limitIsReached, &event, &workerId, etsVM, taskRef, supportInterop]() {
-            auto *eaCoro = TryCreateEACoroutine(etsVM, supportInterop, limitIsReached, jsEnvEmpty);
-            if (eaCoro == nullptr) {
+            auto *eaExecCtx = TryCreateEAWorker(etsVM, supportInterop, limitIsReached, jsEnvEmpty);
+            if (eaExecCtx == nullptr) {
                 LOG(ERROR, COROUTINES) << "Cannot create EAWorker";
                 event.Fire();
                 return;
             }
-            workerId = eaCoro->GetWorker()->GetId();
+            workerId = eaExecCtx->GetWorker()->GetId();
             event.Fire();
-            SetupAndRunExclusiveWorker(etsVM, eaCoro, supportInterop, taskRef);
+            SetupAndRunExclusiveWorker(etsVM, eaExecCtx, supportInterop, taskRef);
         });
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();
@@ -218,19 +207,25 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
 
 void JoinExclusiveWorker(EtsInt workerId, EtsObject *finalTask)
 {
-    auto *coro = Coroutine::GetCurrent();
-    auto *coroMan = coro->GetManager();
-    auto *taskRef =
-        coro->GetVM()->GetGlobalObjectStorage()->Add(finalTask->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    auto eaGroup = CoroutineWorkerGroup::GenerateExactWorkerId(workerId);
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *jobMan = executionCtx->GetManager();
+    auto *taskRef = executionCtx->GetVM()->GetGlobalObjectStorage()->Add(finalTask->GetCoreType(),
+                                                                         mem::Reference::ObjectType::GLOBAL);
+    auto eaGroup = JobWorkerThreadGroup::GenerateExactWorkerId(workerId);
     auto joiningFunc = [](void *param) {
         auto *ref = static_cast<mem::Reference *>(param);
-        auto *eaCoro = EtsCoroutine::GetCurrent();
-        RunExclusiveTask(ref, eaCoro->GetVM()->GetGlobalObjectStorage());
-        eaCoro->GetWorker()->DestroyCallbackPoster();
+        auto *eaExecutionCtx = JobExecutionContext::GetCurrent();
+        RunExclusiveTask(ref, eaExecutionCtx->GetVM()->GetGlobalObjectStorage());
+        eaExecutionCtx->GetWorker()->DestroyCallbackPoster();
     };
-    coroMan->LaunchNative(joiningFunc, taskRef, "joining ea-coro", eaGroup, CoroutinePriority::DEFAULT_PRIORITY, false,
-                          true);
+    auto epInfo = Job::NativeEntrypointInfo {joiningFunc, taskRef};
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    auto *job = jobMan->CreateJob("joining ea-coro", std::move(epInfo), JobPriority::DEFAULT_PRIORITY,
+                                  Job::Type::MUTATOR, true);
+    auto lResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), eaGroup});
+    if (UNLIKELY(lResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+        jobMan->DestroyJob(job);
+    }
 }
 
 }  // namespace ark::ets::intrinsics

@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
@@ -68,16 +69,16 @@ public:
         return bit_cast<napi_valuetype>(type_);
     }
 
-    static JSValue *Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue);
+    static JSValue *Create(EtsExecutionContext *executionCtx, InteropCtx *ctx, napi_value nvalue);
 
-    static JSValue *CreateUndefined(EtsCoroutine *coro, InteropCtx *ctx)
+    static JSValue *CreateUndefined(EtsExecutionContext *executionCtx, InteropCtx *ctx)
     {
-        return AllocUndefined(coro, ctx);
+        return AllocUndefined(executionCtx, ctx);
     }
 
-    static JSValue *CreateNull(EtsCoroutine *coro, InteropCtx *ctx)
+    static JSValue *CreateNull(EtsExecutionContext *executionCtx, InteropCtx *ctx)
     {
-        auto jsvalue = AllocUndefined(coro, ctx);
+        auto jsvalue = AllocUndefined(executionCtx, ctx);
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
@@ -85,9 +86,9 @@ public:
         return jsvalue;
     }
 
-    static JSValue *CreateBoolean(EtsCoroutine *coro, InteropCtx *ctx, bool value)
+    static JSValue *CreateBoolean(EtsExecutionContext *executionCtx, InteropCtx *ctx, bool value)
     {
-        auto jsvalue = AllocUndefined(coro, ctx);
+        auto jsvalue = AllocUndefined(executionCtx, ctx);
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
@@ -95,9 +96,9 @@ public:
         return jsvalue;
     }
 
-    static JSValue *CreateNumber(EtsCoroutine *coro, InteropCtx *ctx, double value)
+    static JSValue *CreateNumber(EtsExecutionContext *executionCtx, InteropCtx *ctx, double value)
     {
-        auto jsvalue = AllocUndefined(coro, ctx);
+        auto jsvalue = AllocUndefined(executionCtx, ctx);
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
@@ -105,31 +106,32 @@ public:
         return jsvalue;
     }
 
-    static JSValue *CreateString(EtsCoroutine *coro, InteropCtx *ctx, std::string &&value)
+    static JSValue *CreateString(EtsExecutionContext *executionCtx, InteropCtx *ctx, std::string &&value)
     {
-        auto jsvalue = AllocUndefined(coro, ctx);
+        auto jsvalue = AllocUndefined(executionCtx, ctx);
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
         jsvalue->SetString(ctx->GetStringStor()->Get(std::move(value)));
-        return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+        return JSValue::AttachFinalizer(EtsExecutionContext::GetCurrent(), jsvalue);
     }
 
-    static JSValue *CreateRefValue(EtsCoroutine *coro, InteropCtx *ctx, napi_value value, napi_valuetype type)
+    static JSValue *CreateRefValue(EtsExecutionContext *executionCtx, InteropCtx *ctx, napi_value value,
+                                   napi_valuetype type)
     {
-        auto jsvalue = AllocUndefined(coro, ctx);
+        auto jsvalue = AllocUndefined(executionCtx, ctx);
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
 
-        [[maybe_unused]] EtsHandleScope s(coro);
-        EtsHandle<JSValue> jsValueHandle(coro, jsvalue);
+        [[maybe_unused]] EtsHandleScope s(executionCtx);
+        EtsHandle<JSValue> jsValueHandle(executionCtx, jsvalue);
         SetRefValue(ctx, value, type, jsValueHandle);
         return jsValueHandle.GetPtr();
     }
 
     // prefer JSConvertJSValue::WrapWithNullCheck
-    static napi_value GetNapiValue(EtsCoroutine *coro, InteropCtx *ctx, EtsHandle<JSValue> &handle);
+    static napi_value GetNapiValue(EtsExecutionContext *executionCtx, InteropCtx *ctx, EtsHandle<JSValue> &handle);
 
     bool GetBoolean() const
     {
@@ -159,7 +161,7 @@ public:
     {
         napi_value value;
         auto napiRef = jsObject->GetNapiRef(env);
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         NAPI_ASSERT_OK(napi_get_reference_value(env, napiRef, &value));
         return value;
     }
@@ -269,11 +271,12 @@ private:
         return val;
     }
 
-    static JSValue *AllocUndefined(EtsCoroutine *coro, [[maybe_unused]] InteropCtx *ctx)
+    static JSValue *AllocUndefined(EtsExecutionContext *executionCtx, [[maybe_unused]] InteropCtx *ctx)
     {
         JSValue *jsValue;
         {
-            auto obj = ObjectHeader::Create(coro, PlatformTypes(coro)->interopJSValue->GetRuntimeClass());
+            auto obj = ObjectHeader::Create(executionCtx->GetMT(),
+                                            PlatformTypes(executionCtx)->interopJSValue->GetRuntimeClass());
             if (UNLIKELY(!obj)) {
                 return nullptr;
             }
@@ -284,16 +287,16 @@ private:
         return jsValue;
     }
 
-    static napi_value GetBooleanValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+    static napi_value GetBooleanValue(EtsExecutionContext *executionCtx, napi_env env, EtsHandle<JSValue> jsObject);
 
-    static napi_value GetNumberValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+    static napi_value GetNumberValue(EtsExecutionContext *executionCtx, napi_env env, EtsHandle<JSValue> jsObject);
 
-    static napi_value GetStringValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+    static napi_value GetStringValue(EtsExecutionContext *executionCtx, napi_env env, EtsHandle<JSValue> jsObject);
 
-    static napi_value GetBigIntValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+    static napi_value GetBigIntValue(EtsExecutionContext *executionCtx, napi_env env, EtsHandle<JSValue> jsObject);
 
     // Returns moved jsValue
-    [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue);
+    [[nodiscard]] static JSValue *AttachFinalizer(EtsExecutionContext *executionCtx, JSValue *jsValue);
 
     napi_ref GetNapiRef(napi_env env) const
     {
@@ -314,14 +317,14 @@ private:
     static bool RefValueEquals([[maybe_unused]] JSValue *left, [[maybe_unused]] JSValue *right)
     {
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-        auto coro = EtsCoroutine::GetCurrent();
+        auto executionCtx = EtsExecutionContext::GetCurrent();
         auto env = InteropCtx::Current()->GetJSEnv();
         auto leftRef = left->GetNapiRef(env);
         auto rightRef = right->GetNapiRef(env);
         napi_value leftValue;
         napi_value rightvalue;
 
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         NAPI_ASSERT_OK(napi_get_reference_value(env, leftRef, &leftValue));
         NAPI_ASSERT_OK(napi_get_reference_value(env, rightRef, &rightvalue));
         bool isEquals = false;
@@ -373,7 +376,7 @@ private:
         ASSERT(GetValueType<true>(ctx->GetJSEnv(), jsValue) == type);
         ASSERT(IsRefType(type));
         jsValueObject->SetType(type);
-        EtsHandle<EtsObject> objHandle(EtsCoroutine::GetCurrent(), jsValueObject->AsObject());
+        EtsHandle<EtsObject> objHandle(EtsExecutionContext::GetCurrent(), jsValueObject->AsObject());
         jsValueObject->SetData(ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, objHandle, jsValue));
     }
 

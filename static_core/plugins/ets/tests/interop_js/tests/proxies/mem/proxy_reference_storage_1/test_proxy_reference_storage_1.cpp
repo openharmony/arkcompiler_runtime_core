@@ -48,13 +48,13 @@ public:
 
     SharedReference *CreateReference(EtsObject *etsObject)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] EtsHandleScope s(coro);
-        EtsHandle<EtsObject> objHandle(coro, etsObject);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(executionCtx);
+        EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
         napi_value jsObj;
-        auto *interopCtx = InteropCtx::Current(coro);
+        auto *interopCtx = InteropCtx::Current(executionCtx);
         {
-            ScopedNativeCodeThread nativeCodeScope(coro);
+            ScopedNativeCodeThread nativeCodeScope(executionCtx->GetMT());
             NAPI_CHECK_FATAL(napi_create_object(interopCtx->GetJSEnv(), &jsObj));
         }
         SharedReference *ref = storage_->CreateETSObjectRef(interopCtx, objHandle, jsObj);

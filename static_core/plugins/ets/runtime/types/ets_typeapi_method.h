@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ namespace test {
 class EtsTypeAPITest;
 }  // namespace test
 
-class EtsCoroutine;
+class EtsexecutionCtxutine;
 
 class EtsTypeAPIMethod : public ObjectHeader {
 public:
@@ -39,7 +39,7 @@ public:
     NO_COPY_SEMANTIC(EtsTypeAPIMethod);
     NO_MOVE_SEMANTIC(EtsTypeAPIMethod);
 
-    static EtsTypeAPIMethod *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
+    static EtsTypeAPIMethod *Create(EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent());
 
     EtsObject *AsObject()
     {
@@ -85,10 +85,10 @@ public:
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsTypeAPIMethod, attr_), attr);
     }
 
-    EtsObject *GetMethodType(EtsCoroutine *coro) const
+    EtsObject *GetMethodType(EtsExecutionContext *executionCtx) const
     {
         return EtsObject::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsTypeAPIMethod, methodType_)));
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsTypeAPIMethod, methodType_)));
     }
 
     EtsMethod *GetEtsMethod();

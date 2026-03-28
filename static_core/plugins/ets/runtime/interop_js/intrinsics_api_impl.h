@@ -116,13 +116,13 @@ EtsObject *JSRuntimeInvokeDynamicFunction(EtsObject *functionObject, EtsObjectAr
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -137,13 +137,13 @@ typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropNa
 template <typename T>
 void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T::cpptype etsPropVal)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return;
     }
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -154,34 +154,34 @@ void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T:
 template <typename T>
 typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
-    [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<JSValue> etsJsValueHandle(coro, etsJsValue);
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<JSValue> etsJsValueHandle(executionCtx, etsJsValue);
     NapiScope jsHandleScope(env);
 
     napi_value result;
-    napi_value jsVal = JSValue::GetNapiValue(coro, ctx, etsJsValueHandle);
+    napi_value jsVal = JSValue::GetNapiValue(executionCtx, ctx, etsJsValueHandle);
     napi_status jsStatus;
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         jsStatus = napi_get_element(env, jsVal, index, &result);
     }
 
     if (jsStatus != napi_ok) {
-        ctx->ForwardJSException(coro);
+        ctx->ForwardJSException(executionCtx);
         return {};
     }
 
     auto res = T::UnwrapWithNullCheck(ctx, env, result);
     if (!res) {
-        ctx->ForwardJSException(coro);
+        ctx->ForwardJSException(executionCtx);
         return {};
     }
 
@@ -191,37 +191,37 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
 template <typename T>
 void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptype value)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_status jsStatus;
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
 
         jsStatus = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
                                     T::WrapWithNullCheck(env, value));
     }
     if (jsStatus != napi_ok) {
-        ctx->ForwardJSException(coro);
+        ctx->ForwardJSException(executionCtx);
     }
 }
 
 template <typename T>
 void *ConvertToLocal(typename T::cpptype etsValue)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     napi_env env = ctx->GetJSEnv();
     napi_value localJsValue = T::Wrap(env, etsValue);
     if (UNLIKELY(localJsValue == nullptr)) {
-        ctx->ForwardJSException(coro);
+        ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
     return localJsValue;
@@ -233,17 +233,17 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
     auto jsThis = ToLocal(obj);
     auto jsFn = ToLocal(fn);
     auto jsArgs = reinterpret_cast<napi_value *>(args);
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
 
     InteropCtx *ctx = nullptr;
     if constexpr (USE_RET) {
-        ctx = InteropCtx::Current(coro);
+        ctx = InteropCtx::Current(executionCtx);
         if (ctx == nullptr) {
             ThrowNoInteropContextException();
             return nullptr;
         }
     } else {
-        ctx = InteropCtx::Current(coro);
+        ctx = InteropCtx::Current(executionCtx);
         if (ctx == nullptr) {
             ThrowNoInteropContextException();
             return;
@@ -251,13 +251,13 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
     }
     ASSERT(ctx != nullptr);
 
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     napi_env env = ctx->GetJSEnv();
 
     [[maybe_unused]] napi_value jsRet;
     napi_status jsStatus;
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         if constexpr (USE_RET) {
             jsStatus = napi_call_function(env, jsThis, jsFn, argc, jsArgs, &jsRet);
         } else {
@@ -267,7 +267,7 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
 
     if (UNLIKELY(jsStatus != napi_ok)) {
         INTEROP_FATAL_IF(jsStatus != napi_pending_exception);
-        ctx->ForwardJSException(coro);
+        ctx->ForwardJSException(executionCtx);
         INTEROP_LOG(DEBUG) << "JSValueJSCall: exit with pending exception";
         if constexpr (USE_RET) {
             return nullptr;
@@ -281,7 +281,7 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
 inline void HandleExceptions(napi_env env, InteropCtx *ctx)
 {
     if (NapiIsExceptionPending(env)) {
-        ctx->ForwardJSException(EtsCoroutine::GetCurrent());
+        ctx->ForwardJSException(EtsExecutionContext::GetCurrent());
     }
     ASSERT(ctx->SanityETSExceptionPending());
 }
@@ -289,8 +289,8 @@ inline void HandleExceptions(napi_env env, InteropCtx *ctx)
 template <typename CONVERTOR>
 typename CONVERTOR::cpptype ConvertFromLocal(void *value)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         if constexpr (!std::is_pointer_v<typename CONVERTOR::cpptype>) {
@@ -299,7 +299,7 @@ typename CONVERTOR::cpptype ConvertFromLocal(void *value)
             return nullptr;
         }
     }
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     napi_env env = ctx->GetJSEnv();
     auto res = CONVERTOR::Unwrap(ctx, env, ToLocal(value));
     if (UNLIKELY(!res.has_value())) {
@@ -317,9 +317,9 @@ template <>
 // CC-OFFNXT(G.FUD.06) solid logic
 inline JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
 {
-    INTEROP_CODE_SCOPE_ETS_TO_JS(EtsCoroutine::GetCurrent());
+    INTEROP_CODE_SCOPE_ETS_TO_JS(EtsExecutionContext::GetCurrent());
 
-    auto ctx = InteropCtx::Current(EtsCoroutine::GetCurrent());
+    auto ctx = InteropCtx::Current(EtsExecutionContext::GetCurrent());
     if (ctx == nullptr) {
         ThrowNoInteropContextException();
         return nullptr;

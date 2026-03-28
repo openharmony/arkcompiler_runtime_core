@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,6 @@ namespace test {
 class EtsReflectTest;
 }  // namespace test
 
-class EtsCoroutine;
-
 class EtsReflectMethod : public ObjectHeader {
 public:
     EtsReflectMethod() = delete;
@@ -37,9 +35,10 @@ public:
     NO_COPY_SEMANTIC(EtsReflectMethod);
     NO_MOVE_SEMANTIC(EtsReflectMethod);
 
-    static EtsReflectMethod *Create(EtsCoroutine *etsCoroutine, bool isStatic = false, bool isConstructor = false);
+    static EtsReflectMethod *Create(EtsExecutionContext *executionCtx, bool isStatic = false,
+                                    bool isConstructor = false);
 
-    static EtsReflectMethod *CreateFromEtsMethod(EtsCoroutine *coro, EtsMethod *method);
+    static EtsReflectMethod *CreateFromEtsMethod(EtsExecutionContext *executionCtx, EtsMethod *method);
 
     EtsObject *AsObject()
     {

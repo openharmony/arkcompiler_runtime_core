@@ -30,7 +30,6 @@
 #include "libarkbase/mem/mem.h"
 #include "libarkbase/utils/expected.h"
 #include "libarkbase/os/mutex.h"
-#include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/external_callback_poster.h"
 #include "runtime/include/gc_task.h"
@@ -56,8 +55,9 @@
 #include "runtime/thread_manager.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/mem/ets_gc_stat.h"
-#include "runtime/coroutines/coroutine_manager.h"
+#include "runtime/execution/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
@@ -215,7 +215,7 @@ public:
 
     ThreadManager *GetThreadManager() const override
     {
-        return coroutineManager_;
+        return jobManager_;
     }
 
     FinalizationRegistryManager *GetFinalizationRegistryManager() const
@@ -223,9 +223,9 @@ public:
         return finalizationRegistryManager_;
     }
 
-    CoroutineManager *GetCoroutineManager() const
+    JobManager *GetJobManager() const
     {
-        return static_cast<CoroutineManager *>(GetThreadManager());
+        return jobManager_;
     }
 
     Rendezvous *GetRendezvous() const override
@@ -285,8 +285,8 @@ public:
 
     void CleanupCompiledFrameResources(Frame *frame) override
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *ifaces = coro->GetExternalIfaceTable();
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        auto *ifaces = executionCtx->GetExternalIfaceTable();
         if (ifaces->GetClearInteropHandleScopesFunction()) {
             ifaces->GetClearInteropHandleScopesFunction()(frame);
         }
@@ -317,10 +317,11 @@ public:
         return true;
     }
 
-    EtsFinalizableWeakRef *RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
-                                                      void (*finalizer)(void *), void *finalizerArg);
+    EtsFinalizableWeakRef *RegisterFinalizerForObject(EtsExecutionContext *executionCtx,
+                                                      const EtsHandle<EtsObject> &object, void (*finalizer)(void *),
+                                                      void *finalizerArg);
 
-    bool UnregisterFinalizerForObject(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef);
+    bool UnregisterFinalizerForObject(EtsExecutionContext *executionCtx, EtsFinalizableWeakRef *weakRef);
 
     void CleanFinalizableReferenceList();
 
@@ -438,7 +439,7 @@ private:
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};
     FinalizationRegistryManager *finalizationRegistryManager_ {nullptr};
-    CoroutineManager *coroutineManager_ {nullptr};
+    JobManager *jobManager_ {nullptr};
     mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
     mem::Reference *nullValueRef_ {nullptr};

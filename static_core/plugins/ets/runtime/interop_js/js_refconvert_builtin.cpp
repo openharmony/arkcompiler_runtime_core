@@ -69,9 +69,9 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
     InteropCtx *ctx, std::string_view descriptor, char const *jsBuiltinName = nullptr,
     const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    PandaEtsVM *vm = coro->GetPandaVM();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    PandaEtsVM *vm = executionCtx->GetPandaVM();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     auto etsClass = etsClassLinker->GetClass(descriptor.data());
     if (UNLIKELY(etsClass == nullptr)) {
@@ -370,7 +370,7 @@ private:
 
     MObjectObjectType GetObjectObjectType(InteropCtx *ctxx, napi_value jsValue)
     {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         NAPI_CHECK_FATAL(napi_is_promise(env, jsValue, &isInstanceof));
@@ -579,11 +579,11 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
 void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
 {
     auto cache = ctx->GetRefConvertCache();
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    PandaEtsVM *vm = coro->GetPandaVM();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    PandaEtsVM *vm = executionCtx->GetPandaVM();
     EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
-    auto ptypes = PlatformTypes(coro);
+    auto ptypes = PlatformTypes(executionCtx);
 
     RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ptypes->interopJSValue);
     RegisterBuiltinRefConvertor<JSConvertESError>(cache, ptypes->interopESError);

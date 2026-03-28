@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,8 +55,8 @@ public:
         if (phase != mem::GCPhase::GC_PHASE_MARK) {
             return;
         }
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *ctx = InteropCtx::Current(coro);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        auto *ctx = InteropCtx::Current(executionCtx);
         napi_env env = ctx->GetJSEnv();
         napi_value global;
         NAPI_CHECK_FATAL(napi_get_global(env, &global));
@@ -66,8 +66,8 @@ public:
         NAPI_CHECK_FATAL(napi_get_named_property(env, global, "etsVm", &etsVm));
         {
             // Create 2 shared references on Concurrent phase, should be processed on Remark phase
-            os::memory::ReadLockHolder lock(*coro->GetPandaVM()->GetRendezvous()->GetMutatorLock());
-            ScopedNativeCodeThread nativeCode(coro);
+            os::memory::ReadLockHolder lock(*executionCtx->GetPandaVM()->GetRendezvous()->GetMutatorLock());
+            ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
             NAPI_CHECK_FATAL(napi_call_function(env, global, createRefsFunction, 1U, &etsVm, nullptr));
         }
         auto *xrefStorage = ctx->GetSharedRefStorage();

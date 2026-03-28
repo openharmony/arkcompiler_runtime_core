@@ -16,7 +16,6 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -46,7 +45,7 @@ extern "C" EtsClass *ReflectMethodGetReturnTypeImpl(EtsLong etsMethodPtr)
 {
     auto *retCls = reinterpret_cast<EtsMethod *>(etsMethodPtr)->ResolveReturnType();
     if (UNLIKELY(retCls == nullptr)) {
-        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         return nullptr;
     }
     return retCls->ResolvePublicClass();
@@ -61,7 +60,7 @@ extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionP
     i = function->IsStatic() ? i : i + 1;
     auto *argType = function->ResolveArgType(i);
     if (UNLIKELY(argType == nullptr)) {
-        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         return nullptr;
     }
 
@@ -77,16 +76,17 @@ extern "C" EtsInt ReflectMethodGetParametersNumImpl(EtsLong etsFunctionPtr)
 
 extern "C" ObjectHeader *ReflectMethodGetParameterTypesImpl(EtsLong etsFunctionPtr)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
     ASSERT(function != nullptr);
     auto numParams = function->GetParametersNum();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> arrayH(coro, EtsObjectArray::Create(PlatformTypes(coro)->coreClass, numParams));
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObjectArray> arrayH(executionCtx,
+                                     EtsObjectArray::Create(PlatformTypes(executionCtx)->coreClass, numParams));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     ASSERT(arrayH.GetPtr() != nullptr);
@@ -96,7 +96,7 @@ extern "C" ObjectHeader *ReflectMethodGetParameterTypesImpl(EtsLong etsFunctionP
         auto i = function->IsStatic() ? idx : idx + 1;
         auto *argType = function->ResolveArgType(i);
         if (UNLIKELY(argType == nullptr)) {
-            ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+            ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
             return nullptr;
         }
         auto *resolvedParameterType = argType->ResolvePublicClass();
@@ -117,9 +117,9 @@ extern "C" EtsString *ReflectMethodGetNameInternal(EtsLong etsMethodPtr)
         name = method->GetNameString();
     }
     if (UNLIKELY(name == nullptr)) {
-        [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro != nullptr);
-        ASSERT(coro->HasPendingException());
+        [[maybe_unused]] auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     ASSERT(name != nullptr);
@@ -130,20 +130,20 @@ extern "C" EtsObject *ReflectMethodCreateInstanceInternal(EtsReflectMethod *this
 {
     ASSERT(thisConstructor != nullptr);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsHandle argsArrH(coro, EtsObjectArray::FromCoreType(argsArr));
-    EtsHandle thisConstructorH(coro, thisConstructor);
+    EtsHandle argsArrH(executionCtx, EtsObjectArray::FromCoreType(argsArr));
+    EtsHandle thisConstructorH(executionCtx, thisConstructor);
 
     auto *constructor = thisConstructor->GetEtsMethod();
     ASSERT(constructor->IsInstanceConstructor());
 
-    EtsHandle objToCreateH(coro, EtsObject::Create(constructor->GetClass()));
+    EtsHandle objToCreateH(executionCtx, EtsObject::Create(constructor->GetClass()));
     if (objToCreateH.GetPtr() == nullptr) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
@@ -158,13 +158,13 @@ extern "C" EtsObject *ReflectMethodCreateInstanceInternal(EtsReflectMethod *this
 extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod, EtsObject *thisObj,
                                                   ObjectHeader *argsArr)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsHandle thisObjH(coro, thisObj);
-    EtsHandle args(coro, EtsObjectArray::FromCoreType(argsArr));
+    EtsHandle thisObjH(executionCtx, thisObj);
+    EtsHandle args(executionCtx, EtsObjectArray::FromCoreType(argsArr));
 
     auto *reflectMethod = EtsReflectMethod::FromEtsObject(EtsObject::FromCoreType(thisMethod));
     ASSERT(reflectMethod != nullptr);
@@ -174,9 +174,9 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     const auto instanceFlag = static_cast<uint8_t>(!method->IsStatic());
     // Step 1: Handle thisObj validation for instance methods
     if (instanceFlag != 0) {
-        method = helpers::ValidateAndResolveInstanceMethod(coro, thisObjH.GetPtr(), method);
+        method = helpers::ValidateAndResolveInstanceMethod(executionCtx, thisObjH.GetPtr(), method);
         if (method == nullptr) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
     }
@@ -187,7 +187,7 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     if (argsSize != parametersNum) {
         PandaStringStream pss;
         pss << "Expected " << parametersNum << " arguments, " << argsSize << " given.";
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, pss.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, pss.str());
         return nullptr;
     }
 
@@ -197,7 +197,7 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     for (size_t i = 0; i < argsSize; ++i) {
         auto resolvedMethod = method->ResolveArgType(i + instanceFlag);
         if (UNLIKELY(resolvedMethod == nullptr)) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
         paramTypes.emplace_back(resolvedMethod);
@@ -214,15 +214,15 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     for (size_t i = 0; i < argsSize; ++i) {
         Value argValue;
         // Check and convert type
-        if (!helpers::CheckReceiverType(coro, args->Get(i), paramTypes[i], &argValue)) {
-            ASSERT(coro->HasPendingException());
+        if (!helpers::CheckReceiverType(executionCtx, args->Get(i), paramTypes[i], &argValue)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;  // Exception already thrown
         }
         passedArgs.emplace_back(argValue);
     }
 
     // Step 5: Invoke method and handle result
-    return helpers::InvokeAndResolveReturnValue(method, coro, passedArgs.data());
+    return helpers::InvokeAndResolveReturnValue(method, executionCtx, passedArgs.data());
 }
 
 }  // namespace ark::ets::intrinsics

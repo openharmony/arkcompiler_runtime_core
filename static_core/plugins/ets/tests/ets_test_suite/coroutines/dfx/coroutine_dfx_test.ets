@@ -17,9 +17,9 @@ import { launch } from 'std/concurrency'
 
 let arr = new Int32Array(1);
 
-function waiter() {
+async function waiter() {
     console.log("start");
-    Atomics.wait(arr, 0, 0);
+    await Atomics.waitAsync(arr, 0, 0);
     console.log("end");
 }
 

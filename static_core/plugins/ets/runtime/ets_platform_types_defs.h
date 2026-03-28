@@ -19,7 +19,7 @@
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 // ETS runtime type dependencies list. Each entry MUST follow the common naming schema.
-// CC-OFFNXTP(G.PRE.06) macro list
+// CC-OFFNXT(G.PRE.06) macro list
 #define ETS_PLATFORM_TYPES_LIST(TP, AN, IM, SM)                                                                       \
     /* Core runtime type system */                                                                                    \
     TP("Lstd/core/Object;", coreObject)                                                                               \
@@ -84,7 +84,7 @@
     TP("Lstd/core/IllegalLockStateError;", coreIllegalLockStateError)                                                 \
     TP("Lstd/core/UnsupportedOperationError;", coreUnsupportedOperationError)                                         \
     TP("Lstd/core/NegativeArraySizeError;", coreNegativeArraySizeError)                                               \
-    TP("Lstd/core/InvalidCoroutineOperationError;", coreInvalidCoroutineOperationError)                               \
+    TP("Lstd/core/InvalidJobOperationError;", coreInvalidJobOperationError)                                           \
     TP("Lstd/core/RangeError;", coreRangeError)                                                                       \
     TP("Lstd/core/SyntaxError;", coreSyntaxError)                                                                     \
     TP("Lstd/core/IndexOutOfBoundsError;", coreIndexOutOfBoundsError)                                                 \

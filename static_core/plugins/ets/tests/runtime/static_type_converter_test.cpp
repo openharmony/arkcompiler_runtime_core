@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "plugins/ets/runtime/static_type_converter.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
@@ -95,7 +96,7 @@ protected:
     {
         StaticTypeConverter stcTypeConverter;
         auto *coro = EtsCoroutine::GetCurrent();
-        EtsObject *boxed = EtsBoxPrimitive<T>::Create(coro, value);
+        EtsObject *boxed = EtsBoxPrimitive<T>::Create(EtsExecutionContext::FromMT(coro), value);
         common_vm::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common_vm::BoxedValue>(boxed));
         if constexpr (std::is_same_v<T, EtsBoolean>) {
             EXPECT_TRUE(std::holds_alternative<bool>(result));
@@ -222,7 +223,8 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test2)
     {
         common_vm::BaseType value = common_vm::BaseNull {};
         common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
-        EXPECT_EQ(reinterpret_cast<EtsObject *>(result), EtsObject::FromCoreType(GetCoroutine()->GetNullValue()));
+        EXPECT_EQ(reinterpret_cast<EtsObject *>(result),
+                  EtsObject::FromCoreType(EtsExecutionContext::FromMT(GetCoroutine())->GetNullValue()));
     }
     {
         common_vm::BaseBigInt bigIntValue;
@@ -339,7 +341,7 @@ TEST_F(StaticTypeConverterTest, UnwrapBoxedNull)
 {
     StaticTypeConverter stcTypeConverter;
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *nullObj = coro->GetNullValue();
+    auto *nullObj = EtsExecutionContext::FromMT(coro)->GetNullValue();
     auto result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common_vm::BoxedValue>(nullObj));
     ASSERT_TRUE(std::holds_alternative<common_vm::BaseNull>(result));
 }

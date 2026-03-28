@@ -47,9 +47,9 @@ Expected<EtsNativeLibrary, os::Error> LoadFromPath(const PandaVector<PandaString
 
 Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNamespace(const char *name)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *mThread = ManagedThread::GetCurrent();
     std::string abcPath;
-    for (auto stack = StackWalker::Create(coroutine); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(mThread); stack.HasFrame(); stack.NextFrame()) {
         auto *method = stack.GetMethod();
         if (LIKELY(method != nullptr)) {
             if (method->GetPandaFile() == nullptr) {
@@ -132,12 +132,12 @@ std::optional<std::string> NativeLibraryProvider::CallAniCtor(ani_env *env, cons
 
 std::optional<std::string> NativeLibraryProvider::GetCallerClassName(ani_env *env)
 {
-    auto coroutine = PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine();
-    if (coroutine == nullptr) {
-        LOG(ERROR, RUNTIME) << "Coroutine is null, failed to get class name.";
+    auto *executionCtx = PandaAniEnv::FromAniEnv(env)->GetExecutionContext();
+    if (executionCtx == nullptr) {
+        LOG(ERROR, RUNTIME) << "ExecutionContext is null, failed to get class name.";
         return std::nullopt;
     }
-    auto stack = StackWalker::Create(coroutine);
+    auto stack = StackWalker::Create(executionCtx->GetMT());
     if (!stack.HasFrame()) {
         LOG(ERROR, RUNTIME) << "No valid method in stack, failed to determine class.";
         return std::nullopt;

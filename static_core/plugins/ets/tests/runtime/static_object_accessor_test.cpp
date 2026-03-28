@@ -87,7 +87,7 @@ public:
         EtsObject *obj = EtsObject::Create(klass);
         StaticObjectAccessor staticObjectAccessor;
         auto *coro = EtsCoroutine::GetCurrent();
-        EtsObject *valueObject = EtsBoxPrimitive<T>::Create(coro, value);
+        EtsObject *valueObject = EtsBoxPrimitive<T>::Create(EtsExecutionContext::FromMT(coro), value);
 
         staticObjectAccessor.SetProperty(nullptr, nullptr, property,
                                          reinterpret_cast<common_vm::BaseObject *>(valueObject));
@@ -113,11 +113,11 @@ public:
     void CheckSetAndGetElementByIdx(T val)
     {
         auto *coro = EtsCoroutine::GetCurrent();
-        auto *array = EtsEscompatArray::Create(coro, ARRAY_LENGTH);
+        auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
         auto *baseObject = reinterpret_cast<common_vm::BaseObject *>(array);
         ASSERT_NE(baseObject, nullptr);
         StaticObjectAccessor staticObjectAccessor;
-        EtsObject *valueObject = BoxType::Create(coro, val);
+        EtsObject *valueObject = BoxType::Create(EtsExecutionContext::FromMT(coro), val);
         staticObjectAccessor.SetElementByIdx(nullptr, nullptr, 1,
                                              reinterpret_cast<common_vm::BaseObject *>(valueObject));
         staticObjectAccessor.SetElementByIdx(nullptr, baseObject, 1,
@@ -241,7 +241,7 @@ TEST_F(StaticObjectAccessorTest, SetAndGetPropertyValue2)
     EtsObject *fooObj1 = EtsObject::Create(fooKlass);
     auto *coro = EtsCoroutine::GetCurrent();
     EtsInt val = 1;
-    EtsObject *valueObject = EtsBoxPrimitive<EtsInt>::Create(coro, val);
+    EtsObject *valueObject = EtsBoxPrimitive<EtsInt>::Create(EtsExecutionContext::FromMT(coro), val);
     StaticObjectAccessor staticObjectAccessor;
     staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(fooObj1), "member",
                                      reinterpret_cast<common_vm::BaseObject *>(valueObject));
@@ -271,10 +271,10 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
     EtsClass *klass = GetTestClass("Triangle");
     ASSERT_NE(klass, nullptr);
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *array = EtsEscompatArray::Create(coro, ARRAY_LENGTH);
+    auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
     ASSERT_NE(array, nullptr);
     auto obj = EtsObject::Create(klass);
-    EtsObject *valueObject = EtsBoxPrimitive<EtsDouble>::Create(coro, VAL_DOUBLE);
+    EtsObject *valueObject = EtsBoxPrimitive<EtsDouble>::Create(EtsExecutionContext::FromMT(coro), VAL_DOUBLE);
     StaticObjectAccessor staticObjectAccessor;
     staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), "firSide",
                                      reinterpret_cast<common_vm::BaseObject *>(valueObject));

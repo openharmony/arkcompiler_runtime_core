@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,8 @@
  */
 
 function testMain() {
-    let buf: ArrayBuffer;
-    let arr: Int32Array; 
-
-    try {
-        buf = new ArrayBuffer(4);
-        arr = new Int32Array(buf, 0, 1);
-    } catch (e) {
-        arktest.assertTrue(false)
-    }
+    let buf = new ArrayBuffer(4);
+    let arr = new Int32Array(buf, 0, 1);
 
     let reason = Atomics.wait(arr, 0, 0, 10)
     console.println('reason is ' + reason)
