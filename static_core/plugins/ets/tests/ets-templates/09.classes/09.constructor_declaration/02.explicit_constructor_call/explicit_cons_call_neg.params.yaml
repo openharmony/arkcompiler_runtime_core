@@ -134,7 +134,7 @@ cases:
     - expected_out: |-
           Semantic error ESE0235: Using super is not allowed in constructor
       decl: |-
-          // CTE if arguments of an explicit constructor call refer to a super method
+          // CTE if code before this() refers to a super method
           class A {
               s: string
               constructor(p: string) {
@@ -156,7 +156,7 @@ cases:
     - expected_out: |-
           Semantic error ESE0235: Using super is not allowed in constructor
       decl: |-
-          // CTE if arguments of an explicit constructor call refer to a super method
+          // CTE if code before this() refers to a super method
           class A {
               s: string
               constructor(p: () => string) {
@@ -321,9 +321,9 @@ cases:
           }
 
     - expected_out: |-
-          Semantic error ESE0235: Using super is not allowed in constructor
+          Semantic error ESE0679: 'super' cannot be referenced before super() call or this() call.
       decl: |-
-          // CTE if arguments of an explicit constructor call refer to a super method
+          // CTE if code before this() refers to a super method
           class A {
               s: string
               constructor(p: string) {
@@ -344,9 +344,9 @@ cases:
           }
 
     - expected_out: |-
-          Semantic error ESE0235: Using super is not allowed in constructor
+          Semantic error ESE0679: 'super' cannot be referenced before super() call or this() call.
       decl: |-
-          // CTE if arguments of an explicit constructor call refer to a super method
+          // CTE if code before this() refers to a super method
           class A {
               s: string
               constructor(p: () => string) {
