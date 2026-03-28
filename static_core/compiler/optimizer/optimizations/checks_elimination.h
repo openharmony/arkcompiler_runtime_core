@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,11 +29,6 @@
 #include "optimizer/ir/graph_visitor.h"
 
 namespace ark::compiler {
-// {parent_index, Vector<bound_check>, max_val, min_val}
-using GroupedBoundsChecks = ArenaVector<std::tuple<Inst *, InstVector, int64_t, int64_t>>;
-// loop->len_array->GroupedBoundsChecks
-using LoopNotFullyRedundantBoundsCheck = ArenaVector<std::pair<Inst *, GroupedBoundsChecks>>;
-using NotFullyRedundantBoundsCheck = ArenaVector<std::pair<Loop *, LoopNotFullyRedundantBoundsCheck>>;
 using FlagPair = std::pair<bool, bool>;
 using InstPair = std::pair<Inst *, Inst *>;
 using InstTriple = std::tuple<Inst *, Inst *, Inst *>;
@@ -113,6 +108,25 @@ public:
 
 #include "optimizer/ir/visitor.inc"
 private:
+    // CC-OFF(G.NAM.03-CPP) project code style
+    static constexpr size_t MIN_BOUNDSCHECKS_FOR_DEOPT_MERGE = 2;
+
+    // Guard info for one inserted deopt: {has_max_add, has_min_add, max_add, min_add, insert_after}.
+    using DeoptGuardInfo = std::tuple<bool, bool, int64_t, int64_t, Inst *>;
+
+    // {check_inst, check_upper, check_lower, cached_offset}
+    using BoundsCheckInfo = std::tuple<Inst *, bool, bool, int64_t>;
+    using NotDominateInstInfoVector = ArenaVector<BoundsCheckInfo>;
+    // {check_block, NotDominateInstInfoVector}, kept in first-seen RPO block order.
+    using NotDominateBoundsChecksByBlock = ArenaVector<std::pair<BasicBlock *, NotDominateInstInfoVector>>;
+
+    // {parent_index, Vector<bound_check>, NotDominateBoundsChecksByBlock, max_val, min_val}
+    using ParentIndexUsedBoundsChecks =
+        std::tuple<Inst *, InstVector, NotDominateBoundsChecksByBlock, int64_t, int64_t>;
+    using GroupedBoundsChecks = ArenaVector<ParentIndexUsedBoundsChecks>;
+    // loop->len_array->GroupedBoundsChecks
+    using LoopNotFullyRedundantBoundsCheck = ArenaVector<std::pair<Inst *, GroupedBoundsChecks>>;
+    using NotFullyRedundantBoundsCheck = ArenaVector<std::pair<Loop *, LoopNotFullyRedundantBoundsCheck>>;
     bool TryToEliminateAnyTypeCheck(Inst *inst, Inst *instToReplace, AnyBaseType type, AnyBaseType prevType);
     void UpdateHclassChecks(Inst *inst);
     std::optional<Inst *> GetHclassCheckFromLoads(Inst *loadClass);
@@ -127,13 +141,20 @@ private:
         checksMustThrow_.push_back(inst);
     }
 
-    static bool IsInstIncOrDec(Inst *inst);
+    static bool IsInstIncOrDecConst(Inst *inst);
     static int64_t GetInc(Inst *inst);
     static Loop *GetLoopForBoundsCheck(BasicBlock *block, Inst *lenArray, Inst *index);
-    void InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
+    // CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters)
+    // NOLINTNEXTLINE(readability-function-size)
+    void InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool checkUpper, bool checkLower,
+                             bool dominateLoopBackEdgeOrGraphEnd);
+    void AppendNotDominateBoundsCheck(NotDominateBoundsChecksByBlock *notDominateInfos, Inst *inst, bool checkUpper,
+                                      bool checkLower, int64_t offset);
     void PushNewBoundsCheck(Loop *loop, Inst *inst, InstPair helpers, bool checkUpper, bool checkLower);
+    // CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters)
+    // NOLINTNEXTLINE(readability-function-size)
     void PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks *indexes, Inst *index, Inst *inst, bool checkUpper,
-                                             bool checkLower);
+                                             bool checkLower, bool dominateLoopBackEdgeOrGraphEnd);
     void TryRemoveDominatedNullChecks(Inst *inst, Inst *ref);
     void TryRemoveDominatedHclassCheck(Inst *inst);
     template <Opcode OPC, bool CHECK_FULL_DOM, typename CheckInputs>
@@ -168,7 +189,24 @@ private:
     void HoistLoopInvariantBoundsChecks(Inst *lenArray, GroupedBoundsChecks *indexBoundschecks, Loop *loop);
     Inst *FindSaveState(const InstVector &instsToDelete);
     void ReplaceBoundsCheckToDeoptimizationInLoop();
-    void ReplaceOneBoundsCheckToDeoptimizationInLoop(std::pair<Loop *, LoopNotFullyRedundantBoundsCheck> &item);
+    // CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep explicit inputs for bounds-check coverage.
+    // NOLINTNEXTLINE(readability-function-size)
+    bool NotDominateInstFitsInDeopt(bool hasMaxAdd, bool hasMinAdd, int64_t maxAdd, int64_t minAdd, int64_t val,
+                                    bool checkUpper, bool checkLower);
+    // CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep explicit inputs for non-dominated BCE
+    // NOLINTNEXTLINE(readability-function-size)
+    void TryEliminateDeoptCoveredBoundsChecks(NotDominateBoundsChecksByBlock &notDominateBoundsChecks, bool hasMaxAdd,
+                                              bool hasMinAdd, int64_t maxAdd, int64_t minAdd, Inst *domGate = nullptr);
+    Inst *SelectInsertAfterForBoundsDeopt(Inst *lenArray, Inst *saveState, Inst *parentIndex) const;
+    Inst *FindSaveStateBlockLocal(const NotDominateInstInfoVector &blockInfos, BasicBlock *block) const;
+    // Merge non-dominated checks inside one block and insert local deopt in the same block only.
+    std::optional<DeoptGuardInfo> TryReplaceBoundsCheckByDeoptInOneBlock(Inst *lenArray, Inst *parentIndex,
+                                                                         BasicBlock *block,
+                                                                         NotDominateInstInfoVector &blockInfos);
+    // For each block (RPO order), do local merge first, then eliminate covered checks in dominated blocks.
+    void TryReplaceBoundsCheckByDeoptInBlock(Inst *lenArray, Inst *parentIndex,
+                                             NotDominateBoundsChecksByBlock &notDominateInstInfos);
+    void ReplaceBoundsChecksByDeoptInOneLoop(std::pair<Loop *, LoopNotFullyRedundantBoundsCheck> &item);
 
     void ReplaceCheckMustThrowByUnconditionalDeoptimize();
     void MoveCheckOutOfLoop();

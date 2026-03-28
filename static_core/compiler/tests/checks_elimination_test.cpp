@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -390,6 +390,7 @@ public:
     void BuildGraphLoopWithUnknowUpperValueLE();
     void BuildGraphLoopWithUnknowUpperValueLT();
     void BuildGraphLoopSeveralBoundsChecks();
+    void BuildGraphLoopConstBoundsChecks();
     void BuildGraphLoopSeveralIndexesBoundsChecks();
     void BuildGraphHeadExitLoop();
     void BuildGraphLoopTest1();
@@ -406,6 +407,11 @@ public:
     void BuildGraphLoopWithBigStepLT();
     void BuildGraphLoopWithBoundsCheckUnderIfGE();
     void BuildGraphLoopWithBoundsCheckUnderIfLT();
+    void BuildGraphLoopInsertAfterParentIndexMiddle();
+    void BuildGraphLoopInsertAfterParentIndexAfter();
+    void BuildGraphLoopMergeBranchLocalBoundsChecks();
+    void BuildGraphLoopCoveredBoundsChecksAcrossBlocks();
+    void BuildGraphRootMergeBranchLocalBoundsChecks();
     void BuildGraphCheckCastAfterIsInstance();
     void BuildGraphOverflowCheckOptimize();
 
@@ -2959,6 +2965,66 @@ TEST_F(ChecksEliminationTest, LoopSeveralBoundsChecks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
+void ChecksEliminationTest::BuildGraphLoopConstBoundsChecks()
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();   // a
+        PARAMETER(16U, 1U).s32();  // i
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::LenArray).s32().Inputs(0U);
+            INST(4U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(3U, 1U, 4U);
+            INST(6U, Opcode::LoadArray).s32().Inputs(0U, 5U);  // a[0]
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::BoundsCheck).s32().Inputs(3U, 2U, 7U);
+            INST(9U, Opcode::LoadArray).s32().Inputs(0U, 8U);  // a[1]
+            INST(10U, Opcode::SaveState).Inputs(0U, 16U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::BoundsCheck).s32().Inputs(3U, 16U, 10U);
+            INST(12U, Opcode::LoadArray).s32().Inputs(0U, 11U);  // a[i]
+            INST(13U, Opcode::Add).s32().Inputs(6U, 9U);
+            INST(14U, Opcode::Add).s32().Inputs(13U, 12U);
+            INST(15U, Opcode::Return).s32().Inputs(14U);
+        }
+    }
+}
+
+TEST_F(ChecksEliminationTest, LoopConstBoundsChecks)
+{
+    BuildGraphLoopConstBoundsChecks();
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        PARAMETER(0U, 0U).ref();   // a
+        PARAMETER(16U, 1U).s32();  // i
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::LenArray).s32().Inputs(0U);
+            INST(4U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(18U, Opcode::Compare).CC(ConditionCode::CC_GE).b().Inputs(2U, 3U);
+            INST(19U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(18U, 4U);
+            INST(5U, Opcode::NOP);
+            INST(6U, Opcode::LoadArray).s32().Inputs(0U, 1U);  // a[0]
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::NOP);
+            INST(9U, Opcode::LoadArray).s32().Inputs(0U, 2U);  // a[1]
+            INST(10U, Opcode::SaveState).Inputs(0U, 16U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::BoundsCheck).s32().Inputs(3U, 16U, 10U);
+            INST(12U, Opcode::LoadArray).s32().Inputs(0U, 11U);  // a[i]
+            INST(13U, Opcode::Add).s32().Inputs(6U, 9U);
+            INST(14U, Opcode::Add).s32().Inputs(13U, 12U);
+            INST(15U, Opcode::Return).s32().Inputs(14U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
 void ChecksEliminationTest::BuildGraphLoopSeveralIndexesBoundsChecks()
 {
     // applied
@@ -4165,10 +4231,7 @@ TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
         BASIC_BLOCK(2U, 3U)
         {
             INST(2U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
-            INST(35U, Opcode::NullCheck).ref().Inputs(0U, 2U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
-            INST(39U, Opcode::LenArray).s32().Inputs(35U);
-            INST(44U, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_LT).Inputs(39U, 9U);
-            INST(45U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(44U, 2U);
+            INST(22U, Opcode::NullCheck).ref().Inputs(0U, 2U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
         }
         BASIC_BLOCK(3U, 7U, 8U)
         {
@@ -4190,10 +4253,9 @@ TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
         BASIC_BLOCK(5U, 4U)
         {
             INST(21U, Opcode::SaveState).Inputs(0U, 3U, 5U, 15U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(22U, Opcode::NOP);
-            INST(23U, Opcode::LenArray).s32().Inputs(35U);
-            INST(24U, Opcode::NOP);
-            INST(25U, Opcode::LoadArray).ref().Inputs(35U, 5U);
+            INST(23U, Opcode::LenArray).s32().Inputs(22U);
+            INST(24U, Opcode::BoundsCheck).s32().Inputs(23U, 5U, 21U);
+            INST(25U, Opcode::LoadArray).ref().Inputs(22U, 24U);
             INST(26U, Opcode::SaveState).Inputs(0U, 3U, 5U, 15U, 25U).SrcVregs({0U, 1U, 2U, 3U, 4U});
             INST(27U, Opcode::NullCheck).ref().Inputs(25U, 26U);
             INST(28U, Opcode::LenArray).s32().Inputs(27U);
@@ -4593,7 +4655,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfGE()
             INST(9U, Opcode::Compare).CC(CC_LT).b().Inputs(8U, 4U);  // i < X
             INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(4U, 5U, 6U)
+        BASIC_BLOCK(4U, 5U, 7U)
         {
             INST(14U, Opcode::Compare).CC(CC_LE).b().Inputs(3U, 8U);  // 3 <= i
             INST(15U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(14U);
@@ -4604,16 +4666,13 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfGE()
             INST(27U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
             INST(17U, Opcode::BoundsCheck).s32().Inputs(7U, 16U, 27U);
             INST(18U, Opcode::LoadArray).s32().Inputs(6U, 17U);  // a[i - 3]
-        }
-        BASIC_BLOCK(6U, 7U)
-        {
-            INST(19U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(20U, Opcode::BoundsCheck).s32().Inputs(7U, 8U, 19U);
+            INST(20U, Opcode::BoundsCheck).s32().Inputs(7U, 8U, 27U);
             INST(21U, Opcode::LoadArray).s32().Inputs(6U, 20U);  // a[i]
+            INST(19U, Opcode::Add).s32().Inputs(18U, 21U);
         }
         BASIC_BLOCK(7U, 3U)
         {
-            INST(22U, Opcode::Phi).s32().Inputs(18U, 21U);
+            INST(22U, Opcode::Phi).s32().Inputs(0U, 19U);
             INST(23U, Opcode::Add).s32().Inputs(25U, 22U);
             INST(24U, Opcode::Add).s32().Inputs(8U, 1U);
         }
@@ -4624,7 +4683,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfGE()
     }
 }
 
-// Lower bound is correct in each branch based on BoundsAnalysis, build deoptimize only for upper bound
+// Lower bound is correct in branch based on BoundsAnalysis, build deoptimize only for upper bound
 // CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
 {
@@ -4646,8 +4705,6 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
             INST(7U, Opcode::LenArray).s32().Inputs(6U);
 
             INST(30U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
-            INST(31U, Opcode::Compare).b().CC(CC_LT).Inputs(7U, 4U);
-            INST(32U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(31U, 30U);
         }
 
         BASIC_BLOCK(3U, 4U, 8U)
@@ -4657,7 +4714,7 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
             INST(9U, Opcode::Compare).CC(CC_LT).b().Inputs(8U, 4U);  // i < X
             INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(4U, 5U, 6U)
+        BASIC_BLOCK(4U, 5U, 7U)
         {
             INST(14U, Opcode::Compare).CC(CC_LE).b().Inputs(3U, 8U);  // 3 <= i
             INST(15U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(14U);
@@ -4666,18 +4723,17 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
         {
             INST(16U, Opcode::Sub).s32().Inputs(8U, 3U);
             INST(27U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(17U, Opcode::NOP);
+            INST(31U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::INT32).Inputs(8U, 7U);
+            INST(32U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(31U, 27U);
+            INST(33U, Opcode::NOP);
             INST(18U, Opcode::LoadArray).s32().Inputs(6U, 16U);  // a[i - 3]
-        }
-        BASIC_BLOCK(6U, 7U)
-        {
-            INST(19U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(20U, Opcode::NOP);
+            INST(34U, Opcode::NOP);
             INST(21U, Opcode::LoadArray).s32().Inputs(6U, 8U);  // a[i]
+            INST(19U, Opcode::Add).s32().Inputs(18U, 21U);
         }
         BASIC_BLOCK(7U, 3U)
         {
-            INST(22U, Opcode::Phi).s32().Inputs(18U, 21U);
+            INST(22U, Opcode::Phi).s32().Inputs(0U, 19U);
             INST(23U, Opcode::Add).s32().Inputs(25U, 22U);
             INST(24U, Opcode::Add).s32().Inputs(8U, 1U);
         }
@@ -4689,6 +4745,7 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfLT()
 {
     GRAPH(GetGraph())
@@ -4728,7 +4785,9 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfLT()
             INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
             INST(17U, Opcode::BoundsCheck).s32().Inputs(7U, 13U, 20U);
             INST(18U, Opcode::LoadArray).s32().Inputs(6U, 17U);
-            INST(19U, Opcode::Mul).s32().Inputs(8U, 18U);  // i * a[i + 3]
+            INST(37U, Opcode::BoundsCheck).s32().Inputs(7U, 8U, 20U);
+            INST(38U, Opcode::LoadArray).s32().Inputs(6U, 37U);
+            INST(19U, Opcode::Mul).s32().Inputs(18U, 38U);
         }
         BASIC_BLOCK(6U, 3U)
         {
@@ -4744,7 +4803,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfLT()
     }
 }
 
-// Upper bound is correct in each branch based on BoundsAnalysis, build deoptimize only for lower bound
+// Upper bound is correct in branch based on BoundsAnalysis, build deoptimize only for lower bound
 // CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
 {
@@ -4766,12 +4825,10 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
             INST(7U, Opcode::LenArray).s32().Inputs(6U);
 
             INST(30U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
-            INST(33U, Opcode::Add).s32().Inputs(4U, 3U);
-            INST(34U, Opcode::Compare).b().CC(CC_LT).Inputs(33U, 0U);  // X + 3 < 0
-            INST(35U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(34U, 30U);
             INST(31U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 7U);  // X < len_array
             INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(31U);
         }
+
         BASIC_BLOCK(3U, 4U, 8U)
         {
             INST(8U, Opcode::Phi).s32().Inputs(4U, 24U);             // i = X
@@ -4788,9 +4845,13 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
         BASIC_BLOCK(5U, 6U)
         {
             INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(17U, Opcode::NOP);
+            INST(39U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(8U, 0U);
+            INST(40U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(39U, 20U);
+            INST(41U, Opcode::NOP);
             INST(18U, Opcode::LoadArray).s32().Inputs(6U, 13U);
-            INST(19U, Opcode::Mul).s32().Inputs(8U, 18U);  // i * a[i + 3]
+            INST(42U, Opcode::NOP);
+            INST(38U, Opcode::LoadArray).s32().Inputs(6U, 8U);
+            INST(19U, Opcode::Mul).s32().Inputs(18U, 38U);
         }
         BASIC_BLOCK(6U, 3U)
         {
@@ -4805,6 +4866,707 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+TEST_F(ChecksEliminationTest, LoopKeepBranchLocalBoundsChecks)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // step
+        PARAMETER(6U, 3U).s32();  // branch selector
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
+            INST(9U, Opcode::LenArray).s32().Inputs(8U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 9U)
+        {
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 26U);  // i
+            INST(11U, Opcode::Compare).b().CC(CC_LT).Inputs(10U, 4U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 6U)
+        {
+            INST(13U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(14U, Opcode::BoundsCheck).s32().Inputs(9U, 10U, 13U);
+            INST(15U, Opcode::StoreArray).s32().Inputs(8U, 14U, 0U);
+            INST(16U, Opcode::Add).s32().Inputs(10U, 1U);
+            INST(17U, Opcode::Add).s32().Inputs(10U, 2U);
+            INST(18U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(6U, 0U);
+            INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
+        }
+
+        BASIC_BLOCK(5U, 8U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(21U, Opcode::BoundsCheck).s32().Inputs(9U, 16U, 20U);
+            INST(22U, Opcode::StoreArray).s32().Inputs(8U, 21U, 0U);
+        }
+
+        BASIC_BLOCK(6U, 8U)
+        {
+            INST(23U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(24U, Opcode::BoundsCheck).s32().Inputs(9U, 17U, 23U);
+            INST(25U, Opcode::StoreArray).s32().Inputs(8U, 24U, 0U);
+        }
+
+        BASIC_BLOCK(8U, 3U)
+        {
+            INST(26U, Opcode::Add).s32().Inputs(10U, 5U);
+        }
+
+        BASIC_BLOCK(9U, 1U)
+        {
+            INST(27U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<ChecksElimination>());
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+void ChecksEliminationTest::BuildGraphLoopMergeBranchLocalBoundsChecks()
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // branch selector
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 12U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 29U);  // i
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 8U)
+        {
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(5U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 8U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(14U, Opcode::Add).s32().Inputs(9U, 1U);
+            INST(15U, Opcode::BoundsCheck).s32().Inputs(8U, 14U, 20U);
+            INST(16U, Opcode::StoreArray).s32().Inputs(7U, 15U, 0U);
+            INST(17U, Opcode::Add).s32().Inputs(9U, 2U);
+            INST(18U, Opcode::BoundsCheck).s32().Inputs(8U, 17U, 20U);
+            INST(19U, Opcode::StoreArray).s32().Inputs(7U, 18U, 0U);
+        }
+
+        BASIC_BLOCK(8U, 3U)
+        {
+            INST(29U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(12U, 1U)
+        {
+            INST(30U, Opcode::ReturnVoid).v0id();
+        }
+    }
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+TEST_F(ChecksEliminationTest, LoopMergeBranchLocalBoundsChecks)
+{
+    BuildGraphLoopMergeBranchLocalBoundsChecks();
+
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // branch selector
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 12U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 29U);  // i
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 8U)
+        {
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(5U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 8U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(34U, Opcode::Add).s32().Inputs(9U, 2U);
+            INST(35U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(34U, 0U);
+            INST(36U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(35U, 20U);
+            INST(31U, Opcode::Add).s32().Inputs(9U, 2U);
+            INST(32U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::INT32).Inputs(31U, 8U);
+            INST(33U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(32U, 20U);
+            INST(14U, Opcode::Add).s32().Inputs(9U, 1U);
+            INST(15U, Opcode::NOP);
+            INST(16U, Opcode::StoreArray).s32().Inputs(7U, 14U, 0U);
+            INST(17U, Opcode::Add).s32().Inputs(9U, 2U);
+            INST(18U, Opcode::NOP);
+            INST(19U, Opcode::StoreArray).s32().Inputs(7U, 17U, 0U);
+        }
+
+        BASIC_BLOCK(8U, 3U)
+        {
+            INST(29U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(12U, 1U)
+        {
+            INST(30U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+void ChecksEliminationTest::BuildGraphLoopInsertAfterParentIndexMiddle()
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // delta
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 22U);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(12U, Opcode::Add).s32().Inputs(9U, 5U);
+            INST(13U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(14U, Opcode::BoundsCheck).s32().Inputs(8U, 12U, 13U);
+            INST(15U, Opcode::StoreArray).s32().Inputs(7U, 14U, 0U);
+            INST(16U, Opcode::Add).s32().Inputs(12U, 1U);
+            INST(17U, Opcode::BoundsCheck).s32().Inputs(8U, 16U, 13U);
+            INST(18U, Opcode::StoreArray).s32().Inputs(7U, 17U, 0U);
+            INST(19U, Opcode::Add).s32().Inputs(12U, 2U);
+            INST(20U, Opcode::BoundsCheck).s32().Inputs(8U, 19U, 13U);
+            INST(21U, Opcode::StoreArray).s32().Inputs(7U, 20U, 0U);
+            INST(22U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(23U, Opcode::ReturnVoid).v0id();
+        }
+    }
+}
+
+TEST_F(ChecksEliminationTest, LoopInsertAfterParentIndexMiddle)
+{
+    BuildGraphLoopInsertAfterParentIndexMiddle();
+
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // delta
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 22U);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(12U, Opcode::Add).s32().Inputs(9U, 5U);
+            INST(13U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(27U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(12U, 0U);
+            INST(28U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(27U, 13U);
+            INST(24U, Opcode::Add).s32().Inputs(12U, 2U);
+            INST(25U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::INT32).Inputs(24U, 8U);
+            INST(26U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(25U, 13U);
+            INST(14U, Opcode::NOP);
+            INST(15U, Opcode::StoreArray).s32().Inputs(7U, 12U, 0U);
+            INST(16U, Opcode::Add).s32().Inputs(12U, 1U);
+            INST(17U, Opcode::NOP);
+            INST(18U, Opcode::StoreArray).s32().Inputs(7U, 16U, 0U);
+            INST(19U, Opcode::Add).s32().Inputs(12U, 2U);
+            INST(20U, Opcode::NOP);
+            INST(21U, Opcode::StoreArray).s32().Inputs(7U, 19U, 0U);
+            INST(22U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(23U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+void ChecksEliminationTest::BuildGraphLoopInsertAfterParentIndexAfter()
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // delta
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 22U);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(13U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(12U, Opcode::Add).s32().Inputs(9U, 5U);
+            INST(14U, Opcode::BoundsCheck).s32().Inputs(8U, 12U, 13U);
+            INST(15U, Opcode::StoreArray).s32().Inputs(7U, 14U, 0U);
+            INST(16U, Opcode::Add).s32().Inputs(12U, 1U);
+            INST(17U, Opcode::BoundsCheck).s32().Inputs(8U, 16U, 13U);
+            INST(18U, Opcode::StoreArray).s32().Inputs(7U, 17U, 0U);
+            INST(19U, Opcode::Add).s32().Inputs(12U, 2U);
+            INST(20U, Opcode::BoundsCheck).s32().Inputs(8U, 19U, 13U);
+            INST(21U, Opcode::StoreArray).s32().Inputs(7U, 20U, 0U);
+            INST(22U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(23U, Opcode::ReturnVoid).v0id();
+        }
+    }
+}
+
+TEST_F(ChecksEliminationTest, LoopInsertAfterParentIndexAfter)
+{
+    BuildGraphLoopInsertAfterParentIndexAfter();
+
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // delta
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 22U);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(13U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(12U, Opcode::Add).s32().Inputs(9U, 5U);
+            INST(27U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(12U, 0U);
+            INST(28U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(27U, 13U);
+            INST(24U, Opcode::Add).s32().Inputs(12U, 2U);
+            INST(25U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::INT32).Inputs(24U, 8U);
+            INST(26U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(25U, 13U);
+            INST(14U, Opcode::NOP);
+            INST(15U, Opcode::StoreArray).s32().Inputs(7U, 12U, 0U);
+            INST(16U, Opcode::Add).s32().Inputs(12U, 1U);
+            INST(17U, Opcode::NOP);
+            INST(18U, Opcode::StoreArray).s32().Inputs(7U, 16U, 0U);
+            INST(19U, Opcode::Add).s32().Inputs(12U, 2U);
+            INST(20U, Opcode::NOP);
+            INST(21U, Opcode::StoreArray).s32().Inputs(7U, 19U, 0U);
+            INST(22U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(23U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+void ChecksEliminationTest::BuildGraphLoopCoveredBoundsChecksAcrossBlocks()
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // branch selector
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 12U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 29U);  // i
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 7U)
+        {
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(5U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 6U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(14U, Opcode::BoundsCheck).s32().Inputs(8U, 1U, 20U);
+            INST(15U, Opcode::StoreArray).s32().Inputs(7U, 14U, 0U);
+            INST(16U, Opcode::BoundsCheck).s32().Inputs(8U, 2U, 20U);
+            INST(17U, Opcode::StoreArray).s32().Inputs(7U, 16U, 0U);
+        }
+
+        BASIC_BLOCK(6U, 7U)
+        {
+            INST(21U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(22U, Opcode::BoundsCheck).s32().Inputs(8U, 1U, 21U);
+            INST(23U, Opcode::StoreArray).s32().Inputs(7U, 22U, 0U);
+        }
+
+        BASIC_BLOCK(7U, 3U)
+        {
+            INST(29U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(12U, 1U)
+        {
+            INST(30U, Opcode::ReturnVoid).v0id();
+        }
+    }
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+TEST_F(ChecksEliminationTest, LoopCoveredBoundsChecksAcrossBlocks)
+{
+    BuildGraphLoopCoveredBoundsChecksAcrossBlocks();
+
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // branch selector
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 12U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 29U);  // i
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 7U)
+        {
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(5U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 6U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(31U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::INT32).Inputs(2U, 8U);
+            INST(32U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(31U, 20U);
+            INST(14U, Opcode::NOP);
+            INST(15U, Opcode::StoreArray).s32().Inputs(7U, 1U, 0U);
+            INST(16U, Opcode::NOP);
+            INST(17U, Opcode::StoreArray).s32().Inputs(7U, 2U, 0U);
+        }
+
+        BASIC_BLOCK(6U, 7U)
+        {
+            INST(21U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(22U, Opcode::NOP);
+            INST(23U, Opcode::StoreArray).s32().Inputs(7U, 1U, 0U);
+        }
+
+        BASIC_BLOCK(7U, 3U)
+        {
+            INST(29U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(12U, 1U)
+        {
+            INST(30U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+void ChecksEliminationTest::BuildGraphRootMergeBranchLocalBoundsChecks()
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // index
+        PARAMETER(5U, 2U).s32();  // branch selector 1
+        PARAMETER(6U, 3U).s32();  // branch selector 2
+
+        BASIC_BLOCK(2U, 4U, 9U)
+        {
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
+            INST(9U, Opcode::LenArray).s32().Inputs(8U);
+            INST(10U, Opcode::Compare).b().CC(CC_EQ).Inputs(5U, 0U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 8U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(14U, Opcode::Add).s32().Inputs(4U, 1U);
+            INST(15U, Opcode::BoundsCheck).s32().Inputs(9U, 14U, 20U);
+            INST(16U, Opcode::StoreArray).s32().Inputs(8U, 15U, 0U);
+            INST(17U, Opcode::Add).s32().Inputs(4U, 2U);
+            INST(18U, Opcode::BoundsCheck).s32().Inputs(9U, 17U, 20U);
+            INST(19U, Opcode::StoreArray).s32().Inputs(8U, 18U, 0U);
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).Inputs(6U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 8U)
+        {
+            INST(21U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(23U, Opcode::BoundsCheck).s32().Inputs(9U, 14U, 21U);
+            INST(24U, Opcode::StoreArray).s32().Inputs(8U, 23U, 0U);
+        }
+
+        BASIC_BLOCK(8U, 1U)
+        {
+            INST(25U, Opcode::ReturnVoid).v0id();
+        }
+
+        BASIC_BLOCK(9U, 1U)
+        {
+            INST(26U, Opcode::ReturnVoid).v0id();
+        }
+    }
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+TEST_F(ChecksEliminationTest, RootMergeBranchLocalBoundsChecks)
+{
+    BuildGraphRootMergeBranchLocalBoundsChecks();
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph1 = CreateEmptyGraph();
+    GRAPH(graph1)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // index
+        PARAMETER(5U, 2U).s32();  // branch selector 1
+        PARAMETER(6U, 3U).s32();  // branch selector 2
+
+        BASIC_BLOCK(2U, 4U, 9U)
+        {
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
+            INST(9U, Opcode::LenArray).s32().Inputs(8U);
+            INST(10U, Opcode::Compare).b().CC(CC_EQ).Inputs(5U, 0U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 8U)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(34U, Opcode::Add).s32().Inputs(4U, 1U);
+            INST(35U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::INT32).Inputs(34U, 0U);
+            INST(36U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(35U, 20U);
+            INST(31U, Opcode::Add).s32().Inputs(4U, 2U);
+            INST(32U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::INT32).Inputs(31U, 9U);
+            INST(33U, Opcode::DeoptimizeIf).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(32U, 20U);
+            INST(14U, Opcode::Add).s32().Inputs(4U, 1U);
+            INST(15U, Opcode::NOP);
+            INST(16U, Opcode::StoreArray).s32().Inputs(8U, 14U, 0U);
+            INST(17U, Opcode::Add).s32().Inputs(4U, 2U);
+            INST(18U, Opcode::NOP);
+            INST(19U, Opcode::StoreArray).s32().Inputs(8U, 17U, 0U);
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).Inputs(6U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 8U)
+        {
+            INST(21U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+            INST(23U, Opcode::NOP);
+            INST(24U, Opcode::StoreArray).s32().Inputs(8U, 14U, 0U);
+        }
+
+        BASIC_BLOCK(8U, 1U)
+        {
+            INST(25U, Opcode::ReturnVoid).v0id();
+        }
+
+        BASIC_BLOCK(9U, 1U)
+        {
+            INST(26U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+TEST_F(ChecksEliminationTest, LoopKeepBranchLocalBoundsChecksOuterSaveState)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        PARAMETER(3U, 0U).ref();  // array
+        PARAMETER(4U, 1U).s32();  // limit
+        PARAMETER(5U, 2U).s32();  // branch selector
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
+            INST(8U, Opcode::LenArray).s32().Inputs(7U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 9U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 29U);  // i
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(9U, 4U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+
+        BASIC_BLOCK(4U, 5U, 8U)
+        {
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(5U, 0U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+
+        BASIC_BLOCK(5U, 8U)
+        {
+            INST(14U, Opcode::Add).s32().Inputs(9U, 1U);
+            INST(15U, Opcode::BoundsCheck).s32().Inputs(8U, 14U, 6U);  // SaveState in preheader block.
+            INST(16U, Opcode::StoreArray).s32().Inputs(7U, 15U, 0U);
+            INST(17U, Opcode::Add).s32().Inputs(9U, 2U);
+            INST(18U, Opcode::BoundsCheck).s32().Inputs(8U, 17U, 6U);  // SaveState in preheader block.
+            INST(19U, Opcode::StoreArray).s32().Inputs(7U, 18U, 0U);
+        }
+
+        BASIC_BLOCK(8U, 3U)
+        {
+            INST(29U, Opcode::Add).s32().Inputs(9U, 1U);
+        }
+
+        BASIC_BLOCK(9U, 1U)
+        {
+            INST(30U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<ChecksElimination>());
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
 TEST_F(ChecksEliminationTest, DeoptTest)

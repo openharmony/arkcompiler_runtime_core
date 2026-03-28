@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -533,14 +533,14 @@ void ChecksElimination::ReplaceUsersAndRemoveCheck(Inst *instDel, Inst *instRep)
     SetApplied();
 }
 
-bool ChecksElimination::IsInstIncOrDec(Inst *inst)
+bool ChecksElimination::IsInstIncOrDecConst(Inst *inst)
 {
     return inst->IsAddSub() && inst->GetInput(1).GetInst()->IsConst();
 }
 
 int64_t ChecksElimination::GetInc(Inst *inst)
 {
-    ASSERT(IsInstIncOrDec(inst));
+    ASSERT(IsInstIncOrDecConst(inst));
     auto val = static_cast<int64_t>(inst->GetInput(1).GetInst()->CastToConstant()->GetIntValue());
     if (inst->IsSub()) {
         val = -val;
@@ -550,17 +550,17 @@ int64_t ChecksElimination::GetInc(Inst *inst)
 
 Loop *ChecksElimination::GetLoopForBoundsCheck(BasicBlock *block, Inst *lenArray, Inst *index)
 {
-    auto parentIndex = IsInstIncOrDec(index) ? index->GetInput(0).GetInst() : index;
+    auto parentIndex = IsInstIncOrDecConst(index) ? index->GetInput(0).GetInst() : index;
     auto indexBlock = parentIndex->GetBasicBlock();
     ASSERT(indexBlock != nullptr);
     auto indexLoop = indexBlock->GetLoop();
     if (auto loopInfo = CountableLoopParser(*indexLoop).Parse()) {
-        auto input = lenArray;
+        auto lenArrayInput = lenArray;
         if (lenArray->GetOpcode() == Opcode::LenArray) {
             // new lenArray can be inserted
-            input = lenArray->GetDataFlowInput(0);
+            lenArrayInput = lenArray->GetDataFlowInput(0);
         }
-        if (loopInfo->index == parentIndex && input->GetBasicBlock()->IsDominate(indexBlock)) {
+        if (loopInfo->index == parentIndex && lenArrayInput->GetBasicBlock()->IsDominate(indexBlock)) {
             ASSERT(indexBlock == indexLoop->GetHeader());
             return indexLoop;
         }
@@ -568,24 +568,52 @@ Loop *ChecksElimination::GetLoopForBoundsCheck(BasicBlock *block, Inst *lenArray
     return block->GetLoop();
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep explicit inputs for grouped bounds-check build.
+// NOLINTNEXTLINE(readability-function-size)
 void ChecksElimination::InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool checkUpper,
-                                            bool checkLower)
+                                            bool checkLower, bool dominateLoopBackEdgeOrGraphEnd)
 {
     ASSERT(inst->GetOpcode() == Opcode::BoundsCheck);
-    InstVector insts(GetGraph()->GetLocalAllocator()->Adapter());
-    insts.push_back(inst);
-    int64_t val = 0;
+    InstVector dominateVec(GetGraph()->GetLocalAllocator()->Adapter());
+    NotDominateBoundsChecksByBlock notDominateInfoVec(GetGraph()->GetLocalAllocator()->Adapter());
     Inst *parentIndex = index;
-    if (IsInstIncOrDec(index)) {
+    int64_t val = 0;
+    if (IsInstIncOrDecConst(index)) {
         val = GetInc(index);
         parentIndex = index->GetInput(0).GetInst();
     } else if (index->IsConst()) {
         val = static_cast<int64_t>(index->CastToConstant()->GetIntValue());
         parentIndex = nullptr;
     }
-    auto maxVal = checkUpper ? val : std::numeric_limits<int64_t>::min();
-    auto minVal = checkLower ? val : std::numeric_limits<int64_t>::max();
-    place->emplace_back(std::make_tuple(parentIndex, insts, maxVal, minVal));
+    if (dominateLoopBackEdgeOrGraphEnd) {
+        dominateVec.push_back(inst);
+        auto maxVal = checkUpper ? val : std::numeric_limits<int64_t>::min();
+        auto minVal = checkLower ? val : std::numeric_limits<int64_t>::max();
+        place->emplace_back(parentIndex, dominateVec, notDominateInfoVec, maxVal, minVal);
+    } else {
+        auto *checkBlock = inst->GetBasicBlock();
+        ASSERT(checkBlock != nullptr);
+        notDominateInfoVec.emplace_back(checkBlock, GetGraph()->GetLocalAllocator()->Adapter());
+        notDominateInfoVec.back().second.emplace_back(inst, checkUpper, checkLower, val);
+        place->emplace_back(parentIndex, dominateVec, notDominateInfoVec, std::numeric_limits<int64_t>::min(),
+                            std::numeric_limits<int64_t>::max());
+    }
+}
+
+void ChecksElimination::AppendNotDominateBoundsCheck(NotDominateBoundsChecksByBlock *notDominateInfos, Inst *inst,
+                                                     bool checkUpper, bool checkLower, int64_t offset)
+{
+    // Keep first-seen block order from RPO traversal.
+    ASSERT(inst != nullptr);
+    auto *block = inst->GetBasicBlock();
+    ASSERT(block != nullptr);
+    auto blockInfoIt = std::find_if(notDominateInfos->begin(), notDominateInfos->end(),
+                                    [block](const auto &info) { return info.first == block; });
+    if (blockInfoIt == notDominateInfos->end()) {
+        notDominateInfos->emplace_back(block, GetGraph()->GetLocalAllocator()->Adapter());
+        blockInfoIt = std::prev(notDominateInfos->end());
+    }
+    blockInfoIt->second.emplace_back(inst, checkUpper, checkLower, offset);
 }
 
 void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *inst, InstPair helpers, bool checkUpper, bool checkLower)
@@ -596,32 +624,50 @@ void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *inst, InstPair help
     ASSERT(inst->GetOpcode() == Opcode::BoundsCheck);
     auto loopChecksIt =
         std::find_if(boundsChecks_.begin(), boundsChecks_.end(), [=](auto p) { return p.first == loop; });
+    bool dominateLoopBackEdgeOrGraphEnd = true;
+    if (loop->IsRoot()) {
+        dominateLoopBackEdgeOrGraphEnd = inst->GetBasicBlock()->IsDominate(GetGraph()->GetEndBlock());
+    } else {
+        // Only checks dominating every back edge are loop-global candidates.
+        for (auto backEdge : loop->GetBackEdges()) {
+            if (!inst->GetBasicBlock()->IsDominate(backEdge)) {
+                dominateLoopBackEdgeOrGraphEnd = false;
+                break;
+            }
+        }
+    }
     if (loopChecksIt == boundsChecks_.end()) {
         auto &loopLenArrays = boundsChecks_.emplace_back(loop, GetGraph()->GetLocalAllocator()->Adapter());
         auto &lenArrayIndexes = loopLenArrays.second.emplace_back(lenArray, GetGraph()->GetLocalAllocator()->Adapter());
-        InitItemForNewIndex(&lenArrayIndexes.second, index, inst, checkUpper, checkLower);
+        InitItemForNewIndex(&lenArrayIndexes.second, index, inst, checkUpper, checkLower,
+                            dominateLoopBackEdgeOrGraphEnd);
     } else {
         auto *lenArrays = &loopChecksIt->second;
         auto lenArrayIt =
             std::find_if(lenArrays->begin(), lenArrays->end(), [lenArray](auto p) { return p.first == lenArray; });
         if (lenArrayIt == lenArrays->end()) {
             auto &lenArrayIndexes = lenArrays->emplace_back(lenArray, GetGraph()->GetLocalAllocator()->Adapter());
-            InitItemForNewIndex(&lenArrayIndexes.second, index, inst, checkUpper, checkLower);
+            InitItemForNewIndex(&lenArrayIndexes.second, index, inst, checkUpper, checkLower,
+                                dominateLoopBackEdgeOrGraphEnd);
         } else {
             auto *indexes = &lenArrayIt->second;
-            PushNewBoundsCheckAtExistingIndexes(indexes, index, inst, checkUpper, checkLower);
+            PushNewBoundsCheckAtExistingIndexes(indexes, index, inst, checkUpper, checkLower,
+                                                dominateLoopBackEdgeOrGraphEnd);
         }
     }
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep explicit inputs for grouped bounds-check update.
+// NOLINTNEXTLINE(readability-function-size)
 void ChecksElimination::PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks *indexes, Inst *index, Inst *inst,
-                                                            bool checkUpper, bool checkLower)
+                                                            bool checkUpper, bool checkLower,
+                                                            bool dominateLoopBackEdgeOrGraphEnd)
 {
-    auto indexIt = std::find_if(indexes->begin(), indexes->end(), [index](auto p) { return std::get<0>(p) == index; });
+    auto indexIt = std::find_if(indexes->begin(), indexes->end(), [index](auto &p) { return std::get<0>(p) == index; });
     if (indexIt == indexes->end()) {
         auto parentIndex = index;
         int64_t val {};
-        if (IsInstIncOrDec(index)) {
+        if (IsInstIncOrDecConst(index)) {
             parentIndex = index->GetInput(0).GetInst();
             val = GetInc(index);
         } else if (index->IsConst()) {
@@ -629,31 +675,37 @@ void ChecksElimination::PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks 
             val = static_cast<int64_t>(index->CastToConstant()->GetIntValue());
         }
         auto parentIndexIt =
-            std::find_if(indexes->begin(), indexes->end(), [=](auto p) { return std::get<0>(p) == parentIndex; });
+            std::find_if(indexes->begin(), indexes->end(), [=](auto &p) { return std::get<0>(p) == parentIndex; });
         if (parentIndex == index || parentIndexIt == indexes->end()) {
-            InitItemForNewIndex(indexes, index, inst, checkUpper, checkLower);
-        } else {
-            auto &boundChecks = std::get<1U>(*parentIndexIt);
-            auto &max = std::get<2U>(*parentIndexIt);
-            auto &min = std::get<3U>(*parentIndexIt);
-            boundChecks.push_back(inst);
+            InitItemForNewIndex(indexes, index, inst, checkUpper, checkLower, dominateLoopBackEdgeOrGraphEnd);
+        } else if (dominateLoopBackEdgeOrGraphEnd) {
+            auto &dominateVec = std::get<1U>(*parentIndexIt);
+            auto &max = std::get<3U>(*parentIndexIt);
+            auto &min = std::get<4U>(*parentIndexIt);
             if (val > max && checkUpper) {
                 max = val;
             } else if (val < min && checkLower) {
                 min = val;
             }
+            dominateVec.push_back(inst);
+        } else {
+            auto &notDominateVec = std::get<2U>(*parentIndexIt);
+            AppendNotDominateBoundsCheck(&notDominateVec, inst, checkUpper, checkLower, val);
         }
-    } else {
-        auto &boundChecks = std::get<1U>(*indexIt);
-        auto &max = std::get<2U>(*indexIt);
-        auto &min = std::get<3U>(*indexIt);
-        boundChecks.push_back(inst);
+    } else if (dominateLoopBackEdgeOrGraphEnd) {
+        auto &dominateVec = std::get<1U>(*indexIt);
+        auto &max = std::get<3U>(*indexIt);
+        auto &min = std::get<4U>(*indexIt);
+        dominateVec.push_back(inst);
         if (max < 0 && checkUpper) {
             max = 0;
         }
         if (min > 0 && checkLower) {
             min = 0;
         }
+    } else {
+        auto &notDominateVec = std::get<2U>(*indexIt);
+        AppendNotDominateBoundsCheck(&notDominateVec, inst, checkUpper, checkLower, 0);
     }
 }
 
@@ -1027,7 +1079,7 @@ bool ChecksElimination::NeedUpperDeoptimization(BasicBlock *header, InstPair ins
     auto newUpper = upper;
     auto newMaxAdd = maxAdd;
     int64_t upperAdd = 0;
-    if (IsInstIncOrDec(upper)) {
+    if (IsInstIncOrDecConst(upper)) {
         upperAdd = GetInc(upper);
         newMaxAdd += upperAdd;
         newUpper = upper->GetInput(0).GetInst();
@@ -1180,13 +1232,19 @@ void ChecksElimination::HoistLoopInvariantBoundsChecks(Inst *lenArray, GroupedBo
     if (lenArrLoop == loop) {
         return;
     }
-    for (auto &[index, boundChecks, max, min] : *indexBoundschecks) {
+    for (auto &indexUsedBoundsCheck : *indexBoundschecks) {
+        auto index = std::get<0>(indexUsedBoundsCheck);
         // Check that index is loop invariant, if index is nullptr it means that it was a constant
         if (index != nullptr && index->GetBasicBlock()->GetLoop() == loop) {
             continue;
         }
-        for (auto boundsCheck : boundChecks) {
+        for (auto boundsCheck : std::get<1U>(indexUsedBoundsCheck)) {
             PushNewCheckForMoveOutOfLoop(boundsCheck);
+        }
+        for (auto &blockInfo : std::get<2U>(indexUsedBoundsCheck)) {
+            for (auto &boundsCheckInfo : blockInfo.second) {
+                PushNewCheckForMoveOutOfLoop(std::get<0>(boundsCheckInfo));
+            }
         }
     }
 }
@@ -1195,18 +1253,26 @@ void ChecksElimination::ProcessingGroupBoundsCheck(GroupedBoundsChecks *indexBou
                                                    Inst *lenArray)
 {
     auto phiIndex = std::get<0>(loopInfo).index;
+    // Find boundschecks where parentIndex equals phiIndex
     auto phiIndexIt = std::find_if(indexBoundschecks->begin(), indexBoundschecks->end(),
-                                   [=](auto p) { return std::get<0>(p) == phiIndex; });
+                                   [=](auto &p) { return std::get<0>(p) == phiIndex; });
     if (phiIndexIt == indexBoundschecks->end()) {
         HoistLoopInvariantBoundsChecks(lenArray, indexBoundschecks, phiIndex->GetBasicBlock()->GetLoop());
         return;
     }
-    const auto &instsToDelete = std::get<1U>(*phiIndexIt);
-    auto maxAdd = std::get<2U>(*phiIndexIt);
-    auto minAdd = std::get<3U>(*phiIndexIt);
-    ASSERT(!instsToDelete.empty());
+    const auto &dominateBackedgeInsts = std::get<1U>(*phiIndexIt);
+    auto &notDominateInsts = std::get<2U>(*phiIndexIt);
+    auto maxAdd = std::get<3U>(*phiIndexIt);
+    auto minAdd = std::get<4U>(*phiIndexIt);
+    bool hasMaxAdd = (maxAdd != std::numeric_limits<int64_t>::min());
+    bool hasMinAdd = (minAdd != std::numeric_limits<int64_t>::max());
+    if (dominateBackedgeInsts.empty()) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM)
+            << "No bounds checks in the loop dominate the loop backedge; cannot eliminate them.";
+        return;
+    }
     bool hasCheckInHeader = false;
-    for (const auto &inst : instsToDelete) {
+    for (const auto &inst : dominateBackedgeInsts) {
         if (inst->GetBasicBlock() == phiIndex->GetBasicBlock()) {
             hasCheckInHeader = true;
         }
@@ -1214,13 +1280,17 @@ void ChecksElimination::ProcessingGroupBoundsCheck(GroupedBoundsChecks *indexBou
     if (TryInsertDeoptimization(loopInfo, lenArray, maxAdd, minAdd, hasCheckInHeader)) {
         COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Delete group of BoundsChecks";
         // Delete bounds checks instructions
-        for (const auto &inst : instsToDelete) {
+        // If deoptimization can cover the non-dominated checks, they can also be eliminated
+        TryEliminateDeoptCoveredBoundsChecks(notDominateInsts, hasMaxAdd, hasMinAdd, maxAdd, minAdd);
+        for (const auto &inst : dominateBackedgeInsts) {
             ReplaceUsersAndRemoveCheck(inst, inst->GetInput(1).GetInst());
+            // Mark the corresponding entry as processed by clearing its data
             auto it = std::find_if(indexBoundschecks->begin(), indexBoundschecks->end(),
-                                   [=](auto p) { return std::get<0>(p) == inst->GetInput(1).GetInst(); });
+                                   [=](auto &p) { return std::get<0>(p) == inst->GetInput(1).GetInst(); });
             if (it != indexBoundschecks->end()) {
                 std::get<0>(*it) = nullptr;
-                std::get<1>(*it).clear();
+                std::get<1U>(*it).clear();
+                std::get<2U>(*it).clear();
             }
         }
     }
@@ -1296,43 +1366,233 @@ Inst *ChecksElimination::FindSaveState(const InstVector &instsToDelete)
     return nullptr;
 }
 
-void ChecksElimination::ReplaceOneBoundsCheckToDeoptimizationInLoop(
-    std::pair<Loop *, LoopNotFullyRedundantBoundsCheck> &item)
+Inst *ChecksElimination::SelectInsertAfterForBoundsDeopt(Inst *lenArray, Inst *saveState, Inst *parentIndex) const
+{
+    ASSERT(lenArray != nullptr);
+    ASSERT(saveState != nullptr);
+    auto *insertAfter = lenArray->IsDominate(saveState) ? saveState : lenArray;
+    if (parentIndex == nullptr || parentIndex->IsDominate(insertAfter)) {
+        return insertAfter;
+    }
+    if (parentIndex->GetBasicBlock() != insertAfter->GetBasicBlock()) {
+        return nullptr;
+    }
+    return parentIndex;
+}
+
+// NOLINTNEXTLINE(readability-function-size)
+void ChecksElimination::ReplaceBoundsChecksByDeoptInOneLoop(std::pair<Loop *, LoopNotFullyRedundantBoundsCheck> &item)
 {
     for (auto &[lenArray, indexBoundchecks] : item.second) {
-        for (auto &[index, instsToDelete, max, min] : indexBoundchecks) {
-            constexpr auto MIN_BOUNDSCHECKS_NUM = 2;
-            if (instsToDelete.size() <= MIN_BOUNDSCHECKS_NUM) {
+        for (auto &indexUsedBoundsChecks : indexBoundchecks) {
+            auto *parentIndex = std::get<0>(indexUsedBoundsChecks);
+            auto &dominateExitBoundsCheck = std::get<1U>(indexUsedBoundsChecks);
+            auto &notDominateBoundsChecks = std::get<2U>(indexUsedBoundsChecks);
+            auto minChecksForLoopDeopt =
+                parentIndex == nullptr ? MIN_BOUNDSCHECKS_FOR_DEOPT_MERGE : MIN_BOUNDSCHECKS_FOR_DEOPT_MERGE + 1;
+            if (dominateExitBoundsCheck.size() < minChecksForLoopDeopt) {
                 COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Skip small group of BoundsChecks";
+                TryReplaceBoundsCheckByDeoptInBlock(lenArray, parentIndex, notDominateBoundsChecks);
                 continue;
             }
             // Try to replace more than 2 bounds checks to deoptimization in loop
-            auto saveState = FindSaveState(instsToDelete);
+            // find the check that dominate every other check, as the deopt placed position
+            auto saveState = FindSaveState(dominateExitBoundsCheck);
             if (saveState == nullptr) {
                 COMPILER_LOG(DEBUG, CHECKS_ELIM) << "SaveState isn't founded";
+                TryReplaceBoundsCheckByDeoptInBlock(lenArray, parentIndex, notDominateBoundsChecks);
                 continue;
             }
-            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Replace group of BoundsChecks on deoptimization in loop";
-            auto insertAfter = lenArray->IsDominate(saveState) ? saveState : lenArray;
-            if (max != std::numeric_limits<int64_t>::min()) {
-                // Create deoptimize if max_index >= lenArray
-                InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, {index, lenArray}, max, {saveState, insertAfter});
+            auto *insertAfter = SelectInsertAfterForBoundsDeopt(lenArray, saveState, parentIndex);
+            if (insertAfter == nullptr) {
+                COMPILER_LOG(DEBUG, CHECKS_ELIM)
+                    << "Skip loop deopt merge because parent index is not available at the insertion point";
+                TryReplaceBoundsCheckByDeoptInBlock(lenArray, parentIndex, notDominateBoundsChecks);
+                continue;
             }
-            if (index != nullptr && min != std::numeric_limits<int64_t>::max()) {
+            auto &maxAdd = std::get<3U>(indexUsedBoundsChecks);
+            auto &minAdd = std::get<4U>(indexUsedBoundsChecks);
+            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Replace group of BoundsChecks on deoptimization in loop";
+            bool hasMaxAdd = (maxAdd != std::numeric_limits<int64_t>::min());
+            bool hasMinAdd = (parentIndex != nullptr && minAdd != std::numeric_limits<int64_t>::max());
+            if (hasMaxAdd) {
+                // Create deoptimize if max_index >= lenArray
+                InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, {parentIndex, lenArray}, maxAdd,
+                                                {saveState, insertAfter});
+            }
+            if (hasMinAdd) {
                 // Create deoptimize if min_index < 0
                 auto zeroConst = GetGraph()->FindOrCreateConstant(0);
-                InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {index, zeroConst}, min,
+                InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {parentIndex, zeroConst}, minAdd,
                                                 {saveState, insertAfter});
             } else {
                 // No lower check needed based on BoundsAnalysis
                 // if index is null, group of bounds checks consists of constants
-                ASSERT(min >= 0);
+                ASSERT(minAdd >= 0);
             }
-            for (const auto &inst : instsToDelete) {
+            for (const auto &inst : dominateExitBoundsCheck) {
                 COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Delete group of BoundsChecks";
                 ReplaceUsersAndRemoveCheck(inst, inst->GetInput(1).GetInst());
             }
+            // If deoptimization can cover the non-dominated checks, they can also be eliminated
+            TryEliminateDeoptCoveredBoundsChecks(notDominateBoundsChecks, hasMaxAdd, hasMinAdd, maxAdd, minAdd,
+                                                 insertAfter);
+            // Try local merge only for remaining non-dominated checks that were not eliminated by loop deopt
+            TryReplaceBoundsCheckByDeoptInBlock(lenArray, parentIndex, notDominateBoundsChecks);
         }
+    }
+}
+
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep explicit inputs for bounds-check coverage
+// NOLINTNEXTLINE(readability-function-size)
+bool ChecksElimination::NotDominateInstFitsInDeopt(bool hasMaxAdd, bool hasMinAdd, int64_t maxAdd, int64_t minAdd,
+                                                   int64_t val, bool checkUpper, bool checkLower)
+{
+    ASSERT((checkUpper || checkLower));
+    if (checkUpper && checkLower) {
+        return (hasMaxAdd && hasMinAdd) ? (val <= maxAdd && val >= minAdd) : false;
+    }
+    if (checkUpper) {
+        return hasMaxAdd ? val <= maxAdd : false;
+    }
+    return hasMinAdd ? val >= minAdd : false;
+}
+
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep explicit inputs for non-dominated BCE
+// NOLINTNEXTLINE(readability-function-size)
+void ChecksElimination::TryEliminateDeoptCoveredBoundsChecks(NotDominateBoundsChecksByBlock &notDominateBoundsChecks,
+                                                             bool hasMaxAdd, bool hasMinAdd, int64_t maxAdd,
+                                                             int64_t minAdd, Inst *domGate)
+{
+    for (auto &blockInfo : notDominateBoundsChecks) {
+        auto *checkBlock = blockInfo.first;
+        if (checkBlock == nullptr || (domGate != nullptr && !domGate->GetBasicBlock()->IsDominate(checkBlock))) {
+            continue;
+        }
+        for (auto &instInfo : blockInfo.second) {
+            auto *boundsCheck = std::get<0>(instInfo);
+            if (boundsCheck == nullptr || boundsCheck->GetBasicBlock() == nullptr ||
+                (domGate != nullptr && !domGate->IsDominate(boundsCheck))) {
+                continue;
+            }
+            bool checkUpper = std::get<1U>(instInfo);
+            bool checkLower = std::get<2U>(instInfo);
+            int64_t val = std::get<3U>(instInfo);
+            if (!NotDominateInstFitsInDeopt(hasMaxAdd, hasMinAdd, maxAdd, minAdd, val, checkUpper, checkLower)) {
+                continue;
+            }
+            ReplaceUsersAndRemoveCheck(boundsCheck, boundsCheck->GetInput(1).GetInst());
+        }
+    }
+}
+
+Inst *ChecksElimination::FindSaveStateBlockLocal(const NotDominateInstInfoVector &blockInfos, BasicBlock *block) const
+{
+    ASSERT(block != nullptr);
+    constexpr auto IMM_2 = 2;
+    Inst *earliestCheck = nullptr;
+    for (const auto &instInfo : blockInfos) {
+        auto *check = std::get<0>(instInfo);
+        if (check == nullptr || check->GetBasicBlock() != block) {
+            continue;
+        }
+        ASSERT(check != nullptr && check->GetInputsCount() > IMM_2);
+        if (earliestCheck == nullptr || check->IsDominate(earliestCheck)) {
+            earliestCheck = check;
+        }
+    }
+    if (earliestCheck == nullptr) {
+        return nullptr;
+    }
+    return earliestCheck->GetInput(IMM_2).GetInst();
+}
+
+// NOLINTNEXTLINE(readability-function-size)
+std::optional<ChecksElimination::DeoptGuardInfo> ChecksElimination::TryReplaceBoundsCheckByDeoptInOneBlock(
+    Inst *lenArray, Inst *parentIndex, BasicBlock *block, NotDominateInstInfoVector &blockInfos)
+{
+    if (block == nullptr) {
+        return std::nullopt;
+    }
+
+    size_t aliveChecks = 0;
+    int64_t maxAdd = std::numeric_limits<int64_t>::min();
+    int64_t minAdd = std::numeric_limits<int64_t>::max();
+    for (const auto &instInfo : blockInfos) {
+        auto *check = std::get<0>(instInfo);
+        if (check == nullptr || check->GetBasicBlock() != block) {
+            continue;
+        }
+        ++aliveChecks;
+        bool checkUpper = std::get<1U>(instInfo);
+        bool checkLower = std::get<2U>(instInfo);
+        int64_t val = std::get<3U>(instInfo);
+        if (checkUpper) {
+            maxAdd = std::max(maxAdd, val);
+        }
+        if (checkLower && parentIndex != nullptr) {
+            minAdd = std::min(minAdd, val);
+        }
+    }
+    if (aliveChecks < MIN_BOUNDSCHECKS_FOR_DEOPT_MERGE) {
+        return std::nullopt;
+    }
+
+    auto *saveState = FindSaveStateBlockLocal(blockInfos, block);
+    if (saveState == nullptr || saveState->GetBasicBlock() != block) {
+        return std::nullopt;
+    }
+    // Keep insertion local to this block.
+    auto *insertAfter = SelectInsertAfterForBoundsDeopt(lenArray, saveState, parentIndex);
+    if (insertAfter == nullptr || insertAfter->GetBasicBlock() != block) {
+        return std::nullopt;
+    }
+
+    bool hasMaxAdd = (maxAdd != std::numeric_limits<int64_t>::min());
+    bool hasMinAdd = (parentIndex != nullptr && minAdd != std::numeric_limits<int64_t>::max());
+    if (!hasMaxAdd && !hasMinAdd) {
+        return std::nullopt;
+    }
+
+    COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Replace same-block bounds checks by local deoptimization";
+    if (hasMaxAdd) {
+        InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, {parentIndex, lenArray}, maxAdd,
+                                        {saveState, insertAfter});
+    }
+    if (hasMinAdd) {
+        auto zeroConst = GetGraph()->FindOrCreateConstant(0);
+        InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {parentIndex, zeroConst}, minAdd,
+                                        {saveState, insertAfter});
+    }
+    for (auto &instInfo : blockInfos) {
+        auto *boundsCheck = std::get<0>(instInfo);
+        if (boundsCheck == nullptr || boundsCheck->GetBasicBlock() != block) {
+            continue;
+        }
+        ReplaceUsersAndRemoveCheck(boundsCheck, boundsCheck->GetInput(1).GetInst());
+    }
+    return std::make_tuple(hasMaxAdd, hasMinAdd, maxAdd, minAdd, insertAfter);
+}
+
+// NOLINTNEXTLINE(readability-function-size)
+void ChecksElimination::TryReplaceBoundsCheckByDeoptInBlock(Inst *lenArray, Inst *parentIndex,
+                                                            NotDominateBoundsChecksByBlock &notDominateInstInfos)
+{
+    // Try local merge in each block.
+    for (auto &blockInfo : notDominateInstInfos) {
+        auto *block = blockInfo.first;
+        auto &blockInfos = blockInfo.second;
+        if (block == nullptr) {
+            continue;
+        }
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Try local deopt merge in block " << block->GetId();
+        auto guardInfo = TryReplaceBoundsCheckByDeoptInOneBlock(lenArray, parentIndex, block, blockInfos);
+        if (!guardInfo.has_value()) {
+            continue;
+        }
+        const auto &[hasMaxAdd, hasMinAdd, maxAdd, minAdd, insertAfter] = guardInfo.value();
+        // Reuse this local guard to eliminate covered checks on dominated paths.
+        TryEliminateDeoptCoveredBoundsChecks(notDominateInstInfos, hasMaxAdd, hasMinAdd, maxAdd, minAdd, insertAfter);
     }
 }
 
@@ -1340,7 +1600,7 @@ void ChecksElimination::ReplaceBoundsCheckToDeoptimizationInLoop()
 {
     COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Start ReplaceBoundsCheckToDeoptimizationInLoop";
     for (auto &item : boundsChecks_) {
-        ReplaceOneBoundsCheckToDeoptimizationInLoop(item);
+        ReplaceBoundsChecksByDeoptInOneLoop(item);
     }
     COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Finish ReplaceBoundsCheckToDeoptimizationInLoop";
 }
