@@ -35,13 +35,30 @@ If based on bounds analysis input of NegativeCheck is more then 0, check is dele
 #### BoundsChecks: 
 If based on bounds analysis input of BoundsCheck is more or equal than 0 and less than length of array, check is deleted.
 
-If BoundsCheck isn't deleted, it insert in special structure `NotFullyRedundantBoundsCheck`.
+If BoundsCheck isn't deleted, it is grouped for later BCE transformations.
+The main grouping key is `(loop, len_array, parent_index)`.
+
+- `parent_index` is the original index for `index +/- const`, or the index itself for non-offset expressions.
+- Constant indexes are stored in a separate `parent_index == nullptr` group.
+- Each group keeps:
+  - checks that dominate all loop back edges or the graph end
+  - checks that do not dominate all back edges, grouped by block
+  - maximal upper offset and minimal lower offset
+
 ```
-// parent_index->{Vector<bound_check>, max_val, min_val}
-using GroupedBoundsChecks = ArenaUnorderedMap<Inst*, std::tuple<ArenaVector<Inst*>, int64_t, int64_t>>;
-// loop->len_array->GroupedBoundsChecks
-using NotFullyRedundantBoundsCheck = ArenaDoubleUnorderedMap<Loop*, Inst*, GroupedBoundsChecks>;
+// {check_inst, check_upper, check_lower, cached_offset}
+using BoundsCheckInfo = std::tuple<Inst *, bool, bool, int64_t>;
+using NotDominateInstInfoVector = ArenaVector<BoundsCheckInfo>;
+// {check_block, NotDominateInstInfoVector}
+using NotDominateBoundsChecksByBlock = ArenaVector<std::pair<BasicBlock *, NotDominateInstInfoVector>>;
+// {parent_index, dominate_checks, not_dominate_checks_by_block, max_val, min_val}
+using ParentIndexUsedBoundsChecks =
+    std::tuple<Inst *, InstVector, NotDominateBoundsChecksByBlock, int64_t, int64_t>;
+using GroupedBoundsChecks = ArenaVector<ParentIndexUsedBoundsChecks>;
+// loop -> len_array -> GroupedBoundsChecks
+using NotFullyRedundantBoundsCheck = ArenaVector<std::pair<Loop *, ArenaVector<std::pair<Inst *, GroupedBoundsChecks>>>>;
 ```
+
 For example, for this method:
 ```
 int Foo(array a, int index) {
@@ -53,29 +70,40 @@ int Foo(array a, int index) {
 ```
 NotFullyRedundantBoundsCheck will be filled in this way:
 ```
-Root_loop->len_array(a)-> index -> {{BoundsChecks 1,2,3}, max_val = 1, min_val = -2}
+Root_loop->len_array(a) ->
+  {parent_index = index,
+   dominate_checks = {BoundsChecks 1,2,3},
+   not_dominate_checks_by_block = {},
+   max_val = 1,
+   min_val = -2}
 ```
 
-For countable loops witch index in `NotFullyRedundantBoundsCheck`, algorithm try to replace boundschecks by `DeoptimiseIf` instructions before loop.
+Current BCE has three main bounds-check deopt paths.
 
-For example, loop:
+1. `BeforeLoop`
+
+For countable loops, if grouped checks use the loop phi as `parent_index`, BCE may replace the loop-global bounds checks by `DeoptimiseIf` instructions before the loop.
+
+Example:
 ```
 for ( int i = 0; i < x; i++) {
   BoundCheck(i);
   a[i] = 0;
 }
 ```
-will be transormed to
+can be transformed to
 ```
 deoptimizeIf(x >= len_array(a));
 for ( int i = 0; i < x; i++) {
   a[i] = 0;
 }
-
 ```
 
-For another BoundsCheck instructions in `NotFullyRedundantBoundsCheck` algorithm try to replace more then 2 grouped bounds checks by `DeoptimiseIf`.
-For example, this method:
+2. `InLoop`
+
+For groups that are not handled by `BeforeLoop`, BCE may replace more than 2 loop-global grouped bounds checks by `DeoptimiseIf` inside the loop.
+
+Example:
 ```
 int Foo(array a, int index) {
   BoundCheck(len_array(a), index); // id = 1
@@ -90,6 +118,39 @@ int Foo(array a, int index) {
   deoptimizeIf(index-2 < 0);
   deoptimizeIf(index+1 >= len_array(a));
   return a[index] + a[index+1] + a[index-2];
+}
+```
+
+Only checks whose instruction blocks dominate all loop back edges are treated as loop-global candidates.
+
+3. `Block-local`
+
+For checks that do not dominate all loop back edges, BCE does not merge them into a loop-global guard.
+Instead, it tries a local merge inside one block.
+
+If several such bounds checks are in the same block, BCE may insert local `DeoptimiseIf` instructions in that block and remove the covered checks there.
+After a local guard is inserted, covered checks in dominated successor blocks may also be eliminated.
+
+This keeps insertion local to the proven path and avoids creating loop-global guards for branch-local checks.
+
+Example:
+```
+for (int i = 0; i < n; i++) {
+  if (cond) {
+    BoundCheck(len_array(a), i);     // id = 1
+    BoundCheck(len_array(a), i + 1); // id = 2
+    x += a[i] + a[i + 1];
+  }
+}
+```
+can be transformed to:
+```
+for (int i = 0; i < n; i++) {
+  if (cond) {
+    deoptimizeIf(i < 0);
+    deoptimizeIf(i + 1 >= len_array(a));
+    x += a[i] + a[i + 1];
+  }
 }
 ```
 

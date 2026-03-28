@@ -28,5 +28,16 @@
 	"tests": "*",
 	"verifier": "*",
 	"taihe": "*",
-	"common_interfaces/objects/string/base_string_impl.h": "*"
+	"common_interfaces/objects/string/base_string_impl.h": "*",
+	"common_runtime/common_components/base/ark_sanitizer.h": "*",
+	"common_runtime/common_components/base/asan_interface.h": "*",
+	"common_runtime/common_components/base/utf_helper.cpp": "*",
+	"common_runtime/common_components/common_runtime/base_runtime_param.h": "*",
+	"common_runtime/common_components/log/log.h": "*",
+	"common_runtime/common_components/log/log_base.h": "*",
+	"common_runtime/common_components/heap/collector/gc_request.h": "*",
+	"common_runtime/common_components/heap/collector/marking_collector.cpp": "*",
+	"common_runtime/common_components/objects/string_table/hashtriemap-inl.h": "*",
+	"libabckit/include/libabckit/cpp/headers/dynamic_isa.h": "*",
+	"libabckit/include/libabckit/cpp/headers/dynamic_isa_impl.h": "*"
 }
