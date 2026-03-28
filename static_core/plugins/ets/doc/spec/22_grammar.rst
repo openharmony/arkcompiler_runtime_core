@@ -812,13 +812,12 @@ Grammar Summary
         | annotationDeclaration
         | accessorDeclaration
         | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
         )
         ;
 
     namespaceDeclaration:
         'namespace' qualifiedName
-        '{' (topDeclaration | topLevelStatements | exportDirective)* '}'
+        '{' (topDeclaration | topLevelStatements | staticBlock | exportDirective)* '}'
         ;
 
     exportDirective:
@@ -1011,22 +1010,22 @@ Grammar Summary
         )
         ;
 
-      newArrayInstance:
-          'new' arrayElementType dimensionExpression+ arrayElement?
-          ;
+    newArrayInstance:
+        'new' arrayElementType dimensionExpression '(' arrayElement ')'
+        ;
 
-      arrayElementType:
-          typeReference
-          | '(' type ')'
-          ;
+    arrayElementType:
+        typeReference
+        | '(' type ')'
+        ;
 
-      dimensionExpression:
-          '[' expression ']'
-          ;
+    dimensionExpression:
+        '[' expression ']'
+        ;
 
-      arrayElement:
-          '(' expression ')'
-          ;
+    arrayElement: 
+        expression
+    ;
 
     interfaceDefaultMethodDeclaration:
         'private'? identifier signature block
@@ -1042,11 +1041,6 @@ Grammar Summary
 
     receiverParameter:
         annotationUsage? 'this' ':' type
-        ;
-
-    accessorWithReceiverDeclaration:
-          'get' identifier '(' receiverParameter ')' returnType block
-        | 'set' identifier '(' receiverParameter ',' requiredParameter ')' block
         ;
 
     functionTypeWithReceiver:

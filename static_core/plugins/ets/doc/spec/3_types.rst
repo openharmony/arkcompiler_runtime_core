@@ -509,7 +509,7 @@ values.
 
 .. note::
 
-   Tables in :ref:`Unary Expressions` and :ref:`Binary Expressions Overview`
+   Tables in :ref:`Unary Expressions` and :ref:`Binary Expressions`
    summarize information about valid combinations of operand types and result
    type for unary and binary operations.
 

@@ -1538,28 +1538,11 @@ The syntax of *object literal* is presented below:
 An *object literal* is written as a comma-separated list of
 *object literal members* enclosed in curly braces ``'{'`` and ``'}'``. A
 trailing comma after the last member is ignored. Each *object literal member*
-can be either an *object literal field* or an *object literal method*.
+can be either an *object literal field* or an *object literal method* in case
+when an *object literal* is of interface type.
 
 More details are here :ref:`Object Literal of Class Type` and
 :ref:`Object Literal of Interface Type`:
-
-.. code-block:: typescript
-   :linenos:
-
-      class A {}
-      interface I {
-         m(): void
-      }
-      abstract class B {
-         abstract m(): void
-      }
-      const a: A = { m(): void {} } // compile-time error, no m() in class A
-      const i: I = { m(): void {} } // OK
-      const b: B = { m(): void {} } // OK
-
-.. index::
-   object literal
-   method
 
 An *object literal field* consists of an identifier and an expression as follows:
 
@@ -1838,35 +1821,6 @@ Otherwise, a :index:`compile-time error` occurs:
    property
    setter
    object literal
-
-If a class is an abstract one, it can be also used with *object literals*:
-
-.. code-block:: typescript
-   :linenos:
-
-    abstract class A {
-        abstract foo () : void
-    }
-    const a1: A = { foo() {} } // OK, foo() is properly defined
-    const a2: A = {} // compile-time error as foo() implementation is not defined
-
-*Object literal* can provide a method with override-compatible (see
-:ref:`Override-Compatible Signatures`) signature:
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {}
-    class Drv1 extends Base {}
-    class Drv2 extends Base {}
-
-    class A {
-        foo (p: Drv1) {}
-        foo (p: Drv2) {}
-    }
-    const a1: A = { foo(p: Base) {} } // OK, foo(p: Base) overrides both foo (p: Drv1) and foo (p: Drv2)
-    const a2: A = { foo (p: number) {} } // compile-time error as foo(p: number) is a new method declaration
-    const a3: A = { foo(p: Drv2) {} } // OK, foo(p: Drv2) overrides only foo (p: Drv2) but not foo (p: Drv1)
 
 
 |
@@ -2723,7 +2677,8 @@ Type of a *field access expression* is the type of a member field.
 If the identifier in a *field access expression* denotes the accessor defined
 for a class or interface type, then either a getter or a setter is called
 depending on the position of the *field access expression* (see
-:ref:`Accessors with Receiver` for detail).
+:ref:`Class Accessor Declarations`  and :ref:`Interface Properties` for
+detail).
 
 .. index::
    access
@@ -4661,11 +4616,11 @@ of the operand provided. The type of *unaryExpression* for each *unary operator*
 is stated explicitly in the following table:
 
 +------------------------+-------------------------+---------------------------+
-| *unary operator*       | type of operand         | type of result            |
+| **Unary Operator**     | **Type of Operand**     | **Type of Result**        |
 +========================+=========================+===========================+
 | '++', '--'             | byte                    | byte                      |
-| (unary, prefix and     +-------------------------+---------------------------+
-| ostfix)                | short                   | short                     |
+| (prefix or             +-------------------------+---------------------------+
+| postfix)               | short                   | short                     |
 |                        +-------------------------+---------------------------+
 |                        | int                     | int                       |
 |                        +-------------------------+---------------------------+
@@ -4693,8 +4648,8 @@ is stated explicitly in the following table:
 |                        +-------------------------+---------------------------+
 |                        | bigint                  | bigint                    |
 +------------------------+-------------------------+---------------------------+
-| '!'                    | boolean or type         | boolean                   |
-| (logical complement)   | mentioned in            |                           |
+| '!'                    | boolean or see          | boolean                   |
+| (logical complement)   |                         |                           |
 |                        | :ref:`extended          |                           |
 |                        | conditional             |                           |
 |                        | expressions`            |                           |
@@ -5247,10 +5202,10 @@ converted) operand value is ``false``, and ``false`` if the operand value
 
 |
 
-.. _Binary Expressions Overview:
+.. _Binary Expressions:
 
-Binary Expressions Overview
-***************************
+Binary Expressions
+******************
 
 The syntax of *binary expression* is presented below:
 
@@ -5281,8 +5236,7 @@ table below. Type combinations not listed in the table cause a
 :index:`runtime error` otherwise.
 
 +----------------+--------------------------------+-------------------------------+-------------------------+
-|                | type of                        | type of                       | type of                 |
-|    *Operator*  | 1st/2nd *operand*              | 2nd/1st *operand*             | result                  |
+| **Operator**   | **Type of One Operand**        | **Type of Other Operand**     | **Type of Result**      |
 +================+================================+===============================+=========================+
 | '*', '/', '%'  | byte, short, int               |  byte, short, int             |    int                  |
 |                +--------------------------------+-------------------------------+-------------------------+
@@ -5314,10 +5268,11 @@ table below. Type combinations not listed in the table cause a
 +----------------+--------------------------------+-------------------------------+-------------------------+
 | '<<', '>>'     | bigint                         |  bigint                       |    bigint               |
 +----------------+--------------------------------+-------------------------------+-------------------------+
-| '<<', '>>',    | *1st* is byte, short, int,     |  *2nd* is any numeric         |    int                  |
-|                | float                          |                               |                         |
-| '>>>'          +--------------------------------+-------------------------------+-------------------------+
-|                | *1st* is long, double          |  *2nd* is any numeric         |    long                 |
+| '<<', '>>',    | byte, short, int,              |  any numeric                  |    int (see Note 2)     |
+| and '>>>'      | float                          |                               |                         |
++                +--------------------------------+-------------------------------+-------------------------+
+|                | long, double                   |  any numeric                  |    long (see Note 2)    |
+|                |                                |                               |                         |
 +----------------+--------------------------------+-------------------------------+-------------------------+
 | '<', '<=',     | string, string literal         |  string, string literal       |    boolean              |
 | '>', '>='      +--------------------------------+-------------------------------+-------------------------+
@@ -5353,23 +5308,26 @@ table below. Type combinations not listed in the table cause a
 |                +--------------------------------+-------------------------------+-------------------------+
 |                | bigint                         | bigint                        |    bigint               |
 +----------------+--------------------------------+-------------------------------+-------------------------+
-| '&&', '||'     | boolean or type mentioned      | boolean or type mentioned     | boolean                 |
-|                | in extended conditional        | in extended conditional       | (except cases with      |
-|                | expressions.                   | expressions.                  | extended semantics)     |
+| '&&', '||'     | boolean                        | boolean                       |    boolean              |
++                +--------------------------------+-------------------------------+-------------------------+
+|                | other types, see Note 5        | other types, see Note 5       |    see Note 5           |
 +----------------+--------------------------------+-------------------------------+-------------------------+
 
 .. note::
    The following applies to the table above.
 
-   -  The type of result of shift operators '``<<``', '``>>``', '``>>>``' with
+   #. For all operators, except shift operators, the order of operands does not influence
+      the type of result.
+   #. The type of result of shift operators '``<<``', '``>>``', '``>>>``' with
       operands of numeric types depends on the type of the 1st (left-hand-side)
       operand, and not on the type of the second (right-hand-side) operand.
-   -  Equality operators '``==``', '``===``', '``!=``', '``!==``' are defined
-      for any type, but the combinations listed explicitly in the table have
-      specific behaviors.
-   -  Equality operators for the types that contain ``null`` or ``undefined``
+   #. Equality operators '``==``', '``===``', '``!=``', and '``!==``' are
+      defined for any type, but the combinations listed explicitly
+      in the table have specific behaviors.
+   #. Equality operators for the types that contain ``null`` or ``undefined``
       are described in :ref:`Extended Equality with null or undefined`.
-   -  Extended semantics of logical operators '``&&``', '``||``' is described in
+   #. Types of operands (other than ``boolean``) and the resultant type for
+      logical operators '``&&``' and '``||``' are discussed in
       :ref:`Extended Conditional Expressions`.
 
 .. meta:
@@ -6767,16 +6725,16 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
   :ref:`Numeric Conversions for Relational and Equality Operands`);
 
 - Both operands are of :ref:`Type char` and have the same value, i.e., both
-  operands represent the same 16-bit code unit
-  (see :ref:`char Operations`);
+  operands represent the same 16-bit code unit (see :ref:`char Operations`);
 
 - One operand is of :ref:`Type char`, other is of a numeric type and
   operand have the same numeric value (see :ref:`char Operations` and
   :ref:`char Conversions for Relational and Equality Operands`);
 
-- Both operands are of the same enumeration (see :ref:`Enumerations`) type and
-  have the same numeric value or the same string
-  contents, depending on the enumeration base type;
+- Both operands are of enumeration types (see :ref:`Enumerations`) and
+  have the same numeric value or the same string value.
+  If operands are of different enumeration types, then a
+  :index:`compile-time warning` occurs;
 
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
@@ -6798,48 +6756,8 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
    equality operator
    function type
 
-If an *equality expression* is known at compile time to always evaluate
-to ``false`` or ``true`` at runtime, then a :index:`compile-time warning`
-is issued as follows:
-
-.. code-block:: typescript
-   :linenos:
-
-    function  foo(b: boolean | undefined) {
-        let n: number | boolean = 1
-        b == n // warning: expression is always false due to smart cast
-        n == 1 // warning: expression is always true due to smart cast
-    }
-
-    class B {
-        f(): B|undefined { return undefined }
-    }
-    class D extends B {
-        f(): D { return this }
-    }
-
-    function bar(c: B) {
-        if (c instanceof D) {
-            c.f() == undefined // warning, expression is always false
-        }
-    }
-
 An evaluation of equality expressions always uses the actual types of operands
 as in the example below:
-
-.. index::
-   comparison
-   value
-   type
-   evaluation
-   runtime
-   semantics
-   instance
-   class
-   string type
-   overlapping
-   equality expression
-   operand
 
 .. code-block:: typescript
    :linenos:
@@ -6918,6 +6836,34 @@ is issued as follows:
             c.f() == undefined // warning, expression is always false
         }
     }
+
+If two operands are of different enumeration types, then a
+:index:`compile-time warning` occurs as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum E1 {A, B}
+    enum E2 {C, D}
+
+    function test (e1: E1, e2: E2) {
+       e1 == e2 // compile-time warning, appears to be unintentional
+    }
+
+.. index::
+   comparison
+   value
+   type
+   evaluation
+   runtime
+   semantics
+   instance
+   class
+   string type
+   overlapping
+   equality expression
+   operand
+
 
 |
 
@@ -7891,18 +7837,23 @@ Left-Hand-Side Expressions
 .. meta:
     frontend_status: Done
 
-*Left-hand-side expression* is an *expression* that is one of the following:
+A *left-hand-side expression* is an *expression* that refers to one of the
+following:
 
--  Named variable;
+-  Variable (see :ref:`Named Reference`);
+-  Parameter, except any parameter named ``this``
+   (see :ref:`Named Reference`);
 -  Field or setter resultant from a field access (see
    :ref:`Field Access Expression`); or
 -  Array or record element access (see :ref:`Indexing Expressions`).
 
-A :index:`compile-time error` occurs in the following situations:
+Otherwise, a :index:`compile-time error` occurs.
 
--  *Expression* contains the chaining operator ``'?.'`` (see
-   :ref:`Chaining Operator`);
--  Result of *expression* is not a variable.
+
+A :index:`compile-time error` occurs if an *expression*:
+
+- Contains the chaining operator ``'?.'`` (see :ref:`Chaining Operator`); or
+- Refers to a readonly entity.
 
 .. index::
    expression
@@ -7916,6 +7867,7 @@ A :index:`compile-time error` occurs in the following situations:
    indexing expression
    chaining operator
    variable
+   parameter
 
 |
 
@@ -8187,31 +8139,18 @@ Lambda Signature
 
 Similarly to function declarations (see :ref:`Function Declarations`),
 a *lambda signature* is composed of formal parameters and
-optional return types. Unlike function declarations,
-type annotations of formal parameters can be omitted.
+optional return types. Type inference (see :ref:`Type Inference`) allows to
+omit type annotations of formal parameters in some cases.
 
 .. code-block:: typescript
    :linenos:
 
-    function foo<T> (a: (p1: T, ...p2: T[]) => T) {}
-    // All calls to foo pass valid lambda expressions in different forms
-    foo (e => e)
-    foo ((e1, e2) => e1)
-    foo ((e1, e2: Object) => e1)
-    foo ((e1: Object, e2) => e1)
-    foo ((e1: Object, e2, e3) => e1)
-    foo ((e1: Object, ...e2) => e1)
+    // Lambda expressions has no type annotations
 
-    foo ((e1: Object, e2: Object) => e1)
+    const func: (p: Object) => Object = e => e
 
-    function bar<T> (a: (...p: T[]) => T) {}
-    // Type can be omitted for the rest parameter
-    bar ((...e) => e)
-
-    function goo<T> (a: (p?: T) => T) {}
-    // Type can be omitted for the optional parameter
-    goo ((e?) => e)
-
+    function foo<T>(p: (p: T) => T) {}
+    foo <Object> (e => e)
 
 The specification of scope is discussed in :ref:`Scopes`, and shadowing details
 of formal parameter declarations in :ref:`Shadowing by Parameter`.
@@ -8596,7 +8535,7 @@ to numeric operands, the operator is evaluated as follows:
 - If any of operands are of type ``double`` or the operator is
   *exponentiation operator*, other operands are converted to type ``double``
   before operator evaluation and the result type is ``double``;
-  
+
 - If any of operands are of type ``float``, other operands are converted
   to type ``float`` before operator evaluation and the result type is
   ``float``; or
@@ -8604,15 +8543,15 @@ to numeric operands, the operator is evaluated as follows:
 - Otherwise, all operands are converted to *some big integer type* that allows
   handling arbitrary-precision integers (like ``bigint`` type) or integers
   larger than the maximum value of type ``long``.
-  
-If a constant expression consists of a single integer literal or 
+
+If a constant expression consists of a single integer literal or
 a constant of an integer type, it is also converted to the same big integer type.
 
 :ref:`Type Inference for Constant Expressions` is always used to infer the
 type of constant expression. In other words, *big integer type* is an
 internal compiler type and values of this type cannot occur during execution.
 
-In case of mixed constant expression, each numeric subexpression is evaluated 
+In case of mixed constant expression, each numeric subexpression is evaluated
 as described above:
 
 .. code-block:: typescript

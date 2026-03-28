@@ -250,7 +250,7 @@ numeric type.
    let c1 = new char
    c1 = c'A'
 
-   // The followihg lines both print true as values are equal
+   // The following lines both print true as values are equal
    console.log(c == c1)  // true
    console.log(c === c1) // true
 
@@ -377,39 +377,19 @@ examples:
    resizable array
    runtime error
 
-Several constructors can be called to create a ``FixedArray<T>`` instance as
-follows:
+The following constructor creates an instance of ``FixedArray<T>``
+of the specified length, filled with a single value ``elem``: 
 
-- ``constructor(len: int, elem: T)`` for any ``T``. The constructor creates an
-  array instance filled with a single value ``elem``:
+- ``constructor(len: int, elem: T)``
 
 .. code-block:: typescript
    :linenos:
 
     let a = new FixedArray<string>(3, "a") // creates array ["a", "a", "a"]
 
-- ``constructor(len: int, elems: (inx: int) => T)`` for any ``T``. The
-  constructor creates an array instance where each *i* element is evaluated
-  as a result of the ``elems`` call with argument *i*:
-
-.. code-block:: typescript
-   :linenos:
-
-    let a = new FixedArray<int>(3, (inx: int) => 3 - inx )
-    // creates array [3, 2, 1]
-
-|
-
 .. index::
-   compile-time error
    constructor
-   call
-   default value
-   value
-   argument
    array instance
-   array
-   instance
 
 |
 
@@ -485,30 +465,18 @@ then a :index:`compile-time error` occurs as follows:
     let x: ValueArray<string> = ["aa"]   // compile-time error
     type A = ValueArray<int | undefined> // compile-time error
 
-The following constructors can be called to create a ``ValueArray<T>`` instance:
+The following constructor creates an instance of ``ValueArray<T>``
+of the specified length, filled with a single value ``elem``: 
 
-- ``constructor(len: int, elem: T)`` creates an
-  array instance filled with a single value ``elem``:
+- ``constructor(len: int, elem: T)``
 
 .. code-block:: typescript
    :linenos:
 
     let a = new ValueArray<double>(3, 7.) // creates array [7., 7., 7.]
 
-- ``constructor(len: int, elems: (inx: int) => T)`` creates an array instance
-  where each *i* element is evaluated
-  as a result of the ``elems`` call with argument *i*:
-
-.. code-block:: typescript
-   :linenos:
-
-    let a = new ValueArray<int>(3, (inx: int) => 3 - inx )
-    // creates array [3, 2, 1]
-
 .. index::
-   compile-time error
    constructor
-   argument
    array instance
 
 |
@@ -529,27 +497,27 @@ The syntax of *array creation expression* is presented below:
 
 .. code-block:: abnf
 
-      newArrayInstance:
-          'new' arrayElementType dimensionExpression+ arrayElement
-          ;
+    newArrayInstance:
+        'new' arrayElementType dimensionExpression '(' arrayElement ')'
+        ;
 
-      arrayElementType:
-          typeReference
-          | '(' type ')'
-          ;
+    arrayElementType:
+        typeReference
+        | '(' type ')'
+        ;
 
-      dimensionExpression:
-          '[' expression ']'
-          ;
+    dimensionExpression:
+        '[' expression ']'
+        ;
 
-      arrayElement:
-          '(' expression ')'
-          ;
+    arrayElement: 
+      expression
+    ;
 
 .. code-block:: typescript
    :linenos:
 
-      let x = new number[2][2] (0) // create 2x2 matrix filled with 0 value
+    let x = new number[3] (7) // create array instance: [7, 7, 7]
 
 .. index::
    resizable array
@@ -565,11 +533,11 @@ The syntax of *array creation expression* is presented below:
 *Array creation expression* creates an object that is a new array with the
 elements of the type specified by ``arrayElementType``.
 
-The type of each *dimension expression* must be assignable (see
+The type of the *dimension expression* must be assignable (see
 :ref:`Assignability`) to an ``int`` type. Otherwise,
 a :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if any *dimension expression* is a
+A :index:`compile-time error` occurs if the *dimension expression* is a
 constant expression that is evaluated to a negative integer value at compile
 time.
 
@@ -591,32 +559,18 @@ time.
    constant expression
    compile time
 
-Type of ``arrayElement`` ``expression`` must be one of the two:
-
-- Type of array element denoted by ``arrayElementType``, or
-- Lambda function with the return type equal to the type of array element
-  denoted by ``arrayElementType`` and the parameters of type ``int``, and the
-  number of parameters equal to the number of array dimensions.
-
+Type of ``arrayElement`` ``expression`` must be be assignable (see
+:ref:`Assignability`) to ``arrayElementType``.
 Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
-   type
    dimension expression
-   number
    floating-point type
-   error
-   fractional part
-   compile time
    compile-time error
    runtime error
-   compilation
    expression
    array element
    array dimension
-   lambda function
-   array
-   parameter
 
 
 .. code-block:: typescript
@@ -624,12 +578,12 @@ Otherwise, a :index:`compile-time error` occurs.
 
       let x = new number[-3] (0) // compile-time error
 
-      let y = new number[3.141592653589] (0) // compile-time error
+      let y = new number[3.14] (0) // compile-time error
 
-      foo (-3)
       function foo (length: int) {
          let y = new number[length] (0)  // runtime error
       }
+      foo (-3)
 
 
 .. index::
@@ -642,7 +596,6 @@ Otherwise, a :index:`compile-time error` occurs.
    optional parameter
    default value
 
-
 A :index:`compile-time error` occurs if ``arrayElementType`` is a type
 parameter:
 
@@ -651,7 +604,7 @@ parameter:
 
       class A<T> {
          foo(element: T) {
-            new T[2] (element) // compile-time error, cannot create an array of type parameter elements
+            new T[2] (element) // compile-time error, 'T' is a type parameter
          }
       }
 
@@ -672,19 +625,9 @@ The creation of an array with a known number of elements is presented below:
 
       let array_size = 5
 
-      let array1 = new A[array_size] (new A(1))
+      let array = new A[array_size] (new A(1))
          /* Create array of 'array_size' elements and all of them will have
             initial value equal to an object created by new A expression */
-
-      let array2 = new A[array_size] ((index): A => { return new A(index) })
-         /* Create array of `array_size` elements and all of them will have
-            initial value equal to the result of lambda function execution with
-            different indices */
-
-      let array2 = new A[2][3] ((index1, index2): A => { return new A(index1 * index2) })
-         /* Create array of arrays of 6 elements total and all of them will
-            have initial value equal to the result of lambda function execution with
-            different indices */
 
 The creation of exotic arrays with different kinds of element types is presented
 below:
@@ -701,10 +644,13 @@ below:
 .. code-block:: typescript
    :linenos:
 
-      let array_of_union = new (Object|undefined) [5] (undefined) // filled with undefined
-      let array_of_functor = new (() => void) [5] ( (): void => {})
-      type aliasTypeName = number []
-      let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
+    let array_of_union = new (Object|undefined) [5] (undefined) // filled with undefined
+
+    type Functor = () => void
+    let array_of_functor = new Functor[5] ( (): void => {}) // filled with lambda    
+
+    type Arr = number []
+    let array_of_array = new Arr [5] ( [3.14] ) // filled with array literal
 
 |
 
@@ -720,24 +666,20 @@ Runtime Evaluation of Array Creation Expressions
 The evaluation of an array creation expression at runtime is performed
 as follows:
 
-#. The dimension expressions are evaluated. The evaluation is performed
-   left-to-right. If any expression evaluation completes abruptly, then
-   the expressions to the right of it are not evaluated.
+#. The dimension expression is evaluated. If the dimension expression
+   evaluation completes abruptly, then *array creation expression* also does
+   so.
 
-#. The values of dimension expressions are checked. If the value of any
-   dimension expression is less than zero, then ``NegativeArraySizeError``
-   is thrown.
+#. The value of dimension expression is checked. If its value is less than
+   zero, then ``NegativeArraySizeError`` is thrown.
 
 #. Space for the new array is allocated. If the available space is not
    sufficient to allocate the array, then ``OutOfMemoryError`` is thrown,
    and the evaluation of the array creation expression completes abruptly.
 
-#. When a one-dimensional array is created, each element of the array is
+#. Then, a one-dimensional array is created. Each element of this array is
    initialized either with the value passed or by calls to the lambda
    generating a set of values.
-
-#. When array with several dimensions is created,
-   the array creation effectively executes a set of nested loops of depth *n-1*.
 
 .. index::
    runtime evaluation
@@ -755,8 +697,6 @@ as follows:
    runtime evaluation
    evaluation
    initialization
-   nested loop
-   array of arrays
 
 |
 
@@ -2779,11 +2719,11 @@ Adding Functionality to Existing Types
 
 |LANG| supports adding functions and accessors to already defined types. The
 usage of functions so added looks the same as if they are methods and accessors
-of such types. The mechanism is called :ref:`Functions with Receiver`
-and :ref:`Accessors with Receiver`. This feature is often used to add new
-functionality to a class or an interface without having to inherit from the
-class or to implement the interface. However, it can be used not only for
-classes and interfaces but also for other types.
+of such types. The mechanism is called :ref:`Functions with Receiver`. This
+feature is often used to add new functionality to a class or an interface
+without having to inherit from the class or to implement the interface. 
+However, it can be used not only for classes and interfaces but also for other
+types.
 
 Moreover, :ref:`Function Types with Receiver` and
 :ref:`Lambda Expressions with Receiver` can be defined and used to make the
@@ -2796,7 +2736,6 @@ code more flexible.
    accessor
    method
    function with receiver
-   accessor with receiver
    interface
    inheritance
    class
@@ -2893,6 +2832,8 @@ it corresponds to the first parameter. The type of parameter ``this`` is called
       a.foo() // method is called
       a.bar() // Function with receiver is called
       a.foo() // method is called
+
+The first parameter named ``this`` is readonly.
 
 If the *receiver type* is a class or interface type, then ``private`` or
 ``protected`` members are not accessible (see :ref:`Accessible`) within the
@@ -3137,128 +3078,6 @@ Using array type as a *receiver type* is presented in the example below:
    array type
    type parameter
    array type
-
-|
-
-.. _Accessors with Receiver:
-
-Accessors with Receiver
-=======================
-
-.. meta:
-    frontend_status: Done
-
-.. note::
-   Accessor declarations at the top level or in namespaces are of the following
-   two kinds:
-
-       - *Accessors with Receiver* (as described in this subsection)
-         that can be used much like fields of a class; and
-       - Ordinary :ref:`Accessor Declarations` that can be used to replace
-         variables.
-
-*Accessor with receiver* declaration is either a top-level declaration
-(see :ref:`Top-Level Declarations`), or a declaration inside a namespace
-(see :ref:`Namespace Declarations`) that can be used as class
-(see :ref:`Class Accessor Declarations`) or interface accessor
-(see :ref:`Interface Properties`) for a specified receiver type:
-
-The syntax of *accessor with receiver* is presented below:
-
-.. code-block:: abnf
-
-    accessorWithReceiverDeclaration:
-          'get' identifier '(' receiverParameter ')' returnType block
-        | 'set' identifier '(' receiverParameter ',' requiredParameter ')' block
-        ;
-
-The keyword ``this`` can be used inside a *function with receiver*. It
-corresponds to the first parameter. Otherwise, a :index:`compile-time error`
-occurs.
-The type of parameter ``this`` is called the *receiver type* (see
-:ref:`Receiver Type`).
-
-If the *receiver type* is a class type or an interface type, then ``private``
-or ``protected`` members are not accessible (see :ref:`Accessible`) within the
-body of a *function with receiver*. Only ``public`` members can be accessed:
-
-A get-accessor (getter) must have the keyword ``this`` as the only getter
-parameter (*receiverParameter*) and an explicit return type.
-
-A set-accessor (setter) must have a keyword ``this`` as a first setter parameter
-(*receiver parameter*), one other parameter, and no return type.
-
-The keyword ``this`` has the same meaning and can be used in the same manner
-as described in :ref:`Functions with Receiver`:
-
-- The keyword ``this`` can be used inside an *accessor with receiver*. It
-  corresponds to the first parameter. Otherwise, a :index:`compile-time error`
-  occurs.
-
-- The type of parameter ``this`` is called the *receiver type* (see
-  :ref:`Receiver Type`).
-
-- If the *receiver type* is a class or interface type, then ``private`` or
-  ``protected`` members are not accessible (see :ref:`Accessible`) within the
-  body of a *function with receiver*. Only ``public`` members can be accessed.
-
-.. note::
-   If the *accessor with receiver* is an entity of a namespace, then the same
-   rules apply to it when exporting and using qualified names as the rules that
-   apply to other namespace entities (see :ref:`Namespace Declarations`).
-
-The use of getters and setters looks identical to the use of fields:
-
-.. index::
-   accessor with receiver
-   accessor with receiver declaration
-   receiver type
-   syntax
-   accessor declaration
-   parameter
-   top-level declaration
-   get-accessor
-   setter
-   getter
-   set-accessor
-   receiver parameter
-   return type
-   field
-
-.. code-block:: typescript
-    :linenos:
-
-    class Person {
-        firstName: string
-        lastName: string
-        constructor (first: string, last: string) {
-            this.firstName = first
-            this.lastName = last
-        }
-    }
-
-    get fullName(this: Person): string {
-        return this.lastName + ' ' + this.firstName
-    }
-
-    let c = new Person("John", "Doe")
-
-    // Getter - OK, top=level getter with receiver used
-    console.log(c.fullName) // output: 'Doe John'
-
-     // compile-time error, as setter is not defined
-    c.fullName = "new name"
-
-A :index:`compile-time error` occurs if an accessor is used in the form of
-a function or a method call.
-
-.. index::
-   accessor
-   function call
-   method call
-   string
-   setter
-   function
 
 |
 
@@ -3794,15 +3613,6 @@ Accessor Declarations
 
 .. meta:
     frontend_status: None
-
-.. note::
-   Accessor declarations at the top level or in namespaces are of the following
-   two kinds:
-
-       - :ref:`Accessors with Receiver` that can be used much like fields of
-         a class; and
-       - Ordinary *Accessor declarations* (as described in this subsection)
-         that can be used to replace variables.
 
 Accessor is either a top-level declaration (see
 :ref:`Top-level Declarations`) or a declaration inside a namespace

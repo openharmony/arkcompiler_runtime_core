@@ -228,6 +228,7 @@ the following use cases:
 
     // end of the critical section
     lock.unlock()
+   }
 
    async function g() {
     // another asynchronous modification sequence that suspends inbetween:
