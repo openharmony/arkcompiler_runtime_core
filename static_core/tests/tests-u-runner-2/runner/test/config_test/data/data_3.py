@@ -90,6 +90,7 @@ args = {
     'test_suite1.parameters.with-js': False,
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,
+    'test_suite1.parameters.rerun-failed': False,
     'test_suite1.parameters.skip-test-lists': False,
     'test_suite1.parameters.update-excluded': False,
     'test_suite1.parameters.update-expected': False,

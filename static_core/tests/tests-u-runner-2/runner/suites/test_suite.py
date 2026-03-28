@@ -80,7 +80,7 @@ class TestSuite(ITestSuite):
 
         self._test_lists = TestLists(self._list_roots, self._test_env, self.jit_repeats)
         self._explicit_file: Path | None = None
-        self._explicit_list: Path | None = self._test_lists.explicit_list
+        self._explicit_list: Path | None = self._test_lists.resolve_explicit_list()
         self._test_lists.collect_excluded_test_lists()
         self._test_lists.collect_ignored_test_lists()
         self.excluded = 0
@@ -587,12 +587,6 @@ class TestSuite(ITestSuite):
             raise TestNotExistException(f"Test '{explicit_file}' does not exist")
         return None
 
-    def _set_explicit_list(self) -> Path | None:
-        if self.config.test_suite.test_lists.explicit_list is not None and self.list_roots is not None:
-            for list_root in self.list_roots:
-                return correct_path(list_root.root_dir, self.config.test_suite.test_lists.explicit_list)
-        return None
-
     def _load_tests_from_lists(self, lists: list[Path]) -> list[Path]:
         tests: list[Path] = []
         any_not_found = False
@@ -858,7 +852,7 @@ class GTestSuite(TestSuite):
         ets_raw_set: set[Path] = set()
 
         self._explicit_file = self._set_explicit_file()
-        self._explicit_list = self._set_explicit_list()
+        self._explicit_list = self._test_lists.resolve_explicit_list()
 
         for step in self._preparation_steps:
             ets_raw_set.update(step.transform(force_generate))

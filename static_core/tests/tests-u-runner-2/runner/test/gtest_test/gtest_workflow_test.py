@@ -54,8 +54,8 @@ class GTestFlowTest(TestCase):
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "ani_tests_wf", "ani_suite", "--test-file", "ani_test_any_call/AnyCallTest"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_step_runner.subprocess.run")
     def test_gtest_runner_all_tests_in_class(self, mock_run: MagicMock) -> None:
@@ -84,8 +84,8 @@ class GTestFlowTest(TestCase):
     @patch('sys.argv', ["runner.sh", "ani_tests_wf", "ani_suite", "--test-file",
                         "ani_test_any_call/AnyCallTest.AnyCall_Valid"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_gtest_runner_one_tests(self) -> None:
         config = self.config_test()
@@ -110,11 +110,13 @@ class GTestFlowTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('runner.suites.test_suite.TestSuite._set_explicit_list', test_list)
+    @patch('runner.suites.test_lists.TestLists._get_explicit_list',
+        lambda self: GTestFlowTest.test_list("ani_tests.txt")
+    )
     @patch('sys.argv', ["runner.sh", "ani_tests_wf", "ani_suite", "--test-list", "ani_test.txt"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_gtest_runner_test_list(self) -> None:
         config = self.config_test()

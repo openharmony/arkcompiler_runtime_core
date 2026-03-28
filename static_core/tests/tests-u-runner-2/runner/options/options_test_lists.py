@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,7 @@ from runner.options.options import IOptions
 PARAMETERS = "parameters"
 TEST_LIST = "test-list"
 TEST_FILE = "test-file"
+RERUN_FAILED = "rerun-failed"
 SKIP_TEST_LISTS = "skip-test-lists"
 EXCLUDE_IGNORED_TESTS = "exclude-ignored-tests"
 EXCLUDE_IGNORED_TEST_LISTS = "exclude-ignored-test-lists"
@@ -34,6 +35,7 @@ TEST_LIST_ARCH = "test-list-arch"
 TEST_LIST_SAN = "test-list-san"
 TEST_LIST_OS = "test-list-os"
 TEST_LIST_BUILD = "test-list-build"
+DEFAULT_RERUN_FAILED = False
 
 
 class TestListsOptions(IOptions):
@@ -65,6 +67,10 @@ class TestListsOptions(IOptions):
             f'--{TEST_FILE}', default=None,
             dest=f"{dest}{TEST_FILE}",
             help='run only one test specified here')
+        parser.add_argument(
+            f'--{RERUN_FAILED}', action='store_true', default=DEFAULT_RERUN_FAILED,
+            dest=f"{dest}{RERUN_FAILED}",
+            help='rerun only tests that failed on the previous run in the same work directory')
         parser.add_argument(
             f'--{SKIP_TEST_LISTS}', action='store_true', default=False,
             dest=f"{dest}{SKIP_TEST_LISTS}",
@@ -147,6 +153,10 @@ class TestListsOptions(IOptions):
         return str(value) if value is not None else value
 
     @cached_property
+    def rerun_failed(self) -> bool:
+        return cast(bool, self.__parameters[RERUN_FAILED])
+
+    @cached_property
     def skip_test_lists(self) -> bool:
         return cast(bool, self.__parameters[SKIP_TEST_LISTS])
 
@@ -170,6 +180,7 @@ class TestListsOptions(IOptions):
         options = [
             f'--test-file="{self.explicit_file}"' if self.explicit_file is not None else '',
             f'--test-list="{self.explicit_list}"' if self.explicit_list is not None else '',
+            '--rerun-failed' if self.rerun_failed else '',
             '--skip-test-lists' if self.skip_test_lists else '',
             '--exclude-ignored-tests' if self.exclude_ignored_tests else '',
             '--update-excluded' if self.update_excluded else '',
