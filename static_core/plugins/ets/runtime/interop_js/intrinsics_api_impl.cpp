@@ -26,13 +26,11 @@
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
-#include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
 #include "plugins/ets/runtime/interop_js/xref_object_operator.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "common_interfaces/objects/base_type.h"
-#include "common_interfaces/objects/dynamic_object_accessor_util.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -787,8 +785,7 @@ EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHa
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
-    PandaVector<TaggedType> realArgs;
-
+    PandaVector<napi_value> realArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto realArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
@@ -796,25 +793,22 @@ EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHa
             ctx->ForwardJSException(coro);
             return nullptr;
         }
-        auto argTaggedType = ArkNapiHelper::GetTaggedType(realArg);
-        realArgs.push_back(argTaggedType);
+        realArgs.push_back(realArg);
     }
 
-    auto recvEtsObject = JSConvertEtsObject::WrapWithNullCheck(env, thisObj);
-    auto thisTaggedType = ArkNapiHelper::GetTaggedType(recvEtsObject);
-    auto funcEtsObject = JSConvertEtsObject::WrapWithNullCheck(env, func);
-    auto funcTaggedType = ArkNapiHelper::GetTaggedType(funcEtsObject);
-    TaggedType *retVal = nullptr;
+    auto receiver = JSConvertEtsObject::WrapWithNullCheck(env, thisObj);
+    auto jsFunc = JSConvertEtsObject::WrapWithNullCheck(env, func);
+    napi_value jsRet;
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        retVal = common_vm::DynamicObjectAccessorUtil::CallFunction(thisTaggedType, funcTaggedType, realArgs.size(),
-                                                                    realArgs.data());
+        jsStatus = napi_call_function(env, receiver, jsFunc, realArgs.size(), realArgs.data(), &jsRet);
     }
-    if (NapiIsExceptionPending(env)) {
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return nullptr;
     }
-    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(retVal)).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 uint8_t JSRuntimeHasPropertyObject(EtsObject *object, EtsObject *property)

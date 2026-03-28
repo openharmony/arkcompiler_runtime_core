@@ -43,17 +43,18 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const PandaString
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsThis = this->GetNapiValue(coro);
-    TaggedType *resultTaggedType = nullptr;
+
+    napi_value result;
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        resultTaggedType =
-            common_vm::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsThis), name.c_str());
+        jsStatus = napi_get_named_property(env, jsThis, name.c_str(), &result);
     }
-    if (NapiIsExceptionPending(env)) {
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return {};
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(resultTaggedType)).value();
+    return JSConvertAny::UnwrapWithNullCheck(ctx, env, result).value();
 }
 
 EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject) const
@@ -207,31 +208,24 @@ EtsObject *XRefObjectOperator::Invoke(EtsCoroutine *coro, Span<VMHandle<ObjectHe
     napi_value jsFunc = this->GetNapiValue(coro);
 
     // convert static args to dynamic args
-    PandaVector<TaggedType> dynamicArgs;
+    PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertAny::WrapWithNullCheck(env, arg);
-        if (dynamicArg == nullptr) {
-            ctx->ForwardJSException(coro);
-            return nullptr;
-        }
-        auto dynamicArgTaggedType = ArkNapiHelper::GetTaggedType(dynamicArg);
-        dynamicArgs.push_back(dynamicArgTaggedType);
+        dynamicArgs.push_back(dynamicArg);
     }
 
-    auto undefinedTaggedType = ArkNapiHelper::GetTaggedType(GetUndefined(env));
-    auto jsFuncTaggedType = ArkNapiHelper::GetTaggedType(jsFunc);
-    TaggedType *jsRetTaggedType = nullptr;
+    napi_value jsRet;
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        jsRetTaggedType = common_vm::DynamicObjectAccessorUtil::CallFunction(undefinedTaggedType, jsFuncTaggedType,
-                                                                             dynamicArgs.size(), dynamicArgs.data());
+        jsStatus = napi_call_function(env, GetUndefined(env), jsFunc, dynamicArgs.size(), dynamicArgs.data(), &jsRet);
     }
-    if (NapiIsExceptionPending(env)) {
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return nullptr;
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(jsRetTaggedType)).value();
+    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, const std::string &name,
@@ -288,31 +282,24 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, EtsHandle<EtsObj
     napi_value jsMethod = XRefObjectOperator::ConvertStaticObjectToDynamic(coro, methodObject);
 
     // convert static args to dynamic args
-    PandaVector<TaggedType> dynamicArgs;
+    PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertAny::WrapWithNullCheck(env, arg);
-        if (dynamicArg == nullptr) {
-            ctx->ForwardJSException(coro);
-            return nullptr;
-        }
-        auto dynamicArgTaggedType = ArkNapiHelper::GetTaggedType(dynamicArg);
-        dynamicArgs.push_back(dynamicArgTaggedType);
+        dynamicArgs.push_back(dynamicArg);
     }
 
-    auto jsThisTaggedType = ArkNapiHelper::GetTaggedType(jsThis);
-    auto jsMethodTaggedType = ArkNapiHelper::GetTaggedType(jsMethod);
-    TaggedType *jsRetTaggedType = nullptr;
+    napi_value jsRet;
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        jsRetTaggedType = common_vm::DynamicObjectAccessorUtil::CallFunction(jsThisTaggedType, jsMethodTaggedType,
-                                                                             dynamicArgs.size(), dynamicArgs.data());
+        jsStatus = napi_call_function(env, jsThis, jsMethod, dynamicArgs.size(), dynamicArgs.data(), &jsRet);
     }
-    if (NapiIsExceptionPending(env)) {
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return nullptr;
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(jsRetTaggedType)).value();
+    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 bool XRefObjectOperator::HasProperty(EtsCoroutine *coro, const std::string &name, bool isOwnProperty) const

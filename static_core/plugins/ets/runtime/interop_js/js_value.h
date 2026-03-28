@@ -21,7 +21,6 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
-#include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/include/coretypes/class.h"
 #include "libarkbase/utils/small_vector.h"
@@ -325,7 +324,9 @@ private:
         ScopedNativeCodeThread nativeScope(coro);
         NAPI_ASSERT_OK(napi_get_reference_value(env, leftRef, &leftValue));
         NAPI_ASSERT_OK(napi_get_reference_value(env, rightRef, &rightvalue));
-        return ArkNapiHelper::GetTaggedType(leftValue) == ArkNapiHelper::GetTaggedType(rightvalue);
+        bool isEquals = false;
+        napi_strict_equals(env, leftValue, rightvalue, &isEquals);
+        return isEquals;
 #else
         INTEROP_LOG(ERROR) << "unable to perform gc-safe strict equal without hybrid VM";
         return false;

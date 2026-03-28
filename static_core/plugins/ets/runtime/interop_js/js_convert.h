@@ -21,8 +21,6 @@
 #include "plugins/ets/runtime/interop_js/js_convert_base.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert_stdlib.h"
-#include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
-#include "common_interfaces/objects/dynamic_object_accessor_util.h"
 
 namespace ark::ets::interop::js {
 
@@ -517,18 +515,17 @@ ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(Interop
     auto coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope s(coro);
     EtsHandle<JSValue> jsvalueHandle(coro, jsvalue);
-    NapiScope jsHandleScope(env);
     auto jsVal = JSValue::GetNapiValue(coro, ctx, jsvalueHandle);
-    TaggedType *result = nullptr;
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        result = common_vm::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
+        jsStatus = napi_get_named_property(env, jsVal, name, &jsVal);
     }
-    if (NapiIsExceptionPending(env)) {
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return {};
     }
-    return T::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(result));
+    return T::UnwrapWithNullCheck(ctx, env, jsVal);
 }
 
 template <typename T>
