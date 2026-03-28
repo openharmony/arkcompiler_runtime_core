@@ -25,7 +25,7 @@ from pathlib import Path
 from subprocess import Popen, PIPE, CalledProcessError, TimeoutExpired, check_output
 from threading import Thread
 from dataclasses import dataclass
-from tempfile import mktemp
+from tempfile import mkstemp
 from vmb.helpers import Singleton
 
 log = logging.getLogger('vmb')
@@ -327,15 +327,21 @@ class ShellDevice(ShellBase):
             measure_time=False)
         res.set_ret_val()
         if measure_time:
-            stderr_host = mktemp(prefix='vmb-')
+            _, stderr_host = mkstemp(prefix='vmb-')
             self.pull(self.stderr_out, stderr_host)
             self._sh.run(f'{self._devsh} shell {q}rm -f {self.stderr_out}{q}')
             if not Path(stderr_host).exists():
                 res.err = 'Pull from device failed'
                 return res
-            with open(stderr_host, 'r', encoding="utf-8") as f:
-                res.err = f.read()
-            os.remove(stderr_host)
+            try:
+                with open(stderr_host, 'r', encoding="utf-8") as f:
+                    res.err = f.read()
+            except UnicodeDecodeError:
+                with open(stderr_host, 'rb') as f:
+                    binary_content = f.read()
+                    res.err = binary_content.decode('utf-8', errors='replace')
+            finally:
+                os.remove(stderr_host)
             res.set_time()
         else:
             res.err = ''
