@@ -23,6 +23,9 @@ if (!defined(ark_use_common_runtime)) {
 if (!defined(support_jsapi)) {
   support_jsapi = false
 }
+if (!defined(panda_with_lto)) {
+  panda_with_lto=true
+}
 
 ark_root = "//arkcompiler/runtime_core/static_core"
 arkplatform_root = "//arkcompiler/runtime_core/arkplatform"

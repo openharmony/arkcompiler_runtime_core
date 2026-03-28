@@ -403,6 +403,12 @@ config("ark_common_config") {
     cflags = coverage_cflags
     ldflags = coverage_ldflags
   }
+
+  if (panda_with_lto && is_ohos && current_cpu == "arm64") {
+    cflags_c += ["-flto=thin"]
+    cflags_cc += ["-flto=thin"]
+  }
+
 }
 
 config("ark_config") {
