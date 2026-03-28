@@ -725,7 +725,7 @@ export class JSON {
         return false
     }
 
-    public static parse<T>(text: String, type: Type): T | null | undefined {
+    public static parse<T = Any>(text: String, type: Type): T | null | undefined {
         const cls = type.getClass()
         if (cls !== undefined) {
             return JSON.parse<T>(text, undefined, cls)
@@ -733,7 +733,7 @@ export class JSON {
         throw new Error(`Unable to resolve type ${type} runtime class`)
     }
 
-    public static parse<T>(text: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Type,
+    public static parse<T = Any>(text: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Type,
         options?: jsonx.ParseOptions): T | null | undefined {
 
         const cls = type.getClass()
@@ -743,11 +743,11 @@ export class JSON {
         throw new Error(`Unable to resolve type ${type} runtime class`)
     }
 
-    public static parse<T>(json: string, type: Class): T | null | undefined {
+    public static parse<T = Any>(json: string, type: Class): T | null | undefined {
         return JSON.parse<T>(json, undefined, type)
     }
 
-    public static parse<T>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class,
+    public static parse<T = Any>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class,
         options?: jsonx.ParseOptions): T | null | undefined {
 
         JSON.checkType(type, new Map<Class, TypeColor>())

@@ -36,7 +36,7 @@ cases:
 
   - decl: |
       class A<T> {
-        foo<T>(): this { return this }
+        foo(): this { return this }
       }
       class B {}
     use: |

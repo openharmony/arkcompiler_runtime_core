@@ -142,7 +142,7 @@ class DeepCloner {
 						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
 					} else {
 						const componentType = srcType.getFixedArrayComponentType()!
-						return this.cloneFixedArray(Types.asFixedArray(src), componentType) as T
+						return this.cloneFixedArray(Types.asFixedArray<Any>(src), componentType) as T
 					}
 				} else {
 					return this.cloneObject(src, srcType) as T
