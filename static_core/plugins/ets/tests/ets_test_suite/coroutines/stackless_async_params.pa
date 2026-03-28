@@ -1,0 +1,107 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+.language eTS
+
+# function pick(a: Object, b: Object, c: Object): Object {
+#     return c
+# }
+#
+# async function async_foo(p: Promise<Object>, x: Object, y: Object): Promise<Object> {
+#     let local = new Object()
+#     await p
+#     return pick(x, y, local)
+# }
+#
+# function main() {
+#     let p = Promise.resolve(new Object())
+#     async_foo(p, new Object(), new Object())
+# }
+
+.record arkruntime.AsyncContext <external>
+.record std.core.Object <external>
+.record std.core.Promise <external>
+
+.function arkruntime.AsyncContext arkruntime.AsyncContext.current() <native, external, static, access.function=public>
+.function std.core.Promise arkruntime.AsyncContext.resolve(arkruntime.AsyncContext a0, std.core.Object a1)
+    <native, external, access.function=public>
+.function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
+.function std.core.Object std.core.Promise.awaitResolution(std.core.Promise a0) <native, external, access.function=public>
+.function std.core.Promise std.core.Promise.resolve(std.core.Object a0) <external, static, access.function=public>
+
+.function std.core.Promise async_foo(std.core.Promise a0, std.core.Object a1, std.core.Object a2) {
+    call.short <static> arkruntime.AsyncContext.current:()
+    sta.obj v3
+    lda.obj v3
+    sta.obj v5
+    ets.async.dispatch v5
+    initobj.short std.core.Object._ctor_:(std.core.Object)
+    sta.obj v4
+    lda.obj a0
+    sta.obj v5
+    call.virt.short std.core.Promise.awaitResolution:(std.core.Promise), v5
+    checkcast arkruntime.AsyncContext
+    sta.obj v6
+    ets.async.suspend v6
+    sta.obj v7
+    checkcast.nonnull std.core.Object
+    lda.obj a1
+    sta.obj v8
+    lda.obj a2
+    sta.obj v9
+    lda.obj v4
+    sta.obj v10
+    call <static> pick:(std.core.Object,std.core.Object,std.core.Object), v8, v9, v10
+    sta.obj v5
+    call.short <static> arkruntime.AsyncContext.current:()
+    sta.obj v6
+    lda.obj v6
+    sta.obj v7
+    ets.istrue v7
+    jeqz jump_label_0
+    lda.obj v6
+    sta.obj v9
+    checkcast.nonnull arkruntime.AsyncContext
+    sta.obj v8
+    lda.obj v5
+    sta.obj v9
+    call.short arkruntime.AsyncContext.resolve:(arkruntime.AsyncContext,std.core.Object), v8, v9
+    sta.obj v9
+    checkcast.nonnull std.core.Promise
+    jmp jump_label_1
+jump_label_0:
+    lda.obj v5
+    sta.obj v9
+    call.short <static> std.core.Promise.resolve:(std.core.Object), v9
+    sta.obj v9
+    checkcast.nonnull std.core.Promise
+jump_label_1:
+    return.obj
+}
+
+.function void main() <static> {
+    initobj.short std.core.Object._ctor_:(std.core.Object)
+    call.acc.short <static> std.core.Promise.resolve:(std.core.Object), v0, 0x0
+    sta.obj v0
+    checkcast.nonnull std.core.Promise
+    initobj.short std.core.Object._ctor_:(std.core.Object)
+    sta.obj v1
+    initobj.short std.core.Object._ctor_:(std.core.Object)
+    call.acc <static> async_foo:(std.core.Promise,std.core.Object,std.core.Object), v0, v1, v0, 0x2
+    return.void
+}
+
+.function std.core.Object pick(std.core.Object a0, std.core.Object a1, std.core.Object a2) {
+    lda.obj a2
+    return.obj
+}

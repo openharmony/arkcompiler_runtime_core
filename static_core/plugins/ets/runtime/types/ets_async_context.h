@@ -78,6 +78,43 @@ public:
         return reinterpret_cast<EtsAsyncContext *>(asyncCtx);
     }
 
+    static constexpr uint32_t GetAwaiteeOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, awaitee_);
+    }
+    static constexpr uint32_t GetReturnValueOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, returnValue_);
+    }
+    static constexpr uint32_t GetRefValuesOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, refValues_);
+    }
+    static constexpr uint32_t GetPrimValuesOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, primValues_);
+    }
+    static constexpr uint32_t GetFrameOffsetsOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, frameOffsets_);
+    }
+    static constexpr uint32_t GetRefCountOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, refCount_);
+    }
+    static constexpr uint32_t GetPrimCountOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, primCount_);
+    }
+    static constexpr uint32_t GetAwaitIdOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, awaitId_);
+    }
+    static constexpr uint32_t GetCompiledCodeOffset()
+    {
+        return MEMBER_OFFSET(EtsAsyncContext, compiledCode_);
+    }
+
 private:
     ObjectPointer<EtsPromise> awaitee_;
     ObjectPointer<EtsPromise> returnValue_;

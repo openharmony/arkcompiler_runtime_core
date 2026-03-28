@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_platform_types_irtoc_offsets.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
+#include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"

@@ -1674,8 +1674,9 @@ llvm::Value *LLVMIrConstructor::GetInputValueFromConstant(ConstantInst *constant
         return llvm::ConstantFP::get(llvmType, value);
     }
     if (pandaType == DataType::POINTER) {
-        auto cval = static_cast<int64_t>(constant->GetIntValue());
-        auto integer = builder_.getInt64(cval);
+        auto intTy = GetEntrypointSizeType();
+        auto cval = static_cast<uint64_t>(constant->GetIntValue());
+        auto integer = llvm::ConstantInt::get(intTy, cval);
         return builder_.CreateIntToPtr(integer, builder_.getPtrTy());
     }
     if (DataType::IsTypeNumeric(pandaType)) {
@@ -3264,6 +3265,12 @@ llvm::Type *LLVMIrConstructor::GetExactType(DataType::Type targetType)
 llvm::Instruction::CastOps LLVMIrConstructor::GetCastOp(DataType::Type from, DataType::Type to)
 {
     Arch arch = GetGraph()->GetArch();
+    if (from == DataType::POINTER && IsInteger(to)) {
+        return llvm::Instruction::PtrToInt;
+    }
+    if (IsInteger(from) && to == DataType::POINTER) {
+        return llvm::Instruction::IntToPtr;
+    }
     if (IsInteger(from) && IsInteger(to) && DataType::GetTypeSize(from, arch) > DataType::GetTypeSize(to, arch)) {
         // narrowing, e.g. U32TOU8, I64TOI32
         return llvm::Instruction::Trunc;

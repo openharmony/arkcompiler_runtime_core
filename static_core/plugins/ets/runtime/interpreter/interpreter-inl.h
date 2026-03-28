@@ -512,7 +512,10 @@ public:
         auto frameHandler = GetFrameHandler(frame);
         auto *coro = this->GetCoro();
         auto *frameOffsets = asyncCtx->GetFrameOffsets(coro);
-        uint32_t frameSize = frame->GetSize();
+        auto *method = frame->GetMethod();
+        ASSERT(method != nullptr);
+        uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
+        ASSERT(frameSize <= frame->GetSize());
         uint32_t idx = 0;
         for (uint32_t frameIdx = 0; frameIdx < frameSize; frameIdx++) {
             auto vreg = frameHandler.GetVReg(frameIdx);
@@ -548,7 +551,6 @@ public:
         auto *coro = this->GetCoro();
         auto *frame = this->GetFrame();
         auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
-        ASSERT(asyncCtx->GetCompiledCode() == 0);
 
         if (asyncCtx == nullptr) {
             ObjectHeader *undefined = nullptr;
@@ -556,6 +558,7 @@ public:
             this->template MoveToNextInst<FORMAT, true>();
             return;
         }
+        ASSERT(asyncCtx->GetCompiledCode() == 0);
 
         // load vregs from context
         auto frameHandler = GetFrameHandler(frame);
@@ -564,9 +567,14 @@ public:
         auto *primValues = asyncCtx->GetPrimValues(coro);
         auto *frameOffsets = asyncCtx->GetFrameOffsets(coro);
         uint32_t refCount = asyncCtx->GetRefCount();
-        uint32_t frameSize = frame->GetSize();
+        uint32_t primCount = asyncCtx->GetPrimCount();
 
-        ASSERT(refCount + asyncCtx->GetPrimCount() == frameSize);
+        [[maybe_unused]] auto *method = frame->GetMethod();
+        ASSERT(method != nullptr);
+        [[maybe_unused]] uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
+        ASSERT(frameSize <= frame->GetSize());
+        ASSERT(refCount + primCount == frameSize);
+
         for (uint32_t idx = 0; idx < refCount; idx++) {
             auto offset = frameOffsets->Get(idx);
             auto vreg = frameHandler.GetVReg(offset);
@@ -575,7 +583,6 @@ public:
             refValues->Set(idx, nullptr);
         }
 
-        uint32_t primCount = frameSize - refCount;
         for (uint32_t idx = 0; idx < primCount; idx++) {
             auto offset = frameOffsets->Get(refCount + idx);
             auto vreg = frameHandler.GetVReg(offset);

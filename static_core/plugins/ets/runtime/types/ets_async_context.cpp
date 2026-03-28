@@ -35,7 +35,10 @@ EtsAsyncContext *EtsAsyncContext::Create(EtsCoroutine *coro)
 
     auto *frame = coro->GetCurrentFrame();
     ASSERT(frame != nullptr);
-    uint32_t frameSize = frame->GetSize();
+    auto *method = frame->GetMethod();
+    ASSERT(method != nullptr);
+    uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
+    ASSERT(frameSize <= frame->GetSize());
     ASSERT(frameSize <= static_cast<uint32_t>(std::numeric_limits<EtsShort>::max()));
 
     EtsHandle<EtsAsyncContext> asyncCtx(coro, ctx);
