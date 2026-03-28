@@ -23,9 +23,15 @@ from runner.options.config import Config
 
 
 class WorkDir:
+    _FAILURES_REPORT_FILE_NAME = "failures.txt"
+    _RERUN_FAILURES_FILE_NAME = ".rerun-failures.txt"
+
     def __init__(self, config: Config, default_work_dir: Path):
         self.__config = config
         self.__default_work_dir = default_work_dir
+        self.__rerun_failures = None
+        if config.test_suite.test_lists.rerun_failed:
+            self.__rerun_failures = self.__preserve_previous_failures()
         shutil.rmtree(self.report, ignore_errors=True)
 
     @property
@@ -40,6 +46,12 @@ class WorkDir:
     def intermediate(self) -> Path:
         return self.root / "intermediate"
 
+    @property
+    def rerun_failures(self) -> Path | None:
+        if self.__rerun_failures is None or not self.__rerun_failures.exists():
+            return None
+        return self.__rerun_failures
+
     @cached_property
     def root(self) -> Path:
         root = Path(self.__config.test_suite.work_dir) if self.__config.test_suite.work_dir else self.__default_work_dir
@@ -49,3 +61,14 @@ class WorkDir:
     @cached_property
     def coverage_dir(self) -> CoverageDir:
         return CoverageDir(self.__config.general, self.root)
+
+    def __preserve_previous_failures(self) -> Path | None:
+        rerun_failures = self.root / self._RERUN_FAILURES_FILE_NAME
+        rerun_failures.unlink(missing_ok=True)
+
+        previous_failures = self.report / self._FAILURES_REPORT_FILE_NAME
+        if not previous_failures.exists():
+            return None
+
+        shutil.copy2(previous_failures, rerun_failures)
+        return rerun_failures
