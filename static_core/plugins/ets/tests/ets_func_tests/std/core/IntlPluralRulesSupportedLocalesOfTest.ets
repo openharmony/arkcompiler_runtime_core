@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,11 +83,8 @@ function supportedLocalesOfTest05() {
 function supportedLocalesOfTest06() {
     const locales: FixedArray<string> = ['']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    try {
-        const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
-    } catch(error) {
-        arktest.assertEQ(error.message, 'RangeError: invalid locale')
-    }
+    arktest.expectError((): void => { Intl.PluralRules.supportedLocalesOf(locales, options) }, 
+        new RangeError('invalid locale'))
 }
 
 function supportedLocalesOfTest07() {
@@ -105,11 +102,8 @@ function supportedLocalesOfTest07() {
 function supportedLocalesOfTest08() {
     const locales: Array<string> = ['']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    try {
-        const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
-    } catch(error) {
-        arktest.assertEQ(error.message, 'RangeError: invalid locale')
-    }
+    arktest.expectError((): void => { Intl.PluralRules.supportedLocalesOf(locales, options) }, 
+        new RangeError('invalid locale'))
 }
 
 function supportedLocalesOfTest09() {

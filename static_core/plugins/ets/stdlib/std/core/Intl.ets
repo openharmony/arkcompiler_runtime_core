@@ -319,7 +319,7 @@ export namespace Intl {
         dayPeriod?: "narrow" | "short" | "long";
         era?: string;
         formatMatcher?: "basic" | "best fit" | "best fit";
-        fractionalSecondDigits?: number;
+        fractionalSecondDigits?: int;
         hour12?: boolean;
         hour?: string;
         hourCycle?: "h11" | "h12" | "h23" | "h24";
@@ -361,7 +361,7 @@ export namespace Intl {
         formatMatcher?: "basic" | "best fit"
         // NOTE(cheezzario) 'number' literal types are not supported #23963
         // fractionalSecondDigits?: 1 | 2 | 3
-        fractionalSecondDigits?: number
+        fractionalSecondDigits?: int
         hour12?: boolean
         hour?: "numeric" | "2-digit"
         hourCycle?: "h11" | "h12" | "h23" | "h24"
@@ -393,8 +393,8 @@ export namespace Intl {
         get formatMatcher(): "basic" | "best fit" | undefined { return this.formatMatcher_}
         // NOTE(cheezzario) 'number' literal types are not supported #23963
         // fractionalSecondDigits?: 1 | 2 | 3
-        set fractionalSecondDigits(val: number | undefined) {this.fractionalSecondDigits_ = val}
-        get fractionalSecondDigits(): number | undefined { return this.fractionalSecondDigits_}
+        set fractionalSecondDigits(val: int | undefined) {this.fractionalSecondDigits_ = val}
+        get fractionalSecondDigits(): int | undefined { return this.fractionalSecondDigits_}
         set hour12(val: boolean | undefined) {this.hour12_ = val}
         get hour12(): boolean | undefined { return this.hour12_}
         set hour(val: "numeric" | "2-digit" | undefined) { this.hour_ = val}
@@ -427,7 +427,7 @@ export namespace Intl {
         private dayPeriod_?: "narrow" | "short" | "long"
         private era_?: "long" | "short" | "narrow"
         private formatMatcher_?: "basic" | "best fit"
-        private fractionalSecondDigits_?: number
+        private fractionalSecondDigits_?: int
         private hour12_?: boolean
         private hour_?: "numeric" | "2-digit"
         private hourCycle_?: "h11" | "h12" | "h23" | "h24"
@@ -526,7 +526,7 @@ export namespace Intl {
         private _dayPeriod?: DayPeriod
         private _era?: string
         private _formatMatcher?: FormatMatcher
-        private _fractionalSecondDigits?: number
+        private _fractionalSecondDigits?: int
         private _hour12?: boolean
         private _hour?: string
         private _hourCycle?: HourCycle
@@ -590,10 +590,10 @@ export namespace Intl {
             this._formatMatcher = formatMatcher
         }
 
-        get fractionalSecondDigits(): number | undefined {
+        get fractionalSecondDigits(): int | undefined {
             return this._fractionalSecondDigits
         }
-        set fractionalSecondDigits(fractionalSecondDigits: number | undefined) {
+        set fractionalSecondDigits(fractionalSecondDigits: int | undefined) {
             this._fractionalSecondDigits = fractionalSecondDigits
         }
 
@@ -1919,11 +1919,11 @@ export class DateTimeFormat {
         currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
         currencySign?: "standard" | "accounting"
         localeMatcher?: "lookup" | "best fit"
-        maximumFractionDigits?: number
-        maximumSignificantDigits?: number
-        minimumFractionDigits?: number
-        minimumIntegerDigits?: number
-        minimumSignificantDigits?: number
+        maximumFractionDigits?: int
+        maximumSignificantDigits?: int
+        minimumFractionDigits?: int
+        minimumIntegerDigits?: int
+        minimumSignificantDigits?: int
         notation?: "standard" | "scientific" | "engineering" | "compact"
         signDisplay?: "auto" | "never" | "always" | "exceptZero"
         style?: "decimal" | "percent" | "currency" | "unit"
@@ -1938,11 +1938,11 @@ export class DateTimeFormat {
         currency?: string
         currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
         locale: Intl.BCP47LanguageTag;
-        maximumFractionDigits: number
-        maximumSignificantDigits?: number
-        minimumFractionDigits: number
-        minimumIntegerDigits: number
-        minimumSignificantDigits?: number
+        maximumFractionDigits: int
+        maximumSignificantDigits?: int
+        minimumFractionDigits: int
+        minimumIntegerDigits: int
+        minimumSignificantDigits?: int
         notation?: "standard" | "scientific" | "engineering" | "compact"
         numberingSystem: string
         signDisplay?: "auto" | "never" | "always" | "exceptZero"
@@ -1966,11 +1966,11 @@ export class DateTimeFormat {
         public _currency?: string;
         public _currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name";
         public _locale: Intl.BCP47LanguageTag;
-        public _maximumFractionDigits: number;
-        public _maximumSignificantDigits?: number;
-        public _minimumFractionDigits: number;
-        public _minimumIntegerDigits: number;
-        public _minimumSignificantDigits?: number;
+        public _maximumFractionDigits: int;
+        public _maximumSignificantDigits?: int;
+        public _minimumFractionDigits: int;
+        public _minimumIntegerDigits: int;
+        public _minimumSignificantDigits?: int;
         public _notation?: "standard" | "scientific" | "engineering" | "compact";
         public _numberingSystem: string;
         public _signDisplay?: "auto" | "never" | "always" | "exceptZero";
@@ -2019,43 +2019,43 @@ export class DateTimeFormat {
             return this._locale;
         }
 
-        set maximumFractionDigits(value: number) {
+        set maximumFractionDigits(value: int) {
             this._maximumFractionDigits = value;
         }
 
-        get maximumFractionDigits(): number {
+        get maximumFractionDigits(): int {
             return this._maximumFractionDigits;
         }
 
-        set maximumSignificantDigits(value: number | undefined) {
+        set maximumSignificantDigits(value: int | undefined) {
             this._maximumSignificantDigits = value;
         }
 
-        get maximumSignificantDigits(): number | undefined {
+        get maximumSignificantDigits(): int | undefined {
             return this._maximumSignificantDigits;
         }
 
-        set minimumFractionDigits(value: number) {
+        set minimumFractionDigits(value: int) {
             this._minimumFractionDigits = value;
         }
 
-        get minimumFractionDigits(): number {
+        get minimumFractionDigits(): int {
             return this._minimumFractionDigits;
         }
 
-        set minimumIntegerDigits(value: number) {
+        set minimumIntegerDigits(value: int) {
             this._minimumIntegerDigits = value;
         }
 
-        get minimumIntegerDigits(): number {
+        get minimumIntegerDigits(): int {
             return this._minimumIntegerDigits;
         }
 
-        set minimumSignificantDigits(value: number | undefined) {
+        set minimumSignificantDigits(value: int | undefined) {
             this._minimumSignificantDigits = value;
         }
 
-        get minimumSignificantDigits(): number | undefined {
+        get minimumSignificantDigits(): int | undefined {
             return this._minimumSignificantDigits;
         }
 
@@ -2578,7 +2578,7 @@ export class DateTimeFormat {
         private native formatToRangePartsDoubleDecStr(start: number, end: string): NumberRangeFormatPart[];
         private native formatToRangePartsDecStrDouble(start: string, end: number): NumberRangeFormatPart[];
         private native formatToRangePartsDecStrDecStr(start: string, end: string): NumberRangeFormatPart[];
-        private native currencyDigits(currency: string | undefined): number;
+        private native currencyDigits(currency: string | undefined): int;
     }
 
     // Intl.PluralRules
@@ -2586,22 +2586,22 @@ export class DateTimeFormat {
     export interface PluralRulesOptions {
         localeMatcher?: "lookup" | "best fit" | undefined
         type?: PluralRuleType | undefined
-        minimumIntegerDigits?: number | undefined
-        minimumFractionDigits?: number | undefined
-        maximumFractionDigits?: number | undefined
-        minimumSignificantDigits?: number | undefined
-        maximumSignificantDigits?: number | undefined
+        minimumIntegerDigits?: int | undefined
+        minimumFractionDigits?: int | undefined
+        maximumFractionDigits?: int | undefined
+        minimumSignificantDigits?: int | undefined
+        maximumSignificantDigits?: int | undefined
     }
 
     export interface ResolvedPluralRulesOptions {
         locale: string
         localeMatcher: "lookup" | "best fit"
         type: PluralRuleType
-        minimumIntegerDigits: number
-        minimumFractionDigits: number
-        maximumFractionDigits: number
-        minimumSignificantDigits?: number
-        maximumSignificantDigits?: number
+        minimumIntegerDigits: int
+        minimumFractionDigits: int
+        maximumFractionDigits: int
+        minimumSignificantDigits?: int
+        maximumSignificantDigits?: int
         pluralCategories: FixedArray<LDMLPluralRule>
     }
 
@@ -2612,11 +2612,11 @@ export class DateTimeFormat {
     export interface PluralRulesSelectOptions {
         locale: string
         type: string
-        minimumIntegerDigits: number
-        minimumFractionDigits: number
-        maximumFractionDigits: number
-        minimumSignificantDigits: number
-        maximumSignificantDigits: number
+        minimumIntegerDigits: int
+        minimumFractionDigits: int
+        maximumFractionDigits: int
+        minimumSignificantDigits: int
+        maximumSignificantDigits: int
     }
 
     class PluralRulesSelectOptionsImpl implements PluralRulesSelectOptions {
@@ -2624,24 +2624,24 @@ export class DateTimeFormat {
         get locale(): string { return this.locale_ }
         set type(val: string) { this.type_ = val}
         get type(): string { return this.type_ }
-        set minimumIntegerDigits(val: number) { this.minimumIntegerDigits_ = val}
-        get minimumIntegerDigits(): number { return this.minimumIntegerDigits_ }
-        get minimumFractionDigits(): number { return this.minimumFractionDigits_ }
-        set minimumFractionDigits(val: number) { this.minimumFractionDigits_ = val}
-        get maximumFractionDigits(): number { return this.maximumFractionDigits_ }
-        set maximumFractionDigits(val: number) { this.maximumFractionDigits_ = val}
-        get minimumSignificantDigits(): number { return this.minimumSignificantDigits_ }
-        set minimumSignificantDigits(val: number) { this.minimumSignificantDigits_ = val}
-        get maximumSignificantDigits(): number { return this.maximumSignificantDigits_ }
-        set maximumSignificantDigits(val: number) { this.maximumSignificantDigits_ = val}
+        set minimumIntegerDigits(val: int) { this.minimumIntegerDigits_ = val}
+        get minimumIntegerDigits(): int { return this.minimumIntegerDigits_ }
+        get minimumFractionDigits(): int { return this.minimumFractionDigits_ }
+        set minimumFractionDigits(val: int) { this.minimumFractionDigits_ = val}
+        get maximumFractionDigits(): int { return this.maximumFractionDigits_ }
+        set maximumFractionDigits(val: int) { this.maximumFractionDigits_ = val}
+        get minimumSignificantDigits(): int { return this.minimumSignificantDigits_ }
+        set minimumSignificantDigits(val: int) { this.minimumSignificantDigits_ = val}
+        get maximumSignificantDigits(): int { return this.maximumSignificantDigits_ }
+        set maximumSignificantDigits(val: int) { this.maximumSignificantDigits_ = val}
 
         private locale_: string = ""
         private type_: string = ""
-        private minimumIntegerDigits_: number = 0
-        private minimumFractionDigits_: number = 0
-        private maximumFractionDigits_: number = 0
-        private minimumSignificantDigits_: number = 0
-        private maximumSignificantDigits_: number = 0
+        private minimumIntegerDigits_: int = 0
+        private minimumFractionDigits_: int = 0
+        private maximumFractionDigits_: int = 0
+        private minimumSignificantDigits_: int = 0
+        private maximumSignificantDigits_: int = 0
     };
 
     export class PluralRules {
@@ -2859,7 +2859,7 @@ export class DateTimeFormat {
     */
     export interface SegmentData {
         /** The index of the segment in the original text */
-        index: number;
+        index: int;
 
         /** The original input text */
         input: string;
@@ -2876,7 +2876,7 @@ export class DateTimeFormat {
     */
     class SegmentDataImpl implements SegmentData {
         // Private backing fields
-        private _index: number = 0;
+        private _index: int = 0;
         private _input: string = "";
         private _isWordLike?: boolean;
         private _segment: string = "";
@@ -2888,7 +2888,7 @@ export class DateTimeFormat {
         * @param segment Segment text
         * @param isWordLike Word-like status
         */
-        constructor(index?: number, input?: string, segment?: string, isWordLike?: boolean) {
+        constructor(index?: int, input?: string, segment?: string, isWordLike?: boolean) {
             this._index = index ?? 0;
             this._input = input ?? "";
             this._segment = segment ?? "";
@@ -2896,8 +2896,8 @@ export class DateTimeFormat {
         }
 
         // Getters and setters for each property
-        public set index(i: number) { this._index = i; }
-        public get index(): number { return this._index; }
+        public set index(i: int) { this._index = i; }
+        public get index(): int { return this._index; }
 
         public set input(inp: string) { this._input = inp; }
         public get input(): string { return this._input; }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,9 +51,9 @@ function testInvokeUndefinedLocale() {
     arktest.assertEQ(getOptions.locale, Intl.Locale.defaultTag(), "Error. Got: " + s);
     arktest.assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
     arktest.assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
-    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
-    arktest.assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
-    arktest.assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 3, "Error. Got: " + s);
     arktest.assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
     arktest.assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
     arktest.assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
@@ -67,9 +67,9 @@ function testInvokeUndefinedLocaleUndefinedOptions() {
     arktest.assertEQ(getOptions.locale, Intl.Locale.defaultTag(), "Error. Got: " + s);
     arktest.assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
     arktest.assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
-    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
-    arktest.assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
-    arktest.assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 3, "Error. Got: " + s);
     arktest.assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
     arktest.assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
     arktest.assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
@@ -81,7 +81,7 @@ function equaledNumberFormats(a: Intl.NumberFormat, b: Intl.NumberFormat, value:
 
 function printResolvedOptions(options: Intl.ResolvedNumberFormatOptions): string {
     let parts = new Array<string>
-    let addValue = (value: number | string | boolean | undefined, name: string) => {
+    let addValue = (value: int | string | boolean | undefined, name: string) => {
         let s = name + " : " + (value === undefined ? "undefined" : String(value));
         parts.push(s);
     };
@@ -112,8 +112,8 @@ function testInvokeMinMaxFracDigits() {
         minimumFractionDigits: 3
     }
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    arktest.assertEQ(getOptions.minimumFractionDigits, 3.0);
-    arktest.assertEQ(getOptions.maximumFractionDigits, 5.0);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 3);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 5);
     arktest.assertTrue(getOptions.maximumFractionDigits > getOptions.minimumFractionDigits);
 }
 
@@ -123,7 +123,7 @@ function testInvokeMinMaxSignDigits() {
         minimumSignificantDigits: 17
     }
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    arktest.assertEQ(getOptions.maximumSignificantDigits!, 18.0);
-    arktest.assertEQ(getOptions.minimumSignificantDigits!, 17.0);
+    arktest.assertEQ(getOptions.maximumSignificantDigits!, 18);
+    arktest.assertEQ(getOptions.minimumSignificantDigits!, 17);
     arktest.assertTrue(getOptions.maximumSignificantDigits! > getOptions.minimumSignificantDigits!);
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,11 @@ class NumberFormatOptionsBuilder
     currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name" = undefined;
     currencySign?: "standard" | "accounting" = undefined;
     localeMatcher?: "lookup" | "best fit" = undefined;
-    maximumFractionDigits?: number = 3;
-    maximumSignificantDigits?: number = undefined;
-    minimumFractionDigits?: number = 0;
-    minimumIntegerDigits?: number = 1;
-    minimumSignificantDigits?: number = undefined;
+    maximumFractionDigits?: int = 3;
+    maximumSignificantDigits?: int = undefined;
+    minimumFractionDigits?: int = 0;
+    minimumIntegerDigits?: int = 1;
+    minimumSignificantDigits?: int = undefined;
     notation?: "standard" | "scientific" | "engineering" | "compact" = "standard";
     signDisplay?: "auto" | "never" | "always" | "exceptZero" = "auto";
     style?: "decimal" | "percent" | "currency" | "unit" = "decimal";
@@ -104,27 +104,27 @@ class NumberFormatOptionsBuilder
         return this;
     }
 
-    public withMaximumFractionDigits(maximumFractionDigits: number): NumberFormatOptionsBuilder {
+    public withMaximumFractionDigits(maximumFractionDigits: int): NumberFormatOptionsBuilder {
         this.maximumFractionDigits = maximumFractionDigits;
         return this;
     }
 
-    public withMaximumSignificantDigits(maximumSignificantDigits: number): NumberFormatOptionsBuilder {
+    public withMaximumSignificantDigits(maximumSignificantDigits: int): NumberFormatOptionsBuilder {
         this.maximumSignificantDigits = maximumSignificantDigits;
         return this;
     }
 
-    public withMinimumFractionDigits(minimumFractionDigits: number): NumberFormatOptionsBuilder {
+    public withMinimumFractionDigits(minimumFractionDigits: int): NumberFormatOptionsBuilder {
         this.minimumFractionDigits = minimumFractionDigits;
         return this;
     }
 
-    public withMinimumIntegerDigits(minimumIntegerDigits: number): NumberFormatOptionsBuilder {
+    public withMinimumIntegerDigits(minimumIntegerDigits: int): NumberFormatOptionsBuilder {
         this.minimumIntegerDigits = minimumIntegerDigits;
         return this;
     }
 
-    public withMinimumSignificantDigits(minimumSignificantDigits: number): NumberFormatOptionsBuilder {
+    public withMinimumSignificantDigits(minimumSignificantDigits: int): NumberFormatOptionsBuilder {
         this.minimumSignificantDigits = minimumSignificantDigits;
         return this;
     }
