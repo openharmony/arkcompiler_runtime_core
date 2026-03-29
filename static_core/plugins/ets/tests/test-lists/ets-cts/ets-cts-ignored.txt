@@ -1743,12 +1743,6 @@
 #33744
 17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
 
-#31097
-18.annotations/base_annotation_syntax_n_2.ets
-18.annotations/base_annotation_syntax_n_3.ets
-18.annotations/base_annotation_syntax_n_5.ets
-18.annotations/base_annotation_syntax_n_6.ets
-
 #33360
 18.annotations/06.runtime_access_to_annotations/runtime_access_0.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
