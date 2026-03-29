@@ -526,12 +526,6 @@
 #32703
 07.expressions/24.exponentiation_expression/inf_27.ets
 
-#33056
-07.expressions/27.relational_expressions/01.numeric_relational_operators/bigint_relational_operators/bigint_greater_than_equal_mixed_n.ets
-07.expressions/27.relational_expressions/01.numeric_relational_operators/bigint_relational_operators/bigint_greater_than_mixed_n.ets
-07.expressions/27.relational_expressions/01.numeric_relational_operators/bigint_relational_operators/bigint_less_than_equal_mixed_n.ets
-07.expressions/27.relational_expressions/01.numeric_relational_operators/bigint_relational_operators/bigint_less_than_mixed_n.ets
-
 #32704
 07.expressions/27.relational_expressions/04.character_relational_operators/char_relational_mixed_n_0.ets
 07.expressions/27.relational_expressions/04.character_relational_operators/char_relational_mixed_n_1.ets
@@ -553,9 +547,6 @@
 07.expressions/27.relational_expressions/04.character_relational_operators/char_relational_mixed_n_17.ets
 07.expressions/27.relational_expressions/04.character_relational_operators/char_relational_mixed_n_18.ets
 07.expressions/27.relational_expressions/04.character_relational_operators/char_relational_mixed_n_19.ets
-
-#32743 bigint and numerical ==/=== should always return false (now return true - false positive)
-07.expressions/28.equality_expressions/01.numerical_equality_operators/bigint_equality_operators/eq_numeric_0.ets
 
 #33172 Expected warning message is not produced
 07.expressions/28.equality_expressions/eq_warn_false_0.ets
