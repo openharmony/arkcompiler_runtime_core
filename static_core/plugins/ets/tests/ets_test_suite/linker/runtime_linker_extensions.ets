@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { AbcFileNotFoundError } from "arkruntime"
+
 export class A { }
 
 class DummyRuntimeLinker extends RuntimeLinker {

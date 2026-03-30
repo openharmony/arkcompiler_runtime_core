@@ -67,8 +67,8 @@
     TP("Lstd/core/BootRuntimeLinker;", coreBootRuntimeLinker)                                                         \
     TP("Lstd/core/AbcRuntimeLinker;", coreAbcRuntimeLinker)                                                           \
     TP("Lstd/core/MemoryRuntimeLinker;", coreMemoryRuntimeLinker)                                                     \
-    TP("Lstd/core/AbcFile;", coreAbcFile)                                                                             \
-    TP("Lstd/core/AbcFileNotFoundError;", coreAbcFileNotFoundError)                                                   \
+    TP("Larkruntime/AbcFile;", arkruntimeAbcFile)                                                                     \
+    TP("Larkruntime/AbcFileNotFoundError;", arkruntimeAbcFileNotFoundError)                                           \
     /* Linker errors */                                                                                               \
     TP("Lstd/core/LinkerClassNotFoundError;", coreLinkerClassNotFoundError)                                           \
     TP("Lstd/core/LinkerUnresolvedFieldError;", coreLinkerUnresolvedFieldError)                                       \
@@ -77,11 +77,11 @@
     TP("Lstd/core/LinkerTypeCircularityError;", coreLinkerTypeCircularityError)                                       \
     TP("Lstd/core/LinkerMethodConflictError;", coreLinkerMethodConflictError)                                         \
     /* Core error handling */                                                                                         \
+    TP("Larkruntime/StackTraceElement;", arkruntimeStackTraceElement)                                                 \
     TP("Lstd/core/ErrorOptions;", coreErrorOptions)                                                                   \
     TP("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                           \
     TP("Lstd/core/OutOfMemoryError;", coreOutOfMemoryError)                                                           \
     TP("Lstd/core/StackOverflowError;", coreStackOverflowError)                                                       \
-    TP("Lstd/core/StackTraceElement;", coreStackTraceElement)                                                         \
     TP("Lstd/core/IllegalArgumentError;", coreIllegalArgumentError)                                                   \
     TP("Lstd/core/IllegalStateError;", coreIllegalStateError)                                                         \
     TP("Lstd/core/IllegalLockStateError;", coreIllegalLockStateError)                                                 \

@@ -35,7 +35,7 @@ public:
 
 TEST_F(EtsStackTraceElementTest, MemoryLayout)
 {
-    auto *klass = GetPlatformTypes()->coreStackTraceElement;
+    auto *klass = GetPlatformTypes()->arkruntimeStackTraceElement;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 }  // namespace ark::ets::test

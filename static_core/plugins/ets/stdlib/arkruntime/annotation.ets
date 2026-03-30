@@ -98,4 +98,3 @@ export namespace annotation {
     };
 
 }
-
