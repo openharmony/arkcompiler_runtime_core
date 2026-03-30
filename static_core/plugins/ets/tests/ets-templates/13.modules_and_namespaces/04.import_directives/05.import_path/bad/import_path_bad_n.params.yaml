@@ -12,21 +12,39 @@
 # limitations under the License.
 
 import_stmts:
+#0
   - import * from "std\math"
+#1
   - import * from "std\\math"
+#2
   - import * from "/dev/null"
+#3 #33874 - COMPILE.ES2PANDA_ABORT_FAIL - excluded
   - import * from "./"
+#4
   - import * from "../"
+#5
   - import * from "."
+#6
   - import * from ".."
+#7
   - import * from "~"
+#8
   - import * from "/"
+#9
   - import * form "NUL"
+#10
   - import * from "!"
+#11
   - import * from "|"
+#12
   - import * from ">"
+#13
   - import * from "<"
+#14
   - import * from ">>"
+#15
   - import * from "<<"
+#16
   - import * from "&"
+#17
   - import * from "#"

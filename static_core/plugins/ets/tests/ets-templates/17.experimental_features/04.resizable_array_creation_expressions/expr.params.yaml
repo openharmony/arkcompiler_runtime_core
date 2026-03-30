@@ -13,12 +13,13 @@
 
 ---
 cases:
+#0
     - decl: |-
           let size = 0  // int, zero-length array
       use: |-
           let v = new string[size]("")
           arktest.assertEQ(v.length, 0)
-
+#1
     - decl: |-
           const size = 256  // int
       use: |-
@@ -26,7 +27,7 @@ cases:
           v[255] = 42.0
           arktest.assertEQ(v.length, 256)
           arktest.assertEQ(v[255], 42.0)
-
+#2
     - decl: |-
           let size: Int = new Int(1)  // int alias
       use: |-
@@ -34,7 +35,7 @@ cases:
           v[0] = 42.0
           arktest.assertEQ(v.length, 1)
           arktest.assertEQ(v[0], 42.0)
-
+#3
     - decl: |-
           const size: byte = 10
       use: |-
@@ -42,7 +43,7 @@ cases:
           v[9] = new Error()
           arktest.assertEQ(v.length, 10)
           arktest.assertTrue(v[9] instanceof Error)
-
+#4
     - decl: |-
           let size: Byte = new Byte(0x7f as byte)  // byte alias
       use: |-
@@ -50,7 +51,7 @@ cases:
           v[0x7e] = new Error()
           arktest.assertEQ(v.length, 0x7f)
           arktest.assertTrue(v[0x7e] instanceof Error)
-
+#5
     - decl: |-
           const size: short = 0o52
       use: |-
@@ -58,7 +59,7 @@ cases:
           v[0o37] = new Number(42.0)
           arktest.assertEQ(v.length, 0o52)
           arktest.assertEQ(v[0o37], 42.0)
-
+#6
     - decl: |-
           let size: Short = new Short(0b0101 as short)  // short alias
       use: |-
@@ -66,17 +67,22 @@ cases:
           v[0b0100] = new Long(42 as long)
           arktest.assertEQ(v.length, 0b0101)
           arktest.assertEQ(v[0b0100], 42)
-
+#7
     - decl: |-
           let size1: byte = 7
           let size2: short = 8
           const size3: int = 9
       use: |-
-          let v: string[][][] = new string[size1][size2][size3]
-          v[size1 - 1][size2 - 1][size3 - 1] = "abc"
-          arktest.assertEQ(v.length, size1)
-          arktest.assertEQ(v[size1 - 1][size2 - 1][size3 - 1], "abc")
-
+          let v1: string[] = new string[size1]("abc")
+          let v2: string[] = new string[size2]("abc")
+          let v3: string[] = new string[size3]("abc")
+          arktest.assertEQ(v1.length, size1)
+          arktest.assertEQ(v2.length, size2)
+          arktest.assertEQ(v3.length, size3)
+          arktest.assertEQ(v1[size1 - 1], "abc")
+          arktest.assertEQ(v2[size2 - 1], "abc")
+          arktest.assertEQ(v3[size3 - 1], "abc")
+#8
     - decl: |-
           enum Color { Red, Green, Blue }
           let size = 3
@@ -85,11 +91,10 @@ cases:
           v[0] = Color.Blue
           arktest.assertEQ(v.length, 3)
           arktest.assertEQ(v[0], Color.Blue)
-
+#9
     - decl: |-
           enum Color { Red, Green, Blue }
       use: |-
-          let v: char[][] = new char[Color.Green][Color.Blue]
-          v[0][0] = c'@'
+          let v: char[] = new char[Color.Green](c'@')
           arktest.assertEQ(v.length, 1)
-          arktest.assertEQ(v[0][0], c'@')
+          arktest.assertEQ(v[0], c'@')

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,8 +13,8 @@
 
 ---
 cases:
-  - { type: byte, val: 42, len: 42 }
-  - { type: short, val: '0xff', len: 255 }
-  - { type: Byte, val: new Byte(3 as byte), len: 3 }
-  - { type: Short, val: new Short(0x1ff), len: 511 }
-  - { type: Int, val: new Int(128), len: 128 }
+  - { type: byte, val: 42, len: 2 }
+  - { type: short, val: '0xff', len: 2 }
+  - { type: Byte, val: new Byte(3), len: 2 }
+  - { type: Short, val: new Short(0x1ff), len: 2 }
+  - { type: Int, val: new Int(128), len: 2 }

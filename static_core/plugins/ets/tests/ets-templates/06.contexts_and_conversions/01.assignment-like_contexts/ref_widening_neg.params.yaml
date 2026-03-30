@@ -14,7 +14,7 @@
 ---
 cases:
 #0
-  - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Array<Object>>' to 'Array<Object>'" }
+  - { stype: 'Object[][]', src: '[ [new Object ()],[new Object()] ]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Array<Object>>' to 'Array<Object>'" }
 #1
   - { stype: 'Byte[]', src: 'new Byte[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Byte>' to 'Array<Object>'" }
 #2

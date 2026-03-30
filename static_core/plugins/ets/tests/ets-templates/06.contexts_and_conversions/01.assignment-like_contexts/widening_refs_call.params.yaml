@@ -26,5 +26,5 @@ cases:
     - { totype: "Object", fromtype: "B[]", fromval: "new B[0](new B())" }
     - { totype: "Object", fromtype: "A[]", fromval: "new A[0](new A())" }
 
-    - { totype: "Object", fromtype: "C[][][]", fromval: "new C[1][2][3]" }
-    - { totype: "Object", fromtype: "Object[][][]", fromval: "new Object[1][2][3]" }
+    - { totype: "Object", fromtype: "C[][][]", fromval: "[[[new C()] ]];" }
+    - { totype: "Object", fromtype: "Object[][][]", fromval: "[[[new Object()] ]];" }

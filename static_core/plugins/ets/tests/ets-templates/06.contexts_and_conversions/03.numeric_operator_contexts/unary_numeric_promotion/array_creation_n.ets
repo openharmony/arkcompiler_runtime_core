@@ -23,9 +23,12 @@ tags: [compile-only, negative]
 expected_out: "{{c.expected}}"
 ---*/
 
+type TP = {{c.type}}[][]
+
 function main() {
     let v: {{c.type}} = {{c.val}};
-    let arr: FixedArray<FixedArray<{{c.type}}>> = new {{c.type}}[v][v];
+    let x: TP = [[new {{c.type}}(v)],[new {{c.type}}(v)]]
+    let arr: FixedArray<FixedArray<{{c.type}}>> = x
     arktest.assertEQ(arr.length, {{c.len}})
 }
 {%- endfor %}
