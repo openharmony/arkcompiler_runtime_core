@@ -21,6 +21,7 @@ from vmb.cli import Args
 from vmb.unit import BenchUnit, BENCH_PREFIX
 from vmb.hook import HookBase
 from vmb.platform import PlatformBase
+from vmb.result import BUStatus
 from vmb.target import Target
 from vmb.shell import ShellDevice
 
@@ -55,7 +56,7 @@ class Hook(HookBase):
         self.hdc.run('hilog -r')  # clear log buffer
 
     def after_unit(self, bu: BenchUnit) -> None:
-        if self.target == Target.HOST:
+        if self.target == Target.HOST or BUStatus.PASS == bu.status:
             return
         if self.hdc is None:
             raise RuntimeError('Hdc has not been set!')
