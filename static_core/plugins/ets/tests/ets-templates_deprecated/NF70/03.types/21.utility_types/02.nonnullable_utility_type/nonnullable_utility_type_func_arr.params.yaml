@@ -46,7 +46,7 @@ cases:
       const a1: NullishArray = ["", null, undefined]
   - decl: |-
       function filterNonNullable<T>(this: T[]): T[] {
-            return this.filter((item: T) =>
+            return this.filter((item: T) => 
                 item instanceof NonNullable<string|null|undefined>
             );
       }
@@ -56,9 +56,37 @@ cases:
       arktest.assertEQ(nonNullableArr[0], "d")
   - decl: |-
       function filterNonNullable<T>(f: T[]): T[] {
-            return f.filter((item: T) =>
+            return f.filter((item: T) => 
                 item instanceof NonNullable<string|null|undefined>
             );
+      }
+    use: |-
+      let nonNullableArr = filterNonNullable<string|null|undefined>(snArr)
+      arktest.assertEQ(nonNullableArr.length, 1)
+      arktest.assertEQ(nonNullableArr[0], "d")
+  - decl: |-
+      function filterNonNullable<T>(this: T[]): T[] {
+          let a: T[] = []
+          for (const item of this) {
+              if (item instanceof NonNullable<string|null|undefined>) {
+                  a.push(item)
+              }
+          }
+          return a
+      }
+    use: |-
+      let nonNullableArr = snArr.filterNonNullable<string|null|undefined>()
+      arktest.assertEQ(nonNullableArr.length, 1)
+      arktest.assertEQ(nonNullableArr[0], "d")
+  - decl: |-
+      function filterNonNullable<T>(f: T[]): T[] {
+          let a: T[] = []
+          for (const item of f) {
+              if (item instanceof NonNullable<string|null|undefined>) {
+                  a.push(item)
+              }
+          }
+          return a
       }
     use: |-
       let nonNullableArr = filterNonNullable<string|null|undefined>(snArr)
