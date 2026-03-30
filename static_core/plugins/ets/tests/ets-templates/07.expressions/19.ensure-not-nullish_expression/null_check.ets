@@ -14,8 +14,10 @@
  */
 
 /*---
-desc: null safety -> Not-null operator
-assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerError.
+desc: >-
+    If the result of the evaluation of expr in expr! is not equal to null
+    or undefined, then the result of ensure-not-nullish expression is
+    the outcome of the evaluation of expr, otherwise NullPointerError is thrown.
 ---*/
 
 function foo(arg: Object) : int {
