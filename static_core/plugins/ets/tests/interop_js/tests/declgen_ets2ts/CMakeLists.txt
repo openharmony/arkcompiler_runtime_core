@@ -273,18 +273,15 @@ function(create_declgen_ets2ts_test TARGET)
     # PACKAGE_NAME is not necessary for declgen_ets2ts_test,
     # but it is necessary for panda_ets_interop_js_test;
     
-    # These test are disabled due to new feature.
-    # Need to be enable later.
-    # panda_ets_interop_js_test(${TARGET}
-    #     ABC_FILE ${LIB_LINKED_ABC}
-    #     JS_LAUNCHER ${ARG_TS_MAIN}
-    #     JS_SOURCES ${ALL_DYNAMIC_SOURCES}
-    #     DYNAMIC_ABC_OUTPUT_DIR ${JS_TO_ABC_OUTPUT_DIR}
-    #     PACKAGE_NAME "main"
-    # )
-    # add_dependencies(${TARGET} ${TARGET}_tsc ${TARGET}_link)
-    # add_dependencies(declgen_ets2ts_test ${TARGET})
-    add_dependencies(declgen_ets2ts_test ${TARGET}_tsc)
+    panda_ets_interop_js_test(${TARGET}
+        ABC_FILE ${LIB_LINKED_ABC}
+        JS_LAUNCHER ${ARG_TS_MAIN}
+        JS_SOURCES ${ALL_DYNAMIC_SOURCES}
+        DYNAMIC_ABC_OUTPUT_DIR ${JS_TO_ABC_OUTPUT_DIR}
+        PACKAGE_NAME "main"
+    )
+    add_dependencies(${TARGET} ${TARGET}_tsc ${TARGET}_link)
+    add_dependencies(declgen_ets2ts_test ${TARGET})
 
     # Test difference between actual and expected declarations
     list(LENGTH DECL_FILES DECL_LEN)
