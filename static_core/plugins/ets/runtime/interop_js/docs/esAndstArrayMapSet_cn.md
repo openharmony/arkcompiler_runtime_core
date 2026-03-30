@@ -35,7 +35,7 @@ export function returnArray<T>(...values: T[]): T[]{
 | **`length`** | (属性) | `number` | 获取数组的长度。 |
 | **`$_get()`** | `index`: `number` | `T \| undefined` |获取指定索引处的元素。 |
 | **`$_set()`** | `index`: `number`, `val`: `T` | `void` |设置指定索引处的元素，不支持扩大。 |
-| **`at()`** | `index`: `number` | `T \| undefined` | 接收一个整数值并返回该索引对应的元素。 |
+| **`at()`** | `index`: `number` | `T \| undefined` | 接收一个整数值并返回该索引对应的元素，支持负索引，超出索引范围会返回`undefined`。|
 
 ### 1.2 添加与删除元素
 
@@ -251,7 +251,7 @@ export function returnArray(): number[]{
 |------|------|--------|------|
 | `sort` | `(comparator?: (a: T, b: T) => number) => Array<T>` | `Array<T>` | 对数组进行排序（**修改原数组**）：<br>- `comparator`：可选比较函数，返回值规则：<br>  - 负数：`a` 排在 `b` 前面<br>  - 0：位置不变<br>  - 正数：`b` 排在 `a` 前面<br>无比较函数时，默认按字符串 Unicode 码点排序 |
 | `reverse` | `() => Array<T>` | `Array<T>` | 反转数组元素顺序（**修改原数组**），返回修改后的原数组 |
-| `at` | `(key: number) => T` | `T` | 通过索引获取元素，支持负索引（如 `at(-1)` 获取最后一个元素），超出索引范围返回 `undefined` |
+| `at` | `(key: number) => T` | `T` | 接收一个整数值并返回该索引对应的元素，支持负索引，超出索引范围会报错`非法索引`。|
 | `copyWithin` | `(target: number, start?: number, end?: number) => Array<T>` | `Array<T>` | 复制数组的一部分到同一数组的另一个位置（**修改原数组**），返回修改后的原数组：<br>- `target`：目标位置索引<br>- `start`：可选，复制起始索引（默认 0）<br>- `end`：可选，复制结束索引（默认数组长度） |
 | `fill` | `(value: T, start?: number, end?: number) => Array<T>` | `Array<T>` | 用指定值填充数组（**修改原数组**），返回修改后的原数组：<br>- `value`：填充值<br>- `start`：可选，填充起始索引（默认 0）<br>- `end`：可选，填充结束索引（默认数组长度） |
 | `join` | `(sep?: string) => string` | `string` | 将数组元素拼接为字符串：<br>- `sep`：可选分隔符（默认逗号 `,`）<br>空数组返回空字符串，`undefined/null` 元素转为空字符串 |
@@ -292,7 +292,6 @@ export function returnArray(): number[]{
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | `size` (get) | `number` | 获取集合中元素的数量，返回非负整数（只读属性，无 setter） |
-| `[index: number]` | `T \| undefined` | 索引访问器：通过数字索引（0 开始）读取集合中的元素，超出索引范围返回 `undefined`；<br> 集合本身是无序的，索引仅为遍历便利，不保证元素顺序固定 |
 
 ### 3.2 基础操作（增/查/删/清空）
 | 方法 | 签名 | 返回值 | 说明 |

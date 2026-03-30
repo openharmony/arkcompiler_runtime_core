@@ -38,7 +38,7 @@ Meanwhile, if you need to call dynamic functions with `Array`/`Map`/`Set` as par
 | **`length`** | (property) | `number` | Gets the length of the array. |
 | **`$_get()`** | `index`: `number` | `T \| undefined` |  Gets the element at the specified index. |
 | **`$_set()`** | `index`: `number`, `val`: `T` | `void` |  Sets the element at the specified index. |
-| **`at()`** | `index`: `number` | `T \| undefined` | Accepts an integer value and returns the element at that index. |
+| **`at()`** | `index`: `number` | `T \| undefined` | Accepts an integer value and returns the element at the corresponding index. Supports negative indices and returns `undefined` if the index is out of bounds. |
 
 ### 1.2 Adding and Removing Elements
 
@@ -256,7 +256,7 @@ Meanwhile, if you need to call static functions with `Array`/`Map`/`Set` as para
 |--------|-----------|--------------|-------------|
 | `sort` | `(comparator?: (a: T, b: T) => number) => Array<T>` | `Array<T>` | Sorts the array (**modifies the original array**):<br>- `comparator`: optional comparison function, return value rules:<br>  - Negative: `a` comes before `b`<br>  - 0: position unchanged<br>  - Positive: `b` comes before `a`<br>Without a comparison function, defaults to sorting by string Unicode code points |
 | `reverse` | `() => Array<T>` | `Array<T>` | Reverses the order of array elements (**modifies the original array**), returns the modified original array |
-| `at` | `(key: number) => T` | `T` | Gets an element by index, supports negative indices (e.g., `at(-1)` gets the last element), returns `undefined` if index is out of range |
+| `at` | `(key: number) => T` | `T` | Accepts an integer and returns the element at the corresponding index. Supports negative indices, and throws an **"Illegal index"** error if the index is out of range. |
 | `copyWithin` | `(target: number, start?: number, end?: number) => Array<T>` | `Array<T>` | Copies a portion of the array to another position in the same array (**modifies the original array**), returns the modified original array:<br>- `target`: target position index<br>- `start`: optional, copy start index (default 0)<br>- `end`: optional, copy end index (default array length) |
 | `fill` | `(value: T, start?: number, end?: number) => Array<T>` | `Array<T>` | Fills the array with a specified value (**modifies the original array**), returns the modified original array:<br>- `value`: fill value<br>- `start`: optional, fill start index (default 0)<br>- `end`: optional, fill end index (default array length) |
 | `join` | `(sep?: string) => string` | `string` | Joins array elements into a string:<br>- `sep`: optional separator (default comma `,`)<br>Empty array returns empty string, `undefined/null` elements are converted to empty strings |
@@ -297,7 +297,6 @@ Meanwhile, if you need to call static functions with `Array`/`Map`/`Set` as para
 | Property | Type | Description |
 |----------|------|-------------|
 | `size` (get) | `number` | Gets the number of elements in the set, returns a non-negative integer (read-only property, no setter) |
-| `[index: number]` | `T \| undefined` | Index accessor: reads elements in the set through a numeric index (starting from 0), returns `undefined` if index is out of range;<br> The set itself is unordered, the index is only for traversal convenience, does not guarantee fixed element order |
 
 ### 3.2 Basic Operations (Add/Query/Delete/Clear)
 | Method | Signature | Return Value | Description |
