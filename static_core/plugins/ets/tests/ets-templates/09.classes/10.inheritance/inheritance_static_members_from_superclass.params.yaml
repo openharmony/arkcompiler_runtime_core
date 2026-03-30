@@ -33,3 +33,11 @@ cases:
       B.f
     expected: |-
       "Semantic error ESE0087: Property 'f' does not exist on type 'B'"
+  - decl: |-
+      static get prop(): int {
+        return 1;
+      }
+    use: |-
+      B.prop
+    expected: |-
+      "Semantic error ESE0087: Property 'prop' does not exist on type 'B'"
