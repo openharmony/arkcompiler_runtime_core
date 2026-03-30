@@ -21,9 +21,9 @@ desc: Record index expression - record union type index.
 enum Keys { k1, k2, k3 };
 
 let x: Record<Keys, number> = {
-    Keys.k1: 1;
-    Keys.k2: 2;
-    Keys.k3: 4;
+    Keys.k1: 1,
+    Keys.k2: 2,
+    Keys.k3: 4,
 }
 
 function main(): void {

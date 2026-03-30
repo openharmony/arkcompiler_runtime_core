@@ -843,7 +843,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 }
 
-export class Record<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string>, V> extends Map<K, V> {
+export class Record<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V> extends Map<K, V> {
     $_get(k : K) : V | undefined {
         return super.get(k)
     }

@@ -47,23 +47,23 @@ cases:
     - decl: |-
         type TL = () => void
       use: |-
-        let r: Record<TL, string>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
+        let r: Record<TL, string>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
 
     - use: |-
-        let r: Record<Any, string> = {}  // CTE: TypeError: Type argument 'Any' should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
+        let r: Record<Any, string> = {}  // CTE: TypeError: Type argument 'Any' should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
 
     - use: |-
-        let r: Record<Void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
+        let r: Record<Void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
 
     - use: |-
-        let r: Record<void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
+        let r: Record<void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
 
     - decl: |-
         type SA = String[]
       use: |-
-        let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
+        let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
 
     - decl: |-
         type SA = FixedArray<String>
       use: |-
-        let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
+        let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
