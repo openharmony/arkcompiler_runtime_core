@@ -62,6 +62,21 @@ enum Event {
     METHOD_CALLED,
 }
 
+enum ThrowEvent {
+    NONE,
+    GET_THREW,
+    SET_THREW,
+    INVOKE_THREW,
+}
+
+class ProxyThrowError extends Error {
+    event: ThrowEvent
+    constructor(event: ThrowEvent) {
+        super()
+        this.event = event
+    }
+}
+
 let LATEST_EVENT: Event = Event.NONE
 
 class BasicHandler implements reflect.InvocationHandler {
@@ -310,6 +325,21 @@ class TestHandler7 implements reflect.InvocationHandler {
         arktest.assertTrue(method.equals(i2bar!))
         arktest.assertEQ(args.length, 0)
         return method.invoke(this.instance, args)
+    }
+}
+
+// Handler that throws a ProxyThrowError carrying the ThrowEvent value
+class ThrowingHandler implements reflect.InvocationHandler {
+    get(proxy: reflect.Proxy, method: reflect.InstanceMethod): Any {
+        throw new ProxyThrowError(ThrowEvent.GET_THREW)
+    }
+
+    set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {
+        throw new ProxyThrowError(ThrowEvent.SET_THREW)
+    }
+
+    invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
+        throw new ProxyThrowError(ThrowEvent.INVOKE_THREW)
     }
 }
 
@@ -747,6 +777,84 @@ function isProxyTestReference() {
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<ProxyChildChild>()))
 }
 
+//Test that exception thrown in invoke() carries correct ThrowEvent value
+function throwInInvokeTest() {
+    let ifaces: FixedArray<Class> = [ Class.from<I1>() ]
+    let proxy: I1 = createProxy(ifaces, new ThrowingHandler()) as I1
+    arktest.expectThrow(() => { proxy.foo() }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+}
+
+//Test that exception thrown in get() carries correct ThrowEvent value
+function throwInGetTest() {
+    let ifaces: FixedArray<Class> = [ Class.from<I1>() ]
+    let proxy: I1 = createProxy(ifaces, new ThrowingHandler()) as I1
+    arktest.expectThrow(() => { let _ = proxy.fld }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.GET_THREW
+    })
+}
+
+//Test that exception thrown in set() carries correct ThrowEvent value
+function throwInSetTest() {
+    let ifaces: FixedArray<Class> = [ Class.from<I1>() ]
+    let proxy: I1 = createProxy(ifaces, new ThrowingHandler()) as I1
+    arktest.expectThrow(() => { proxy.fld = 42.0 }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.SET_THREW
+    })
+}
+
+//Test throw propagation with multiple interfaces [E, F]: invoke via E methods
+function throwMultipleIfacesInvokeTest1() {
+    let ifaces: FixedArray<Class> = [ Class.from<E>(), Class.from<F>() ]
+    let proxyE: E = createProxy(ifaces, new ThrowingHandler()) as E
+    let proxyF: F = createProxy(ifaces, new ThrowingHandler()) as F
+    arktest.expectThrow(() => { proxyE.hoo() }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+    arktest.expectThrow(() => { proxyF.ioo() }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+    arktest.expectThrow(() => { proxyE.goo(1.0) }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+}
+
+//Test throw propagation with multiple interfaces [F, E]: invoke via F methods
+function throwMultipleIfacesInvokeTest2() {
+    let ifaces: FixedArray<Class> = [ Class.from<F>(), Class.from<E>() ]
+    let proxyF: F = createProxy(ifaces, new ThrowingHandler()) as F
+    let proxyE: E = createProxy(ifaces, new ThrowingHandler()) as E
+    arktest.expectThrow(() => { proxyF.ioo() }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+    arktest.expectThrow(() => { proxyE.hoo() }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+    arktest.expectThrow(() => { proxyF.goo(2.0) }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.INVOKE_THREW
+    })
+}
+
+//Test throw propagation with multiple interfaces [I1, I3]: get and set
+function throwMultipleIfacesGetSetTest() {
+    let ifaces: FixedArray<Class> = [ Class.from<I1>(), Class.from<I3>() ]
+    let proxyI1: I1 = createProxy(ifaces, new ThrowingHandler()) as I1
+    let proxyI3: I3 = createProxy(ifaces, new ThrowingHandler()) as I3
+    arktest.expectThrow(() => { let _ = proxyI1.fld }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.GET_THREW
+    })
+    arktest.expectThrow(() => { proxyI1.fld = 1.0 }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.SET_THREW
+    })
+    arktest.expectThrow(() => { let _ = proxyI3.fld }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.GET_THREW
+    })
+    arktest.expectThrow(() => { proxyI3.fld = 2.0 }, (e) => {
+        return (e as ProxyThrowError).event == ThrowEvent.SET_THREW
+    })
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Proxy test')
     suite.addTest('negative test Proxy.isProxyClass for primitive types', isProxyTestPrimitives)
@@ -761,5 +869,11 @@ function main() {
     suite.addTest('Test class proxy', extraDispatchTest5)
     suite.addTest('Test multiple interfaces proxy: part 1', extraDispatchTest6)
     suite.addTest('Test multiple interfaces proxy: part 2', extraDispatchTest7)
+    suite.addTest('Test throw in invoke handler propagates', throwInInvokeTest)
+    suite.addTest('Test throw in get handler propagates', throwInGetTest)
+    suite.addTest('Test throw in set handler propagates', throwInSetTest)
+    suite.addTest('Test throw with multiple interfaces [E,F]: invoke', throwMultipleIfacesInvokeTest1)
+    suite.addTest('Test throw with multiple interfaces [F,E]: invoke', throwMultipleIfacesInvokeTest2)
+    suite.addTest('Test throw with multiple interfaces [I1,I3]: get and set', throwMultipleIfacesGetSetTest)
     return suite.run()
 }
