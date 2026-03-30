@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 #include "plugins/ets/runtime/tooling/internal_api.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+
 #include <ani.h>
+#include <gtest/gtest.h>
 
 namespace ark::ets::interop::js::testing {
 
@@ -220,7 +222,7 @@ public:
     }
 };
 
-TEST_F(HybridStackTsToEtsTest, check_js_to_ets_hybridgref)
+TEST_F(HybridStackTsToEtsTest, check_ts_to_ets_hybridstack)
 {
     ani_env *aniEnv {};
     ASSERT_TRUE(GetAniEnv(&aniEnv));

@@ -45,3 +45,9 @@ options:
   default: false
   description: taskpool support interop or not, only valid when taskpool-mode is eaworker
 
+- name: interop-support-hybridstack
+  lang:
+    - ets
+  type: bool
+  default: false
+  description: interop support hybridstack or not, only valid in the UT environment or the command is activated on the device side

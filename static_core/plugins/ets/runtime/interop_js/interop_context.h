@@ -17,8 +17,8 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 
 #include "ets_platform_types.h"
-#include "runtime/execution/job_execution_context.h"
-#include "runtime/execution/job_worker_thread.h"
+#include "platforms/ohos/ohos_device_helpers.h"
+#include "platforms/target_defaults/default_target_options.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/app_state_manager.h"
@@ -29,6 +29,8 @@
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 #include "plugins/ets/runtime/interop_js/interop_stacks.h"
 #include "plugins/ets/runtime/interop_js/intrinsics/std_js_jsruntime.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_worker_thread.h"
 #include "runtime/include/value.h"
 
 #include "plugins/ets/runtime/interop_js/stack_info.h"
@@ -437,6 +439,15 @@ public:
         return ecmaInterface_;
     }
 
+    bool GetInteropHybridStackEnabled()
+    {
+        if (ark::default_target_options::GetInteropHybridStackEnable()) {
+            sharedEtsVmState_->isInteropStackEnabled = true;
+            return true;
+        }
+        return sharedEtsVmState_->isInteropStackEnabled;
+    }
+
     // hybrid call stack support
     PANDA_PUBLIC_API static InteropCallStack &GetOrCreateCallStack();
 
@@ -477,6 +488,7 @@ private:
         PandaEtsVM *pandaEtsVm = nullptr;
         PandaUniquePtr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage {};
         PandaUniquePtr<arkplatform::STSVMInterface> stsVMInterface {};
+        bool isInteropStackEnabled {};
 
     private:
         explicit SharedEtsVmState(PandaEtsVM *vm);

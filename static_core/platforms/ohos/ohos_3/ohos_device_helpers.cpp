@@ -47,4 +47,10 @@ std::string GetDebuggerLibraryPath()
     return "/system/lib64/libarkinspector.so";
 #endif
 }
+
+bool GetInteropHybridStackEnable()
+{
+    return OHOS::system::GetBoolParameter("ark.interop.hybridstack.enable", false);
+}
+
 }  // namespace ark::ohos_device

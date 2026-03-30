@@ -541,6 +541,8 @@ if (is_ohos && is_standard_system) {
       "$ark_root/runtime:runtime.para.dac",
       "$ark_root/runtime/para:Runtime.para",
       "$ark_root/runtime/para:Runtime.para.dac",
+      "$ark_root/runtime/para:Interop.para",
+      "$ark_root/runtime/para:Interop.para.dac",
     ]
   }
 }

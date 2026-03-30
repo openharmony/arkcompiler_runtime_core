@@ -51,6 +51,8 @@ bool GetEnableDebugMode();
 
 std::string GetDebuggerLibraryPath();
 
+bool GetInteropHybridStackEnable();
+
 }  // namespace ark::default_target_options
 
 #endif  // PLATFORMS_TARGET_DEFAULTS_DEFAULT_TARGET_OPTIONS_H

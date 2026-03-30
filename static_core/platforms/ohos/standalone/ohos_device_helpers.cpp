@@ -57,4 +57,10 @@ std::string GetDebuggerLibraryPath()
 {
     return "";
 }
+
+bool GetInteropHybridStackEnable()
+{
+    return false;
+}
+
 }  // namespace ark::ohos_device

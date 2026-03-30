@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_INL_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_INL_H
 
+#include "ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::interop::js {
@@ -28,16 +29,24 @@ inline bool OpenInteropCodeScope(EtsExecutionContext *executionCtx, char const *
     }
 
     auto *ctx = InteropCtx::Current(executionCtx);
-    void *topFrame {};
     if constexpr (ETS_TO_JS) {
         ctx->UpdateInteropStackInfoIfNeeded();
-        // ETS → JS: Record static (ETS) frame
-        topFrame = ctx->GetOrCreateCallStack().GetStaticTopFrame();
-    } else {
-        // JS → ETS: Record dynamic (JS) frame
-        topFrame = ctx->GetOrCreateCallStack().GetDynamicTopFrameSP();
     }
-    ctx->GetOrCreateCallStack().AllocRecord(topFrame, ETS_TO_JS, descr);
+
+    if (ctx->GetInteropHybridStackEnabled()) {
+        void *topFrame {};
+        if constexpr (ETS_TO_JS) {
+            // ETS → JS: Record static (ETS) frame
+            topFrame = ctx->GetOrCreateCallStack().GetStaticTopFrame();
+        } else {
+            // JS → ETS: Record dynamic (JS) frame
+            topFrame = ctx->GetOrCreateCallStack().GetDynamicTopFrameSP();
+        }
+        ctx->GetOrCreateCallStack().AllocRecord(topFrame, ETS_TO_JS, descr);
+    } else {
+        ctx->GetOrCreateCallStack().AllocRecord(executionCtx->GetMT()->GetCurrentFrame(), ETS_TO_JS, descr);
+    }
+
     return true;
 }
 

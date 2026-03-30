@@ -30,6 +30,8 @@ bool GetEnableDebugMode();
 
 std::string GetDebuggerLibraryPath();
 
+bool GetInteropHybridStackEnable();
+
 }  // namespace ark::ohos_device
 
 #endif  // PLATFORMS_OHOS_OHOS_DEVICE_HELPERS_H
