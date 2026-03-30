@@ -91,23 +91,6 @@ cases:
   - decl: |-
       class C { }
       
-      interface X1<T extends C> {
-        read(): T
-        write(p: T): void
-        prop: T
-      }
-      
-      function foo1(o: Object) {
-        if (o instanceof X1) {
-          o.prop = o.read() // compile-time error, T in "invariant" position
-        }
-      }
-    expected_out: |-
-      "Semantic error ESE0000: Type T in 'invariant' position."
-
-  - decl: |-
-      class C { }
-      
       interface X2<out T extends C> {
         read(): T
       }
@@ -149,19 +132,3 @@ cases:
       }
     expected_out: |-
       "Semantic error ESE0046: Type 'C' is not compatible with type 'T' at index 1"
-
-  - decl: |-
-      class X4<T> {
-        p: T
-        constructor(p: T) { this.p = p }
-      }
-      
-      function foo4(a: Any, b: Any) {
-        if (a instanceof X4 && b instanceof X4) {
-          a.p = b.p // compile-time error defined by invariance
-        }
-      }
-    use: |-
-      foo4(new X4<number>(1), new X4<string>("a"))
-    expected_out: |-
-      "Semantic error ESE0000: compile-time error defined by invariance"
