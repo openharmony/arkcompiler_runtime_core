@@ -364,9 +364,10 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
 
 // CC-OFFNXT(G.PRE.06) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CheckAndAddBytes(fd, filePath, checkBytes, writtenBytes)                \
+#define CheckAndAddBytes(fd, filePath, checkBytes, writtenBytes, error)         \
     {                                                                           \
         if ((checkBytes) == 0) {                                                \
+            LOG(ERROR, RUNTIME) << (error);                                     \
             (fd).close();                                                       \
             if (remove((filePath).data()) == -1) {                              \
                 LOG(ERROR, RUNTIME) << "Failed to remove file: " << (filePath); \
@@ -394,10 +395,10 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
 
     auto savedProf = GetSavedTypes(profObject->GetAllMethods());
     auto headerBytes = WriteFileHeader(fd, MAGIC, VERSION, PROFILE_TYPE, savedProf, classCtxStr);
-    CheckAndAddBytes(fd, tmpFileName, headerBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, headerBytes, writtenBytes, "Failed to write profile header");
 
     auto pandaFilesBytes = WritePandaFilesSection(fd, profObject->GetPandaFileMapReverse());
-    CheckAndAddBytes(fd, tmpFileName, pandaFilesBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, pandaFilesBytes, writtenBytes, "Failed to write panda files section");
 
     uint32_t offset = writtenBytes;
     auto sectionNum = GetSectionNumbers(profObject->GetAllMethods());
@@ -406,11 +407,11 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
     fd.seekp(sectionInfosSize, std::ios::cur);
 
     auto methodsBytes = WriteAllMethodsSections(fd, profObject->GetAllMethods());
-    CheckAndAddBytes(fd, tmpFileName, methodsBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, methodsBytes, writtenBytes, "Failed to write methods sections");
 
     fd.seekp(offset, std::ios::beg);
     auto sectionInfoBytes = WriteSectionInfosSection(fd, sectionInfos_);
-    CheckAndAddBytes(fd, tmpFileName, sectionInfoBytes, writtenBytes);
+    CheckAndAddBytes(fd, tmpFileName, sectionInfoBytes, writtenBytes, "Failed to write section info section");
 
     fd.close();
 

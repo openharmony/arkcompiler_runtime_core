@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
-#define PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
+#ifndef PANDA_COMPILER_TOOLS_APTOOL_MERGE_MERGE_RESULT_H
+#define PANDA_COMPILER_TOOLS_APTOOL_MERGE_MERGE_RESULT_H
 
-namespace ark::aptool::dump {
+namespace ark::aptool::merge {
 
-class DumpCommand {
-public:
-    int Run(const char *progName, int argc, const char **argv);
+// Exit codes returned by `aptool merge`
+enum class MergeExitCode : int {
+    SUCCESS = 0,
+    USAGE_ERROR = 1,
+    PROFILE_LOAD_ERROR = 2,
+    PROFILE_COMPATIBILITY_ERROR = 3,
+    PROFILE_WRITE_ERROR = 4,
 };
 
-}  // namespace ark::aptool::dump
+}  // namespace ark::aptool::merge
 
-#endif  // PANDA_COMPILER_TOOLS_APTOOL_DUMP_DUMP_COMMAND_H
+#endif  // PANDA_COMPILER_TOOLS_APTOOL_MERGE_MERGE_RESULT_H

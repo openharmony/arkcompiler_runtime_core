@@ -18,13 +18,18 @@
 #include <iostream>
 #include <string_view>
 
+#ifdef PANDA_OHOS_USE_INNER_HILOG
+#include <hilog/log.h>
+#endif
+
 #include "compiler/tools/aptool/common/utils.h"
 #ifdef APTOOL_INCLUDE_DUMP
 #include "compiler/tools/aptool/dump/dump_command.h"
 #endif
+#include "compiler/tools/aptool/merge/merge_command.h"
 #include "libarkbase/utils/logger.h"
-#include "runtime/mem/internal_allocator-inl.h"
 #include "runtime/mem/internal_allocator.h"
+#include "runtime/mem/internal_allocator-inl.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
 
@@ -40,6 +45,36 @@ template void InternalAllocator<InternalAllocatorConfig::MALLOC_ALLOCATOR>::Visi
 
 namespace ark::aptool {
 
+#ifdef PANDA_OHOS_USE_INNER_HILOG
+int AptoolLogPrint([[maybe_unused]] int id, int level, const char *component, [[maybe_unused]] const char *fmt,
+                   const char *message)
+{
+    constexpr unsigned int ARK_DOMAIN = 0xD003F00;
+    constexpr auto TAG = "ArkAptool";
+    constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
+    switch (level) {
+        case ark::Logger::PandaLog2MobileLog::DEBUG:
+            OHOS::HiviewDFX::HiLog::Debug(LABEL, "%{public}s: %{public}s", component, message);
+            return 0;
+        case ark::Logger::PandaLog2MobileLog::INFO:
+            OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s: %{public}s", component, message);
+            return 0;
+        case ark::Logger::PandaLog2MobileLog::ERROR:
+            OHOS::HiviewDFX::HiLog::Error(LABEL, "%{public}s: %{public}s", component, message);
+            return 0;
+        case ark::Logger::PandaLog2MobileLog::FATAL:
+            OHOS::HiviewDFX::HiLog::Fatal(LABEL, "%{public}s: %{public}s", component, message);
+            return 0;
+        case ark::Logger::PandaLog2MobileLog::WARN:
+            OHOS::HiviewDFX::HiLog::Warn(LABEL, "%{public}s: %{public}s", component, message);
+            return 0;
+        default:
+            OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s: %{public}s", component, message);
+            return 0;
+    }
+}
+#endif
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_APTOOL(level) LOG(level, PROFILER) << "APTOOL: "
 
@@ -53,6 +88,7 @@ void PrintGlobalUsage(std::ostream &out, const char *progName)
 #ifdef APTOOL_INCLUDE_DUMP
     out << "  dump      Dump profile content to human-readable YAML format" << std::endl;
 #endif
+    out << "  merge     Merge multiple profiles into one" << std::endl;
     out << std::endl;
     out << "Global options:" << std::endl;
     out << "  --help     Show this help message" << std::endl;
@@ -91,9 +127,13 @@ int Main(int argc, const char **argv)
 #ifdef APTOOL_INCLUDE_DUMP
     if (firstArg == "dump") {
         dump::DumpCommand cmd;
-        return cmd.Run(argc - 1, argv + 1);
+        return cmd.Run(argv[0], argc - 1, argv + 1);
     }
 #endif
+    if (firstArg == "merge") {
+        merge::MergeCommand cmd;
+        return static_cast<int>(cmd.Run(argv[0], argc - 1, argv + 1));
+    }
 
     // Unknown command or option
     LOG_APTOOL(ERROR) << "unknown command or option '" << firstArg << "'";
@@ -119,6 +159,9 @@ int main(int argc, const char **argv)
     // Initialize logging
     ark::Logger::InitializeStdLogging(ark::Logger::Level::INFO,
                                       ark::Logger::ComponentMask().set(ark::Logger::Component::PROFILER));
+#ifdef PANDA_OHOS_USE_INNER_HILOG
+    ark::Logger::SetMobileLogPrintEntryPointByPtr(reinterpret_cast<void *>(ark::aptool::AptoolLogPrint));
+#endif
 
     // Run main logic
     auto result = ark::aptool::Main(argc, argv);

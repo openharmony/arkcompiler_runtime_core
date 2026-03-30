@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -564,10 +564,14 @@ void Method::StartProfiling()
 
     auto profilingData = ProfilingData::Make(
         allocator, vcalls.size(), branches.size(), throws.size(),
-        [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
-            return new (data)
-                ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
-                              ThrowData::From(throwsMem, throws), branchProfilingEnabled);
+        [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem, void *branchLastSavedMem,
+            void *throwLastSavedMem) {
+            return new (data) ProfilingData(
+                CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
+                ThrowData::From(throwsMem, throws),
+                Span<ProfilingData::BranchLastSaved>(
+                    reinterpret_cast<ProfilingData::BranchLastSaved *>(branchLastSavedMem), branches.size()),
+                Span<uint64_t>(reinterpret_cast<uint64_t *>(throwLastSavedMem), throws.size()), branchProfilingEnabled);
         });
     if (!InitProfilingData(profilingData)) {
         allocator->Free(profilingData);

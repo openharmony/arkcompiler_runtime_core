@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,14 +41,20 @@ public:
 
         // Set branch profiling enabled based on runtime options (auto-enabled when JIT is active)
         bool branchProfilingEnabled = Runtime::GetCurrent()->IsProfileBranches();
-        return ProfilingData::Make(allocator, inlineCaches.size(), branches.size(), throws.size(),
-                                   [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
-                                       return new (data)
-                                           // CC-OFFNXT(G.FMT.02) project code style
-                                           ProfilingData(CreateInlineCaches(vcallsMem, inlineCaches, classResolver),
-                                                         CreateBranchData(branchesMem, branches),
-                                                         CreateThrowData(throwsMem, throws), branchProfilingEnabled);
-                                   });  // CC-OFF(G.FMT.02) project code style
+        return ProfilingData::Make(
+            allocator, inlineCaches.size(), branches.size(), throws.size(),
+            [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem, void *branchLastSavedMem,
+                void *throwLastSavedMem) {
+                return new (data)
+                    // CC-OFFNXT(G.FMT.02) project code style
+                    ProfilingData(
+                        CreateInlineCaches(vcallsMem, inlineCaches, classResolver),
+                        CreateBranchData(branchesMem, branches), CreateThrowData(throwsMem, throws),
+                        Span<ProfilingData::BranchLastSaved>(
+                            reinterpret_cast<ProfilingData::BranchLastSaved *>(branchLastSavedMem), branches.size()),
+                        Span<uint64_t>(reinterpret_cast<uint64_t *>(throwLastSavedMem), throws.size()),
+                        branchProfilingEnabled);
+            });  // CC-OFF(G.FMT.02) project code style
     }
 
 private:

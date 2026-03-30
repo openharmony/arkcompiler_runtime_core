@@ -11,6 +11,7 @@ Currently, ark_aptool supports the following commands:
 | Command | Description |
 |---------|-------------|
 | `dump` | Convert profile to human-readable YAML format |
+| `merge` | Merge multiple profile files into one `.ap` profile |
 
 ## dump Command
 
@@ -85,6 +86,52 @@ Methods:
               bytecode: "throw v0"
               takenCount: 2
 ```
+
+## merge Command
+
+The `merge` command merges multiple input profile files into one output `.ap` file.
+
+### Usage
+
+```
+ark_aptool merge --ap-path <a.ap> --ap-path <b.ap> --output <merged.ap> [options]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--ap-path` | Input profile path(s), can be specified multiple times (required) |
+| `--output` | Path for merged output profile file (required) |
+| `--verbose` | Print merge summary |
+| `--help` | Print help message |
+
+Notes:
+- At least two input profiles are required.
+- Duplicate input paths are automatically deduplicated.
+
+### Examples
+
+Merge multiple inputs:
+```
+ark_aptool merge --ap-path a.ap --ap-path b.ap --ap-path c.ap --output merged.ap
+```
+
+### Exit Codes (merge)
+
+`ark_aptool merge` returns the following process exit codes:
+
+| Exit Code | Name | Meaning |
+|----------:|------|---------|
+| `0` | `Success` | Merge completed successfully |
+| `1` | `UsageError` | Invalid command-line usage (for example, missing required options or fewer than two distinct inputs) |
+| `2` | `ProfileLoadError` | Failed to load one of the input profiles |
+| `3` | `ProfileCompatibilityError` | Input profiles are incompatible and cannot be merged (for example, class context or profile-data mismatch) |
+| `4` | `ProfileWriteError` | Failed to write merged output profile |
+
+Notes:
+- The exit code contract above applies to the `merge` subcommand.
+- Scripts should check exact non-zero codes when they need error-category-specific handling.
 
 ## See Also
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -243,13 +243,27 @@ private:
 
 class ProfilingData {
 public:
+    // Last successfully persisted branch counters.
+    // This is save-state metadata only.
+    struct BranchLastSaved {
+        uint64_t taken;
+        uint64_t notTaken;
+    };
+
     explicit ProfilingData(Span<CallSiteInlineCache> inlineCaches, Span<BranchData> branchData,
-                           Span<ThrowData> throwData, bool branchProfilingEnabled = false)
+                           Span<ThrowData> throwData, Span<BranchLastSaved> branchLastSaved,
+                           Span<uint64_t> throwLastSaved, bool branchProfilingEnabled = false)
         : inlineCaches_(inlineCaches),
           branchData_(branchData),
           throwData_(throwData),
+          branchLastSaved_(branchLastSaved),
+          throwLastSaved_(throwLastSaved),
           branchProfilingEnabled_(branchProfilingEnabled)
     {
+        for (auto &entry : branchLastSaved_) {
+            entry = {0, 0};
+        }
+        std::fill(throwLastSaved_.begin(), throwLastSaved_.end(), 0);
     }
 
     Span<CallSiteInlineCache> GetInlineCaches() const
@@ -342,6 +356,7 @@ public:
         return isUpdated_;
     }
 
+    // Marks runtime counters as flushed to disk for the current save cycle.
     void DataSaved()
     {
         isUpdated_ = false;
@@ -354,6 +369,59 @@ public:
         return thr0w->GetTakenCounter();
     }
 
+    // LastSaved state is saver-thread-only and used by incremental saver to
+    // compute delta against current runtime counters.
+    bool HasLastSaved() const
+    {
+        return hasLastSaved_;
+    }
+
+    void InvalidateLastSaved()
+    {
+        hasLastSaved_ = false;
+    }
+
+    void MarkLastSavedValid()
+    {
+        hasLastSaved_ = true;
+    }
+
+    uint64_t GetLastSavedBranchTaken(size_t index) const
+    {
+        ASSERT(index < branchLastSaved_.size());
+        return branchLastSaved_[index].taken;
+    }
+
+    uint64_t GetLastSavedBranchNotTaken(size_t index) const
+    {
+        ASSERT(index < branchLastSaved_.size());
+        return branchLastSaved_[index].notTaken;
+    }
+
+    void SetLastSavedBranchTaken(size_t index, uint64_t taken)
+    {
+        ASSERT(index < branchLastSaved_.size());
+        branchLastSaved_[index].taken = taken;
+    }
+
+    void SetLastSavedBranchNotTaken(size_t index, uint64_t notTaken)
+    {
+        ASSERT(index < branchLastSaved_.size());
+        branchLastSaved_[index].notTaken = notTaken;
+    }
+
+    uint64_t GetLastSavedThrowTaken(size_t index) const
+    {
+        ASSERT(index < throwLastSaved_.size());
+        return throwLastSaved_[index];
+    }
+
+    void SetLastSavedThrowTaken(size_t index, uint64_t taken)
+    {
+        ASSERT(index < throwLastSaved_.size());
+        throwLastSaved_[index] = taken;
+    }
+
     template <typename Callback>
     static ProfilingData *Make(mem::InternalAllocatorPtr allocator, size_t nInlineCaches, size_t nBranches,
                                size_t nThrows, Callback &&callback)
@@ -362,7 +430,10 @@ public:
         auto branchesDataOffset =
             RoundUp(vcallDataOffset + sizeof(CallSiteInlineCache) * nInlineCaches, alignof(BranchData));
         auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * nBranches, alignof(ThrowData));
-        auto data = allocator->Alloc(throwsDataOffset + sizeof(ThrowData) * nThrows);
+        auto branchLastSavedOffset = RoundUp(throwsDataOffset + sizeof(ThrowData) * nThrows, alignof(BranchLastSaved));
+        auto throwLastSavedOffset =
+            RoundUp(branchLastSavedOffset + sizeof(BranchLastSaved) * nBranches, alignof(uint64_t));
+        auto data = allocator->Alloc(throwLastSavedOffset + sizeof(uint64_t) * nThrows);
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto vcallsMem = reinterpret_cast<uint8_t *>(data) + vcallDataOffset;
@@ -370,7 +441,11 @@ public:
         auto branchesMem = reinterpret_cast<uint8_t *>(data) + branchesDataOffset;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
-        return callback(data, vcallsMem, branchesMem, throwsMem);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto branchLastSavedMem = reinterpret_cast<uint8_t *>(data) + branchLastSavedOffset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto throwLastSavedMem = reinterpret_cast<uint8_t *>(data) + throwLastSavedOffset;
+        return callback(data, vcallsMem, branchesMem, throwsMem, branchLastSavedMem, throwLastSavedMem);
     }
 
 private:
@@ -401,6 +476,11 @@ private:
     Span<CallSiteInlineCache> inlineCaches_;
     Span<BranchData> branchData_;
     Span<ThrowData> throwData_;
+    // Save-state metadata only. These arrays mirror branchData_/throwData_ by index.
+    // LastSaved state is saver-thread-only.
+    Span<BranchLastSaved> branchLastSaved_;
+    Span<uint64_t> throwLastSaved_;
+    bool hasLastSaved_ {false};
     bool branchProfilingEnabled_ {false};
     std::atomic_bool isUpdated_ {true};
 };

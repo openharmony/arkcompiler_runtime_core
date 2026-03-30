@@ -216,6 +216,8 @@ _libarkruntime_calculated_sources = [
   "interpreter/interpreter.cpp",
   "intrinsics.cpp",
   "jit/libprofile/pgo_file_builder.cpp",
+  "jit/libprofile/pgo_class_context_utils.cpp",
+  "jit/libprofile/profile_merger.cpp",
   "jit/profile_saver_worker.cpp",
   "jit/profiling_loader.cpp",
   "jit/profiling_saver.cpp",

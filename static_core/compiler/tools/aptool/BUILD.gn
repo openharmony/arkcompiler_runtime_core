@@ -41,11 +41,19 @@ if (_aptool_include_dump) {
   }
 }
 
+ark_gen_file("merge_options_h") {
+  template_file = "$ark_root/templates/options/options.h.erb"
+  data = [ "merge/merge_options.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
+  output_file = "$target_gen_dir/generated/merge_options.h"
+}
+
 _ark_aptool_sources = [
   "common/abc_metadata.cpp",
   "common/profile_loader.cpp",
   "common/utils.cpp",
   "main.cpp",
+  "merge/merge_command.cpp",
 ]
 
 if (_aptool_include_dump) {
@@ -67,6 +75,7 @@ _ark_aptool_configs = [
 
 _ark_aptool_deps = [
   "$ark_root/assembler:libarktsassembler",
+  ":merge_options_h",
   "$ark_root/libarkbase:libarktsbase",
   "$ark_root/libarkfile:libarktsfile",
 ]
@@ -76,6 +85,15 @@ if (_aptool_include_dump) {
 }
 
 _ark_aptool_external_deps = [ sdk_libc_secshared_dep ]
+_ark_aptool_defines = []
+
+if (_aptool_include_dump) {
+  _ark_aptool_defines += [ "APTOOL_INCLUDE_DUMP" ]
+}
+
+if (enable_hilog && current_toolchain != host_toolchain) {
+  _ark_aptool_defines += [ "PANDA_OHOS_USE_INNER_HILOG" ]
+}
 
 ohos_executable("ark_aptool") {
   sources = _ark_aptool_sources
@@ -95,11 +113,9 @@ ohos_executable("ark_aptool") {
     ]
   }
 
-  if (_aptool_include_dump) {
-    defines = [ "APTOOL_INCLUDE_DUMP" ]
-  }
+  defines = _ark_aptool_defines
 
-  external_deps = _ark_aptool_external_deps
+  external_deps = _ark_aptool_external_deps + hiviewdfx_ext_deps
 
   install_enable = true
   part_name = ark_part_name
