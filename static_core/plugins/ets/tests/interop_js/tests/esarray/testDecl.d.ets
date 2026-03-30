@@ -36,7 +36,7 @@ export declare namespace es {
         $_get(index: number): T | undefined;
         $_set(index: number, val: T): void;
         at(index: number): T | undefined;
-        concat(val: T): Array<T>;
+        concat(item: T | Array<T>): Array<T>;
         copyWithin(target: number, start?: number, end?: number): Array<T>;
         every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean;
         fill(value: T, start?: number, end?: number): Array<T>;
