@@ -205,12 +205,14 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
     ASSERT(exclusiveCoro == Coroutine::GetCurrent());
 
     if (interopEnabled) {
+        bool isJsEnvNewCreate = false;
         auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
         if (jsEnv == nullptr) {
             jsEnv = ifaceTable->CreateJSRuntime();
+            isJsEnvNewCreate = true;
             ASSERT(jsEnv != nullptr);
         }
-        ifaceTable->CreateInteropCtx(EtsExecutionContext::FromMT(exclusiveCoro), jsEnv);
+        ifaceTable->CreateInteropCtx(EtsExecutionContext::FromMT(exclusiveCoro), jsEnv, isJsEnvNewCreate);
     }
     *result = EtsExecutionContext::FromMT(exclusiveCoro)->GetPandaAniEnv();
 
@@ -245,7 +247,9 @@ static ani_status DetachCurrentThread(ani_vm *vm)
     auto *jsEnv = ifaceTable->GetJSEnv();
     auto result = jobMan->DetachExclusiveWorker();
     if (jsEnv != nullptr) {
-        ifaceTable->CleanUpJSEnv(jsEnv);
+        if (ifaceTable->IsJSEnvNewCreate()) {
+            ifaceTable->CleanUpJSEnv(jsEnv);
+        }
     }
     if (!result) {
         LOG(ERROR, ANI) << "Cannot DetachThread, thread was not attached";

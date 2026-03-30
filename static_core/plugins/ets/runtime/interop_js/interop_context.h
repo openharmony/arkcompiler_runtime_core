@@ -499,6 +499,7 @@ private:
 
     // JSVM context
     napi_env jsEnv_ {};
+    bool isJsEnvNewCreateFlag_ {true};
 
     // various per-JSVM interfaces
     ExternalIfaceTable interfaceTable_;

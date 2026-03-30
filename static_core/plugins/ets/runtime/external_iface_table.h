@@ -31,8 +31,9 @@ public:
     using ClearInteropHandleScopesFunction = std::function<void(Frame *)>;
     using CreateJSRuntimeFunction = std::function<JSEnv()>;
     using CleanUpJSEnvFunction = std::function<void(JSEnv)>;
+    using IsJSEnvNewCreateFunction = std::function<bool()>;
     using GetJSEnvFunction = std::function<JSEnv()>;
-    using CreateInteropCtxFunction = std::function<void(EtsExecutionContext *, JSEnv)>;
+    using CreateInteropCtxFunction = std::function<void(EtsExecutionContext *, JSEnv, bool)>;
 
     NO_COPY_SEMANTIC(ExternalIfaceTable);
     NO_MOVE_SEMANTIC(ExternalIfaceTable);
@@ -72,6 +73,12 @@ public:
         cleanUpJSEnv_ = std::move(cb);
     }
 
+    void SetIsJSEnvNewCreateFunction(IsJSEnvNewCreateFunction &&cb)
+    {
+        ASSERT(!isJSEnvNewCreate_);
+        isJSEnvNewCreate_ = std::move(cb);
+    }
+
     void SetGetJSEnvFunction(GetJSEnvFunction &&cb)
     {
         ASSERT(!getJSEnv_);
@@ -99,6 +106,14 @@ public:
         }
     }
 
+    bool IsJSEnvNewCreate()
+    {
+        if (isJSEnvNewCreate_) {
+            return isJSEnvNewCreate_();
+        }
+        return true;
+    }
+
     JSEnv GetJSEnv()
     {
         void *jsEnv = nullptr;
@@ -114,10 +129,10 @@ public:
         createInteropCtx_ = std::move(cb);
     }
 
-    void CreateInteropCtx(EtsExecutionContext *executionCtx, JSEnv jsEnv)
+    void CreateInteropCtx(EtsExecutionContext *executionCtx, JSEnv jsEnv, bool isJsEnvNewCreate = true)
     {
         if (createInteropCtx_) {
-            createInteropCtx_(executionCtx, jsEnv);
+            createInteropCtx_(executionCtx, jsEnv, isJsEnvNewCreate);
         }
     }
 
@@ -126,6 +141,7 @@ private:
     ClearInteropHandleScopesFunction clearInteropHandleScopes_ = nullptr;
     CreateJSRuntimeFunction createJSRuntime_ = nullptr;
     CleanUpJSEnvFunction cleanUpJSEnv_ = nullptr;
+    IsJSEnvNewCreateFunction isJSEnvNewCreate_ = nullptr;
     GetJSEnvFunction getJSEnv_ = nullptr;
     CreateInteropCtxFunction createInteropCtx_ = nullptr;
 };

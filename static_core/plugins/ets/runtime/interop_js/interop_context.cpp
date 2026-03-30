@@ -408,19 +408,23 @@ void InteropCtx::InitExternalInterfaces()
         ASSERT(status == napi_ok);
     });
 
+    interfaceTable_.SetIsJSEnvNewCreateFunction([this]() -> bool { return isJsEnvNewCreateFlag_; });
+
 #endif
-    interfaceTable_.SetCreateInteropCtxFunction([](EtsExecutionContext *executionCtx, ExternalIfaceTable::JSEnv jsEnv) {
-        auto env = static_cast<napi_env>(jsEnv);
-        {
-            ScopedManagedCodeThread managedScope(executionCtx->GetMT());
-            InteropCtx::Init(executionCtx, env);
-        }
+    interfaceTable_.SetCreateInteropCtxFunction(
+        [this](EtsExecutionContext *executionCtx, ExternalIfaceTable::JSEnv jsEnv, bool isJsEnvNewCreate) {
+            isJsEnvNewCreateFlag_ = isJsEnvNewCreate;
+            auto env = static_cast<napi_env>(jsEnv);
+            {
+                ScopedManagedCodeThread managedScope(executionCtx->GetMT());
+                InteropCtx::Init(executionCtx, env);
+            }
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
-        INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
-        // Here need to init interop in the given JSVM instance.
-        TryInitInteropInJsEnv(jsEnv);
+            INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
+            // Here need to init interop in the given JSVM instance.
+            TryInitInteropInJsEnv(jsEnv);
 #endif
-    });
+        });
 }
 
 InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env)
