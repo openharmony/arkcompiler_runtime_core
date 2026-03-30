@@ -18,7 +18,7 @@ let timeoutCheckPassed = false;
 arktest.expectThrow(() => {
     setTimeout(() => {}, 1);
 }, (e: Error) => {
-    return e instanceof InvalidCoroutineOperationError;
+    return e instanceof InvalidJobOperationError;
 });
 timeoutCheckPassed = true;
 
@@ -27,7 +27,7 @@ let intervalCheckPassed = false;
 arktest.expectThrow(() => {
     setInterval(() => {}, 1);
 }, (e: Error) => {
-    return e instanceof InvalidCoroutineOperationError;
+    return e instanceof InvalidJobOperationError;
 });
 intervalCheckPassed = true;
 

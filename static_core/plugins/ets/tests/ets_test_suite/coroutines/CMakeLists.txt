@@ -37,6 +37,7 @@ function(add_ets_coroutines_test)
     set(prefix ARG)
     set(noValues SKIP_ARM32_COMPILER LIST_UNHANDLED)
     set(singleValues FILE)
+    set(multiValues OPTIONS IMPL OPTION_SETS_STACKFUL WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # NOTE(26403) Profilesaver is turned off beause of integer overflow
