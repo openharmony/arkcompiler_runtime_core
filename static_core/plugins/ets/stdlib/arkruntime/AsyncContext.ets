@@ -43,20 +43,21 @@ export final class AsyncContext {
     /**
      * Method returns current AsyncContext of async function
      * @returns { AsyncContext } current async context
+     * Undefined if the context was not yet initialized
      */
     static native current(): AsyncContext | undefined;
 
     /**
      * Method sets value to resolve associated promise  
-     * @returns { Promise<Any> } resolved promise 
+     * @returns { Promise<Awaited<T>> } resolved promise 
      */
     native resolve<T>(val: T): Promise<Awaited<T>>;
 
     /**
      * Method sets error to reject associated promise  
-     * @returns { Promise<Any> } rejected promise 
+     * @returns { Promise<Awaited<T>> } rejected promise 
      */
-    native reject(err: Error): Promise<Any>;
+    native reject<T = void>(err: Error): Promise<Awaited<T>>;
 
     /**
      * Method returns value that was used to resolve or reject associated promise  
