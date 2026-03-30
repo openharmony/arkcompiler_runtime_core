@@ -110,12 +110,6 @@
         ]
     },
     {
-        "file": "core/AbcFile.ets",
-        "interfaces": [
-            "AbcFileNotFoundError"
-        ]
-    },
-    {
         "file": "core/UnionCase.ets",
         "interfaces": [
             "UnionCase"

@@ -15,6 +15,8 @@
 
 package std.core;
 
+import { StackTrace } from "arkruntime"
+
 /**
  * The maximum depth of printing nested objects
  * Useful for cyclic linked objects

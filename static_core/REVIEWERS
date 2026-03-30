@@ -171,11 +171,11 @@ static_core/plugins/ets/runtime/interop_js/                                   @i
 static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @artemu ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/*concurrency* ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/intrinsics/arkruntime_AbcFile.cpp             @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof @schernykh
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @schernykh ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @schernykh ^slynkodenis ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/runtime/intrinsics/std_core_AbcFile.cpp               @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_ExclusiveLauncher.cpp     ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_Job.cpp                   ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5

@@ -43,8 +43,8 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
     EtsHandle currentAbcFilesHandle(executionCtx, linkerHandle->GetAbcFiles());
     auto currentLength = currentAbcFilesHandle->GetLength();
     auto resultLength = newAbcFilesHandle->GetLength() + currentLength;
-    EtsHandle resultAbcFilesHandle(executionCtx,
-                                   EtsObjectArray::Create(PlatformTypes(executionCtx)->coreAbcFile, resultLength));
+    EtsHandle resultAbcFilesHandle(
+        executionCtx, EtsObjectArray::Create(PlatformTypes(executionCtx)->arkruntimeAbcFile, resultLength));
     if (UNLIKELY(resultAbcFilesHandle.GetPtr() == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return;

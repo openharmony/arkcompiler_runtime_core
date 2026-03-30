@@ -69,12 +69,12 @@ EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
     return element.GetPtr();
 }
 
-extern "C" EtsObjectArray *StdCoreStackTraceProvisionStackTrace()
+extern "C" EtsObjectArray *ArkRuntimeStackTraceProvisionStackTrace()
 {
     auto executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto stackTraceElementClass = PlatformTypes(executionCtx)->coreStackTraceElement;
+    auto stackTraceElementClass = PlatformTypes(executionCtx)->arkruntimeStackTraceElement;
 
     auto walker = StackWalker::Create(executionCtx->GetMT());
 
