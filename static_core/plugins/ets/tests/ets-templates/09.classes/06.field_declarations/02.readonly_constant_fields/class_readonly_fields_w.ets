@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-{% for timing in ["compile", "runtime"] %}
-
 {% for c in cases %}
 
 {% for decl in c.decl_variants %}
@@ -38,20 +36,14 @@
 /*---
 desc: {{c.desc}}
 assert: {{c.assert}}
-{% if 'compile' in timing %}
-tags: [compile-only]
-expected_out: {{c.expected_out[cv_id]}}
-{% endif %}
+expected_out: {"compiler": {{c.expected_out[cv_id]}}}
 ---*/
-
-// #2345 after runner is made to support this properly, remove compile-only tag and "timing" loop
 
 {{decl}}
 
 function main(): void {
 }
 
-{% endfor %}
 {% endfor %}
 {% endfor %}
 {% endfor %}

@@ -13,20 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for timing in ["compile", "runtime"] %}
-
 /*---
 desc: Non-static field initialization with keyword 'super'.
 assert: >-
     If the instance field initializer expression uses
     this or super directly in any form,then a compile-time warning occurs.
-{% if 'compile' in timing %}
-tags: [compile-only]
-expected_out: "Warning W0010: The instance field initializer expression cannot use the super."
-{% endif %}
+expected_out: {"compiler": "Warning W0010: The instance field initializer expression cannot use the super."}
 ---*/
-
-// #2345 after runner is made to support this properly, remove compile-only tag and "timing" loop
 
 class A {
   private _y: int = 5
@@ -48,5 +41,3 @@ function main(): void {
 
     arktest.assertTrue(instance.x == 4, "unexpected instance.x: <" + instance.x + ">")
 }
-
-{% endfor %}
