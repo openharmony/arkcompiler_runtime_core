@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-  Bigint with literal negative exponent causes a compile-time error.
+  Bigint with parenthesized literal negative exponent causes a compile-time error.
   If the second operand of type bigint is negative,
   then a compile-time error occurs when detected at compile time.
 tags: [compile-only, negative]
@@ -23,5 +23,5 @@ expected_out: 'Semantic error ESE655064: Exponentiation expressions cannot have 
 ---*/
 
 function main(): void {
-    let x = 2n ** -1n
+    let x = 2n ** ((-1n))
 }
