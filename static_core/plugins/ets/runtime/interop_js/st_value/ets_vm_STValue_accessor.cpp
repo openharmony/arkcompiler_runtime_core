@@ -1254,6 +1254,10 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
 
     napi_value newValue = jsArgv[1];
     auto *newValueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, newValue));
+    if (UNLIKELY(newValueData == nullptr)) {
+        STValueThrowJSError(env, "arg value is not an STValue instance");
+        return nullptr;
+    }
 
     ani_variable getVariable {nullptr};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Namespace_FindVariable(aniNamespace, variableName.c_str(), &getVariable));
