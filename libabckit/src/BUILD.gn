@@ -125,11 +125,9 @@ ohos_shared_library("libabckit") {
 
   if (is_linux) {
     libs = [ "stdc++fs" ]
-    ldflags = [ "-Wl,--allow-multiple-definition" ]
   }
 
   if (is_mingw || is_win) {
-    ldflags = [ "-Wl,--allow-multiple-definition" ]
     output_extension = "dll"
   } else {
     output_extension = "so"
@@ -162,8 +160,9 @@ group("libabckit_all") {
   deps += libabckit_so_deps
   deps += [ ":libabckit_source_set" ]
   deps += [
+    "$ark_root_dynamic/abc2program:abc2program_frontend_static",
     "$ark_root_static/abc2program:arkts_abc2program_static",
-    "$ark_root_static/assembler:libarktsassembler_static",
+    "$ark_root_static/assembler:libarktsassembler_frontend_static",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt_frontend_static",
     "$ark_root_static/libarkbase:libarktsbase_frontend_static",
     "$ark_root_static/libarkfile:libarktsfile_frontend_static",
