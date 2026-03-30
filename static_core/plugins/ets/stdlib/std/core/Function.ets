@@ -22,20 +22,6 @@ package std.core;
 
 native function getFunctionObjectNameFromAnnotation(func: Object): string;
 
-export @interface NamedFunctionObject {
-    name: string
-}
-
-/**
- * An annotation that marks that a functional
- * object was lowered from an async function.
- * @typedef { AsyncFunctionObject }
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export @interface AsyncFunctionObject {}
-
 export interface Function {
     unsafeCall(...r: FixedArray<Any>): Any
     get name(): string

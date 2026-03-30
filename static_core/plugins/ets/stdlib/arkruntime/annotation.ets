@@ -36,4 +36,66 @@ export namespace annotation {
 
     @annotation.BytecodeAPI @Retention("RUNTIME")
     export @interface Async { /* properties are not defined */ }
+
+    /**
+    * An annotation that marks that a functional
+    * object is named function.
+    * @typedef { namedFunctionObject }
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
+    */
+    @annotation.BytecodeAPI
+    export @interface NamedFunctionObject {
+        name: string
+    }
+
+    /**
+    * An annotation that marks that a functional
+    * object was lowered from an async function.
+    * @typedef { AsyncFunctionObject }
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
+    */
+    @annotation.BytecodeAPI
+    export @interface AsyncFunctionObject {}
+
+    /**
+    * Defines ModuleDeclaration annotation
+    * Support import from .abc file.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
+    */
+    export @interface ModuleDeclaration {
+        /**
+        * string with declaration text, which is used for typecheck when binary import is performed
+        * @type { string }
+        * @syscap SystemCapability.Utils.Lang
+        * @FaAndStageModel
+        * @since 24
+        */
+        declaration: string;
+    }
+
+    /**
+     * Defines OptionalParametersAnnotation annotation
+     * Mark function which contain optional param and rest param.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export @interface OptionalParametersAnnotation {
+        /**
+         * Minimum number of optional param and rest param.
+         * @type { int }
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
+        minArgCount: int
+    };
+
 }
+
