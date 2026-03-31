@@ -92,14 +92,20 @@ function main(): int {
   })
 
   suite.addTest("string[][] assignable to Object", () => {
-    let arr: string[][] = new string[2][2]
+    let arr: string[][] = [
+    ['', ''],
+    ['', '']
+    ]
     arr[1][1] = "ABC"
     let obj: Object = arr
     arktest.assertTrue(obj === arr)
   })
 
   suite.addTest("Z[][] assignable to Object", () => {
-    let arr: Z[][] = new Z[2][2]
+    let arr: Z[][] = [
+    [undefined, undefined],
+    [undefined, undefined]
+    ]
     let obj: Object = arr
     arktest.assertTrue(obj === arr)
   })

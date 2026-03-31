@@ -73,30 +73,6 @@ cases:
         arktest.assertEQ(a[i], [check_value])
       }
 
-  - desc: Create 2D Array with predefined types
-    check_variants:
-      - {check_type: "number", check_value: "0"}
-      - {check_type: "double", check_value: "0.0"}
-      - {check_type: "float", check_value: "0.0f"}
-      - {check_type: "long", check_value: "0"}
-      - {check_type: "int", check_value: "0"}
-      - {check_type: "short", check_value: "0"}
-      - {check_type: "byte", check_value: "0"}
-      - {check_type: "string", check_value: "\"\""}
-      - {check_type: "bigint", check_value: "0n"}
-      - {check_type: "char", check_value: "c'\\u0000'"}
-      - {check_type: "boolean", check_value: "false"}
-    logic: |-
-      let a = new [check_type][30][10]
-      arktest.assertEQ(a.length, 30)
-      arktest.assertTrue(a[0][0] instanceof [check_type])
-      for (let i = 0; i < 30; i++) {
-        arktest.assertEQ(a[i].length, 10)
-        for (let j = 0; j < 10; j++) {
-          arktest.assertEQ(a[i][j], [check_value])
-        }
-      }
-
   - desc: |-
       >-
         Create Array with type that has constructor

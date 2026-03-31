@@ -88,54 +88,6 @@ cases:
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][] = new number[size][1] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][] = new number[1][size] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][] = new number[1][size](1.0) // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][] = new number[1][size]((index1, index2): number => { return 1.0 }) // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][][] = new number[size][1][1] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][][] = new number[1][size][1] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][][] = new number[1][1][size] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: long = 1
-    use: |-
-      let v: number[][][] = new number[1][1][size](1.0) // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
       let size: Number = new Number(1.0)
     use: |-
       let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
@@ -148,18 +100,6 @@ cases:
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-
-      let size: number = 1.0
-    use: |-
-      let v: number[][] = new number[1][size] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: number = 1.0
-    use: |-
-      let v: number[][][] = new number[1][1][size] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
       let size: Float = new Float(1.0f)
     use: |-
       let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
@@ -169,18 +109,6 @@ cases:
       let size: float = 1.0f
     use: |-
       let v: number[] = new number[size](0) // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: float = 1.0f
-    use: |-
-      let v: number[][] = new number[1][size] // CTE: dimension is not assignable to int type
-    expected_out: "Expected CTE output is unknown"
-
-  - decl: |-
-      let size: float = 1.0f
-    use: |-
-      let v: number[][][] = new number[1][1][size] // CTE: dimension is not assignable to int type
     expected_out: "Expected CTE output is unknown"
 
   - decl: |-

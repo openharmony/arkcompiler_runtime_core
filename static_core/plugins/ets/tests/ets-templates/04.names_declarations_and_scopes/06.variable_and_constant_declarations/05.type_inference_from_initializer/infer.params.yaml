@@ -20,9 +20,6 @@ cases:
   - decl: "let arr = new (Error|undefined)[1](undefined);  // inferred array of Error|undefined"
     assert: arr[0] == undefined
 
-  - decl: "let arr:FixedArray<FixedArray<FixedArray<byte>>> = new byte[1][2][3];  // inferred three-dimensional array of bytes"
-    assert: arr instanceof FixedArray<FixedArray<FixedArray<byte>>> && arr[0][0][0] == 0
-
   - decl: |-
       enum Color { Red, Green, Blue }
       let c = Color.Red;  // inferred enum type
