@@ -15,6 +15,7 @@
 
 package std.concurrency;
 
+import { WorkerPriority } from "std/core";
 import { InteropSerializeHelper } from "std/interop";
 
 export namespace taskpool {
@@ -98,7 +99,11 @@ export namespace taskpool {
                 removeFromIdleWorkers(this);
 
                 const internalTask = InternalTask.of(task);
-                this.currentPriority = internalTask?.priority;
+                const taskPriority = internalTask?.priority;
+                if (taskPriority != undefined && this.currentPriority !== taskPriority) {
+                    this.currentPriority = taskPriority;
+                    this.updateCurrentWorkerPriority(taskPriority);
+                }
                 ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
                     const curCount: int | undefined = this.currentTasks.get(task);
                     this.currentTasks.set(task, curCount == undefined ? 1 : curCount + 1);
@@ -152,6 +157,10 @@ export namespace taskpool {
                 ConcurrencyHelpers.condVarNotifyAll(globalTaskCondVar, globalTaskQueuesMutex);
             });
             this.join();
+        }
+
+        private updateCurrentWorkerPriority(taskPriority: Priority): void {
+            this.setPriority(GlobalQueueWorker.workerPriorityMap[taskPriority.valueOf()]);
         }
 
         public isWorkerActive(): boolean {
@@ -381,6 +390,12 @@ export namespace taskpool {
         private blockedExpandTimerId: int = -1;
         // managerWorker only: worker ids that already triggered a special expansion.
         private blockedExpandedWorkerIds: Set<int> = new Set<int>();
+        private static readonly workerPriorityMap: WorkerPriority[] = [
+            WorkerPriority.PRIORITY_HIGH,
+            WorkerPriority.PRIORITY_DEFAULT,
+            WorkerPriority.PRIORITY_LOW,
+            WorkerPriority.PRIORITY_IDLE
+        ];
     }
 
     /**

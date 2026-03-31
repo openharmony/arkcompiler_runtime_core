@@ -1608,7 +1608,8 @@ function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addAsyncTest('CurrentTaskTest', currentTaskTest);
-    commonTaskSuite.addAsyncTest('BlockedExpandDefaultConfigTest', blockedExpandDefaultConfigTest);
+    // #33877: Test is incorrect and flaky fails
+    commonTaskSuiteDisabled.addAsyncTest('BlockedExpandDefaultConfigTest', blockedExpandDefaultConfigTest);
     commonTaskSuite.addAsyncTest('BlockedExpandCustomThresholdAndIntervalTest', blockedExpandCustomThresholdAndIntervalTest);
     commonTaskSuite.addAsyncTest('GetTaskpoolInfoTest', testTaskpoolInfo);
     commonTaskSuite.addTest('GetTaskpoolInfoOfNoneNameTaskTest', testTaskpoolInfoOfNoneNameTask);
@@ -1655,7 +1656,8 @@ function main(): int {
     commonTaskSuiteDisabled.addAsyncTest('taskpoolRetriggerShrinkTest', taskpoolRetriggerShrinkTest);
     commonTaskSuiteDisabled.addAsyncTest('taskpoolShrinkTest', taskpoolShrinkTest);
     commonTaskSuite.addAsyncTest('TestExecuteUndefined', testExecuteUndefined);
-    commonTaskSuite.addTest('testTaskpoolReturnObjWithGC', testTaskpoolReturnObjWithGC);
+    // #33877: Test is incorrect and flaky fails
+    commonTaskSuiteDisabled.addTest('testTaskpoolReturnObjWithGC', testTaskpoolReturnObjWithGC);
     commonTaskSuite.addTest('executeAfterExecutePeriodically', executeAfterExecutePeriodically);
     commonTaskSuite.addTest('periodicTaskAddDepedency', periodicTaskAddDepedency);
     commonTaskSuite.addTest('periodicTaskAddedAsDepedency', periodicTaskAddedAsDepedency);

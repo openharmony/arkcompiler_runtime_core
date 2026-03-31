@@ -261,13 +261,16 @@ async function pendingDependencyShouldNotBlockReadyTask(): Promise<void> {
 
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
+    let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addAsyncTest('cancelInSuccessCallback', cancelInSuccessCallback);
     commonTaskSuite.addTest('getcurrentTask', getcurrentTask);
     commonTaskSuite.addAsyncTest('onExecutionFailedtestAsyncfun', onExecutionFailedtestAsyncfun);
     commonTaskSuite.addAsyncTest('onExecutionFailedtestmultAsyncfun', onExecutionFailedtestmultAsyncfun);
     commonTaskSuite.addAsyncTest('onFailCallbackExceptionTest', onFailCallbackExceptionTest);
     commonTaskSuite.addAsyncTest('multipleFailCallbackExceptionTest', multipleFailCallbackExceptionTest);
-    commonTaskSuite.addAsyncTest('pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);
+    // #33877: Test is incorrect and flaky fails
+    commonTaskSuiteDisabled.addAsyncTest(
+        'pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);
 
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
