@@ -54,7 +54,6 @@ export class RegExpResultArray extends Array<String | undefined> {
     protected input_: String = ""
 
     private endIndex: int = 0
-    private wasProcessed: boolean = false
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
     protected indices_: Array<Array<int>> = []
@@ -93,7 +92,6 @@ export class RegExpResultArray extends Array<String | undefined> {
         // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
         this.updateGroups()
         this.updateIndicesAndResult(hasIndices)
-        this.wasProcessed = true
     }
 
     /**
@@ -171,19 +169,12 @@ export class RegExpResultArray extends Array<String | undefined> {
         throw new Error("not overridden")
     }
 
-    // NOTE(mgroshev): remove it as part of #20259
-    public getWasProcessed(): boolean {
-        return this.wasProcessed
-    }
-
     private updateIndicesAndResult(hasIndices: boolean): void {
         const data = this.resultRaw_.split(',')
         const n: int = (data.length / 2)
 
         if (n > this.length) {
             this.extendTo(n, undefined as (String | undefined))
-        } else if (n < this.length) {
-            this.shrinkTo(n)
         }
 
         if (hasIndices) {
@@ -450,9 +441,6 @@ export class RegExpExecArray extends RegExpResultArray {
         let result = new RegExpGroupsContainer()
 
         for (let groupData of this.groupsRaw_.split(";")) {
-            if (groupData.length == 0) {
-                continue
-            }
             let unitData = groupData.split(",")
             if (unitData.length != 3) {
                 throw new Error("internal error: invalid group data")
@@ -468,10 +456,6 @@ export class RegExpExecArray extends RegExpResultArray {
             } else {
                 result.set(unitData[0], undefined)
             }
-        }
-        if (result.size == 0) {
-            this.groups = undefined
-            return
         }
         this.groups = result
     }
@@ -751,9 +735,7 @@ export class RegExp extends Object {
         const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            if (!res.getWasProcessed() && res.isCorrect) {
-                res.postExecProcessing(res, str, res.index, this.hasIndices)
-            }
+            res.postExecProcessing(res, str, res.index, this.hasIndices)
             return res
         } else {
             return null
@@ -779,9 +761,7 @@ export class RegExp extends Object {
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            if (!res.getWasProcessed() && res.isCorrect) {
-                res.postExecProcessing(res, str, res.index!, this.hasIndices)
-            }
+            res.postExecProcessing(res, str, res.index!, this.hasIndices)
             return res
         } else {
             return null
