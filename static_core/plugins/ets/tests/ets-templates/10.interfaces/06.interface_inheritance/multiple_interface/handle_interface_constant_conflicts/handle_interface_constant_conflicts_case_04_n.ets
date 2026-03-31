@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@ desc: >-
     Verify that a class implementing two interfaces with the same constant name but different types
     (number[] and string[]) causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0136: Method CONSTANT(): Array<Double>|Array<String> in TestClass not overriding any method
 ---*/
 
 interface InterfaceA {

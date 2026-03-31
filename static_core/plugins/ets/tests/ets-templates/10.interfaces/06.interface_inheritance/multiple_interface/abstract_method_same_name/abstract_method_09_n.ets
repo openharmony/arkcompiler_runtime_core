@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,9 @@
 /*---
 desc: The method with the same name has the same parameter type but different return types.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildClass is not abstract
+    and does not override abstract method calculate(value: Double): Double in Parent1
 ---*/
 
 interface Parent1 {

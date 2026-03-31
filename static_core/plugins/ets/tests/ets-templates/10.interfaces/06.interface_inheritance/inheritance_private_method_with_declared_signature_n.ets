@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,6 +21,9 @@ assert: >-
         Signature of m is compatible with the public instance method 𝑚′ in a superinterface of I, and
         𝑚′ is otherwise accessible to code in I.
 tags: [negative, compile-only]
+expected_out: >-
+    Semantic error ESE0141: foo(): Int in B cannot override foo(): Int in A
+    because overridden method has weaker access privilege.
 ---*/
 
 interface A {

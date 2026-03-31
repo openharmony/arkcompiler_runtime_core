@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,9 @@
 desc: Overriding getter.
 assertion:  A compile-time error occurs if a field overrides getter or setter in a superclass.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE129829: 'num' is defined as an accessor in class 'C',
+    but is overridden here in 'D' as an instance property.
 ---*/
 
 class C {
