@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require "ostruct"
+require 'stringio'
 require_relative 'instructions_data'
 require_relative 'output'
 

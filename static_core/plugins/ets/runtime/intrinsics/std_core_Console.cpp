@@ -28,6 +28,8 @@
 
 #ifdef PANDA_TARGET_OHOS
 #include <hilog/log.h>
+#elif PANDA_TARGET_ANDROID
+#include <android/log.h>
 #endif  // PANDA_TARGET_OHOS
 
 namespace ark::ets::intrinsics {
@@ -108,6 +110,35 @@ void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *dat
         str.erase(std::remove(str.begin(), str.end(), '\0'), str.end());
         LogPrint(lvl, "arkts.console", str.c_str());
     }
+#elif PANDA_TARGET_ANDROID
+    if (lvl == ConsoleLevel::PRINTLN) {
+        return;
+    }
+
+    std::string str(res);
+    str.erase(std::remove(str.begin(), str.end(), '\0'), str.end());
+
+    auto toNativeLevel = [](ConsoleLevel level) {
+        switch (level) {
+            case ConsoleLevel::DEBUG:
+                return ANDROID_LOG_DEBUG;
+            case ConsoleLevel::INFO:
+                return ANDROID_LOG_INFO;
+            case ConsoleLevel::LOG:
+                return ANDROID_LOG_INFO;
+            case ConsoleLevel::WARN:
+                return ANDROID_LOG_WARN;
+            case ConsoleLevel::ERROR:
+                return ANDROID_LOG_ERROR;
+            case ConsoleLevel::PRINTLN:
+                return ANDROID_LOG_INFO;
+            default:
+                break;
+        }
+        return ANDROID_LOG_INFO;
+    };
+
+    __android_log_write(toNativeLevel(lvl), "arkts.console", str.c_str());
 #else
     (lvl == ConsoleLevel::ERROR ? std::cerr : std::cout) << res << std::flush;
 #endif  // PANDA_TARGET_OHOS

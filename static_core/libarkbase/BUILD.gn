@@ -117,7 +117,7 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libarkbase/trace.cpp",
   ]
 
-  if (is_mob) {
+  if (is_mob && !is_android) {
     libarkbase_sources +=
         [ "$ark_root/platforms/mobile/libarkbase/library_loader_load.cpp" ]
   } else {
@@ -178,7 +178,7 @@ if (current_cpu == "arm64" && !is_mac && target_os != "ios") {
   libarkbase_sources += [ "$ark_root/libarkbase/arch/default/cpu_features.cpp" ]
 }
 
-if (is_mob) {
+if (is_mob && !is_android) {
   copy("coherency_line_size_h") {
     sources = [ "$ark_root/platforms/mobile/libarkbase/coherency_line_size.h" ]
     outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]

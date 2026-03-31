@@ -397,7 +397,7 @@ private:
 
 }  // namespace ark
 
-#if defined(PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS)
+#if defined(PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS) && !defined(PANDA_TARGET_ANDROID)
 #include "platforms/mobile/runtime/mutator-inl.cpp"
 #endif  // PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS
 
