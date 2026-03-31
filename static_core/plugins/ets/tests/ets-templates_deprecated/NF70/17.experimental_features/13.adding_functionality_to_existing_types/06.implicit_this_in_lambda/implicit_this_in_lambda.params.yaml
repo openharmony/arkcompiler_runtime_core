@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,8 +13,6 @@
 
 ---
 cases:
-  # All test cases moved to deprecated/NF70
-  # and some of them deleted from this file
   - decl: |
       class A {
         foo(): int { return 0 }
@@ -25,6 +23,14 @@ cases:
       })
   - decl: |
       class A {
+        foo(): int { return 0 }
+      }
+      function f(context: (this: A) => void) { context(new A()) }
+      f((this: A): void => {
+        arktest.assertEQ(foo(), 0)
+      })
+  - decl: |
+      class A {
         m: int = 0
       }
       function f(context: (this: A) => void) { context(new A()) }
@@ -36,8 +42,32 @@ cases:
         m: int = 0
       }
       function f(context: (this: A) => void) { context(new A()) }
+      f((this: A): void => {
+        arktest.assertEQ(m, 0)
+      })
+  - decl: |
+      class A {
+        m: int = 0
+      }
+      function f(context: (this: A) => void) { context(new A()) }
+      f() {
+        arktest.assertEQ(m, 0)
+      }
+  - decl: |
+      class A {
+        m: int = 0
+      }
+      function f(context: (this: A) => void) { context(new A()) }
       f() {
         arktest.assertEQ(this.m, 0)
+      }
+  - decl: |
+      class A {
+        foo(): int { return 0 }
+      }
+      function f(context: (this: A) => void) { context(new A()) }
+      f() {
+        arktest.assertEQ(foo(), 0)
       }
   - decl: |
       class A {
