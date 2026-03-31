@@ -1520,7 +1520,7 @@ public:
         graph_->EraseMarker(marker_);
     }
 
-    Marker GetMarker()
+    Marker GetMarker() const
     {
         return marker_;
     }

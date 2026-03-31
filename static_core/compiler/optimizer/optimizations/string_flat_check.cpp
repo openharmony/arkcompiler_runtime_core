@@ -96,7 +96,7 @@ void StringFlatCheck::InsertStringFlatCheck(IntrinsicInst *intrinsic, uint32_t s
     }
 }
 
-Inst *StringFlatCheck::GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *inst)
+Inst *StringFlatCheck::GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *inst) const
 {
     for (auto &user : inst->GetUsers()) {
         auto *userInst = user.GetInst();
@@ -110,7 +110,7 @@ Inst *StringFlatCheck::GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *in
     return nullptr;
 }
 
-bool StringFlatCheck::MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *intrinsic)
+bool StringFlatCheck::MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *intrinsic) const
 {
     ASSERT(flatCheck->Is(Opcode::StringFlatCheck));
     ASSERT(!flatCheck->IsDominate(intrinsic));
@@ -151,7 +151,7 @@ bool StringFlatCheck::MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *
     return true;
 }
 
-Inst *StringFlatCheck::InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst *inputInst)
+Inst *StringFlatCheck::InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst *inputInst) const
 {
     auto *graph = GetGraph();
     auto *flatCheck = graph->CreateInstStringFlatCheck(DataType::REFERENCE, intrinsic->GetPc());
@@ -185,7 +185,7 @@ void StringFlatCheck::ReplaceUsers(Inst *inputInst, Inst *flatCheck)
         for (auto &user : inst->GetUsers()) {
             auto *userInst = user.GetInst();
             if (CanUpdateInput(userInst, flatCheck)) {
-                users_.push_back({user.GetIndex(), userInst});
+                users_.emplace_back(user.GetIndex(), userInst);
             }
         }
     }
@@ -195,7 +195,7 @@ void StringFlatCheck::ReplaceUsers(Inst *inputInst, Inst *flatCheck)
     }
 }
 
-bool StringFlatCheck::CanUpdateInput(Inst *userInst, Inst *flatCheck)
+bool StringFlatCheck::CanUpdateInput(Inst *userInst, Inst *flatCheck) const
 {
     if (!flatCheck->IsDominate(userInst) || userInst == flatCheck) {
         return false;
@@ -208,7 +208,7 @@ bool StringFlatCheck::CanUpdateInput(Inst *userInst, Inst *flatCheck)
     return !SeparatedByOsrEntry(userInst->GetBasicBlock(), flatCheck->GetBasicBlock());
 }
 
-void StringFlatCheck::InsertStringFlatCheckSaveState(Inst *flatCheck, SaveStateInst *saveState)
+void StringFlatCheck::InsertStringFlatCheckSaveState(Inst *flatCheck, SaveStateInst *saveState) const
 {
     auto *graph = GetGraph();
     saveState->SetPc(flatCheck->GetPc());
@@ -227,7 +227,7 @@ void StringFlatCheck::InsertStringFlatCheckSaveState(Inst *flatCheck, SaveStateI
     flatCheck->SetSaveState(saveState);
 }
 
-void StringFlatCheck::FixSaveStates()
+void StringFlatCheck::FixSaveStates() const
 {
     SaveStateBridgesBuilder ssb;
     for (auto *bb : GetGraph()->GetBlocksRPO()) {
@@ -237,7 +237,7 @@ void StringFlatCheck::FixSaveStates()
     }
 }
 
-bool StringFlatCheck::SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2)
+bool StringFlatCheck::SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2) const
 {
     ASSERT(GetGraph()->IsOsrMode());
     if (bb1->GetLoop() != bb2->GetLoop()) {

@@ -347,6 +347,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/loop_unswitch_test.cpp
     tests/liveness_analyzer_test.cpp
     tests/live_registers_test.cpp
+    tests/load_gc_entrypoint_checker_test.cpp
     tests/loop_analyzer_test.cpp
     tests/loop_peeling_test.cpp
     tests/loop_idioms_test.cpp

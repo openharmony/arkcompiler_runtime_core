@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include <sys/types.h>
 #include "codegen_test.h"
 #include "optimizer/ir/inst.h"
+#include <sys/types.h>
 
 namespace ark::compiler {
 
 // NOLINTBEGIN(readability-magic-numbers,modernize-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
-class OptionalInputsTest : public CodegenTest {
+class OptionalInputsTest : public UncheckedGraphTestMixin<CodegenTest> {
 public:
     template <typename Callback>
     LoadInst *CreateGraph(Callback &&createLoadArray)
@@ -32,7 +32,8 @@ public:
             PARAMETER(2U, 2U).u64();  // index
             BASIC_BLOCK(2U, -1L)
             {
-                createLoadArray(INST(3U, Opcode::LoadArray).SetNeedReadBarrier(true).ref(), 1U, 2U, 0U);
+                std::forward<Callback>(createLoadArray)(INST(3U, Opcode::LoadArray).SetNeedReadBarrier(true).ref(), 1U,
+                                                        2U, 0U);
                 INST(4U, Opcode::LoadArrayI).u64().Inputs(3U).Imm(0U);
                 INST(5U, Opcode::Return).u64().Inputs(4U);
             }
@@ -41,7 +42,7 @@ public:
         return INS(3U).CastToLoadArray();
     }
 
-    bool CompileGraph()
+    bool CompileGraph() const
     {
         InPlaceCompilerTaskRunner taskRunner;
         taskRunner.GetContext().SetGraph(GetGraph());
@@ -61,7 +62,7 @@ public:
         GetExecModule().SetInstructions(codeEntry, codeExit);
 
         GetExecModule().SetParameter(0U, arg1);
-        std::array<ObjectPointerType, N> wrapped;
+        std::array<ObjectPointerType, N> wrapped {};
         std::transform(std::begin(arg2), std::end(arg2), std::begin(wrapped), [this](uint64_t val) {
             return static_cast<ObjectPointerType>(
                 reinterpret_cast<uintptr_t>(GetExecModule().CreateArray(&val, 1, GetObjectAllocator())));

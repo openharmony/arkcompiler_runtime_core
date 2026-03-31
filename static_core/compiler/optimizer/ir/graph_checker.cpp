@@ -24,6 +24,7 @@
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/inst.h"
+#include "optimizer/ir/use_def_path_walker.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "inst_checker_gen.h"
 #include "intrinsic_string_flat_check.inl"
@@ -108,6 +109,7 @@ void GraphChecker::UserInputCheck(Graph *graph)
     }
 }
 
+// CC-OFFNXT(G.FUD.05) solid logic
 bool GraphChecker::Check()
 {
     success_ = InstChecker::Run(GetGraph());
@@ -163,6 +165,8 @@ bool GraphChecker::Check()
         // Check that between savestate and it's runtime call user have not reference insts.
         CheckSaveStatesWithRuntimeCallUsers();
     }
+    CheckLoadGCEntrypointBarrierTypes();
+    CheckLoadGCEntrypointToUserPaths();
 #endif  // COMPILER_DEBUG_CHECKS
     return GetStatus();
 }
@@ -1018,60 +1022,37 @@ bool GraphChecker::IsPhiUserSafeToSkipObjectCheck(Inst *inst, Marker visited)
     return true;
 }
 
+namespace {
 // Checks if object is correctly used in SaveStates between it and user
-class ObjectSSChecker {
+class ObjectSSChecker final : public UseDefPathWalker<ObjectSSChecker> {
 public:
-    explicit ObjectSSChecker(Inst *object) : object_(object), visited_(object->GetBasicBlock()->GetGraph()) {}
+    explicit ObjectSSChecker(Inst *object) : UseDefPathWalker(object) {}
 
-    bool Run(const Inst *user, const BasicBlock *block, Inst *startFrom)
+    bool Check(User &user) const
     {
-        if (startFrom != nullptr) {
-            auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, startFrom);
-            for (; it != block->AllInstsSafeReverse().end(); ++it) {
-                auto inst = *it;
-                if (inst == nullptr) {
-                    break;
-                }
-                if (inst->SetMarker(visited_.GetMarker()) || inst == object_ || inst == user) {
-                    return true;
-                }
-                if (!FindAndRemindObjectInSaveState(inst)) {
-                    return false;
-                }
-            }
-        }
-        for (auto pred : block->GetPredsBlocks()) {
-            // Catch-begin block has edge from try-end block, and all try-blocks should be visited from this edge.
-            // `object` can be placed inside try-block - after try-begin, so that visiting try-begin is wrong
-            if (block->IsCatchBegin() && pred->IsTryBegin()) {
-                continue;
-            }
-            if (!Run(user, pred, pred->GetLastInst())) {
-                return false;
-            }
-        }
-        return true;
+        return Walk(user);
     }
 
-    Inst *FailedSS()
+    const Inst *FailedSS() const
     {
         return failedSs_;
     }
 
 private:
-    static bool FindObjectInSaveState(Inst *object, Inst *ss)
+    friend UseDefPathWalker;
+
+    static bool FindObjectInSaveState(Inst *object, const Inst *ss)
     {
         if (!object->IsMovableObject()) {
             return true;
         }
         while (ss != nullptr && object->IsDominate(ss)) {
-            auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(), [object, ss](Input input) {
-                return ss->GetDataFlowInput(input.GetInst()) == object;
-            });
+            auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(),
+                                   [object](Input input) { return Inst::GetDataFlowInput(input.GetInst()) == object; });
             if (it != ss->GetInputs().end()) {
                 return true;
             }
-            auto caller = static_cast<SaveStateInst *>(ss)->GetCallerInst();
+            auto caller = static_cast<const SaveStateInst *>(ss)->GetCallerInst();
             if (caller == nullptr) {
                 break;
             }
@@ -1080,19 +1061,23 @@ private:
         return false;
     }
 
-    bool FindAndRemindObjectInSaveState(Inst *inst)
+    bool FindAndRemindObjectInSaveState(const Inst *inst) const
     {
-        if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object_, inst)) {
+        if (IsSaveStateForGc(inst) && !FindObjectInSaveState(GetDef(), inst)) {
             failedSs_ = inst;
             return false;
         }
         return true;
     }
 
-    Inst *object_;
-    Inst *failedSs_ {};
-    MarkerHolder visited_;
+    bool HandleInst(const Inst *inst) const
+    {
+        return FindAndRemindObjectInSaveState(inst);
+    }
+
+    mutable const Inst *failedSs_ {};
 };
+}  // namespace
 
 void GraphChecker::CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users)
 {
@@ -1110,35 +1095,33 @@ void GraphChecker::CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users)
 
     ObjectSSChecker objectSSChecker(inst);
     MarkerHolder osrVisited(GetGraph());
-    for (auto &it : *users) {
-        auto user = it->GetInst();
-        if (user->IsCatchPhi()) {
+    for (auto it : *users) {
+        auto &user = *it;
+        auto *userInst = user.GetInst();
+        if (userInst->IsCatchPhi()) {
             continue;
         }
         // true if we do not need check for this user (because it is Phi used only in SaveStates)
-        bool skipObjCheckUser = false;
-        BasicBlock *startBb;
-        Inst *startInst;
-        if (user->IsPhi()) {
+        auto skipObjCheckUser = [this, userInst] {
             MarkerHolder visited(GetGraph());
-            skipObjCheckUser = IsPhiUserSafeToSkipObjectCheck(user, visited.GetMarker());
-            // check SaveStates on path between inst and the end of corresponding predecessor of Phi's block
-            startBb = user->GetBasicBlock()->GetPredsBlocks()[it->GetBbNum()];
-            startInst = startBb->GetLastInst();
-        } else {
-            // check SaveStates on path between inst and user
-            startBb = user->GetBasicBlock();
-            startInst = user->GetPrev();
-        }
-        CHECKER_DO_IF_NOT_AND_PRINT(skipObjCheck || skipObjCheckUser || objectSSChecker.Run(user, startBb, startInst),
-                                    std::cerr << "Object v" << inst->GetId() << " used in v" << user->GetId()
+            return userInst->IsPhi() && IsPhiUserSafeToSkipObjectCheck(userInst, visited.GetMarker());
+        };
+
+        CHECKER_DO_IF_NOT_AND_PRINT(skipObjCheck || skipObjCheckUser() || objectSSChecker.Check(user),
+                                    std::cerr << "Object v" << inst->GetId() << " used in v" << userInst->GetId()
                                               << ", but not found on the path between them in the "
                                               << objectSSChecker.FailedSS()->GetOpcodeStr() << " v"
                                               << objectSSChecker.FailedSS()->GetId() << ":\n"
                                               << *inst << std::endl
-                                              << *user << std::endl
+                                              << *userInst << std::endl
                                               << *objectSSChecker.FailedSS() << std::endl);
-        CheckSaveStateOsrRec(inst, user, startBb, osrVisited.GetMarker());
+        // handle instructions on path between inst and user
+        auto startBb = userInst->GetBasicBlock();
+        if (userInst->IsPhi()) {
+            // handle instructions on path between inst and the end of corresponding predecessor of Phi's block
+            startBb = userInst->GetBasicBlock()->GetPredsBlocks()[user.GetBbNum()];
+        }
+        CheckSaveStateOsrRec(inst, userInst, startBb, osrVisited.GetMarker());
     }
     users->clear();
 }
@@ -1224,6 +1207,502 @@ void GraphChecker::ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, cons
                                           << *ss << std::endl);
 }
 
+namespace {
+class GCEntrypointBarrierTypeChecker final {
+public:
+    /// A load or store instruction must get the GC Barrier on the different input.
+    struct UnexpectedBarrierUseFault {
+        const Inst *failedInst;     // NOLINT(misc-non-private-member-variables-in-classes)
+        const Inst *barrierSource;  // NOLINT(misc-non-private-member-variables-in-classes)
+        explicit UnexpectedBarrierUseFault(const Inst *failed, const Inst *bsource)
+            : failedInst(failed), barrierSource(bsource)
+        {
+            ASSERT(failed != nullptr);
+            ASSERT(bsource != nullptr);
+        }
+    };
+    /// A load or store instruction expect the different type of the GC barrier.
+    struct UnexpectedBarrierTypeFault {
+        std::optional<LoadGCEntrypointInst::BarrierType>
+            barrierType;            // NOLINT(misc-non-private-member-variables-in-classes)
+        const Inst *failedInst;     // NOLINT(misc-non-private-member-variables-in-classes)
+        const Inst *barrierSource;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+        explicit UnexpectedBarrierTypeFault(const Inst *failed, std::optional<LoadGCEntrypointInst::BarrierType> btype,
+                                            const Inst *bsource)
+            : barrierType(btype), failedInst(failed), barrierSource(bsource)
+        {
+            ASSERT(failed != nullptr);
+            ASSERT(bsource != nullptr);
+        }
+    };
+    /// A phi instruction takes different types of the GC barrier.
+    struct InconsistentBarrierTypeFault {
+        const Inst *failedInst;          // NOLINT(misc-non-private-member-variables-in-classes)
+        const Inst *barrierSource;       // NOLINT(misc-non-private-member-variables-in-classes)
+        const Inst *inconsistentSource;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+        explicit InconsistentBarrierTypeFault(const Inst *failed, const Inst *bsource1, const Inst *bsource2)
+            : failedInst(failed), barrierSource(bsource1), inconsistentSource(bsource2)
+        {
+            ASSERT(failed != nullptr);
+            ASSERT(bsource1 != nullptr);
+            ASSERT(bsource2 != nullptr);
+        }
+    };
+
+    using FailedResult = std::variant<std::monostate, UnexpectedBarrierUseFault, UnexpectedBarrierTypeFault,
+                                      InconsistentBarrierTypeFault>;
+
+    explicit GCEntrypointBarrierTypeChecker(Graph *graph)
+        : barrierSources_(graph->GetLocalAllocator()->Adapter()),
+          worklist_(graph->GetLocalAllocator()->Adapter()),
+          graph_(graph)
+    {
+    }
+
+    FailedResult Check();
+
+private:
+    static bool IsPotentialLoadGCEntrypoint(const Inst *inst)
+    {
+        return inst->GetType() == DataType::POINTER && !inst->IsStore();
+    }
+
+    void CheckBarrierTypesFromSources();
+
+    bool CheckBarrierTypeUser(Inst *inst, const Inst *source, const Inst *barrierSource, Marker checked);
+    bool CheckBarrierTypeInMemoryInst(Inst *inst, const Inst *source, const Inst *barrierSource,
+                                      LoadGCEntrypointInst::BarrierType allowedBarrierType);
+    bool CheckBarrierTypeInPhi(Inst *inst, const Inst *barrierSource, Marker checked);
+    bool CheckNoBarrierInOtherInst(Inst *inst, const Inst *barrierSource);
+
+    const Inst *GetBarrierSource(const Inst *inst) const
+    {
+        ASSERT(IsPotentialLoadGCEntrypoint(inst));
+        if (inst->IsPhi()) {
+            auto it = barrierSources_.find(inst);
+            if (it == barrierSources_.end()) {
+                return nullptr;
+            }
+            ASSERT(!it->second->IsPhi());
+            return it->second;
+        }
+
+        // By default, the source of the barrier type is the instruction itself. LoadGCEntrypoint is a source
+        // of a correct barrier type, any other but phi are sources of the No Barrier placeholder.
+        ASSERT(!inst->IsPhi());
+        return inst;
+    }
+
+    void SetBarrierSource(Inst *inst, const Inst *barrierSource)
+    {
+        ASSERT(barrierSources_.find(inst) == barrierSources_.end());
+        barrierSources_.emplace(inst, barrierSource);
+    }
+
+    static std::optional<LoadGCEntrypointInst::BarrierType> GetProducedBarrierType(const Inst *inst)
+    {
+        ASSERT(IsPotentialLoadGCEntrypoint(inst) && !inst->IsPhi());
+        // For LoadGCEntrypoint the produced barrier type is the instruction's one.
+        if (inst->GetOpcode() == Opcode::LoadGCEntrypoint) {
+            return inst->CastToLoadGCEntrypoint()->GetBarrierType();
+        }
+        // All the others produce No Barrier type.
+        return {};
+    }
+
+    void CollectWorklistOfSources()
+    {
+        for (auto *block : graph_->GetBlocksRPO()) {
+            for (auto *inst : block->AllInsts()) {
+                // Let's consider any POINTER instruction but Phi as a potential source (that may be an incorrect one)
+                // for a GCEntrypoint optional input of a memory instruction.
+                if (IsPotentialLoadGCEntrypoint(inst) && !inst->IsPhi()) {
+                    worklist_.emplace(inst);
+                }
+            }
+        }
+    }
+
+    // barrierSources_ is a map from Phi to their first encountered concrete/non-phi barrier source.
+    // barrierSources_ is needed to generate the correct report: we need to have what instruction was the first
+    // encountered source of an inconsistent barrier type.
+    ArenaUnorderedMap<const Inst *, const Inst *> barrierSources_;
+    ArenaQueue<Inst *> worklist_;
+    Graph *graph_;
+    FailedResult failedResult_;
+};
+}  // namespace
+
+GCEntrypointBarrierTypeChecker::FailedResult GCEntrypointBarrierTypeChecker::Check()
+{
+    CollectWorklistOfSources();
+    CheckBarrierTypesFromSources();
+    return failedResult_;
+}
+
+bool GCEntrypointBarrierTypeChecker::CheckBarrierTypeInMemoryInst(Inst *inst, const Inst *source,
+                                                                  const Inst *barrierSource,
+                                                                  LoadGCEntrypointInst::BarrierType allowedBarrierType)
+{
+    auto barrierType = GetProducedBarrierType(barrierSource);
+    if (GetInstGCBarrierEntrypoint(inst) != source) {
+        if (barrierType.has_value()) {
+            failedResult_ = UnexpectedBarrierUseFault {inst, barrierSource};
+            return false;
+        }
+        return true;
+    }
+    if (barrierType != allowedBarrierType) {
+        failedResult_ = UnexpectedBarrierTypeFault {inst, barrierType, barrierSource};
+        return false;
+    }
+    return true;
+}
+
+bool GCEntrypointBarrierTypeChecker::CheckBarrierTypeInPhi(Inst *inst, const Inst *barrierSource, Marker checked)
+{
+    ASSERT(inst->IsPhi());
+    auto expectedBarrierSource = GetBarrierSource(inst);
+    if (expectedBarrierSource != nullptr) {
+        ASSERT(!expectedBarrierSource->IsPhi());
+        auto barrierType = GetProducedBarrierType(barrierSource);
+        auto expectedBarrierType = GetProducedBarrierType(expectedBarrierSource);
+        if (barrierType != expectedBarrierType) {
+            failedResult_ = InconsistentBarrierTypeFault {inst, barrierSource, expectedBarrierSource};
+            return false;
+        }
+        return true;
+    }
+    SetBarrierSource(inst, barrierSource);
+    if (!inst->IsMarked(checked)) {
+        // Only Phi's users should be checked further.
+        worklist_.emplace(inst);
+    }
+    return true;
+}
+
+bool GCEntrypointBarrierTypeChecker::CheckNoBarrierInOtherInst(Inst *inst, const Inst *barrierSource)
+{
+    if (GetProducedBarrierType(barrierSource).has_value()) {
+        // This is not allowed:
+        // 1.ptr LoadGCEntrypoint Rb
+        // 2.ptr  Return v1
+        failedResult_ = UnexpectedBarrierUseFault {inst, barrierSource};
+        return false;
+    }
+    // ...while this is:
+    // 2.ptr Load v0, v1
+    // 3.ptr Return v2
+    return true;
+}
+
+bool GCEntrypointBarrierTypeChecker::CheckBarrierTypeUser(Inst *inst, const Inst *source, const Inst *barrierSource,
+                                                          Marker checked)
+{
+    if (inst->IsStore()) {
+        return CheckBarrierTypeInMemoryInst(inst, source, barrierSource, LoadGCEntrypointInst::BarrierType::PRE_WRITE);
+    }
+    if (inst->IsLoad()) {
+        return CheckBarrierTypeInMemoryInst(inst, source, barrierSource, LoadGCEntrypointInst::BarrierType::READ);
+    }
+    if (inst->IsPhi()) {
+        return CheckBarrierTypeInPhi(inst, barrierSource, checked);
+    }
+    // No more users for LoadGCEntrypoint are allowed.
+    return CheckNoBarrierInOtherInst(inst, barrierSource);
+}
+
+void GCEntrypointBarrierTypeChecker::CheckBarrierTypesFromSources()
+{
+    MarkerHolder holder {graph_};
+    auto checked = holder.GetMarker();
+    while (!worklist_.empty()) {
+        auto *inst = worklist_.front();
+        worklist_.pop();
+        if (inst->SetMarker(checked)) {
+            continue;
+        }
+
+        const auto *producedBarrierSource = GetBarrierSource(inst);
+        for (auto &user : inst->GetUsers()) {
+            if (!CheckBarrierTypeUser(user.GetInst(), inst, producedBarrierSource, checked)) {
+                return;
+            }
+        }
+    }
+}
+
+template <typename... Ts>
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+struct Overload : Ts... {
+    using Ts::operator()...;
+};
+
+template <typename... Ts>
+Overload(Ts...) -> Overload<Ts...>;
+
+void GraphChecker::CheckLoadGCEntrypointBarrierTypes()
+{
+    // The method checks the following cases:
+
+    /*
+     * There is a LoadGCEntrypoint with a wrong barrier type in the def-use chain:
+     *
+     * [loadGCentrypoint Rb]    [loadGCentrypoint Rb]
+     *     |                       |
+     *     \----->[phi1]<---------/
+     *              |
+     *              |              [loadGCentrypoint Wb]
+     *              |                 |
+     *              \---->[phi2]<----/
+     *                      |
+     *                      |     [loadGCentrypoint Rb]
+     *                      |        |
+     *                   [phi3]<----/
+     *                      |
+     *                ["LoadArray x, y, phi3"]
+     */
+
+    /* There is a Load...ptr that is a source for the GCEntrypoint input of the final user.
+     *
+     * [loadGCentr. Rb]  [loadGCentr. Rb]   [load]            [load]
+     *     |                 |                |                 |
+     *     |                 |                |                 |
+     *     \----> [phi1]<---/                 \----> [phi2]<---/
+     *              |                                  |
+     *              |                                  |
+     *              \-------------->[phi3]<-----------/
+     *                                |
+     *                                |
+     *                          ["LoadArray x, y, phi3"]
+     */
+
+    GCEntrypointBarrierTypeChecker checker(GetGraph());
+    auto visitor = Overload {
+        [](std::monostate) {
+            // Do nothing, the barrier types are consistent.
+        },
+        [this](GCEntrypointBarrierTypeChecker::UnexpectedBarrierUseFault fault) {
+            CHECKER_DO_IF_NOT_AND_PRINT(!fault.failedInst->IsLoad() && !fault.failedInst->IsStore(),
+                                        (std::cerr
+                                         << "A load/store instruction may have the result of LoadGCEntrypoint\n"
+                                         << "in the GC barrier entrypoint input only:\n"
+                                         << "input: " << *fault.barrierSource << std::endl
+                                         << "user:  " << *fault.failedInst << std::endl));
+            CHECKER_DO_IF_NOT_AND_PRINT(
+                fault.failedInst->IsLoad() || fault.failedInst->IsStore() || fault.failedInst->IsPhi(),
+                (std::cerr
+                 << "Only Phi, load and store instructions are allowed to use\nthe result of LoadGCEntrypoint\n"
+                 << "input: " << *fault.barrierSource << std::endl
+                 << "user:  " << *fault.failedInst << std::endl));
+        },
+        [this](GCEntrypointBarrierTypeChecker::UnexpectedBarrierTypeFault fault) {
+            CHECKER_DO_IF_NOT_AND_PRINT(
+                (!fault.failedInst->IsLoad() && !fault.failedInst->IsStore()) || fault.barrierType.has_value(),
+                (std::cerr << "A load/store instruction must have the result of LoadGCEntrypoint\n"
+                           << "in the GC barrier entrypoint input:\n"
+                           << "input: " << *fault.barrierSource << std::endl
+                           << "user:  " << *fault.failedInst << std::endl));
+            if (fault.failedInst->IsLoad()) {
+                CHECKER_DO_IF_NOT_AND_PRINT(fault.barrierType == LoadGCEntrypointInst::BarrierType::READ,
+                                            (std::cerr << "Only Phi and a store instruction are allowed to use\n"
+                                                       << "the result of LoadGCEntrypoint PreWrb.\n"
+                                                       << "input: " << *fault.barrierSource << std::endl
+                                                       << "user:  " << *fault.failedInst << std::endl));
+            } else if (fault.failedInst->IsStore()) {
+                CHECKER_DO_IF_NOT_AND_PRINT(fault.barrierType == LoadGCEntrypointInst::BarrierType::PRE_WRITE,
+                                            (std::cerr << "Only Phi and a load instruction are allowed to use\n"
+                                                       << "the result of LoadGCEntrypoint Rb.\n"
+                                                       << "input: " << *fault.barrierSource << std::endl
+                                                       << "user:  " << *fault.failedInst << std::endl));
+            }
+        },
+        [this](GCEntrypointBarrierTypeChecker::InconsistentBarrierTypeFault fault) {
+            CHECKER_DO_IF_NOT_AND_PRINT(!fault.failedInst->IsPhi(),
+                                        (std::cerr << "All the inputs of Phi must have the same GC barrier\n"
+                                                   << "type if they have any.\n"
+                                                   << "phi:     " << *fault.failedInst << std::endl
+                                                   << "source1: " << *fault.barrierSource << std::endl
+                                                   << "source2: " << *fault.inconsistentSource << std::endl));
+        }};
+    std::visit(visitor, checker.Check());
+}
+
+namespace {
+class GCEntrypointUsersChecker final : public UseDefPathWalker<GCEntrypointUsersChecker> {
+public:
+    explicit GCEntrypointUsersChecker(Inst *gcbarrier) : UseDefPathWalker(gcbarrier) {}
+
+    bool Check(User &user) const
+    {
+        return Walk(user);
+    }
+
+    const Inst *RuntimeCall() const
+    {
+        ASSERT(runtimeCall_ != nullptr);
+        return runtimeCall_;
+    }
+
+private:
+    friend UseDefPathWalker;
+
+    bool HandleInst(const Inst *inst) const
+    {
+        if (inst->IsRuntimeCall()) {
+            runtimeCall_ = inst;
+            return false;
+        }
+        return true;
+    }
+
+    mutable const Inst *runtimeCall_ {};
+};
+
+class GCEntrypointPathChecker final {
+public:
+    struct FailedResult {
+        const Inst *runtimeCall;
+        const Inst *gcentrypoint;
+        const Inst *user;
+    };
+
+    explicit GCEntrypointPathChecker(Graph *graph) : graph_(graph) {}
+
+    std::optional<FailedResult> Check();
+
+private:
+    void CheckMarkedDefToUserPaths();
+
+    void CheckMarkedDefToUserPath(Inst *def);
+
+    void MarkGCBarrierDefs() const;
+
+    bool IsGCBarrierDef(const Inst *inst) const
+    {
+        return inst->IsMarked(nonSafeDef_.GetMarker());
+    }
+
+    void MarkGCBarrierDef(Inst *inst) const
+    {
+        inst->SetMarker(nonSafeDef_.GetMarker());
+    }
+
+    void MarkGCBarrierUseDefChain(Inst *gcbarrierInput, ArenaVector<Inst *> &worklist, Marker visited) const
+    {
+        if (gcbarrierInput->SetMarker(visited)) {
+            return;
+        }
+
+        if (gcbarrierInput->Is(Opcode::LoadGCEntrypoint)) {
+            MarkGCBarrierDef(gcbarrierInput);
+        } else if (gcbarrierInput->IsPhi()) {
+            // We have already checked in GCEntrypointBarrierTypeChecker that every input of all phis on the path
+            // from a GCEntrypoint user to the corresponding LoadGCEntrypoint instruction is either a LoadGCEntrypoint
+            // instructions with the desired barrier type or another phi.
+            MarkGCBarrierDef(gcbarrierInput);
+            for (auto &&input : gcbarrierInput->GetInputs()) {
+                worklist.emplace_back(input.GetInst());
+            }
+        } else {
+            UNREACHABLE();
+        }
+    }
+
+    std::optional<FailedResult> failedResult_;
+    Graph *graph_;
+    MarkerHolder nonSafeDef_ {graph_};
+};
+}  // namespace
+
+std::optional<GCEntrypointPathChecker::FailedResult> GCEntrypointPathChecker::Check()
+{
+    MarkGCBarrierDefs();
+    CheckMarkedDefToUserPaths();
+    return failedResult_;
+}
+
+void GCEntrypointPathChecker::CheckMarkedDefToUserPath(Inst *def)
+{
+    GCEntrypointUsersChecker gcUsersChecker(def);
+    for (auto &user : def->GetUsers()) {
+        // We have already checked in GCEntrypointBarrierTypeChecker that every user of a LoadGCEntrypoint instruction
+        // as well as every user of all phis on the path from a LoadGCEntrypoint instruction to its final user is
+        // either the user itself or another phi and all paths between LoadGCEntrypoint -> phi -> ... -> phi -> User
+        // (Load or Store) must be checked.
+        if (!gcUsersChecker.Check(user)) {
+            failedResult_ = {gcUsersChecker.RuntimeCall(), def, user.GetInst()};
+            return;
+        }
+    }
+}
+
+void GCEntrypointPathChecker::CheckMarkedDefToUserPaths()
+{
+    for (auto *block : graph_->GetBlocksRPO()) {
+        for (auto *inst : block->AllInsts()) {
+            if (!IsGCBarrierDef(inst)) {
+                continue;
+            }
+            CheckMarkedDefToUserPath(inst);
+        }
+    }
+}
+
+void GCEntrypointPathChecker::MarkGCBarrierDefs() const
+{
+    MarkerHolder holder {graph_};
+    auto visited = holder.GetMarker();
+
+    ArenaVector<Inst *> worklist(graph_->GetLocalAllocator()->Adapter());
+    for (auto *block : graph_->GetBlocksRPO()) {
+        for (auto *inst : block->AllInsts()) {
+            if (!InstHasGCBarrierEntrypointInput(inst->GetOpcode())) {
+                continue;
+            }
+            auto *gcbarrierInput = GetInstGCBarrierEntrypoint(inst);
+            if (gcbarrierInput == nullptr) {
+                continue;
+            }
+            worklist.emplace_back(gcbarrierInput);
+        }
+    }
+
+    while (!worklist.empty()) {
+        auto *gcbarrierInput = worklist.back();
+        worklist.pop_back();
+        MarkGCBarrierUseDefChain(gcbarrierInput, worklist, visited);
+    }
+}
+
+void GraphChecker::CheckLoadGCEntrypointToUserPaths()
+{
+    // There must not be a runtime call on any path from a GCEntrypoint to its user:
+
+    /*
+     *         [loadGCentrypoint Rb]
+     *                 |
+     *      /<----- [ifimm]------>\
+     *     |                      |
+     *  [runtime call]            |
+     *     |                      |
+     *     \------>[phi1]<--------/
+     *               |
+     *               |
+     *      ["LoadArray x, y, phi1"]
+     */
+    [[maybe_unused]] auto result = GCEntrypointPathChecker(GetGraph()).Check();
+    CHECKER_DO_IF_NOT_AND_PRINT(!result, std::cerr << "A runtime call v" << result->runtimeCall->GetId()
+                                                   << " is found on a path between the GC entrypoint\n"
+                                                   << "source " << result->gcentrypoint->GetOpcodeStr() << " v"
+                                                   << result->gcentrypoint->GetId() << " and its user v"
+                                                   << result->user->GetId() << ":\n"
+                                                   << *result->gcentrypoint << std::endl
+                                                   << *result->user << std::endl
+                                                   << *result->runtimeCall << std::endl);
+}
 #endif  // COMPILER_DEBUG_CHECKS
 
 void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, BasicBlock *block, Marker visited)
@@ -1238,9 +1717,9 @@ void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, Basi
         CHECKER_IF_NOT_PRINT(GetGraph()->IsOsrMode());
         auto ss = block->GetFirstInst();
         CHECKER_IF_NOT_PRINT(ss != nullptr && ss->GetOpcode() == Opcode::SaveStateOsr);
-        [[maybe_unused]] auto it =
-            std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(),
-                         [inst, ss](Input input) { return ss->GetDataFlowInput(input.GetInst()) == inst; });
+        [[maybe_unused]] auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(), [inst](Input input) {
+            return Inst::GetDataFlowInput(input.GetInst()) == inst;
+        });
         CHECKER_DO_IF_NOT_AND_PRINT(it != ss->GetInputs().end(),
                                     std::cerr << "Inst v" << inst->GetId() << " used in v" << user->GetId()
                                               << ", but not found on the path between them in the "
@@ -1263,30 +1742,53 @@ void GraphChecker::CheckGCBarrierEntrypointInputsCount([[maybe_unused]] GraphVis
                                          inst->Dump(&std::cerr)));
 }
 
-void GraphChecker::CheckGCBarrierEntrypointInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
-                                                 [[maybe_unused]] bool needBarrier)
+void GraphChecker::CheckGCBarrierEntrypointInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_ASSERT(SwitchOverOpcodes(inst, [v, needBarrier](auto traits, auto *typedInst) -> std::optional<bool> {
+    // NOLINTNEXTLINE(bugprone-lambda-function-name)
+    CHECKER_ASSERT(SwitchOverOpcodes(inst, [v](auto traits, auto *typedInst) -> std::optional<bool> {
         if constexpr (InstHasGCBarrierEntrypointInput(traits.GetOpcode())) {
-            if (typedInst->GetGCBarrierEntrypoint() == nullptr) {
+            const auto *gcentrypoint = typedInst->GetGCBarrierEntrypoint();
+            if (gcentrypoint == nullptr) {
                 CheckGCBarrierEntrypointInputsCount(v, typedInst, typedInst->STATIC_INPUTS_CAPACITY - 1);
             } else {
                 CheckGCBarrierEntrypointInputsCount(v, typedInst, typedInst->STATIC_INPUTS_CAPACITY);
                 CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                    v,
-                    typedInst->GetGCBarrierEntrypoint() ==
-                        typedInst->GetInput(typedInst->STATIC_INPUTS_CAPACITY - 1).GetInst(),
-                    (std::cerr << "This load/store has inconsistent GC barrier entrypoint input:\n",
-                     typedInst->Dump(&std::cerr)));
+                    v, gcentrypoint == typedInst->GetInput(typedInst->STATIC_INPUTS_CAPACITY - 1).GetInst(),
+                    (std::cerr << "This load/store has inconsistent GC barrier entrypoint input:\n"
+                               << "input: " << *gcentrypoint << std::endl
+                               << "user:  " << *typedInst << std::endl));
                 CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                    v, needBarrier,
-                    (std::cerr << "This load/store with GC barrier entrypoint doesn't need GC barriers:\n",
-                     typedInst->Dump(&std::cerr)));
+                    v, gcentrypoint->IsPhi() || gcentrypoint->Is(Opcode::LoadGCEntrypoint),
+                    (std::cerr << "Only LoadGCEntrypoint or Phi may be the GC barrier entrypoint input:\n"
+                               << "input: " << *gcentrypoint << std::endl
+                               << "user:  " << *typedInst << std::endl));
+
+                // If a GCBarrier entrypoint is used at the correct input, it doesn't mean it may not be used
+                // incorrectly too.
+                // 2.ptr  LoadGCEntrypoint PreWrb
+                // 3.ptr  Store v0, v1, v2, v2
+                CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+                    v, std::count(typedInst->GetInputs().begin(), typedInst->GetInputs().end(), gcentrypoint) == 1,
+                    (std::cerr << "A load/store instruction may have the result of LoadGCEntrypoint\n"
+                               << "in the GC barrier entrypoint input only:\n"
+                               << "input: " << *gcentrypoint << std::endl
+                               << "user:  " << *typedInst << std::endl));
             }
             return true;
         }
         return false;
     }));
+}
+
+void GraphChecker::CheckNeedGCBarrier([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
+                                      [[maybe_unused]] const Inst *gcBarrierEntrypoint,
+                                      [[maybe_unused]] bool needGCBarrier)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, gcBarrierEntrypoint == nullptr || needGCBarrier,
+                                        (std::cerr
+                                         << "A user of a LoadGCEntrypoint must need a corresponding GC barrier\n"
+                                         << "input: " << *gcBarrierEntrypoint << std::endl
+                                         << " user: " << *inst << std::endl));
 }
 
 void GraphChecker::CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
@@ -1297,8 +1799,12 @@ void GraphChecker::CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[ma
         v, DataType::IsTypeNumeric(type) || DataType::IsReference(type) || DataType::IsAny(type),
         (std::cerr << "Memory instruction has wrong type:\n", inst->Dump(&std::cerr)));
 
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, type == DataType::REFERENCE || type == DataType::ANY || !needBarrier,
+        (std::cerr << "This load/store must not have barrier:\n", inst->Dump(&std::cerr)));
+
     if (InstHasGCBarrierEntrypointInput(inst->GetOpcode())) {
-        CheckGCBarrierEntrypointInput(v, inst, needBarrier);
+        CheckGCBarrierEntrypointInput(v, inst);
     }
 
     // GC_BARRIER flag is set in yaml and is not supposed to change later.
@@ -1575,28 +2081,41 @@ void GraphChecker::VisitSubOverflow(GraphVisitor *v, Inst *inst)
 {
     CheckBinaryOverflowOperation(v, inst->CastToSubOverflow());
 }
+void GraphChecker::VisitLoad(GraphVisitor *v, Inst *inst)
+{
+    auto *load = inst->CastToLoad();
+    CheckMemoryInstruction(v, inst, load->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, load->GetGCBarrierEntrypoint(), load->GetNeedReadBarrier());
+}
 void GraphChecker::VisitLoadArray(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst, inst->CastToLoadArray()->GetNeedReadBarrier());
+    auto *loadArray = inst->CastToLoadArray();
+    CheckMemoryInstruction(v, inst, loadArray->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadArray->GetGCBarrierEntrypoint(), loadArray->GetNeedReadBarrier());
 }
 void GraphChecker::VisitLoadArrayI(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst, inst->CastToLoadArrayI()->GetNeedReadBarrier());
+    auto *loadArrayI = inst->CastToLoadArrayI();
+    CheckMemoryInstruction(v, inst, loadArrayI->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadArrayI->GetGCBarrierEntrypoint(), loadArrayI->GetNeedReadBarrier());
 }
 void GraphChecker::VisitLoadArrayPair(GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst, inst->CastToLoadArrayPair()->GetNeedReadBarrier());
+    auto *loadArrayPair = inst->CastToLoadArrayPair();
+    CheckMemoryInstruction(v, inst, loadArrayPair->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadArrayPair->GetGCBarrierEntrypoint(), loadArrayPair->GetNeedReadBarrier());
 }
 void GraphChecker::VisitLoadObjectPair(GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    auto loadObj = inst->CastToLoadObjectPair();
+    auto *loadObj = inst->CastToLoadObjectPair();
     CheckMemoryInstruction(v, inst, loadObj->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadObj->GetGCBarrierEntrypoint(), loadObj->GetNeedReadBarrier());
     ASSERT(loadObj->GetObjectType() == MEM_OBJECT || loadObj->GetObjectType() == MEM_STATIC);
     ASSERT(loadObj->GetVolatile() == false);
     auto field0 = loadObj->GetObjField0();
@@ -1612,7 +2131,9 @@ void GraphChecker::VisitLoadArrayPairI(GraphVisitor *v, Inst *inst)
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst, inst->CastToLoadArrayPairI()->GetNeedReadBarrier());
+    auto *loadArrayPairI = inst->CastToLoadArrayPairI();
+    CheckMemoryInstruction(v, inst, loadArrayPairI->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadArrayPairI->GetGCBarrierEntrypoint(), loadArrayPairI->GetNeedReadBarrier());
 }
 
 void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
@@ -1656,11 +2177,13 @@ void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreArrayPair(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreArrayPair()->GetNeedWriteBarrier();
+    auto *storeArrayPair = inst->CastToStoreArrayPair();
+    bool needBarrier = storeArrayPair->GetNeedWriteBarrier();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, storeArrayPair->GetGCBarrierEntrypoint(), storeArrayPair->GetNeedPreWriteBarrier());
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
         (std::cerr << "Types of store and the first stored value are not compatible\n", inst->Dump(&std::cerr)));
@@ -1674,9 +2197,10 @@ void GraphChecker::VisitStoreArrayPair(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
 {
-    auto storeObj = inst->CastToStoreObjectPair();
+    auto *storeObj = inst->CastToStoreObjectPair();
     bool needBarrier = storeObj->GetNeedWriteBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, storeObj->GetGCBarrierEntrypoint(), storeObj->GetNeedPreWriteBarrier());
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and the first store input are not compatible\n", inst->Dump(&std::cerr)));
@@ -1700,11 +2224,13 @@ void GraphChecker::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreArrayPairI(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreArrayPairI()->GetNeedWriteBarrier();
+    auto *arrayPairI = inst->CastToStoreArrayPairI();
+    bool needBarrier = arrayPairI->GetNeedWriteBarrier();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, arrayPairI->GetGCBarrierEntrypoint(), arrayPairI->GetNeedPreWriteBarrier());
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and the first stored value are not compatible\n", inst->Dump(&std::cerr)));
@@ -1718,18 +2244,24 @@ void GraphChecker::VisitStoreArrayPairI(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStore(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst, inst->CastToStore()->GetNeedWriteBarrier());
+    auto *store = inst->CastToStore();
+    CheckMemoryInstruction(v, inst, store->GetNeedWriteBarrier());
+    CheckNeedGCBarrier(v, inst, store->GetGCBarrierEntrypoint(), store->GetNeedPreWriteBarrier());
 }
 
 void GraphChecker::VisitStoreI(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst, inst->CastToStoreI()->GetNeedWriteBarrier());
+    auto *storeI = inst->CastToStoreI();
+    CheckMemoryInstruction(v, inst, storeI->GetNeedWriteBarrier());
+    CheckNeedGCBarrier(v, inst, storeI->GetGCBarrierEntrypoint(), storeI->GetNeedPreWriteBarrier());
 }
 
 void GraphChecker::VisitStoreArray(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreArray()->GetNeedWriteBarrier();
+    auto *storeArray = inst->CastToStoreArray();
+    bool needBarrier = storeArray->GetNeedWriteBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, storeArray->GetGCBarrierEntrypoint(), storeArray->GetNeedPreWriteBarrier());
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
@@ -1740,8 +2272,10 @@ void GraphChecker::VisitStoreArray(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreArrayI(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreArrayI()->GetNeedWriteBarrier();
+    auto *storeArrayI = inst->CastToStoreArrayI();
+    bool needBarrier = storeArrayI->GetNeedWriteBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, storeArrayI->GetGCBarrierEntrypoint(), storeArrayI->GetNeedPreWriteBarrier());
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
@@ -1752,8 +2286,10 @@ void GraphChecker::VisitStoreArrayI(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreStatic(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreStatic()->GetNeedWriteBarrier();
+    auto *storeStatic = inst->CastToStoreStatic();
+    bool needBarrier = storeStatic->GetNeedWriteBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, storeStatic->GetGCBarrierEntrypoint(), storeStatic->GetNeedPreWriteBarrier());
     auto graph = static_cast<GraphChecker *>(v)->GetGraph();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
@@ -1770,7 +2306,6 @@ void GraphChecker::VisitStoreStatic(GraphVisitor *v, Inst *inst)
         v, (opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadImmediate),
         (std::cerr << "The first input for the StoreStatic should be LoadAndInitClass or LoadImmediate",
          inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
-    [[maybe_unused]] auto storeStatic = inst->CastToStoreStatic();
     [[maybe_unused]] auto classId =
         graph->GetRuntime()->GetClassIdForField(storeStatic->GetMethod(), storeStatic->GetTypeId());
     // See comment in VisitNewObject about this if statement
@@ -1785,6 +2320,8 @@ void GraphChecker::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
 {
     bool needBarrier = inst->CastToUnresolvedStoreStatic()->GetNeedWriteBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
+    // UnresolvedStoreStatic has no GCBarriers, no need to call CheckNeedGCBarrier for it.
+    CHECKER_ASSERT(GetInstGCBarrierEntrypoint(inst) == nullptr);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[0].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
@@ -1800,15 +2337,17 @@ void GraphChecker::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreObject(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreObject()->GetNeedWriteBarrier();
+    auto *storeObject = inst->CastToStoreObject();
+    bool needBarrier = storeObject->GetNeedWriteBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
+    CheckNeedGCBarrier(v, inst, storeObject->GetGCBarrierEntrypoint(), storeObject->GetNeedPreWriteBarrier());
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, needBarrier == DataType::IsReference(inst->GetType()) || DataType::IsAny(inst->GetType()),
         (std::cerr << "StoreObject has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
-    CheckObjectType(v, inst, inst->CastToStoreObject()->GetObjectType(), inst->CastToStoreObject()->GetTypeId());
+    CheckObjectType(v, inst, storeObject->GetObjectType(), storeObject->GetTypeId());
 }
 
 void GraphChecker::VisitStoreObjectDynamic(GraphVisitor *v, Inst *inst)
@@ -1825,19 +2364,23 @@ void GraphChecker::VisitFillConstArray([[maybe_unused]] GraphVisitor *v, [[maybe
 
 void GraphChecker::VisitStoreResolvedObjectField(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreResolvedObjectField()->GetNeedWriteBarrier();
-    CheckMemoryInstruction(v, inst, needBarrier);
+    auto *typedInst = inst->CastToStoreResolvedObjectField();
+    CheckMemoryInstruction(v, inst, typedInst->GetNeedWriteBarrier());
+    CheckNeedGCBarrier(v, inst, typedInst->GetGCBarrierEntrypoint(), typedInst->GetNeedPreWriteBarrier());
 }
 
 void GraphChecker::VisitStoreResolvedObjectFieldStatic(GraphVisitor *v, Inst *inst)
 {
-    bool needBarrier = inst->CastToStoreResolvedObjectFieldStatic()->GetNeedWriteBarrier();
-    CheckMemoryInstruction(v, inst, needBarrier);
+    auto *typedInst = inst->CastToStoreResolvedObjectFieldStatic();
+    CheckMemoryInstruction(v, inst, typedInst->GetNeedWriteBarrier());
+    CheckNeedGCBarrier(v, inst, typedInst->GetGCBarrierEntrypoint(), typedInst->GetNeedPreWriteBarrier());
 }
 
 void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst, inst->CastToLoadStatic()->GetNeedReadBarrier());
+    auto loadStatic = inst->CastToLoadStatic();
+    CheckMemoryInstruction(v, inst, loadStatic->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadStatic->GetGCBarrierEntrypoint(), loadStatic->GetNeedReadBarrier());
     auto graph = static_cast<GraphChecker *>(v)->GetGraph();
     [[maybe_unused]] auto initInst = inst->GetInputs()[0].GetInst();
     if (initInst->IsPhi()) {
@@ -1848,7 +2391,6 @@ void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
         v, opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadImmediate,
         (std::cerr << "The first input for the LoadStatic should be LoadAndInitClass or LoadImmediate",
          inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
-    [[maybe_unused]] auto loadStatic = inst->CastToLoadStatic();
     [[maybe_unused]] auto classId =
         graph->GetRuntime()->GetClassIdForField(loadStatic->GetMethod(), loadStatic->GetTypeId());
     // See comment in VisitNewObject about this if statement
@@ -1983,6 +2525,7 @@ void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, [[maybe_unus
     }
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
 #include "intrinsics_graph_checker.inl"
+
         default: {
             return;
         }
@@ -1991,8 +2534,10 @@ void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, [[maybe_unus
 
 void GraphChecker::VisitLoadObject(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst, inst->CastToLoadObject()->GetNeedReadBarrier());
-    CheckObjectType(v, inst, inst->CastToLoadObject()->GetObjectType(), inst->CastToLoadObject()->GetTypeId());
+    auto *loadObject = inst->CastToLoadObject();
+    CheckMemoryInstruction(v, inst, loadObject->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, loadObject->GetGCBarrierEntrypoint(), loadObject->GetNeedReadBarrier());
+    CheckObjectType(v, inst, loadObject->GetObjectType(), loadObject->GetTypeId());
 }
 
 void GraphChecker::VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
@@ -3050,6 +3595,30 @@ void GraphChecker::VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *in
     CHECKER_IF_NOT_PRINT_VISITOR(v, objType != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET ||
                                         static_cast<GraphChecker *>(v)->GetGraph()->IsAotMode());
     CHECKER_IF_NOT_PRINT_VISITOR(v, loadImm->GetObject() != nullptr);
+}
+
+void GraphChecker::VisitLoadGCEntrypoint([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    [[maybe_unused]] auto *loadGC = inst->CastToLoadGCEntrypoint();
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
+        loadGC->GetBarrierType() == LoadGCEntrypointInst::BarrierType::READ ||
+            loadGC->GetBarrierType() == LoadGCEntrypointInst::BarrierType::PRE_WRITE,
+        (std::cerr << "Instruction has invalid BarrierType:\n", inst->Dump(&std::cerr)));
+    for (auto &user : inst->GetUsers()) {
+        [[maybe_unused]] const auto *userInst = user.GetInst();
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, userInst->IsLoad() || userInst->IsStore() || userInst->IsPhi(),
+            (std::cerr << "Only Phi, load and store instructions are allowed to use\nthe result of LoadGCEntrypoint\n"
+                       << "input: " << *inst << std::endl
+                       << "user:  " << *userInst << std::endl));
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, userInst->IsPhi() || GetInstGCBarrierEntrypoint(userInst) == inst,
+                                            (std::cerr
+                                             << "A load/store instruction may have the result of LoadGCEntrypoint\n"
+                                             << "in the GC barrier entrypoint input only:\n"
+                                             << "input: " << *inst << std::endl
+                                             << "user:  " << *userInst << std::endl));
+    }
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,8 @@ T CutValue(uint64_t data, DataType::Type type)
 // Class for emulate generated arm64 code
 class VixlExecModule {
 public:
+    using ManagedThreadData = std::array<uint8_t, sizeof(ManagedThread)>;
+
     VixlExecModule(ark::ArenaAllocator *allocator, RuntimeInterface *runtimeInfo)
         : decoder_(allocator),
           simulator_(allocator, &decoder_, SimStack().Allocate()),
@@ -225,12 +227,18 @@ public:
     // Run emulator on current code with current parameters
     void Execute()
     {
+        static ManagedThreadData dummy;
+        Execute(dummy.data());
+    }
+
+    // Run emulator on current code with current parameters and space for ManagedThread
+    void Execute(ManagedThreadData::value_type *threadData)
+    {
         simulator_.ResetState();
         // method
         simulator_.WriteXRegister(0, 0xDEADC0DE);  // NOLINT(readability-magic-numbers)
         // Set x28 to the dummy thread, since prolog of the compiled method writes to it.
-        static std::array<uint8_t, sizeof(ManagedThread)> dummy;
-        simulator_.WriteCPURegister(XRegister(28U), dummy.data());  // NOLINT(readability-magic-numbers)
+        simulator_.WriteCPURegister(XRegister(28U), threadData);  // NOLINT(readability-magic-numbers)
 
         WriteParameters();
         simulator_.RunFrom(reinterpret_cast<const Instruction *>(startPointer_));

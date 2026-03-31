@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <sys/types.h>
 #include "codegen_test.h"
 #include "optimizer/ir/inst.h"
 
@@ -646,6 +645,51 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     // index < 0 [THROW]
     */
     GetExecModule().FreeArray(param1);
+}
+
+SRC_GRAPH(LoadGCEntrypointPreWb, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U).i32();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::LoadGCEntrypoint).ptr().SetBarrierType(LoadGCEntrypointInst::BarrierType::PRE_WRITE);
+            INST(2U, Opcode::Add).ptr().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).ptr().Inputs(2U);
+        }
+    }
+}
+
+TEST_F(UncheckedThreadAwareCodegenTest, LoadGCEntrypointPreWb)
+{
+    src_graph::LoadGCEntrypointPreWb::CREATE(GetGraph());
+    SetNumArgs(0U);
+    CheckReturnValue(GetGraph(), reinterpret_cast<uintptr_t>(GetCurrentPreWrbEntrypoint()));
+}
+
+SRC_GRAPH(LoadGCEntrypointRb, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U).i32();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SafePoint).Inputs(0U).SrcVregs({4U});
+            INST(2U, Opcode::LoadGCEntrypoint).ptr().SetBarrierType(LoadGCEntrypointInst::BarrierType::READ);
+            INST(3U, Opcode::Add).ptr().Inputs(2U, 0U);
+            INST(4U, Opcode::Return).ptr().Inputs(3U);
+        }
+    }
+}
+
+// NOTE(howard, #27636): enable after implementing codegen for LoadGCEntrypoint Rb
+TEST_F(UncheckedThreadAwareCodegenTest, DISABLED_LoadGCEntrypointRb)
+{
+    src_graph::LoadGCEntrypointRb::CREATE(GetGraph());
+    RegAlloc(GetGraph());
+    EXPECT_TRUE(RunCodegen(GetGraph()));
+    SetNumArgs(0U);
 }
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

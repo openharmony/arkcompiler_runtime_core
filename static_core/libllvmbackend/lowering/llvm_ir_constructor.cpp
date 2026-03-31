@@ -5413,6 +5413,23 @@ void LLVMIrConstructor::VisitLoadImmediate(GraphVisitor *v, Inst *inst)
     ctor->ValueMapAdd(inst, result);
 }
 
+void LLVMIrConstructor::VisitLoadGCEntrypoint(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetType() == DataType::POINTER);
+    auto *ctor = static_cast<LLVMIrConstructor *>(v);
+    auto *graph = ctor->GetGraph();
+    switch (inst->CastToLoadGCEntrypoint()->GetBarrierType()) {
+        case LoadGCEntrypointInst::BarrierType::READ:
+            // NOTE(howard, #33409): need to implement read barriers generation
+            UNREACHABLE();
+        case LoadGCEntrypointInst::BarrierType::PRE_WRITE:
+            auto offset = graph->GetRuntime()->GetTlsPreWrbEntrypointOffset(graph->GetArch());
+            auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
+                                                                   ctor->builder_.getPtrTy());
+            ctor->ValueMapAdd(inst, result);
+    }
+}
+
 void LLVMIrConstructor::VisitStringFlatCheck(GraphVisitor *v, Inst *inst)
 {
     auto *ctor = static_cast<LLVMIrConstructor *>(v);

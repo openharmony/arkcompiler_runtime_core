@@ -343,6 +343,44 @@ protected:
     Graph *graph_ {nullptr};        // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
+/**
+ * Sometimes, we need to disable the GraphChecker in passes because some graphs are compilable but not valid from
+ * the GraphChecker's point of view.
+ */
+template <typename BaseTest>
+class UncheckedGraphTestMixin : public BaseTest {
+public:
+    using BaseTest::BaseTest;
+    ~UncheckedGraphTestMixin() override = default;
+
+    NO_COPY_SEMANTIC(UncheckedGraphTestMixin);
+    NO_MOVE_SEMANTIC(UncheckedGraphTestMixin);
+
+    void SetUp() override
+    {
+        checkGraph_ = g_options.IsCompilerCheckGraph();
+        checkGraphFinal_ = g_options.IsCompilerCheckFinal();
+        g_options.SetCompilerCheckGraph(false);
+        g_options.SetCompilerCheckFinal(false);
+        BaseTest::builder_->EnableGraphChecker(false);
+
+        BaseTest::SetUp();
+    }
+
+    void TearDown() override
+    {
+        BaseTest::TearDown();
+
+        BaseTest::builder_->EnableGraphChecker(true);
+        g_options.SetCompilerCheckGraph(checkGraph_);
+        g_options.SetCompilerCheckFinal(checkGraphFinal_);
+    }
+
+private:
+    bool checkGraph_ {false};
+    bool checkGraphFinal_ {false};
+};
+
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PandaRuntimeTest : public ::testing::Test, public PandaRuntimeInterface {
 public:

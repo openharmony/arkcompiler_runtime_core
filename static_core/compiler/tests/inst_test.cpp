@@ -606,6 +606,40 @@ TEST_F(InstTest, Flags)
     ASSERT_EQ(inst->GetFlagsMask(), (initialMask | inst_flags::ALLOC) & ~inst_flags::LOAD);
 }
 
+TEST_F(InstTest, LoadGCEntrypointClone)
+{
+    auto *bb0 = GetGraph()->CreateEmptyBlock();
+    GetGraph()->SetStartBlock(bb0);
+    auto *gcentry = GetGraph()->CreateInstLoadGCEntrypoint(DataType::POINTER, INVALID_PC,
+                                                           LoadGCEntrypointInst::BarrierType::PRE_WRITE);
+    bb0->AddInst<true>(gcentry);
+
+    auto *gcentryCopy = gcentry->Clone(GetGraph());
+    bb0->InsertAfter(gcentryCopy, gcentry);
+
+    gcentryCopy->Dump(&std::cout);
+    ASSERT_NE(gcentry, gcentryCopy);
+    ASSERT_EQ(gcentryCopy->GetOpcode(), Opcode::LoadGCEntrypoint);
+    EXPECT_EQ(gcentry->GetBarrierType(), gcentryCopy->CastToLoadGCEntrypoint()->GetBarrierType());
+}
+
+TEST_F(InstTest, LoadGCEntrypointFlags)
+{
+    auto initialMask = inst_flags::GetFlagsMask(Opcode::LoadGCEntrypoint);
+    auto inst = GetGraph()->CreateInstLoadGCEntrypoint(DataType::POINTER, INVALID_PC);
+    ASSERT_EQ(initialMask, inst->GetFlagsMask());
+    ASSERT_EQ(inst->GetFlagsMask(), initialMask);
+
+    auto inst2 = GetGraph()->CreateInstLoadGCEntrypoint(DataType::POINTER, INVALID_PC,
+                                                        LoadGCEntrypointInst::BarrierType::PRE_WRITE);
+    ASSERT_EQ(initialMask, inst2->GetFlagsMask());
+    ASSERT_EQ(inst2->GetFlagsMask(), initialMask);
+
+    auto inst3 = GetGraph()->CreateInstLoadGCEntrypoint();
+    ASSERT_EQ(initialMask, inst3->GetFlagsMask());
+    ASSERT_EQ(inst3->GetFlagsMask(), initialMask);
+}
+
 TEST_F(InstTest, IntrinsicFlags)
 {
     ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};

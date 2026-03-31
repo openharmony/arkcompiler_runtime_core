@@ -219,7 +219,7 @@ instructions:
   - opcode: GetAnyTypeName
     base: GetAnyTypeNameInst
     signature: [d-any]
-    flags: [acc_read, acc_write, ifcvt, no_hoist, ref_special]
+    flags: [acc_read, acc_write, ifcvt, no_hoist, ref_ptr_special]
     description:  Get string with any type name.
 
   - opcode: CastAnyTypeValue
@@ -592,7 +592,7 @@ instructions:
   - opcode: LoadRuntimeClass
     base: RuntimeClassInst
     signature: [d-ref]
-    flags: [ref_special]
+    flags: [ref_ptr_special]
     modes: [jit_aot, bytecode_opt]
     description: Get special runtime classes from thread register
     fields:
@@ -601,7 +601,7 @@ instructions:
   - opcode: GetInstanceClass
     base: FixedInputsInst<1>
     signature: [d-ref, ref]
-    flags: [ref_special]
+    flags: [ref_ptr_special]
     description: >-
         Get class from the input object. Each object holds reference to the class on the specific offset.
         This instruction reads this reference from the input object.
@@ -634,6 +634,13 @@ instructions:
     description: Get global var address
     fields:
       - type_id: TypeId
+
+  - opcode: LoadGCEntrypoint
+    base: LoadGCEntrypointInst
+    signature: [d-ptr]
+    flags: [ref_ptr_special]
+    description: >-
+        Read the GC barrier's entrypoint of the desired type. This data only needs to be read once per GC safe-point.
 
     ##############################################################################
     # Check instructions
@@ -1439,7 +1446,7 @@ flags:
   pseudo_dst: Instruction has pseudo destination operand, i.e. it doesn't affect on dataflow
   implicit_runtime_call: Instruction may call runtime before loading source, which can be moved by GC during that call
   low_level: Low level instruction
-  ref_special: Instruction which can not be moved throught runtime calls
+  ref_ptr_special: Instruction which can not be moved through runtime calls
   ifcvt: Instruction can be used in if-conversion
   require_state: Instruction may call runtime, thus, it requires SaveState in the inputs
   runtime_call: Instruction must call runtime

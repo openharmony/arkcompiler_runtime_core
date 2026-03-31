@@ -923,6 +923,14 @@ public:
         return *this;
     }
 
+    IrConstructor &SetBarrierType(LoadGCEntrypointInst::BarrierType bt)
+    {
+        auto inst = CurrentInst();
+        ASSERT(inst->GetOpcode() == Opcode::LoadGCEntrypoint);
+        inst->CastToLoadGCEntrypoint()->SetBarrierType(bt);
+        return *this;
+    }
+
     IrConstructor &SetNeedPreWriteBarrier(bool needBarrier)
     {
         InstSetNeedPreWriteBarrier(CurrentInst(), needBarrier);

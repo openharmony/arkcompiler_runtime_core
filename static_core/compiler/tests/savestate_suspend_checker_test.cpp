@@ -14,48 +14,22 @@
  */
 
 #include "libarkbase/macros.h"
-#include "libarkbase/utils/utils.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/graph_checker.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/ir_constructor.h"
-#include "tests/graph_comparator.h"
 #include "unit_test.h"
-#include "optimizer/optimizations/cleanup.h"
 
 namespace ark::compiler {
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class SaveStateSuspendCheckerTest : public AsmTest {
-public:
-    SaveStateSuspendCheckerTest() = default;
-    ~SaveStateSuspendCheckerTest() override = default;
-    NO_COPY_SEMANTIC(SaveStateSuspendCheckerTest);
-    NO_MOVE_SEMANTIC(SaveStateSuspendCheckerTest);
+class SaveStateSuspendCheckerTest : public GraphTest {};
 
-    // Override to handle null method in GraphChecker
-    std::string GetClassNameFromMethod(MethodPtr method) const override
-    {
-        if (method == nullptr) {
-            return "TestClass";
-        }
-        return AsmTest::GetClassNameFromMethod(method);
-    }
-
-    std::string GetMethodName(MethodPtr method) const override
-    {
-        if (method == nullptr) {
-            return "testMethod";
-        }
-        return AsmTest::GetMethodName(method);
-    }
-};
-
+// NOLINTBEGIN(readability-magic-numbers)
+#ifdef COMPILER_DEBUG_CHECKS
 /*
  * Test that SaveStateSuspend with all live values included passes validation.
  */
 TEST_F(SaveStateSuspendCheckerTest, AllLiveValuesPresent)
 {
-#ifdef COMPILER_DEBUG_CHECKS
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -73,9 +47,6 @@ TEST_F(SaveStateSuspendCheckerTest, AllLiveValuesPresent)
     GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
-#else
-    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
-#endif
 }
 
 /*
@@ -85,7 +56,6 @@ TEST_F(SaveStateSuspendCheckerTest, AllLiveValuesPresent)
  */
 TEST_F(SaveStateSuspendCheckerTest, MissingLiveValue)
 {
-#ifdef COMPILER_DEBUG_CHECKS
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -103,9 +73,6 @@ TEST_F(SaveStateSuspendCheckerTest, MissingLiveValue)
     GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_DEATH(checker.Check(), "");
-#else
-    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
-#endif
 }
 
 /*
@@ -114,7 +81,6 @@ TEST_F(SaveStateSuspendCheckerTest, MissingLiveValue)
  */
 TEST_F(SaveStateSuspendCheckerTest, ValueAfterSuspend)
 {
-#ifdef COMPILER_DEBUG_CHECKS
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -131,9 +97,6 @@ TEST_F(SaveStateSuspendCheckerTest, ValueAfterSuspend)
     GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
-#else
-    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
-#endif
 }
 
 /*
@@ -143,7 +106,6 @@ TEST_F(SaveStateSuspendCheckerTest, ValueAfterSuspend)
  */
 TEST_F(SaveStateSuspendCheckerTest, UserNotDominated)
 {
-#ifdef COMPILER_DEBUG_CHECKS
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -161,9 +123,6 @@ TEST_F(SaveStateSuspendCheckerTest, UserNotDominated)
     GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
-#else
-    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
-#endif
 }
 
 /*
@@ -174,7 +133,6 @@ TEST_F(SaveStateSuspendCheckerTest, UserNotDominated)
  */
 TEST_F(SaveStateSuspendCheckerTest, PhiLiveValue)
 {
-#ifdef COMPILER_DEBUG_CHECKS
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -202,9 +160,6 @@ TEST_F(SaveStateSuspendCheckerTest, PhiLiveValue)
     GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
-#else
-    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
-#endif
 }
 
 /*
@@ -214,7 +169,6 @@ TEST_F(SaveStateSuspendCheckerTest, PhiLiveValue)
  */
 TEST_F(SaveStateSuspendCheckerTest, LoopLatchToHeader)
 {
-#ifdef COMPILER_DEBUG_CHECKS
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -246,9 +200,12 @@ TEST_F(SaveStateSuspendCheckerTest, LoopLatchToHeader)
     GetGraph()->SetSaveStateSuspendInputsAllocated();
     GraphChecker checker(GetGraph());
     ASSERT_TRUE(checker.Check());
-#else
-    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
-#endif
 }
-
+#else
+TEST_F(SaveStateSuspendCheckerTest, RequiresCompilerDebugChecks)
+{
+    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
+}
+#endif
+// NOLINTEND(readability-magic-numbers)
 }  // namespace ark::compiler

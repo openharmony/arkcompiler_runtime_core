@@ -2863,4 +2863,17 @@ void EncodeVisitor::VisitStringFlatCheck(GraphVisitor *visitor, Inst *inst)
         cg->CallFastPath(inst, EntrypointId::STRING_FLAT_CHECK, dst, {}, src);
     }
 }
+
+void EncodeVisitor::VisitLoadGCEntrypoint(GraphVisitor *visitor, Inst *inst)
+{
+    auto *cg = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
+    auto *enc = static_cast<EncodeVisitor *>(visitor)->GetEncoder();
+    auto dst = cg->ConvertRegister(inst->GetDstReg(), inst->GetType());
+    // NOTE(howard, #27636): need to implement read barriers generation
+    ASSERT(inst->CastToLoadGCEntrypoint()->GetBarrierType() == LoadGCEntrypointInst::BarrierType::PRE_WRITE);
+    enc->EncodeLdr(
+        dst, false,
+        MemRef(cg->ThreadReg(),
+               static_cast<ssize_t>(cg->GetGraph()->GetRuntime()->GetTlsPreWrbEntrypointOffset(cg->GetArch()))));
+}
 }  // namespace ark::compiler

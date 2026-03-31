@@ -1083,11 +1083,12 @@ public:
         return GetFlag(inst_flags::GC_BARRIER);
     }
 
-    // Returns true if opcode can not be moved throught runtime calls (REFERENCE type only)
-    bool IsRefSpecial() const
+    // Returns true if opcode can not be moved through runtime calls (REFERENCE type or a POINTER that is a GC
+    // Entrypoint)
+    bool IsRefPtrSpecial() const
     {
-        bool result = GetFlag(inst_flags::REF_SPECIAL);
-        ASSERT(!result || IsReferenceOrAny());
+        bool result = GetFlag(inst_flags::REF_PTR_SPECIAL);
+        ASSERT(!result || IsReferenceOrAny() || Is(Opcode::LoadGCEntrypoint));
         return result;
     }
 
@@ -2712,7 +2713,7 @@ public:
         InputsArray<N> inputs;
     };
 
-    using Initializer = InitializerN<L>;
+    using Initializer = std::conditional_t<L == 0, Inst::Initializer, InitializerN<L>>;
 
     template <size_t N>
     explicit LimitedInputsInst(InitializerN<N> t) : Inst(t.base), InputCountMixin(std::max(N, L))
@@ -4506,7 +4507,7 @@ public:
 
     using Base::Base;
 
-    Inst *GetGCBarrierEntrypoint()
+    Inst *GetGCBarrierEntrypoint() const
     {
         auto input = Base::GetInputOpt(INDEX_GC_BARRIER_ENTRYPOINT);
         return input.has_value() ? input->GetInst() : nullptr;
@@ -4537,8 +4538,8 @@ template <size_t N>
 using WithGCBarrierEntrypointInst = WithGCBarrierEntrypointMixin<LimitedInputsInst<N, N + 1>, N>;
 
 void SetInstGCBarrierEntrypoint(Inst *inst, Inst *entrypoint);
-Inst *GetInstGCBarrierEntrypoint(Inst *inst);
 void ResetInstGCBarrierEntrypoint(Inst *inst);
+Inst *GetInstGCBarrierEntrypoint(const Inst *inst);
 bool InstNeedGCBarrier(const Inst *inst);
 bool InstNeedReadBarrier(const Inst *inst);
 bool InstNeedWriteBarrier(const Inst *inst);
@@ -6613,7 +6614,7 @@ public:
         SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
-            SetFlag(inst_flags::REF_SPECIAL);
+            SetFlag(inst_flags::REF_PTR_SPECIAL);
             // Select instruction cannot be generated before LICM where NO_HOIST flag is checked
             // Set it just for consistency
             SetFlag(inst_flags::NO_HOIST);
@@ -6670,7 +6671,7 @@ public:
         SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
-            SetFlag(inst_flags::REF_SPECIAL);
+            SetFlag(inst_flags::REF_PTR_SPECIAL);
             SetFlag(inst_flags::NO_HOIST);
         }
     }
@@ -7119,6 +7120,51 @@ public:
     {
         return 0;
     }
+};
+
+/// Load the GC barrier's entrypoint of the desired type.
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class PANDA_PUBLIC_API LoadGCEntrypointInst : public FixedInputsInst0 {
+public:
+    using Base = FixedInputsInst0;
+    using Base::Base;
+
+    enum class BarrierType : uint8_t {
+        READ,
+        PRE_WRITE,
+        LAST = PRE_WRITE,
+    };
+
+    LoadGCEntrypointInst(Initializer t, BarrierType barrierType) : Base(std::move(t))
+    {
+        SetBarrierType(barrierType);
+    }
+
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
+
+    auto GetBarrierType() const
+    {
+        return GetField<BarrierTypeField>();
+    }
+
+    void SetBarrierType(BarrierType barrierType)
+    {
+        SetField<BarrierTypeField>(barrierType);
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = FixedInputsInst::Clone(targetGraph);
+        ASSERT(clone->CastToLoadGCEntrypoint()->GetBarrierType() == GetBarrierType());
+        return clone;
+    }
+
+private:
+    using BarrierTypeField = LastField::NextField<BarrierType, MinimumBitsToStore(BarrierType::LAST)>;
+    using LastField = BarrierTypeField;
+
+    static const char *GetBarrierTypeString(BarrierType type);
 };
 
 /// Store a pair of consecutive values to array, using array index as immediate
@@ -7714,19 +7760,23 @@ inline std::ostream &operator<<(std::ostream &os, const Inst &inst)
     return os;
 }
 
-template <typename Instruction, typename Callback>
+namespace detail {
+// `Inst` is a template parameter to take `Inst *` and `const Inst *`, see the two `ark::compiler::SwitchOverOpcodes`
+// wrappers below.
+template <typename Inst, typename Callback,
+          typename = std::enable_if_t<std::is_base_of_v<ark::compiler::Inst, std::remove_cv_t<Inst>>>>
 // NOLINTNEXTLINE(readability-function-size)
-auto SwitchOverOpcodes(Instruction *inst, Callback &&callback)
+auto SwitchOverOpcodes(Inst *inst, Callback &&callback)
 {
     switch (inst->GetOpcode()) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define HANDLE_INST(OPCODE, BASE, ...)                                                  \
-    case Opcode::OPCODE: {                                                              \
-        auto value = callback(OpcodeTraits<Opcode::OPCODE> {}, inst->CastTo##OPCODE()); \
-        if (value.has_value()) {                                                        \
-            return *value; /* CC-OFF(G.PRE.05) code generation */                       \
-        }                                                                               \
-        break; /* CC-OFF(G.PRE.05) code generation */                                   \
+#define HANDLE_INST(OPCODE, BASE, ...)                                                                          \
+    case Opcode::OPCODE: {                                                                                      \
+        auto value = std::forward<Callback>(callback)(OpcodeTraits<Opcode::OPCODE> {}, inst->CastTo##OPCODE()); \
+        if (value.has_value()) {                                                                                \
+            return *value; /* CC-OFF(G.PRE.05) code generation */                                               \
+        }                                                                                                       \
+        break; /* CC-OFF(G.PRE.05) code generation */                                                           \
     }
         OPCODE_LIST(HANDLE_INST)
 #undef HANDLE_INST
@@ -7734,6 +7784,19 @@ auto SwitchOverOpcodes(Instruction *inst, Callback &&callback)
             break;
     }
     UNREACHABLE();
+}
+}  // namespace detail
+
+template <typename Callback>
+auto SwitchOverOpcodes(Inst *inst, Callback &&callback)
+{
+    return detail::SwitchOverOpcodes(inst, std::forward<Callback>(callback));
+}
+
+template <typename Callback>
+auto SwitchOverOpcodes(const Inst *inst, Callback &&callback)
+{
+    return detail::SwitchOverOpcodes(inst, std::forward<Callback>(callback));
 }
 
 }  // namespace ark::compiler

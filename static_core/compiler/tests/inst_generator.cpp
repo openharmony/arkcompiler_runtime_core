@@ -922,28 +922,27 @@ ParameterInst *GraphCreator::CreateParamInst(Graph *graph, DataType::Type type, 
 
 Graph *GraphCreatorWithGCBarrierEntrypoints::GenerateGraphImpl(Inst *inst)
 {
-    auto *res = GraphCreator::GenerateGraphImpl(inst);
-    if (inst_flags::HasFlag(inst->GetOpcode(), inst_flags::GC_BARRIER) && inst->GetType() == DataType::REFERENCE) {
-        auto *bb = res->GetStartBlock();
-        auto iter = bb->AllInsts();
-        size_t nParams = 0;
-        for ([[maybe_unused]] const auto &p : res->GetParameters()) {
-            ++iter, ++nParams;
+    auto getGCBarrierType = [inst]() {
+        if (inst_flags::HasFlags(inst->GetOpcode(), inst_flags::GC_BARRIER | inst_flags::STORE)) {
+            return LoadGCEntrypointInst::BarrierType::PRE_WRITE;
+        }
+        if (inst_flags::HasFlags(inst->GetOpcode(), inst_flags::GC_BARRIER | inst_flags::LOAD)) {
+            return LoadGCEntrypointInst::BarrierType::READ;
+        }
+        UNREACHABLE();
+    };
+    auto *graph = GraphCreator::GenerateGraphImpl(inst);
+    if (inst_flags::HasFlags(inst->GetOpcode(), inst_flags::GC_BARRIER) && inst->GetType() == DataType::REFERENCE) {
+        // NOTE(howard, #33409): need to implement read barriers generation
+        if (inst_flags::HasFlag(inst->GetOpcode(), inst_flags::LOAD)) {
+            return graph;
         }
 
-        auto param = res->CreateInstParameter(nParams, DataType::POINTER);
-        if (*iter == nullptr) {
-            bb->AppendInst(param);
-        } else {
-            bb->InsertBefore(param, *iter);
-        }
-
-        SetNumVRegsArgs(runtime_.GetMethodRegistersCount(res->GetMethod()), nParams + 1);
-        res->SetVRegsCount(res->GetVRegsCount() + 1);
-
-        SetInstGCBarrierEntrypoint(inst, param);
+        auto *gcentry = graph->CreateInstLoadGCEntrypoint(DataType::POINTER, INVALID_PC, getGCBarrierType());
+        inst->GetBasicBlock()->InsertBefore(gcentry, inst);
+        SetInstGCBarrierEntrypoint(inst, gcentry);
     }
-    return res;
+    return graph;
 }
 
 template <class T>
