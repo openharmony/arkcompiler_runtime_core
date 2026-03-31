@@ -176,6 +176,7 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
     if (launchRes != LaunchResult::OK) {
         refStorage->Remove(callbackRef);
         jobMan->DestroyJob(job);
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(timerInfo);
     }
     return timerId;
 }
