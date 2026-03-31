@@ -27,6 +27,32 @@ function longFunc(duration: int): string {
     return 'success';
 }
 
+class Event {
+    constructor() {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+            this.resolveFn = resolve;
+        })
+        this.job = new CompletableJob<boolean>();
+        this.promise.then((result: boolean) => {
+            this.job.finish(result);
+        }).catch((e: Error) => {
+            this.job.fail(e);
+        });
+    }
+
+    public wait(): boolean {
+        return this.job.Await();
+    }
+
+    public fire(val: boolean = true) {
+        this.resolveFn!(val);
+    }
+
+    private promise: Promise<boolean>;
+    private resolveFn: ((val: boolean) => void) | null = null;
+    private job: CompletableJob<boolean>;
+}
+
 async function taskExecuteWithinTimeout(): Promise<void> {
     let task1 = new taskpool.Task(returnAbc);
     try {
@@ -458,6 +484,36 @@ async function timeoutNotTriggerSuccessAndFailedCallbacks(): Promise<void> {
     arktest.assertEQ(groupOnExecutionFailedStr2, '');
 }
 
+async function cancelBeforeTimeout() {
+    let event = new Event();
+    let timeoutFunc = (): string => {
+        let start = Date.now();
+        while (Date.now() - start < 100) {
+            continue;
+        }
+        event.fire();
+        let start2 = Date.now();
+        while (Date.now() - start2 < 600) {
+            continue;
+        }
+        return 'done';
+    };
+    let task = new taskpool.Task(timeoutFunc);
+    let res = taskpool.execute(task, {timeout: 250});
+    try {
+        event.wait();
+        taskpool.cancel(task);
+        arktest.expectError(() => {
+            waitForCompletion(async () => {
+                await res;
+            })
+        }, new Error('taskpool:: task has been timeout'));
+    } catch (e) {
+        let err = e as Error;
+        arktest.assertEQ('taskpool:: task has been executed', err.message);
+    }
+}
+
 function main(): int {
     let timeoutTaskSuite = new arktest.ArkTestsuite('taskpool.Timeout');
     let timeoutTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -474,6 +530,7 @@ function main(): int {
     timeoutTaskSuiteDisabled.addAsyncTest('TimeoutTaskGroupExecutedCannotSetTimeout', timeoutTaskGroupExecutedCannotSetTimeout);
     timeoutTaskSuiteDisabled.addAsyncTest('TaskGroupWithTimeoutCannotExecuteWithoutTimeout', taskGroupWithTimeoutCannotExecuteWithoutTimeout);
     timeoutTaskSuiteDisabled.addAsyncTest('TimeoutNotTriggerSuccessAndFailedCallbacks', timeoutNotTriggerSuccessAndFailedCallbacks);
+    timeoutTaskSuite.addAsyncTest('CancelBeforeTimeout', cancelBeforeTimeout);
 
     let res = timeoutTaskSuite.run();
     CoroutineExtras.stopTaskpool();
