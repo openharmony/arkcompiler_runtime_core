@@ -745,9 +745,6 @@
 #33380
 07.expressions/24.exponentiation_expression/bigint_exp_negative_n.ets
 
-#32703
-07.expressions/24.exponentiation_expression/inf_27.ets
-
 #26476 bigint literals with hex, oct, bin
 07.expressions/25.additive_expressions/bigint_operations/bigint_hex.ets
 
