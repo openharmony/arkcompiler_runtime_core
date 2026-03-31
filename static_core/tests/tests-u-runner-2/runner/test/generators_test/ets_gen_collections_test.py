@@ -114,3 +114,28 @@ class EtsGeneratorCollectionsTest(TestCase):
             self.assertEqual(sorted(expected_tests), gen_tests)
         finally:
             test_utils.clear_after_test()
+
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('sys.argv', ["runner.sh", "config-1", "test_suite_3_col",
+                        "--test-file", "03.types/inner/simple_test_types.ets"])
+    def test_gen_for_collections_with_test_file(self) -> None:
+        """
+        test suite contains 3 collections (5 test in total), tst-fil is set explicitly.
+        expected result: 1 test from test collection 03.types was generated
+        """
+        args = get_args()
+        self.config = Config(args)
+
+        _ = RunnerStandardFlow(self.config)
+        gen_folder = Path(os.environ["WORK_DIR"]) / 'gen'
+        gen_tests = sorted(test.name for test in gen_folder.rglob("*") if test.is_file() and test.suffix == ".ets")
+
+        expected_tests = ['simple_test_types.ets']
+        try:
+            self.assertEqual(sorted(expected_tests), gen_tests)
+        finally:
+            test_utils.clear_after_test()

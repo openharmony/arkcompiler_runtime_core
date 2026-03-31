@@ -143,7 +143,7 @@ class EtsGeneratorTest(TestCase):
         test_source_path: Path = Path(__file__).with_name("ets_data")
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
-        self.args['test_suite.parameters.test-file'] = 'simple_test.ets'
+        self.args['test_suite.parameters.test-file'] = f'{test_source_path}/simple_test.ets'
         self.load_config()
 
         generated_tests = self.generate_tests(test_source_path, test_gen_path)
@@ -174,7 +174,7 @@ class EtsGeneratorTest(TestCase):
         test_source_path: Path = Path(__file__).with_name("ets_data")
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
-        self.args['test_suite.parameters.test-file'] = 'simple_exp_test.ets'
+        self.args['test_suite.parameters.test-file'] = f'{test_source_path}/simple_exp_test.ets'
         self.load_config()
 
         generated_tests = self.generate_tests(test_source_path, test_gen_path)
