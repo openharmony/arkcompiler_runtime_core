@@ -92,19 +92,22 @@ cases:
         values can be the same
     decl_variants:
       - |-
-        enum Enum { first, second = -1, third }
+        enum Enum: int { A, B = -1, C, D }
     sub_cases_logic:
       - |-
-        arktest.assertTrue(Enum.first instanceof Enum)
-        arktest.assertTrue(Enum.second instanceof Enum)
-        arktest.assertTrue(Enum.third instanceof Enum)
-        arktest.assertTrue(Enum.first.valueOf() instanceof int)
-        arktest.assertTrue(Enum.second.valueOf() instanceof int)
-        arktest.assertTrue(Enum.third.valueOf() instanceof int)
-        arktest.assertTrue(Enum.first.valueOf() == 0)
-        arktest.assertTrue(Enum.second.valueOf() == -1)
-        arktest.assertTrue(Enum.third.valueOf() == 0)
-        arktest.assertTrue(Enum.third == Enum.first)
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertTrue(Enum.D.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A.valueOf(), 0)
+        arktest.assertEQ(Enum.B.valueOf(), -1)
+        arktest.assertEQ(Enum.C.valueOf(), 0)
+        arktest.assertEQ(Enum.D.valueOf(), 1)
+        arktest.assertTrue(Enum.C == Enum.A)
     test_suffix: "phcei2"
     ids: "2"
 
@@ -502,7 +505,7 @@ cases:
         plus one.
     params: |-
       >-
-        all have not a constant expression initializers,
+        all have explicit initializers,
         using enum members values in initializers expressions
     decl_variants:
       - |-
@@ -550,7 +553,7 @@ cases:
         arktest.assertEQ(Enum.K, -4)
         arktest.assertEQ(Enum.L, -5 >>> 2)
         arktest.assertEQ(Enum.L, 1073741822)
-    test_suffix: "ahnacei3"
+    test_suffix: "ahei"
     ids: "15"
 
   - desc: |-

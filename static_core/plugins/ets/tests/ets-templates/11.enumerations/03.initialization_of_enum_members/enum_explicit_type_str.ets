@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,47 +13,26 @@
  * limitations under the License.
  */
 
-{% for ct in check_types %}
-
 {% for c in cases %}
 
-{% for cv in c.check_variants %}
-
 {% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
 
-{% if cv.check_type == ct %}
-
-{% set logic_data -%}
-{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
-{% endset -%}
-
-{% set ns = namespace() %}
-
-{% set ns.logic_data = logic_data %}
-{% for k, v in cv.items() %}
-  {% set ns.logic_data = ns.logic_data|replace("[" ~ k ~ "]", v) %}
-{% endfor %}
-{% set logic_data=ns.logic_data %}
-
-{% set ns.decl = decl %}
-{% for k, v in cv.items() %}
-  {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
-{% endfor %}
-{% set decl=ns.decl %}
+{% for scl in c.sub_cases_logic %}
+{% set scl_id = loop.index0 %}
 
 /*---
 desc: {{c.desc}}
-tags: [compile-only, negative]
+params: {{c.params}}
+test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
 ---*/
 
 {{decl}}
 
 function main(): void {
-{{logic_data}}
+  {{scl|indent(width=2)}}
 }
 
-{% endif %}
-{% endfor %}
 {% endfor %}
 {% endfor %}
 {% endfor %}

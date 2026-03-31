@@ -58,10 +58,8 @@ limitations under the License.
 desc: {{c.desc}}
 tags: [negative, compile-only]
 expected_out: {{ns.expected_out}}
+test_suffix: "{{c.test_suffix}}_{{cv_id}}_{{scl_id}}"
 ---*/
-
-//#4097 (urunner2) note: use this after declgen run support
-//test suffix: "{{c.test_suffix}}_{{cv_id}}_{{scl_id}}"
 
 {{decl}}
 
