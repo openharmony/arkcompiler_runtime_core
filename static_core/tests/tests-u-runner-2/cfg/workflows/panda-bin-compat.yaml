@@ -1,0 +1,106 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+runner-api-level: 0.0.0.1
+type: workflow
+workflow-name: panda-bin-compat
+parameters:
+    # common
+    build: ${PANDA_BUILD}
+    work-dir: ${parameters.work-dir}
+    load-runtimes: ${parameters.load-runtimes}
+    # es2panda and verifier
+    opt-level: 2
+    es2panda-timeout: 30
+    verifier-timeout: 30
+    enable-es2panda: true
+    enable-verifier: true
+    extension: ${parameters.extension}
+    es2panda-args: [ ]
+    # ark
+    ark-timeout: 180
+    gc-type: g1-gc
+    full-gc-bombing-frequency: 0
+    heap-verifier: fail_on_verification
+    ark-args: [ ]
+    # adds --boot-panda-files option to verifier and ark with all dependent and the current abc files
+    is-panda: true
+    boot-panda-files: ""
+    compiler-enable-jit: "true"
+steps:
+    compile-old-libs:
+        from: es2panda-verifier
+        opt-level: ${parameters.opt-level}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        extension: ${parameters.extension}
+        load-runtimes: ${parameters.load-runtimes}
+        enable-es2panda: ${parameters.enable-es2panda}
+        enable-verifier: ${parameters.enable-verifier}
+        es2panda-timeout: ${parameters.es2panda-timeout}
+        verifier-timeout: ${parameters.verifier-timeout}
+        es2panda-args: ${parameters.es2panda-args}
+        boot-panda-files: ${parameters.boot-panda-files}
+    runtime-with-old-libs:
+        from: ark
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        ark-args: ${parameters.ark-args}
+        boot-panda-files: ${parameters.boot-panda-files}
+        compiler-enable-jit: ${parameters.compiler-enable-jit}
+    copy-new-libs:
+        executable-path: /bin/bash
+        args:
+            - "${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner-2/cfg/scripts/bin-compat-copy-new-libs.sh"
+            - "${parameters.work-dir}/gen/${test-id-name}"
+        timeout: 30
+    compile-new-libs:
+        executable-path: /bin/bash
+        args:
+            - "${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner-2/cfg/scripts/bin-compat-compile-new-libs.sh"
+            - "${parameters.build}/bin/es2panda"
+            - "${parameters.arktsconfig}"
+            - "${parameters.extension}"
+            - "${parameters.opt-level}"
+            - "${parameters.work-dir}/gen/${test-id-name}"
+            - "${parameters.work-dir}/intermediate/${test-id-name}"
+        timeout: 60
+    verify-new-libs:
+        executable-path: ${parameters.build}/bin/verifier
+        timeout: ${parameters.verifier-timeout}
+        enabled: ${parameters.enable-verifier}
+        step-type: verifier
+        step-filter: ${parameters.es2panda-verifier-step-filter}
+        args:
+            - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
+            - "--load-runtimes=${parameters.load-runtimes}"
+            - "--config-file=${parameters.verifier-config}"
+            - "${parameters.verifier-test-suite-args}"
+            - "${parameters.output-file}"
+    runtime-with-new-libs:
+        from: ark
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        ark-args: ${parameters.ark-args}
+        boot-panda-files: ${parameters.boot-panda-files}
+        compiler-enable-jit: ${parameters.compiler-enable-jit}
