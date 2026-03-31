@@ -17,13 +17,15 @@
 /*---
 desc: Unsigned right shift expression for enumeration with explicit type
 ---*/
-enum TypedEnum: {{c.enum_values}}
+enum TypedEnum: {{c.check_type}} { A = {{c.value_a}}, B = {{c.value_b}} }
 
 function main(): void {
-
-  let res = TypedEnum.A >>> TypedEnum.B
-  arktest.assertEQ(res, TypedEnum.C)
-
+  let a: {{c.check_type}} = {{c.value_a}}
+  let b: {{c.check_type}} = {{c.value_b}}
+  let res1 = TypedEnum.A >>> TypedEnum.B
+  let res2 = a >>> b
+  arktest.assertEQ(res1, res2)
+  arktest.assertEQ(TypedEnum.A >>> TypedEnum.B, a >>> b)
 }
 
 {% endfor %}

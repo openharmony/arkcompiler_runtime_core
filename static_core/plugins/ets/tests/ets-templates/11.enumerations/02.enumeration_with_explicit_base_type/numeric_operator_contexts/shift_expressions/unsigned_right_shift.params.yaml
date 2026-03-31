@@ -13,15 +13,9 @@
 
 ---
 cases:
-    - enum_values: |-
-        byte { A = -4, B = 1, C = 2147483646}
-    - enum_values: |-
-        short { A = -4, B = 1, C = 2147483646}
-    - enum_values: |-
-        int { A = -4, B = 1, C = 2147483646}
-    - enum_values: |-
-        long { A = -4, B = 1, C = 9223372036854775806}
-    - enum_values: |-
-        float { A = -4.0f, B = 1.0f, C = 2147483646.0f}
-    - enum_values: |-
-        double { A = -4.0, B = 1.0, C = 9223372036854775806.0}
+  - {check_type: "byte", value_a: "-4", value_b: "1"}
+  - {check_type: "short", value_a: "-4", value_b: "1"}
+  - {check_type: "int", value_a: "-4", value_b: "1"}
+  - {check_type: "long", value_a: "-4", value_b: "1"}
+  - {check_type: "float", value_a: "-4.0f", value_b: "1.0f"}
+  - {check_type: "double", value_a: "-4.0", value_b: "1.0"}

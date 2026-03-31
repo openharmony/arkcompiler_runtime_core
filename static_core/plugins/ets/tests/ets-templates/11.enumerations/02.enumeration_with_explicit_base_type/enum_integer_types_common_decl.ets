@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-{% for ct in check_types %}
-
 {% for c in cases %}
 
 {% for cv in c.check_variants %}
 
 {% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
 
 {% for scl in c.sub_cases_logic %}
-
-{% if cv.check_type == ct %}
+{% set scl_id = loop.index0 %}
 
 {% set logic_data  = "  " ~ (scl|indent(width=2)) %}
 
@@ -43,6 +41,8 @@
 
 /*---
 desc: {{c.desc}}
+params: {{c.params}}
+test_suffix: "{{c.test_suffix}}_{{cv.check_type}}_{{decl_id}}_{{scl_id}}"
 ---*/
 
 {{decl}}
@@ -51,8 +51,6 @@ function main(): void {
 {{logic_data}}
 }
 
-{% endif %}
-{% endfor %}
 {% endfor %}
 {% endfor %}
 {% endfor %}
