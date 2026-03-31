@@ -73,11 +73,11 @@ export final class Constructor extends Method {
      * @FaAndStageModel
      * @since 24
      */
-    public createInstance(args?: FixedArray<Any>): Any {
+    public createInstance(args?: FixedArray<Any>): Object {
         return this.createInstanceInternal(args);
     }
 
-    private native createInstanceInternal(args?: FixedArray<Any>): Any
+    private native createInstanceInternal(args?: FixedArray<Any>): Object
 }
 
 } // namespace reflect

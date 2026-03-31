@@ -7207,7 +7207,7 @@ intrinsics:
     method_name: createInstanceInternal
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args:
         - Y[]
     impl: ark::ets::intrinsics::ReflectMethodCreateInstanceInternal
