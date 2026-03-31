@@ -683,7 +683,33 @@
 11.enumerations/01.enumeration_base_type/enum_int_n_17.ets
 11.enumerations/01.enumeration_base_type/enum_str_n_11.ets
 
+#33805
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_cevwi_0.ets
+
 #33639
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_0_0.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_1_0.ets
+
+#33976
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_mot_0.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_mot_1.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_oor_0.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_oor_1.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_wit_0.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_wit_1.ets
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_wit_2.ets
+
+#33977
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udil_0_0.ets
+
+#33978
+11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_2_0.ets
+
+#33639
+11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_ahnacei1_0_0.ets
+11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_ahnacei2_0_0.ets
+11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_uoemvaemi_1_0.ets
+11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_udevtattf_0_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_4.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_5.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_6.ets
@@ -713,6 +739,9 @@
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_4.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_5.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_6.ets
+
+#33977
+11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_uemviie_0_0.ets
 
 #33476
 13.modules_and_namespaces/02.module_header/module_header.ets
