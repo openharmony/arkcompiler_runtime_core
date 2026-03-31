@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-[base_annotation_syntax_n_3.ets:29:1] Syntax error ESY125879: No white space or line separator is allowed between '@' and the annotation name.
+[base_annotation_syntax_n_6.ets:29:1] Syntax error ESY125879: No white space or line separator is allowed between '@' and the annotation name.
