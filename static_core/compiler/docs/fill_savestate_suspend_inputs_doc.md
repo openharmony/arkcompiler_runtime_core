@@ -11,16 +11,18 @@ The IR builder adds VReg (virtual register) inputs to SaveStateSuspend. This pas
 ## Dependence
 
 * RPO order.
-* LivenessAnalyzer — the pipeline runs it immediately before this pass; the pass does not run it internally.
+* LivenessAnalyzer - pass runs the default target-independent part internally. Target-dependent part is not run, but is invalidated by the pass.
 
 ## Placement
 
-The pass runs **before** Register Allocation. It must not run after RegAlloc because it modifies instruction inputs and uses LivenessAnalyzer, which is invalid after allocation.
+The pass runs **before** Register Allocation:
+- Register Allocation can re-use target-independent Liveness Analysis, run by this pass;
+- Register Allocation must recompute target-dependent Liveness Analysis based on modifications done by this pass.
 
 ## Algorithm
 
-1. If the graph has no SaveStateSuspend instructions, return without changes.
-2. Require valid LivenessAnalyzer (pipeline runs it before this pass).
+1. Run target-independent LivenessAnalysis, if not already computed.
+2. If the graph has no SaveStateSuspend instructions, return without changes.
 3. For each SaveStateSuspend instruction:
    - Mark all existing inputs with a marker (for O(1) duplicate detection).
    - Mark the SaveStateSuspend instruction itself so it is not added as its own input.

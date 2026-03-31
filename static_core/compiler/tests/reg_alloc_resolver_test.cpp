@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,8 +60,9 @@ void RegAllocResolverTest::ResolveFixedInputsRunLiveness()
 {
     Target target(GetGraph()->GetArch());
     auto storeInst = &INS(3U);
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    ASSERT_TRUE(la.Run());
+    auto maybeLa = RunFullLivenessAnalysis(GetGraph());
+    EXPECT_NE(maybeLa, nullptr);
+    auto &la = *maybeLa;
 
     auto param0 = &INS(0U);
     auto param1 = &INS(1U);

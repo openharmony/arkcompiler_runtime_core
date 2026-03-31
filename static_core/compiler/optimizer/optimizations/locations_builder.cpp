@@ -26,7 +26,11 @@
 namespace ark::compiler {
 bool RunLocationsBuilder(Graph *graph)
 {
+    if (graph->IsLocationsBuilt()) {
+        return true;
+    }
     if (graph->GetCallingConvention() == nullptr) {
+        graph->SetLocationsBuilt();
         return true;
     }
     auto pinfo = graph->GetCallingConvention()->GetParameterInfo(0);
@@ -64,6 +68,7 @@ LOCATIONS_BUILDER(const ArenaVector<BasicBlock *> &)::GetBlocksToVisit() const
 LOCATIONS_BUILDER(bool)::RunImpl()
 {
     VisitGraph();
+    GetGraph()->SetLocationsBuilt();
     return true;
 }
 

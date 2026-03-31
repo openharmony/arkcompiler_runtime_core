@@ -28,32 +28,26 @@ bool FillSaveStateSuspendInputs::RunImpl()
     auto *graph = GetGraph();
 
     COMPILER_LOG(DEBUG, FILL_SS_SUSPEND) << "Running FillSaveStateSuspendInputs pass";
+
+    if (!graph->RunPass<LivenessAnalyzer>()) {
+        COMPILER_LOG(ERROR, FILL_SS_SUSPEND) << "LivenessAnalyzer failed";
+        return false;
+    }
+
+    bool encountered = false;
     bool modified = false;
-    bool livenessReady = false;
-    auto ensureLivenessReady = [graph, &livenessReady]() {
-        if (livenessReady) {
-            return true;
-        }
-        if (!graph->RunPass<LivenessAnalyzer>()) {
-            COMPILER_LOG(ERROR, FILL_SS_SUSPEND) << "LivenessAnalyzer failed";
-            return false;
-        }
-        livenessReady = true;
-        return true;
-    };
     for (auto *block : graph->GetBlocksRPO()) {
         for (auto *inst : block->Insts()) {
             if (!inst->IsSaveStateSuspend()) {
                 continue;
             }
-            if (!ensureLivenessReady()) {
-                return false;
-            }
 
+            encountered = true;
             modified |= ProcessSaveStateSuspend(static_cast<SaveStateInst *>(inst));
         }
     }
-    if (!livenessReady) {
+
+    if (!encountered) {
         COMPILER_LOG(DEBUG, FILL_SS_SUSPEND) << "No SaveStateSuspend instructions found, skipping pass";
         return false;
     }
@@ -112,7 +106,9 @@ bool FillSaveStateSuspendInputs::ProcessSaveStateSuspend(SaveStateInst *saveStat
 
 void FillSaveStateSuspendInputs::InvalidateAnalyses()
 {
-    GetGraph()->InvalidateAnalysis<LivenessAnalyzer>();
+    if (GetGraph()->GetAnalysis<LivenessAnalyzer>().IsTargetSpecificComputed()) {
+        GetGraph()->InvalidateAnalysis<LivenessAnalyzer>();
+    }
 }
 
 }  // namespace ark::compiler

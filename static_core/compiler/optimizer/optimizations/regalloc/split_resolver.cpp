@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "compiler/optimizer/analysis/dominators_tree.h"
 #include "compiler/optimizer/analysis/loop_analyzer.h"
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc_base.h"
+#include "compiler_logger.h"
 
 namespace ark::compiler {
 

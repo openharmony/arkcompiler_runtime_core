@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/cleanup.h"
+#include "optimizer/optimizations/fill_savestate_suspend_inputs.h"
 #include "reg_alloc_graph_coloring.h"
 #include "reg_alloc_linear_scan.h"
 #include "reg_alloc_resolver.h"
@@ -98,10 +99,14 @@ bool RegAlloc(Graph *graph)
     // Regalloc doesn't use RPO, so additional throw arcs aren't needed
     RemoveThrowEdges(graph);
 
-    bool raPassed = false;
-
     if (graph->IsBytecodeOptimizer()) {
         RegAllocResolver(graph).ResolveCatchPhis();
+    } else {
+        graph->RunPass<FillSaveStateSuspendInputs>();
+    }
+
+    bool raPassed = false;
+    if (graph->IsBytecodeOptimizer()) {
         raPassed = graph->RunPass<RegAllocGraphColoring>(GetFrameSize());
     } else {
         if (IsGraphColoringEnable(graph)) {

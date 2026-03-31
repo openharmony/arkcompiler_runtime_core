@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "reg_alloc_base.h"
+#include "compiler_logger.h"
+#include "optimizer/analysis/liveness_analyzer.h"
 #include "reg_type.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/datatype.h"
@@ -105,10 +107,8 @@ bool RegAllocBase::Prepare()
 
     GetGraph()->RunPass<DominatorsTree>();
 
-    // Because linear numbers should stay unchanged from Liveness
-    // pass, we have not to run any passes between. But may be ran
-    // by previous try of allocation.
-    if (!GetGraph()->RunPass<LivenessAnalyzer>()) {
+    // Previous register allocation attempt might have invalidated liveness analysis
+    if (RunFullLivenessAnalysis(GetGraph()) == nullptr) {
         return false;
     }
     if (GetGraph()->IsBytecodeOptimizer()) {

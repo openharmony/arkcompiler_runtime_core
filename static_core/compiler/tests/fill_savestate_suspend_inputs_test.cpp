@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "compiler_options.h"
+#include "gmock/gmock.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/utils.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/ir_constructor.h"
+#include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "tests/graph_comparator.h"
 #include "unit_test.h"
 #include "optimizer/analysis/liveness_analyzer.h"
@@ -32,6 +35,13 @@ public:
     ~FillSaveStateSuspendInputsTest() override = default;
     NO_COPY_SEMANTIC(FillSaveStateSuspendInputsTest);
     NO_MOVE_SEMANTIC(FillSaveStateSuspendInputsTest);
+
+    void RunFillSaveStateSuspendInputs()
+    {
+        ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+        ASSERT_TRUE(GetGraph()->IsAnalysisValid<LivenessAnalyzer>());
+        ASSERT_FALSE(GetGraph()->GetAnalysis<LivenessAnalyzer>().IsTargetSpecificComputed());
+    }
 
     std::string GetClassNameFromMethod(MethodPtr method) const override
     {
@@ -102,7 +112,7 @@ TEST_F(FillSaveStateSuspendInputsTest, LivePrimitiveValuesAddedAsBridgeInputs)
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -137,7 +147,7 @@ TEST_F(FillSaveStateSuspendInputsTest, LiveObjectValuesAddedAsBridgeInputs)
             INST(5U, Opcode::Return).ref().Inputs(0U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -172,7 +182,7 @@ TEST_F(FillSaveStateSuspendInputsTest, NonLiveValuesNotAdded)
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -208,7 +218,7 @@ TEST_F(FillSaveStateSuspendInputsTest, ExistingInputsNotRemovedNoDuplicates)
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -239,7 +249,8 @@ TEST_F(FillSaveStateSuspendInputsTest, NoSaveStateSuspendReturnsFalse)
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
-    ASSERT_FALSE(GetGraph()->IsAnalysisValid<LivenessAnalyzer>());
+    ASSERT_TRUE(GetGraph()->IsAnalysisValid<LivenessAnalyzer>());
+    ASSERT_FALSE(GetGraph()->GetAnalysis<LivenessAnalyzer>().IsTargetSpecificComputed());
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -273,7 +284,7 @@ TEST_F(FillSaveStateSuspendInputsTest, MultipleSaveStateSuspendDifferentLiveSets
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -307,7 +318,7 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphFlagSetAfterPass)
             INST(5U, Opcode::Return).s32().Inputs(0U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -342,7 +353,7 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphCheckerPassesAfterFillPass)
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -376,7 +387,7 @@ TEST_F(FillSaveStateSuspendInputsTest, ConstantsConvertedToImmediates)
             INST(5U, Opcode::Return).s64().Inputs(0U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -429,7 +440,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInThenBranch)
             INST(12U, Opcode::Return).s32().Inputs(11U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -490,7 +501,7 @@ TEST_F(FillSaveStateSuspendInputsTest, IfBranchSaveStateSuspendInElseBranch)
             INST(10U, Opcode::Return).s32().Inputs(9U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -552,7 +563,7 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopWithSaveStateSuspendInBody)
             INST(12U, Opcode::Return).s32().Inputs(6U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -617,7 +628,7 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopTwoExitsSaveStateSuspendInHeader)
             INST(12U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<FillSaveStateSuspendInputs>());
+    RunFillSaveStateSuspendInputs();
 
     Graph *expectedGraph = CreateGraph();
     GRAPH(expectedGraph)
@@ -651,6 +662,194 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopTwoExitsSaveStateSuspendInHeader)
     }
     OptimizeSaveStateConstantInputs(GetInstById(expectedGraph, 7U)->CastToSaveStateSuspend());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
+}
+
+namespace {
+[[maybe_unused]] auto GetVRegs(SaveStateInst *ss)
+{
+    std::vector<VirtualRegister::ValueType> vregs;
+    for (size_t i = 0; i < ss->GetInputsCount(); i++) {
+        vregs.push_back(ss->GetVirtualRegister(i).Value());
+    }
+    return vregs;
+}
+}  // namespace
+
+/// Test that running FillSaveStateSuspendInputs pass in compilation pipeline works.
+TEST_F(FillSaveStateSuspendInputsTest, CompilationPipeline)
+{
+#ifdef COMPILER_DEBUG_CHECKS
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(14U, 1U).ref();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::SaveStateSuspend).Inputs(14U).SrcVregs({4U});
+            INST(5U, Opcode::Return).s32().Inputs(0U);
+        }
+    }
+    // Run FillSaveStateSuspendInputs as part of register allocation pipeline
+    EXPECT_TRUE(RegAlloc(GetGraph()));
+    EXPECT_TRUE(GetGraph()->IsSaveStateSuspendInputsAllocated());
+
+    auto *saveStateSuspend = INS(4U).CastToSaveStateSuspend();
+
+    using namespace ::testing;
+    auto inputIdsAre = [](auto... ids) {
+        return ElementsAre(Property(&Input::GetInst, Property(&Inst::GetId, ids))...);
+    };
+    EXPECT_THAT(saveStateSuspend->GetInputs(), inputIdsAre(14U, 0U));
+    EXPECT_THAT(GetVRegs(saveStateSuspend), ElementsAre(4U, BRIDGE_VREG));
+#else
+    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
+#endif
+}
+
+namespace {
+class OpBuilder {
+public:
+    OpBuilder() {}
+
+    void PushNextArg(size_t arg)
+    {
+        toUseNext_.push_back(arg);
+    }
+
+    std::optional<size_t> PopArg()
+    {
+        if (toUse_.empty()) {
+            return {};
+        }
+        size_t arg = toUse_.back();
+        toUse_.pop_back();
+        return arg;
+    }
+
+    void Next()
+    {
+        toUse_.swap(toUseNext_);
+        toUseNext_.clear();
+    }
+
+    const std::vector<size_t> &GetArgs()
+    {
+        return toUse_;
+    }
+
+    const std::vector<size_t> &GetNextArgs()
+    {
+        return toUseNext_;
+    }
+
+    void Reset()
+    {
+        toUse_.clear();
+        toUseNext_.clear();
+    }
+
+private:
+    std::vector<size_t> toUse_;
+    std::vector<size_t> toUseNext_;
+};
+
+template <typename SourceCallback>
+OpBuilder InitOps(size_t numSources, SourceCallback &&source)
+{
+    OpBuilder builder;
+    for (size_t i = 0; i < numSources; i++) {
+        builder.PushNextArg(source(i));
+    }
+    builder.Next();
+    return builder;
+}
+
+template <typename OpCallback>
+void BuildOps(OpBuilder &builder, OpCallback &&op)
+{
+    ASSERT_FALSE(builder.GetArgs().empty());
+    auto fallback = builder.GetArgs().front();
+    while (builder.GetArgs().size() > 1) {
+        do {
+            auto lhs = builder.PopArg();
+            ASSERT_TRUE(lhs.has_value());
+            auto rhs = builder.PopArg();
+            builder.PushNextArg(op(*lhs, rhs.value_or(fallback)));
+        } while (!builder.GetArgs().empty());
+        builder.Next();
+    }
+}
+}  // namespace
+
+/*
+ * Create a graph with the following binary tree structure (for 7 inputs):
+ *          Return
+ *            |
+ *        ___Add___
+ *       /         \
+ *    Add           Add
+ *   /   \         /   \
+ * Add    Add    Add   Add
+ * ||     / \    / \   / \
+ * C1    C2 C3  C4 C5 C6 C7
+ *
+ * After each Add a SaveStateSuspend and a CallStatic is inserted.
+ */
+SRC_GRAPH(BigGraph, Graph *graph, size_t numSources)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        // Create many constants that will be live across the same range
+        size_t id = 1;
+        auto adder = InitOps(numSources, [this, &id](size_t i) {
+            CONSTANT(id, i);
+            return id++;
+        });
+        BASIC_BLOCK(2U, -1L)
+        {
+            BuildOps(adder, [this, &id](size_t lhs, size_t rhs) {
+                INST(id, Opcode::Add).u64().Inputs(lhs, rhs);
+                size_t arg = id++;
+                INST(id++, Opcode::SaveStateSuspend).Inputs(0U).SrcVregs({4U});
+                INST(id++, Opcode::SaveState).NoVregs();
+                INST(id, Opcode::CallStatic).v0id().InputsAutoType(id - 1);
+                id++;
+                return arg;
+            });
+            INST(id++, Opcode::Return).u64().Inputs(*adder.PopArg());
+        }
+    }
+}
+
+/// Same, but with more complicated graph.
+TEST_F(FillSaveStateSuspendInputsTest, BigGraph)
+{
+#ifdef COMPILER_DEBUG_CHECKS
+    constexpr size_t NUM_CONSTANTS = 300U;
+    EXPECT_GT(NUM_CONSTANTS, MAX_NUM_IMM_SLOTS);
+
+    src_graph::BigGraph::CREATE(GetGraph(), NUM_CONSTANTS);
+    EXPECT_TRUE(RegAlloc(GetGraph()));
+    EXPECT_TRUE(GetGraph()->IsSaveStateSuspendInputsAllocated());
+
+    size_t id = 1;  // skip Parameter
+    auto adder = InitOps(NUM_CONSTANTS, [&id]([[maybe_unused]] size_t i) { return id++; });
+    BuildOps(adder, [this, &adder, &id]([[maybe_unused]] size_t lhs, [[maybe_unused]] size_t rhs) {
+        size_t arg = id++;  // skip Add
+        auto &saveStateSuspend = INS(id++);
+        EXPECT_TRUE(saveStateSuspend.IsSaveStateSuspend());
+        for (auto live : adder.GetNextArgs()) {
+            using namespace ::testing;
+            EXPECT_THAT(saveStateSuspend.CastToSaveStateSuspend()->GetInputs(),
+                        Contains(Property(&Input::GetInst, Property(&Inst::GetId, live))));
+        }
+        id += 2U;  // skip SaveState and CallStatic
+        return arg;
+    });
+#else
+    GTEST_SKIP() << "Test requires COMPILER_DEBUG_CHECKS";
+#endif
 }
 
 // NOLINTEND(readability-magic-numbers)
