@@ -22,7 +22,7 @@ cases:
         eaWorker.start();
         mainWorker.quit();
       expected_error: |-
-        "Unhandled exception: std.core.Error"
+        "Error: EAWorker:: Main worker cannot be stopped"
     - desc: Main worker cannot be started.
       decl: |-
         import { EAWorker } from "std/core"
@@ -32,4 +32,4 @@ cases:
         eaWorker.start();
         mainWorker.start();
       expected_error: |-
-        "Unhandled exception: std.core.Error"
+        "Error: EAWorker:: Main worker cannot be started"
