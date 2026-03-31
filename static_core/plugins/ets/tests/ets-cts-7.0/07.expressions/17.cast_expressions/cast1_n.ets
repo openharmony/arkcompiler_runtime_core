@@ -15,9 +15,8 @@ limitations under the License.
 
 /*---
 desc: >-
-    A compile-time error occurs if the casting conversion (see Casting Conversions)
-    cannot convert the operand’s compile-time type to the target type
-    specified by the cast operator
+    If the result of x instanceof T is false, then x as T causes ClassCastError thrown at runtime
+expected_out: "Warning W0326: Attempting to cast type 'B' to 'A' can throw 'CastClassError' exception at runtime"
 ---*/
 
 class A {}

@@ -12,89 +12,127 @@
 # limitations under the License.
 
 --- # A list of top level declarations
-compileErrorTypes:
+cases:
 # 0-2 Incompatible types
-  - "let x: string = 123;"
-  - "let y: number = 'hello';"
-  - "const z: boolean = 1;"
+  - type: "let x: string = 123;"
+    exp_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'String'"
+  - type: "let y: number = 'hello';"
+    exp_out: "Semantic error ESE0318: Type '\\\"hello\\\"' cannot be assigned to type 'Double'"
+  - type: "const z: boolean = 1;"
+    exp_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Boolean'"
   
 # 3-4 Incorrect use of types
-  - "let a: class = Point;"
-  - "type B = interface;"
+  - type: "let a: class = Point;"
+    exp_out: "Syntax error ESY0138: Invalid Type."
+  - type: "type B = interface;"
+    exp_out: "Syntax error ESY0138: Invalid Type."
   
 # 5-6 Duplicate
-  - "class Point {} class Point {}"
-  - "interface A {} interface A {}"
+  - type: "class Point {} class Point {}"
+    exp_out: "Semantic error ESE0351: Variable 'Point' has already been declared."
+  - type: "interface A {} interface A {}"
+    exp_out: "Semantic error ESE0351: Variable 'A' has already been declared."
   
 # 7 Incorrect generic
-  - "class GenericClass<T, T> {}"
+  - type: "class GenericClass<T, T> {}"
+    exp_out: "Semantic error ESE0182: Duplicate type parameter 'T'."
   
 # 8-9 Errors in union types
-  - "type InvalidUnion = string | | number;"
-  - "type EmptyUnion = |;"
+  - type: "type InvalidUnion = string | | number;"
+    exp_out: "Syntax error ESY0138: Invalid Type."
+  - type: "type EmptyUnion = |;"
+    exp_out: "Syntax error ESY0138: Invalid Type."
   
 # 10 Incorrect conditional types
-  - "type InvalidConditional = T extends ? string : number;"
+  - type: "type InvalidConditional = T extends ? string : number;"
+    exp_out: "Semantic error ESE0371: Cannot find type 'T'."
   
 # 11-12 Errors in async functions
-  - "async function badAsync(): string { return 'data'; }"
-  - "async function missingAwait(): Promise<string> { return Promise; }"
+  - type: "async function badAsync(): string { return 'data'; }"
+    exp_out: "Semantic error ESE0001: Return type of async function must be 'Promise'."
+  - type: "async function missingAwait(): Promise<string> { return Promise; }"
+    exp_out: "Syntax error ESY0318: Class cannot be used as object."
   
 # 13 Readonly violation
-  - "interface Point { readonly x: number; } let p: Point = { x: 1 }; p.x = 2;"
+  - type: "interface Point { readonly x: number; } let p: Point = { x: 1 }; p.x = 2;"
+    exp_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
   
 # 14-15 Incorrect function parameters
-  - "function badParams(x: number, x: string): void {}"
-  - "function missingType(x): void {}"
+  - type: "function badParams(x: number, x: string): void {}"
+    exp_out: "Semantic error ESE0351: Variable 'x' has already been declared."
+  - type: "function missingType(x): void {}"
+    exp_out: "Syntax error ESY0194: Parameter declaration should have an explicit type annotation."
   
 # 16 Errors in rest parameters
-  - "function badRest(...x: number, y: string): void {}"
+  - type: "function badRest(...x: number, y: string): void {}"
+    exp_out: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
   
-# 17 Incorrect enum
-  - "enum BadEnum { A = 'hello', B = 2 }"
+# 17 Incorrect const enum
+  - type: "const enum BadEnum { A = 'hello', B = 2 }"
+    exp_out: "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
   
 # 18-19 Errors in ambient declarations
-  - "declare const x;"
-  - "declare function f();"
+  - type: "declare const x;"
+    exp_out: "Semantic error ESE1111: Missing type annotation for the 'x'."
+  - type: "declare function f();"
+    exp_out: "Semantic error ESE0018: Native and Declare methods should have explicit return type."
   
 # 20 Incompatible overrides
-  - "class Base { method(): number { return 1; } } class Derived extends Base { method(): string { return 'hello'; } }"
+  - type: "class Base { method(): number { return 1; } } class Derived extends Base { method(): string { return 'hello'; } }"
+    exp_out: "Semantic error ESE0136: Method method(): String in Derived not overriding any method"
   
 # 21-22 Using undeclared types
-  - "let x: UndefinedType = 1;"
-  - "function f(): NonExistentType { return 1; }"
+  - type: "let x: UndefinedType = 1;"
+    exp_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'UndefinedType'"
+  - type: "function f(): NonExistentType { return 1; }"
+    exp_out: "Semantic error ESE0371: Cannot find type 'NonExistentType'."
   
 # 23-24 Errors in classes
-  - "class AbstractClass { abstract method(): void; }"
-  - "class FinalClass final {}"
+  - type: "class AbstractClass { abstract method(): void; }"
+    exp_out: "Semantic error ESE0019: Non abstract class has abstract method."
+  - type: "class FinalClass final {}"
+    exp_out: "Syntax error ESY0227: Unexpected token '{'."
   
 # 25 Incorrect interface implementations
-  - "interface I { prop: number; } class C implements I { prop: string; }"
+  - type: "interface I { prop: number; } class C implements I { prop: string; }"
+    exp_out: "Semantic error ESE0136: Method prop(): String in C not overriding any method"
   
 # 26 Violation of contracts of types
-  - "type StringContainer = { value: string }; let container: StringContainer = { value: 123 };"
+  - type: "type StringContainer = { value: string }; let container: StringContainer = { value: 123 };"
+    exp_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
   
 # 27 Circular dependencies
-  - "type A = B; type B = A;"
+  - type: "type A = B; type B = A;"
+    exp_out: "Semantic error ESE0311: Circular type alias reference"
   
 # 28-29 Mixing value and type spaces
-  - "let x: class Point = Point;"
-  - "type Y = let origin;"
+  - type: "let x: class Point = Point;"
+    exp_out: "Syntax error ESY0138: Invalid Type."
+  - type: "type Y = let origin;"
+    exp_out: "Syntax error ESY0138: Invalid Type."
   
 # 30-31 Invalid array types
-  - "let arr: number[] = [1, '2', 3];"
-  - "let matrix: number[][] = [[1, 2], ['3', 4]];"
+  - type: "let arr: number[] = [1, '2', 3];"
+    exp_out: "Semantic error ESE0227: Array element at index 1 with type '\\\"2\\\"' is not compatible with the target array element type 'Double'"
+  - type: "let matrix: number[][] = [[1, 2], ['3', 4]];"
+    exp_out: "Semantic error ESE0227: Array element at index 0 with type '\\\"3\\\"' is not compatible with the target array element type 'Double'"
   
 # 32 Promise errors
-  - "async function badPromise(): Promise<number> { return 'string'; }"
+  - type: "async function badPromise(): Promise<number> { return 'string'; }"
+    exp_out: "Semantic error ESE0091: Type '\\\"string\\\"' is not compatible with the enclosing method's return type 'Promise<Double> | Double'"
   
 # 33-34 Invalid enum values
-  - "enum BadEnum { A = computedValue }"
-  - "enum AnotherBad { A = {} }"
+  - type: "enum BadEnum { A = computedValue }"
+    exp_out: "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+  - type: "enum AnotherBad { A = {} }"
+    exp_out: "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
   
 # 35-36 Type assertion errors
-  - "let x = 'hello' as number;"
-  - "let y = 123 as string;"
+  - type: "let x = 'hello' as number;"
+    exp_out: "Semantic error ESE0326: Cannot cast string literal to 'Double'"
+  - type: "let y = 123 as string;"
+    exp_out: "Semantic error ESE0326: Cannot cast number literal to 'String'"
   
 # 37 Invalid module/namespace
-  - "export default;"
+  - type: "export default;"
+    exp_out: "Syntax error ESY0227: Unexpected token 'export'."

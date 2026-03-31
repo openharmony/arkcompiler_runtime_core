@@ -27,6 +27,7 @@ desc: >-
         – FPi is an optional parameter if SPi is an optional parameter.
     • FR can be any type if SR is type void. Otherwise, the resultant type FR is a subtype of SR (covariance).
 tags: [{{c.compileonly}}]
+{% if c.error%}expected_error: {{c.error}}{% endif %}
 ---*/
 
 class Base {}

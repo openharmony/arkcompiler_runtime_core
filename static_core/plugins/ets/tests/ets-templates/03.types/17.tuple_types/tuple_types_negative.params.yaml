@@ -119,4 +119,3 @@ cases:
           a =+ [1, "X"]
       expected_out: |-
           Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
-

@@ -38,6 +38,17 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined4.ets
 
+#34200
+06.contexts_and_conversions/attempt_invalid_type_conversion/attemp_invalid_type_conversion_runtime_n_1.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_0.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_4.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_5.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_9.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_10.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_11.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_n_16.ets
+
 #33818
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_1.ets

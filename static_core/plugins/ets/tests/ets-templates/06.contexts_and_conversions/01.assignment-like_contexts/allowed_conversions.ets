@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,16 @@
  */
 
 {% for c in cases %}
-
 /*---
-desc: Test of covariant _out_ type parameter modifier. 
-{% if c.warn %}expected_out: "{{ c.warn }}"{% endif %}
+desc: >-
+    Allowed conversions
 ---*/
 
-class A<out T> {
-  readonly field: T = {{c.value}} as T
-  f(): T { return this.field }
-}
+{{c.defs}}
 
 function main(): void {
-  let arg: {{c.type}} = {{c.value}}
-  let a: A<{{c.type}}> = new A<{{c.type}}>()
-  arktest.assertEQ(a.f(), arg)
+    let src: {{c.stype}} = {{c.sval|safe}};
+    let dst = src {{c.dtype if c.dtype else c.dtype2}};
+    {{ c.asserts|indent }}
 }
-
 {% endfor %}

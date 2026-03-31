@@ -14,132 +14,193 @@
 ---
 cases:
 #0
-  - { tags: [compile-only], stype: boolean, sval: 'true', dtype: as byte, expected: "Warning W0326: Attempting to cast type 'Boolean' to 'Byte' can throw 'CastClassError' exception at runtime" }
+  - stype: boolean
+    sval: 'true'
+    dtype: 'as byte'
+    error: {runtime: "ClassCastError: std.core.Boolean cannot be cast to std.core.Byte"}
+    asserts: |
+      arktest.assertTrue(dst instanceof byte)
+      arktest.assertEQ(dst, 1)
 #1
-  - { tags: [compile-only, negative], stype: boolean, sval: 'false', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Boolean'"}
+  - { tags: compile-only, stype: boolean, sval: 'false', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Boolean'"}
 #2
-  - { tags: [compile-only, negative], stype: boolean, sval: 'true', dtype2: .toDouble(), expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'Boolean'"}
+  - { tags: compile-only, stype: boolean, sval: 'true', dtype2: .toDouble(), expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'Boolean'"}
 #3
-  - { tags: [compile-only], stype: short, sval: (1).toShort(), dtype: as boolean, expected: "Warning W0326: Attempting to cast type 'Short' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: short
+    sval: (1).toShort()
+    dtype: as boolean
+    error: {runtime: "ClassCastError: std.core.Short cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
+      arktest.assertEQ(dst, true)
 #4
-  - { tags: [compile-only], stype: long, sval: (1).toLong(), dtype: as boolean, expected: "Warning W0326: Attempting to cast type 'Long' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: long
+    sval: (11).toLong()
+    dtype: as boolean
+    error: {runtime: "ClassCastError: std.core.Long cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
+      arktest.assertEQ(dst, true)
 #5
-  - { tags: [compile-only], stype: float, sval: 1.0f, dtype: as boolean, expected: "Warning W0326: Attempting to cast type 'Float' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: float
+    sval: 1.0f
+    dtype: as boolean
+    error: {runtime: "ClassCastError: std.core.Float cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean);
+      arktest.assertEQ(dst, true)
 #6
-  - { tags: [compile-only, negative], stype: Boolean, sval: new Boolean(), dtype2: .toShort(), expected: "Semantic error ESE0087: Property 'toShort' does not exist on type 'Boolean'" }
+  - { tags: compile-only, stype: Boolean, sval: new Boolean(), dtype2: .toShort(), expected: "Semantic error ESE0087: Property 'toShort' does not exist on type 'Boolean'" }
 #7
-  - { tags: [compile-only, negative], stype: Boolean, sval: new Boolean(), dtype2: .toLong(), expected: "Semantic error ESE0087: Property 'toLong' does not exist on type 'Boolean'" }
+  - { tags: compile-only, stype: Boolean, sval: new Boolean(), dtype2: .toLong(), expected: "Semantic error ESE0087: Property 'toLong' does not exist on type 'Boolean'" }
 #8
-  - { tags: [compile-only, negative], stype: Boolean, sval: new Boolean(), dtype2: f, expected: "Syntax error ESY0227: Unexpected token 'f'." }
+  - { tags: compile-only, stype: Boolean, sval: new Boolean(), dtype2: f, expected: "Syntax error ESY0227: Unexpected token 'f'." }
 #9
-  - { tags: [compile-only], stype: byte, sval: 1 as byte, dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Byte' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: byte
+    sval: 1 as byte
+    dtype: as Boolean
+    error: {runtime: "ClassCastError: std.core.Byte cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
+      arktest.assertEQ(dst, true)
 #10
-  - { tags: [compile-only], stype: int, sval: (1).toInt(), dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Int' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: int
+    sval: (1).toInt()
+    dtype: as Boolean
+    error: {runtime: "ClassCastError: std.core.Int cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
+      arktest.assertEQ(dst, true)
 #11
-  - { tags: [compile-only], stype: double, sval: 1.0, dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Double' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: double
+    sval: 1.0
+    dtype: as Boolean
+    error: {runtime: "ClassCastError: std.core.Double cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
+      arktest.assertEQ(dst, true)
 #12
-  - { tags: [compile-only], stype: int, sval: 1, dtype: as string, expected: "Warning W0326: Attempting to cast type 'Int' to 'String' can throw 'CastClassError' exception at runtime" }
+  - stype: int
+    sval: 1
+    dtype: as string
+    error: {runtime: "ClassCastError: std.core.Int cannot be cast to std.core.String"}
+    asserts: |
+      arktest.assertTrue(dst instanceof string);
 #13
-  - { tags: [compile-only, negative], stype: string, sval: '"1"', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'String'" }
+  - { tags: compile-only, stype: string, sval: '"1"', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'String'" }
 #14
-  - { tags: [compile-only], stype: Boolean, sval: new Boolean(), dtype: as string, expected: "Warning W0326: Attempting to cast type 'Boolean' to 'String' can throw 'CastClassError' exception at runtime" }
+  - stype: Boolean
+    sval: new Boolean()
+    dtype: as string
+    error: {runtime: "ClassCastError: std.core.Boolean cannot be cast to std.core.String"}
+    asserts: |
+      arktest.assertTrue(dst instanceof string)
 #15
-  - { tags: [compile-only], stype: string, sval: '"true"', dtype: as Boolean, expected: "Warning W0326: Attempting to cast type '\\\"true\\\"' to 'Boolean' can throw 'CastClassError' exception at runtime" }
+  - stype: string
+    sval: '"true"'
+    dtype: as Boolean
+    error: {runtime: "ClassCastError: std.core.LineString cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
 #16
-  - { tags: [compile-only], stype: Object, sval: new Int(), dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Int' to 'Boolean' can throw 'CastClassError' exception at runtime" }
-
-#17
+  - stype: Object
+    sval: new Int()
+    dtype: as Boolean
+    error: {runtime: "ClassCastError: std.core.Int cannot be cast to std.core.Boolean"}
+    asserts: |
+      arktest.assertTrue(dst instanceof boolean)
+      arktest.assertEQ(dst, false)
+#9
   - defs: |-
       class A {}
       class B extends A {}
       class C extends A {}
-    tags: [compile-only]
     stype: B
     sval: new B()
     dtype: as C
-    expected: "Warning W0326: Attempting to cast type 'B' to 'C' can throw 'CastClassError' exception at runtime"
-#18
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst instanceof C)
+#10
   - defs: |-
       interface I {}
       interface J extends I {}
       interface K extends I {}
       class B implements J {}
       class C implements K {}
-    tags: [compile-only]
     stype: B
     sval: new B()
     dtype: as C
-    expected: "Warning W0326: Attempting to cast type 'B' to 'C' can throw 'CastClassError' exception at runtime"
-#19
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst instanceof C)
+#11
   - defs: |-
       class A {}
       class B {}
-    tags: [compile-only]
     stype: B[]
     sval: new B[1](new B())
     dtype: as A[]
-    expected: "Warning W0326: Attempting to cast type 'Array<B>' to 'Array<A>' can throw 'CastClassError' exception at runtime"
-#20
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst[0] instanceof A)
+#12
+  - defs: |-
+      type func = (a: int, b: int) => Int;
+      function foo(a: int, b: int): Int {
+        return new Int(a + b);
+      }
+    stype: Int
+    sval: foo(1, 2)
+    dtype: as func
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst instanceof func)
+#13
   - defs: |-
       type func = (a: int, b: int) => int;
-    tags: [compile-only, negative]
+    tags: compile-only
     stype: func
     sval: '(a: int, b: int): int => { return a + b; }'
     dtype2: .toInt()
     expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Function'"
-#21
-  - defs: |-
-      type func = (a: int, b: int) => Int;
-      function foo(a: int, b: int): Int {
-        return new Int(a + b);
-      }
-    tags: [compile-only]
-    stype: Int
-    sval: foo(1, 2)
-    dtype: as func
-    expected: "Warning W0326: Attempting to cast type 'Int' to '((p1: Int, p2: Int) => Int)' can throw 'CastClassError' exception at runtime"
-#22
-  - defs: |-
-      class A<T> {}
-    tags: [compile-only]
-    stype: A<Int>
-    sval: new A<Int>()
-    dtype: as A<Long>
-    expected: "Warning W0326: Attempting to cast type 'A<Int>' to 'A<Long>' can throw 'CastClassError' exception at runtime"
-#23
+#14
   - defs: |-
       class A {}
-    tags: [compile-only, negative]
+    tags: compile-only
     stype: Object
     sval: new A()
     dtype2: .toDouble()
     expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'A'"
-#24
+#15
   - defs: |-
       interface I {}
       class A implements I {}
       class B implements I {}
-    tags: [compile-only]
     stype: I
     sval: new A()
     dtype: as B
-    expected: "Warning W0326: Attempting to cast type 'A' to 'B' can throw 'CastClassError' exception at runtime"
-#25
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst instanceof B)
+#16
   - defs: |-
       class A {}
-    tags: [compile-only]
     stype: Object
     sval: new A[1](new A())
     dtype: as A[][]
-    expected: "Warning W0326: Attempting to cast type 'Array<A>' to 'Array<Array<A>>' can throw 'CastClassError' exception at runtime"
-#26
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst[0] instanceof A)
+#17
   - defs: |-
       type func = (a: int, b: int) => Int;
       function foo(a: int, b: int): Int {
         return new Int(a + b);
       }
-    tags: [compile-only]
     stype: func
     sval: foo
     dtype: as Object[]
-    expected: "Warning W0326: Attempting to cast type '((p1: Int, p2: Int) => Int)' to 'Array<Object>' can throw 'CastClassError' exception at runtime"
+    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
+    asserts: |
+      arktest.assertTrue(dst instanceof object)

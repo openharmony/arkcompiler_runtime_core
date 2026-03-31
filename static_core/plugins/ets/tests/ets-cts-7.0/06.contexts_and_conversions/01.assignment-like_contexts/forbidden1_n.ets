@@ -17,8 +17,9 @@
 /*---
 desc: >-
     Any conversion that is not explicitly allowed is forbidden.
-tags: {{c.tags}}
-expected_out: "{{c.expected}}"
+tags: [negative, {{c.tags}}]
+{% if c.expected %}expected_out: "{{c.expected}}"{% endif %}
+{% if c.error %}expected_error: {{c.error}}{% endif %}
 ---*/
 
 {{c.defs}}
@@ -26,5 +27,6 @@ expected_out: "{{c.expected}}"
 function main(): void {
     let src: {{c.stype}} = {{c.sval|safe}};
     let dst = src {{c.dtype if c.dtype else c.dtype2}};
+    {% if c.asserts %}{{c.asserts|indent}}{% endif %}
 }
 {% endfor %}
