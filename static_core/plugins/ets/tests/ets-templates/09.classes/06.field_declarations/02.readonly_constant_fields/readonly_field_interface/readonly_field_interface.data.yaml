@@ -1,0 +1,87 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases: 
+  - {type: "byte", base_value: "0", expected_value: "0", check_type: "Byte", default_value: "0"}
+  - {type: "Byte", base_value: "3", expected_value: "3", check_type: "Byte", default_value: "0"}
+  - {type: "byte", base_value: "-0x3", expected_value: "-3", check_type: "byte", default_value: "0"}
+  - {type: "Byte", base_value: "Byte.MAX_VALUE", expected_value: "127", check_type: "byte", default_value: "0"}
+
+  - {type: "short", base_value: "0", expected_value: "0", check_type: "Short", default_value: "0"}
+  - {type: "short", base_value: "72", expected_value: "72", check_type: "short", default_value: "0"}
+  - {type: "Short", base_value: "-0o12", expected_value: "-10", check_type: "Short", default_value: "0"}
+  - {type: "Short", base_value: "Short.MIN_VALUE", expected_value: "-32768", check_type: "short", default_value: "0"}
+
+  - {type: "int", base_value: "0b101", expected_value: "5", check_type: "int", default_value: "0"}
+  - {type: "int", base_value: "0", expected_value: "0", check_type: "Int", default_value: "0"}
+  - {type: "Int", base_value: "-5", expected_value: "-5", check_type: "int", default_value: "0"}
+  - {type: "Int", base_value: "Int.MAX_VALUE", expected_value: "2147483647", check_type: "Int", default_value: "0"}
+
+  - {type: "long", base_value: "0", expected_value: "0", check_type: "long", default_value: "0"}
+  - {type: "Long", base_value: "5678972036854775004", expected_value: "5678972036854775004", check_type: "Long", default_value: "0"}
+  - {type: "Long", base_value: "-5678972036854775001", expected_value: "-5678972036854775001", check_type: "long", default_value: "0"}
+  - {type: "long", base_value: "Long.MIN_VALUE", expected_value: "-9223372036854775808", check_type: "Long", default_value: "0"}
+
+  - {type: "Float", base_value: "0.0f", expected_value: "0.0f", check_type: "Float", default_value: "0f"}
+  - {type: "float", base_value: "12.3f", expected_value: "12.3f", check_type: "float", default_value: "0f"}
+  - {type: "float", base_value: "-3.3f", expected_value: "-3.3f", check_type: "Float", default_value: "0f"}
+  - {type: "Float", base_value: "Float.MAX_SAFE_INTEGER", expected_value: "16777215", check_type: "float", default_value: "0f"}
+
+  - {type: "double", base_value: "-7.3", expected_value: "-7.3", check_type: "double", default_value: "0"}
+  - {type: "Double", base_value: "-74.35678644566554433578009876543", expected_value: "-74.35678644566554433578009876543", check_type: "Double", default_value: "0"}
+  - {type: "double", base_value: "0", expected_value: "0", check_type: "Double", default_value: "0"}
+  - {type: "Double", base_value: "Double.MIN_SAFE_INTEGER", expected_value: "-9007199254740991", check_type: "double", default_value: "0"}
+
+  - {type: "number", base_value: "7", expected_value: "7", check_type: "number", default_value: "0"}
+  - {type: "Number", base_value: "0", expected_value: "0", check_type: "Number", default_value: "0"}
+  - {type: "number", base_value: "-0xA", expected_value: "-10", check_type: "Number", default_value: "0"}
+  - {type: "Number", base_value: "Double.MAX_SAFE_INTEGER", expected_value: "9007199254740991", check_type: "number", default_value: "0"}
+
+  - {type: "Char", base_value: "c'S'", expected_value: "c'S'", check_type: "Char", default_value: "c'\\u0000'"}
+  - {type: "char", base_value: "c'\\u0000'", expected_value: "c'\\u0000'", check_type: "char", default_value: "c'\\u0000'"}
+  - {type: "Char", base_value: "c'a'", expected_value: "c'\\u0061'", check_type: "char", default_value: "c'\\u{0000}'"}
+  - {type: "char", base_value: "c'\\u2131'", expected_value: "c'ℱ'", check_type: "Char", default_value: "c'\\u{0000}'"}
+
+  - {type: "boolean", base_value: "false", expected_value: "false", check_type: "boolean", default_value: "false"}
+  - {type: "Boolean", base_value: "true", expected_value: "true", check_type: "Boolean", default_value: "false"}
+  - {type: "boolean", base_value: "!false", expected_value: "true", check_type: "Boolean", default_value: "false"}
+  - {type: "Boolean", base_value: "!true", expected_value: "false", check_type: "boolean", default_value: "false"}
+
+cases2:
+  - {type: "Any", base_value: "5", expected_value: "5", check_type: "Any", default_value: "undefined"}
+  - {type: "Object | undefined | null", base_value: "undefined", expected_value: "undefined", check_type: "Object | undefined | null", default_value: "undefined"}
+  - {type: "Object | undefined | null", base_value: "5", expected_value: "5", check_type: "object | undefined | null", default_value: "undefined"}
+  - {type: "object | undefined", base_value: "undefined", expected_value: "undefined", check_type: "Object | undefined ", default_value: "undefined"}
+  - {type: "Any", base_value: "undefined", expected_value: "undefined", check_type: "Any", default_value: "undefined"}
+  - {type: "undefined", base_value: "undefined", expected_value: "undefined", check_type: "undefined", default_value: "undefined"}
+
+cases3:
+  - {type: "bigint", base_value: "372647863284762837468764328746238746832746873246n", expected_value: "372647863284762837468764328746238746832746873246n", check_type: "bigint"}
+  - {type: "bigint", base_value: "0n", expected_value: "0n", check_type: "BigInt"}
+  - {type: "BigInt", base_value: "-212121212122121212565670070507050747678900001n", expected_value: "-212121212122121212565670070507050747678900001n", check_type: "BigInt"}
+  - {type: "BigInt", base_value: "2n.pow(5n)", expected_value: "32n", check_type: "bigint"}
+
+  - {type: "Object", base_value: "8", expected_value: "8", check_type: "Object"}
+  - {type: "object", base_value: "5", expected_value: "5", check_type: "object"}
+  - {type: "Object", base_value: "'eeeee'", expected_value: "\"eeeee\"", check_type: "object"}
+  - {type: "object", base_value: "''", expected_value: "''", check_type: "Object"}
+
+  - {type: "string", base_value: "'https'", expected_value: "'https'", check_type: "string"}
+  - {type: "String", base_value: "\"\\u0000\\u00001\\u3456\\u{12345}\\u{1F385}\\u{10082}\\u{10082}\\u{10082}\\u{10082}\\u{10082}\"", expected_value: "\"\\u0000\\u00001\\u3456\\u{12345}\\u{1F385}𐂂𐂂𐂂𐂂\\u{10082}\"", check_type: "String"}
+  - {type: "string", base_value: "\"\"", expected_value: "\"\"", check_type: "String"}
+  - {type: "String", base_value: "''", expected_value: "''", check_type: "string"}
+
+cases4:
+  - {type: "Object | null", base_value: "null", expected_value: "null", check_type: "null"}
+  - {type: "null", base_value: "null", expected_value: "null", check_type: "null"}
+
