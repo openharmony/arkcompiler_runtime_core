@@ -1021,11 +1021,37 @@ add_gtests(
     tests/options_test.cpp
 )
 
-# Issue 33659
-# add_gtests(
-#     arkruntime_signal_test
-#     tests/signal_handler_test.cpp
-# )
+add_gtests(
+    arkruntime_signal_test
+    tests/signal_handler_test.cpp
+)
+
+panda_add_gtest(
+    NO_CORES
+    NAME arkruntime_aot_escape_signal_test
+    SOURCES
+        tests/aot_escape_signal_handler_test.cpp
+    LIBRARIES
+        arkruntime
+        arkassembler
+        arkcompiler
+        aot_builder
+    SANITIZERS
+        ${PANDA_SANITIZERS_LIST}
+    DEPS_TARGETS
+        arkstdlib
+    PANDA_STD_LIB
+        $<TARGET_PROPERTY:arkstdlib,FILE>
+)
+
+if(TARGET arkruntime_aot_escape_signal_test)
+    panda_target_include_directories(arkruntime_aot_escape_signal_test
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+        PUBLIC ${PANDA_ROOT}
+        PRIVATE ${GEN_INCLUDE_DIR}
+    )
+    panda_target_compile_options(arkruntime_aot_escape_signal_test PUBLIC "-Wno-ignored-attributes")
+endif()
 
 add_gtests(
     arkruntime_regexp_test
