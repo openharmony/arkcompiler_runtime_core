@@ -236,7 +236,7 @@ public:
 
     PANDA_PUBLIC_API void DebugDump() const;
 
-    std::set<std::string> CollectStringsFromFunctionInsns() const;
+    PANDA_PUBLIC_API std::set<std::string> CollectStringsFromFunctionInsns() const;
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

@@ -27,7 +27,7 @@
 #include "libarkbase/utils/small_vector.h"
 
 namespace ark::compiler {
-class RegAllocGraphColoring : public RegAllocBase {
+class PANDA_PUBLIC_API RegAllocGraphColoring : public RegAllocBase {
 public:
     explicit RegAllocGraphColoring(Graph *graph);
     PANDA_PUBLIC_API RegAllocGraphColoring(Graph *graph, size_t regsCount);
