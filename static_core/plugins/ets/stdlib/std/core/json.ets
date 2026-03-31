@@ -1114,11 +1114,14 @@ class JSONWriter {
     }
 
     private writeEnumValue(obj: Object, cls: Class) {
-        let valMethod = cls.getInstanceMethod('valueOf')
-        if (valMethod!.getReturnType() == Class.from<String>()) {
-            this.buffer.append('"' + obj + '"')
-        } else {
-            this.buffer.append(obj)
+        const valueOfMethod = reflect.getInstanceMethodsRecursiveByName(cls, "valueOf")
+        if (valueOfMethod !== undefined) {
+            const value: Object = valueOfMethod.invoke(obj) as Object
+            if (value instanceof String) {
+                this.buffer.append('\"').append(value).append("\"")
+            } else {
+                this.buffer.append(value)
+            }
         }
     }
 

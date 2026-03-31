@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compiler/optimizer/optimizations/const_folding.h"
+#include "optimizer/ir/datatype.h"
 #include "runtime/include/coretypes/string.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
@@ -467,56 +468,21 @@ static bool HandleIstrueBigInt(RuntimeInterface::ClassPtr klass, Inst *input, In
     return true;
 }
 
-static bool FindNullCheckAndSaveStateInUsers(Inst *input, Inst *&nullCheck, Inst *&saveState)
+static Inst *CreateLoadFieldInst(RuntimeInterface::ClassPtr klass, Inst *input, Graph *graph, RuntimeInterface *runtime,
+                                 DataType::Type valueType)
 {
-    nullCheck = nullptr;
-    saveState = nullptr;
-    for (auto &user : input->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (userInst->GetOpcode() == Opcode::NullCheck) {
-            nullCheck = userInst;
-        }
-        if (userInst->GetOpcode() == Opcode::SaveState) {
-            saveState = userInst;
-        }
-    }
-    return nullCheck != nullptr && saveState != nullptr;
-}
-
-static Inst *CreateValueOfCall(IntrinsicInst *intrinsic, Inst *input, Graph *graph, RuntimeInterface *runtime,
-                               RuntimeInterface::MethodPtr valueOf)
-{
-    Inst *nullCheckInst = nullptr;
-    Inst *saveStateInst = nullptr;
-    if (!FindNullCheckAndSaveStateInUsers(input, nullCheckInst, saveStateInst)) {
+    auto fieldPtr = runtime->GetFieldPtrByName(klass, "value");
+    if (fieldPtr == nullptr) {
         return nullptr;
     }
-    auto saveStateClone = CopySaveState(graph, saveStateInst->CastToSaveState());
-    auto callStaticInst = graph->CreateInstCallStatic(runtime->GetMethodReturnType(valueOf), intrinsic->GetPc(),
-                                                      runtime->GetMethodId(valueOf), valueOf);
-    callStaticInst->SetInputs(graph->GetAllocator(),
-                              {{nullCheckInst, nullCheckInst->GetType()}, {saveStateClone, saveStateClone->GetType()}});
-    nullCheckInst->InsertAfter(callStaticInst->GetSaveState());
-    callStaticInst->GetSaveState()->InsertAfter(callStaticInst);
-    return callStaticInst;
+    auto loadObjectInst =
+        graph->CreateInstLoadObject(valueType, input->GetPc(), input, TypeIdMixin {0U, graph->GetMethod()}, fieldPtr,
+                                    runtime->IsFieldVolatile(fieldPtr));
+    return loadObjectInst;
 }
 
-static void PrepareZeroConstAndInputInst(Graph *graph, IntrinsicInst *intrinsic, DataType::Type &type, Inst *&inputInst,
-                                         ConstantInst *&zeroConst)
-{
-    zeroConst = nullptr;
-    if (type == DataType::INT32) {
-        zeroConst = graph->FindOrCreateConstant<int32_t>(0);
-    } else if (type == DataType::INT64) {
-        zeroConst = graph->FindOrCreateConstant<int64_t>(0);
-    } else {
-        // For other types, replace the type with INT32 and create the array length inst
-        type = DataType::INT32;
-        inputInst = graph->CreateInstLenArray(type, intrinsic->GetPc(), inputInst, false);
-        intrinsic->InsertBefore(inputInst);
-        zeroConst = graph->FindOrCreateConstant<int32_t>(0);
-    }
-}
+static bool HandleIstrueBoxedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
+                                   Graph *graph, RuntimeInterface *runtime);
 
 static bool HandleIstrueEnumClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
                                   RuntimeInterface *runtime)
@@ -527,25 +493,19 @@ static bool HandleIstrueEnumClass(RuntimeInterface::ClassPtr klass, Inst *input,
     if (input->GetBasicBlock() != intrinsic->GetBasicBlock()) {
         return false;
     }
-    auto objField = input->CastToLoadStatic()->GetObjField();
-    auto objClass = runtime->GetClassForField(objField);
-    auto valueOf = runtime->GetInstanceMethodByName(objClass, "valueOf");
-    if (valueOf == nullptr) {
+
+    RuntimeInterface::ClassPtr boxedKlass = runtime->GetEnumBoxedClass(klass);
+    if (boxedKlass == nullptr || !runtime->IsBoxedClass(boxedKlass)) {
         return false;
     }
-    auto callStatic = CreateValueOfCall(intrinsic, input, graph, runtime, valueOf);
-    if (callStatic == nullptr) {
+
+    auto loadValueInst = CreateLoadFieldInst(klass, input, graph, runtime, DataType::REFERENCE);
+    if (loadValueInst == nullptr) {
         return false;
     }
-    ConstantInst *zeroConst = nullptr;
-    Inst *inputInst = callStatic;
-    DataType::Type type = runtime->GetMethodReturnType(valueOf);
-    PrepareZeroConstAndInputInst(graph, intrinsic, type, inputInst, zeroConst);
-    auto checkNonZero =
-        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), inputInst, zeroConst, type, ConditionCode::CC_NE);
-    intrinsic->InsertBefore(checkNonZero);
-    intrinsic->ReplaceUsers(checkNonZero);
-    return true;
+    intrinsic->InsertBefore(loadValueInst);
+
+    return HandleIstrueBoxedClass(boxedKlass, loadValueInst, intrinsic, graph, runtime);
 }
 
 static bool HandleIstrueStringClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
@@ -562,19 +522,6 @@ static bool HandleIstrueStringClass(RuntimeInterface::ClassPtr klass, Inst *inpu
     intrinsic->InsertBefore(checkNonZero);
     intrinsic->ReplaceUsers(checkNonZero);
     return true;
-}
-
-static Inst *CreateLoadFieldInst(Inst *input, Graph *graph, RuntimeInterface *runtime, DataType::Type valueType)
-{
-    auto fieldPtr = runtime->GetFieldPtrByName(input->GetObjectTypeInfo().GetClass(), "value");
-    if (fieldPtr == nullptr) {
-        return nullptr;
-    }
-    auto loadObjectInst = graph->CreateInstLoadObject(
-        valueType, input->GetPc(), input, TypeIdMixin {fieldPtr->GetFileId().GetOffset(), graph->GetMethod()}, fieldPtr,
-        runtime->IsFieldVolatile(fieldPtr));
-
-    return loadObjectInst;
 }
 
 template <typename FloatType, typename IntType>
@@ -655,7 +602,7 @@ static bool HandleIstrueBoxedClass(RuntimeInterface::ClassPtr klass, Inst *input
     }
 
     // Load the actual value from the boxed object.
-    auto loadObjectInst = CreateLoadFieldInst(input, graph, runtime, valueType);
+    Inst *loadObjectInst = CreateLoadFieldInst(klass, input, graph, runtime, valueType);
     if (loadObjectInst == nullptr) {
         return false;
     }

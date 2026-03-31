@@ -673,6 +673,11 @@ public:
         return false;
     }
 
+    virtual ClassPtr GetEnumBoxedClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
     virtual bool IsBigIntClass([[maybe_unused]] ClassPtr klass) const
     {
         return false;
@@ -1499,6 +1504,11 @@ public:
     }
 
     virtual bool IsInterface([[maybe_unused]] ClassPtr unused) const
+    {
+        return false;
+    }
+
+    virtual bool IsUnionClass([[maybe_unused]] ClassPtr unused) const
     {
         return false;
     }

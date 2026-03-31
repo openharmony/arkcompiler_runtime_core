@@ -104,4 +104,48 @@ export function getInstanceFieldsRecursive(targetClass: Class): Array<InstanceFi
     return res
 }
 
+/***
+ * Searches for an instance field with the specified name in the class and its superclasses.
+ *
+ * @param { Class } targetClass The class to start the search from.
+ * @param { string } name The name of the instance field to search for.
+ * @returns { InstanceField | undefined } The instance field with the specified name, or undefined if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+*/
+export function getInstanceFieldsRecursiveByName(targetClass: Class, name: string): reflect.InstanceField | undefined {
+    let currClass: Class | undefined = targetClass
+    while(currClass != undefined) {
+        const candidate = currClass.getInstanceField(name)
+        if (candidate != undefined) {
+            return candidate
+        }
+        currClass = currClass.getSuper()
+    }
+    return undefined
+}
+
+/***
+ * Searches for an instance method with the specified name in the class and its superclasses.
+ *
+ * @param { Class } targetClass The class to start the search from.
+ * @param { string } name The name of the instance method to search for.
+ * @returns { InstanceMethod | undefined } The instance method with the specified name, or undefined if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+*/
+export function getInstanceMethodsRecursiveByName(targetClass: Class, name: string): reflect.InstanceMethod | undefined {
+    let currClass: Class | undefined = targetClass
+    while(currClass != undefined) {
+        const candidate = currClass.getInstanceMethod(name)
+        if (candidate != undefined) {
+            return candidate
+        }
+        currClass = currClass.getSuper()
+    }
+    return undefined
+}
+
 } // namespace reflect

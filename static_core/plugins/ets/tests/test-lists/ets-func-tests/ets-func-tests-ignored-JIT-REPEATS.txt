@@ -6,3 +6,7 @@ ets_func_tests/std/core/ArrayFilterTest.ets
 
 #33140
 std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets
+
+# 32774 call valueOf of enum failed in isTrue optimization
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0041.ets
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0086.ets

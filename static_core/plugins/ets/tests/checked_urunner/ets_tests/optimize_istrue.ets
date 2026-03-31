@@ -550,11 +550,11 @@
 //! # testEnum
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumFalse"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -562,11 +562,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumTrue1"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -574,11 +574,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumTrue2"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -586,11 +586,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumTrue3"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -598,11 +598,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64False"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -610,11 +610,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64True1"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -622,11 +622,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64True2"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -634,11 +634,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64True3"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -646,31 +646,25 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumStringFalse"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*ColorString::valueOf/
-//! INST_NOT          "LenArray"
-//! INST_NOT          "Compare NE i32"
+//! INST              /LoadStatic.*ColorString.Red/
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*ColorString::valueOf/
-//! INST_NEXT         "LenArray"
-//! INST_NEXT         "Compare NE i32"
-//! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
+//! INST              /LoadStatic.*ColorString.Red/
+//! INST              "Intrinsic.CompilerEtsIstrue"
+//! INST_NOT          "Compare NE i32"
 //! PASS_AFTER_NEXT   "Cleanup"
-//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 0
+//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumStringTrue"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*ColorString::valueOf/
-//! INST_NOT          "LenArray"
-//! INST_NOT          "Compare NE i32"
+//! INST              /LoadStatic.*ColorString.Green/
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*ColorString::valueOf/
-//! INST_NEXT         "LenArray"
-//! INST_NEXT         "Compare NE i32"
-//! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
+//! INST              /LoadStatic.*ColorString.Green/
+//! INST              "Intrinsic.CompilerEtsIstrue"
+//! INST_NOT          "Compare NE i32"
 //! PASS_AFTER_NEXT   "Cleanup"
-//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 0
+//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testNonConstString"
 //! PASS_BEFORE       "Peepholes"
@@ -1238,11 +1232,11 @@
 //! # testEnum
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumFalse"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1250,11 +1244,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumTrue1"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1262,11 +1256,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumTrue2"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1274,11 +1268,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumTrue3"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i32"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1286,11 +1280,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64False"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1298,11 +1292,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64True1"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1310,11 +1304,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64True2"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1322,11 +1316,11 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnum64True3"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*Color64::valueOf/
+//! INST_NOT          /LoadObject.*BaseEnum.value/
 //! INST_NOT          "Compare NE i64"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*Color64::valueOf/
+//! INST              /LoadObject.*BaseEnum.value/
 //! INST_NEXT         "Compare NE i64"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
 //! PASS_AFTER_NEXT   "Cleanup"
@@ -1334,31 +1328,25 @@
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumStringFalse"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*ColorString::valueOf/
-//! INST_NOT          "LenArray"
-//! INST_NOT          "Compare NE i32"
+//! INST              /LoadStatic.*ColorString.Red/
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*ColorString::valueOf/
-//! INST_NEXT         "LenArray"
-//! INST_NEXT         "Compare NE i32"
-//! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
+//! INST              /LoadStatic.*ColorString.Red/
+//! INST              "Intrinsic.CompilerEtsIstrue"
+//! INST_NOT          "Compare NE i32"
 //! PASS_AFTER_NEXT   "Cleanup"
-//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 0
+//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testEnumStringTrue"
 //! PASS_BEFORE       "Peepholes"
-//! INST_NOT          /CallStatic.*ColorString::valueOf/
-//! INST_NOT          "LenArray"
-//! INST_NOT          "Compare NE i32"
+//! INST              /LoadStatic.*ColorString.Green/
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
-//! INST              /CallStatic.*ColorString::valueOf/
-//! INST_NEXT         "LenArray"
-//! INST_NEXT         "Compare NE i32"
-//! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
+//! INST              /LoadStatic.*ColorString.Green/
+//! INST              "Intrinsic.CompilerEtsIstrue"
+//! INST_NOT          "Compare NE i32"
 //! PASS_AFTER_NEXT   "Cleanup"
-//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 0
+//! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //!
 //! METHOD            "optimize_istrue.ETSGLOBAL::testNonConstString"
 //! PASS_BEFORE       "Peepholes"

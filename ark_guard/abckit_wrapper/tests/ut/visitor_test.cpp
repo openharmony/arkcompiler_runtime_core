@@ -128,16 +128,12 @@ class TestMethodVisitor final : public BaseTestVisitor, public abckit_wrapper::M
 public:
     void InitTargetObjectNames() override
     {
-        AddTargetObjectName("module_static.Color1.valueOf:module_static.Color1;i32;");
-        AddTargetObjectName("module_static.Ns1.Color2.getName:module_static.Ns1.Color2;std.core.String;");
         AddTargetObjectName("module_static.Color1.$_get:module_static.Color1;std.core.String;");
         AddTargetObjectName("module_static.Ns1.ClassB._ctor_:module_static.Ns1.ClassB;void;");
-        AddTargetObjectName("module_static.Ns1.Color2.toString:module_static.Ns1.Color2;std.core.String;");
         AddTargetObjectName("module_static.Ns1.Color2._cctor_:void;");
-        AddTargetObjectName("module_static.Ns1.Color2.valueOf:module_static.Ns1.Color2;i32;");
-        AddTargetObjectName("module_static.Ns1.Color2._ctor_:module_static.Ns1.Color2;i32;i32;void;");
+        AddTargetObjectName("module_static.Ns1.Color2._ctor_:module_static.Ns1.Color2;i32;i32;std.core.String;void;");
         AddTargetObjectName("module_static.Ns1.Interface2.iMethod2:module_static.Ns1.Interface2;void;");
-        AddTargetObjectName("module_static.Color1._ctor_:module_static.Color1;i32;i32;void;");
+        AddTargetObjectName("module_static.Color1._ctor_:module_static.Color1;i32;i32;std.core.String;void;");
         AddTargetObjectName("module_static.Ns1.Ns2._cctor_:void;");
         AddTargetObjectName("module_static.Ns1._cctor_:void;");
         AddTargetObjectName("module_static._cctor_:void;");
@@ -170,11 +166,9 @@ public:
         AddTargetObjectName("module_static.Ns1.Color2.getValueOf:std.core.String;module_static.Ns1.Color2;");
         AddTargetObjectName("module_static.Color1.getOrdinal:module_static.Color1;i32;");
         AddTargetObjectName("module_static.Ns1.Color2.values:module_static.Ns1.Color2[];");
-        AddTargetObjectName("module_static.Color1.toString:module_static.Color1;std.core.String;");
         AddTargetObjectName("module_static.Interface1.%%get-iField1:module_static.Interface1;i32;");
         AddTargetObjectName("module_static.Interface1.%%set-iField1:module_static.Interface1;i32;void;");
         AddTargetObjectName("module_static.Color1._cctor_:void;");
-        AddTargetObjectName("module_static.Color1.getName:module_static.Color1;std.core.String;");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -206,19 +200,14 @@ class TestFieldVisitor final : public BaseTestVisitor, public abckit_wrapper::Fi
 public:
     void InitTargetObjectNames() override
     {
-        AddTargetObjectName("module_static.Color1.#StringValuesArray");
-        AddTargetObjectName("module_static.Color1.#ValuesArray");
         AddTargetObjectName("module_static.Color1.RED");
         AddTargetObjectName("module_static.Ns1.Color2.YELLOW");
-        AddTargetObjectName("module_static.Color1.#NamesArray");
         AddTargetObjectName("module_static.Ns1.m2");
         AddTargetObjectName("module_static.Ns1.Color2.#ordinal");
-        AddTargetObjectName("module_static.Ns1.Color2.#StringValuesArray");
         AddTargetObjectName("module_static.Ns1.ClassB.sField2");
         AddTargetObjectName("module_static.Ns1.ClassB.%%property-iField2");
         AddTargetObjectName("module_static.Interface1.%%property-iField1");
         AddTargetObjectName("module_static.Color1.#ordinal");
-        AddTargetObjectName("module_static.Ns1.Color2.#NamesArray");
         AddTargetObjectName("module_static.Ns1.ClassB.field2");
         AddTargetObjectName("module_static.Ns1.Color2.#ItemsArray");
         AddTargetObjectName("module_static.Color1.#ItemsArray");
@@ -227,7 +216,6 @@ public:
         AddTargetObjectName("module_static.ClassA.%%property-iField1");
         AddTargetObjectName("module_static.Ns1.Interface2.%%property-iField2");
         AddTargetObjectName("module_static.ClassA.sField1");
-        AddTargetObjectName("module_static.Ns1.Color2.#ValuesArray");
     }
 
     bool Visit(abckit_wrapper::Module *module) override

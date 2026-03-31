@@ -36,13 +36,13 @@
 
 const CONCAT_LHS = 'xyzasadasdsadasaaaa'; // longer than 13 chars
 class MyEnum extends BaseEnum<string> {
-    constructor(c: string) {
-        super(CONCAT_LHS + c)
+    constructor(c: string, n: string) {
+        super(CONCAT_LHS + c, n)
     }
 }
 function testGetHashCode() {
   const CONCAT_RHS = Runtime.getHashCodeByValue('123123').toString(); // can't constant-fold
-  const x = new MyEnum(CONCAT_RHS);
+  const x = new MyEnum(CONCAT_RHS, "element_1");
   const xHash = Runtime.getHashCodeByValue(x)
   const strHash = Runtime.getHashCodeByValue(CONCAT_LHS + CONCAT_RHS)
   arktest.assertEQ(xHash, strHash);

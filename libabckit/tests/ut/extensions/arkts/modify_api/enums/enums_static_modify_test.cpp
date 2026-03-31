@@ -129,9 +129,7 @@ TEST_F(LibAbcKitArkTSModifyApiEnumsTest, EnumAddField)
         (*ctx).emplace_back(filedName);
         return true;
     });
-    std::vector<std::string> actualFieldNames = {
-        "#ordinal",           "RED",         "BLUE",  "BLACK", "#NamesArray", "#ValuesArray",
-        "#StringValuesArray", "#ItemsArray", "YELLOW"};
+    std::vector<std::string> actualFieldNames = {"#ordinal", "RED", "BLUE", "BLACK", "#ItemsArray", "YELLOW"};
     ASSERT_EQ(FieldNames, actualFieldNames);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

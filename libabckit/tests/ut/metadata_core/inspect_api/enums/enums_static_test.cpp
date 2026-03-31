@@ -87,11 +87,8 @@ TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetAllMethodsStatic)
                                                   "fromValue:i32;enums_static.EnumA;",
                                                   "getValueOf:std.core.String;enums_static.EnumA;",
                                                   "values:enums_static.EnumA[];",
-                                                  "_ctor_:enums_static.EnumA;i32;i32;void;",
-                                                  "getName:enums_static.EnumA;std.core.String;",
-                                                  "getOrdinal:enums_static.EnumA;i32;",
-                                                  "toString:enums_static.EnumA;std.core.String;",
-                                                  "valueOf:enums_static.EnumA;i32;"};
+                                                  "_ctor_:enums_static.EnumA;i32;i32;std.core.String;void;",
+                                                  "getOrdinal:enums_static.EnumA;i32;"};
     sort(actualMethodNames.begin(), actualMethodNames.end());
     sort(methodNames.begin(), methodNames.end());
     ASSERT_EQ(methodNames, actualMethodNames);
@@ -112,8 +109,7 @@ TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetFieldsStatic)
         }
     }
 
-    std::vector<std::string> actualFieldName = {
-        "#ordinal", "ONE", "TWO", "THREE", "#NamesArray", "#ValuesArray", "#StringValuesArray", "#ItemsArray"};
+    std::vector<std::string> actualFieldName = {"#ordinal", "ONE", "TWO", "THREE", "#ItemsArray"};
 
     sort(actualFieldName.begin(), actualFieldName.end());
     sort(fieldNames.begin(), fieldNames.end());
