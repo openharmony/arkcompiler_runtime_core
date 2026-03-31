@@ -16,7 +16,7 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0003.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0006.ets
 escompat/ArrayFlatMapTest.ets
-std/core/JsonParseTest.ets
+std/core/json/JsonParseTest.ets
 regression/Issue20610.ets
 regression/verify_generics.ets
 regression/verify_generics_constraint_1.ets
@@ -122,7 +122,7 @@ std/core/std_core_stringbuilder_instance_StringBuilder_append_004.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append_005.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append_006.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append_007.ets
-std/core/JsonReplacerTest.ets
+std/core/json/JsonReplacerTest.ets
 std/core/DeepCopyTest.ets
 std/core/json/JsonElementParseTest.ets
 std/core/json/JsonElementFromJsonTest.ets
