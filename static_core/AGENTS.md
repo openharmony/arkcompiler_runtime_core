@@ -10,141 +10,56 @@ This file provides guidance to AI when working with code in this repository.
 
 ## About Static Core
 
-This is the **Ark Runtime Core** (static_core) - a virtual machine runtime designed for OpenHarmony. It supports the ArkTS-Sta programming language through the ETS plugin. The runtime includes a bytecode interpreter, JIT compiler, AOT (Ahead-Of-Time) compiler, and multiple garbage collector implementations.
+This is the **Ark Runtime Core** (`static_core`) for ArkTS-Sta. It contains the runtime, the optimizing compiler, the
+IR-to-Code generator (`irtoc`), language plugins, and the test infrastructure used to validate JIT, OSR, AOT, LLVM AOT,
+intrinsics, and fast paths.
 
-## Directory Structure
+## Current References
 
-Main File Directories
+Use the current repository sources:
 
-```
-static_core/
-├── runtime/                   # Core runtime implementation
-│   ├── include/               # Public headers (class_linker.h, thread.h, object_header.h, etc.)
-│   ├── interpreter/           # Bytecode interpreter (irtoc handlers, frame, state)
-│   ├── mem/                   # Memory management
-│   ├── arch/                  # Architecture-specific code (ARM, RISC-V, x86_64)
-│   ├── jit/                   # Profile support
-│   ├── coroutines/            # Coroutine support
-│   ├── entrypoints/           # Generated runtime intrinsics 
-│   ├── compiler.cpp/h         # Compiler
-│   ├── runtime.cpp/h          # Main runtime implementation
-│   ├── thread.cpp/h           # Thread management
-│   ├── class_linker.cpp/h     # Class loading and linking
-│   └── tests/                 # Runtime unit tests
-│
-├── compiler/                  # Compiler
-│
-├── plugins/                   # Language plugins
-│   └── ets/                   # ETS (ArkTS) language plugin
-│
-├── irtoc/                     # IR-to-Code compiler
-│
-├── isa/                       # Instruction set architecture
-│   ├── isa.yaml               # Bytecode instruction definitions
-│   └── templates/             # Instruction templates
-│
-├── libarkbase/                # Base library
-│   ├── os/                    # OS abstraction layer
-│   ├── mem/                   # Memory utilities
-│   └── utils/                 # Utility functions
-│
-├── libarkfile/                 # File handling library
-├── libllvmbackend/             # LLVM backend (optional)
-├── libziparchive/              # ZIP archive support
-│
-├── assembler/                  # Panda assembler
-├── disassembler/               # Bytecode disassembler
-├── bytecode_optimizer/         # Bytecode optimization tool
-├── verifier/                   # Bytecode verifier
-│
-├── tests/                      # Test suites
-│
-├── third_party/                # Third-party dependencies
-│
-├── scripts/                    # Build and utility scripts
-│
-├── cmake/                      # CMake build configuration
-│
-├── docs/                       # Architecture documentation
-│
-└── platforms/                 # Platform-specific configurations
-    ├── unix/                  # Unix-like systems
-    └── windows/               # Windows platform
-```
+- `runtime/options.yaml` - runtime CLI defaults such as JIT, OSR, and interpreter selection
+- `compiler/compiler.yaml` and `compiler/tools/paoc/paoc.yaml` - compiler and `ark_aot` option names/defaults
+- `README.md` - current quick-start commands
+- `docs/compiler_intro_current.md` - current compiler-wide notes and caveats
+- `docs/irtoc.md` - current irtoc pipeline, modes, validation, and debugging outputs
+- `docs/flaky_debugging.md` - current checked/URunner/flaky-debug workflows
+- `compiler/docs/performance_workflows.md` and `compiler/docs/aot_pgo.md` - current perf and AOT PGO workflows
+- `tools/es2panda/AGENTS.md` and `tools/es2panda/README.md` - frontend pipeline and spec-first workflow
 
-## Build Commands
+## Start Here for Compiler Work
 
-### Build Release Mode
-```bash
-cd runtime_core/static_core
-cmake -B out -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/host_clang_default.cmake -GNinja .
-cmake --build out
-```
+If the task is compiler-related, do not stay only in this root file. Use the nearest specialized guide:
 
-### Build Modes
-- `Debug` - Assertions enabled, no optimizations, debug info
-- `Release` - No assertions
+- `compiler/AGENTS.md` - core compiler guidance
+- `plugins/ets/compiler/AGENTS.md` - ETS compiler guidance
+- `runtime/AGENTS.md` - runtime/compiler integration guidance
+- `runtime/jit/AGENTS.md` - profiling and `.ap` guidance
+- `irtoc/AGENTS.md` - irtoc guidance
+- `tests/AGENTS.md` - compiler-related test guidance
 
-### Running Tests
-```bash
-cd runtime_core/static_core/out
+## irtoc Use Policy
 
-# Run all test suites
-ninja tests
-```
+Treat `irtoc` as a specialized tool for short hot paths, not as the default implementation language for intrinsics or
+stdlib helpers.
 
-### Compile && Run ETS File
+For detailed selection rules, tradeoffs, and validation expectations, use `irtoc/AGENTS.md` first, then the nearest
+subtree guide such as `compiler/AGENTS.md`, `runtime/AGENTS.md`, or `tests/AGENTS.md`.
 
-#### Test Case
-```ts
-//test.ets
+## Repository Shape
 
-function main() {
-  console.log("hello");
-}
-```
+Use the owning subtree rather than this root file for detailed guidance:
 
-#### Run ETS File
-```bash
-cd runtime_core/static_core
+- `compiler/` - optimizing compiler, pipeline, AOT toolchain, compiler-owned docs
+- `plugins/ets/compiler/` - ETS compiler plugin, intrinsics, interop, native-call lowering
+- `runtime/` - runtime/compiler boundary, bridges, deopt, OSR, profiling data
+- `irtoc/` - interpreter and fastpath generation
+- `tests/` - checked tests, runners, and benchmark layers
+- `tools/es2panda/` - frontend pipeline and spec-first rules
+- `docs/` - shared architecture notes owned outside `compiler/`
 
-# Compile ets file to abc file
-./out/bin/es2panda test.ets --output test.abc
-
-# run abc file with ark
-./out/bin/ark --boot-panda-files=./out/plugins/ets/etsstdlib.abc --load-runtimes=ets test.abc test.ETSGLOBAL::main
-```
-
-## High-Level Architecture
-
-### Core Runtime Components
-
-**1. Memory Management (`runtime/mem/`)**
-- **Object Header**: Object header design supporting 64/128-bit configurations
-- **GC Implementations**:
-  - `g1/` - G1GC (Garbage First) - region-based generational GC (main production GC)
-  - `epsilon-g1/` - Epsilon GC - no-op GC
-- **Allocators**: Arena allocator, humongous allocator for large objects, TLAB support
-
-**2. Interpreter (`runtime/interpreter/`)**
-- **Stackless interpreter**: No new host frame created for managed-to-managed calls
-- **Indirect threaded dispatch**: Uses computed goto for fast bytecode dispatch
-- **Register-based bytecode**: Virtual registers with accumulator for compact encoding
-- **Irtoc**: IR-to-Code compiler that generates optimized interpreter handlers from IR descriptions
-
-**3. Compiler Infrastructure (`compiler/`)**
-- **AOT Compiler** (`compiler/aot/`): Compiles bytecode to native code stored in `.an` ELF files
-- **JIT Compiler**: Runtime compilation with hotness-based triggering
-
-**4. Class Linking (`runtime/include/class_linker.h`)**
-- Loads and resolves classes from `.abc` (Ark Bytecode) files
-- Builds vtables, itables (interface tables), and imtables
-- Handles class initialization and verification
-
-**5. Thread Management (`runtime/include/thread.h`)**
-- ManagedThread/MTManagedThread: Per-thread runtime state
-- Safepoint implementation for GC stop-the-world
-- Stack walking for GC root scanning
+For build, smoke-run, and quick-start commands, use `README.md`. Keep this file focused on routing and source-of-truth
+decisions rather than duplicating command catalogs.
 
 ## Code Style
 

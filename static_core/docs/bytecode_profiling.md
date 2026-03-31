@@ -1,31 +1,65 @@
-# Bytecode profiling in Dynamic languages
+# Bytecode Profiling And `.ap` Profiles
 
-## Support in ISA
+This note is a compact cross-subsystem overview of the current profiling flow. The runtime-side source of truth lives
+in `runtime/jit/`, especially `profiling_data.h`, `profiling_loader.{h,cpp}`, `profiling_saver.{h,cpp}`, and
+`libprofile/`.
 
-Each bytecode instruction, that supports profiling, contains additional field - profile index. It denotes index of
-a corresponding profile data in the profile vector.
+## What The Runtime Collects
 
-Currently, it has 2 bytes size, but we can reduce it for small methods, where size of a profiling vector will be less
-than 256 bytes.
+Current profiling data includes:
 
-## Support in Runtime
+- inline caches for virtual call sites
+- branch taken / not-taken counters
+- throw counters
 
-For each method, that contains instructions with profiling data, Runtime should allocate profiling vector.
+Runtime structures for these live in `runtime/jit/profiling_data.h`.
 
-Profiling vector is a plain data of bytes, which content is determined by the language of a given bytecode. Core part
-of Runtime knows nothing about how to interpret the profiling vector.
+## How It Is Collected
 
-Profile elements are sorted in descending order, from largest Profiles to smallest. It avoids alignment issues.
+- profiling-capable bytecodes carry a profile index that selects a slot in the method profile data
+- runtime allocates per-method profiling data only for methods that contain profiling-enabled instructions
+- the profile layout is language-defined; core runtime does not interpret it generically
+- interpreter execution reads the profile index from bytecode and updates the corresponding slot during bytecode handling
+- profiling begins once methods cross `--compiler-profiling-threshold`
+- additional branch detail is controlled by `--profile-branches=true`
 
-Each interpreter handler reads profiling field from bytecode instruction and update corresponding slot in profiling
-vector.
+Relevant runtime options are defined in `runtime/options.yaml`.
 
-## Support in AOT compilation
+## How Profiles Are Saved
 
-Profile information, gathered during run, can be saved into special profile file, that can be specified by option
-`--profile-ouptut`. After VM execution is finished, all profile information will be saved into this file.
+Current saved profiles use the `.ap` format.
 
-Format of a profile file is determined by the language plugin.
+Important options are:
 
-AOT compiler accesses this file via runtime interface. CoreVM doesn't implement profiling interface, it must be
-implemented by all language plugins, that supports profiling.
+- `--profiler-enabled=true`
+- `--profilesaver-enabled=true`
+- `--incremental-profilesaver-enabled=true` for background saves
+- `--profile-output=<file.ap>`
+
+The runtime can save profiles on shutdown or through incremental profile-saver flows.
+
+## How The Compiler Uses Them
+
+`ark_aot` consumes runtime profiles through:
+
+```bash
+--paoc-use-profile:path=<profile.ap>[,force]
+```
+
+Current compiler-facing usage is documented in `../compiler/docs/aot_pgo.md`.
+
+## Inspection
+
+Use `ark_aptool` to inspect a saved profile:
+
+```bash
+./out/bin/ark_aptool dump --ap-path workload.ap --output workload.yaml
+```
+
+Add `--abc-path` or `--abc-dir` when you need resolved class or method names.
+
+## Related Guides
+
+- `../runtime/jit/AGENTS.md` - runtime-side ownership and caveats
+- `../compiler/docs/aot_pgo.md` - compiler consumption and current limitations
+- `aptool.md` - `ark_aptool` usage

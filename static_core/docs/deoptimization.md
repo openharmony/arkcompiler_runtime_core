@@ -128,7 +128,8 @@ int64_t InvokeInterpreter(ManagedThread* thread, const uint8_t* pc, Frame* frame
 }
 ```
 
-Details in [bridge.cpp](runtime/bridge/bridge.cpp)
+Details in [runtime/deoptimization.cpp](../runtime/deoptimization.cpp), [runtime/stack_walker.cpp](../runtime/stack_walker.cpp),
+and [runtime/bridge/bridge.cpp](../runtime/bridge/bridge.cpp)
 
 ## Tests
 
@@ -140,4 +141,3 @@ Details in [bridge.cpp](runtime/bridge/bridge.cpp)
 
 [deopt_true_test.pa](../tests/regression/deopt_true_test.pa)   
 [deopt_true_call_test.pa](../tests/regression/deopt_true_call_test.pa)  
-

@@ -55,6 +55,17 @@ plugins/ets/
 └── cmake/                      # CMake scripts
 ```
 
+## Start Here For Compiler-Adjacent Work
+
+Do not stop at this file for compiler tasks:
+
+- `compiler/AGENTS.md` - ETS IR builder, intrinsics, JS interop, codegen extensions, compiler-facing tests
+- `runtime/AGENTS.md` - ETS runtime entrypoints, `ets_compiler_intrinsics.yaml`, ANI/runtime integration
+- `../../compiler/AGENTS.md` - core compiler pipeline, dumps, logs, codegen, call conventions, checked tests
+- `../../tests/AGENTS.md` - checked tests, URunner, benchmark/perf harnesses
+- `tests/interop_js/README.MD` - focused JS interop build/test workflow and per-subsuite targets
+- `../../tests/tests-u-runner-2/cfg/test-suites/compiler_checker_suite.yaml` - ETS compiler checker suite entry point
+
 ## Build Commands
 
 See @../../AGENTS.md

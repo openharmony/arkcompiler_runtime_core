@@ -88,6 +88,12 @@ ${BUILD}/bin/ark --load-runtimes=ets --boot-panda-files=${BUILD}/plugins/ets/ets
 
 The most frequent used options for each program are described here.
 
+These tables are quick-start subsets, not exhaustive option references. Current source-of-truth definitions live in:
+
+- `runtime/options.yaml` for `ark`
+- `compiler/tools/paoc/paoc.yaml` for `ark_aot`
+- `compiler/docs/paoc.md` for compiler-owned `ark_aot` workflow notes
+
 ### es2panda
 
 `es2panda` is used to compile source code to .abc file.
@@ -95,16 +101,18 @@ The most frequent used options for each program are described here.
 | Option name | Type of option | Default value | Description |
 | ---         | ---            | ---           | ---         |
 | --extension | string         | "ets" | Parse the input as the given extension |
-|--opt-level| number | 2 | Compiler optimization level |
-|--output| string | filename with extension .abc | Path to output file |
+|--opt-level| number | 1 | Compiler optimization level |
+|--output| string | ""* | Path to output file |
 
 Compile `ets` file:
 
 ```bash
-./bin/es2panda --exttension=ets <file>.ets
+./bin/es2panda --extension=ets <file>.ets
 ```
 
 You can see more options by pass `--help`.
+
+\* If `--output` is omitted, `es2panda` derives `<input-basename>.abc`.
 
 ---
 
@@ -115,14 +123,18 @@ You can see more options by pass `--help`.
 | Option name | Type of option | Default value | Description |
 | ---         | ---            | ---           | ---         |
 |--load-runtimes|string|"core"|Load specified class and intrinsic spaces and define runtime type|
-|--boot-panda-files|string[]|[]|Boot panda files (.abc) separated by colon|
-|--interpreter-type|string|irtoc|Interpreter implementation type|
+|--boot-panda-files|string[]|$ORIGIN/../pandastdlib/arkstdlib.abc|Boot panda files (.abc) separated by colon|
+|--interpreter-type|string|llvm*|Interpreter implementation type|
 |--compiler-enable-jit|bool|true|Enables/disables JIT compiler|
 |--no-async-jit|bool|false|Perform compilation in the main thread or in parallel worker|
 |--compiler-hotness-threshold|uint32_t|3000|Threshold for "hotness" counter of the method after that it will be compiled|
+|--boot-an-location|string|/data/service/el1/public/for-all-app/framework_ark_cache|Preferred location for boot `.an` files when `--enable-an` is used|
 |--aot-files|string[]|[]|List of aot files (.an) to be loaded separated by colon|
-|--enable-an|bool|false|Try to load ARK .an file base on abc file location|
+|--enable-an|bool|false|Try to load ARK `.an` files from `--boot-an-location` first, then from the `.abc` file location|
 |--enable-an:force|bool|false|Crash if there is no .an file for location based on .abc file|
+
+\* Runtime may downgrade the default choice to `irtoc` or `cpp` when LLVM/IRTOC support is unavailable or restricted by
+build or runtime configuration. For reproducible setups, pass `--interpreter-type=...` explicitly.
 
 Launch `ets` abc file:
 
@@ -141,8 +153,10 @@ You can see more options by pass `--help`.
 | Option name | Type of option | Default value | Description |
 | ---         | ---            | ---           | ---         |
 |--load-runtimes|string|"core"|Load specified class and intrinsic spaces and define runtime type|
-|--paoc-panda-files|string[]|[]|List of input panda files to compiler separated by colon|
-|--boot-panda-files|string[]|[]|Boot panda files (.abc) separated by colon|
+|--paoc-panda-files|string[]|[]|List of input panda files to compile separated by comma|
+|--boot-panda-files|string[]|$ORIGIN/../pandastdlib/arkstdlib.abc|Boot panda files (.abc) separated by colon|
+|--paoc-location|string|""|Location path of the input panda file written into the AOT file|
+|--paoc-mode|string|aot|Compiler mode: `aot`, `llvm`, `jit`, or `osr`|
 |--paoc-output|string|out.an|Path to output file|
 
 Compile an `ets` abc file to AOT file:
@@ -153,7 +167,7 @@ Compile an `ets` abc file to AOT file:
 
 > *NOTE*: `boot-panda-files` should be the same as it will be during launch `ark`, otherwise will be throw error during execution about mismach class hierarchy.
 
-You can see more options by launch `ark_aot` without options.
+For the maintained compiler-side workflow and current paoc option map, see `compiler/docs/paoc.md`.
 
 ---
 
@@ -164,7 +178,7 @@ You can see more options by launch `ark_aot` without options.
 | Option name | Type of option | Default value | Description |
 | ---         | ---            | ---           | ---         |
 |--load-runtimes|string|"core"|Load specified class and intrinsic spaces and define runtime type|
-|--boot-panda-files|string[]|[]|Boot panda files (.abc) separated by colon|
+|--boot-panda-files|string[]|$ORIGIN/../pandastdlib/arkstdlib.abc|Boot panda files (.abc) separated by colon|
 
 ```bash
 ./bin/verifier --load-runtimes=ets --boot-panda-files=plugins/ets/etsstdlib.abc <file>.abc

@@ -112,20 +112,15 @@ Refer to [doc](../compiler/docs/aot_resolve_string.md) for details.
 
 #### Compilation
 
-`ark_aot` tool aims to compile input panda files into the single AOT file that can be consumed by
-Panda runtime.
+`ark_aot` compiles input panda files into AOT output that can later be loaded by the runtime.
 
-ark_aot has following options:
+Compiler-side CLI ownership lives in:
 
-- `--panda-files` - list of input panda files to be compiled
-- `--output` - path to the output AOT file (default is `out.an`)
-- `--location` - path where panda files are actually stored in the device
-- `--arch` - target architecture: arm, arm64, x86, x86_64 (default is arm64)
+- `../compiler/docs/paoc.md`
+- `../compiler/tools/paoc/paoc.yaml`
 
-Paoc uses Panda runtime inside, thus, runtime's options are also may be specified. If paoc is ran not from the build
-directory then path to `arkstdlib.abc` should be specified via `--boot-panda-files` option.
-
-Additional information could be found [here](../compiler/docs/paoc.md).
+This document focuses on runtime-visible AOT behavior, loading, and metadata rather than on the full `ark_aot` option
+catalog.
 
 #### AOT in Panda
 
@@ -133,27 +128,27 @@ To pass AOT file to the Panda `--aot-file` option should be specified:
 
 `ark --aot-file file.an file.abc _GLOBAL::main`
 
-- `--panda-files` parameter specifies list of `ark_aot` or `ark` necessary input panda files which is not within `--boot-panda-files`
+- `--panda-files` on `ark` specifies additional input panda files that are not within `--boot-panda-files`
 
 Example of usage:
 
-`ark_aot --panda-files=file1.abc:file2.abc --output file.an`
+`ark_aot --paoc-panda-files=file1.abc,file2.abc --paoc-output file.an`
 
 Panda file shall be passed with same name as it was compiled by ark_aot, otherwise AOT loader won't find the file because
-of different names. To avoid this restriction `--location` ark_aot's option may be used.
+of different names. To avoid this restriction, use `--paoc-location`.
 
 Example:
 ```
 Good:
-    ark_aot --panda-files file.abc --output file.an
+    ark_aot --paoc-panda-files file.abc --paoc-output file.an
     ark --aot-file file.an file.abc _GLOBAL::main
 
 Bad ("file.abc" != "/local/data/tmp/file.abc"):
-    ark_aot --panda-files file.abc --output file.an
+    ark_aot --paoc-panda-files file.abc --paoc-output file.an
     ark --aot-file file.an /local/data/tmp/file.abc _GLOBAL::main
 
 Solution:
-    ark_aot --panda-files file.abc --output file.an --location /local/data/tmp
+    ark_aot --paoc-panda-files file.abc --paoc-output file.an --paoc-location /local/data/tmp
     ark --aot-file file.an /local/data/tmp/file.abc _GLOBAL::main
 ```
 
@@ -168,14 +163,14 @@ Example of usage:
 
 Sometimes it is interesting to see what code had generated for specific IR instruction, to do so there is an option
 `--compiler-disasm-dump` that dumps disassembler, IR instruction and all generated native code for it after each compiler optimization pass.
-Disassembler creates files with following name format `disasm-<METHOD_NAME>.txt`. IR dumps are written into files with name `<METHOD_NAME>.ir`
- in `ir_dump` folder if option `--compiler-dump-folder` is not set. Also option `--compiler-dump-bytecode`
-enables printing byte code instruction after ir instruction in dump ir. There is one more option `--compiler-dump-final` which enables
-to dump ir only after last (codegen) pass. All of these options are used at compile time.
+Disassembler creates files with following name format `disasm-<METHOD_NAME>.txt`. IR dumps are written into `ir_dump`
+unless you override the folder with `--compiler-dump:folder=<path>`. Additional dump suboptions include
+`--compiler-dump:bytecode` for bytecode annotations and `--compiler-dump:final` to keep only the final post-CodeGen IR.
+All of these options are used at compile time.
 
 Example of usage:
 
-`ark_aot --compiler-disasm-dump --panda-files file.abc --output file.an`
+`ark_aot --compiler-disasm-dump --paoc-panda-files file.abc --paoc-output file.an`
 
 `ark_disasm` prints full IR disassembler.
 

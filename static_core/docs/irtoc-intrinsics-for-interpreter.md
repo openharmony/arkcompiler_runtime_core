@@ -1,4 +1,4 @@
-# Using IrToc implementations of the intrinsics in the interpreter
+# Using irtoc implementations of the intrinsics in the interpreter
 
 ## Introduction
 
@@ -9,21 +9,28 @@ implementation to the method description. Each time while executing the
 bytecode if the interpreter encounters a call to such a method it invokes
 the c++ function associated with method's compiled code information.
 
-Apart from the c++ implementations there are also (target) optimized IrToc
+Apart from the c++ implementations there are also (target) optimized irtoc
 implementations for some (having considerable performance impact ) intrinsics.
-Having the interpeter use these IrToc intrinsics implementations is
+Having the interpeter use these irtoc intrinsics implementations is
 beneficial for the interpreter performance and might reduce the overall
 amount of the c++ code.
 
+Current source-of-truth notes:
+
+- the shared implementation pattern described here is still current
+- the tree also contains explicit `NativePlus` generators in addition to `FastPathPlus` expansions
+- interpreter-side selection of irtoc implementations is driven by intrinsic YAML metadata such as `irtoc_impl`,
+  together with `codegen_arch`
+
 ## The issues
 
-Originally IrToc functions were intended to by used by the compiled code
+Originally irtoc functions were intended to by used by the compiled code
 and were themselves compiled in so called `FastPath` mode. The interpreter
 on the other hand uses native ABI with an imposed condition that the first
 argument in the argument list is always a MethodPtr. So to invoke a regular
 c++ code using this convention the arguments list has to be "shifted left".
 This is done by means of the special bridge.
-The current IrToc intrinsics implementations are using so called `FastPath`
+The current irtoc intrinsics implementations are using so called `FastPath`
 calling convention that is incompatible with that of the interpreter, so,
 we cannot use them directly and there is no bridge for such a mode transition.        
 
@@ -36,28 +43,28 @@ is suffixed with "NativePlus".
 
 The function compiled in the `NativePlus` mode uses the same calling
 convention as the interpreter. Since the first `MethodPtr` argument
-has no meaning in the IrToc context it will be ignored. This approach,
-however, allows us to call the IrToc implementation directly from the
+has no meaning in the irtoc context it will be ignored. This approach,
+however, allows us to call the irtoc implementation directly from the
 I2C bridge. Strictly speaking it will be called via bridge selector
 but the bridge selector will call the function itself not the bridge.
 
-If a `NativePlus` IrToc implementation has to call another `NativePlus`
+If a `NativePlus` irtoc implementation has to call another `NativePlus`
 implementation it has to manually pass a fake first argument to the callee.
 The regular c++ code can be called using the "natural" arguments list.
 
 The bridge selectors generation is guided by the presence of "irtoc_impl"
 field of the intrinsic definition. If the field is present the selector
 will use the field's value directly otherwise the `impl` field will be
-used and the CompiledAbi bridge will be generated for it. The IrToc
+used and the CompiledAbi bridge will be generated for it. The irtoc
 implementation is used only for the targets that are listed in the
 `codegen_arch`.
 
 ## The limitations
 
-If an IrToc intrinsic calls other functions the `FastPath` and the
+If an irtoc intrinsic calls other functions the `FastPath` and the
 `NativePlus` modes imply different approaches, so, callsite have to be
 guarded by a condition checking the mode. This means that non-leaf
-functions cannot generally use the same IrToc code intact via the
+functions cannot generally use the same irtoc code intact via the
 `FastPathPlus` macro-mode.
 
 `SlowPath` intrinsic is not currently supported for the `NativePlus` mode

@@ -14,7 +14,7 @@ OSR workflow:
                                     |     Interpreter       |
                                     |                       |
                                     +-----------------------+
-    Method::osr_code                            |
+    runtime compiler OSR-code map               |
     +------------------------+                  |
     | Method Prologue        |                  V
     +------------------------+         +-----------------+
@@ -62,28 +62,28 @@ To ensure all loops in the compiled code may be entered from the interpreter, we
 In OSR-methods special osr-entry flag is added to the loop-header basic blocks and some optimizations have to skip
 such loops.
 
-There are no restrictions for inlining: methods can be inlined in a general way and all loop-optimizations are
-applicable for them, because methods' loop-headers are not marked as osr-entry.
+Inlining is currently disabled in OSR mode in the main optimizing pipeline, so OSR compilation uses a stricter subset
+of the normal optimization pipeline.
 
-New pseudo-instruction is introduced: SaveStateOsr - instruction should be the first one in each loop-header basic block
+New pseudo-instruction is introduced: `SaveStateOsr` - the instruction should be the first one in each loop-header basic block
 with true osr-entry flag.
-This instruction contains information about all live virtual registers at the enter to the loop.
-Codegen creates special OsrStackMap for each SaveStateOsr instruction. Difference from regular stackmap is that it has
+This instruction contains information about all live virtual registers at loop entry.
+Codegen creates a special OsrStackMap for each `SaveStateOsr` instruction. Difference from a regular stackmap is that it has
 `osr entry bytecode offset` field.
 
 ### Metainfo
 
 On each OSR entry, we need to restore execution context.
 To do this, we need to know all live virtual registers at this moment.
-For this purpose new stackmap and new opcode were introduced.
+For this purpose a dedicated stackmap flavor and `SaveStateOsr` opcode are used.
  
-New opcode(OsrSaveState) has the same properties as regular SaveState, except that codegen handles them differently.
-No code is generated in place of OsrSaveState, but a special OsrEntryStub entity is created,
+`SaveStateOsr` has the same general purpose as regular `SaveState`, except that codegen handles it differently.
+No code is generated in place of `SaveStateOsr`, but a special OsrEntryStub entity is created,
 which is necessary to generate an OSR entry code.
 
 OsrEntryStub does the following:
 1. move all constants to the cpu registers or frame slots by inserting move or store instructions
-2. encodes jump instruction to the head of the loop where the corresponding OsrSaveState is located
+2. encodes jump instruction to the head of the loop where the corresponding `SaveStateOsr` is located
 
 The first point is necessary because the Panda compiler can place some constants in the cpu registers,
 but the constants themselves are not virtual registers and won't be stored in the metainfo.
@@ -132,7 +132,7 @@ def osr_entry(method: Method*, bytecode_offset: int) -> bool:
     return true
 ```
 
-Most part of the OSR entry is written in an assembly language, because CFrame is resided in the native stack.
+Most of the OSR entry is written in assembly because CFrame lives in the native stack.
 
 Osr Entry can occur in three different contexts according to the previous frame's kind:
 1. **Previous frame is CFrame**
