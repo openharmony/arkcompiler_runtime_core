@@ -57,7 +57,7 @@ TEST_F(ClassFindIteratorTest, lookup_status_is_forwarded_without_verify_abort)
 TEST_F(ClassFindIteratorTest, wrong_env)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindIterator(nullptr, class_, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIterator(nullptr, class_, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
@@ -69,7 +69,7 @@ TEST_F(ClassFindIteratorTest, wrong_env)
 TEST_F(ClassFindIteratorTest, wrong_class)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindIterator(env_, nullptr, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIterator(env_, nullptr, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -80,7 +80,7 @@ TEST_F(ClassFindIteratorTest, wrong_class)
 
 TEST_F(ClassFindIteratorTest, wrong_result_storage)
 {
-    ASSERT_EQ(env_->c_api->Class_FindIterator(env_, class_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIterator(env_, class_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -111,7 +111,7 @@ TEST_F(ClassFindIteratorTest, pending_error_is_rejected)
     ThrowError();
 
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindIterator(env_, class_, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIterator(env_, class_, &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"class", "ani_class"},

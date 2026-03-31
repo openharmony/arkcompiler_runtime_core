@@ -59,10 +59,10 @@ TEST_F(VariableGetValue{{ Type }}Test, null_env)
 
 {% if type == "ref" %}
     ani_ref result {};
-    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(nullptr, variable, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(nullptr, variable, &result), ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(nullptr, variable, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(nullptr, variable, &result), ANI_INVALID_ARGS);
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -76,10 +76,10 @@ TEST_F(VariableGetValue{{ Type }}Test, null_variable)
 {
 {% if type == "ref" %}
     ani_ref result {};
-    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, nullptr, &result), ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, nullptr, &result), ANI_INVALID_ARGS);
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -135,7 +135,7 @@ TEST_F(VariableGetValue{{ Type }}Test, null_result)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, variable, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, variable, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable"},

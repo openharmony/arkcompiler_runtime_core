@@ -22,7 +22,7 @@ class GetUnhandledErrorTest : public VerifyAniTest {};
 TEST_F(GetUnhandledErrorTest, wrong_env)
 {
     ani_error err {};
-    ASSERT_EQ(env_->c_api->GetUnhandledError(nullptr, &err), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetUnhandledError(nullptr, &err), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "ani_error *"},
@@ -32,7 +32,7 @@ TEST_F(GetUnhandledErrorTest, wrong_env)
 
 TEST_F(GetUnhandledErrorTest, wrong_err)
 {
-    ASSERT_EQ(env_->c_api->GetUnhandledError(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetUnhandledError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result", "ani_error *", "wrong pointer for storing 'ani_error'"},

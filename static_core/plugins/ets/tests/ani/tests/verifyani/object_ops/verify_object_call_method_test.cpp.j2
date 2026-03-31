@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -144,7 +144,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_env)
     ani_{{ type }} result;
     ASSERT_EQ(
         env_->c_api->Object_CallMethod_{{ Type }}(nullptr, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -174,7 +174,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_0)
     ani_{{ type }} result;
     ASSERT_EQ(
         env_->c_api->Object_CallMethod_{{ Type }}(env_, nullptr, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -289,7 +289,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_2)
     ani_{{ type }} result;
     ASSERT_EQ(
         env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, nullptr, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -309,7 +309,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_result)
 
     ASSERT_EQ(
         env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -483,7 +483,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_ref_arg)
 
 TEST_F(ObjectCallMethod{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -504,7 +504,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_return_type)
     ani_{{ type }} result;
     ASSERT_EQ(
         env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -747,7 +747,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_env)
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, object_, method_, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, object_, method_, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -775,7 +775,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_object_0)
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, nullptr, method_, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, nullptr, method_, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -883,7 +883,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_2)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, nullptr, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, nullptr, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -901,7 +901,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_result)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, nullptr, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, nullptr, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -929,7 +929,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_args)
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -944,7 +944,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_args)
 
 TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -993,7 +993,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_return_type)
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ wrong_ret }}Method", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &method_), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

@@ -25,7 +25,7 @@ TEST_F(ReferenceDeleteTest, wrong_env)
     ani_ref ref {};
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, ref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"lref", "ani_ref"},
@@ -37,7 +37,7 @@ TEST_F(ReferenceDeleteTest, wrong_env)
 
 TEST_F(ReferenceDeleteTest, wrong_lref_null)
 {
-    ASSERT_EQ(env_->c_api->Reference_Delete(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Delete(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"lref", "ani_ref", "wrong reference"},
@@ -64,12 +64,12 @@ TEST_F(ReferenceDeleteTest, wrong_lref_from_other_scope)
 
 TEST_F(ReferenceDeleteTest, wrong_ref_global)
 {
-    ani_ref ref {};
-    ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
+    ani_string str {};
+    ASSERT_EQ(env_->String_NewUTF8("aaa", 3U, &str), ANI_OK);
     ani_ref gref {};
-    ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
+    ASSERT_EQ(env_->GlobalReference_Create(str, &gref), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Reference_Delete(env_, gref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Delete(env_, gref), ANI_INCORRECT_REF);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"lref", "ani_ref", "wrong reference type: global reference"},
@@ -77,7 +77,7 @@ TEST_F(ReferenceDeleteTest, wrong_ref_global)
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
-    ASSERT_EQ(env_->Reference_Delete(ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_Delete(str), ANI_OK);
 }
 
 TEST_F(ReferenceDeleteTest, wrong_ref_stack)
@@ -115,7 +115,7 @@ TEST_F(ReferenceDeleteTest, wrong_ref_stack)
     // Check the error that occurs when deleting a stack reference.
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference type: stack reference"},
+        {"lref", "ani_ref", "wrong reference"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 
@@ -172,7 +172,7 @@ TEST_F(ReferenceDeleteTest, wrong_lref_junk_like_weak_ref)
 
 TEST_F(ReferenceDeleteTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"lref", "ani_ref", "wrong reference"},

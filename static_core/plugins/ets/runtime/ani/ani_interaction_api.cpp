@@ -376,6 +376,7 @@ static ani_status ClassSetStaticField(ani_env *env, ani_class cls, ani_static_fi
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     if constexpr (std::is_same_v<T, ani_ref>) {
+        ASSERT(value != nullptr);
         EtsObject *etsValue = s.ToInternalType(value);
         etsClass->SetStaticFieldObject(etsField, etsValue);
     } else {
@@ -1939,6 +1940,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(ani_env *env, ani_clas
                                                           ani_ref value)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(value);
 
     return ClassSetStaticField(env, cls, field, value);
 }
@@ -5136,7 +5138,6 @@ static ani_status TupleValueSetItem(ani_env *env, ani_tuple_value tupleValue, an
     // NOTE (#24962): Extend implementation to TupleN, when FE supports it
     EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
     ASSERT(field != nullptr);
-
     internalTuple->SetFieldObject(field, boxed.GetPtr());
 
     return ANI_OK;

@@ -23,7 +23,7 @@ TEST_F(PromiseNewTest, wrong_env)
 {
     ani_object promise {};
     ani_resolver resolver {};
-    ASSERT_EQ(env_->c_api->Promise_New(nullptr, &resolver, &promise), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Promise_New(nullptr, &resolver, &promise), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result_resolver", "ani_resolver *"},
@@ -35,7 +35,7 @@ TEST_F(PromiseNewTest, wrong_env)
 TEST_F(PromiseNewTest, wrong_promise)
 {
     ani_resolver resolver {};
-    ASSERT_EQ(env_->c_api->Promise_New(env_, &resolver, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Promise_New(env_, &resolver, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result_resolver", "ani_resolver *"},
@@ -47,7 +47,7 @@ TEST_F(PromiseNewTest, wrong_promise)
 TEST_F(PromiseNewTest, wrong_resolver)
 {
     ani_object promise {};
-    ASSERT_EQ(env_->c_api->Promise_New(env_, nullptr, &promise), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Promise_New(env_, nullptr, &promise), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result_resolver", "ani_resolver *", "wrong pointer for storing 'ani_resolver'"},
@@ -58,7 +58,7 @@ TEST_F(PromiseNewTest, wrong_resolver)
 
 TEST_F(PromiseNewTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Promise_New(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Promise_New(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result_resolver", "ani_resolver *", "wrong pointer for storing 'ani_resolver'"},
@@ -73,7 +73,7 @@ TEST_F(PromiseNewTest, throw_error)
 
     ani_object promise {};
     ani_resolver resolver {};
-    ASSERT_EQ(env_->c_api->Promise_New(env_, &resolver, &promise), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Promise_New(env_, &resolver, &promise), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"result_resolver", "ani_resolver *"},

@@ -50,6 +50,7 @@ NO_UB_SANITIZE static ani_status GetEnv(VVm *vvm, uint32_t version, VEnv **vresu
         ANIArg::MakeForEnvStorage(vresult, "result"),
     );
     // clang-format on
+    ANI_CHECK_RETURN_IF_EQ(vresult, nullptr, ANI_INVALID_ARGS);
     ani_env *result {};
     ani_status status = g_vmApi->GetEnv(vvm->GetVm(), version, &result);
     if (LIKELY(status == ANI_OK)) {
@@ -69,6 +70,7 @@ NO_UB_SANITIZE static ani_status AttachCurrentThread(VVm *vvm, const ani_options
         ANIArg::MakeForEnvStorage(vresult, "result"),
     );
     // clang-format on
+    ANI_CHECK_RETURN_IF_EQ(vresult, nullptr, ANI_INVALID_ARGS);
     ani_env *result {};
     ani_status status = g_vmApi->AttachCurrentThread(vvm->GetVm(), options, version, &result);
     if (LIKELY(status == ANI_OK)) {

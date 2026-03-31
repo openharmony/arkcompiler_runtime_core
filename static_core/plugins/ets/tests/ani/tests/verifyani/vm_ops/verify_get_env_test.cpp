@@ -22,7 +22,7 @@ class GetEnvTest : public VerifyAniTest {};
 TEST_F(GetEnvTest, wrong_vm)
 {
     ani_env *env {};
-    ASSERT_EQ(vm_->c_api->GetEnv(nullptr, ANI_VERSION_1, &env), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->GetEnv(nullptr, ANI_VERSION_1, &env), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *", "wrong VM pointer"},
         {"version", "uint32_t"},
@@ -35,7 +35,7 @@ TEST_F(GetEnvTest, wrong_version)
 {
     constexpr uint32_t FAKE_ANI_VERSION = 0xfe3d;
     ani_env *env {};
-    ASSERT_EQ(vm_->c_api->GetEnv(vm_, FAKE_ANI_VERSION, &env), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->GetEnv(vm_, FAKE_ANI_VERSION, &env), ANI_INVALID_VERSION);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
         {"version", "uint32_t", "unsupported ANI version"},
@@ -46,7 +46,7 @@ TEST_F(GetEnvTest, wrong_version)
 
 TEST_F(GetEnvTest, wrong_result_ptr)
 {
-    ASSERT_EQ(vm_->c_api->GetEnv(vm_, ANI_VERSION_1, nullptr), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->GetEnv(vm_, ANI_VERSION_1, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
         {"version", "uint32_t"},
@@ -58,7 +58,7 @@ TEST_F(GetEnvTest, wrong_result_ptr)
 TEST_F(GetEnvTest, wrong_all_args)
 {
     constexpr uint32_t FAKE_ANI_VERSION = 0xdeadbeaf;
-    ASSERT_EQ(vm_->c_api->GetEnv(nullptr, FAKE_ANI_VERSION, nullptr), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->GetEnv(nullptr, FAKE_ANI_VERSION, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *", "wrong VM pointer"},
         {"version", "uint32_t", "unsupported ANI version"},

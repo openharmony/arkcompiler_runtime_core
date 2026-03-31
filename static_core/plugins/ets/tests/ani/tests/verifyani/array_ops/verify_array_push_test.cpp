@@ -54,7 +54,7 @@ TEST_F(ArrayPushTest, wrong_env)
 
     ani_object intObj;
     CreateInt(env_, magicNumber, &intObj);
-    ASSERT_EQ(env_->c_api->Array_Push(nullptr, arr, intObj), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_Push(nullptr, arr, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array"},
@@ -67,7 +67,7 @@ TEST_F(ArrayPushTest, wrong_array)
 {
     ani_object intObj;
     CreateInt(env_, magicNumber, &intObj);
-    ASSERT_EQ(env_->Array_Push(nullptr, intObj), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Push(nullptr, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference"},
@@ -173,7 +173,7 @@ TEST_F(ArrayPushTest, wrong_ref)
     ani_size length = 3U;
     CreateAndInitArray(env_, length, &arr);
 
-    ASSERT_EQ(env_->Array_Push(arr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Push(arr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
@@ -184,7 +184,7 @@ TEST_F(ArrayPushTest, wrong_ref)
 
 TEST_F(ArrayPushTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Array_Push(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_Push(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array", "wrong reference"},
@@ -203,7 +203,7 @@ TEST_F(ArrayPushTest, throw_error)
     CreateInt(env_, magicNumber, &intObj);
 
     ThrowError();
-    ASSERT_EQ(env_->Array_Push(arr, intObj), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Push(arr, intObj), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"array", "ani_array"},

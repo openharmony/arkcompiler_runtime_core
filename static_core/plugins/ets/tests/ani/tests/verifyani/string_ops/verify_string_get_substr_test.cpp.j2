@@ -67,7 +67,7 @@ protected:
 TEST_F(StringGet{{ Format }}SubstrTest, wrong_env)
 {
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(nullptr, string_, substrOffset_, substrSize_, buf_, bufSize_, &res_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"string", "ani_string"},
@@ -82,7 +82,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_env)
 TEST_F(StringGet{{ Format }}SubstrTest, wrong_input_string)
 {
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(env_, nullptr, substrOffset_, substrSize_, buf_, bufSize_, &res_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -195,7 +195,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, cls_input_string)
 TEST_F(StringGet{{ Format }}SubstrTest, wrong_res)
 {
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(env_, string_, substrOffset_, substrSize_, buf_, bufSize_, nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -213,7 +213,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_res)
 TEST_F(StringGet{{ Format }}SubstrTest, wrong_buf)
 {
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(env_, string_, substrOffset_, substrSize_, nullptr, bufSize_, &res_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"string", "ani_string"},
@@ -229,7 +229,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_all_args)
 {
     ASSERT_EQ(
         env_->c_api->String_Get{{ Format }}SubString(nullptr, nullptr, substrOffset_, substrSize_, nullptr, bufSize_, nullptr),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"string", "ani_string", "wrong reference"},
@@ -245,7 +245,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, throw_error)
 {
     ThrowError();
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(env_, string_, substrOffset_, substrSize_, buf_, bufSize_, &res_),
-              ANI_ERROR);
+              ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"string", "ani_string"},

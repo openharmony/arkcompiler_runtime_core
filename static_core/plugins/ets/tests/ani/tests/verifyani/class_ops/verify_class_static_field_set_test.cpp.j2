@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -64,9 +64,9 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_env)
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("test", 4U, &string), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(nullptr, class_, field, string), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(nullptr, class_, field, string), ANI_INVALID_ARGS);
 {% else %}
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(nullptr, class_, field, {{ test_value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(nullptr, class_, field, {{ test_value }}), ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -88,9 +88,9 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_class)
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("test", 4U, &string), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, nullptr, field, string), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, nullptr, field, string), ANI_INVALID_ARGS);
 {% else %}
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, nullptr, field, {{ test_value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, nullptr, field, {{ test_value }}), ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -109,9 +109,9 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_field)
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("test", 4U, &string), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, nullptr, string), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, nullptr, string), ANI_INVALID_ARGS);
 {% else %}
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, nullptr, {{ test_value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, nullptr, {{ test_value }}), ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -154,7 +154,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_invalid_args
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, field, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, field, nullptr), ANI_INVALID_ARGS);
 
     // clang-format off
     std::vector<TestLineInfo> testLines {

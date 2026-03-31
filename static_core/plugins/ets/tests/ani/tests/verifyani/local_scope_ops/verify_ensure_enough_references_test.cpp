@@ -22,7 +22,7 @@ class EnsureEnoughRef : public VerifyAniTest {};
 TEST_F(EnsureEnoughRef, wrong_env)
 {
     ani_size cnt = 5U;
-    ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, cnt), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, cnt), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"nrRefs", "ani_size"},

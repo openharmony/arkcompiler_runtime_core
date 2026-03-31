@@ -23,6 +23,7 @@ namespace ark::ets::ani::verify {
 class VVm;
 class VEnv;
 class VRef;
+class VWRef;
 class VModule;
 class VNamespace;
 class VObject;
@@ -130,6 +131,16 @@ struct TypeMapping<VEnumItem *> {
 template <>
 struct TypeMapping<VRef **> {
     using Type = ani_ref *;
+};
+
+template <>
+struct TypeMapping<VWRef *> {
+    using Type = ani_wref;
+};
+
+template <>
+struct TypeMapping<VWRef **> {
+    using Type = ani_wref *;
 };
 
 template <>
@@ -280,6 +291,11 @@ struct TypeMapping<VFixedArray *> {
 template <>
 struct TypeMapping<VFixedArrayBoolean *> {
     using Type = ani_fixedarray_boolean;
+};
+
+template <>
+struct TypeMapping<VFixedArray **> {
+    using Type = ani_fixedarray *;
 };
 
 template <>

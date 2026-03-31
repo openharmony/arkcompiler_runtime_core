@@ -16,19 +16,38 @@
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 
 namespace ark::ets::ani::verify {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+InternalRef::InternalRef(ani_ref aniRef) : ref {aniRef} {}
+
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+InternalRef::InternalRef(ani_wref aniWref) : wref {aniWref} {}
+
+ani_ref InternalRef::GetRef()
+{
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    return ref;
+}
+
+ani_wref InternalRef::GetWRef()
+{
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    return wref;
+}
+
 VRef *InternalRef::CastToVRef(InternalRef *iref)
 {
-    ASSERT(((ark::mem::ToUintPtr(iref) & TYPE_MASK) != TYPE_VREF) || ManagedCodeAccessor::IsUndefined(iref->ref_));
-    return reinterpret_cast<VRef *>((ark::mem::ToUintPtr(iref) | TYPE_VREF));
+    ASSERT((ToUintPtr(iref) & VERIFY_HANDLE_TAG_MASK) == 0U);
+    return reinterpret_cast<VRef *>((ToUintPtr(iref) | VERIFY_HANDLE_TAG_VREF));
 }
 
 InternalRef *InternalRef::CastFromVRef(VRef *vref)
 {
-    ASSERT((ark::mem::ToUintPtr(vref) & TYPE_MASK) == TYPE_VREF);
-    return reinterpret_cast<InternalRef *>((ark::mem::ToUintPtr(vref) & ~TYPE_MASK));
+    ASSERT((ToUintPtr(vref) & VERIFY_HANDLE_TAG_MASK) == VERIFY_HANDLE_TAG_VREF);
+    return reinterpret_cast<InternalRef *>((ToUintPtr(vref) & ~VERIFY_HANDLE_TAG_MASK));
 }
 
 bool InternalRef::IsUndefinedStackRef(VRef *vref)
@@ -41,7 +60,35 @@ bool InternalRef::IsStackVRef(VRef *vref)
     if (IsUndefinedStackRef(vref)) {
         return true;
     }
-    return (ark::mem::ToUintPtr(vref) & TYPE_MASK) != TYPE_VREF;
+    return (ToUintPtr(vref) & VERIFY_HANDLE_TAG_MASK) != VERIFY_HANDLE_TAG_VREF;
+}
+
+VWRef *InternalRef::CastToVWRef(InternalRef *iref)
+{
+    ASSERT((ToUintPtr(iref) & VERIFY_HANDLE_TAG_MASK) == 0U);
+    return reinterpret_cast<VWRef *>((ToUintPtr(iref) | VERIFY_HANDLE_TAG_VWREF));
+}
+
+InternalRef *InternalRef::CastFromVWRef(VWRef *vwref)
+{
+    ASSERT((ToUintPtr(vwref) & VERIFY_HANDLE_TAG_MASK) == VERIFY_HANDLE_TAG_VWREF);
+    return reinterpret_cast<InternalRef *>((ToUintPtr(vwref) & ~VERIFY_HANDLE_TAG_MASK));
+}
+
+bool InternalRef::IsVWRef(VWRef *vwref)
+{
+    if (vwref == nullptr) {
+        return false;
+    }
+    return (ToUintPtr(vwref) & VERIFY_HANDLE_TAG_MASK) == VERIFY_HANDLE_TAG_VWREF;
+}
+
+bool InternalRef::IsVRef(VRef *vref)
+{
+    if (vref == nullptr) {
+        return false;
+    }
+    return (ToUintPtr(vref) & VERIFY_HANDLE_TAG_MASK) == VERIFY_HANDLE_TAG_VREF;
 }
 
 }  // namespace ark::ets::ani::verify

@@ -44,7 +44,7 @@ TEST_F(AnyCallTest, wrong_func_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_ref out {};
-    ASSERT_EQ(env_->c_api->Any_Call(env_, nullptr, 0U, nullptr, &out), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Any_Call(env_, nullptr, 0U, nullptr, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},    {"func", "ani_ref", "wrong reference"}, {"argc", "ani_size"}, {"argv", "ani_ref *"},
         {"result", "ani_ref *"},

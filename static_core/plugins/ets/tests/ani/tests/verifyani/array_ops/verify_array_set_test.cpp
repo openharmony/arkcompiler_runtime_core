@@ -46,7 +46,7 @@ TEST_F(ArraySetTest, wrong_env)
     ani_int val = 1U;
     CreateInt(env_, val, &intObj);
     ani_size index = 1U;
-    ASSERT_EQ(env_->c_api->Array_Set(nullptr, arr, index, intObj), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_Set(nullptr, arr, index, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array"},
@@ -61,7 +61,7 @@ TEST_F(ArraySetTest, wrong_input_array)
     ani_object intObj;
     CreateInt(env_, 1U, &intObj);
     ani_size index = 2U;
-    ASSERT_EQ(env_->Array_Set(nullptr, index, intObj), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Set(nullptr, index, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference"},
@@ -179,7 +179,7 @@ TEST_F(ArraySetTest, wrong_ref)
     CreateArray(env_, length, &arr);
 
     ani_size index = 2U;
-    ASSERT_EQ(env_->Array_Set(arr, index, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Set(arr, index, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
@@ -192,7 +192,7 @@ TEST_F(ArraySetTest, wrong_ref)
 TEST_F(ArraySetTest, wrong_all_args)
 {
     ani_size index = -1;
-    ASSERT_EQ(env_->c_api->Array_Set(nullptr, nullptr, index, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_Set(nullptr, nullptr, index, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array", "wrong reference"},
@@ -213,7 +213,7 @@ TEST_F(ArraySetTest, throw_error)
     ThrowError();
 
     ani_size index = 2U;
-    ASSERT_EQ(env_->Array_Set(arr, index, intObj), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Set(arr, index, intObj), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"array", "ani_array"},

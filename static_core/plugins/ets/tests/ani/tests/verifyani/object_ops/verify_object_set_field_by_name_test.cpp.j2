@@ -106,7 +106,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_env)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} value = GetValidArgValue(env_);
-    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(nullptr, object_, "{{ type }}Field", value), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(nullptr, object_, "{{ type }}Field", value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -123,7 +123,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_object_0)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} value = GetValidArgValue(env_);
-    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(env_, nullptr, "{{ type }}Field", value), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(env_, nullptr, "{{ type }}Field", value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -159,7 +159,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_name)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} value = GetValidArgValue(env_);
-    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(env_, object_, nullptr, value), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(env_, object_, nullptr, value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -181,7 +181,11 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_all_args)
     ani_{{ type }} value = GetTestValue();
     {% endif %}
 
+    {% if type == "boolean" %}
     ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(nullptr, nullptr, nullptr, value), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(nullptr, nullptr, nullptr, value), ANI_INVALID_ARGS);
+    {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -427,7 +431,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_ref)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_by_name_ref.Parent", &object_);
 
-    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Ref(env_, object_, "refField", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Ref(env_, object_, "refField", nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

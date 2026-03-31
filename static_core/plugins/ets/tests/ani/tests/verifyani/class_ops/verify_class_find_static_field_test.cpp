@@ -59,7 +59,7 @@ TEST_F(ClassFindStaticFieldTest, lookup_status_is_forwarded_without_verify_abort
 TEST_F(ClassFindStaticFieldTest, wrong_env)
 {
     ani_static_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticField(nullptr, class_, "staticField", &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticField(nullptr, class_, "staticField", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
@@ -72,7 +72,7 @@ TEST_F(ClassFindStaticFieldTest, wrong_env)
 TEST_F(ClassFindStaticFieldTest, wrong_class)
 {
     ani_static_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, nullptr, "staticField", &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, nullptr, "staticField", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -85,7 +85,7 @@ TEST_F(ClassFindStaticFieldTest, wrong_class)
 TEST_F(ClassFindStaticFieldTest, wrong_name)
 {
     ani_static_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, nullptr, &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, nullptr, &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -97,7 +97,7 @@ TEST_F(ClassFindStaticFieldTest, wrong_name)
 
 TEST_F(ClassFindStaticFieldTest, wrong_result_storage)
 {
-    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, "staticField", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, "staticField", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -130,7 +130,7 @@ TEST_F(ClassFindStaticFieldTest, pending_error_is_rejected)
     ThrowError();
 
     ani_static_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, "staticField", &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, "staticField", &field), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"class", "ani_class"},

@@ -21,7 +21,7 @@ class CreateLocalScopeTest : public VerifyAniTest {};
 
 TEST_F(CreateLocalScopeTest, wrong_env)
 {
-    ASSERT_EQ(env_->c_api->CreateLocalScope(nullptr, 1), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->CreateLocalScope(nullptr, 1), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"nr_refs", "ani_size"},
@@ -54,7 +54,7 @@ TEST_F(CreateLocalScopeTest, wrong_nr_refs_1)
 
 TEST_F(CreateLocalScopeTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->CreateLocalScope(nullptr, 0), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->CreateLocalScope(nullptr, 0), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"nr_refs", "ani_size", "wrong value"},

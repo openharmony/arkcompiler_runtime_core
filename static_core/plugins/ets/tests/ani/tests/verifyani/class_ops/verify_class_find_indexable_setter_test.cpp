@@ -65,7 +65,7 @@ TEST_F(ClassFindIndexableSetterTest, lookup_status_is_forwarded_without_verify_a
 TEST_F(ClassFindIndexableSetterTest, wrong_env)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(nullptr, class_, signature, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(nullptr, class_, signature, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
@@ -78,7 +78,7 @@ TEST_F(ClassFindIndexableSetterTest, wrong_env)
 TEST_F(ClassFindIndexableSetterTest, wrong_class)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, nullptr, signature, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, nullptr, signature, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -103,7 +103,7 @@ TEST_F(ClassFindIndexableSetterTest, null_signature_reports_ambiguous_method)
 
 TEST_F(ClassFindIndexableSetterTest, wrong_result_storage)
 {
-    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, class_, signature, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, class_, signature, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -136,7 +136,7 @@ TEST_F(ClassFindIndexableSetterTest, pending_error_is_rejected)
     ThrowError();
 
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, class_, signature, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, class_, signature, &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"class", "ani_class"},

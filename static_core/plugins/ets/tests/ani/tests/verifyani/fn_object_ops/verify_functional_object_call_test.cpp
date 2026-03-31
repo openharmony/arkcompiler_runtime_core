@@ -74,7 +74,7 @@ TEST_F(FunctionalObjectCallTest, wrong_env)
     GetModuleFunctionResult("getFnObj", &fnRef);
     auto fnObj = reinterpret_cast<ani_fn_object>(fnRef);
     ani_ref result {};
-    ASSERT_EQ(env_->c_api->FunctionalObject_Call(nullptr, fnObj, 0, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->FunctionalObject_Call(nullptr, fnObj, 0, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"fn", "ani_fn_object"},
@@ -88,7 +88,7 @@ TEST_F(FunctionalObjectCallTest, wrong_env)
 TEST_F(FunctionalObjectCallTest, wrong_functional_object)
 {
     ani_ref result {};
-    ASSERT_EQ(env_->FunctionalObject_Call(nullptr, 0, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FunctionalObject_Call(nullptr, 0, nullptr, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> nullLines {
         {"env", "ani_env *"},
@@ -157,7 +157,7 @@ TEST_F(FunctionalObjectCallTest, wrong_result_storage)
     ani_ref fnRef {};
     GetModuleFunctionResult("getFnObj", &fnRef);
     auto fnObj = reinterpret_cast<ani_fn_object>(fnRef);
-    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"fn", "ani_fn_object"},
@@ -176,7 +176,7 @@ TEST_F(FunctionalObjectCallTest, pending_error_is_rejected)
     ThrowError();
 
     ani_ref result {};
-    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"fn", "ani_fn_object"},

@@ -25,7 +25,7 @@ TEST_F(ObjectInstanceOfTest, wrong_env)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_boolean result {};
-    ASSERT_EQ(env_->c_api->Object_InstanceOf(nullptr, cls, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_InstanceOf(nullptr, cls, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object"},
@@ -43,7 +43,7 @@ TEST_F(ObjectInstanceOfTest, wrong_object_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_boolean result {};
-    ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, nullptr, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
@@ -82,7 +82,7 @@ TEST_F(ObjectInstanceOfTest, wrong_type_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_boolean result {};
-    ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, cls, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, cls, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
@@ -120,7 +120,7 @@ TEST_F(ObjectInstanceOfTest, wrong_result_ptr)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, cls, cls, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, cls, cls, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
@@ -152,7 +152,7 @@ TEST_F(ObjectInstanceOfTest, throw_error)
     ThrowError();
 
     ani_boolean result {};
-    ASSERT_EQ(env_->Object_InstanceOf(cls, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->Object_InstanceOf(cls, cls, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"object", "ani_object"},

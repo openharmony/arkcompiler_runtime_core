@@ -109,7 +109,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_env)
 {
     ani_boolean res {};
 
-    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullRef, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref", "ani_ref"},
@@ -122,7 +122,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_ref)
 {
     ani_boolean res {};
 
-    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullptr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},
@@ -133,7 +133,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_ref)
 
 TEST_F(ReferenceIs{{ Suff }}Test, wrong_res)
 {
-    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
@@ -144,7 +144,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_res)
 
 TEST_F(ReferenceIs{{ Suff }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref", "ani_ref", "wrong reference"},
@@ -158,7 +158,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, throw_error)
     ThrowError();
 
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"ref", "ani_ref"},

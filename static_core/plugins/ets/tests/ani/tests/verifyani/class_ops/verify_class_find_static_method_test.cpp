@@ -105,7 +105,7 @@ TEST_F(ClassFindStaticMethodTest, old_static_getter_name_is_rejected)
 TEST_F(ClassFindStaticMethodTest, wrong_env)
 {
     ani_static_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(nullptr, class_, "staticMethod", ":i", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(nullptr, class_, "staticMethod", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
@@ -119,7 +119,7 @@ TEST_F(ClassFindStaticMethodTest, wrong_env)
 TEST_F(ClassFindStaticMethodTest, wrong_class)
 {
     ani_static_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, nullptr, "staticMethod", ":i", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, nullptr, "staticMethod", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -133,7 +133,7 @@ TEST_F(ClassFindStaticMethodTest, wrong_class)
 TEST_F(ClassFindStaticMethodTest, wrong_name)
 {
     ani_static_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, nullptr, ":i", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, nullptr, ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -146,7 +146,7 @@ TEST_F(ClassFindStaticMethodTest, wrong_name)
 
 TEST_F(ClassFindStaticMethodTest, wrong_result_storage)
 {
-    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, "staticMethod", ":i", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, "staticMethod", ":i", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -181,7 +181,7 @@ TEST_F(ClassFindStaticMethodTest, pending_error_is_rejected)
     ThrowError();
 
     ani_static_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, "staticMethod", ":i", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, "staticMethod", ":i", &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"class", "ani_class"},

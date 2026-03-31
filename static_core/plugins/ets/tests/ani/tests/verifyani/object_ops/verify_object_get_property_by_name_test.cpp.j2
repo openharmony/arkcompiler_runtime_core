@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -74,7 +74,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_env)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_property_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -89,7 +89,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_env)
 TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_object_0)
 {
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -124,7 +124,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_name)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_property_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, nullptr, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -141,7 +141,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_name_not_found)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_property_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", &result), ANI_NOT_FOUND);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -157,7 +157,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_result)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_property_by_name_{{ type }}.Parent", &object_);
 
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -171,7 +171,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_result)
 
 TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -190,7 +190,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_type)
     ani_{{ type }} result {};
     ASSERT_EQ(
         env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Property", &result),
-        ANI_ERROR);
+        ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -211,7 +211,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_object_type)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_property_by_name_{{ type }}.Animal", &object_);
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", &result), ANI_NOT_FOUND);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

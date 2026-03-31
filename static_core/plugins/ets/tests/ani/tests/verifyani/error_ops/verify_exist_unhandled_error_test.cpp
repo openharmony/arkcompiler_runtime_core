@@ -22,7 +22,7 @@ class ExistUnhandledErrorTest : public VerifyAniTest {};
 TEST_F(ExistUnhandledErrorTest, wrong_env)
 {
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->ExistUnhandledError(nullptr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->ExistUnhandledError(nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "ani_boolean *"},
@@ -32,7 +32,7 @@ TEST_F(ExistUnhandledErrorTest, wrong_env)
 
 TEST_F(ExistUnhandledErrorTest, wrong_res)
 {
-    ASSERT_EQ(env_->c_api->ExistUnhandledError(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->ExistUnhandledError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},

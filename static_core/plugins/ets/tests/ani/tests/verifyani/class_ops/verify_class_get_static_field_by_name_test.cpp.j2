@@ -42,7 +42,7 @@ TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_env)
 {
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(nullptr, class_, "{{ type }}Field", &result),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -58,7 +58,7 @@ TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_class)
 {
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, nullptr, "{{ type }}Field", &result),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -73,7 +73,7 @@ TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_class)
 TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_name)
 {
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, nullptr, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -88,7 +88,7 @@ TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_name)
 TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_result)
 {
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -102,7 +102,7 @@ TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_result)
 
 TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -230,7 +230,7 @@ TEST_F(ClassGetStaticFieldByName{{ Type }}Test, pending_error)
     ThrowError();
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", &result), ANI_PENDING_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},

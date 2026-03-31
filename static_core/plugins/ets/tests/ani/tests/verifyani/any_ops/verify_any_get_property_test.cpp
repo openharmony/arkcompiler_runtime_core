@@ -43,7 +43,7 @@ TEST_F(AnyGetPropertyTest, wrong_ref_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_ref out {};
-    ASSERT_EQ(env_->c_api->Any_GetProperty(env_, nullptr, "x", &out), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Any_GetProperty(env_, nullptr, "x", &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},

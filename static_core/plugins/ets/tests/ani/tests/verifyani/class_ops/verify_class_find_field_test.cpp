@@ -83,7 +83,7 @@ TEST_F(ClassFindFieldTest, interface_property_name_is_rejected)
 TEST_F(ClassFindFieldTest, wrong_env)
 {
     ani_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindField(nullptr, class_, "field", &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindField(nullptr, class_, "field", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
@@ -96,7 +96,7 @@ TEST_F(ClassFindFieldTest, wrong_env)
 TEST_F(ClassFindFieldTest, wrong_class)
 {
     ani_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindField(env_, nullptr, "field", &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindField(env_, nullptr, "field", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -109,7 +109,7 @@ TEST_F(ClassFindFieldTest, wrong_class)
 TEST_F(ClassFindFieldTest, wrong_name)
 {
     ani_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, nullptr, &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, nullptr, &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -121,7 +121,7 @@ TEST_F(ClassFindFieldTest, wrong_name)
 
 TEST_F(ClassFindFieldTest, wrong_result_storage)
 {
-    ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, "field", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, "field", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -154,7 +154,7 @@ TEST_F(ClassFindFieldTest, pending_error_is_rejected)
     ThrowError();
 
     ani_field field {};
-    ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, "field", &field), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, "field", &field), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"class", "ani_class"},

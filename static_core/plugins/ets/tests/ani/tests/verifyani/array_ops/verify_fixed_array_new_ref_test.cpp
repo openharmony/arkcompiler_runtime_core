@@ -55,7 +55,7 @@ TEST_F(FixedArrayNewRefTest, wrong_env)
     ASSERT_EQ(env_->GetUndefined(&initialElement), ANI_OK);
 
     ani_fixedarray_ref result {};
-    ASSERT_EQ(env_->c_api->FixedArray_New_Ref(nullptr, arrayType, LENGTH, initialElement, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->FixedArray_New_Ref(nullptr, arrayType, LENGTH, initialElement, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"type", "ani_ref"},
@@ -72,7 +72,7 @@ TEST_F(FixedArrayNewRefTest, wrong_type)
     CreateString(env_, &initialElement);
 
     ani_fixedarray_ref result {};
-    ASSERT_EQ(env_->FixedArray_New_Ref(nullptr, LENGTH, initialElement, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_New_Ref(nullptr, LENGTH, initialElement, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},           {"type", "ani_ref", "wrong reference"}, {"length", "ani_size"},
         {"initial_element", "ani_ref"}, {"result", "ani_fixedarray_ref *"},
@@ -104,7 +104,7 @@ TEST_F(FixedArrayNewRefTest, wrong_result)
     ani_ref initialElement {};
     ASSERT_EQ(env_->GetUndefined(&initialElement), ANI_OK);
 
-    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, LENGTH, initialElement, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, LENGTH, initialElement, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref"},
@@ -165,7 +165,7 @@ TEST_F(FixedArrayNewRefTest, throw_error)
     ThrowError();
 
     ani_fixedarray_ref result {};
-    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, LENGTH, initialElement, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, LENGTH, initialElement, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"type", "ani_ref"},

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -123,7 +123,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_env)
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(nullptr, function, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -198,7 +198,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_2)
 {
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, nullptr, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -216,7 +216,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_result)
     ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -379,7 +379,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_ref_arg)
 
 TEST_F(FunctionCall{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -398,7 +398,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_return_type)
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(env_, function, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -529,7 +529,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_env)
     ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, function, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, function, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -601,7 +601,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_1)
 TEST_F(FunctionCall{{ Type }}ATest, wrong_function_2)
 {
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, nullptr, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, nullptr, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -618,7 +618,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_result)
     ani_function function {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, nullptr, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, nullptr, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -645,7 +645,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_args)
     ASSERT_EQ(env_->Module_FindFunction(module_, "{{ type }}Function", "zcbsilfdC{std.core.String}:{{ ret }}", &function), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -659,7 +659,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_args)
 
 TEST_F(FunctionCall{{ Type }}ATest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -706,7 +706,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_return_type)
     ASSERT_EQ(env_->Module_FindFunction(module_, "{{ wrong_ret }}Function", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &function), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(env_, function, &result, args_.data()), ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

@@ -63,7 +63,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_env)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(nullptr, object_, "{{ type }}Field", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(nullptr, object_, "{{ type }}Field", &result), ANI_INVALID_ARGS);
 
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -79,7 +79,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_env)
 TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_object_0)
 {
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(env_, nullptr, "{{ type }}Field", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(env_, nullptr, "{{ type }}Field", &result), ANI_INVALID_ARGS);
 
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -117,7 +117,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_name)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_by_name_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(env_, object_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(env_, object_, nullptr, &result), ANI_INVALID_ARGS);
 
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -134,7 +134,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_result)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_by_name_{{ type }}.Parent", &object_);
 
-    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(env_, object_, "{{ type }}Field", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(env_, object_, "{{ type }}Field", nullptr), ANI_INVALID_ARGS);
 
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -149,7 +149,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_result)
 
 TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
 
     // clang-format off
     std::vector<TestLineInfo> testLines {

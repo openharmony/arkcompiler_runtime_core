@@ -98,7 +98,7 @@ TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_success)
 TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_wrong_module)
 {
     std::array functions = {ani_native_function {"moduleSum", "ii:i", reinterpret_cast<void *>(Sum)}};
-    ASSERT_EQ(env_->Module_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_ERROR);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"module", "ani_module", "wrong reference"},
@@ -110,7 +110,7 @@ TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_wrong_module)
 
 TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_wrong_functions)
 {
-    ASSERT_EQ(env_->Module_BindNativeFunctions(module_, nullptr, 1U), ANI_ERROR);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module_, nullptr, 1U), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
@@ -200,7 +200,7 @@ TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_success)
 TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_wrong_namespace)
 {
     std::array functions = {ani_native_function {"nsSum", "ii:i", reinterpret_cast<void *>(Sum)}};
-    ASSERT_EQ(env_->Namespace_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_ERROR);
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace", "wrong reference"},
@@ -212,7 +212,7 @@ TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_wrong_name
 
 TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_wrong_functions)
 {
-    ASSERT_EQ(env_->Namespace_BindNativeFunctions(namespace_, nullptr, 1U), ANI_ERROR);
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(namespace_, nullptr, 1U), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
@@ -245,7 +245,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_success)
 TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_wrong_class)
 {
     std::array methods = {ani_native_function {"foo", ":i", reinterpret_cast<void *>(InstanceFoo)}};
-    ASSERT_EQ(env_->Class_BindNativeMethods(nullptr, methods.data(), methods.size()), ANI_ERROR);
+    ASSERT_EQ(env_->Class_BindNativeMethods(nullptr, methods.data(), methods.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -257,7 +257,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_wrong_class)
 
 TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_wrong_methods)
 {
-    ASSERT_EQ(env_->Class_BindNativeMethods(instanceClass_, nullptr, 1U), ANI_ERROR);
+    ASSERT_EQ(env_->Class_BindNativeMethods(instanceClass_, nullptr, 1U), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -326,7 +326,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_success)
 TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_class)
 {
     std::array methods = {ani_native_function {"foo", ":i", reinterpret_cast<void *>(StaticFoo)}};
-    ASSERT_EQ(env_->Class_BindStaticNativeMethods(nullptr, methods.data(), methods.size()), ANI_ERROR);
+    ASSERT_EQ(env_->Class_BindStaticNativeMethods(nullptr, methods.data(), methods.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -338,7 +338,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_cla
 
 TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_methods)
 {
-    ASSERT_EQ(env_->Class_BindStaticNativeMethods(staticClass_, nullptr, 1U), ANI_ERROR);
+    ASSERT_EQ(env_->Class_BindStaticNativeMethods(staticClass_, nullptr, 1U), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},

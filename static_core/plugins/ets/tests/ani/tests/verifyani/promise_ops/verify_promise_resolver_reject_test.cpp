@@ -53,7 +53,7 @@ protected:
 
 TEST_F(PromiseResolverRejectTest, wrong_env)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, resolver_, err_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, resolver_, err_), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"resolver", "ani_resolver"},
@@ -64,7 +64,7 @@ TEST_F(PromiseResolverRejectTest, wrong_env)
 
 TEST_F(PromiseResolverRejectTest, wrong_rejection)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -75,7 +75,7 @@ TEST_F(PromiseResolverRejectTest, wrong_rejection)
 
 TEST_F(PromiseResolverRejectTest, wrong_resolver)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, nullptr, err_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, nullptr, err_), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver", "wrong resolver"},
@@ -86,7 +86,7 @@ TEST_F(PromiseResolverRejectTest, wrong_resolver)
 
 TEST_F(PromiseResolverRejectTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"resolver", "ani_resolver", "wrong resolver"},
@@ -99,7 +99,7 @@ TEST_F(PromiseResolverRejectTest, throw_error)
 {
     ThrowError();
 
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, err_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, err_), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"resolver", "ani_resolver"},

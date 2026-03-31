@@ -84,7 +84,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
 
     ani_{{ type }} value = ANI_TRUE;
-    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(nullptr, object_, field, value), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(nullptr, object_, field, value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -103,7 +103,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_object_0)
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
 
     ani_{{ type }} value = ANI_TRUE;
-    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(env_, nullptr, field, value), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(env_, nullptr, field, value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -180,7 +180,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_field_2)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_{{ type }}.Parent", &object_);
 
     ani_{{ type }} value = ANI_TRUE;
-    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(env_, object_, nullptr, value), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(env_, object_, nullptr, value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -216,7 +216,11 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_value)
 TEST_F(ObjectSetField{{ Type }}Test, wrong_all_args)
 {
     const ani_{{ type }} value = 4;
+    {% if type == "boolean" %}
     ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(nullptr, nullptr, nullptr, value), ANI_ERROR);
+    {% else %}
+    ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(nullptr, nullptr, nullptr, value), ANI_INVALID_ARGS);
+    {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},

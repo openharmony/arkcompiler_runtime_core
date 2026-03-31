@@ -29,8 +29,10 @@
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -219,18 +221,6 @@ static Class *GetTupleElementRuntimeClass(EtsObject *element)
     return element->GetClass()->GetRuntimeClass();
 }
 
-static bool IsPrimitiveBoxedTupleElement(EtsExecutionContext *executionCtx, Class *runtimeClass)
-{
-    return runtimeClass == EtsBoxPrimitive<ani_boolean>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_char>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_byte>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_short>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_int>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_long>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_float>::GetBoxClass(executionCtx) ||
-           runtimeClass == EtsBoxPrimitive<ani_double>::GetBoxClass(executionCtx);
-}
-
 static bool IsCorrectTupleElementType(EtsExecutionContext *executionCtx, EtsObject *element, EtsType expectedType)
 {
     auto *runtimeClass = GetTupleElementRuntimeClass(element);
@@ -238,7 +228,7 @@ static bool IsCorrectTupleElementType(EtsExecutionContext *executionCtx, EtsObje
         return false;
     }
     if (expectedType == EtsType::OBJECT) {
-        return !IsPrimitiveBoxedTupleElement(executionCtx, runtimeClass);
+        return true;
     }
 
     return runtimeClass == GetPrimitiveBoxClass(executionCtx, expectedType);
@@ -730,7 +720,7 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F32: return true;  // uses double
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
-                return envANIVerifier->IsValidRefInCurrentFrame(reinterpret_cast<VRef *>(v.r));
+                return envANIVerifier->IsValidRef(reinterpret_cast<VRef *>(v.r));
             case panda_file::Type::TypeId::NOVALUE: return false;
             // clang-format on
             default:
@@ -748,7 +738,7 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F32: return true;
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
-                return envANIVerifier->IsValidRefInCurrentFrame(reinterpret_cast<VRef *>(v.r));
+                return envANIVerifier->IsValidRef(reinterpret_cast<VRef *>(v.r));
             case panda_file::Type::TypeId::NOVALUE: return false;
             // clang-format on
             default:
@@ -827,6 +817,9 @@ public:
 
     VerificationResult VerifyVm(VVm *vvm)
     {
+        if (UNLIKELY(vvm == nullptr)) {
+            return {"wrong VM pointer", ANIErrorSeverity::ERROR};
+        }
         if (UNLIKELY(vvm != vvm_)) {
             return {"wrong VM pointer", ANIErrorSeverity::FATAL};
         }
@@ -835,16 +828,20 @@ public:
 
     VerificationResult VerifyEnv(VEnv *venv, bool checkPendingError)
     {
+        if (UNLIKELY(venv == nullptr)) {
+            return {"called from incorrect the native scope", ANIErrorSeverity::ERROR};
+        }
         if (UNLIKELY(venv_ == nullptr)) {
             return {"current native thread is not attached", ANIErrorSeverity::FATAL};
         }
+
         if (UNLIKELY(venv != venv_)) {
             return {"called from incorrect the native scope", ANIErrorSeverity::FATAL};
         }
         auto *pandaEnv = PandaAniEnv::FromAniEnv(venv_->GetEnv());
         ASSERT(pandaEnv == EtsExecutionContext::GetCurrent()->GetPandaAniEnv());
         if (UNLIKELY(checkPendingError && pandaEnv->HasPendingException())) {
-            return {"has unhandled an error", ANIErrorSeverity::FATAL};
+            return {"has unhandled an error", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -854,7 +851,7 @@ public:
         if (opt.option == nullptr) {
             PandaStringStream ss;
             ss << "wrong 'option' pointer, options->options[" << index << "].option == NULL";
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         std::string_view name = opt.option;
         constexpr std::string_view EXT_PREFIX = "--ext:";
@@ -865,7 +862,7 @@ public:
             if (!isValid) {
                 PandaStringStream ss;
                 ss << "wrong 'option' value, options->options[" << index << "].option == " << name;
-                return {ss.str(), ANIErrorSeverity::FATAL};
+                return {ss.str(), ANIErrorSeverity::ERROR};
             }
         }
         return {};
@@ -902,7 +899,7 @@ public:
         if (value == nullptr) {
             PandaStringStream ss;
             ss << "wrong pointer for storing '" << typeName << "'";
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -935,7 +932,7 @@ public:
         if (value == nullptr) {
             PandaStringStream ss;
             ss << "wrong pointer to use as argument in '" << typeName << "'";
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -943,7 +940,7 @@ public:
     VerificationResult VerifyEnvVersion(uint32_t version)
     {
         if (!IsVersionSupported(version)) {
-            return {"unsupported ANI version", ANIErrorSeverity::FATAL};
+            return {"unsupported ANI version", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -964,12 +961,29 @@ public:
     VerificationResult VerifyRef(VRef *vref)
     {
         if (vref == nullptr) {
+            return {"wrong reference", ANIErrorSeverity::ERROR};
+        }
+        if (!GetEnvANIVerifier()->IsValidRef(vref)) {
             return {"wrong reference", ANIErrorSeverity::FATAL};
         }
-        if (GetEnvANIVerifier()->IsValidRefInCurrentFrame(vref)) {
-            return {};
+        return {};
+    }
+
+    VerificationResult VerifyEscapeRef(VRef *vref)
+    {
+        if (vref == nullptr) {
+            return {"wrong reference", ANIErrorSeverity::ERROR};
         }
-        if (GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vref)) {
+        if (GetEnvANIVerifier()->IsValidRef(vref)) {
+            if (GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vref)) {
+                return {"not local reference", ANIErrorSeverity::ERROR};
+            }
+            if (GetEnvANIVerifier()->IsValidWeakRef(reinterpret_cast<VWRef *>(vref))) {
+                return {"not local reference", ANIErrorSeverity::ERROR};
+            }
+            if (!GetEnvANIVerifier()->IsValidRefInCurrentScope(vref)) {
+                return {"the reference was not created in the current EscapeLocalScope", ANIErrorSeverity::ERROR};
+            }
             return {};
         }
         return {"wrong reference", ANIErrorSeverity::FATAL};
@@ -1043,11 +1057,15 @@ public:
 
     VerificationResult VerifyGlobalRef(VRef *vgref)
     {
+        if (UNLIKELY(vgref == nullptr)) {
+            return {"wrong global reference", ANIErrorSeverity::ERROR};
+        }
         auto *envVerifier = GetEnvANIVerifier();
         if (envVerifier->IsValidGlobalVerifiedRef(vgref)) {
             return {};
         }
-        if (envVerifier->IsValidRefInCurrentFrame(vgref)) {
+
+        if (envVerifier->IsValidRef(vgref)) {
             if (ManagedCodeAccessor::IsUndefined(vgref->GetRef())) {
                 return {};
             }
@@ -1056,24 +1074,23 @@ public:
         return {"wrong global reference", ANIErrorSeverity::FATAL};
     }
 
-    VerificationResult VerifyWRef(ani_wref wref)
+    VerificationResult VerifyWRef(VWRef *vwref)
     {
-        if (ManagedCodeAccessor::IsUndefined(wref)) {
+        if (UNLIKELY(vwref == nullptr)) {
+            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+        }
+        auto *envVerifier = GetEnvANIVerifier();
+        if (envVerifier->IsValidWeakRef(vwref)) {
             return {};
         }
-        if (wref == nullptr) {
-            return {"wrong weak reference", ANIErrorSeverity::ERROR};
-        }
 
-        auto *refStorage = PandaAniEnv::FromAniEnv(venv_->GetEnv())->GetEtsReferenceStorage();
-        auto *etsRef = reinterpret_cast<EtsReference *>(wref);
-        if (!refStorage->IsValidEtsRef(etsRef)) {
-            return {"wrong weak reference", ANIErrorSeverity::FATAL};
-        }
-        if (!etsRef->IsWeak()) {
+        if (envVerifier->IsValidRef(reinterpret_cast<VRef *>(vwref))) {
+            if (ManagedCodeAccessor::IsUndefined(vwref->GetWRef())) {
+                return {};
+            }
             return {"wrong weak reference", ANIErrorSeverity::ERROR};
         }
-        return {};
+        return {"wrong weak reference", ANIErrorSeverity::FATAL};
     }
 
     VerificationResult VerifyFunctionalObject(VFnObject *vfnObject)
@@ -1325,7 +1342,7 @@ public:
     VerificationResult VerifyError(VError *verr)
     {
         if (verr == nullptr) {
-            return {"wrong reference", ANIErrorSeverity::FATAL};
+            return {"wrong reference", ANIErrorSeverity::ERROR};
         }
 
         auto errMessage = VerifyRef(verr);
@@ -1519,8 +1536,9 @@ public:
         EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
         ASSERT(field != nullptr);
 
-        if (!IsCorrectTupleElementType(executionCtx, internalTuple->GetFieldObject(field), tupleElementType)) {
-            return {"wrong tuple element type at this index", ANIErrorSeverity::FATAL};
+        auto *resultField = internalTuple->GetFieldObject(field);
+        if (!IsCorrectTupleElementType(executionCtx, resultField, tupleElementType)) {
+            return {"wrong tuple element type at this index", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1530,7 +1548,7 @@ public:
         if (currentArray_ == nullptr) {
             PandaStringStream ss;
             ss << "no array context for index validation";
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
 
         return {};
@@ -1538,16 +1556,19 @@ public:
 
     VerificationResult VerifyDelLocalRef(VRef *vref)
     {
+        if (vref == nullptr) {
+            return {"wrong reference", ANIErrorSeverity::ERROR};
+        }
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
-        if (envANIVerifier->IsGlobalRef(vref)) {
-            return {"wrong reference type: global reference", ANIErrorSeverity::FATAL};
+        if (!envANIVerifier->IsValidRef(vref)) {
+            return {"wrong reference", ANIErrorSeverity::FATAL};
+        }
+
+        if (!envANIVerifier->IsValidLocalRef(vref) && !envANIVerifier->IsValidStackRef(vref)) {
+            return {"wrong reference type: global reference", ANIErrorSeverity::ERROR};
         }
 
         if (envANIVerifier->IsValidStackRef(vref)) {
-            return {"wrong reference type: stack reference", ANIErrorSeverity::FATAL};
-        }
-
-        if (!envANIVerifier->IsValidRefInCurrentFrame(vref)) {
             return {"wrong reference", ANIErrorSeverity::FATAL};
         }
 
@@ -1640,13 +1661,20 @@ public:
 
         EtsType methodReturnType = vmethod->GetEtsMethod()->GetReturnValueType();
         if (methodReturnType != returnType) {
-            return {"wrong return type", ANIErrorSeverity::FATAL};
+            return {"wrong return type", ANIErrorSeverity::ERROR};
         }
         return {};
     }
 
     VerificationResult VerifyCtor(VMethod *vctor, EtsType returnType)
     {
+        if (vctor == nullptr) {
+            return {"wrong ctor", ANIErrorSeverity::ERROR};
+        }
+        if (class_ == nullptr) {
+            return {"wrong class for ctor", ANIErrorSeverity::ERROR};
+        }
+
         if (!GetEnvANIVerifier()->IsValidMethod(vctor)) {
             return {"wrong ctor", ANIErrorSeverity::FATAL};
         }
@@ -1669,6 +1697,20 @@ public:
     template <bool IS_STATIC, typename FieldHandle>
     VerificationResult VerifyReadFieldImpl(FieldHandle *vfield, EtsType fieldType)
     {
+        if (vfield == nullptr) {
+            if constexpr (IS_STATIC) {
+                return {"wrong static field", ANIErrorSeverity::ERROR};
+            } else {
+                return {"wrong field", ANIErrorSeverity::ERROR};
+            }
+        }
+        if (class_ == nullptr) {
+            if constexpr (IS_STATIC) {
+                return {"wrong class for static field", ANIErrorSeverity::ERROR};
+            } else {
+                return {"wrong object for field", ANIErrorSeverity::ERROR};
+            }
+        }
         if (!GetEnvANIVerifier()->IsValidField(vfield)) {
             if constexpr (IS_STATIC) {
                 return {"wrong static field", ANIErrorSeverity::FATAL};
@@ -1684,7 +1726,7 @@ public:
             return err;
         }
 
-        if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+        if (!vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
             if constexpr (IS_STATIC) {
                 return {"wrong class for static field", ANIErrorSeverity::FATAL};
             } else {
@@ -1704,9 +1746,9 @@ public:
 
         if (class_ == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+                return {"wrong class for static field", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong object for field", ANIErrorSeverity::FATAL};
+                return {"wrong object for field", ANIErrorSeverity::ERROR};
             }
         }
 
@@ -1756,9 +1798,9 @@ public:
 
         if (class_ == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+                return {"wrong class for static field", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong object for field", ANIErrorSeverity::FATAL};
+                return {"wrong object for field", ANIErrorSeverity::ERROR};
             }
         }
 
@@ -1843,9 +1885,9 @@ public:
 
         if (class_ == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+                return {"wrong class for static field", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong class for field", ANIErrorSeverity::FATAL};
+                return {"wrong class for field", ANIErrorSeverity::ERROR};
             }
         }
 
@@ -1873,9 +1915,9 @@ public:
         signature_ = signature;
         if (class_ == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong class for static method", ANIErrorSeverity::FATAL};
+                return {"wrong class for static method", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong class for method", ANIErrorSeverity::FATAL};
+                return {"wrong class for method", ANIErrorSeverity::ERROR};
             }
         }
         if (name_ == nullptr) {
@@ -1898,9 +1940,9 @@ public:
         }
         if (class_ == nullptr) {
             if constexpr (IS_SETTER) {
-                return {"wrong class for setter", ANIErrorSeverity::FATAL};
+                return {"wrong class for setter", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong class for getter", ANIErrorSeverity::FATAL};
+                return {"wrong class for getter", ANIErrorSeverity::ERROR};
             }
         }
 
@@ -1919,9 +1961,9 @@ public:
         signature_ = signature;
         if (class_ == nullptr) {
             if constexpr (IS_SETTER) {
-                return {"wrong class for indexable setter", ANIErrorSeverity::FATAL};
+                return {"wrong class for indexable setter", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong class for indexable getter", ANIErrorSeverity::FATAL};
+                return {"wrong class for indexable getter", ANIErrorSeverity::ERROR};
             }
         }
 
@@ -1950,7 +1992,7 @@ public:
         }
 
         if (class_ == nullptr) {
-            return {"wrong class for variable", ANIErrorSeverity::FATAL};
+            return {"wrong class for variable", ANIErrorSeverity::ERROR};
         }
 
         EtsField *field = class_->GetStaticFieldIDByName(name, nullptr);
@@ -1979,7 +2021,7 @@ public:
     {
         signature_ = signature;
         if (class_ == nullptr) {
-            return {"wrong class for function", ANIErrorSeverity::FATAL};
+            return {"wrong class for function", ANIErrorSeverity::ERROR};
         }
         if (name_ == nullptr) {
             return {};
@@ -2032,7 +2074,7 @@ public:
                 PandaStringStream ss;
                 ss << "wrong property type: " << EtsTypeToString(field->GetEtsType())
                    << ", expected: " << EtsTypeToString(propertyType);
-                return {ss.str(), ANIErrorSeverity::FATAL};
+                return {ss.str(), ANIErrorSeverity::ERROR};
             }
             return {};
         }
@@ -2040,13 +2082,13 @@ public:
         EtsMethod *method = class_->GetInstanceMethod((PandaString(GETTER_BEGIN) + name).c_str(), nullptr);
         if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 1 ||
             method->GetArgType(0) != EtsType::OBJECT) {
-            return {"wrong property", ANIErrorSeverity::FATAL};
+            return {"wrong property", ANIErrorSeverity::ERROR};
         }
         if (method->GetReturnValueType() != propertyType) {
             PandaStringStream ss;
             ss << "wrong property type: " << EtsTypeToString(method->GetReturnValueType())
                << ", expected: " << EtsTypeToString(propertyType);
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -2066,7 +2108,7 @@ public:
                 PandaStringStream ss;
                 ss << "wrong property type: " << EtsTypeToString(field->GetEtsType())
                    << ", expected: " << EtsTypeToString(propertyType);
-                return {ss.str(), ANIErrorSeverity::FATAL};
+                return {ss.str(), ANIErrorSeverity::ERROR};
             }
             if (field->IsReadonly()) {
                 return {"property is read-only", ANIErrorSeverity::FATAL};
@@ -2077,22 +2119,26 @@ public:
         EtsMethod *method = class_->GetInstanceMethod((PandaString(SETTER_BEGIN) + name).c_str(), nullptr);
         if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 2U ||
             method->GetArgType(0) != EtsType::OBJECT) {
-            return {"wrong property", ANIErrorSeverity::FATAL};
+            return {"wrong property", ANIErrorSeverity::ERROR};
         }
         if (method->GetArgType(1U) != propertyType) {
             PandaStringStream ss;
             ss << "wrong property type: " << EtsTypeToString(method->GetArgType(1U))
                << ", expected: " << EtsTypeToString(propertyType);
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         if (method->GetReturnValueType() != EtsType::VOID && method->GetReturnValueType() != EtsType::NOVALUE) {
-            return {"wrong property", ANIErrorSeverity::FATAL};
+            return {"wrong property", ANIErrorSeverity::ERROR};
         }
         return {};
     }
 
     VerificationResult VerifyReadVariable(VVariable *vvariable, EtsType variableType)
     {
+        if (vvariable == nullptr) {
+            return {"wrong variable", ANIErrorSeverity::ERROR};
+        }
+
         if (!GetEnvANIVerifier()->IsValidField(vvariable)) {
             return {"wrong variable", ANIErrorSeverity::FATAL};
         }
@@ -2106,6 +2152,10 @@ public:
 
     VerificationResult VerifyWriteVariable(VVariable *vvariable, EtsType variableType)
     {
+        if (vvariable == nullptr) {
+            return {"wrong variable", ANIErrorSeverity::ERROR};
+        }
+
         if (!GetEnvANIVerifier()->IsValidField(vvariable)) {
             return {"wrong variable", ANIErrorSeverity::FATAL};
         }
@@ -2128,6 +2178,12 @@ public:
 
     VerificationResult VerifyMethod(VMethod *vmethod, EtsType returnType)
     {
+        if (vmethod == nullptr) {
+            return {"wrong method", ANIErrorSeverity::ERROR};
+        }
+        if (class_ == nullptr) {
+            return {"wrong object for method", ANIErrorSeverity::ERROR};
+        }
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
             return {"wrong method", ANIErrorSeverity::FATAL};
         }
@@ -2141,7 +2197,7 @@ public:
             return {"method is ctor", ANIErrorSeverity::FATAL};
         }
 
-        if (class_ == nullptr || !vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+        if (!vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
             return {"wrong object for method", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -2149,6 +2205,12 @@ public:
 
     VerificationResult VerifyStaticMethod(VStaticMethod *vstaticmethod, EtsType returnType)
     {
+        if (vstaticmethod == nullptr) {
+            return {"wrong static method", ANIErrorSeverity::ERROR};
+        }
+        if (class_ == nullptr) {
+            return {"wrong class for method", ANIErrorSeverity::ERROR};
+        }
         if (!GetEnvANIVerifier()->IsValidMethod(vstaticmethod)) {
             return {"wrong static method", ANIErrorSeverity::FATAL};
         }
@@ -2157,7 +2219,7 @@ public:
             return err;
         }
 
-        if (class_ == nullptr || !vstaticmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+        if (!vstaticmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
             return {"wrong class for method", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -2165,6 +2227,10 @@ public:
 
     VerificationResult VerifyFunction(VFunction *vfunction, EtsType returnType)
     {
+        if (vfunction == nullptr) {
+            return {"expected non-null function", ANIErrorSeverity::ERROR};
+        }
+
         if (!GetEnvANIVerifier()->IsValidMethod(vfunction)) {
             return {"wrong function", ANIErrorSeverity::FATAL};
         }
@@ -2204,7 +2270,7 @@ public:
         }
 
         if (etsMethod->GetReturnValueType() != returnType) {
-            return {"wrong return type", ANIErrorSeverity::FATAL};
+            return {"wrong return type", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -2293,7 +2359,7 @@ public:
             return {};
         }
         if (class_ == nullptr) {
-            return {"wrong class for native function", ANIErrorSeverity::FATAL};
+            return {"wrong class for native function", ANIErrorSeverity::ERROR};
         }
 
         for (ani_size i = 0; i < nrFunctions; ++i) {
@@ -2379,7 +2445,10 @@ public:
     {
         ASSERT(methodArgs != nullptr);
         if (methodArgs->vargs == nullptr) {
-            return {"wrong arguments value", ANIErrorSeverity::FATAL};
+            return {"wrong arguments value", ANIErrorSeverity::ERROR};
+        }
+        if (methodArgs->method == nullptr) {
+            return {"wrong method", ANIErrorSeverity::ERROR};
         }
         return DoVerifyMethodArgs(methodArgs);
     }
@@ -2387,6 +2456,9 @@ public:
     VerificationResult VerifyMethodVArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         ASSERT(methodArgs != nullptr);
+        if (methodArgs->method == nullptr) {
+            return {"wrong method", ANIErrorSeverity::ERROR};
+        }
         return DoVerifyMethodArgs(methodArgs);
     }
 
@@ -2400,7 +2472,7 @@ public:
             return {};
         }
         if (vargs == nullptr && etsMethod->GetNumArgs() != 0) {
-            return {"wrong arguments value", ANIErrorSeverity::FATAL};
+            return {"wrong arguments value", ANIErrorSeverity::ERROR};
         }
 
         methodArgsForExtInfo_ = ANIArg::AniMethodArgs {etsMethod, vargs, {}, false};
@@ -2424,10 +2496,6 @@ public:
 
     VerificationResult DoVerifyMethodArgs(ANIArg::AniMethodArgs *methodArgs)
     {
-        if (methodArgs->method == nullptr) {
-            return {"wrong method", ANIErrorSeverity::FATAL};
-        }
-
         CallArgs callArgs(methodArgs->method, methodArgs->vargs);
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
         VerificationResult err;
@@ -2451,7 +2519,11 @@ public:
 
     VerificationResult VerifyResolver(VResolver *vresolver)
     {
-        if (!GetEnvANIVerifier()->IsValidGlobalVerifiedResolver(vresolver)) {
+        if (vresolver == nullptr) {
+            return {"wrong resolver", ANIErrorSeverity::ERROR};
+        }
+
+        if (!GetEnvANIVerifier()->IsValidGlobalResolver(vresolver)) {
             return {"wrong resolver", ANIErrorSeverity::FATAL};
         }
 
@@ -2556,6 +2628,12 @@ static VerificationResult VerifyNamespace(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NAMESPACE);
     return v.VerifyNamespace(arg.GetValueNamespace());
+}
+
+static VerificationResult VerifyEscapeRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ESCAPE_REF);
+    return v.VerifyEscapeRef(arg.GetValueRef());
 }
 
 static VerificationResult VerifyType(Verifier &v, const ANIArg &arg)
@@ -3326,13 +3404,13 @@ static constexpr std::array<CheckerHandler, helpers::ToUnderlying(ANIArg::Action
 };
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-static void DoReportANI(PandaEtsVM *etsVm, std::string_view functionName, std::string_view message)
+static void DoReportANI(PandaEtsVM *etsVm, std::string_view functionName, std::string_view message, bool isFatal = true)
 {
     PandaStringStream ss;
     ss << "DETECT AN ERROR WHEN USING ANI:";
     ss << "\n  ANI method: " << functionName;
     ss << "\n" << message;
-    etsVm->GetANIVerifier()->Report(ss.str());
+    etsVm->GetANIVerifier()->Report(ss.str(), isFatal);
 }
 
 struct ArgInfo {
@@ -3472,7 +3550,7 @@ static void ProcessExtArgs(const PandaVector<ExtArgInfo> &extArgInfoList, Report
     }
 }
 
-static void DoANIArgsReport(PandaEtsVM *etsVm, std::string_view functionName, const ArgsInfo &argsInfo)
+static void DoANIArgsReport(PandaEtsVM *etsVm, std::string_view functionName, const ArgsInfo &argsInfo, bool isFatal)
 {
     ReportData data;
     ProcessStandardArgs(argsInfo.argInfoList, data);
@@ -3480,7 +3558,7 @@ static void DoANIArgsReport(PandaEtsVM *etsVm, std::string_view functionName, co
         ProcessExtArgs(argsInfo.extArgInfoList.value(), data);
     }
     if (!data.Empty()) {
-        DoReportANI(etsVm, functionName, data.ToString());
+        DoReportANI(etsVm, functionName, data.ToString(), isFatal);
     }
 }
 
@@ -3531,7 +3609,7 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
     }
     argsInfo.argInfoList = std::move(argInfoList);
     bool isFatal = hasFatalError;
-    DoANIArgsReport(etsVm, functionName, argsInfo);
+    DoANIArgsReport(etsVm, functionName, argsInfo, isFatal);
     return !isFatal;
 }
 

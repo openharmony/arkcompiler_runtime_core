@@ -37,7 +37,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_env)
 {
     void *data {};
     ani_arraybuffer arraybuffer {};
-    ASSERT_EQ(env_->c_api->CreateArrayBuffer(nullptr, LENGTH, &data, &arraybuffer), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->CreateArrayBuffer(nullptr, LENGTH, &data, &arraybuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"length", "ani_size"},
@@ -50,7 +50,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_env)
 TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_data_storage)
 {
     ani_arraybuffer arraybuffer {};
-    ASSERT_EQ(env_->CreateArrayBuffer(LENGTH, nullptr, &arraybuffer), ANI_ERROR);
+    ASSERT_EQ(env_->CreateArrayBuffer(LENGTH, nullptr, &arraybuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
@@ -63,7 +63,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_data_storage)
 TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_arraybuffer_storage)
 {
     void *data {};
-    ASSERT_EQ(env_->CreateArrayBuffer(LENGTH, &data, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->CreateArrayBuffer(LENGTH, &data, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},

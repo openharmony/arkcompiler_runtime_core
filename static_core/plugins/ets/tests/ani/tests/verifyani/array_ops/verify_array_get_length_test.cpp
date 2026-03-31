@@ -34,7 +34,7 @@ TEST_F(ArrayGetLengthTest, wrong_env)
     CreateArray(env_, length, &arr);
 
     ani_size res = -1;
-    ASSERT_EQ(env_->c_api->Array_GetLength(nullptr, arr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_GetLength(nullptr, arr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array"},
@@ -49,7 +49,7 @@ TEST_F(ArrayGetLengthTest, wrong_result)
     ani_size length = 3U;
     CreateArray(env_, length, &arr);
 
-    ASSERT_EQ(env_->Array_GetLength(arr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Array_GetLength(arr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
@@ -64,7 +64,7 @@ TEST_F(ArrayGetLengthTest, wrong_all_args)
     ani_size length = 3U;
     CreateArray(env_, length, &arr);
 
-    ASSERT_EQ(env_->c_api->Array_GetLength(nullptr, arr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_GetLength(nullptr, arr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array"},
@@ -82,7 +82,7 @@ TEST_F(ArrayGetLengthTest, throw_error)
     ThrowError();
 
     ani_size res = -1;
-    ASSERT_EQ(env_->Array_GetLength(arr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->Array_GetLength(arr, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"array", "ani_array"},

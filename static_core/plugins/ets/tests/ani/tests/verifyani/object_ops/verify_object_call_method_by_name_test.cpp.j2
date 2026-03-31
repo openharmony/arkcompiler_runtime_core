@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -170,13 +170,13 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(nullptr, object_, "{{ type }}Method",
                                                               "zcbsilfdC{std.core.String}:", z_, c_, b_, s_, i_, l_, f_, d_,
                                                               r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(nullptr, object_, "{{ type }}Method",
                                                               "zcbsilfdC{std.core.String}:{{ ret }}", &result, z_, c_, b_, s_,
                                                               i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -184,20 +184,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_env)
         {"object", "ani_object"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {% endif %}
-        {"...", "va_list *"},
-        {"[0]", "ani_boolean"},
-        {"[1]", "ani_char"},
-        {"[2]", "ani_byte"},
-        {"[3]", "ani_short"},
-        {"[4]", "ani_int"},
-        {"[5]", "ani_long"},
-        {"[6]", "ani_float"},
-        {"[7]", "ani_double"},
-        {"[8]", "ani_ref"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}", testLines);
@@ -208,13 +194,13 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_object_0)
 {% if type == "void" %}
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(env_, nullptr, "{{ type }}Method", "zcbsilfdC{std.core.String}:",
                                                               z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(env_, nullptr, "{{ type }}Method",
                                                               "zcbsilfdC{std.core.String}:{{ ret }}", &result, z_, c_, b_, s_,
                                                               i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -222,11 +208,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_object_0)
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {% endif %}
-        {"...", "va_list *"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}", testLines);
@@ -253,11 +234,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_object_1)
         {"object", "ani_object", "wrong reference type: null"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {% endif %}
-        {"...", "va_list *"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}", testLines);
@@ -321,16 +297,14 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_result)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(env_, object_, "{{ type }}Method",
                                                               "zcbsilfdC{std.core.String}:{{ ret }}",
                                                               nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
-        {"...", "va_list *"},
+        {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -358,13 +332,8 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_boolean_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {% endif %}
-        {"...", "va_list *", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean", "wrong value"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -386,13 +355,9 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_boolean_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
-        {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
-        {% endif %}
-        {"...", "va_list *", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean", "wrong value"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -427,13 +392,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_char_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "va_list *", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char", "wrong value"},
         {"[2]", "ani_byte"},
@@ -467,13 +430,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_byte_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "va_list *", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte", "wrong value"},
@@ -507,13 +468,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_short_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "va_list *", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -547,13 +506,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_ref_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "va_list *", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -571,10 +528,10 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_ref_arg)
 TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_all_args)
 {
 {% if type == "void" %}
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
 {% else %}
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -582,11 +539,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_all_args)
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
-        {% endif %}
-        {"...", "va_list *"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}", testLines);
@@ -599,25 +551,23 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_return_type)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Method",
                                                               "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}",
                                                               z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Method",
                                                               "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &result,
                                                               z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method", "wrong return type"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "va_list *"},
+        {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -672,11 +622,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, object_from_local_scope)
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {% endif %}
-        {"...", "va_list *"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}", testLines);
@@ -841,12 +786,12 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_env)
 {% if type == "void" %}
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(nullptr, object_, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:", args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(nullptr, object_, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:{{ ret }}", &result, args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -854,22 +799,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_env)
         {"object", "ani_object"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {"args", "const ani_value *"},
-        {% else %}
-        {"args", "const ani_value *"},
-        {% endif %}
-        {"[0]", "ani_boolean"},
-        {"[1]", "ani_char"},
-        {"[2]", "ani_byte"},
-        {"[3]", "ani_short"},
-        {"[4]", "ani_int"},
-        {"[5]", "ani_long"},
-        {"[6]", "ani_float"},
-        {"[7]", "ani_double"},
-        {"[8]", "ani_ref"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}_A", testLines);
@@ -880,26 +809,19 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_object_0)
 {% if type == "void" %}
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, nullptr, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:", args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, nullptr, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:{{ ret }}", &result, args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *"},
-        {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {"args", "const ani_value *"},
-        {% else %}
-        {"args", "const ani_value *"},
-        {% endif %}
+        {"signature", "const char *"}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}_A", testLines);
@@ -925,13 +847,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_object_1)
         {"object", "ani_object", "wrong reference type: null"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {"args", "const ani_value *"},
-        {% else %}
-        {"args", "const ani_value *"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}_A", testLines);
@@ -959,16 +874,14 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_result)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, object_, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:{{ ret }}",
                                                                 nullptr, args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
-        {"args", "const ani_value *"},
+        {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -991,15 +904,13 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_args)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, object_, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:",
                                                                 nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
-        {"args", "const ani_value *", "wrong arguments value"},
+        {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on
 {% else %}
@@ -1007,16 +918,14 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_args)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, object_, "{{ type }}Method",
                                                                 "zcbsilfdC{std.core.String}:{{ ret }}",
                                                                 &result, nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"args", "const ani_value *", "wrong arguments value"},
+        {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on
 {% endif %}
@@ -1043,13 +952,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_{{ type }}_arg)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"args", "const ani_value *", "wrong method arguments"},
+        {"args", "ani_value *", "wrong method arguments"},
         {"[0]", "ani_boolean", "wrong value"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -1071,25 +978,23 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_return_type)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, object_, "{{ wrong_ret }}Method",
                                                                 "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}",
                                                                 args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_{{ Type }}_A(env_, object_, "{{ wrong_ret }}Method",
                                                                 "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &result,
                                                                 args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *"},
-        {"signature", "const char *"},
         {"method", "ani_method", "wrong return type"},
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"args", "const ani_value *"},
+        {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -1141,13 +1046,6 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, object_from_local_scope)
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"method", "ani_method"},
-        {% if type != "void" %}
-        {"result", "ani_{{ type }} *"},
-        {"args", "const ani_value *"},
-        {% else %}
-        {"args", "const ani_value *"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethodByName_{{ Type }}_A", testLines);

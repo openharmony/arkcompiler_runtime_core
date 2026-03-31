@@ -22,7 +22,7 @@ class WeakReferenceCreateTest : public VerifyAniTest {};
 TEST_F(WeakReferenceCreateTest, wrong_ref)
 {
     ani_wref wref {};
-    ASSERT_EQ(env_->c_api->WeakReference_Create(env_, nullptr, &wref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->WeakReference_Create(env_, nullptr, &wref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},
@@ -36,7 +36,7 @@ TEST_F(WeakReferenceCreateTest, wrong_result)
     ani_ref ref {};
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->WeakReference_Create(env_, ref, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->WeakReference_Create(env_, ref, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},

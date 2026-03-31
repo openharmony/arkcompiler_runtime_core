@@ -30,7 +30,7 @@ TEST_F(FindNamespaceTest, find_namespace_success)
 TEST_F(FindNamespaceTest, find_namespace_wrong_descriptor)
 {
     ani_namespace result {};
-    ASSERT_EQ(env_->FindNamespace(nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FindNamespace(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> nullDescriptorLines {
         {"env", "ani_env *"},
         {"namespace_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
@@ -49,7 +49,7 @@ TEST_F(FindNamespaceTest, find_namespace_wrong_descriptor)
 
 TEST_F(FindNamespaceTest, find_namespace_wrong_result_storage)
 {
-    ASSERT_EQ(env_->FindNamespace("verify_find_namespace_test.Ns", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->FindNamespace("verify_find_namespace_test.Ns", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> namespaceLines {
         {"env", "ani_env *"},
         {"namespace_descriptor", "const char *"},

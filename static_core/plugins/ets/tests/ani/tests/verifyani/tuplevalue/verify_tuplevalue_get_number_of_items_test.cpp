@@ -39,7 +39,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_env)
     ani_tuple_value tupleValue = GetPrimitiveTuple();
     ani_size result = 0U;
 
-    ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, tupleValue, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, tupleValue, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"tuple_value", "ani_tuple_value"},
@@ -51,7 +51,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_env)
 TEST_F(TupleValueGetNumberOfItemsTest, wrong_tuple)
 {
     ani_size result = 0U;
-    ASSERT_EQ(env_->TupleValue_GetNumberOfItems(nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->TupleValue_GetNumberOfItems(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value", "wrong reference"},
@@ -161,7 +161,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_result)
 {
     ani_tuple_value tupleValue = GetPrimitiveTuple();
 
-    ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value"},
@@ -172,7 +172,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_result)
 
 TEST_F(TupleValueGetNumberOfItemsTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"tuple_value", "ani_tuple_value", "wrong reference"},
@@ -187,7 +187,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, throw_error)
     ThrowError();
 
     ani_size result = 0U;
-    ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
+    ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"tuple_value", "ani_tuple_value"},

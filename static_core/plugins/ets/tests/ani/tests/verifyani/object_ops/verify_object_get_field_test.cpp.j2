@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -84,7 +84,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(nullptr, object_, field, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(nullptr, object_, field, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -103,7 +103,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_object_0)
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, nullptr, field, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, nullptr, field, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -180,7 +180,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_field_2)
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_{{ type }}.Parent", &object_);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, nullptr, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -198,7 +198,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_result)
     ani_field field {};
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, field, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, field, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -212,7 +212,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_result)
 
 TEST_F(ObjectGetField{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},

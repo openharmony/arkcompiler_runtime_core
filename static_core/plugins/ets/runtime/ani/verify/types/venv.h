@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
@@ -53,12 +54,16 @@ public:
     [[nodiscard]] std::optional<PandaString> DestroyLocalScope();
     void CreateEscapeLocalScope();
     [[nodiscard]] std::optional<PandaString> DestroyEscapeLocalScope(VRef *vref);
+    // Stack refs
+    bool IsValidStackVerifiedRef(VRef *vref);
 
     // Local refs
     template <class RefType>
     auto AddLocalVerifiedRef(RefType ref);
 
     void DeleteLocalVerifiedRef(VRef *vref);
+
+    bool IsValidLocalVerifiedRef(VRef *vref);
 
     VMethod *GetVerifiedMethod(ani_method method);
 
@@ -77,10 +82,15 @@ public:
     void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
+    // Weak refs
+    VWRef *AddVerifiedWeakRef(ani_wref wref);
+    void DeleteVerifiedWeakRef(VWRef *vwref);
+    bool IsValidWeakRef(VWRef *vwref);
+
     // Global resolvers
     VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
-    void DeleteGlobalVerifiedResolver(VResolver *vresolver);
-    bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
+    void DeleteGlobalResolver(VResolver *vresolver);
+    bool IsValidGlobalResolver(VResolver *vresolver);
 
 private:
     explicit VEnv(ani_env *ownerEnv) : ani_env(), ownerEnv_(ownerEnv)
