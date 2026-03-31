@@ -603,3 +603,41 @@ cases:
       const instance = new MultiGenericChild<number, string>("100", "hundred");
       const result = instance.getFirst();
       arktest.assertEQ(result, "100");
+
+  - desc: Deeply nested generic type argument with overloaded constructors exercises vtable builder for Container<OuterList<InnerList<string>>>.
+    decl: |-
+      class OuterList<T> extends Array<T> {
+        add(item: T): void {
+          this.push(item);
+        }
+      }
+
+      class InnerList<T> extends Array<T> {
+        add(item: T): void {
+          this.push(item);
+        }
+      }
+
+      class Container<T> extends OuterList<T> {
+        constructor(t: T, s: InnerList<string>) {
+          super();
+          s.add("ctor1");
+        }
+
+        constructor(s: InnerList<string>, t: T) {
+          super();
+          s.add("ctor2");
+        }
+      }
+    logic: |-
+      let log1 = new InnerList<string>();
+      let outer1 = new OuterList<InnerList<string>>();
+      new Container<OuterList<InnerList<string>>>(outer1, log1);
+      arktest.assertEQ(log1.length as int, 1);
+      arktest.assertEQ(log1[0], "ctor1");
+
+      let log2 = new InnerList<string>();
+      let outer2 = new OuterList<InnerList<string>>();
+      new Container<OuterList<InnerList<string>>>(log2, outer2);
+      arktest.assertEQ(log2.length as int, 1);
+      arktest.assertEQ(log2[0], "ctor2");
