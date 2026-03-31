@@ -116,6 +116,26 @@ enum class MemoryReduceDegree : uint8_t {
 
 using HeapVisitor = const std::function<void(BaseObject *)>;
 
+class GCListener {
+public:
+    GCListener() = default;
+
+    virtual void OnGCStart(GCReason reason, GCType type) = 0;
+    virtual void OnGCFinish(GCReason reason, GCType type) = 0;
+    virtual void OnGCPhaseStart(GCPhase phase) = 0;
+    virtual void OnGCPhaseEnd(GCPhase phase) = 0;
+
+    virtual ~GCListener() = default;
+
+    // No copy
+    GCListener(const GCListener &) = delete;
+    GCListener &operator=(const GCListener &) = delete;
+
+    // No move
+    GCListener(GCListener &&) = delete;
+    GCListener &operator=(GCListener &&) = delete;
+};
+
 class PUBLIC_API BaseRuntime {
 public:
     BaseRuntime() = default;
@@ -135,6 +155,9 @@ public:
     bool RegisterVM(VMInterface *vm);
     bool UnregisterVM(VMInterface *vm);
     void ForEachVM(std::function<void(VMInterface *)> action);
+
+    void AddGCListener(GCListener *listener);
+    void RemoveGCListener(GCListener *listener);
 
     // Need refactor, move to other file
     static void WriteRoot(void *obj);
@@ -223,8 +246,8 @@ private:
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
-    std::unordered_set<VMInterface *> vmIfaces;
-    std::shared_mutex vmIfacesLock;
+    std::unordered_set<VMInterface *> vmIfaces_;
+    std::shared_mutex vmIfacesLock_;
 };
 }  // namespace common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H

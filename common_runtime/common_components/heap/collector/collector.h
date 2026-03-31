@@ -28,6 +28,7 @@
 #include "common_components/heap/collector/gc_stats.h"
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/base/runtime_param.h"
+#include "common_interfaces/base_runtime.h"
 
 namespace common_vm {
 enum CollectorType {
@@ -99,6 +100,24 @@ public:
         return obj;
     };
 
+    void AddGCListener(GCListener *listener)
+    {
+        std::lock_guard gcListenersLock(gcListenersLock_);
+        gcListeners_.push_back(listener);
+    }
+
+    void RemoveGCListener(GCListener *listener)
+    {
+        std::lock_guard gcListenersLock(gcListenersLock_);
+        gcListeners_.erase(std::remove(gcListeners_.begin(), gcListeners_.end(), listener), gcListeners_.end());
+    }
+
+    void NotifyGCListeners(std::function<void(GCListener *)> notifier)
+    {
+        std::lock_guard gcListenersLock(gcListenersLock_);
+        std::for_each(gcListeners_.begin(), gcListeners_.end(), notifier);
+    }
+
 protected:
     virtual void RequestGCInternal(GCReason, bool, GCType)
     {
@@ -108,6 +127,9 @@ protected:
 
     CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
     std::atomic<GCPhase> gcPhase_ = { GCPhase::GC_PHASE_IDLE };
+private:
+    std::vector<GCListener *> gcListeners_;
+    std::mutex gcListenersLock_;
 };
 } // namespace common_vm
 

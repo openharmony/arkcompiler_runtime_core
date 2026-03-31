@@ -847,8 +847,29 @@ void ArkCollector::CollectGarbageWithXRef()
     GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
 }
 
+class GCTracer final {
+public:
+    GCTracer(GCReason reason, GCType type) : gcReason_(reason), gcType_(type)
+    {
+        Heap::GetHeap().GetCollector().NotifyGCListeners([reason, type] (GCListener *l) {
+            l->OnGCStart(reason, type);
+        });
+    }
+
+    ~GCTracer()
+    {
+        Heap::GetHeap().GetCollector().NotifyGCListeners([reason = gcReason_, type = gcType_] (GCListener *l) {
+            l->OnGCFinish(reason, type);
+        });
+    }
+private:
+    GCReason gcReason_;
+    GCType gcType_;
+};
+
 void ArkCollector::DoGarbageCollection()
 {
+    GCTracer gcTracer(gcReason_, gcType_);
     const bool isNotYoungGC = gcReason_ != GCReason::GC_REASON_YOUNG;
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::DoGarbageCollection", "");
     if (gcReason_ == GCReason::GC_REASON_XREF) {

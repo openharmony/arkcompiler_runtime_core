@@ -259,7 +259,14 @@ public:
 
     void TransitionToGCPhase(const GCPhase phase, const bool)
     {
+        const auto currentPhase = Heap::GetHeap().GetGCPhase();
+        Heap::GetHeap().GetCollector().NotifyGCListeners([currentPhase] (GCListener *l) {
+            l->OnGCPhaseEnd(currentPhase);
+        });
         MutatorManager::Instance().TransitionAllMutatorsToGCPhase(phase);
+        Heap::GetHeap().GetCollector().NotifyGCListeners([phase] (GCListener *l) {
+            l->OnGCPhaseStart(phase);
+        });
     }
 
     GCStats& GetGCStats() override { return collectorResources_.GetGCStats(); }

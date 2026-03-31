@@ -112,11 +112,25 @@ static void ProcessFinalizationRegistryCleanup()
     vm->GetFinalizationRegistryManager()->LaunchCleanupJobIfNeeded(executionCtx);
 }
 
+// Temporary solution. Without changes under static_core directory CI 'Panda' tests group won't run
+class DummyGCListener final : public common_vm::GCListener {
+public:
+    void OnGCStart(common_vm::GCReason reason, common_vm::GCType type) override {}
+    void OnGCFinish(common_vm::GCReason reason, common_vm::GCType type) override {}
+    void OnGCPhaseStart(common_vm::GCPhase phase) override {}
+    void OnGCPhaseEnd(common_vm::GCPhase phase) override {}
+    ~DummyGCListener()
+    {
+        common_vm::BaseRuntime::GetInstance()->RemoveGCListener(this);
+    }
+};
+
 class StaticVMInterface : public common_vm::VMInterface {
 public:
-    StaticVMInterface()
+    StaticVMInterface() : dummyGCListener_(new DummyGCListener())
     {
         common_vm::BaseRuntime::GetInstance()->RegisterVM(this);
+        common_vm::BaseRuntime::GetInstance()->AddGCListener(dummyGCListener_.get());
     }
 
     ~StaticVMInterface() override
@@ -150,6 +164,9 @@ public:
     }
 
     void VisitPreforwardRoots([[maybe_unused]] const common_vm::RefFieldVisitor &visitor) override {}
+
+private:
+    std::unique_ptr<DummyGCListener> dummyGCListener_;
 };
 
 common_vm::VMInterface *RegisterCmcGcCallbacks()
