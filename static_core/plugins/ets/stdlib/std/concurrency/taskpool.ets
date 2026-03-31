@@ -844,12 +844,10 @@ export namespace taskpool {
                 }
                 // Notify waiting workers using condition variable
                 ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
-                    this.callUserCallback(this.onEnqueueCallback);
                     ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
                 });
-            } else {
-                this.callUserCallback(this.onEnqueueCallback);
-            }
+            } 
+            this.callUserCallback(this.onEnqueueCallback);
         }
 
         /**
