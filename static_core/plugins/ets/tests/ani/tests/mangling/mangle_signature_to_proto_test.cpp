@@ -242,9 +242,7 @@ TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_Invalid)
     CheckInvalidSignatureParsing("C{a:b:");
     CheckInvalidSignatureParsing("C{std:core:Object}:");
     CheckInvalidSignatureParsing("E{a:b:c.Color}:");
-    CheckInvalidSignatureParsing("P{a:b:c.X}:");
     CheckInvalidSignatureParsing("E{a:b:c:d.Color}:");
-    CheckInvalidSignatureParsing("P{std:foo:bar:X}:");
     CheckInvalidSignatureParsing("{:}:");
     CheckInvalidSignatureParsing("C{std:core:Object}C{a:b:c}:");
     CheckInvalidSignatureParsing("C{a:b:c}C{d:e:f}:");

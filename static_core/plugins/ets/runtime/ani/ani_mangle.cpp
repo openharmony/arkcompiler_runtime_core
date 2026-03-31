@@ -118,11 +118,8 @@ static size_t ParseArrayBody(const std::string_view data, PandaString &str)
     return sizeof('{') + size + sizeof('}');
 }
 
-static size_t ParseBody(char type, const std::string_view data, PandaString &str)
+static size_t ParseBody(const std::string_view data, PandaString &str)
 {
-    ASSERT(type != 'A');
-    ASSERT(type != 'X');
-
     if (data.size() < MIN_BODY_SIZE || data[0] != '{') {
         return std::string_view::npos;
     }
@@ -144,11 +141,6 @@ static size_t ParseBody(char type, const std::string_view data, PandaString &str
             return std::string_view::npos;
         }
         str.push_back(dataNorm[pos] == '.' ? '/' : dataNorm[pos]);
-    }
-    if (type == 'P') {
-        // e.g. "La/b/c/X;" -> "La/b/c/%%partial-X;"
-        size_t lastPos = str.find_last_of('/') + 1;
-        str.replace(lastPos, str.length(), "%%partial-" + str.substr(lastPos));
     }
     str.push_back(';');
     return end + 1;
@@ -173,8 +165,7 @@ static size_t ParseType(char type, const std::string_view data, PandaString &str
         case 'A': bodySize = ParseArrayBody(data.substr(1), str); break;
         case 'X': bodySize = ParseUnionBody(data.substr(1), str); break;
         case 'C':
-        case 'E':
-        case 'P': bodySize = ParseBody(type, data.substr(1), str); break;
+        case 'E': bodySize = ParseBody(data.substr(1), str); break;
         default:
             // The 'descriptor' does not match the expected format
             return std::string_view::npos;
@@ -232,7 +223,6 @@ static EtsType GetTypeByFirstChar(char c)
         case 'X':
         case 'C':
         case 'E':
-        case 'P':
             return EtsType::OBJECT;
         case 'z':
             return EtsType::BOOLEAN;
