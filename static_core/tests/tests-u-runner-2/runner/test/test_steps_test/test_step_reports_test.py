@@ -131,7 +131,7 @@ step: Step status: status"""
             status="status"
         )
         report2 = StepReport(
-            name="step2",
+            name="step1",
             command_line="cmd",
             cmd_output="output",
             cmd_error="error",
