@@ -31,6 +31,7 @@ class MTThreadManager;
 
 namespace test {
 class ThreadTest;
+class StackOverflowTest;
 }  // namespace test
 namespace tooling {
 class PtThreadInfo;
@@ -130,6 +131,16 @@ public:
                        : fp;
         }
         return fp;
+    }
+
+    uintptr_t GetNativeStackBegin() const
+    {
+        return nativeStackBegin_;
+    }
+
+    size_t GetNativeStackProtectedSize() const
+    {
+        return nativeStackProtectedSize_;
     }
 
     bool IsCurrentFrameCompiled() const
@@ -940,6 +951,7 @@ private:
     uint32_t unwindingDepth_ {0};
 
     friend class ark::test::ThreadTest;
+    friend class ark::test::StackOverflowTest;
     friend class ark::MTThreadManager;
 
     // Used in mathod events

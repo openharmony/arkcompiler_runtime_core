@@ -60,11 +60,16 @@ ark_runtime_unittest("arkruntime_profile_merger_test") {
   module_out_path = runtime_test_module_out_path
 }
 
+ark_runtime_unittest("arkruntime_stack_overflow_test") {
+  sources = [ "stack_overflow_test.cpp" ]
+  module_out_path = runtime_test_module_out_path
+}
+
 ark_unittest_group("runtime_tests") {
   deps = [
     ":arkruntime_pgo_class_context_utils_test",
     ":arkruntime_get_method_test",
     ":arkruntime_memory_management_test",
-    ":arkruntime_profile_merger_test",
+    ":arkruntime_stack_overflow_test",
   ]
 }
