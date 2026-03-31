@@ -1,0 +1,224 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const elementsNum: int = 10;
+const stressNum: int = 100;
+let f1: int | undefined = 0;
+let f2: int | undefined = 0;
+
+let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(200);
+
+function main(): int {
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetFirstTest");
+
+    ArrayBlockingQueueTestsuite.addTest("GetFirstTest001", () =>
+    {
+        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(200);
+        for (let i = 0; i < elementsNum; i++) {
+            arktest.assertTrue(queueInt.add(i));
+        }
+        let res = queueInt.getFirst();
+        arktest.assertEQ(res, 0);
+        arktest.assertFalse(queueInt.isEmpty());
+        arktest.assertEQ(queueInt.size, elementsNum);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTest002", async () =>
+    {
+        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(200);
+        for (let i = 0; i < elementsNum; i++) {
+            arktest.assertTrue(queueInt.add(i));
+        }
+        await queueInt.pop();
+        let res = queueInt.getFirst();
+        arktest.assertEQ(res, 1);
+        arktest.assertFalse(queueInt.isEmpty());
+        arktest.assertEQ(queueInt.size, elementsNum - 1);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstAndSizeAndPopAndPollTest009", async () =>
+    {
+        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(200);
+        for (let i = 0; i < 10; i++) {
+            queueInt.add(i);
+        }
+        arktest.assertEQ(queueInt.getFirst(), 0);
+        for (let i = 10; i < 20; i++) {
+            await queueInt.push(i);
+        }
+        arktest.assertEQ(queueInt.getFirst(), 0);
+        for (let i = 0; i < 10; i++) {
+            arktest.assertEQ(queueInt.size, 20 - i);
+            await queueInt.pop();
+        }
+        arktest.assertEQ(queueInt.getFirst(), 10);
+        for (let i = 0; i < 10; i++) {
+            arktest.assertEQ(queueInt.size, 10 - i);
+            queueInt.poll();
+        }
+        arktest.assertEQ(queueInt.size, 0);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstAndIsEmptyAndPopAndPollTest010", async () =>
+    {
+        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(200);
+        for (let i = 0; i < 10; i++) {
+            queueInt.add(i);
+        }
+        arktest.assertEQ(queueInt.getFirst(), 0);
+        for (let i = 10; i < 20; i++) {
+            await queueInt.push(i);
+        }
+        arktest.assertFalse(queueInt.isEmpty());
+        arktest.assertEQ(queueInt.getFirst(), 0);
+        for (let i = 0; i < 10; i++) {
+            await queueInt.pop();
+        }
+        arktest.assertEQ(queueInt.getFirst(), 10);
+        for (let i = 0; i < 10; i++) {
+            queueInt.poll();
+        }
+        arktest.assertTrue(queueInt.isEmpty());
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstStressTest005", async () =>
+    {
+        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(stressNum);
+        for (let i = 0; i < stressNum; i++) {
+            queueInt.add(i);
+        }
+        for (let i = 0; i < stressNum; i++) {
+            arktest.assertEQ(queueInt.getFirst(), i);
+            await queueInt.pop();
+        }
+        arktest.assertEQ(queueInt.size, 0);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTestInt001", async () =>
+    {
+        while (!queueInt.isEmpty()) {
+            let el = queueInt.getFirst();
+            arktest.assertEQ(el, await queueInt.pop());
+        }
+        let frontNum = 0;
+        for (let i: int = 0; i < elementsNum; ++i) {
+            let el = (random() * 10000).toInt();
+            await queueInt.push(el);
+            if (i == 0) {
+                frontNum = el;
+            }
+        }
+        arktest.assertEQ(queueInt.getFirst(), frontNum);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTestInt002", async () =>
+    {
+        while (!queueInt.isEmpty()) {
+            let el = queueInt.getFirst();
+            arktest.assertEQ(el, await queueInt.pop());
+        }
+        let p1 = launch(queueIntGetFirstdata);
+        let frontNum: int = 10;
+        await queueInt.push(frontNum);
+        p1.Await();
+        arktest.assertEQ(queueInt.size, 1);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTestInt003", async () =>
+    {
+        while (!queueInt.isEmpty()) {
+            await queueInt.pop();
+        }
+        for (let i: int = 0; i < elementsNum; ++i) {
+            await queueInt.push(i);
+        }
+        arktest.assertEQ(queueInt.size, elementsNum);
+        while (!queueInt.isEmpty()) {
+            let el = queueInt.getFirst();
+            arktest.assertEQ(el, await queueInt.pop());
+        }
+        arktest.assertEQ(queueInt.size, 0);
+        let p1 = launch(queueIntGetFirstdata);
+        let frontNum: int = 10;
+        await queueInt.push(frontNum);
+        p1.Await();
+        arktest.assertEQ(queueInt.size, 1);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTestInt004", async () =>
+    {
+        while (!queueInt.isEmpty()) {
+            queueInt.pop();
+        }
+        let p1 = launch(queueIntGetFirstF1data);
+        await queueInt.push(10);
+        await queueInt.push(20);
+        p1.Await();
+        let p2 = launch(queueIntGetEndB1data);
+        p2.Await();
+        arktest.assertEQ(queueInt.size, 2);
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTestInt005", async () =>
+    {
+        f1 = 0;
+        f2 = 0;
+        while (!queueInt.isEmpty()) {
+            await queueInt.pop();
+        }
+        arktest.assertTrue(queueInt.isEmpty());
+        let p1 = queueIntAddTwodata();
+        let p2 = launch(queueIntGetFirstF1data);
+        let p3 = launch(queueIntGetFirstF2data);
+        await p1;
+        p2.Await();
+        p3.Await();
+        arktest.assertTrue(f1 == 10 || f1 == undefined);
+        arktest.assertTrue(f2 == 10 || f2 == undefined);
+        arktest.assertFalse(queueInt.isEmpty());
+    });
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetFirstTestInt006", async () =>
+    {
+        while (!queueInt.isEmpty()) {
+            await queueInt.pop();
+        }
+        await queueInt.push(10);
+        await queueInt.push(30);
+        let p1 = launch(queueIntGetFirstdata);
+        await queueInt.push(20);
+        p1.Await();
+        let p2 = launch(queueIntGetFirstdata);
+        p2.Await();
+        arktest.assertEQ(queueInt.getFirst(), 10);
+    });
+
+    return ArrayBlockingQueueTestsuite.run();
+}
+
+function queueIntGetEnddata() {
+    queueInt.getEnd();
+}
+
+function queueIntGetEndB1data() {
+    queueInt.getEnd();
+}
+
+function queueIntGetFirstF1data() {
+    f1 = queueInt.getFirst();
+}
+
+function queueIntGetFirstF2data() {
+    f2 = queueInt.getFirst();
+}
+
+async function queueIntAddTwodata() {
+    await queueInt.push(10);
+    await queueInt.push(20);
+}
+
+function queueIntGetFirstdata() {
+    queueInt.getFirst();
+}
