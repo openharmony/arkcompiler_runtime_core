@@ -488,9 +488,9 @@ napi_value XRefObjectOperator::GetNapiValue(EtsExecutionContext *executionCtx) c
     // get it from there
     ASSERT_MANAGED_CODE();
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    if (UNLIKELY(storage->HasReference(this->etsObject_.GetPtr(), env))) {
-        auto jsObject = storage->GetJsObject(this->etsObject_.GetPtr(), env);
-        return jsObject;
+    napi_value result;
+    if (UNLIKELY(storage->GetJsObject(this->etsObject_.GetPtr(), env, &result))) {
+        return result;
     }
 
     // 3. otherwise, we assume that it is a jsvalue object,
