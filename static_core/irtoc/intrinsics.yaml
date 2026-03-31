@@ -123,6 +123,20 @@ intrinsics:
     args: [ void*, void* ]
   clear_flags: [require_state, can_throw, heap_inv]
 
+- name: InitInterpreterCallRecordForLLVM
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: EmitInitInterpreterCallRecordForLLVMIntrinsic
+  codegen_virt: true
+  llvm_codegen_func: EmitInitInterpreterCallRecordForLLVM
+  signature:
+    ret: void
+    args: [ void*, void* ]
+  clear_flags: [require_state, can_throw, heap_inv]
+
 - name: PushInterpreterCallRecord
   class_name: Irtoc
   method_name:
@@ -133,7 +147,7 @@ intrinsics:
   codegen_virt: true
   llvm_codegen_func: EmitPushInterpreterCallRecord
   signature:
-    ret: void
+    ret: u8
     args: [ void*, void* ]
   clear_flags: [require_state, can_throw, heap_inv]
 
@@ -177,6 +191,20 @@ intrinsics:
   signature:
     ret: void
     args: [ u32 ]
+  clear_flags: [require_state, can_throw, heap_inv]
+
+- name: AllocateInterpreterCallRecords
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: EmitAllocateInterpreterCallRecordsIntrinsic
+  codegen_virt: true
+  llvm_codegen_func: EmitAllocateInterpreterCallRecords
+  signature:
+    ret: void
+    args: []
   clear_flags: [require_state, can_throw, heap_inv]
 
 - name: LoadAcquireMarkWordExclusive

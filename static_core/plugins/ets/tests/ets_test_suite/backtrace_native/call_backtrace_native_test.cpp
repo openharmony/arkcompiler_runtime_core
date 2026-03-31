@@ -14,7 +14,6 @@
  */
 #include <gtest/gtest.h>
 #include <cstdint>
-#include <filesystem>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -48,8 +47,7 @@ TEST_F(BackTraceNativeTest, BackTraceNativeTestCase)
     }
     auto pandafile = std::getenv("ARK_GTEST_ABC_PATH");
     if (pandafile == nullptr) {
-        LOG(FATAL, TOOLING)
-            << "ARK_ETS_GTEST_ABC_PATH env variable should be set and point to call_backtrace_native.abc";
+        LOG(FATAL, TOOLING) << "ARK_GTEST_ABC_PATH env variable should be set and point to call_backtrace_native.abc";
     }
     options.SetBootPandaFiles({stdlib});
     options.SetPandaFiles({pandafile});

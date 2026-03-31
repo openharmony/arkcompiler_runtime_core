@@ -49,10 +49,12 @@ private:
     bool EmitExclusiveStoreWithRelease(Inst *inst);
     bool EmitInterpreterReturn(Inst *inst);
     bool EmitInitInterpreterCallRecord(Inst *inst);
+    bool EmitInitInterpreterCallRecordForLLVM(Inst *inst);
     bool EmitPushInterpreterCallRecord(Inst *inst);
     bool EmitPopInterpreterCallRecord(Inst *inst);
     bool EmitPopMultipleInterpreterCallRecords(Inst *inst);
     bool EmitUpdateInterpreterCallRecord(Inst *inst);
+    bool EmitAllocateInterpreterCallRecords(Inst *inst);
     bool EmitTailCall(Inst *inst);
     bool EmitCompressEightUtf16ToUtf8CharsUsingSimd(Inst *inst);
     bool EmitCompressSixteenUtf16ToUtf8CharsUsingSimd(Inst *inst);

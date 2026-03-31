@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,8 +16,8 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-# NOTE: Disable llvm because mix-stack not support llvm backend.
-if (PANDA_LLVM_BACKEND)
+# NOTE: LLVM interpreter backtrace currently only supports PANDA_TARGET_ARM64.
+if (PANDA_LLVM_INTERPRETER AND NOT PANDA_TARGET_ARM64)
     return()
 endif()
 

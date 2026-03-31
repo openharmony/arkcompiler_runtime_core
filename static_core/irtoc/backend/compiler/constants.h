@@ -25,6 +25,7 @@ namespace ark::compiler {
  *  Should be synced with spills_count_max in interpreter.irt
  */
 constexpr size_t IRTOC_NUM_SPILL_SLOTS = 32;
+constexpr size_t TOTAL_RECORD_SLOTS = 128;
 
 constexpr auto IRTOC_CFRAME_LAYOUT_X86_64 = CFrameLayout {Arch::X86_64, IRTOC_NUM_SPILL_SLOTS};
 constexpr auto IRTOC_CFRAME_LAYOUT_AARCH64 = CFrameLayout {Arch::AARCH64, IRTOC_NUM_SPILL_SLOTS};

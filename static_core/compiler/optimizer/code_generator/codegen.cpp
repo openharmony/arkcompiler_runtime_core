@@ -401,6 +401,13 @@ void Codegen::EmitInitInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicI
     GetEncoder()->SetFalseResult();
 }
 
+void Codegen::EmitInitInterpreterCallRecordForLLVMIntrinsic([[maybe_unused]] IntrinsicInst *inst,
+                                                            [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
 void Codegen::EmitPushInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
                                                      [[maybe_unused]] SRCREGS src)
 {
@@ -424,6 +431,13 @@ void Codegen::EmitPopMultipleInterpreterCallRecordsIntrinsic([[maybe_unused]] In
 
 void Codegen::EmitUpdateInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
                                                        [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitAllocateInterpreterCallRecordsIntrinsic([[maybe_unused]] IntrinsicInst *inst,
+                                                          [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
 {
     ASSERT(0);
     GetEncoder()->SetFalseResult();

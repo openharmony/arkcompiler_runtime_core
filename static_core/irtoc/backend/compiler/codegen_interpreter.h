@@ -98,8 +98,47 @@ public:
         enc->EncodeSti(INITIAL_COUNT, sizeof(uint32_t), MemRef(sp, 2 * pointerSize));  // 2 : Offset of counter from SP
     }
 
-    void EmitPushInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
-                                                SRCREGS src) override
+    void EmitInitInterpreterCallRecordForLLVMIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                       SRCREGS src) override
+    {
+        auto *enc = GetEncoder();
+        auto sp = SpReg();
+        ssize_t pointerSize = PointerSize(GetArch());
+        /*
+         * Layout for LLVM record space (64 records, each 16 bytes):
+         * Metadata    [    offset -16    ]:  record_num (8 bytes) + counter (8 bytes)
+         * Record 0-62 [offset -32 ~ -1024]:  method (8 bytes) + pc (8 bytes)
+         *
+         * Total: 64 * 16 = 1024 bytes allocated
+         * [-1]   record_num 63
+         * [-2]   counter
+         * [-3]   void*    bytecode PC of 1st call record
+         * [-4]   void*    method of 1st call record
+         * [-5]   reserved for record
+         * [..]   reserved for record
+         * [-127] reserved for record
+         * [-128] reserved for record            <------- New SP (at offset -1024)
+         * ...(will be use for Irtoc-LLVM HANDLE)
+         */
+        if (GetArch() == Arch::AARCH64) {
+            constexpr ssize_t PER_METADATA_SLOTS = 2;
+            constexpr ssize_t INIT_SLOTS = 4;
+            constexpr uint32_t INITIAL_COUNT = 1U;
+            constexpr uint32_t INITIAL_RECORDS_NUMBER = 63U;
+            static_assert(TOTAL_RECORD_SLOTS == 2 * INITIAL_RECORDS_NUMBER + PER_METADATA_SLOTS);
+
+            enc->EncodeStpPreIndex(src[0], src[1], sp, Imm(-INIT_SLOTS * pointerSize));
+
+            enc->EncodeSti(INITIAL_COUNT, sizeof(uint32_t), MemRef(sp, PER_METADATA_SLOTS * pointerSize));
+            enc->EncodeSti(INITIAL_RECORDS_NUMBER, sizeof(uint32_t),
+                           MemRef(sp, (PER_METADATA_SLOTS + 1) * pointerSize));
+
+            // Allocate remaining record space
+            enc->EncodeAdd(sp, sp, Imm(-static_cast<ssize_t>((TOTAL_RECORD_SLOTS - INIT_SLOTS) * pointerSize)));
+        }
+    }
+
+    void EmitPushInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src) override
     {
         auto *enc = GetEncoder();
         ssize_t pointerSize = PointerSize(GetArch());
@@ -116,6 +155,9 @@ public:
         enc->EncodeLdr(temp, false, MemRef {FpReg(), countOffset});
         enc->EncodeAdd(temp, temp, Imm(1));
         enc->EncodeStr(temp, MemRef {FpReg(), countOffset});
+
+        // need_more_records is always 0 on IRTOC.
+        enc->EncodeMov(dst, Imm(0));
     }
 
     void EmitPopInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
