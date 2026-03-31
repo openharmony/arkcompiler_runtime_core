@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -83,14 +83,20 @@ class HookRegistry(metaclass=Singleton):
         return self
 
     def run_before_unit(self, bu: BenchUnit) -> None:
-        for hook in self.__b_u_hooks:
-            log.debug('Run before-unit hook: %s', hook.name)
-            hook.before_unit(bu)
+        try:
+            for hook in self.__b_u_hooks:
+                log.debug('Run before-unit hook: %s', hook.name)
+                hook.before_unit(bu)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            log.error(e)
 
     def run_after_unit(self, bu: BenchUnit) -> None:
-        for hook in self.__a_u_hooks:
-            log.debug('Run after-unit hook: %s', hook.name)
-            hook.after_unit(bu)
+        try:
+            for hook in self.__a_u_hooks:
+                log.debug('Run after-unit hook: %s', hook.name)
+                hook.after_unit(bu)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            log.error(e)
 
     def run_before_suite(self, platform: PlatformBase) -> None:
         try:
