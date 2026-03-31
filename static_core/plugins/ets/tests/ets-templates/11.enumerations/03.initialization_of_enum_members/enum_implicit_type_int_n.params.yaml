@@ -19,11 +19,6 @@ cases:
         params: all subsequent members must be explicitly initialized
     decl_variants:
       - |-
-          enum Enum { A = 5, B, C = A, D }
-      - |-
-          enum Enum1 { A = 5, B }
-          enum Enum2 { A = Enum1.A, B }
-      - |-
           const a: int = 5
           enum Enum { A = a, B }
       - |-
@@ -43,18 +38,14 @@ cases:
         enum Enum { A = 5, B, C, D = foo(), E = 11, F, G }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Syntax error ESY133690: If an initializer for an enumeration member is not a constant expression, then all subsequent members must be explicitly initialized."
       - |-
-        "Expected CTE output is unknown"
+        "Syntax error ESY133690: If an initializer for an enumeration member is not a constant expression, then all subsequent members must be explicitly initialized."
       - |-
-        "Expected CTE output is unknown"
+        "Syntax error ESY133690: If an initializer for an enumeration member is not a constant expression, then all subsequent members must be explicitly initialized."
       - |-
-        "Expected CTE output is unknown"
+        "Syntax error ESY133690: If an initializer for an enumeration member is not a constant expression, then all subsequent members must be explicitly initialized."
       - |-
-        "Expected CTE output is unknown"
-      - |-
-        "Expected CTE output is unknown"
-      - |-
-        "Expected CTE output is unknown"
+        "Syntax error ESY133690: If an initializer for an enumeration member is not a constant expression, then all subsequent members must be explicitly initialized."
     test_suffix: "asmmbei"
-    ids: "0-6"
+    ids: "0-4"

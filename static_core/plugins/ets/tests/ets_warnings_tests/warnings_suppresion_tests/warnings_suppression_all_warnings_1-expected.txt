@@ -1,0 +1,2 @@
+[warnings_suppression_all_warnings_1.ets:75:13] Warning W65000: The equality expression is always true.
+[warnings_suppression_all_warnings_1.ets:80:13] Warning W65000: The equality expression is always true.
