@@ -276,9 +276,6 @@
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_n_neg_18.ets
 07.expressions/06.object_literal/03.object_literal_of_record_type/spec_ex4.ets
 
-# 33206
-07.expressions/06.object_literal/03.object_literal_of_record_type/re_n_neg_19.ets
-
 #28898 Iterable refused as spread
 07.expressions/07.spread_expression/iterable0.ets
 07.expressions/07.spread_expression/iterable1.ets
