@@ -385,7 +385,10 @@ void Mutator::BindMutator()
 void Mutator::UnbindMutator()
 {
     DCHECK_CC(!IsInRunningState());
-    allocBuffer_ = nullptr;
+    if (allocBuffer_ != nullptr) {
+        reinterpret_cast<AllocationBuffer *>(allocBuffer_)->DecreaseRefCount();
+        allocBuffer_ = nullptr;
+    }
     auto &mutatorManager = MutatorManager::Instance();
     mutatorManager.UnbindMutator(*this);
 }
@@ -397,6 +400,7 @@ void Mutator::ReleaseAllocBuffer()
         auto buf = reinterpret_cast<AllocationBuffer *>(allocBuffer_);
         if (buf->DecreaseRefCount()) {
             buf->Unregister();
+            ThreadLocal::SetAllocBuffer(nullptr);
             delete buf;
         }
         allocBuffer_ = nullptr;
@@ -438,4 +442,4 @@ Mutator::TryBindMutatorScope::~TryBindMutatorScope()
     }
 }
 
-} // namespace common_vm
+}  // namespace common_vm
