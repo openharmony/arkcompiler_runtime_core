@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ function main(): int {
                  "The object before GC must be placed in young space");
         let addr_before_gc: long = GC.getObjectAddress(obj);
         // Run GC
-        let gc_id = GC.startGC(GC.Cause.MIXED);
+        let gc_id = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(gc_id);
         let addr_after_gc: long = GC.getObjectAddress(obj);
         arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED,
@@ -52,7 +52,7 @@ function main(): int {
         arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "The pinned array after GC must be placed in tenured space");
         let addr_before_gc: long = GC.getObjectAddress(obj);
         // Run GC
-        let gc_id = GC.startGC(GC.Cause.MIXED);
+        let gc_id = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(gc_id);
         let addr_after_gc: long = GC.getObjectAddress(obj);
         GC.unpinObject(obj);
