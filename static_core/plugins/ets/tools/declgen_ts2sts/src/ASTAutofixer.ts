@@ -2034,11 +2034,11 @@ export class Autofixer {
     }
 
     const nonInteropImportDeclarationStatements = node.statements.filter((stmt: ts.Statement): boolean => {
-      return !ts.isImportDeclaration(stmt) || isNonInteropImportDeclaration(stmt);
+      return !ts.isImportDeclaration(stmt) || isNonInteropImportDeclaration(stmt, this.typeChecker);
     });
 
     const interopImportDeclarations = node.statements.filter((stmt: ts.Statement): stmt is ts.ImportDeclaration => {
-      return ts.isImportDeclaration(stmt) && !isNonInteropImportDeclaration(stmt);
+      return ts.isImportDeclaration(stmt) && !isNonInteropImportDeclaration(stmt, this.typeChecker);
     });
 
     const interopImportDeclaration = createESInteropImportDeclaration(this.context);
@@ -3762,10 +3762,21 @@ function createESArrayTypeNode(
   );
 }
 
-function isNonInteropImportDeclaration(node: ts.ImportDeclaration): boolean {
+function isNonInteropImportDeclaration(node: ts.ImportDeclaration, typeChecker: ts.TypeChecker): boolean {
   const moduleSpecifier = node.moduleSpecifier;
   if (ts.isStringLiteral(moduleSpecifier) && moduleSpecifier.text === InteropSdkName) {
     return false;
+  }
+  const moduleSymbol = typeChecker.getSymbolAtLocation(moduleSpecifier);
+  if (moduleSymbol) {
+    const declarations = moduleSymbol.getDeclarations();
+    if (declarations?.length) {
+      const sourceFile = declarations[0].getSourceFile();
+      const importName = getBaseNameFromFilePath(sourceFile.fileName);
+      if (importName === InteropSdkName) {
+        return false;
+      }
+    }
   }
   return true;
 }
