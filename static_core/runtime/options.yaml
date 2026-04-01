@@ -290,6 +290,7 @@ options:
     - debug
     - debug-never
     - pause-time-goal-trigger
+    - cmc-gc
   description: Type of used GC trigger
 
 - name: log-detailed-gc-info-enabled
