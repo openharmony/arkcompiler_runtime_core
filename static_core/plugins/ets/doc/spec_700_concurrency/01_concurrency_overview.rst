@@ -1,0 +1,108 @@
+..
+    Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+|
+
+|LANG| provides a wide variety of means for writing programs that efficiently
+utilize hardware resources by running certain pieces of code in parallel and
+asynchronously.
+
+This chapter covers:
+
+- the |LANG| execution model
+- the semantics of *asynchronous*, *parallel* and *concurrent* code execution in
+  |LANG|
+- the language features and standard library API that provide the corresponding
+  functionality
+
+|
+
+.. _Execution model:
+
+Execution model
+***************
+
+.. meta:
+    frontend_status: Done
+
+A program in |LANG| defines one or more |C_JOBS| that are executed by the
+runtime environment. A |C_JOB| is a piece of code that can be executed
+concurrently (that is, either asynchronously or in parallel with other |C_JOBS|)
+and communicate its return value via the language provided mechanism. 
+
+Given that the target platform allows for parallel code execution, a |C_WORKER|
+is an abstraction over platform provided unit of parallelism. Typically, it will
+map 1:1 with OS threads. That means:
+
+-  every |C_JOB| is hosted by a |C_WORKER| with only one |C_JOB| per |C_WORKER|
+   being executed at once
+-  if two or more |C_JOBS| run on different |C_WORKERS| then their code is able
+   to run in parallel (this execution mode will be referred to as
+   :term:`parallel execution`)
+-  if several |C_JOBS| share the same |C_WORKER| then their code can never run
+   in parallel (this execution mode will be referred to as :term:`asynchronous
+   execution`).
+
+A |C_JOB|'s body has the starting point (the beginning of the corresponding
+piece of code) and the completion point (the end of the corresponding piece of
+code). A |C_JOB|'s body can (but is not obliged to) map 1:1 to such language
+entities as functions, methods or lambdas.
+
+A |C_JOB| can have zero or more suspension points. Execution of a |C_JOB| can be
+paused at a suspension point and resumed at a later moment in time. Once
+suspended, a |C_JOB| allows another |C_JOB| to be executed on the same
+|C_WORKER|.
+
+Any |LANG| program implicitly defines one **main** |C_JOB|, which corresponds to
+the :ref:`Program Entry Point`. The execution starts from it, and its completion
+initiates the program termination sequence.
+
+The exact language features and standard library APIs that are used for defining
+|C_JOBS| and their respective suspension points are described in the subsequent
+sections.
+
+The program memory is shared between all |C_JOBS| , which allows for efficient
+data sharing but implies that the developer should use the provided means of
+synchronization to avoid race conditions and guarantee thread safety.
+
+
+.. _Overview of concurrency features:
+
+Overview of concurrency features
+********************************
+
+|LANG| allows for both asynchronous and parallel programming and provides the
+following:
+
+- :ref:`Asynchronous execution` primitives: ``async`` / ``await`` / ``Promise``;
+- :ref:`Parallel execution` API: ``EAWorker API`` / ``Taskpool API`` / 
+  ``launch API``, including the structured concurrency support;
+- :ref:`Synchronization` API: locks API, atomics API and other means of
+  synchronization;
+
+The :ref:`API details and restrictions` section provides the detailed API
+description and the restrictions on its usage.
+
+.. index::
+   concurrency
+   asynchronous programming
+   coroutine
+   shared memory
+   functionality
+   parallel-run coroutine
+   structured concurrency
+   synchronization
+
+|
+
+

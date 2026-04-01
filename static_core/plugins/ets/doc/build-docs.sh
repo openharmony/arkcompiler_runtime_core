@@ -26,13 +26,11 @@ BUILD_TYPE=debug
 
 # Build targets:
 BUILD_COOKBOOK=no
-BUILD_RUNTIME=no
 BUILD_SPEC=no
+BUILD_SPEC_700=no
 BUILD_STDLIB=no
 BUILD_TUTORIAL=no
 BUILD_SYSTEM_ARKTS=no
-BUILD_INTEROP_JS=no
-BUILD_CONCURRENCY=no
 
 CHECK_CODE=no
 
@@ -77,13 +75,11 @@ TARGETS
     targets (they are included into 'all' alias):
 
     * cookbook
-    * runtime
     * spec
+    * spec_700
     * stdlib
     * tutorial
-    * system ArkTS
-    * interop_js
-    * concurrency
+    * system_arkts
 
     Following aliases are supported:
 
@@ -126,7 +122,7 @@ function build_sphinx_document()
     sphinx-build ${build_options} -b html "${src_dir}" "${BUILD_DIR}/${target}-html"
 
     # NB! Markdown for the spec is not skipped (mark-up too complex)
-    if [[ "${target}" != "spec" ]] && [[ "${target}" != "concurrency" ]]; then
+    if [[ "${target}" != "spec" ]] && [[ "${target}" != "spec_700" ]]; then
         echo "${target}: Building Markdown"
         sphinx-build ${build_options} -b markdown "${src_dir}" "${BUILD_DIR}/${target}-md"
         python3 "${SCRIPT_DIR}/merge_markdown.py" "${SCRIPT_DIR}" "${target}" "${BUILD_DIR}"
@@ -181,15 +177,15 @@ for i in "$@"; do
 
         BUILD_COOKBOOK=yes
         ;;
-    runtime)
-        BUILD_SOMETHING=yes
-
-        BUILD_RUNTIME=yes
-        ;;
     spec)
         BUILD_SOMETHING=yes
 
         BUILD_SPEC=yes
+        ;;
+    spec_700)
+        BUILD_SOMETHING=yes
+
+        BUILD_SPEC_700=yes
         ;;
     stdlib)
         BUILD_SOMETHING=yes
@@ -206,16 +202,6 @@ for i in "$@"; do
 
         BUILD_SYSTEM_ARKTS=yes
         ;;
-    interop_js)
-        BUILD_SOMETHING=yes
-
-        BUILD_INTEROP_JS=yes
-        ;;
-    concurrency)
-        BUILD_SOMETHING=yes
-
-        BUILD_CONCURRENCY=yes
-        ;;
 
     # Alias build targets:
 
@@ -223,13 +209,11 @@ for i in "$@"; do
         BUILD_SOMETHING=yes
 
         BUILD_COOKBOOK=yes
-        BUILD_RUNTIME=yes
         BUILD_SPEC=yes
+        BUILD_SPEC_700=yes
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
         BUILD_SYSTEM_ARKTS=yes
-        BUILD_INTEROP_JS=yes
-        BUILD_CONCURRENCY=yes
         ;;
     guides)
         BUILD_SOMETHING=yes
@@ -238,7 +222,6 @@ for i in "$@"; do
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
         BUILD_SYSTEM_ARKTS=yes
-        BUILD_INTEROP_JS=yes
         ;;
 
     *)
@@ -252,13 +235,11 @@ if [[ "${BUILD_SOMETHING}" == "no" ]] ; then
     BUILD_SOMETHING=yes
 
     BUILD_COOKBOOK=yes
-    BUILD_RUNTIME=yes
     BUILD_SPEC=yes
+    BUILD_SPEC_700=yes
     BUILD_STDLIB=yes
     BUILD_TUTORIAL=yes
     BUILD_SYSTEM_ARKTS=yes
-    BUILD_INTEROP_JS=yes
-    BUILD_CONCURRENCY=yes
 fi
 
 check_ubuntu_version
@@ -271,10 +252,6 @@ if [[ "${CHECK_CODE}" == "yes" ]]; then
         echo "Error: Panda directory is not set"
         exit 1
     fi
-
-    if [[ "${BUILD_CONCURRENCY}" == "yes" ]]; then
-        python3 $(dirname "$SCRIPT_DIR")/tools/specification_checker.py --spec-folder "${SCRIPT_DIR}/concurrency"
-    fi
 fi
 
 if [[ "${BUILD_SPEC}" == "yes" ]]; then
@@ -283,6 +260,14 @@ if [[ "${BUILD_SPEC}" == "yes" ]]; then
     python3 "${SCRIPT_DIR}/validate_spec.py" "${SCRIPT_DIR}/spec"
     build_sphinx_document spec "${SCRIPT_DIR}/spec"
     rm -f ${SCRIPT_DIR}/spec/*.plantuml
+fi
+
+if [[ "${BUILD_SPEC_700}" == "yes" ]]; then
+    echo "spec: Validating ${SCRIPT_DIR}/spec_700"
+    cp ${SCRIPT_DIR}/spec_700_concurrency/*.plantuml ${SCRIPT_DIR}/spec_700/
+    python3 "${SCRIPT_DIR}/validate_spec.py" "${SCRIPT_DIR}/spec_700"
+    build_sphinx_document spec_700 "${SCRIPT_DIR}/spec_700"
+    rm -f ${SCRIPT_DIR}/spec_700/*.plantuml
 fi
 
 if [[ "${BUILD_COOKBOOK}" == "yes" ]]; then
@@ -299,10 +284,6 @@ if [[ "${BUILD_COOKBOOK}" == "yes" ]]; then
     build_sphinx_document cookbook "${SCRIPT_DIR}/cookbook"
 fi
 
-if [[ "${BUILD_RUNTIME}" == "yes" ]]; then
-    build_sphinx_document runtime "${SCRIPT_DIR}/runtime"
-fi
-
 if [[ "${BUILD_STDLIB}" == "yes" ]]; then
     build_sphinx_document stdlib "${SCRIPT_DIR}/stdlib"
 fi
@@ -314,14 +295,5 @@ fi
 if [[ "${BUILD_SYSTEM_ARKTS}" == "yes" ]]; then
     build_sphinx_document system_arkts "${SCRIPT_DIR}/system_arkts"
 fi
-
-if [[ "${BUILD_INTEROP_JS}" == "yes" ]]; then
-    build_sphinx_document interop_js "${SCRIPT_DIR}/interop_js"
-fi
-
-if [[ "${BUILD_CONCURRENCY}" == "yes" ]]; then
-    build_sphinx_document concurrency "${SCRIPT_DIR}/concurrency"
-fi
-
 
 echo "Build succeeded, please find documents in ${BUILD_DIR}"
