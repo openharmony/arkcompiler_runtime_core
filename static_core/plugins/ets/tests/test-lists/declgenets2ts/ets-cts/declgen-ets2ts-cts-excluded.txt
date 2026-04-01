@@ -3107,12 +3107,6 @@
 07.expressions/35.lambda_expression/02.lambda_body/negative.ets
 07.expressions/35.lambda_expression/03.lambda_expression_type/negative_0.ets
 07.expressions/35.lambda_expression/03.lambda_expression_type/negative_1.ets
-07.expressions/36.constant_expression/wrong_constant_expression_0.ets
-07.expressions/36.constant_expression/wrong_constant_expression_1.ets
-07.expressions/36.constant_expression/wrong_constant_expression_2.ets
-07.expressions/36.constant_expression/wrong_constant_expression_3.ets
-07.expressions/36.constant_expression/wrong_constant_expression_4.ets
-07.expressions/36.constant_expression/wrong_constant_expression_5.ets
 08.statements/03.block/block_statements_n_0.ets
 08.statements/03.block/block_statements_n_1.ets
 08.statements/04.constant_or_variable_declarations/local_const_n.ets

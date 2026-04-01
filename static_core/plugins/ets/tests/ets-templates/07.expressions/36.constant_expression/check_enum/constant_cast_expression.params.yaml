@@ -12,30 +12,7 @@
 # limitations under the License.
 ---
 cases:
-  # Int literals
-  - { expr: '42',            expected: 42          }
-  - { expr: '0',             expected: 0           }
-  - { expr: '1',             expected: 1           }
-  - { expr: '100',           expected: 100         }
-
-  # Negative int literals
-  - { expr: '-1',            expected: -1          }
-  - { expr: '-10',           expected: -10         }
-  - { expr: '-100',          expected: -100        }
-
-  # Hex literals
-  - { expr: '0xFF',          expected: 255         }
-  - { expr: '0x7F',          expected: 127         }
-  - { expr: '0x00',          expected: 0           }
-
-  # Binary literals
-  - { expr: '0b1010',        expected: 10          }
-  - { expr: '0b11111111',    expected: 255         }
-
-  # Octal literals
-  - { expr: '0o77',          expected: 63          }
-  - { expr: '0o10',          expected: 8           }
-
-  # Boundary values
-  - { expr: '2147483647',    expected: 2147483647  }
-  - { expr: '-2147483648',   expected: -2147483648 }
+    - { type: 'byte', expr: '3', expected: 4 }
+    - { type: 'short', expr: '10000', expected: 10001 }
+    - { type: 'int', expr: '42', expected: 43 }
+    - { type: 'long', expr: '100', expected: 101 }

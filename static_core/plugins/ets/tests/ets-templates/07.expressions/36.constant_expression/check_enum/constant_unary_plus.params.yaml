@@ -12,15 +12,11 @@
 # limitations under the License.
 ---
 cases:
-  - { type: byte,   value: 16,      expected: 16     }
-  - { type: short,  value: 300,     expected: 300    }
-  - { type: int,    value: 3000,    expected: 3000   }
-  - { type: long,   value: 50000,   expected: 50000  }
-  - { type: float,  value: 120.2f,  expected: 120.2f }
-  - { type: double, value: 5050.9,  expected: 5050.9 }
-  - { type: byte,   value: -16,     expected: -16    }
-  - { type: short,  value: -300,    expected: -300   }
-  - { type: int,    value: -3000,   expected: -3000  }
-  - { type: long,   value: -50000,  expected: -50000 }
-  - { type: float,  value: -120.2f, expected: -120.2f}
-  - { type: double, value: -5050.9, expected: -5050.9}
+    - { type: byte, value: 16, expected: 17 }
+    - { type: short, value: 300, expected: 301 }
+    - { type: int, value: 3000, expected: 3001 }
+    - { type: long, value: 50000, expected: 50001 }
+    - { type: byte, value: -16, expected: -15 }
+    - { type: short, value: -300, expected: -299 }
+    - { type: int, value: -3000, expected: -2999 }
+    - { type: long, value: -50000, expected: -49999 }

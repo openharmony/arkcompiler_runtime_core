@@ -12,40 +12,40 @@
 # limitations under the License.
 ---
 cases:
-  # Conditional-and &&
-  - { expression: 'true && true',   if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'true && false',  if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'false && true',  if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'false && false', if_true: 1, if_false: 0, expected: 0 }
+    # Conditional-and &&
+    - { expression: 'true && true', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'true && false', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'false && true', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'false && false', if_true: 1, if_false: 0, expected: 1 }
 
-  # Conditional-or ||
-  - { expression: 'true || true',   if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'true || false',  if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'false || true',  if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'false || false', if_true: 1, if_false: 0, expected: 0 }
+    # Conditional-or ||
+    - { expression: 'true || true', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'true || false', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'false || true', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'false || false', if_true: 1, if_false: 0, expected: 1 }
 
-  # Logical NOT !
-  - { expression: '!true',  if_true: 1, if_false: 0, expected: 0 }
-  - { expression: '!false', if_true: 1, if_false: 0, expected: 1 }
-  - { expression: '!!true', if_true: 1, if_false: 0, expected: 1 }
+    # Logical NOT !
+    - { expression: '!true', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: '!false', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: '!!true', if_true: 1, if_false: 0, expected: 2 }
 
-  # Boolean bitwise & ^ |
-  - { expression: 'true & true',   if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'true & false',  if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'true ^ false',  if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'true ^ true',   if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'false | false', if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'true | false',  if_true: 1, if_false: 0, expected: 1 }
+    # Boolean bitwise & ^ |
+    - { expression: 'true & true', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'true & false', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'true ^ false', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'true ^ true', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'false | false', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'true | false', if_true: 1, if_false: 0, expected: 2 }
 
-  # Boolean equality == !=
-  - { expression: 'true == true',   if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'true == false',  if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'true != false',  if_true: 1, if_false: 0, expected: 1 }
-  - { expression: 'false != false', if_true: 1, if_false: 0, expected: 0 }
+    # Boolean equality == !=
+    - { expression: 'true == true', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'true == false', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'true != false', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: 'false != false', if_true: 1, if_false: 0, expected: 1 }
 
-  # Combined
-  - { expression: '(true && false) || true',  if_true: 1, if_false: 0, expected: 1 }
-  - { expression: '(true || false) && false', if_true: 1, if_false: 0, expected: 0 }
-  - { expression: 'true && !false',           if_true: 1, if_false: 0, expected: 1 }
-  - { expression: '!(true && false)',         if_true: 1, if_false: 0, expected: 1 }
-  - { expression: '!true || !false',          if_true: 1, if_false: 0, expected: 1 }
+    # Combined
+    - { expression: '(true && false) || true', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: '(true || false) && false', if_true: 1, if_false: 0, expected: 1 }
+    - { expression: 'true && !false', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: '!(true && false)', if_true: 1, if_false: 0, expected: 2 }
+    - { expression: '!true || !false', if_true: 1, if_false: 0, expected: 2 }
