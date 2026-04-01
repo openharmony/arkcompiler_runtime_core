@@ -152,4 +152,15 @@ void RefBlock::PrintBlock()
     }
 }
 
+bool RefBlock::IsBlockInFrame(const RefBlock *frame)
+{
+    while (frame != nullptr) {
+        if (this == frame) {
+            return true;
+        }
+        frame = frame->GetPrev();
+    }
+    return false;
+}
+
 }  // namespace ark::mem
