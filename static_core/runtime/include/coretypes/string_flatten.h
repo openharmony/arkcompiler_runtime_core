@@ -52,6 +52,7 @@ public:
      * @return the flattened string
      */
     static FlatStringInfo FlattenSlicedString(VMHandle<String> &slicedStr);
+    static FlatStringInfo FlattenSlicedString(String *slicedStr);
 
     /**
      * @brief flatten str to line string , in order to use it comfortably

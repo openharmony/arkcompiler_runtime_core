@@ -457,11 +457,16 @@ extern "C" bool SameValueZeroEntrypoint(ObjectHeader *o1, ObjectHeader *o2)
 
 extern "C" EtsBoolean EtsStringEqualsEntrypoint(coretypes::String *str1, coretypes::String *str2)
 {
-    // We could use `ark::ets::intrinsics::StdCoreStringEquals` as the entrypoint, it works, but
-    // `ark::ets::intrinsics::StdCoreStringEquals` repeats the checks that the irtoc implementation
-    // of the intrinsic has already performed: whether both pointers contain the same memory address
-    // as well as for whether the pointees are actually strings.
-    return ToEtsBoolean(EtsString::FromCoreType(str1)->Compare(EtsString::FromCoreType(str2)) == 0);
+    if (str1 == nullptr) {
+        return UINT8_C(str2 == nullptr);
+    }
+    if (str1 == str2) {
+        return UINT8_C(1);
+    }
+    if (str2 == nullptr) {
+        return UINT8_C(0);
+    }
+    return ToEtsBoolean(EtsString::StringsAreEqualWithCache(str1, str2));
 }
 
 extern "C" EtsBoolean EtsDefaultLocaleAllowsFastLatinCaseConversion()

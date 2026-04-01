@@ -712,10 +712,9 @@ int32_t String::Compare(VMHandle<String> &left, VMHandle<String> &right, const L
         return 0;
     }
 
-    // when left or right is tree string , use native memory , no need to handle
-    // when function exit , native memory will be deleted in ~FlatStringInfo()
-    FlatStringInfo lflat = FlatStringInfo::FlattenAllString(left, ctx, true);
-    FlatStringInfo rflat = FlatStringInfo::FlattenAllString(right, ctx, true);
+    static constexpr bool withNativeMemory = true;
+    FlatStringInfo lflat = FlatStringInfo::FlattenAllString(left, ctx, withNativeMemory);
+    FlatStringInfo rflat = FlatStringInfo::FlattenAllString(right, ctx, withNativeMemory);
 
     int32_t lCount = static_cast<int32_t>(lflat.GetLength());  // NOLINT(modernize-use-auto)
     int32_t rCount = static_cast<int32_t>(rflat.GetLength());  // NOLINT(modernize-use-auto)

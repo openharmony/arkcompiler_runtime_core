@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
+#include "runtime/include/coretypes/string_flatten.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
+
+using ark::coretypes::FlatStringInfo;
 
 namespace ark::ets {
 
@@ -347,6 +350,86 @@ EtsString *EtsString::DoReplace(EtsString *src, EtsChar oldC, EtsChar newC)
     coretypes::String *result = coretypes::String::DoReplace(reinterpret_cast<coretypes::String *>(src), oldC, newC,
                                                              ctx, Runtime::GetCurrent()->GetPandaVM());
     return reinterpret_cast<EtsString *>(result);
+}
+
+static bool CheckForEquality(const FlatStringInfo &flat1, const FlatStringInfo &flat2)
+{
+    auto len1 = static_cast<int32_t>(flat1.GetLength());
+    auto len2 = static_cast<int32_t>(flat2.GetLength());
+
+    if (flat1.IsUtf8()) {
+        common_vm::Span<const uint8_t> span1(flat1.GetDataUtf8(), len1);
+        // utf8, utf8
+        if (flat2.IsUtf8()) {
+            common_vm::Span<const uint8_t> span2(flat2.GetDataUtf8(), len2);
+            return common_vm::BaseString::StringsAreEquals(span1, span2);
+        }
+        // utf8, utf16
+        common_vm::Span<const uint16_t> span2(flat2.GetDataUtf16(), len2);
+        return common_vm::BaseString::StringsAreEquals(span1, span2);
+    }
+    common_vm::Span<const uint16_t> span1(flat1.GetDataUtf16(), len1);
+    // utf16, utf16
+    if (flat2.IsUtf16()) {
+        common_vm::Span<const uint16_t> span2(flat2.GetDataUtf16(), len2);
+        return common_vm::BaseString::StringsAreEquals(span1, span2);
+    }
+    // utf16, utf8
+    common_vm::Span<const uint8_t> span2(flat2.GetDataUtf8(), len2);
+    return common_vm::BaseString::StringsAreEquals(span1, span2);
+}
+
+bool EtsString::StringsAreEqualWithCache(String *str1, String *str2)
+{
+    DCHECK_CC(str1 != nullptr);
+    DCHECK_CC(str2 != nullptr);
+
+    uint32_t str1Len = str1->GetLength();
+    if (str1Len != str2->GetLength()) {
+        return false;
+    }
+    if (str1Len == 0) {
+        return true;
+    }
+    uint32_t hash1;
+    uint32_t hash2;
+    if (str1->ToString()->TryGetHashCode(&hash1) && str2->ToString()->TryGetHashCode(&hash2) && hash1 != hash2) {
+        return false;
+    }
+    FlatStringInfo flat1(nullptr, 0, 0);
+    FlatStringInfo flat2(nullptr, 0, 0);
+    if (!str1->IsTreeString() && !str2->IsTreeString()) {
+        // VMHandle machinery is not needed in this case
+        if (str1->IsLineString()) {
+            flat1 = FlatStringInfo(str1, 0, str1->GetLength());
+        } else if (str1->IsSlicedString()) {
+            flat1 = FlatStringInfo::FlattenSlicedString(str1);
+        } else {
+            UNREACHABLE();
+        }
+        if (str2->IsLineString()) {
+            flat2 = FlatStringInfo(str2, 0, str2->GetLength());
+        } else if (str2->IsSlicedString()) {
+            flat2 = FlatStringInfo::FlattenSlicedString(str2);
+        } else {
+            UNREACHABLE();
+        }
+    } else {
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        auto thread = ManagedThread::GetCurrent();
+        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+        VMMutableHandle<String> h1(thread, str1);
+        VMHandle<String> h2(thread, str2);
+        // We want FlatStringInfo::FlattenTreeString() to use FlattenedStringCache.
+        // The cache is used iff 'withNativeMemory' == false (see FlatStringInfo::FlattenTreeString).
+        static constexpr bool WITH_NATIVE_MEMORY = false;
+        flat1 = FlatStringInfo::FlattenAllString(h1, ctx, WITH_NATIVE_MEMORY);
+        // As native memory is not used flattening may trigger GC (and move the string kept in flat1).
+        h1.Update(flat1.GetString());
+        flat2 = FlatStringInfo::FlattenAllString(h2, ctx, WITH_NATIVE_MEMORY);
+        flat1.SetString(h1.GetPtr());
+    }
+    return CheckForEquality(flat1, flat2);
 }
 
 }  // namespace ark::ets
