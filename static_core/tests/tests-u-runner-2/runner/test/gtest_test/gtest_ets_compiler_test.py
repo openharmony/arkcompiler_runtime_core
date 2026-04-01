@@ -37,6 +37,8 @@ class EtsGeneratorTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    failed_test = Path("fail.ets")
+    failed_timeout_test = Path("fail_timeout.ets")
     cmake_fake = "CMake.fake"
     cmake_for_test = "CMakeLists.txt"
 
@@ -54,6 +56,12 @@ class EtsGeneratorTest(TestCase):
         shutil.rmtree(int_folder, ignore_errors=True)
 
     def fake_compile_file(self, _step: Step, test_id: Path) -> None:
+        if test_id.name == self.failed_test.name:
+            raise CompileEtsTestPartException("compile failed")
+
+        if test_id.name == self.failed_timeout_test.name:
+            raise CompileEtsTestPartTimeoutException("compile timeout")
+
         self._compiled.append(test_id)
         assert self._compiler is not None
 
@@ -205,6 +213,33 @@ class EtsGeneratorTest(TestCase):
             self.assertTrue(all(abc_file.name.startswith("ani_verify_test") for abc_file in abc_files))
         finally:
             # clear up
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch('sys.argv', ["runner.sh", "ani_tests_wf", "ani_suite", "--test-file", "ani_test_any_call/AnyCallTest"])
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_gtest_ets_partial_compile_failure(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_with_failures")
+        work_dir = Path(os.environ["WORK_DIR"])
+        test_gen_path: Path = work_dir.with_name("gen")
+        test_intermediate_path = work_dir.with_name("intermediate")
+        test_config = self.config_test()
+
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        shutil.rmtree(test_intermediate_path, ignore_errors=True)
+
+        ets_test_generator = GTestEtsCompiler(test_source_path, test_gen_path, test_config)
+        self._compiler = ets_test_generator
+
+        try:
+            with patch.object(ets_test_generator, "compile_file", side_effect=self.fake_compile_file):
+                compiled_tests = ets_test_generator.generate()
+
+            # 2 tests from 4 - failed, the other 2 were compiled
+            self.assertEqual(len(compiled_tests), 2)
+        finally:
             shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
