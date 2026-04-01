@@ -1081,12 +1081,11 @@ export namespace taskpool {
          * @returns { boolean } true if current running task is canceled, false - otherwise
          */
         static isCanceled(): boolean {
-            let result: boolean = false;
-            let currentTask = getCurrentTask();
-            if (currentTask !== undefined) {
-                result = InternalTask.of(currentTask!).state.load() == (State.CANCELED.valueOf());
+            const item: Task | undefined = getCurrentTask();
+            if (item === undefined) {
+                throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
             }
-            return result;
+            return InternalTask.of(item!).state.load() == (State.CANCELED.valueOf());
         }
 
         /**
@@ -2226,20 +2225,9 @@ export namespace taskpool {
      */
     export function cancel(taskId: int): void {
         let task: Task | undefined = undefined;
-        let currentWorker:Array<GlobalQueueWorker> = [];
-        ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            currentWorker = Array.from(workers)
-        });
-        for (let i = 0; i < currentWorker.length; i++) {
-            ConcurrencyHelpers.lockGuard(currentWorker[i].currentTasksMutex, () => {
-                for (let t: Task of currentWorker[i].currentTasks.keys()) {
-                    if (t.taskId == taskId) {
-                        task = t;
-                        break;
-                    }
-                }
-            });
-            if (task != undefined) {
+        for (let t of allTasks.keys()) {
+            if (t.taskId == taskId) {
+                task = t;
                 break;
             }
         }
