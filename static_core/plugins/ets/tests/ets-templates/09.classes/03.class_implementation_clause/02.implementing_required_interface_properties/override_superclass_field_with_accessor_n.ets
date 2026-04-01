@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,13 +16,13 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: >-
-      A class must implement all required properties from all superinterfaces (see Interface Properties)
-      that can be defined in a form of a field or as a getter, a setter, or both. In any case implementation
-      may be provided in a form of field or accessors.
+    If a superclass implements an interface property as a field, then a derived class
+    cannot override it with an accessor.
 assert: {{c.doc}}
 tags: [compile-only, negative]
 expected_out: "{{c.expected_out}}"
 ---*/
 
-{{c.decl}}
+{{c.decl|indent}}
+
 {% endfor %}

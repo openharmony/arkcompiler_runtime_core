@@ -447,6 +447,11 @@
 #32625
 09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/implementing_property_neg_simple_wrong_type_n.ets
 
+#33998 no CTE override superclass field by accessor
+09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_0.ets
+09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_1.ets
+09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_2.ets
+
 #32724
 09.classes/06.field_declarations/access_field_neg_7.ets
 09.classes/06.field_declarations/access_field_neg_8.ets
