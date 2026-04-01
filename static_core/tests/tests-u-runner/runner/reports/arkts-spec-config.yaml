@@ -1463,10 +1463,10 @@
     status: No testable assertions
 '23':
     title: Binary Compatibility
-    status: No testable assertions
+    status: ''
 '23.1':
     title: Classification of Source Code Changes
-    status: No testable assertions
+    status: ''
 '24':
     title: Contributors
     status: No testable assertions
