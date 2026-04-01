@@ -136,17 +136,17 @@ void RegExp16::FreePcre2Object(Pcre2Obj re)
 bool RegExp16::IsUncountable(const uint16_t *pattern, const size_t len, size_t index)
 {
     uint8_t next = '\0';
-    if (index < len - 1U) {
+    if (index + 1U < len) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         next = static_cast<uint8_t>(pattern[index + 1U]);
     }
     uint8_t next2 = '\0';
-    if (index < len - 2U) {
+    if (index + 2U < len) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         next2 = static_cast<uint8_t>(pattern[index + 2U]);
     }
     uint8_t next3 = '\0';
-    if (index < len - 3U) {
+    if (index + 3U < len) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         next3 = static_cast<uint8_t>(pattern[index + 3U]);
     }
