@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-{% for timing in ["compile", "runtime"] %}
-
 /*---
 desc: |-
     The instance field initializer expression cannot use
@@ -23,13 +21,8 @@ desc: |-
     • this.
     If the initializer expression contains one of the above patterns,
     then a compile-time warning occurs.
-{% if 'compile' in timing %}
-tags: [compile-only]
-expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
-{% endif %}
+expected_out: {"compiler": "Warning W0010: The instance field initializer expression cannot use the this."}
 ---*/
-
-// #2345 after runner is made to support this properly, remove compile-only tag and "timing" loop
 
 class A {
   public x: int = 10;
@@ -38,5 +31,3 @@ class A {
 
 function main(): void {
 }
-
-{% endfor %}

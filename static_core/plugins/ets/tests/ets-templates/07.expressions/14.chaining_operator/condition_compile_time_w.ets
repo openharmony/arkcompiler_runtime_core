@@ -13,20 +13,12 @@
  * limitations under the License.
  */
 
-{% for timing in ["compile", "runtime"] %}
-
 /*---
 desc: |-
     If an expression preceding a chaining operator is known at compile time to always evaluate to a nullish
     value (undefined or null) or a non-nullish value at runtime, then a compile-time warning is issued.
-{% if 'compile' in timing %}
-tags: [compile-only]
-expected_out: "warning: expression is always evaluated as nullish or non-nullish"
-{% endif %}
-test_suffix: "{{timing}}"
+expected_out: {"compiler": "warning: expression is always evaluated as nullish or non-nullish"}
 ---*/
-
-// #2345 after runner is made to support this properly, remove compile-only tag and "timing" loop
 
 class Example {
     member: int = 1
@@ -123,5 +115,3 @@ function main(): void {
     let d: C | undefined = undefined
     d?.f // warning: expression is always evaluated as undefined
 }
-
-{% endfor %}
