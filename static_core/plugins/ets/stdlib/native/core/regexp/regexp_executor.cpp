@@ -26,9 +26,38 @@
 
 namespace ark::ets::stdlib {
 
-bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16, const int len)
+bool EtsRegExp::Compile(const uint8_t *pattern, int len)
 {
-    utf16_ |= isUtf16;
+    if (re8_ != nullptr) {
+        return true;
+    }
+    re8_ = RegExp8::CreatePcre2Object(pattern, GetCompileFlags(), GetExtraCompileFlags(), len);
+    return re8_ != nullptr;
+}
+
+bool EtsRegExp::Compile(const uint16_t *pattern, int len)
+{
+    if (re16_ != nullptr) {
+        return true;
+    }
+    re16_ = RegExp16::CreatePcre2Object(pattern, GetCompileFlags(), GetExtraCompileFlags(), len);
+    return re16_ != nullptr;
+}
+
+void EtsRegExp::Destroy()
+{
+    if (re8_ != nullptr) {
+        RegExp8::FreePcre2Object(re8_);
+        re8_ = nullptr;
+    }
+    if (re16_ != nullptr) {
+        RegExp16::FreePcre2Object(re16_);
+        re16_ = nullptr;
+    }
+}
+
+uint32_t EtsRegExp::GetCompileFlags() const
+{
     uint32_t flags = 0U;
     if (flagMultiline_) {
         flags |= PCRE2_MULTILINE;
@@ -51,43 +80,14 @@ bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16,
     }
     flags |= PCRE2_MATCH_UNSET_BACKREF;
     flags |= PCRE2_ALLOW_EMPTY_CLASS;
+    return flags;
+}
+
+uint32_t EtsRegExp::GetExtraCompileFlags()
+{
     uint32_t extraFlags = 0U;
     extraFlags |= PCRE2_EXTRA_ALT_BSUX;
-    utf16_ |= flagUnicode_;
-    if (utf16_) {
-        re_ = RegExp16::CreatePcre2Object(reinterpret_cast<const uint16_t *>(pattern.data()), flags, extraFlags, len);
-    } else {
-        re_ = RegExp8::CreatePcre2Object(pattern.data(), flags, extraFlags, len);
-    }
-    return re_ != nullptr;
-}
-
-RegExpExecResult EtsRegExp::Execute(const std::vector<uint8_t> &pattern, const std::vector<uint8_t> &str, const int len,
-                                    const int startOffset)
-{
-    uint32_t matchFlags = 0U;
-    if (flagUnicode_ || flagVnicode_) {
-        matchFlags |= PCRE2_NO_UTF_CHECK;
-    }
-    RegExpExecResult result;
-    if (utf16_) {
-        result = RegExp16::Execute(re_, matchFlags, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
-        RegExp16::EraseExtraGroups(reinterpret_cast<const uint16_t *>(pattern.data()), pattern.size() / 2U, result);
-    } else {
-        result = RegExp8::Execute(re_, matchFlags, str.data(), len, startOffset);
-        RegExp8::EraseExtraGroups(pattern.data(), pattern.size(), result);
-    }
-
-    return result;
-}
-
-void EtsRegExp::Destroy()
-{
-    if (utf16_) {
-        RegExp16::FreePcre2Object(re_);
-    } else {
-        RegExp8::FreePcre2Object(re_);
-    }
+    return extraFlags;
 }
 
 void EtsRegExp::SetUnicodeFlag(const char &chr)
@@ -150,7 +150,6 @@ void EtsRegExp::SetFlags(const std::string &flagsStr)
     for (const auto &c : flagsStr) {
         SetFlag(c);
     }
-    utf16_ |= flagUnicode_;
 }
 
 }  // namespace ark::ets::stdlib

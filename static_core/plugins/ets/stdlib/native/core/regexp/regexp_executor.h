@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,9 @@
 #include "plugins/ets/stdlib/native/core/regexp/regexp_exec_result.h"
 
 #include <ani.h>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace ark::ets::stdlib {
 
@@ -32,23 +35,40 @@ public:
         env_ = env;
     }
     void SetFlags(const std::string &flagsStr);
-    bool Compile(const std::vector<uint8_t> &pattern, const bool isUtf16, const int len);
-    RegExpExecResult Execute(const std::vector<uint8_t> &pattern, const std::vector<uint8_t> &str, const int len,
-                             const int startOffset);
+    bool Compile(const uint8_t *pattern, int len);
+    bool Compile(const uint16_t *pattern, int len);
     void Destroy();
 
-    bool IsUtf16() const
+    void *GetCompiledRe8() const
     {
-        return utf16_;
+        return re8_;
+    }
+
+    void *GetCompiledRe16() const
+    {
+        return re16_;
+    }
+
+    bool HasCompiledRe() const
+    {
+        return re8_ != nullptr || re16_ != nullptr;
+    }
+
+    bool HasUnicodeFlag() const
+    {
+        return flagUnicode_ || flagVnicode_;
     }
 
 private:
     void SetFlag(const char &chr);
     void SetUnicodeFlag(const char &chr);
     void SetIfNotSet(bool &flag);
+    uint32_t GetCompileFlags() const;
+    static uint32_t GetExtraCompileFlags();
     static void ThrowBadFlagsException(ani_env *env);
 
-    void *re_ = nullptr;
+    void *re8_ = nullptr;
+    void *re16_ = nullptr;
     bool flagGlobal_ = false;           // g
     bool flagMultiline_ = false;        // m
     bool flagCaseInsentitive_ = false;  // i
@@ -57,7 +77,6 @@ private:
     bool flagVnicode_ = false;          // v
     bool flagDotAll_ = false;           // s
     bool flagIndices_ = false;          // d
-    bool utf16_ = false;
 
     ani_env *env_ = nullptr;
 };

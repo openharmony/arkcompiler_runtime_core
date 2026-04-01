@@ -519,6 +519,7 @@ export class RegExp extends Object {
     private source_: String = ""
     private flags_: String = ""
     private flagsSorted_: boolean = false
+    private requiresUtf16Execution_: boolean = false
     private isGlobal: boolean = false
     private isUnicode: boolean = false
     private isUnicodeSets: boolean = false
@@ -678,11 +679,14 @@ export class RegExp extends Object {
      */
     private native static parse(pattern: String, flags: String): void
 
-    private native execImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpExecArray;
+    private native execImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
+        lastIndex: int, requiresUtf16Execution: boolean): RegExpExecArray;
 
-    private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpMatchArray;
+    private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
+        lastIndex: int, requiresUtf16Execution: boolean): RegExpMatchArray;
 
-    private native testImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): boolean;
+    private native testImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
+        lastIndex: int, requiresUtf16Execution: boolean): boolean;
 
     /**
      * Executes a match search on the string starting from the specified index.
@@ -695,8 +699,8 @@ export class RegExp extends Object {
      * @FaAndStageModel
      */
     public exec(str: String, index: int): RegExpExecArray | null {
-        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
-        const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
+        const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index,
+            this.requiresUtf16Execution_)
         if (res.isCorrect) {
             res.input = str
             res.postExecProcessing(res, str, res.index, this.hasIndices)
@@ -720,8 +724,8 @@ export class RegExp extends Object {
     }
 
     private matchInternal(str: String, index: int): RegExpMatchArray | null {
-        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
-        const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
+        const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index,
+            this.requiresUtf16Execution_)
         if (res.isCorrect) {
             res.input = str
             res.postExecProcessing(res, str, res.index!, this.hasIndices)
@@ -1018,8 +1022,8 @@ export class RegExp extends Object {
         if (!globalOrSticky || (this.lastIndex < 0)) {
             this.lastIndex = 0
         }
-        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
-        let res = this.testImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, this.lastIndex, hasSlashU)
+        let res = this.testImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, this.lastIndex,
+            this.requiresUtf16Execution_)
 
         if (!res && globalOrSticky) {
             this.lastIndex = 0
@@ -1133,6 +1137,7 @@ export class RegExp extends Object {
         re.isIgnoreCase = re.flags_.contains("i", 0)
         re.isIndices = re.flags_.contains("d", 0)
         re.isDotAll = re.flags_.contains("s", 0)
+        re.requiresUtf16Execution_ = re.isUnicode || re.isUnicodeSets || pattern.contains("\\u", 0)
         RegExp.parse(pattern, re.flags_)
     }
 
