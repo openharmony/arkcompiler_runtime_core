@@ -1,2 +1,5 @@
+#33832
+ets_func_tests/std/concurrency/AsyncRWLockTest.ets
+
 #32998
 std/core/get_hash.ets
