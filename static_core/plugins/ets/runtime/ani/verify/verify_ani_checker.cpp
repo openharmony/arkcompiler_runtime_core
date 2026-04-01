@@ -15,9 +15,14 @@
 
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 
+#include <cstring>
+#include <optional>
+#include <string>
+
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
+#include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -126,6 +131,107 @@ private:
     const ani_value *args_ {};
 };
 
+template <bool IS_STATIC>
+static bool CheckUniqueMethodByName(EtsClass *klass, const char *name)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(name != nullptr);
+    size_t nameCounter = 0;
+    auto methodsList = (panda_file_items::CTOR == name) ? klass->GetConstructors() : klass->GetMethods();
+    for (auto &method : methodsList) {
+        if (method->IsStatic() == IS_STATIC && ::strcmp(method->GetName(), name) == 0) {
+            if (++nameCounter == 2U) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+template <bool IS_STATIC_METHOD>
+static ani_status ResolveClassMethodByName(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(name != nullptr);
+    ASSERT(result != nullptr);
+    *result = nullptr;
+
+    if (signature == nullptr && !CheckUniqueMethodByName<IS_STATIC_METHOD>(klass, name)) {
+        return ANI_AMBIGUOUS;
+    }
+
+    std::optional<EtsMethodSignature> methodSignature;
+    if (signature != nullptr) {
+        Mangle::ConvertSignatureToProto(methodSignature, signature);
+        if (!methodSignature.has_value()) {
+            return ANI_INVALID_DESCRIPTOR;
+        }
+    }
+
+    EtsMethod *method = nullptr;
+    if constexpr (IS_STATIC_METHOD) {
+        method = klass->GetStaticMethod(name, methodSignature);
+    } else {
+        method = klass->GetInstanceMethod(name, methodSignature);
+    }
+    if (method == nullptr) {
+        return ANI_NOT_FOUND;
+    }
+
+    *result = method;
+    return ANI_OK;
+}
+
+PandaString NormalizeMethodNameForAni(const char *name)
+{
+    ASSERT(name != nullptr);
+
+    // Note: remove this code as soon as new mangler rules have merged.
+    static constexpr std::size_t OLD_GET_SET_PREFIX_LENGTH = std::string_view("<get>").size();
+    PandaString methodName(name);
+    if (methodName.rfind("<get>", 0) == 0) {
+        methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%get-");
+    } else if (methodName.rfind("<set>", 0) == 0) {
+        methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%set-");
+    }
+    return methodName;
+}
+
+ani_status ResolveInstanceMethodByName(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(name != nullptr);
+    ASSERT(result != nullptr);
+
+    PandaString methodName = NormalizeMethodNameForAni(name);
+    return ResolveClassMethodByName<false>(klass, methodName.c_str(), signature, result);
+}
+
+static ANIArg::AniMethodArgs MakeMethodArgsFromVvaArgs(EtsMethod *etsMethod, va_list *vvaArgs)
+{
+    ANIArg::AniMethodArgs methodArgs {etsMethod, nullptr, {}, true};
+    ASSERT(etsMethod != nullptr);
+    ASSERT(vvaArgs != nullptr);
+
+    va_list copiedArgs;             // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_copy(copiedArgs, *vvaArgs);  // NOLINT(clang-analyzer-valist.Uninitialized)
+    auto &args = methodArgs.argsStorage;
+    args.reserve(etsMethod->GetNumArgs());
+    panda_file::ShortyIterator it(etsMethod->GetPandaMethod()->GetShorty());
+    panda_file::ShortyIterator end;
+    ++it;  // skip the return value
+    for (; it != end; ++it) {
+        ani_value value {};
+        panda_file::Type type = *it;
+        READ_VALUE_FROM_VA_LIST(type, copiedArgs, value, va_end(copiedArgs));
+        args.emplace_back(value);
+    }
+    va_end(copiedArgs);
+
+    methodArgs.vargs = methodArgs.argsStorage.data();
+    return methodArgs;
+}
+
 // Сheckers must be consistent with the type hierarchy
 // ani_ref
 //    |
@@ -218,6 +324,10 @@ void FormatPointer(PandaStringStream &ss, T *ptr)
 PandaString ANIArg::GetStringValue() const
 {
     PandaStringStream ss;
+    if (action_ == Action::VERIFY_METHOD_RETURN_TYPE) {
+        ss << "<resolved by name>";
+        return ss.str();
+    }
     switch (type_) {
         case ValueType::ANI_SIZE:
             ss << GetValueSize();
@@ -245,6 +355,9 @@ PandaString ANIArg::GetStringValue() const
 // CC-OFFNXT(G.FUD.05) solid logic
 PandaString ANIArg::GetStringType() const
 {
+    if (action_ == Action::VERIFY_METHOD_RETURN_TYPE) {
+        return "ani_method";
+    }
     // clang-format off
     switch (type_) {
         case ValueType::ANI_ENV:                          return "ani_env *";
@@ -261,6 +374,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_OBJECT:                       return "ani_object";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
+        case ValueType::ANI_VVA_ARGS:                     return "va_list *";
         case ValueType::ANI_UTF8_BUFFER:                  return "char *";
         case ValueType::ANI_UTF8_STRING:                  return "const char *";
         case ValueType::ANI_UTF16_BUFFER:                 return "uint16_t *";
@@ -383,6 +497,13 @@ static bool IsValidMethodArgRefType(ani_env *env, EtsMethod *method, VRef *ref, 
     Class *inputKlass = s.ToInternalType(realRef)->GetClass()->GetRuntimeClass();
     return methodKlass->IsAssignableFrom(inputKlass);
 }
+
+struct ExtArgInfo {
+    PandaString name;
+    int64_t value;
+    panda_file::Type type;
+    bool isValid;
+};
 
 class Verifier {
 public:
@@ -621,6 +742,22 @@ public:
         return {};
     }
 
+    std::optional<PandaString> VerifyMethodName(const char *name)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err.has_value()) {
+            return err;
+        }
+        name_ = name;
+        return {};
+    }
+
+    std::optional<PandaString> VerifySignature(const char *signature)
+    {
+        signature_ = signature;
+        return {};
+    }
+
     std::optional<PandaString> DoVerifyMethod(impl::VMethod *vmethod, impl::VMethod::ANIMethodType type,
                                               EtsType returnType)
     {
@@ -804,6 +941,23 @@ public:
         return {};
     }
 
+    std::optional<PandaString> VerifyMethodReturnType(EtsType returnType)
+    {
+        if (class_ == nullptr || name_ == nullptr) {
+            return {};
+        }
+
+        EtsMethod *etsMethod = ResolveMethodByName();
+        if (etsMethod == nullptr) {
+            return {};
+        }
+
+        if (etsMethod->GetReturnValueType() != returnType) {
+            return "wrong return type";
+        }
+        return {};
+    }
+
     std::optional<PandaString> VerifyMethodAArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         ASSERT(methodArgs != nullptr);
@@ -817,6 +971,38 @@ public:
     {
         ASSERT(methodArgs != nullptr);
         return DoVerifyMethodArgs(methodArgs);
+    }
+
+    std::optional<PandaString> VerifyAArgs(const ani_value *vargs)
+    {
+        if (class_ == nullptr || name_ == nullptr) {
+            return {};
+        }
+        EtsMethod *etsMethod = ResolveMethodByName();
+        if (etsMethod == nullptr) {
+            return {};
+        }
+        if (vargs == nullptr && etsMethod->GetNumArgs() != 0) {
+            return "wrong arguments value";
+        }
+
+        methodArgsForExtInfo_ = ANIArg::AniMethodArgs {etsMethod, vargs, {}, false};
+        return DoVerifyMethodArgs(&methodArgsForExtInfo_.value());
+    }
+
+    std::optional<PandaString> VerifyVvaArgs(va_list *vvaArgs)
+    {
+        if (vvaArgs == nullptr || class_ == nullptr || name_ == nullptr) {
+            return {};
+        }
+
+        EtsMethod *etsMethod = ResolveMethodByName();
+        if (etsMethod == nullptr) {
+            return {};
+        }
+
+        methodArgsForExtInfo_ = MakeMethodArgsFromVvaArgs(etsMethod, vvaArgs);
+        return DoVerifyMethodArgs(&methodArgsForExtInfo_.value());
     }
 
     std::optional<PandaString> DoVerifyMethodArgs(ANIArg::AniMethodArgs *methodArgs)
@@ -855,6 +1041,8 @@ public:
         return {};
     }
 
+    std::optional<PandaVector<ExtArgInfo>> GetExtArgInfoListForResolvedArgs(PandaAniEnv *pandaEnv) const;
+
 private:
     EnvANIVerifier *GetEnvANIVerifier()
     {
@@ -862,11 +1050,29 @@ private:
         return PandaAniEnv::FromAniEnv(venv_->GetEnv())->GetEnvANIVerifier();
     }
 
+    EtsMethod *ResolveMethodByName()
+    {
+        if (methodByNameResolved_) {
+            return resolvedMethod_;
+        }
+        methodByNameResolved_ = true;
+        if (class_ == nullptr || name_ == nullptr) {
+            return nullptr;
+        }
+        ResolveInstanceMethodByName(class_, name_, signature_, &resolvedMethod_);
+        return resolvedMethod_;
+    }
+
     VVm *vvm_ {};
     VEnv *venv_ {};
 
     EtsClass *class_ {};
-    VArray *currentArray_ {};  // For array index validation
+    const char *name_ {};
+    const char *signature_ {};
+    bool methodByNameResolved_ {false};
+    EtsMethod *resolvedMethod_ {nullptr};
+    std::optional<ANIArg::AniMethodArgs> methodArgsForExtInfo_ {};
+    VArray *currentArray_ {};
 };
 
 using CheckerHandler = std::optional<PandaString> (*)(Verifier &, const ANIArg &);
@@ -941,6 +1147,24 @@ static std::optional<PandaString> VerifyUTF8String(Verifier &v, const ANIArg &ar
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_STRING);
     return v.VerifyTypePtr(arg.GetValueUTF8String(), "const char *");
+}
+
+static std::optional<PandaString> VerifyMethodName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_NAME);
+    return v.VerifyMethodName(arg.GetValueUTF8String());
+}
+
+static std::optional<PandaString> VerifyMethodReturnType(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_RETURN_TYPE);
+    return v.VerifyMethodReturnType(arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifySignature(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIGNATURE);
+    return v.VerifySignature(arg.GetValueUTF8String());
 }
 
 static std::optional<PandaString> VerifyUTF16Buffer(Verifier &v, const ANIArg &arg)
@@ -1037,6 +1261,18 @@ static std::optional<PandaString> VerifyMethodVArgs(Verifier &v, const ANIArg &a
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_V_ARGS);
     return v.VerifyMethodVArgs(arg.GetValueMethodArgs());
+}
+
+static std::optional<PandaString> VerifyAArgs(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_A_ARGS);
+    return v.VerifyAArgs(arg.GetValueValueArgs());
+}
+
+static std::optional<PandaString> VerifyVvaArgs(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VVA_ARGS);
+    return v.VerifyVvaArgs(arg.GetValueVvaArgs());
 }
 
 static std::optional<PandaString> VerifyVmStorage(Verifier &v, const ANIArg &arg)
@@ -1230,17 +1466,48 @@ struct ArgInfo {
     std::optional<PandaString> err;
 };
 
-struct ExtArgInfo {
-    PandaString name;
-    int64_t value;
-    panda_file::Type type;
-    bool isValid;
-};
-
 struct ArgsInfo {
     PandaVector<ArgInfo> argInfoList;
     std::optional<PandaVector<ExtArgInfo>> extArgInfoList;
 };
+
+static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaAniEnv *pandaEnv, const ANIArg::AniMethodArgs *methodArgs)
+{
+    if (methodArgs == nullptr || methodArgs->method == nullptr || methodArgs->vargs == nullptr) {
+        return {};
+    }
+
+    auto getName = [](size_t index) -> PandaString {
+        PandaStringStream ss;
+        ss << '[' << index << ']';
+        return ss.str();
+    };
+
+    PandaVector<ExtArgInfo> extArgInfoList;
+    size_t i = 0;
+
+    CallArgs callArgs(methodArgs->method, methodArgs->vargs);
+    auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
+    callArgs.ForEachArgs([&](ani_value value, panda_file::Type type, size_t refIndex) -> bool {
+        PandaString name = getName(i++);
+        bool isValid = IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs);
+        if (isValid && type.IsReference()) {
+            isValid =
+                IsValidMethodArgRefType(pandaEnv, methodArgs->method, reinterpret_cast<VRef *>(value.r), refIndex);
+        }
+        extArgInfoList.emplace_back(ExtArgInfo {std::move(name), value.l, type, isValid});
+        return true;
+    });
+    return extArgInfoList;
+}
+
+std::optional<PandaVector<ExtArgInfo>> Verifier::GetExtArgInfoListForResolvedArgs(PandaAniEnv *pandaEnv) const
+{
+    if (!methodArgsForExtInfo_.has_value()) {
+        return {};
+    }
+    return MakeExtArgInfoList(pandaEnv, &methodArgsForExtInfo_.value());
+}
 
 static PandaString GetAniTypeByType(panda_file::Type type)
 {
@@ -1338,37 +1605,6 @@ static void DoANIArgsAbort(PandaEtsVM *etsVm, std::string_view functionName, con
     DoAbortANI(etsVm, functionName, ss.str());
 }
 
-static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaAniEnv *pandaEnv, ANIArg::AniMethodArgs *methodArgs)
-{
-    if (methodArgs->method == nullptr || methodArgs->vargs == nullptr) {
-        return {};
-    }
-
-    ASSERT(methodArgs != nullptr);
-    auto getName = [](size_t index) -> PandaString {
-        PandaStringStream ss;
-        ss << '[' << index << ']';
-        return ss.str();
-    };
-
-    PandaVector<ExtArgInfo> extArgInfoList;
-    size_t i = 0;
-
-    CallArgs callArgs(methodArgs->method, methodArgs->vargs);
-    auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
-    callArgs.ForEachArgs([&](ani_value value, panda_file::Type type, size_t refIndex) -> bool {
-        PandaString name = getName(i++);
-        bool isValid = IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs);
-        if (isValid && type.IsReference()) {
-            isValid =
-                IsValidMethodArgRefType(pandaEnv, methodArgs->method, reinterpret_cast<VRef *>(value.r), refIndex);
-        }
-        extArgInfoList.emplace_back(ExtArgInfo {std::move(name), value.l, type, isValid});
-        return true;
-    });
-    return extArgInfoList;
-}
-
 // CC-OFFNXT(G.NAM.03) false positive
 bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> args)
 {
@@ -1396,6 +1632,9 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
             auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
             auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
             argsInfo.extArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
+        } else if (action == ANIArg::Action::VERIFY_VVA_ARGS || action == ANIArg::Action::VERIFY_A_ARGS) {
+            auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
+            argsInfo.extArgInfoList = verifier.GetExtArgInfoListForResolvedArgs(pandaEnv);
         }
         argsInfo.argInfoList = std::move(argInfoList);
         DoANIArgsAbort(PandaEtsVM::FromAniVM(vvm->GetVm()), functionName, argsInfo);

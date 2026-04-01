@@ -54,3 +54,18 @@ ani_verify_add_generated_tests(ani_verify_test_object_call_method
            "double: Type=Double,type=double,ret=d,ret_type=double,wrong_ret=int,wrong_ret_short=i,value=1"
            "ref: Type=Ref,type=ref,ret=C{std:core.Object},ret_type=Object,wrong_ret=int,wrong_ret_short=i,value=new Object()"
 )
+
+ani_verify_add_generated_tests(ani_verify_test_object_call_method_by_name
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_call_method_by_name_test.cpp.j2
+    J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_call_method_by_name_test.ets.j2
+    PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,ret=z,wrong_ret=int,wrong_ret_short=i,value=true,cpp_value=true"
+           "char: Type=Char,type=char,ret_type=char,ret=c,wrong_ret=int,wrong_ret_short=i,value=c'a',cpp_value='a'"
+           "byte: Type=Byte,type=byte,ret_type=byte,ret=b,wrong_ret=int,wrong_ret_short=i,value=1,cpp_value=1"
+           "short: Type=Short,type=short,ret_type=short,ret=s,wrong_ret=int,wrong_ret_short=i,value=1,cpp_value=1"
+           "int: Type=Int,type=int,ret_type=int,ret=i,wrong_ret=byte,wrong_ret_short=b,value=1,cpp_value=1"
+           "long: Type=Long,type=long,ret_type=long,ret=l,wrong_ret=int,wrong_ret_short=i,value=1,cpp_value=1"
+           "float: Type=Float,type=float,ret_type=float,ret=f,wrong_ret=int,wrong_ret_short=i,value=1,cpp_value=1"
+           "double: Type=Double,type=double,ret_type=double,ret=d,wrong_ret=int,wrong_ret_short=i,value=1,cpp_value=1"
+           "ref: Type=Ref,type=ref,ret_type=Object,ret=C{std.core.Object},wrong_ret=int,wrong_ret_short=i,value=new Object(),cpp_value=0"
+           "void: Type=Void,type=void,ret_type=void,ret=,wrong_ret=int,wrong_ret_short=i,value="
+)

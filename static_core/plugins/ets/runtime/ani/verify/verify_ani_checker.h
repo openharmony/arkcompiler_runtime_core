@@ -22,7 +22,7 @@
 #include "runtime/include/mem/panda_string.h"
 
 // clang-format off
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-vararg)
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
 #define ANI_VERIFICATION_MAP                                                      \
     X(VERIFY_VM,                            VerifyVm)                             \
@@ -48,6 +48,8 @@
     X(VERIFY_FUNCTION,                      VerifyFunction)                       \
     X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
     X(VERIFY_METHOD_V_ARGS,                 VerifyMethodVArgs)                    \
+    X(VERIFY_A_ARGS,                        VerifyAArgs)                          \
+    X(VERIFY_VVA_ARGS,                      VerifyVvaArgs)                        \
     X(VERIFY_VM_STORAGE,                    VerifyVmStorage)                      \
     X(VERIFY_ENV_STORAGE,                   VerifyEnvStorage)                     \
     X(VERIFY_BOOLEAN_STORAGE,               VerifyBooleanStorage)                 \
@@ -67,6 +69,9 @@
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
     X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
+    X(VERIFY_METHOD_NAME,                   VerifyMethodName)                     \
+    X(VERIFY_METHOD_RETURN_TYPE,            VerifyMethodReturnType)               \
+    X(VERIFY_SIGNATURE,                     VerifySignature)                      \
     X(VERIFY_ARRAY_INDEX,                   VerifyArrayIndex)                     \
     X(VERIFY_SIZE,                          VerifySize)                           \
     X(VERIFY_RESOLVER,                      VerifyResolver)                       \
@@ -129,6 +134,7 @@
     X(ANI_ERROR_STORAGE,                ErrorStorage,              VError **)                \
     X(UINT32,                           U32,                       uint32_t)                 \
     X(METHOD_ARGS,                      MethodArgs,                AniMethodArgs *)          \
+    X(ANI_VVA_ARGS,                     VvaArgs,                   va_list *)                \
     X(ANI_ARRAY_STORAGE,                ArrayStorage,              VArray **)                \
     X(ANI_FIXED_ARRAY_BOOLEAN_STORAGE,  FixedArrayBooleanStorage,  VFixedArrayBoolean **)    \
     X(ANI_FIXED_ARRAY_CHAR_STORAGE,     FixedArrayCharStorage,     VFixedArrayChar **)       \
@@ -141,15 +147,56 @@
     X(ANI_RESOLVER,                     Resolver,                  VResolver *)              \
     X(ANI_RESOLVER_STORAGE,             ResolverStorage,           VResolver **)             \
 
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02-CPP) keep va_list consumption local while sharing switch logic
+#define READ_VALUE_FROM_VA_LIST(TYPE, VA_ARGS, VALUE, CLEANUP_ON_UNEXPECTED)             \
+    do {                                                                                 \
+        switch ((TYPE).GetId()) {                                                        \
+            case panda_file::Type::TypeId::U1:                                           \
+            case panda_file::Type::TypeId::U16:                                          \
+                (VALUE).l = va_arg((VA_ARGS), uint32_t);                                 \
+                break;                                                                   \
+            case panda_file::Type::TypeId::I8:                                           \
+            case panda_file::Type::TypeId::I16:                                          \
+            case panda_file::Type::TypeId::I32:                                          \
+                (VALUE).i = va_arg((VA_ARGS), int32_t);                                  \
+                break;                                                                   \
+            case panda_file::Type::TypeId::I64:                                          \
+                (VALUE).l = va_arg((VA_ARGS), int64_t);                                  \
+                break;                                                                   \
+            case panda_file::Type::TypeId::F32:                                          \
+                (VALUE).f = static_cast<float>(va_arg((VA_ARGS), double));               \
+                break;                                                                   \
+            case panda_file::Type::TypeId::F64:                                          \
+                (VALUE).d = va_arg((VA_ARGS), double);                                   \
+                break;                                                                   \
+            case panda_file::Type::TypeId::REFERENCE:                                    \
+                if constexpr (sizeof(ani_ref) == sizeof(ani_long)) {                     \
+                    (VALUE).l = va_arg((VA_ARGS), int64_t);                              \
+                } else {                                                                 \
+                    (VALUE).l = va_arg((VA_ARGS), uint32_t);                             \
+                }                                                                        \
+                break;                                                                   \
+            default:                                                                     \
+                CLEANUP_ON_UNEXPECTED;                                                   \
+                LOG(FATAL, ANI) << "Unexpected argument type";                           \
+                break;                                                                   \
+        }                                                                                \
+    } while (false)
+
+// NOLINTEND(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-vararg)
 // clang-format on
 
 namespace ark::ets {
 class EtsMethod;
 class EtsField;
+class EtsClass;
 }  // namespace ark::ets
 
 namespace ark::ets::ani::verify {
+
+PandaString NormalizeMethodNameForAni(const char *name);
+
+ani_status ResolveInstanceMethodByName(EtsClass *klass, const char *name, const char *signature, EtsMethod **result);
 
 enum class AccessMode {
     READ,
@@ -264,6 +311,22 @@ public:
         return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_UTF8_STRING);
     }
 
+    static ANIArg MakeForMethodName(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_METHOD_NAME);
+    }
+
+    static ANIArg MakeForSignature(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_SIGNATURE);
+    }
+
+    static ANIArg MakeForMethodReturnType(EtsType returnType, std::string_view name)
+    {
+        return ANIArg(ArgValueBySize(static_cast<ani_size>(returnType)), name, Action::VERIFY_METHOD_RETURN_TYPE,
+                      returnType);
+    }
+
     static ANIArg MakeForUTF16Buffer(uint16_t *ptr, std::string_view name)
     {
         return ANIArg(ArgValueByUTF16Buffer(ptr), name, Action::VERIFY_UTF16_BUFFER);
@@ -333,6 +396,16 @@ public:
     static ANIArg MakeForMethodAArgs(AniMethodArgs *aniMethodArgs, std::string_view name)
     {
         return ANIArg(ArgValueByMethodArgs(aniMethodArgs), name, Action::VERIFY_METHOD_A_ARGS);
+    }
+
+    static ANIArg MakeForAArgs(const ani_value *vargs, std::string_view name)
+    {
+        return ANIArg(ArgValueByValueArgs(vargs), name, Action::VERIFY_A_ARGS);
+    }
+
+    static ANIArg MakeForVvaArgs(va_list &vvaArgs, std::string_view name)
+    {
+        return ANIArg(ArgValueByVvaArgs(&vvaArgs), name, Action::VERIFY_VVA_ARGS);
     }
 
     static ANIArg MakeForArray(VArray *varray, std::string_view name)
