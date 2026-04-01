@@ -2016,7 +2016,6 @@ export namespace taskpool {
         if (GroupState.of(group).hasTimeout) {
             throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: the taskGroup cannot be executed again, taskGroup has already set timeout");
         }
-        taskGroupSubmitted(GroupState.of(group).id, tasksCount);
         if (GroupState.of(group).isTaskAlreadySubmitted) {
             GroupState.of(group).taskCount.store(tasksCount);
             GroupState.of(group).hasFailedTask.store(0);
@@ -2039,7 +2038,6 @@ export namespace taskpool {
         if (GroupState.of(group).state_.compareAndSwap(InternalState.NOT_FOUND, InternalState.WAITING) != InternalState.NOT_FOUND) {
             throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP, "taskpool:: the taskGroup cannot be executed again, taskGroup cannot be set timeout");
         }
-        taskGroupSubmitted(GroupState.of(group).id, tasksCount);
         GroupState.of(group).isTaskAlreadySubmitted = true;
         GroupState.of(group).hasTimeout = true;
         allGroups.set(GroupState.of(group).id, group);
@@ -2401,17 +2399,6 @@ export namespace taskpool {
     function taskSubmitted(task: Task): void {
         const count: int | undefined = waitingTasks.get(task);
         waitingTasks.set(task, count == undefined ? 1 : count + 1);
-    }
-
-    /**
-     * @brief Submit group of tasks to the taskpool on the execute method
-     * @see taskpool.execute
-     * @param groupId identifier of the submitted group
-     * @param tasksCount count of tasks in the passed group
-     */
-    function taskGroupSubmitted(groupId: int, tasksCount: int): void {
-        const count: int | undefined = waitingGroupTasks.get(groupId);
-        waitingGroupTasks.set(groupId, count == undefined ? tasksCount : count + tasksCount);
     }
 
     function popFromMap<T>(item: T, currentTasksMap: containers.ConcurrentHashMap<T, int>, possibleTasksMap: containers.ConcurrentHashMap<T, int>, cancelSet: containers.ConcurrentSet<T>): boolean {
@@ -3042,12 +3029,6 @@ export namespace taskpool {
     const pendingDelayed: containers.ConcurrentSet<Task> = new containers.ConcurrentSet<Task>();
     const pendingDelayedCanceled: containers.ConcurrentSet<Task> = new containers.ConcurrentSet<Task>();
     const tasksToBeCanceled: containers.ConcurrentSet<Task> = new containers.ConcurrentSet<Task>();
-    // key is group id, value is count of associated tasks with this group
-    const waitingGroupTasks: Map<int, int> = new Map<int, int>();
-    const runningGroupTasks: Map<int, int> = new Map<int, int>();
-    const groupsToBeCanceled: Set<int> = new Set<int>();
-    // Count of pending tasks per worker
-    const workerPendingTasksCount: Map<WorkerId, Int> = new Map<WorkerId, Int>();
 
     const workersMutex: Object = ConcurrencyHelpers.mutexCreate();
     let workers: Set<GlobalQueueWorker> = new Set<GlobalQueueWorker>();
