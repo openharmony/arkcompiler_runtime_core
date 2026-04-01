@@ -1,18 +1,6 @@
 #28019
 02.lexical_elements/07.keywords/soft_12.ets
 
-#26512 regex literals not implemented
-02.lexical_elements/09.literals/08.regex_literal/regex_anchor_boundaries.ets
-02.lexical_elements/09.literals/08.regex_literal/regex_basic_literal.ets
-02.lexical_elements/09.literals/08.regex_literal/regex_example_literals.ets
-02.lexical_elements/09.literals/08.regex_literal/regex_flags_literal.ets
-02.lexical_elements/09.literals/08.regex_literal/regex_groups_capturing.ets
-02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
-02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
-
-#31967
-03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.outside_let_const_selected_values.ets
-
 #25512
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
@@ -120,22 +108,6 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_type_resolution_n_7.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_type_resolution_n_8.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_type_resolution_n_9.ets
-
-#32226 missing CTE for circular dependency
-05.generics/03.utility_types/01.awaited_utility_type/awaited_circular_n.ets
-
-#33270
-05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_0.ets
-05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_1.ets
-05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_2.ets
-05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_3.ets
-
-#33271
-05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_1.ets
-05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_3.ets
-
-#31615 RTE for partial class field assignment
-05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
 
 #33818
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
@@ -810,13 +782,7 @@
 #33476
 13.modules_and_namespaces/09.multifile_module/multifile_module_mismatched_export_n.ets
 
-#26714
-13.modules_and_namespaces/04.import_directives/test.ets
-
-#31411
-13.modules_and_namespaces/04.import_directives/03.selective_binding/import_conflict_neg.ets
-
-#33874
+#33874 
 13.modules_and_namespaces/04.import_directives/05.import_path/bad/import_path_bad_n_3.ets
 
 #32456 Initializer in ambient const declaration
@@ -992,9 +958,6 @@
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0002.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
 
-#33791
-17.experimental_features/01.type_char/02.char_operations/relational_const.ets
-
 #33936 No CTE on relational operations between char type and non-numeric type
 17.experimental_features/01.type_char/02.char_operations/rel_n_0.ets
 17.experimental_features/01.type_char/02.char_operations/rel_n_1.ets
@@ -1050,8 +1013,6 @@
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_40.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_41.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_43.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_0.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_1.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_2.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_16.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_17.ets
@@ -1066,7 +1027,6 @@
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_28.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_30.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_31.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_2d_dim_assign_to_int_type.ets
 
 # 33922
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_0.ets
@@ -1126,18 +1086,6 @@
 17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_21.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_22.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_23.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_24.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_25.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_26.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_27.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_28.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_29.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_30.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_31.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_32.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_33.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_34.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_35.ets
 
 #29160
 17.experimental_features/enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_236.ets
