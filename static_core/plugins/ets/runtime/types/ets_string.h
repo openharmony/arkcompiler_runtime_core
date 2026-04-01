@@ -290,6 +290,8 @@ public:
         return coretypes::String::StringsAreEqual(GetCoreType(), FromEtsObject(obj)->GetCoreType());
     }
 
+    static bool StringsAreEqualWithCache(String *str1, String *str2);
+
     coretypes::String *GetCoreType()
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();

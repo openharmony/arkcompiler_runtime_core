@@ -189,7 +189,7 @@ EtsBoolean StdCoreStringIsEmpty(EtsString *s)
     return ToEtsBoolean(s->IsEmpty());
 }
 
-uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
+EtsBoolean StdCoreStringEquals(EtsString *owner, EtsObject *s)
 {
     if (owner == nullptr) {
         return UINT8_C(s == nullptr);
@@ -200,7 +200,9 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
     if (s == nullptr || !(s->GetClass()->IsStringClass())) {
         return UINT8_C(0);
     }
-    return ToEtsBoolean(owner->Compare(EtsString::FromEtsObject(s)) == 0);
+    auto *s1 = owner->GetCoreType();
+    auto *s2 = EtsString::FromEtsObject(s)->GetCoreType();
+    return ToEtsBoolean(EtsString::StringsAreEqualWithCache(s1, s2));
 }
 
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
