@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -106,7 +106,8 @@ class InitRunner:
             init_parser.add_argument(
                 f'--{prop_name.lower()}', action='store', default=prop_value,
                 dest=prop_name, type=process_type,
-                help=f'Set mandatory property {prop_name}. Expected {expected_value}.')
+                help=f'Set mandatory property {prop_name}. Expected {expected_value}. '
+                     f'(saved and later used in configs as ${prop_name})')
 
     @classmethod
     def should_runner_initialize(cls, argv: list[str]) -> bool:

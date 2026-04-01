@@ -15,19 +15,19 @@ all required python libraries  (`tqdm`, `dataclasses`, `python-dotenv`, etc).
 It is possible to run tests either using script `runner.sh` or `main.py` directly.
 
 ### Before the first start
-- Create at your home the file `.urunner.env`
-- Specify there following environment variables:
+- Create `.urunner.env` in your home directory.
+- Specify the following environment variables there:
 ```bash
 ARKCOMPILER_RUNTIME_CORE_PATH=<your path to the folder with cloned repository arkcompiler_runtime_core>
 ARKCOMPILER_ETS_FRONTEND_PATH=<your path to the folder with cloned repository arkcompiler_ets_frontend>
 PANDA_BUILD=<your path to build folder>
 WORK_DIR=<your path to temporary folder where all intermediate files and reports will be kept>
 ```
-- or run
-```commandline
-urunner2> ./runner.sh init
+- Or run:
+```bash
+./runner.sh init
 ```
-To create it in interactive mode
+This creates the file in interactive mode. Saved variables can be used later in test suite or workflow config files by name.
 
 ### Shell script
 Script `runner.sh` activates the virtual environment with all required libraries
@@ -165,7 +165,7 @@ ArkTS Specification coverage report shows test statistics for every specificatio
 ## Generation options:
 
 -   `--generate-only` - only generate tests without running them. Tests are run as usual without this option.
--   `--force-generate` - force ETS tests generation from templates
+-   `--force-generate` - regenerate ETS test cases from templates. Use after changing test sources or templates.
 
 ## Other options:
 

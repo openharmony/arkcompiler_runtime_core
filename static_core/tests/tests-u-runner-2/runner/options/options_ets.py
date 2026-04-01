@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -65,7 +65,7 @@ class ETSOptions(IOptions):
             default=False,
             type=ETSOptions.str2bool,
             dest=f"{dest}{ETSOptionsConsts.FORCE_GENERATE.value}",
-            help='force generating the ETS test cases from templates')
+            help='Regenerate ETS test cases from templates. Use after changing test sources or templates.')
         parser.add_argument(
             f'--{ETSOptionsConsts.COMPARE_FILES.value}', action='store_true', default=False,
             dest=f"{dest}{ETSOptionsConsts.COMPARE_FILES.value}",
