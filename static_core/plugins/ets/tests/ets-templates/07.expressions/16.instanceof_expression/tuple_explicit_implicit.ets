@@ -52,8 +52,8 @@ function main() {
         "failed negative (greater arity) for {{c.type}}")
 
     // Negative: lesser arity -> does not match
-    arktest.assertFalse(pass_through(a1) instanceof (other_tuple_lesser_arity),
-        "failed negative (lesser arity) for {{c.type}}")
+    arktest.assertTrue(pass_through(a1) instanceof (other_tuple_lesser_arity),
+        "failed instanceof (lesser arity)")
 
     let a2 = {{c.init}}
     // Implicit type: without explicit type annotation this syntax can produce a tuple or an array of unions

@@ -254,6 +254,7 @@ cases:
       - { type: 'int', res: 0 }
       - { type: 'Array', res: 0 }
       - { type: 'Tuple2', res: 1 }
+      - { type: 'TT', res: 1 }
 
   - decl: |-
       class A<T> {}
