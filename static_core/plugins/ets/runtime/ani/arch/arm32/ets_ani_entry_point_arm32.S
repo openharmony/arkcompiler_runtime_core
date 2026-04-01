@@ -79,7 +79,7 @@ AniCriticalNativeEntryPoint:
     blx GetCurrentManagedThread
     str fp, [r0, #MANAGED_THREAD_FRAME_OFFSET]
     ldrb r7, [r0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    mov r1, #1
+    mov r1, #MANAGED_THREAD_FRAME_KIND_NATIVE
     strb r1, [r0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     mov THREAD_REG, r0
     pop {r0}
@@ -308,7 +308,7 @@ AniCriticalNativeEntryPoint:
     blx GetCurrentManagedThread
     str fp, [r0, #MANAGED_THREAD_FRAME_OFFSET]
     ldrb r7, [r0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    mov r1, #1
+    mov r1, #MANAGED_THREAD_FRAME_KIND_NATIVE
     strb r1, [r0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     mov THREAD_REG, r0
     mov r0, r4

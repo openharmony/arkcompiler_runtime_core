@@ -42,6 +42,12 @@ namespace ark {
 using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 
+// Fix CurrentFrameKind's constants because assembler code relays on them.
+// See MANAGED_THREAD_FRAME_KIND_OFFSET usage in *.S files.
+static_assert(static_cast<uint8_t>(CurrentFrameKind::INTERPRETER) == 0);
+static_assert(static_cast<uint8_t>(CurrentFrameKind::COMPILER) == 1);
+static_assert(static_cast<uint8_t>(CurrentFrameKind::NATIVE) == 2);
+
 mem::TLAB *ManagedThread::zeroTlab_ = nullptr;
 static const int MIN_PRIORITY = os::thread::LOWEST_PRIORITY;
 static constexpr int MICROSEC_CONVERSION = 1000000;

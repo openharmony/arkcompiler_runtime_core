@@ -37,7 +37,9 @@
 #endif
 \name:
     ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    cbz w17, 1f
+    // Test the current frame kind is CurrentFrameKind::INTERPRETER (0) or CurrentFrameKind::NATIVE (2)
+    // In both cases bit #0 must be 0
+    tbz w17, #0, 1f 
     b \compiled_entry
     // workround relocation R_AARCH64_CONDBR19 out of range
 1:  b \notcompiled_entry
@@ -178,8 +180,7 @@
     // If the caller is not a compiled method, we need to call \entry
     // and return back after its execution
     ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w17, w17
-    beq 1f
+    tbz w17, #0, 1f
     CFI_REMEMBER_STATE
 
     str lr, [sp, #-8]

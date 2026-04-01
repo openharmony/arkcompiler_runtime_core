@@ -84,7 +84,7 @@ AniCriticalNativeEntryPoint:
 
     // Update current frame in the thread
     movq %rbp, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
-    movb $1, MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG)
+    movb $MANAGED_THREAD_FRAME_KIND_NATIVE, MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG)
 
     // Check num args. If all args could be settle in regs
     // don't calculate stack size
@@ -302,7 +302,7 @@ AniCriticalNativeEntryPoint:
 
     // Update current frame in the thread
     movq %rbp, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
-    movb $1, MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG)
+    movb $MANAGED_THREAD_FRAME_KIND_NATIVE, MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG)
 
     // save return type to %r14d
     movq METHOD_SHORTY_OFFSET(%rbx), %rcx
