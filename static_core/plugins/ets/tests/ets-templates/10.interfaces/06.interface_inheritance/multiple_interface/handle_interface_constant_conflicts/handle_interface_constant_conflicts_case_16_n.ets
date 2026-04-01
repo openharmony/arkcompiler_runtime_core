@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@ desc: >-
     Verify that a class implementing an interface with a constant and having a property with the same name but
     different types causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0141: CONSTANT(): Double in TestClass cannot override CONSTANT():
+    String in InterfaceA because overriding return type is not compatible with the other return type.
 ---*/
 
 interface InterfaceA {

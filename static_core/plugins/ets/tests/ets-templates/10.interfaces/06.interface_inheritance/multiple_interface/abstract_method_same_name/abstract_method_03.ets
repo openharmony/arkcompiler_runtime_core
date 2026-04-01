@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 /*---
 desc: Method signature of the same name is compatible.
-tags: [compile-only]
 ---*/
+
+let num: number = 0
+let str: string = ""
 
 interface Parent1 {
   greet(message: string): void;
@@ -29,7 +31,22 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {
   greet(message: string | number): void;
 }
-
 class ChildClass implements Child {
-  greet(message: string | number): void {}
+  greet(message: string | number): void {
+    if(message instanceof string) {
+      str = message
+    } else if ( message instanceof number ) {
+      num = message
+    }
+  }
+}
+
+function main() {
+  num = 0
+  str = ""
+  let i: Child = new ChildClass()
+  i.greet("some str")
+  i.greet(5.6)
+  arktest.assertEQ(str, "some str")
+  arktest.assertEQ(num, 5.6)
 }

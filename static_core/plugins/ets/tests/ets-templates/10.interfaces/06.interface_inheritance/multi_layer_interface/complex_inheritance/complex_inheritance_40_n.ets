@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,9 @@
 desc:  Overriding a field by an accessor.
 assertion: Overriding a field by an accessor causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE45073: 'num' is defined as a property in class 'C',
+    but is overridden here in 'D' as an accessor.
 ---*/
 
 class C {

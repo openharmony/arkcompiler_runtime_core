@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,9 @@
 /*---
 desc: Modify the return value type of the interface.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0141: sayHello(): String in B cannot override sayHello(): void in A
+    because overriding return type is not compatible with the other return type.
 ---*/
 
 interface A {
