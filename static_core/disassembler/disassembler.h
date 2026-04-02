@@ -60,7 +60,7 @@ public:
     }
 
     PANDA_PUBLIC_API void Serialize(std::ostream &os, bool addSeparators = false, bool printInformation = false) const;
-    PANDA_PUBLIC_API void Disassemble(std::string_view filenameIn, bool quiet = false, bool skipStrings = false);
+    PANDA_PUBLIC_API bool Disassemble(std::string_view filenameIn, bool quiet = false, bool skipStrings = false);
     PANDA_PUBLIC_API void Disassemble(const panda_file::File &file, bool quiet = false, bool skipStrings = false);
     PANDA_PUBLIC_API void Disassemble(std::unique_ptr<const panda_file::File> &file, bool quiet = false,
                                       bool skipStrings = false);
