@@ -191,7 +191,7 @@ inline bool IsStdClass(EtsClass *klass)
 
 inline bool IsSubClassOfError(EtsClass *klass)
 {
-    return klass->IsSubClass(PlatformTypes()->escompatError);
+    return klass->IsSubClass(PlatformTypes()->coreError);
 }
 
 }  // namespace ark::ets::interop::js

@@ -15,11 +15,11 @@
 
 .record N <external>
 .record std.core.Object <external>
-.record escompat.Error <external>
-.record escompat.ErrorOptions <external>
+.record std.core.Error <external>
+.record std.core.ErrorOptions <external>
 .record std.core.String <external>
 .function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
-.function void escompat.Error._ctor_(escompat.Error a0, std.core.String a1, escompat.ErrorOptions a2) <ctor, external, access.function=public>
+.function void std.core.Error._ctor_(std.core.Error a0, std.core.String a1, std.core.ErrorOptions a2) <ctor, external, access.function=public>
 
 .record A {
     N field
@@ -40,7 +40,7 @@
 	lda.str "foo() never returns"
 	sta.obj v0
 	mov.null v1
-	initobj.short escompat.Error._ctor_:(escompat.Error,std.core.String,escompat.ErrorOptions), v0, v1
+	initobj.short std.core.Error._ctor_:(std.core.Error,std.core.String,std.core.ErrorOptions), v0, v1
 	sta.obj v2
 	throw v2
 }

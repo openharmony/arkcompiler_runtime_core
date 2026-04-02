@@ -20,10 +20,10 @@ desc: >-
 tags: [negative, no-warmup]
 expected_error:
   runtime:
-  - 'Unhandled exception: escompat.Error'
+  - 'Unhandled exception: std.core.Error'
   - 'Error: main job uncaught error'
 ---*/
 
 function main(): void {
-    throw new Error("main job uncaught error");
+    throw new Error('main job uncaught error');
 }

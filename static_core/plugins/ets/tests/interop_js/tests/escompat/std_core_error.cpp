@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,20 +18,20 @@
 
 namespace ark::ets::interop::js::testing {
 
-class ESCompatErrorTest : public EtsInteropTest {};
-TEST_F(ESCompatErrorTest, compat_error)
+class StdCoreErrorTest : public EtsInteropTest {};
+TEST_F(StdCoreErrorTest, std_core_error)
 {
-    // NOTE (vpukhov): compat accessors
-    ASSERT_EQ(true, RunJsTestSuite("compat_error.js"));
+    // NOTE (vpukhov): accessors
+    ASSERT_EQ(true, RunJsTestSuite("std_core_error.js"));
 }
 
-TEST_F(ESCompatErrorTest, compat_error_with_cause)
+TEST_F(StdCoreErrorTest, std_core_error_with_cause)
 {
     // NOTE (oignatenko) uncomment code in Error_TestJSSampleWithCause after interop will be supported in this direction
     ASSERT_EQ(true, RunJsTestSuite("error_js_suites/test_cause.js"));
 }
 
-TEST_F(ESCompatErrorTest, compat_error_to_string)
+TEST_F(StdCoreErrorTest, std_core_error_to_string)
 {
     // NOTE (oignatenko) uncomment code in Error_TestJSSampleWithCause after interop will be supported in this direction
     ASSERT_EQ(true, RunJsTestSuite("error_js_suites/test_to_string.js"));

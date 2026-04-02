@@ -33,7 +33,7 @@ static void SetRuntimeException(EtsLong regNumber, EtsExecutionContext *executio
 {
     auto errorMsg =
         "Failed to access variable at vreg #" + std::to_string(regNumber) + " and type " + std::string(typeName);
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, errorMsg);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, errorMsg);
 }
 
 template <typename T>
@@ -44,7 +44,7 @@ static T DebuggerAPIGetLocal(EtsLong regNumber)
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *runtime = executionCtx->GetPandaVM()->GetRuntime();
     if (UNLIKELY(!runtime->IsDebugMode())) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "Debugger is not enabled");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, "Debugger is not enabled");
         return static_cast<T>(0);
     }
     if (UNLIKELY(regNumber < 0)) {
@@ -117,7 +117,7 @@ static void DebuggerAPISetLocal(EtsLong regNumber, T value)
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *runtime = executionCtx->GetPandaVM()->GetRuntime();
     if (UNLIKELY(!runtime->IsDebugMode())) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "Debugger is not enabled");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, "Debugger is not enabled");
         return;
     }
     if (UNLIKELY(regNumber < 0)) {

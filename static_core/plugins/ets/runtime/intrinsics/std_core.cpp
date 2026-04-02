@@ -210,7 +210,7 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
 
     auto nameStr = name->GetMutf8();
     if (nameStr.empty()) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "The native library path is empty");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, "The native library path is empty");
         return;
     }
     PandaString fileNameStr = fileName != nullptr ? fileName->GetMutf8() : "";

@@ -13,7 +13,7 @@
 #
 Unhandled exception: throw_from_top_level_statement_1.TLSErr
 Error
-        at escompat.Error.<ctor> (Error.ets:56:0)
+        at std.core.Error.<ctor> (Error.ets:56:0)
         at throw_from_top_level_statement_1.TLSErr.<ctor> (throw_from_top_level_statement_1.ets:23:0)
         at throw_from_top_level_statement_1.ETSGLOBAL.lambda_invoke-0 (throw_from_top_level_statement_1.ets:28:0)
         at throw_from_top_level_statement_1.%lambda-lambda_invoke-0.invoke0 (throw_from_top_level_statement_1.ets:1:0)

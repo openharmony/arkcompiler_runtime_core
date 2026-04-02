@@ -454,11 +454,11 @@ TEST_F(ErrorHandlingTest, throw_multiple_call_test)
 TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
 {
     ani_class errorClass {};
-    ASSERT_EQ(env_->FindClass("escompat.Error", &errorClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Error", &errorClass), ANI_OK);
     ASSERT_NE(errorClass, nullptr);
 
     ani_method constructor {};
-    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std:core.String}C{escompat.ErrorOptions}:", &constructor),
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std:core.String}C{std.core.ErrorOptions}:", &constructor),
               ANI_OK);
     ASSERT_NE(constructor, nullptr);
 
@@ -489,7 +489,7 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
     std::string errorDescription {};
     GetErrorDescription(env_, errorDescription);
     CheckErrorDescription(errorDescription, std::string(MESSAGE_FROM_THROW_ERROR),
-                          {"at escompat.Error.<ctor>", "at escompat.Error.<ctor>"});
+                          {"at std.core.Error.<ctor>", "at std.core.Error.<ctor>"});
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,16 +19,16 @@ const fail = 1;
 function main(): int {
     let failures = 0;
 
-    failures += test(testThrowError(), "Throw an Error and catch it");
-    failures += test(testErrorWithMessage(), "Error object with cause");
-    failures += test(testThrowRuntimeErrorWithoutArgs(), "Throw an RuntimeError object");
-    failures += test(testThrowRuntimeErrorWithoutReason(), "Throw an RuntimeError object with message");
+    failures += test(testThrowError(), 'Throw an Error and catch it');
+    failures += test(testErrorWithMessage(), 'Error object with cause');
+    failures += test(testThrowRuntimeErrorWithoutArgs(), 'Throw an RuntimeError object');
+    failures += test(testThrowRuntimeErrorWithoutReason(), 'Throw an RuntimeError object with message');
     return failures;
 }
 
 function testThrowError(): int {
     try {
-        throw new Error("Test throw");
+        throw new Error('Test throw');
     } catch (ex) {
         if (ex instanceof Error) {
             return success;
@@ -39,7 +39,7 @@ function testThrowError(): int {
 
 function testErrorWithMessage(): int {
     try {
-        let message = "Test Error with message";
+        let message = 'Test Error with message';
         throw new Error(message);
     } catch (ex) {
         if (ex instanceof Error) {
@@ -52,8 +52,7 @@ function testErrorWithMessage(): int {
 function testThrowRuntimeErrorWithoutArgs(): int {
     try {
         throw new RuntimeError();
-    }
-    catch (ex) {
+    } catch (ex) {
         if (ex instanceof RuntimeError) {
             return success;
         }
@@ -63,9 +62,8 @@ function testThrowRuntimeErrorWithoutArgs(): int {
 
 function testThrowRuntimeErrorWithoutReason(): int {
     try {
-        throw new RuntimeError("Test RuntimeError");
-    }
-    catch (ex) {
+        throw new RuntimeError('Test RuntimeError');
+    } catch (ex) {
         if (ex instanceof RuntimeError) {
             return success;
         }
@@ -76,8 +74,8 @@ function testThrowRuntimeErrorWithoutReason(): int {
 
 function test(result: int, message: String): int {
     if (result == 0) {
-      return success;
+        return success;
     }
-    console.println("FAILED: " + message);
+    console.println('FAILED: ' + message);
     return fail;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,8 @@ class equalityExtra {
     compareFuncs(): boolean {
         let res: boolean = true;
         res &= this.comparison(foo, fooOther, this.noEqual);
-        // [TID 00657a] E/runtime: Unhandled error: escompat.Error
-        // [TID 00657a] E/runtime: at escompat.Error.$_invoke (etsstdlib.ets:114:0)
+        // [TID 00657a] E/runtime: Unhandled error: std.core.Error
+        // [TID 00657a] E/runtime: at std.core.Error.$_invoke (etsstdlib.ets:114:0)
         res &= this.comparison(foo, foo, this.equal);
         return res;
     }

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Unhandled exception: escompat.Error
+Unhandled exception: std.core.Error
 Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
+	at std.core.Error.<ctor> (Error.ets:56:0)
 	at abstract_class_initializer_declaration_try_neg_1.A.<cctor> (abstract_class_initializer_declaration_try_neg_1.ets:27:0)
 	at abstract_class_initializer_declaration_try_neg_1.ETSGLOBAL.main (abstract_class_initializer_declaration_try_neg_1.ets:31:0)

@@ -4,7 +4,7 @@
     "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/nullish_expr/expr/nonnull-object-expression-4.ets": 1,
     "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-and-nonempty-3-operands.ets": 1,
     "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/nullish_expr/expr/nonnull-object-expression.ets": 1,
-    "/tmp/abckit_test_ets/escompat/ErrorStackTest.ets": 1,
+    "/tmp/abckit_test_ets/std/core/ErrorStackTest.ets": 1,
     "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-and-empty-2-operands.ets": 1,
     "/tmp/abckit_test_ets/spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_02.ets": 1,
     "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-nonempty.ets": 1,

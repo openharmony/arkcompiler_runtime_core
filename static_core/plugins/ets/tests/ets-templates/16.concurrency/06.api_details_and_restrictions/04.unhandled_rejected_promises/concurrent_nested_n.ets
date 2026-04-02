@@ -23,9 +23,9 @@ expected_out:
         - "Task B start"
 expected_error:
     runtime:
-        - "Unhandled exception: escompat.Error"
+        - "Unhandled exception: std.core.Error"
         - "Error: concurrent_nested_n.ets: task A failed"
-        - "at concurrent_nested_n.ETSGLOBAL.%async-A (concurrent_nested_n.ets:40:0)"
+        - "at concurrent_nested_n.ETSGLOBAL.%async-taskA (concurrent_nested_n.ets:40:0)"
 ---*/
 
 async function delay(): Promise<string> {
@@ -34,21 +34,19 @@ async function delay(): Promise<string> {
             resolve(`Resolved after 100 ms`);
         }, 100);
     });
-  }
-  
-  async function A(): Promise<void> {
-    console.log("Task A start");
-    throw new Error("concurrent_nested_n.ets: task A failed");
-    console.log("Task A done");
-  }
-  
-  async function B(): Promise<void> {
-    console.log("Task B start");
+}
+
+async function taskA(): Promise<void> {
+    console.log('Task A start');
+    throw new Error('concurrent_nested_n.ets: task A failed');
+}
+
+async function taskB(): Promise<void> {
+    console.log('Task B start');
     console.log(await delay());
-    console.log("Task B done");
-  }
-  
-  function main(): void {
-    waitForCompletion(() => Promise.all([A(), B()]))
-  }
-  
+    console.log('Task B done');
+}
+
+function main(): void {
+    waitForCompletion(() => Promise.all([taskA(), taskB()]))
+}

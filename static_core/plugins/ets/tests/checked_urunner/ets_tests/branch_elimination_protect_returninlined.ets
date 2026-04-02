@@ -172,7 +172,7 @@ function test3InfLoop(): int {
 //! INST_COUNT       "Throw", 2
 //! PASS_BEFORE_NTH  "BranchElimination", 2
 //! INST             /Call.*Inlined.*eliminateThrow/
-//! INST             /LoadClass.*escompat.Error/
+//! INST             /LoadClass.*std.core.Error/
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
 //! INST_NEXT        "ReturnInlined"

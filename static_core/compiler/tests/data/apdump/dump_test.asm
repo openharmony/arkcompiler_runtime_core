@@ -29,7 +29,7 @@
 
 .record escompat.Array <external>
 
-.record escompat.Error <external>
+.record std.core.Error <external>
 
 .record ets.annotation.Module <external>
 
@@ -59,7 +59,7 @@
 	jlez jump_label_0
 	lda.str "neg"
 	sta.obj v0
-	initobj.short escompat.Error._ctor_:(escompat.Error,std.core.String), v0
+	initobj.short std.core.Error._ctor_:(std.core.Error,std.core.String), v0
 	sta.obj v0
 	throw v0
 jump_label_0:
@@ -124,7 +124,7 @@ jump_label_4:
 jump_label_3:
 	return.void
 
-.catch escompat.Error, try_begin_label_0, try_end_label_0, handler_begin_label_0_0
+.catch std.core.Error, try_begin_label_0, try_end_label_0, handler_begin_label_0_0
 }
 
 .function f64 dump_test.ETSGLOBAL.noisyBranch(f64 a0) <static, access.function=public> {
@@ -153,7 +153,7 @@ jump_label_3:
 try_begin_label_0:
 	lda.str "bang"
 	sta.obj v3
-	initobj.short escompat.Error._ctor_:(escompat.Error,std.core.String), v3
+	initobj.short std.core.Error._ctor_:(std.core.Error,std.core.String), v3
 	sta.obj v3
 	throw v3
 try_end_label_0:
@@ -166,7 +166,7 @@ jump_label_2:
 	i32tof64
 	return.64
 
-.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function f64 dump_test.ETSGLOBAL.runPolymorphic(escompat.Array a0, f64 a1) <static, access.function=public> {
@@ -244,7 +244,7 @@ jump_label_0:
 
 .function void escompat.Array._ctor_(escompat.Array a0, i32 a1) <ctor, external, access.function=public>
 
-.function void escompat.Error._ctor_(escompat.Error a0, std.core.String a1) <ctor, external, access.function=public>
+.function void std.core.Error._ctor_(std.core.Error a0, std.core.String a1) <ctor, external, access.function=public>
 
 .function void std.core.Console.log(std.core.Console a0, escompat.Array a1) <varargs, external, access.function=public>
 
