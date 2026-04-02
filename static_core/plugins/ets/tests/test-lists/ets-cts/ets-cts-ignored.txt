@@ -827,9 +827,6 @@
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_12.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_13.ets
 
-#33241
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets
-
 #16840
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method.ets
 
