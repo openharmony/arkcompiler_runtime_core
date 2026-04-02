@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -353,7 +353,7 @@ protected:
         SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetThread()->GetInternalId(), true));
         if (this->GetThread()->TestAllFlags()) {
             this->GetFrame()->SetAcc(this->GetAcc());
-            RuntimeIfaceT::Safepoint();
+            this->GetThread()->Safepoint();
             this->GetAcc() = this->GetFrame()->GetAcc();
         }
         if constexpr (ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR) {

@@ -182,6 +182,8 @@ public:
 
     PANDA_PUBLIC_API void ResumeImpl(bool internalResume = false);
 
+    PANDA_PUBLIC_API void Safepoint();
+
     PANDA_PUBLIC_API void SafepointPoll();
 
     PANDA_PUBLIC_API bool IsUserSuspended() const;
@@ -393,7 +395,37 @@ public:
 
 private:
     MutatorType *mutator_;
-};  // ScopedCurrentMutator
+};  // class ScopedCurrentMutator
+
+std::ostream &operator<<(std::ostream &stream, Mutator::MutatorType type);
+
+/**
+ * @class ScopedChangeMutatorStatus provides a scope-based (RAII) mechanism for managing
+ * the passed mutator status. It keeps the actual status and updates for the new status in the constructor,
+ * and updates back in the destructor
+ * @see Mutator::UpdateStatus
+ */
+class PANDA_PUBLIC_API ScopedChangeMutatorStatus {
+public:
+    ScopedChangeMutatorStatus(Mutator *mutator, MutatorStatus newStatus) : mutator_(mutator)
+    {
+        ASSERT(mutator_ != nullptr);
+        oldStatus_ = mutator_->GetStatus();
+        mutator_->UpdateStatus(newStatus);
+    }
+
+    NO_COPY_SEMANTIC(ScopedChangeMutatorStatus);
+    NO_MOVE_SEMANTIC(ScopedChangeMutatorStatus);
+
+    ~ScopedChangeMutatorStatus()
+    {
+        mutator_->UpdateStatus(oldStatus_);
+    }
+
+private:
+    Mutator *mutator_;
+    MutatorStatus oldStatus_;
+};  // class ScopedChangeMutatorStatus
 
 }  // namespace ark
 

@@ -287,52 +287,10 @@ public:
         thread->GetStackFrameAllocator()->Free(frame->GetExt());
     }
 
-    static void ThreadSuspension(ManagedThread *thread)
-    {
-        thread->WaitSuspension();
-    }
-
-    static void ThreadRuntimeTermination(ManagedThread *thread)
-    {
-        thread->OnRuntimeTerminated();
-    }
-
     static panda_file::SourceLang GetLanguageContext(Method *methodPtr)
     {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*methodPtr);
         return ctx.GetLanguage();
-    }
-
-    /**
-     * @brief Executes external implementation of safepoint
-     *
-     * It is not-inlined version of safepoint.
-     * Shouldn't be used in production in the JIT.
-     */
-    static void Safepoint(ManagedThread *thread)
-    {
-        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
-#ifndef NDEBUG
-        // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
-        if (Runtime::GetOptions().IsRunGcEverySafepoint() && Mutator::GetCurrent()->GetMutatorLock()->HasLock()) {
-            auto *vm = ManagedThread::GetCurrent()->GetVM();
-            vm->GetGCTrigger()->TriggerGcIfNeeded(vm->GetGC());
-        }
-#endif
-        ASSERT(thread != nullptr);
-        ASSERT(thread->IsRuntimeCallEnabled());
-        if (UNLIKELY(thread->IsRuntimeTerminated())) {
-            ThreadRuntimeTermination(thread);
-        }
-        if (thread->IsSuspended()) {
-            ThreadSuspension(thread);
-        }
-        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), false));
-    }
-
-    static void Safepoint()
-    {
-        Safepoint(ManagedThread::GetCurrent());
     }
 
     static LanguageContext GetLanguageContext(const Method &method)

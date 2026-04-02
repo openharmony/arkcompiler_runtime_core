@@ -403,7 +403,7 @@ void ManagedThread::NativeCodeBegin()
 
 void ManagedThread::NativeCodeEnd()
 {
-    // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
+    // threadFrameStates_ should not be accessed without MutatorLock (as runtime could have been destroyed)
     // If this was last frame, it should have been called from Destroy() and it should UpdateStatus to FINISHED
     // after this method
     UpdateStatus(MutatorStatus::RUNNING);
@@ -481,40 +481,6 @@ bool ManagedThread::HasManagedCodeOnStack() const
 bool ManagedThread::HasClearStack() const
 {
     return threadFrameStates_.empty();
-}
-
-PandaString ManagedThread::ThreadStatusAsString(enum MutatorStatus status)
-{
-    switch (status) {
-        case MutatorStatus::CREATED:
-            return "New";
-        case MutatorStatus::RUNNING:
-            return "Runnable";
-        case MutatorStatus::IS_BLOCKED:
-            return "Blocked";
-        case MutatorStatus::IS_WAITING:
-            return "Waiting";
-        case MutatorStatus::IS_TIMED_WAITING:
-            return "Timed_waiting";
-        case MutatorStatus::IS_SUSPENDED:
-            return "Suspended";
-        case MutatorStatus::IS_COMPILER_WAITING:
-            return "Compiler_waiting";
-        case MutatorStatus::IS_WAITING_INFLATION:
-            return "Waiting_inflation";
-        case MutatorStatus::IS_SLEEPING:
-            return "Sleeping";
-        case MutatorStatus::IS_TERMINATED_LOOP:
-            return "Terminated_loop";
-        case MutatorStatus::TERMINATING:
-            return "Terminating";
-        case MutatorStatus::NATIVE:
-            return "Native";
-        case MutatorStatus::FINISHED:
-            return "Terminated";
-        default:
-            return "unknown";
-    }
 }
 
 PandaString ManagedThread::LogThreadStack(ThreadState newState) const
@@ -875,9 +841,9 @@ void ManagedThread::CollectTLABMetrics()
     }
 }
 
-void ManagedThread::DestroyInternalResources()
+void ManagedThread::DestroyInternalResources(mem::MutatorUnregistrationMode mode)
 {
-    GetVM()->GetGC()->OnThreadTerminate(this, mem::BuffersKeepingFlag::DELETE);
+    GetVM()->GetGC()->OnMutatorTerminate(this, mode, mem::BuffersKeepingFlag::DELETE);
     ASSERT(preBuff_ == nullptr);
     ASSERT(g1PostBarrierRingBuffer_ == nullptr);
     ptThreadInfo_->Destroy();
@@ -885,7 +851,8 @@ void ManagedThread::DestroyInternalResources()
 
 void ManagedThread::CleanupInternalResources()
 {
-    GetVM()->GetGC()->OnThreadTerminate(this, mem::BuffersKeepingFlag::KEEP);
+    GetVM()->GetGC()->OnMutatorTerminate(this, mem::MutatorUnregistrationMode::UNREGISTER,
+                                         mem::BuffersKeepingFlag::KEEP);
 }
 
 void ManagedThread::FreeInternalMemory()
@@ -893,7 +860,7 @@ void ManagedThread::FreeInternalMemory()
 #if defined(VERBOSE_THREAD_STATE_LOG)
     threadFrameStates_.~PandaStack<ThreadState>();
 #endif
-    DestroyInternalResources();
+    DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
 
     localObjects_.~PandaVector<ObjectHeader **>();
     {

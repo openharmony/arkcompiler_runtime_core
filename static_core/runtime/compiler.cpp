@@ -165,7 +165,7 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetClass(MethodPtr m
         return loadedClass;
     }
     ErrorHandler handler;
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     return Runtime::GetCurrent()->GetClassLinker()->GetClass(*caller->GetPandaFile(), panda_file::File::EntityId(id),
                                                              caller->GetClass()->GetLoadContext(), &handler);
 }
@@ -195,7 +195,7 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetLineStringClass(M
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetNumberClass(MethodPtr method, const char *name,
                                                                            uint32_t *typeId) const
 {
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     auto *caller = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
     const uint8_t *classDescriptor = utf::CStringAsMutf8(name);
@@ -215,7 +215,7 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU16Class(Met
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU8Class(MethodPtr method) const
 {
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     auto *caller = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U8);
@@ -355,7 +355,7 @@ bool PandaRuntimeInterface::CanNativeMethodUseObjects(MethodPtr method) const
 
 uint32_t PandaRuntimeInterface::FindCatchBlock(MethodPtr m, ClassPtr cls, uint32_t pc) const
 {
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     return MethodCast(m)->FindCatchBlockInPandaFile(ClassCast(cls), pc);
 }
 
@@ -667,7 +667,7 @@ Method *PandaRuntimeInterface::GetMethod(MethodPtr caller, RuntimeInterface::IdT
         return methodFromCache;
     }
     ErrorHandler errorHandler;
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     return Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(caller), panda_file::File::EntityId(id),
                                                               &errorHandler);
 }
@@ -680,7 +680,7 @@ Field *PandaRuntimeInterface::GetField(MethodPtr method, RuntimeInterface::IdTyp
         return field;
     }
     ErrorHandler errorHandler;
-    ScopedMutatorLock lock;
+    ScopedManagedHeapAccess scope;
     return Runtime::GetCurrent()->GetClassLinker()->GetField(*MethodCast(method), panda_file::File::EntityId(id),
                                                              isStatic, &errorHandler);
 }
@@ -898,7 +898,23 @@ RuntimeInterface::ThreadPtr PandaRuntimeInterface::CreateCompilerThread()
 {
     ASSERT(Mutator::GetCurrent() != nullptr);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    return allocator->New<Mutator>(PandaVM::GetCurrent(), Mutator::MutatorType::COMPILER);
+    auto *mutator = allocator->New<Mutator>(PandaVM::GetCurrent(), Mutator::MutatorType::COMPILER);
+    // Compiler's mutator executes tasks in native state
+    mutator->UpdateStatus(MutatorStatus::NATIVE);
+    return mutator;
+}
+
+void PandaRuntimeInterface::RegisterMutator(ThreadPtr mutator) const
+{
+    auto *m = static_cast<Mutator *>(mutator);
+    m->GetVM()->GetGC()->OnMutatorCreate(m);
+}
+
+void PandaRuntimeInterface::UnregisterMutator(ThreadPtr mutator) const
+{
+    auto *m = static_cast<Mutator *>(mutator);
+    m->GetVM()->GetGC()->OnMutatorTerminate(m, mem::MutatorUnregistrationMode::UNREGISTER,
+                                            mem::BuffersKeepingFlag::DELETE);
 }
 
 void PandaRuntimeInterface::DestroyCompilerThread(ThreadPtr thread)

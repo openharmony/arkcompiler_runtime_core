@@ -137,7 +137,7 @@ extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, Et
         if (auto result = processChunk(i, CHUNK_SIZE); result.has_value()) {
             return result.value();
         }
-        ark::interpreter::RuntimeInterface::Safepoint();
+        executionCtx->GetMT()->Safepoint();
     }
     if (remainder > 0) {
         if (auto result = processChunk(iterCount, remainder); result.has_value()) {
@@ -195,7 +195,7 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
         if (auto result = processChunk(i, CHUNK_SIZE); result.has_value()) {
             return result.value();
         }
-        ark::interpreter::RuntimeInterface::Safepoint();
+        executionCtx->GetMT()->Safepoint();
     }
     if (remainder > 0) {
         if (auto result = processChunk(iterCount, remainder); result.has_value()) {
@@ -242,7 +242,7 @@ extern "C" void EtsEscompatArrayFillImpl(ObjectHeader *bufferHeader, int32_t len
 
     for (std::uint32_t i = 0; i < iterCount; ++i) {
         processChunk(i, CHUNK_SIZE);
-        ark::interpreter::RuntimeInterface::Safepoint();
+        executionCtx->GetMT()->Safepoint();
     }
     if (remainder > 0) {
         processChunk(iterCount, remainder);
@@ -329,7 +329,7 @@ static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArr
             barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(T), size);
             barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(T) - size, size);
         }
-        ark::interpreter::RuntimeInterface::Safepoint(executionCtx->GetMT());
+        executionCtx->GetMT()->Safepoint();
         usePreBarrier = barrierSet->IsPreBarrierEnabled();
     };
     auto halfLength = static_cast<size_t>(length) / 2;
@@ -744,7 +744,7 @@ extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(ObjectHeader *buffe
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    ark::interpreter::RuntimeInterface::Safepoint();
+    executionCtx->GetMT()->Safepoint();
 
     if (res.utf16Size > 0) {
         return EtsEscompatArrayJoinUtf16(res, bufferHandle, actualLength, separatorHandle);

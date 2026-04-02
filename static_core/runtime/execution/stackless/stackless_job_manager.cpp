@@ -109,14 +109,7 @@ void StacklessJobManager::RegisterExecutionContext(JobExecutionContext *executio
     os::memory::LockHolder lock(jobCtxListLock_);
     jobExecCtxs_.insert(executionCtx);
     RegisterJob(executionCtx->GetJob());
-    executionCtx->GetVM()->GetGC()->OnThreadCreate(executionCtx);
-    // NOTE(panferovi): should we suspend created executionCtx?
-#if !defined(ARK_USE_COMMON_RUNTIME)
-    if (Mutator::GetCurrent() != nullptr && JobExecutionContext::GetCurrent() != nullptr &&
-        JobExecutionContext::GetCurrent()->IsSuspended() && !executionCtx->IsSuspended()) {
-        executionCtx->SuspendImpl(true);
-    }
-#endif  // !ARK_USE_COMMON_RUNTIME
+    executionCtx->GetVM()->GetGC()->OnMutatorCreate(executionCtx);
 }
 
 bool StacklessJobManager::TerminateExecutionContext(JobExecutionContext *executionCtx)
@@ -131,7 +124,7 @@ bool StacklessJobManager::TerminateExecutionContext(JobExecutionContext *executi
         executionCtx->CollectTLABMetrics();
         executionCtx->ClearTLAB();
 
-        executionCtx->DestroyInternalResources();
+        executionCtx->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
         executionCtx->UpdateStatus(MutatorStatus::FINISHED);
     }
     Runtime::GetCurrent()->GetNotificationManager()->ThreadEndEvent(executionCtx);
@@ -281,24 +274,6 @@ void StacklessJobManager::OnWorkerShutdown(JobWorkerThread *worker)
     workersCv_.Signal();
     LOG(DEBUG, EXECUTION) << "StacklessJobManager::OnWorkerShutdown(): COMPLETED, workers left = "
                           << activeWorkersCount_;
-}
-
-void StacklessJobManager::SuspendAllThreads()
-{
-    os::memory::LockHolder lock(jobCtxListLock_);
-    LOG(DEBUG, EXECUTION) << "StacklessJobManager::SuspendAllThreads started";
-    for (auto *t : jobExecCtxs_) {
-        t->SuspendImpl(true);
-    }
-    LOG(DEBUG, EXECUTION) << "StacklessJobManager::SuspendAllThreads finished";
-}
-
-void StacklessJobManager::ResumeAllThreads()
-{
-    os::memory::LockHolder lock(jobCtxListLock_);
-    for (auto *t : jobExecCtxs_) {
-        t->ResumeImpl(true);
-    }
 }
 
 bool StacklessJobManager::IsRunningThreadExist()

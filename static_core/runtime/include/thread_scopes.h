@@ -106,29 +106,6 @@ private:
     NO_MOVE_SEMANTIC(ScopedManagedCodeThread);
 };
 
-class PANDA_PUBLIC_API ScopedChangeMutatorStatus {
-public:
-    explicit ScopedChangeMutatorStatus(ManagedThread *thread, MutatorStatus newStatus) : thread_(thread)
-    {
-        ASSERT(thread_ != nullptr);
-        oldStatus_ = thread_->GetStatus();
-        thread_->UpdateStatus(newStatus);
-    }
-
-    ~ScopedChangeMutatorStatus()
-    {
-        ASSERT(thread_ != nullptr);
-        thread_->UpdateStatus(oldStatus_);
-    }
-
-private:
-    ManagedThread *thread_;
-    MutatorStatus oldStatus_;
-
-    NO_COPY_SEMANTIC(ScopedChangeMutatorStatus);
-    NO_MOVE_SEMANTIC(ScopedChangeMutatorStatus);
-};
-
 }  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_SCOPES_H_

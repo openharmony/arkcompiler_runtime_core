@@ -17,6 +17,7 @@
 
 #include "mem/lock_config_helper.h"
 #include "runtime/default_debugger_agent.h"
+#include "runtime/include/mutator_manager.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/runtime_notification.h"
@@ -33,6 +34,17 @@ PandaVM *PandaVM::Create(Runtime *runtime, const RuntimeOptions &options, std::s
 {
     LanguageContext ctx = runtime->GetLanguageContext(std::string(runtimeType));
     return ctx.CreateVM(runtime, options);
+}
+
+PandaVM::PandaVM() : mutatorLock_(Locks::NewMutatorLock())
+{
+    mutatorManager_ = Runtime::GetCurrent()->GetInternalAllocator()->New<MutatorManager>();
+};
+
+// virtual
+PandaVM::~PandaVM()
+{
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(mutatorManager_);
 }
 
 Expected<int, Runtime::Error> PandaVM::InvokeEntrypoint(Method *entrypoint, const std::vector<std::string> &args)

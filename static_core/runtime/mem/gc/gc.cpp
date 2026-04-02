@@ -111,6 +111,19 @@ GCType GC::GetType()
     return gcType_;
 }
 
+void GC::OnMutatorCreate(Mutator *mutator)
+{
+    vm_->GetMutatorManager()->RegisterMutator(mutator, nullptr);
+}
+
+void GC::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
+                            [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
+{
+    if (mode == MutatorUnregistrationMode::UNREGISTER) {
+        vm_->GetMutatorManager()->UnregisterMutator(mutator);
+    }
+}
+
 void GC::SetPandaVM(PandaVM *vm)
 {
     vm_ = vm;

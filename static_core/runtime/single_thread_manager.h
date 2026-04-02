@@ -29,20 +29,10 @@ public:
 
     void WaitForDeregistration() override {}
 
-    void SuspendAllThreads() override
+    void RegisterAndSetMainThread(ManagedThread *thread)
     {
-        ManagedThread *mainThread = GetMainThread();
-        if (Mutator::GetCurrent() != mainThread) {
-            mainThread->SuspendImpl(true);
-        }
-    }
-
-    void ResumeAllThreads() override
-    {
-        ManagedThread *mainThread = GetMainThread();
-        if (Mutator::GetCurrent() != mainThread) {
-            mainThread->ResumeImpl(true);
-        }
+        SetMainThread(thread);
+        thread->GetVM()->GetGC()->OnMutatorCreate(thread);
     }
 
     bool IsRunningThreadExist() override

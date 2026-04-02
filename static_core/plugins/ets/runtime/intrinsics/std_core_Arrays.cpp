@@ -257,7 +257,7 @@ static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, Objec
         auto putSafepoint = [&usePreBarrier, barrierSet, srcArray, dstArray,
                              mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
             PostWrite<T>(mThread, dstArray, start, count);
-            ark::interpreter::RuntimeInterface::Safepoint(mThread);
+            mThread->Safepoint();
             usePreBarrier = barrierSet->IsPreBarrierEnabled();
             // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
@@ -272,7 +272,7 @@ static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, Objec
     } else {
         auto putSafepoint = [srcArray, dstArray, mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
             PostWrite<T>(mThread, dstArray, start, count);
-            ark::interpreter::RuntimeInterface::Safepoint(mThread);
+            mThread->Safepoint();
             // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
             srcPtr = srcArray.GetStartPtr();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,8 @@ public:
     bool WaitForGC(GCTask task) override;
     void InitGCBits(ark::ObjectHeader *objHeader) override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
-    void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
+    void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
+                            mem::BuffersKeepingFlag keepBuffers) override;
 
 private:
     void InitializeImpl() override;

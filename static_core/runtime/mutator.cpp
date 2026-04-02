@@ -14,14 +14,67 @@
  */
 
 #include "runtime/include/mutator.h"
+
+#include "runtime/include/managed_thread.h"
 #include "runtime/include/panda_vm.h"
-#include "runtime/interpreter/runtime_interface.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #endif
 
 namespace ark {
+
+std::ostream &operator<<(std::ostream &stream, Mutator::MutatorType type)
+{
+    switch (type) {
+        case Mutator::MutatorType::MANAGED:
+            stream << "MANAGED";
+            break;
+        case Mutator::MutatorType::COMPILER:
+            stream << "COMPILER";
+            break;
+        case Mutator::MutatorType::GC:
+            stream << "GC";
+            break;
+        default:
+            stream << "NONE";
+    }
+    return stream;
+}
+
+std::ostream &operator<<(std::ostream &stream, MutatorStatus status)
+{
+    switch (status) {
+        case MutatorStatus::CREATED:
+            return stream << "New";
+        case MutatorStatus::RUNNING:
+            return stream << "Runnable";
+        case MutatorStatus::IS_BLOCKED:
+            return stream << "Blocked";
+        case MutatorStatus::IS_WAITING:
+            return stream << "Waiting";
+        case MutatorStatus::IS_TIMED_WAITING:
+            return stream << "Timed_waiting";
+        case MutatorStatus::IS_SUSPENDED:
+            return stream << "Suspended";
+        case MutatorStatus::IS_COMPILER_WAITING:
+            return stream << "Compiler_waiting";
+        case MutatorStatus::IS_WAITING_INFLATION:
+            return stream << "Waiting_inflation";
+        case MutatorStatus::IS_SLEEPING:
+            return stream << "Sleeping";
+        case MutatorStatus::IS_TERMINATED_LOOP:
+            return stream << "Terminated_loop";
+        case MutatorStatus::TERMINATING:
+            return stream << "Terminating";
+        case MutatorStatus::NATIVE:
+            return stream << "Native";
+        case MutatorStatus::FINISHED:
+            return stream << "Terminated";
+        default:
+            return stream << "unknown";
+    }
+}
 
 Mutator::Mutator(PandaVM *vm, MutatorType type) : vm_(vm), type_(type)
 {
@@ -39,7 +92,7 @@ Mutator::Mutator(PandaVM *vm, MutatorType type) : vm_(vm), type_(type)
 CONSTEXPR_IN_RELEASE MutatorFlag GetInitialMutatorFlag()
 {
 #ifndef NDEBUG
-    MutatorFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
+    MutatorFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? GC_ON_SAFEPOINT_REQUEST : NO_FLAGS;
     return initialFlag;
 #else
     return NO_FLAGS;
@@ -176,7 +229,6 @@ void Mutator::SuspendCheck()
     GetMutatorLock()->Unlock();
     GetMutatorLock()->ReadLock();
     ResumeImpl(true);
-
 #else
     UNREACHABLE();
 #endif
@@ -233,13 +285,40 @@ void Mutator::ResumeImpl(bool internalResume)
 void Mutator::SafepointPoll()
 {
 #if !defined(ARK_USE_COMMON_RUNTIME)
-    if (this->TestAllFlags()) {
+    if (TestAllFlags()) {
         trace::ScopedTrace scopedTrace("RunSafepoint");
-        ark::interpreter::RuntimeInterface::Safepoint();
+        Safepoint();
     }
 #else
     common_vm::Mutator::CheckSafepointIfSuspended();
 #endif
+}
+
+void Mutator::Safepoint()
+{
+#if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
+    if (LIKELY(type_ == Mutator::MutatorType::MANAGED)) {
+        SafepointTimerTable::ResetTimers(static_cast<ManagedThread *>(this)->GetInternalId(), true);
+    }
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
+#if !defined(NDEBUG)
+    // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
+    if (Runtime::GetOptions().IsRunGcEverySafepoint() && mutatorLock_->HasLock()) {
+        auto *vm = GetVM();
+        vm->GetGCTrigger()->TriggerGcIfNeeded(vm->GetGC());
+    }
+#endif  // !NDEBUG
+    if (UNLIKELY(IsRuntimeTerminated())) {
+        OnRuntimeTerminated();
+    }
+    if (IsSuspended()) {
+        WaitSuspension();
+    }
+#if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
+    if (LIKELY(type_ == Mutator::MutatorType::MANAGED)) {
+        SafepointTimerTable::ResetTimers(static_cast<ManagedThread *>(this)->GetInternalId(), false);
+    }
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
 }
 
 bool Mutator::IsUserSuspended() const

@@ -26,8 +26,8 @@ void Rendezvous::SafepointBegin()
 {
     ASSERT(!mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointBegin";
-    // Suspend all threads
-    Mutator::GetCurrent()->GetVM()->GetThreadManager()->SuspendAllThreads();
+    // Suspend all mutators
+    Mutator::GetCurrent()->GetVM()->GetMutatorManager()->SuspendAllMutators();
     // Acquire write MutatorLock
     mutatorLock_->WriteLock();
 }
@@ -38,8 +38,8 @@ void Rendezvous::SafepointEnd()
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd";
     // Release write MutatorLock
     mutatorLock_->Unlock();
-    // Resume all threads
-    Mutator::GetCurrent()->GetVM()->GetThreadManager()->ResumeAllThreads();
+    // Resume all mutators
+    Mutator::GetCurrent()->GetVM()->GetMutatorManager()->ResumeAllMutators();
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd exit";
 }
 

@@ -231,7 +231,9 @@ TEST_F(ThreadTest, MutatorStatusAsStringTest)
     for (int i = start; i <= end; ++i) {
         auto status = static_cast<MutatorStatus>(i);
         std::string expected = GetMutatorStatus(status);
-        EXPECT_EQ(std::string_view(ManagedThread::ThreadStatusAsString(status)), std::string_view(expected));
+        std::ostringstream strStream;
+        strStream << status;
+        EXPECT_EQ(std::string_view(strStream.str()), std::string_view(expected));
     }
 }
 

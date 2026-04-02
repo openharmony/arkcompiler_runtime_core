@@ -226,8 +226,6 @@ public:
 
     static void Shutdown();
 
-    static PandaString ThreadStatusAsString(enum MutatorStatus status);
-
     ark::mem::StackFrameAllocator *GetStackFrameAllocator() const
     {
         return stackFrameAllocator_;
@@ -663,7 +661,7 @@ public:
     ThreadId GetInternalId();
 
     virtual void FreeInternalMemory();
-    void DestroyInternalResources();
+    void DestroyInternalResources(mem::MutatorUnregistrationMode mode);
 
     /// Clears the pre/post barrier buffers (and other resources) without deallocation.
     void CleanupInternalResources();

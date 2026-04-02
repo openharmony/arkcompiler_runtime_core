@@ -59,12 +59,16 @@ void EpsilonG1GC<LanguageConfig>::InitializeImpl()
 }
 
 template <class LanguageConfig>
-void EpsilonG1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread,
-                                                    [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
+void EpsilonG1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
+                                                     mem::BuffersKeepingFlag keepBuffers)
 {
-    LOG(DEBUG, GC) << "Call OnThreadTerminate";
+    LOG(DEBUG, GC) << "Call OnMutatorTerminate";
     // Clearing buffers to remove memory leaks in internal allocator
-
+    GC::OnMutatorTerminate(mutator, mode, keepBuffers);
+    if (mutator->GetMutatorType() != Mutator::MutatorType::MANAGED) {
+        return;
+    }
+    auto *thread = static_cast<ManagedThread *>(mutator);
     auto preBuff = thread->MovePreBuff();
     ASSERT(preBuff != nullptr);
     this->GetInternalAllocator()->Delete(preBuff);
@@ -73,7 +77,6 @@ void EpsilonG1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread,
     thread->ResetG1PostBarrierBuffer();
     ASSERT(localBuffer != nullptr);
     this->GetInternalAllocator()->Delete(localBuffer);
-    GC::OnThreadTerminate(thread, keepBuffers);
 }
 
 template <class LanguageConfig>
