@@ -2527,7 +2527,11 @@ method of a class (see :ref:`Method Body`) or an interface (see
 :ref:`Default Interface Method Declarations`). A corresponding class or
 interface type is the type of *this* expression. If a method is declared in an
 object literal (see :ref:`Object Literal`), then the type of the object literal
-is the type of ``this``.
+is the type of ``this``. A class constructor body can also use ``this``, and
+the exact semantics of such use are described in :ref:`Constructor Body`. 
+
+The keyword ``this`` can also be used in the initializer of a class field (see
+:ref:`Field Initialization`).
 
 The keyword ``this`` can be used in a lambda expression only if it is allowed
 in the context in which the lambda expression occurs. The type of ``this`` is

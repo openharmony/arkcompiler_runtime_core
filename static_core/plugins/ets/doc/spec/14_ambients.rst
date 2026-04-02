@@ -158,46 +158,39 @@ The syntax of *ambient function declaration* is presented below:
 .. code-block:: abnf
 
     ambientFunctionDeclaration:
-        'function' identifier
-        typeParameters? signature
+        'function' identifier typeParameters? signature
         ;
 
-A :index:`compile-time error` occurs if explicit return type for an ambient
-function declaration is not specified.
+A :index:`compile-time error` occurs if an ambient function declaration has the
+following:
+
+- No explicit return type specified;
+- A parameter with the default value;
+- A function body, or;
+- Modifier ``async`` specified.
+
+Examples below illustrate that:
+
+.. code-block:: typescript
+   :linenos:
+
+    declare function ok1(x: number): void // OK
+    declare function bad1(x: number) // Compile-time error, no return specified
+
+    declare function ok2(x?: string): void // OK, optional parameters can be used
+    declare function bad2(y: number = 1): void // Compile-time error, parameter
+                                               // has default value
+
+    declare function bad3(): void {} // Compile-time error, function body provided
+
+    declare async function bad4(): void // Compile-time error, async modifier is used 
+
 
 .. index::
    syntax
    ambient function declaration
-   type annotation
    return type
-   function
-   ambient function declaration
-   function declaration
-
-.. code-block:: typescript
-   :linenos:
-
-    declare function foo(x: number): void // OK
-    declare function bar(x: number) // Compile-time error
-
-Ambient functions cannot have parameters with default values but can have
-optional parameters.
-
-Ambient function declarations cannot specify function bodies.
-
-.. code-block:: typescript
-   :linenos:
-
-    declare function foo(x?: string): void // OK
-    declare function bar(y: number = 1): void // Compile-time error
-
-.. note::
-   The modifier ``async`` cannot be used in an ambient context.
-
-.. index::
-   ambient function declaration
-   ambient function
-   value
+   function body
    parameter
    optional parameter
    default value

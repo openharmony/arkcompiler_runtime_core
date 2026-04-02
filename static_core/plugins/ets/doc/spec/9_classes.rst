@@ -1667,17 +1667,10 @@ The initializer of a non-static field declaration is evaluated at runtime.
 The assignment is performed each time an instance of the class is created (see
 :ref:`New Expressions`).
 
-The instance field initializer expression cannot use the following directly in
-any form:
-
-- ``super``; or
-- ``this``.
-
-If the initializer expression contains one of the above patterns, then a
+If the initializer expression uses ``super`` or ``this`` in any form, then a
 :index:`compile-time warning` occurs.
 
-If allowed in the code, the above restrictions can break the consistency of
-class instances as shown in the following examples:
+If such use occurs then runtime error can occur as shown in the following examples:
 
 .. index::
    non-static field declaration
@@ -1700,24 +1693,24 @@ class instances as shown in the following examples:
    :linenos:
 
     class C {
-        a = this        // Compile-time warning
+        f0 = this // Compile-time warning as 'this' is used
 
-        f1 = this.foo() // Compile-time warning as 'this' method is invoked
+        f1 = this.init_f1() // Compile-time warning as method of 'this' method is invoked
 
-        f2 = "a string field"
-
-        foo (): string {
-           // Type safety requires fields to be initialized before access
-           console.log (this.f1, this.f2)
-           return this.f2
+        init_f1 (): string {
+           console.log (this.f1) // this.f1 was not yet initialized, a runtime error occurs
+           return "a string field"
         }
-
     }
 
     class B {}
     function foo (f: () => B) { return f() }
     class A {
-        field1 = foo(() => this.field2) // Compile-time warning as 'this' is used in the initializer code
+        field1 = foo(() => this.field2) 
+            // Compile-time warning as 'this' is used in the initializer code
+            // At runtime the lambda call will lead to a runtime error as
+            // this.field2 was not yet initialized
+
         field2 = new B
     }
 
@@ -1750,9 +1743,7 @@ field of type ``T`` with any form of access.
 *Field with late initialization* must be an *instance field*. Otherwise,
 a :index:`compile-time error` occurs.
 
-.. , e.g. if a field with late initialization is defined as ``static``,
-
-*Field with late initialization* must of a *nullish type* (see
+*Field with late initialization* cannot be of a *nullish type* (see
 :ref:`Nullish Types`). Otherwise, a :index:`compile-time error` occurs.
 
 As all other fields, a *field with late initialization* must be initialized

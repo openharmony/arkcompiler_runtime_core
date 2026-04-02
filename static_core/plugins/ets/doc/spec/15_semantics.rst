@@ -2276,8 +2276,8 @@ following table:
      - ``s'(l(v)):= s(l(v))-undefined-null``
 
    * - *v* ``===`` *ec*, where *ec* is an ``enum`` constant
-     - ``s'(l(v)):=ec``
-     - ``s'(l(v)):=s(l(v))-ec``
+     - ``s'(l(v)):=N(ec)``
+     - ``s'(l(v)):=s(l(v))``
    * - ``typeof`` *v* ``===`` *str*
 
        See **Note 2** below for evaluation of type *T*.
@@ -2490,8 +2490,6 @@ The following simplifications for object types are also taken into account:
    ``A&I = never``, ``A-I = A``.
 #. If ``A`` is a class or interface, and *U* is ``never`` or ``undefined``, then
    ``A&U = never``, ``A-U = A``.
-#. If ``E`` is enum with cases ``E``:sub:`1` ``, ... , E``:sub:`n`, then
-   ``E = E``:sub:`1` ``| ... |E``:sub:`n`.
 
 The following normalization procedure is performed for every *smart type* at
 every node of CFG where possible:

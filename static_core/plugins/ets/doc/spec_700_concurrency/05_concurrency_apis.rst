@@ -21,51 +21,6 @@ API details and restrictions
 This section describes the noteworthy details and the notable restrictions for
 the concurrency APIs described in the previous sections.
 
-.. _launch API details and restrictions:
-
-``launch`` API details and restrictions
-=======================================
-
-.. meta:
-    frontend_status: Done
-
-The ``launch`` API allows for defining a set of |C_WORKERS| that a newly created
-|C_JOB| can run on. This set is defined in terms of |C_WORKER| *domains* and
-*groups*.
-
-|C_WORKER| ID
-  A unique number that is assigned to every |C_WORKER|, existing or newly
-  created.
-
-|C_WORKER| domain
-  A named filtering criteria that defines some set of |C_WORKERS| that have
-  something in common. A |C_WORKER| domain can contain different number of
-  workers at different time. Notable domains include *main* and *exclusive*
-  |C_WORKERS|. The exact list of available domains is provided in the standard
-  library documentation.
-
-|C_WORKER| group
-  An immutable set of |C_WORKERS|.
-
-The ``launch`` API allows to define a |C_WORKER| group in several ways, for
-example by specifying the |C_WORKER| domain or the exact list of |C_WORKER| IDs.
-Once defined, a |C_WORKER| group can be specified in the ``launch`` parameters,
-so the newly created |C_JOB| will be assigned to the appropriate |C_WORKER| from
-the provided |C_WORKER| group. Later on, if the scheduler decides to reschedule
-this |C_JOB| to another |C_WORKER|, the new |C_WORKER| will be chosen from this
-group, too.
-
-.. note::
-   Since the |C_WORKER| group is immutable, at some point the |C_WORKER| IDs it
-   refers might become invalid. This happens because in some situations
-   |C_WORKERS| can be created or deleted (e.g. the *exclusive* |C_WORKERS|),
-   including the |C_WORKERS| that the group contains. In such case, the
-   functions from `launch`` API will either safely ignore the invalid IDs, throw
-   an error or return the appropriate return value. For the details, please
-   refer to the standard library documentation.
-
-|
-
 .. _Using async API:
 
 Using the asynchronous API

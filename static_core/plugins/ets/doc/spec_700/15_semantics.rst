@@ -2276,8 +2276,8 @@ following table:
      - ``s'(l(v)):= s(l(v))-undefined-null``
 
    * - *v* ``===`` *ec*, where *ec* is an ``enum`` constant
-     - ``s'(l(v)):=ec``
-     - ``s'(l(v)):=s(l(v))-ec``
+     - ``s'(l(v)):=N(ec)``
+     - ``s'(l(v)):=s(l(v))``
    * - ``typeof`` *v* ``===`` *str*
 
        See **Note 2** below for evaluation of type *T*.
@@ -2490,8 +2490,6 @@ The following simplifications for object types are also taken into account:
    ``A&I = never``, ``A-I = A``.
 #. If ``A`` is a class or interface, and *U* is ``never`` or ``undefined``, then
    ``A&U = never``, ``A-U = A``.
-#. If ``E`` is enum with cases ``E``:sub:`1` ``, ... , E``:sub:`n`, then
-   ``E = E``:sub:`1` ``| ... |E``:sub:`n`.
 
 The following normalization procedure is performed for every *smart type* at
 every node of CFG where possible:
@@ -3200,7 +3198,7 @@ compile time. Thus, *overloading* is compile-time *polymorphism by name*.
 |LANG| supports the following two *overloading*  mechanisms:
 
 - *Implicit overloading*, where a set of overloaded entities for functions and
-  methods is determined by their names, or includes all unnamed constructors;
+  methods is determined by their names, or includes all constructors;
   and
 - *Explicit overloading* (see :ref:`Explicit Overload Declarations`) that allows
   a developer to specify a set of overloaded entities explicitly.
@@ -3413,7 +3411,7 @@ Implicit Constructor Overloading
 .. meta:
     frontend_status: None
 
-Two or more unnamed constructors within a class are *implicitly overloaded*. If
+Two or more constructors within a class are *implicitly overloaded*. If
 signatures of two overloaded constructors are *overload-equivalent* (see
 :ref:`Overload-Equivalent Signatures`), then a :index:`compile-time error`
 occurs.
@@ -3893,40 +3891,25 @@ Overload Set for Constructors
 
 For a given class, the overload set for constructors is formed from
 implicitly overloaded constructors
-(see :ref:`Implicit Constructor Overloading`)
-and from constructors listed in :ref:`Explicit Constructor Overload`.
-The order of constructors in the overload set is determined
-according to the following rules:
+(see :ref:`Implicit Constructor Overloading`).
+The order of constructors in the overload set is textual order
+of constructor declarations.
 
-- If an overload set is formed from implicitly overloaded constructors only,
-  the order is the textual order of constructors declarations;
-
-- If and overload set is formed from *explicit overload* only, the
-  order is the order of constructors in its list.
-
-- For a combination of implicitly and explicitly overloaded constructors,
-  the order is based by the order in *explicit overload*, all unnamed
-  constructors are included in textual order of their
-  declarations to the beginning of the ordered set.
-
-The example below illustrates how *overload set* is formed and used
-by *overload resolution*:
+The example below illustrates how *overload set* is formed by
+*overload resolution*:
 
 .. code-block:: typescript
    :linenos:
 
     class C {
         constructor () {}       // ctor#1
-        constructor (s: string) // ctor#2
-        constructor fromNumber(n: number) {}
-        overload constructor { fromNumber }
+        constructor (s: string) {} // ctor#2
     }
     /* The overload set of constructors for class 'C' is
-       {ctor#1, ctor2#1, fromNumber} */
+       {ctor#1, ctor#2} */
 
     new C()     // ctor#1 is used
     new C("aa") // ctor#2 is used
-    new C(1)    // fromNumber is used
 
 |
 
@@ -4253,7 +4236,6 @@ member is excluded in the right-hand-side column for brevity):
 
        - *Covariant* type parameters are instantiated with the constraint type;
        - *Contravariant* type parameters are instantiated with type ``never``;
-       - *Invariant* type parameters are instantiated with a *Wildcard Type*
    * - :ref:`Type Parameters`
      - :ref:`Type Parameter Constraint`
    * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``

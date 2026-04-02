@@ -46,64 +46,10 @@ Parallel execution API
 |LANG| standard library provides the following sets of API for parallel
 execution:
 
-- :ref:`launch API`: the primary parallel execution API, simple and fast;
 - :ref:`EAWorker API`: the API that allows for creation of |C_WORKERS| that are
   used exclusively by a |C_JOB| and its children;
 - :ref:`Taskpool API`: the framework that offers structured concurrency
   capabilities: task grouping, dependencies and cancellation
-
-|
-
-.. _launch API:
-
-``launch`` API
-==============
-
-The ``launch`` API is the primary parallel execution API. It launches the
-provided lambda (synchronous or asynchronous) as a new |C_JOB|, by default
-choosing the least busy |C_WORKER| to host it. If an asynchronous lambda is
-provided as a body for this new |C_JOB|, and this asynchronous lambda has
-suspension points, it can be rescheduled upon resumption to the |C_WORKER| that
-is least busy at the time of resumption.
-
-.. code-block:: typescript
-   :linenos:
-
-   async function g() { /* some actions */ }
-
-   async function f() {
-    // ...
-
-    // The full explicit form of launch.
-    // Runs the provided lambda on the least busy worker thread and returns a 
-    // promise that will get resolved once the lambda completes.
-    let p1: Promise<Int> = launch<Int>(async () => {
-        /* some long calculation here */
-        await g()
-    })
-    let result1 = await p1 // can be safely awaited on the caller worker thread
-
-    // Most of the details can be inferred from the context or omitted: 
-    let p2 = launch async { await g() }
-
-    // ...
-   }
-
-   function h() {
-       // launch is allowed in non-async functions, too
-       launch { console.log("hello!") }
-   }
-
-The ``launch`` API allows to select the target |C_WORKER| for the new |C_JOB|
-and to customize other launch parameters. The important details and usage
-restrictions of this functionality are described in the :ref:`API details and
-restrictions` section.
-
-For the detailed API specification, please refer to the |LANG| standard library
-documentation.
-
-.. index::
-   launch
 
 |
 
