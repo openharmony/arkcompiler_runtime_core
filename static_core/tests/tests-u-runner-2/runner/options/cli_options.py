@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import os
 from argparse import ArgumentParser, Namespace
 from glob import glob
 from pathlib import Path
@@ -23,6 +24,7 @@ from typing import Any, cast
 from runner import utils
 from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, InvalidConfiguration
 from runner.enum_types.config_type import ConfigType
+from runner.environment import MandatoryPropDescription
 from runner.logger import Log
 from runner.options import cli_options_utils as cli_utils
 from runner.options.cli_options_utils import CliOptionsConsts
@@ -34,6 +36,14 @@ _LOGGER = Log.get_logger(__file__)
 CliOptionType = str | int | float | bool | list
 OptionType = CliOptionType | dict | Path | None
 ArgListType = list[str]
+RUNNER_WORK_DIR_CLI_OPTION = "work-dir-runner"
+ENV_OPTION_ALIASES: dict[str, str] = {
+    "WORK_DIR": RUNNER_WORK_DIR_CLI_OPTION,
+}
+
+
+def env_option_to_cli_name(option_name: str) -> str:
+    return ENV_OPTION_ALIASES.get(option_name, utils.convert_underscore(option_name.lower()))
 
 
 class CliOptions:
@@ -359,6 +369,22 @@ class CliParserBuilder:
                                            f"with default value = {default_value}") from exp
         return parser, keys_with_default_lists
 
+    def gather_env_options(self, parser: ArgumentParser,
+                           env_options: list[MandatoryPropDescription]) -> argparse.ArgumentParser:
+        config = parser.add_argument_group(title="Environment variables options")
+        for option in env_options:
+            parser_option = env_option_to_cli_name(option.name)
+            try:
+                config.add_argument(
+                    f"--{parser_option}", action='store',
+                    default=None,
+                    dest=f'{CliOptionsConsts.CFG_RUNNER.value}.{parser_option}',
+                    help=f"Config for URunner env variables, parameter '{parser_option}'"
+                )
+            except (argparse.ArgumentError, argparse.ArgumentTypeError) as exp:
+                raise InvalidConfiguration(f"An exception occurred when adding parameter '{option.name}'") from exp
+        return parser
+
     def create_parser_for_workflow(self) -> tuple[argparse.ArgumentParser, dict[str, list]]:
         parser_for_config, keys_from_wf = self.create_parser_for_config(
             config_name=self.configs.workflow_name,
@@ -387,6 +413,12 @@ class CliParserBuilder:
                                                                parser=wf_config)
         return parser_options, keys_list
 
+    def create_parser_for_env_vars(self, env_options: list[MandatoryPropDescription]) -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser(add_help=False, description="URunner env variables parser",
+                                         conflict_handler="resolve")
+        parser_options = self.gather_env_options(parser, env_options)
+        return parser_options
+
 
 class HelpAction(argparse.Action):
 
@@ -401,13 +433,14 @@ class CliOptionsParser:
     def __init__(self, configs_loader: ConfigsLoader, runner_parser: argparse.ArgumentParser,
                  test_suite_parser: argparse.ArgumentParser,
                  default_test_suite_parser: argparse.ArgumentParser,
-                 workflow_parser: argparse.ArgumentParser, *argv: str):
+                 workflow_parser: argparse.ArgumentParser, env_vars_parser: argparse.ArgumentParser, *argv: str):
         self.configs = configs_loader
 
         self.runner_parser = runner_parser
         self.test_suite_parser = test_suite_parser
         self.default_test_suite_parser = default_test_suite_parser
         self.workflow_parser = workflow_parser
+        self.env_parser = env_vars_parser
         self.argv = argv
         self.full_options: dict[str, OptionType] = {}
 
@@ -417,21 +450,18 @@ class CliOptionsParser:
         parser = argparse.ArgumentParser(
             usage=usage,
             description="Universal test runner",
-            parents=[self.runner_parser, self.test_suite_parser, self.default_test_suite_parser,
-                     self.workflow_parser],
+            parents=[self.test_suite_parser, self.default_test_suite_parser,
+                     self.workflow_parser, self.runner_parser, self.env_parser],
             conflict_handler="resolve",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         try:
             self.full_options = vars(parser.parse_args(self.argv))
         except (argparse.ArgumentError, argparse.ArgumentTypeError):
             parser.print_help()
+            raise
 
 
-def get_args() -> dict[str, OptionType]:
-
-    workflow_list = cli_utils.get_config_list(Path(utils.get_config_workflow_folder()))
-    test_suite_list = cli_utils.get_config_list(Path(utils.get_config_test_suite_folder()))
-
+def create_parser(workflow_list: list[str], test_suite_list: list[str]) -> ArgumentParser:
     help_desc = ("\nTo explore possible workflow and test suite options:  \n"
                  " './runner.sh <WORKFLOW_NAME> <TEST_SUITE_NAME> --help'\n"
                  "\nExample: \n"
@@ -444,12 +474,22 @@ def get_args() -> dict[str, OptionType]:
                                      usage=argparse.SUPPRESS)
 
     parser.add_argument("workflow_name", metavar="<WORKFLOW_NAME>",
-                         choices=workflow_list,
+                        choices=workflow_list,
                         help="{%(choices)s}")
     parser.add_argument("test_suite_name", metavar="<TEST_SUITE_NAME>",
                         help="{%(choices)s}",
                         choices=test_suite_list)
     parser.add_argument("-h", "--help", action=HelpAction, dest=argparse.SUPPRESS, nargs=0)
+
+    return parser
+
+
+def get_args(env_properties: list[MandatoryPropDescription]) -> dict[str, OptionType]:
+
+    workflow_list = cli_utils.get_config_list(Path(utils.get_config_workflow_folder()))
+    test_suite_list = cli_utils.get_config_list(Path(utils.get_config_test_suite_folder()))
+
+    parser = create_parser(workflow_list, test_suite_list)
 
     args, remaining = parser.parse_known_args()
     remaining = getattr(args, "remaining", []) + remaining
@@ -459,11 +499,12 @@ def get_args() -> dict[str, OptionType]:
     parser_builder = CliParserBuilder(configs_loader)
     test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
     workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+    env_vars_parser = parser_builder.create_parser_for_env_vars(env_properties)
 
     cli = CliOptionsParser(configs_loader, parser_builder.create_parser_for_runner(),
                             test_suite_parser,
                             parser_builder.create_parser_for_default_test_suite(),
-                            workflow_parser, *remaining)
+                            workflow_parser, env_vars_parser, *remaining)
     cli.parse_args()
 
     cli.full_options[f"{CliOptionsConsts.CFG_RUNNER.value}.cli_options"] = remaining
@@ -474,3 +515,13 @@ def get_args() -> dict[str, OptionType]:
     parsed_options = cli_utils.restore_default_list(parsed_options, key_lists_ts | key_lists_wf)
 
     return parsed_options
+
+
+def apply_cli_environment_overrides(parsed_options: dict[str, OptionType],
+                                    env_options: list[MandatoryPropDescription]) -> None:
+    for option in env_options:
+        cli_option_name = env_option_to_cli_name(option.name)
+        cli_option_val = parsed_options.get(f"{CliOptionsConsts.CFG_RUNNER.value}.{cli_option_name}")
+        if cli_option_val:
+            normalized_val = Path(cast(str, cli_option_val)).expanduser().resolve()
+            os.environ[option.name] = normalized_val.as_posix()

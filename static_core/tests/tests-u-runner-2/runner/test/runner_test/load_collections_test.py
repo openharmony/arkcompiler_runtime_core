@@ -20,6 +20,7 @@ from typing import ClassVar
 from unittest import TestCase
 from unittest.mock import MagicMock, PropertyMock, patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.root_dir import RootDir
@@ -35,10 +36,11 @@ class CollectionsTest(TestCase):
     get_instance_id: ClassVar[Callable[[], str]] = lambda: create_runner_test_id(__file__)
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', (data_folder / "tests").as_posix())
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def get_config() -> Config:
-        args = get_args()
+        args = get_args(CollectionsTest.env_properties)
         return Config(args)
 
     @patch('runner.utils.get_config_workflow_folder', lambda: CollectionsTest.data_folder)

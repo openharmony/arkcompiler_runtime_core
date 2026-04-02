@@ -122,5 +122,7 @@ args = {
     'runner.time_edges': [1, 10, 100, 500],
     'runner.use_llvm_cov': True,
     'runner.profdata_files_dir': Path.cwd().resolve().as_posix(),
-    'runner.coverage_html_report_dir': Path.cwd().resolve().as_posix()
+    'runner.coverage_html_report_dir': Path.cwd().resolve().as_posix(),
+    'runner.runner-work-dir': None,
+    'runner.runner-build-dir': None
 }

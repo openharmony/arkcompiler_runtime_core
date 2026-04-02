@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options import cli_options_utils as cli_utils
 from runner.options.cli_options import CliOptionsParser, CliParserBuilder, ConfigsLoader
 from runner.test.config_test.data import data_1, data_2
@@ -31,12 +32,14 @@ class TestSuiteConfigTest1(unittest.TestCase):
     test_suite_name = "test_suite1"
     current_path = Path(__file__).parent
     data_folder = current_path / "data"
+    config_path: ClassVar[Path] = data_folder / ".urunner.env"
     test_environ: ClassVar[dict[str, str]] = {
         'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
         'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
         'PANDA_BUILD': Path.cwd().as_posix(),
         'WORK_DIR': Path.cwd().as_posix()
     }
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest1.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest1.data_folder)
@@ -47,11 +50,12 @@ class TestSuiteConfigTest1(unittest.TestCase):
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest1.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *[])
+                               workflow_parser, env_parser, *[])
         cli.parse_args()
 
         actual = cli.full_options
@@ -89,18 +93,20 @@ class TestSuiteConfigTest1(unittest.TestCase):
             "--time-edges", "1,10,100,500",
             "--gn-build",
             "--gcov-tool", "/usr/bin/ls",
-            "--retrieve-log-timeout", "111"]
+            "--retrieve-log-timeout", "111",
+            "--work-dir-runner", "~/tmp_dir"]
 
         configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
 
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest1.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *args)
+                               workflow_parser, env_parser, *args)
         cli.parse_args()
 
         actual = cli.full_options

@@ -21,6 +21,7 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -32,6 +33,7 @@ class FailKindTest(TestCase):
     COMPILER_STEP_NAME = "ECHO-COMPILER"
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
     data_folder: ClassVar[Callable[[], Path]] = lambda: test_utils.data_folder(__file__, "test_data")
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
     sys_argv: ClassVar = [
@@ -56,7 +58,7 @@ class FailKindTest(TestCase):
 
     @staticmethod
     def get_config() -> Config:
-        args = get_args()
+        args = get_args(FailKindTest.env_properties)
         return Config(args)
 
     @staticmethod
