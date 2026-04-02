@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,12 @@
 #include "timer.h"
 
 #include <array>
+#include <string>
 #include <unordered_map>
 #include <iostream>
 
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -87,7 +89,8 @@ static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref>
         bool isExceptionPending = false;
         napi_is_exception_pending(env, &isExceptionPending);
         if (isExceptionPending || (result == nullptr)) {
-            std::cerr << "Error occured during timer callback";
+            std::cerr << "Error occured during timer callback. Error code: "
+                      << std::to_string(INTEROP_CALLBACK_EXECUTION_FAILED);
             std::abort();  // CC-OFF(G.STD.16-CPP) fatal error
         }
 
@@ -122,7 +125,8 @@ napi_value SetTimeoutImpl(napi_env env, napi_callback_info info, bool repeat)
     size_t argc = 0;
     napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (argc < 1) {
-        napi_throw_error(env, nullptr, "setTimeout/setInterval: callback info is nullptr");
+        napi_throw_error(env, std::to_string(INTEROP_INVALID_ARGUMENT_VALUE).c_str(),
+                         "setTimeout/setInterval: callback info is nullptr");
         return nullptr;
     }
 
@@ -143,12 +147,12 @@ napi_value SetTimeoutImpl(napi_env env, napi_callback_info info, bool repeat)
     if (argc > 1) {
         napi_status status = napi_get_value_int32(env, argv[1], &timeout);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "timeout should be number");
+            napi_throw_error(env, std::to_string(INTEROP_ARGUMENT_TYPE_MISMATCH).c_str(), "timeout should be number");
             return nullptr;
         }
     }
     if (timeout < 0) {
-        napi_throw_error(env, nullptr, "timeout < 0 is unreasonable");
+        napi_throw_error(env, std::to_string(INTEROP_INVALID_ARGUMENT_VALUE).c_str(), "timeout < 0 is unreasonable");
         return nullptr;
     }
 
@@ -171,7 +175,7 @@ napi_value ClearTimerImpl(napi_env env, napi_callback_info info)
     std::array<napi_value, 1> argv {};
     napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr);
     if (argc < 1) {
-        napi_throw_error(env, nullptr, "The number of params must be one");
+        napi_throw_error(env, std::to_string(INTEROP_BAD_ARGUMENTS_COUNT).c_str(), "The number of params must be one");
         return nullptr;
     }
 

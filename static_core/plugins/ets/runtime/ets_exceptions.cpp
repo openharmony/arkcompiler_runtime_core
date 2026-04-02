@@ -66,6 +66,50 @@ static EtsObject *CreateErrorInstance(EtsExecutionContext *executionCtx, EtsClas
     return error.GetPtr();
 }
 
+static EtsObject *CreateErrorInstanceWithCode(EtsExecutionContext *executionCtx, EtsClass *cls, int32_t errorCode,
+                                              EtsHandle<EtsString> msg, EtsHandle<EtsObject> pending)
+{
+    EtsHandle<EtsErrorOptions> errOptions(executionCtx, EtsErrorOptions::Create(executionCtx));
+    if (UNLIKELY(errOptions.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+    errOptions->SetCause(pending.GetPtr());
+
+    EtsHandle<EtsObject> error(executionCtx, EtsObject::Create(cls));
+    if (UNLIKELY(error.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+
+    Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
+                                                     panda_file::Type(panda_file::Type::TypeId::I32),
+                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE),
+                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
+                        Method::Proto::RefTypeVector {PlatformTypes()->coreString->GetDescriptor(),
+                                                      PlatformTypes()->coreErrorOptions->GetDescriptor()});
+
+    EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
+    if (ctor == nullptr) {
+        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << cls->GetDescriptor();
+        return nullptr;
+    }
+
+    EtsString *name = EtsString::CreateFromMUtf8("Error");
+    if (UNLIKELY(name == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+
+    std::array args {Value(error.GetPtr()->GetCoreType()), Value(errorCode), Value(msg.GetPtr()->GetCoreType()),
+                     Value(errOptions.GetPtr()->AsObject()->GetCoreType())};
+
+    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(executionCtx->GetMT(), args.data());
+
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
+        return nullptr;
+    }
+    return error.GetPtr();
+}
+
 EtsObject *SetupEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, const char *msg)
 {
     ASSERT(PlatformTypes(executionCtx)->coreError->IsAssignableFrom(cls));
@@ -126,6 +170,39 @@ void ThrowEtsException(EtsExecutionContext *executionCtx, const char *classDescr
     }
 
     ThrowEtsException(executionCtx, cls, msg);
+}
+
+void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, int32_t errorCode, const char *msg)
+{
+    ASSERT(executionCtx != nullptr);
+    ASSERT(executionCtx->GetMT() == ManagedThread::GetCurrent());
+
+    if (executionCtx->GetMT()->IsUsePreAllocObj()) {
+        executionCtx->GetMT()->SetUsePreAllocObj(false);
+        executionCtx->GetMT()->SetException(executionCtx->GetPandaVM()->GetOOMErrorObject());
+        return;
+    }
+
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> pending(executionCtx, EtsObject::FromCoreType(executionCtx->GetMT()->GetException()));
+    executionCtx->GetMT()->ClearException();
+
+    EtsHandle<EtsString> etsMsg(executionCtx,
+                                msg == nullptr ? EtsString::CreateNewEmptyString() : EtsString::CreateFromMUtf8(msg));
+    if (UNLIKELY(etsMsg.GetPtr() == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return;
+    }
+    if (!executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, cls)) {
+        LOG(ERROR, CLASS_LINKER) << "Class " << cls->GetDescriptor() << " cannot be initialized";
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return;
+    }
+    EtsObject *exc = CreateErrorInstanceWithCode(executionCtx, cls, errorCode, etsMsg, pending);
+    if (LIKELY(exc != nullptr)) {
+        executionCtx->GetMT()->SetException(exc->GetCoreType());
+    }
+    ASSERT(executionCtx->GetMT()->HasPendingException());
 }
 
 }  // namespace ark::ets

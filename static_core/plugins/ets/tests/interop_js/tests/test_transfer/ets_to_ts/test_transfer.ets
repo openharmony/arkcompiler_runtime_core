@@ -153,10 +153,14 @@ const errStrPost = ' is not supported';
 
 function testNoSeamlessForClass(func: ESValue, arg: Object, className: String): void {
     let res = false;
+    let a:ESValue = ESValue.wrap(arg);
     try {
-        func.invoke(ESValue.wrap(arg));
+        func.invoke(a);
     } catch (err) {
-        res = err.toString() === errStrPre + className + errStrPost;
+        console.log(err.message);
+        console.log(err.toString());
+        console.log("error code: ", err.code);
+        res = err.toString().includes(errStrPre + className + errStrPost);
     }
     arktest.assertTrue(res);
 }

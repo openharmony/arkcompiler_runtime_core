@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
 namespace ark::ets::interop::js {
@@ -63,7 +64,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), nullptr, nullptr));
 
     if (argc < 2U) {
-        INTEROP_LOG(ERROR) << "Invalid number of arguments for $_get";
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT, "Invalid number of arguments for $_get");
         return nullptr;
     }
     napi_valuetype vtype;
@@ -126,7 +127,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
     EtsMethod *setMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreRecordSet);
 
     if (argc < 3U) {
-        INTEROP_LOG(ERROR) << "Invalid number of arguments for $_set";
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT, "Invalid number of arguments for $_set");
         return nullptr;
     }
 
@@ -146,14 +147,15 @@ EtsObject *JSRefConvertRecord::UnwrapImpl([[maybe_unused]] InteropCtx *ctx, [[ma
     if (LIKELY(sharedRef != nullptr)) {
         EtsObject *etsObject = sharedRef->GetEtsObject();
         if (UNLIKELY(!PlatformTypes()->coreRecord->IsAssignableFrom(etsObject->GetClass()))) {
-            InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with std.core.Record"));
+            InteropCtx::ThrowJSTypeError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
+                                         "Object is not compatible with std.core.Record");
             return nullptr;
         }
 
         return etsObject;
     }
 
-    InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with std.core.Record"));
+    InteropCtx::ThrowJSTypeError(env, INTEROP_TYPE_NOT_ASSIGNABLE, "Object is not compatible with std.core.Record");
     return nullptr;
 }
 

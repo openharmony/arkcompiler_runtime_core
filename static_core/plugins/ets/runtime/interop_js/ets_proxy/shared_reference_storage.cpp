@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -51,7 +52,8 @@ PandaUniquePtr<SharedReferenceStorage> SharedReferenceStorage::Create(PandaEtsVM
 
     void *data = os::mem::MapRWAnonymousRaw(realSize);
     if (data == nullptr) {
-        INTEROP_LOG(FATAL) << "Cannot allocate MemPool";
+        INTEROP_LOG(FATAL) << "Cannot allocate MemPool"
+                           << ". Error code: " << std::to_string(INTEROP_MEMORY_ALLOCATION_FAILED);
         return nullptr;
     }
     auto sharedStorage = MakePandaUnique<SharedReferenceStorage>(vm, data, realSize);
@@ -164,8 +166,12 @@ napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env en
         uint32_t index = currentRef->flags_.GetNextIndex();
         if (index == 0U) {
             // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
-            InteropFatal("No JS Object for SharedReference (" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) +
-                         ") and napi_env: " + std::to_string(reinterpret_cast<std::uintptr_t>(env)));
+            storageLock_.Unlock();
+            InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), INTEROP_SHARED_REFERENCE_NOT_FOUND,
+                                      "No JS Object for SharedReference (" +
+                                          std::to_string(reinterpret_cast<std::uintptr_t>(this)) +
+                                          ") and napi_env: " + std::to_string(reinterpret_cast<std::uintptr_t>(env)));
+            return nullptr;
         }
         currentRef = GetItemByIndex(index);
     } while (true);
@@ -285,7 +291,7 @@ SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHan
 {
     SharedReference *sharedRef = AllocItem();
     if (UNLIKELY(sharedRef == nullptr)) {
-        ctx->ThrowJSError(ctx->GetJSEnv(), "no free space for SharedReference");
+        ctx->ThrowJSError(ctx->GetJSEnv(), INTEROP_MEMORY_ALLOCATION_FAILED, "no free space for SharedReference");
         return nullptr;
     }
     SharedReference *lastRefInChain = nullptr;
