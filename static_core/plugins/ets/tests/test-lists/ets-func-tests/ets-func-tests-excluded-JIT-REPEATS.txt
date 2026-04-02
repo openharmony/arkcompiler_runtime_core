@@ -21,3 +21,6 @@ std/concurrency/AsyncRWLockTest.ets
 # 24811 thread-safe containers tests may cause failure on timeout or CoroutineLimitExceedError in JIT_REPEARS - see issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
 std/containers/BlockingQueue/AddAndPollStress.ets
 # End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
+
+# It is executed too long with repeats
+regression/mark_old_refs.ets
