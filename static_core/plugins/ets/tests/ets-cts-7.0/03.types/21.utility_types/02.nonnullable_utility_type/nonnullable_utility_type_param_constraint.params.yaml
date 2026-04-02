@@ -1,0 +1,31 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # Type parameter constraint with NonNullable
+  - init: "new G<NonNullable<Base|null|undefined>>"
+    call: (new Base).b
+    expected: 1
+  - init: "new G<NonNullable<Derived|null|undefined>>"
+    call: (new Derived).b
+    expected: 2
+  - init: "new G<NonNullable<number|null|undefined>>"
+    call: (2)
+    expected: 2
+  - init: "new H<NonNullable<'b'|null|undefined>>"
+    call: ('b')
+    expected: "'b'"
+  - init: "new H<NonNullable<'d'|null|undefined>>"
+    call: ('d')
+    expected: "'d'"
