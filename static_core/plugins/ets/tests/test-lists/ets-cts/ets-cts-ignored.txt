@@ -53,6 +53,10 @@
 #31615 RTE for partial class field assignment
 03.types/21.utility_types/03.partial_utility_type/partial_inherit3.ets
 
+#29971
+04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
+04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
+
 #27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets

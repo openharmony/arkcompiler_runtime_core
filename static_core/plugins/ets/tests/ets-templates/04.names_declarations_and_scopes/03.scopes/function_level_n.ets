@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-{% for m in modules %}
 /*---
-desc: module scope to import but not exported
-files: ['./module_to_export.ets']
+desc: >-
+    The scope of a name declared immediately within the body of a function
+    (method) declaration is the body of that function declaration (method
+    or function scope) from the place of declaration and up to the end of
+    the body.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0143: Unresolved reference x"
 ---*/
 
-import { {{m.entity}} } from './module_to_export'
-
-{{m.decl}}
-
-function main() {
-    arktest.assertEQ({{m.use}}, {{m.expected}})
+function f1() {
+    let x = 9
 }
 
-{% endfor %}
-
+function main() {
+    f1()
+    arktest.assertEQ( x, 9 ) // CTE
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,28 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Standalone expression (see Type of Expression) is an expression for which no target type is expected in its context.
+desc: >-
+    Class, interface, and enumeration members can only be accessed 
+    by applying the dot operator to an instance or to a type.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0143: Unresolved reference {{c.member}}"
 ---*/
 
-let ab : "A" | "B" = "A"
-
-{% for c in cases %}
-let v{{loop.index}} = {{c}}
-const c{{loop.index}} = {{c}}
-{% endfor %}
-
-
-function main() {
-{% for c in cases %}
-    {{c}};
-{% endfor %}
+class C {
+    static x: int = 1
 }
+
+interface I {
+    y: int
+}
+
+enum E { A, B }
+
+function main(): void {
+    let a = {{ c.member }}
+}
+
+{% endfor %}
