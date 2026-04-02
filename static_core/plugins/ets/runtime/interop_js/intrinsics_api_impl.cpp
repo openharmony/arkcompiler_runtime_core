@@ -536,6 +536,37 @@ static bool NeedWrapDefault(const PandaString &moduleName, const std::string_vie
            moduleName.compare(0, OHOS_PLUGIN_PREFIX_SIZE, OHOS_PLUGIN_PREFIX) == 0 && func == "requireNapi";
 }
 
+EtsString *GetCallerABCPath()
+{
+    constexpr std::string_view STATIC_ABC_SUFFIX = "_static.abc";
+    constexpr std::string_view ABC_SUFFIX = ".abc";
+    constexpr size_t STATIC_ABC_SUFFIX_LEN = STATIC_ABC_SUFFIX.size();
+
+    auto coroutine = EtsCoroutine::GetCurrent();
+    std::string abcPath;
+    auto stack = StackWalker::Create(coroutine);
+    stack.NextFrame();
+    if (!stack.HasFrame()) {
+        LOG(ERROR, DEBUGGER) << "caller stack has no frame.";
+        return EtsString::CreateNewEmptyString();
+    }
+    auto *method = stack.GetMethod();
+    if (LIKELY(method != nullptr)) {
+        if (method->GetPandaFile() == nullptr) {
+            LOG(ERROR, DEBUGGER) << "caller has no abcfile.";
+            return EtsString::CreateNewEmptyString();
+        }
+        abcPath = method->GetPandaFile()->GetFullFileName();
+        size_t pos = abcPath.find(STATIC_ABC_SUFFIX);
+        if (pos != std::string::npos) {
+            abcPath.replace(pos, STATIC_ABC_SUFFIX_LEN, ABC_SUFFIX);
+        }
+        return (EtsString *)EtsString::CreateFromMUtf8(abcPath.c_str());
+    }
+    LOG(ERROR, DEBUGGER) << "caller stack has no method.";
+    return EtsString::CreateNewEmptyString();
+}
+
 JSValue *JSRuntimeLoadModule(EtsString *module, [[maybe_unused]] EtsString *abcFilePath)
 {
     auto executionCtx = EtsExecutionContext::GetCurrent();
@@ -592,7 +623,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module, [[maybe_unused]] EtsString *abcF
 
 JSValue *JSRuntimeLoadModule(EtsString *module)
 {
-    return JSRuntimeLoadModule(module, nullptr);
+    return JSRuntimeLoadModule(module, GetCallerABCPath());
 }
 
 uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs)

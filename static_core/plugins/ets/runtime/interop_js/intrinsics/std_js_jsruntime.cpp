@@ -209,11 +209,6 @@ JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)
     return JSRuntimeLoadModule(module);
 }
 
-JSValue *JSRuntimeLoadModuleWithAbcIntrinsic(EtsString *module, EtsString *abcFilePath)
-{
-    return JSRuntimeLoadModule(module, abcFilePath);
-}
-
 uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 {
     return JSRuntimeStrictEqual(lhs, rhs);
