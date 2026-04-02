@@ -70,6 +70,7 @@ public:
     PANDA_PUBLIC_API SharedReference *GetReference(napi_env env, napi_value jsObject) const;
     PANDA_PUBLIC_API SharedReference *GetReference(EtsObject *etsObject) const;
 
+    bool GetJsObject(EtsObject *etsObject, napi_env env, napi_value *result) const;
     napi_value GetJsObject(EtsObject *etsObject, napi_env env) const;
     bool HasReference(EtsObject *etsObject, napi_env env);
 

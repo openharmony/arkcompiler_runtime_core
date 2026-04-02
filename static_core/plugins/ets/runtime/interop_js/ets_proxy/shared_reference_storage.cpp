@@ -171,6 +171,29 @@ napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env en
     } while (true);
 }
 
+bool SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env env, napi_value *result) const
+{
+    storageLock_.ReadLock();
+    if (!SharedReference::HasReference(vm_, etsObject)) {
+        storageLock_.Unlock();
+        return false;
+    }
+    uint32_t index = SharedReference::ExtractMaybeIndex(vm_, etsObject);
+    do {
+        const SharedReference *currentRef = GetItemByIndex(index);
+        if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
+            auto ref = currentRef->jsRef_;
+            storageLock_.Unlock();
+            ScopedNativeCodeThread s(EtsCoroutine::GetCurrent());
+            NAPI_CHECK_FATAL(napi_get_reference_value(env, ref, result));
+            return true;
+        }
+        index = currentRef->flags_.GetNextIndex();
+    } while (index != 0U);
+    storageLock_.Unlock();
+    return false;
+}
+
 bool SharedReferenceStorage::HasReferenceWithCtx(SharedReference *ref, InteropCtx *ctx) const
 {
     uint32_t idx;
