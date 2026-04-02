@@ -1,0 +1,54 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |-
+      interface I {
+        n: number
+      }
+      class C implements I {
+        n: number = 1
+      }
+      class C1 extends C {
+        get n(): number { return 2 }
+      }
+    expected_out: "Semantic error ESE129829: 'n' is defined as an accessor in class 'C', but is overridden here in 'C1' as an instance property."
+    doc: getter overrides superclass field that implements interface property
+
+  - decl: |-
+      interface I {
+        n: int
+      }
+      class C implements I {
+        n: int = 1
+      }
+      class C1 extends C {
+        get n(): int { return 2 }
+        set n(x: int) {}
+      }
+    expected_out: "Semantic error ESE129829: 'n' is defined as an accessor in class 'C', but is overridden here in 'C1' as an instance property."
+    doc: getter and setter override superclass field that implements interface property
+
+  - decl: |-
+      interface I {
+        s: string
+      }
+      abstract class A implements I {
+        s: string = 's'
+      }
+      class C1 extends A {
+        get s(): string { return "str" }
+      }
+    expected_out: "Semantic error ESE129829: 'n' is defined as an accessor in class 'C', but is overridden here in 'C1' as an instance property."
+    doc: getter overrides field from abstract superclass that implements interface property
