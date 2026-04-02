@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 /*---
 desc: Null interface inherits an interface containing an readonly type, modify a read-only array.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
 ---*/
 
 interface ParentInterface {

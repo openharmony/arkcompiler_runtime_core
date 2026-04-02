@@ -14,14 +14,22 @@
  */
 
 /*---
-desc: Nan empty interface inherits an empty interface.
+desc: Null interface inherits an interface containing an this type.
 ---*/
 
-interface ParentEmptyInterface {}
+interface ParentInterface {
+  getThis(): this;
+}
 
-interface EmptyInterface extends ParentEmptyInterface {}
+interface EmptyInterface extends ParentInterface {}
+
+class Example implements EmptyInterface {
+  getThis(): this {
+    return this;
+  }
+}
 
 function main(): void {
-  const obj: EmptyInterface = {};
-  arktest.assertTrue(obj instanceof ParentEmptyInterface)
+  const obj = new Example();
+  arktest.assertEQ(obj.getThis(), obj);
 }

@@ -13,15 +13,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+desc: Override public default method from superinterface.
+assert: >-
+      An instance method mI declared in or inherited by interface I,
+      overrides from I another instance method mJ declared in interface J,
+      if all of the following are true - I is a subinterface of J.
 ---*/
 
-{{c.decl}}
+interface A {
+  foo(): int {
+    return 1;
+  }
+}
 
-{% endfor %}
+interface B extends A {
+  foo(): int {
+    return 2;
+  }
+}
+
+class C implements B {}
+
+function main(): void {
+  let instance: C = new C();
+
+  arktest.assertEQ(instance.foo(), 2)
+}

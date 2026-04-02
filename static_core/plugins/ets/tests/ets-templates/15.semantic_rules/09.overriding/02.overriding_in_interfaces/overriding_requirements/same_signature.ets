@@ -13,15 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+desc: Override public default method from superinterface with same signature.
+assert: >-
+      The relationship between the signature of an interface method and the signatures
+      of any overridden interface methods is specified in link to class’ requirements
+      in overriding and hiding.
+tags: [compile-only]
 ---*/
 
-{{c.decl}}
+interface A {
+  foo(): int {
+    return 1;
+  }
+}
 
-{% endfor %}
+interface B extends A {
+  foo(): int {
+    return 2;
+  }
+}

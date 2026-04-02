@@ -13,15 +13,25 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Nan empty interface inherits an empty interface.
+desc: Verify that a child class can access '{{c.type}}' constant from an interface.
 ---*/
 
-interface ParentEmptyInterface {}
-
-interface EmptyInterface extends ParentEmptyInterface {}
-
-function main(): void {
-  const obj: EmptyInterface = {};
-  arktest.assertTrue(obj instanceof ParentEmptyInterface)
+interface I1 {
+  readonly field: {{c.type}}
 }
+
+interface I2 extends I1 {}
+
+class C implements I2 {
+  readonly field: {{c.type}} = {{c.init}}
+}
+
+function main() {
+  let i: C = new C()
+  arktest.assertEQ(i.field{{c.index}}, {% if c.check is defined %}{{c.check}}{% else %}{{c.init}}{% endif %})
+}
+
+{% endfor %}

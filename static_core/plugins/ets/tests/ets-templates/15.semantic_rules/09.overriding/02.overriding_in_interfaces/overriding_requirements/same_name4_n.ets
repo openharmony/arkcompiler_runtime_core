@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+      CTE occurs if the body of an interface declares a method with a name
+      that is already used for a property in this declaration.
+tags: [compile-only, negative]
 ---*/
 
-{{c.decl}}
+interface I {
+  private foo(): int {
+    return 1;
+  }
+}
 
-{% endfor %}
+interface J extends I {
+  foo(i: int): string {
+    return i.toString()
+  }
+}
+
+class C implements J { }
+
+function main() {
+  arktest.assertTrue(new C().foo(2), "2")
+}

@@ -13,15 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+desc: Override Object's methods in interface which is public and not abstract.
+tags: [compile-only]
 ---*/
 
-{{c.decl}}
-
-{% endfor %}
+interface A {
+  toString(): String {
+    return "sd";
+  };
+}

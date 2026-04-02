@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Nan empty interface inherits an empty interface.
+desc: {{c.doc}}
+tags: [compile-only, negative]
+expected_out: {{c.error}}
 ---*/
 
-interface ParentEmptyInterface {}
+{{c.decl}}
 
-interface EmptyInterface extends ParentEmptyInterface {}
-
-function main(): void {
-  const obj: EmptyInterface = {};
-  arktest.assertTrue(obj instanceof ParentEmptyInterface)
-}
+{% endfor %}
