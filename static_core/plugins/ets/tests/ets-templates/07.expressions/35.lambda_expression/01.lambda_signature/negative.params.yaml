@@ -16,39 +16,65 @@ cases:
   - desc: A lambda expression declares two formal parameters with the same name
     impl: |-
         let f = (a: int, a: long) => a + a
+    output:
+      - "Semantic error ESE0351: Variable 'a' has already been declared."
 
   - desc: A formal parameter contains no type provided, and the type cannot be derived by type inference
     impl: |-
         let f = (a, b) => a + b
+    output:
+      - "Semantic error ESE0132: The type of parameter 'a' cannot be inferred"
+      - "Semantic error ESE0132: The type of parameter 'b' cannot be inferred"
 
   - desc: A required parameter cannot follow an optional parameter.
     impl: |-
       let f = (a?: String, b: String) => a + b
+    output:
+      - "Syntax error ESY0219: A required parameter cannot follow an optional parameter."
 
   - desc: A required parameter cannot follow an optional parameter.
     impl: |-
       let f = (a: String = 'test ', b: String) => a + b
+    output:
+      - "Syntax error ESY0219: A required parameter cannot follow an optional parameter."
 
   - desc: A rest parameter is not last in parameter list.
     impl: |-
       let f = (...a: string[], b: string) => a[0] + b
+    output:
+      - "Syntax error ESY0067: Rest parameter must be the last formal parameter."
+      - "Syntax error ESY0230: Expected '=>', got 'identification literal'."
+      - "Semantic error ESE0143: Unresolved reference b"
+      - "Syntax error ESY0227: Unexpected token ':'."
+      - "Syntax error ESY0227: Unexpected token 'string'."
+      - "Semantic error ESE0144: Type name 'string' used in the wrong context"
+      - "Syntax error ESY0227: Unexpected token ')'."
+      - "Syntax error ESY0227: Unexpected token '=>'."
 
   - desc: A rest parameter is neither array nor tuple.
     impl: |-
       let f = (a: string, ...b: string) => a + b
+    output:
+      - "Syntax error ESY0193: Rest parameter should be either array or tuple type."
 
   - desc: Generic lambda.
     impl: |-
       let f = <T>(p: T) => T
+    output:
+      - "Syntax error ESY12842: Generic lambda expressions are not supported."
 
   - desc: Readonly array as lambda parameter.
     impl: |-
       (array: readonly string[]) => {
           array[0] = 'test'
       }
+    output:
+      - "Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter"
 
   - desc: Readonly tuple as lambda parameter.
     impl: |-
       (tuple: readonly [number, string]) => {
           tuple[0] = 1
       }
+    output:
+      - "Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter"

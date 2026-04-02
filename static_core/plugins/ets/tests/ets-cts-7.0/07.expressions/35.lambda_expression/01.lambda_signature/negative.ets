@@ -21,6 +21,7 @@ desc: |-
 tags:
 - compile-only
 - negative
+expected_out: {{c.output}}
 ---*/
 
 {{c.impl}}
