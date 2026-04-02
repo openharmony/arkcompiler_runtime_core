@@ -65,12 +65,12 @@ public:
 
     static SuspendableJob *FromExecutionContext(JobExecutionContext *executionCtx);
 
-    void InvokeEntrypoint() override
-    {
-        InvokeEntrypointImpl(true);
-    }
+    void InvokeEntrypoint() override;
 
 private:
+    void PreInvokeExecutionContextUpdate() override;
+    void PostInvokeExecutionContextUpdate() override;
+
     mem::Reference *suspensionCtx_ = nullptr;
 };
 

@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/stackless/suspendable_job.h"
+#include "plugins/ets/runtime/ets_execution_context_wrapper.h"
 
 namespace ark::ets {
 
@@ -105,10 +106,12 @@ EtsAsyncContext *EtsAsyncContext::GetCurrent(EtsExecutionContext *executionCtx)
     if LIKELY (!StackWalker::Create(executionCtx->GetMT()).IsResumed()) {
         return nullptr;
     }
-    auto *job = SuspendableJob::FromExecutionContext(JobExecutionContext::CastFromMutator(executionCtx->GetMT()));
-    auto *asyncCtxRef = EtsReference::CastFromReference(job->GetSuspensionContext());
-    auto *refStorage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
-    return asyncCtxRef == nullptr ? nullptr : EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(asyncCtxRef));
+    auto *asyncContext = EtsAsyncContext::FromCoreType(
+        EtsExecutionContextWrapper::CastFromMutator(executionCtx->GetMT())->GetSuspensionContext());
+    ASSERT_PRINT(asyncContext == EtsAsyncContext::GetFromRefStorage(executionCtx),
+                 "Cached asyncContext = " << asyncContext << ", asyncContext from ref storage = "
+                                          << EtsAsyncContext::GetFromRefStorage(executionCtx));
+    return asyncContext;
 }
 
 void EtsAsyncContext::AddReference(EtsExecutionContext *executionCtx, uint32_t idx, EtsObject *ref)
@@ -378,6 +381,14 @@ uint32_t EtsAsyncContext::RestoreCompiledContext(ark::Frame *frame, EtsExecution
     LOG(DEBUG, COROUTINES) << "Restored compiled native pc to awaitId: " << stackMap.GetBytecodePc();
     EVENT_CONVERT_ASYNC_CTX(std::string(frame->GetMethod()->GetFullName()), stackMap.GetBytecodePc());
     return stackMap.GetBytecodePc();
+}
+
+EtsAsyncContext *EtsAsyncContext::GetFromRefStorage(EtsExecutionContext *executionCtx)
+{
+    auto *job = SuspendableJob::FromExecutionContext(JobExecutionContext::CastFromMutator(executionCtx->GetMT()));
+    auto *asyncCtxRef = EtsReference::CastFromReference(job->GetSuspensionContext());
+    auto *refStorage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
+    return asyncCtxRef == nullptr ? nullptr : EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(asyncCtxRef));
 }
 
 }  // namespace ark::ets

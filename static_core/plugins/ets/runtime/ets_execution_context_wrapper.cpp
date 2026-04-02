@@ -187,4 +187,13 @@ void EtsExecutionContextWrapper::OnJobCompletion(Value returnValue)
     UNREACHABLE();
 }
 
+void EtsExecutionContextWrapper::VisitGCRoots(const GCRootVisitor &cb)
+{
+    JobExecutionContext::VisitGCRoots(cb);
+
+    if (asyncContext_ != nullptr) {
+        cb({mem::RootType::ROOT_THREAD, reinterpret_cast<ObjectHeader **>(&asyncContext_)});
+    }
+}
+
 }  // namespace ark::ets

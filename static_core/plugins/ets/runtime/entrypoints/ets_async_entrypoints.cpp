@@ -20,6 +20,7 @@
 #include "runtime/include/cframe.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/object_header.h"
+#include "plugins/ets/runtime/ets_execution_context_wrapper.h"
 
 namespace ark::ets {
 
@@ -53,9 +54,9 @@ std::pair<size_t, size_t> CountLiveVRegs(const VRegList &vregList)
     return {refCount, primCount};
 }
 
-void SaveLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, CFrame cframe, uintptr_t suspendRetAddr)
+void SaveLiveVRegs(EtsExecutionContext *executionCtx, EtsAsyncContext *asyncContext, CFrame cframe,
+                   uintptr_t suspendRetAddr)
 {
-    auto executionCtx = coro->GetExecutionCtx();
     auto refValues = asyncContext->GetRefValues(executionCtx);
     auto primValues = asyncContext->GetPrimValues(executionCtx);
     auto frameOffsets = asyncContext->GetFrameOffsets(executionCtx);
@@ -111,9 +112,8 @@ void SaveLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, CFrame cfr
     asyncContext->SetPrimCount(totalPrimCount);
 }
 
-void RestoreLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, CFrame cframe)
+void RestoreLiveVRegs(EtsExecutionContext *executionCtx, EtsAsyncContext *asyncContext, CFrame cframe)
 {
-    auto executionCtx = coro->GetExecutionCtx();
     auto refValues = asyncContext->GetRefValues(executionCtx);
     auto primValues = asyncContext->GetPrimValues(executionCtx);
     auto frameOffsets = asyncContext->GetFrameOffsets(executionCtx);
@@ -143,8 +143,8 @@ void RestoreLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, CFrame 
 }
 }  // namespace
 
-extern "C" ObjectHeader *EtsAsyncSuspendImpl(EtsCoroutine *coro, ObjectHeader *asyncContextObj, void *fp,
-                                             uintptr_t suspendRetAddr)
+extern "C" ObjectHeader *EtsAsyncSuspendImpl(EtsExecutionContextWrapper *executionCtxWrapper,
+                                             ObjectHeader *asyncContextObj, void *fp, uintptr_t suspendRetAddr)
 {
     auto *asyncContext = EtsAsyncContext::FromCoreType(asyncContextObj);
     if (UNLIKELY(asyncContext == nullptr)) {
@@ -153,16 +153,17 @@ extern "C" ObjectHeader *EtsAsyncSuspendImpl(EtsCoroutine *coro, ObjectHeader *a
         return nullptr;
     }
 
-    SaveLiveVRegs(coro, asyncContext, CFrame(fp), suspendRetAddr);
+    auto *executionCtx = EtsExecutionContext::FromMT(executionCtxWrapper);
+    SaveLiveVRegs(executionCtx, asyncContext, CFrame(fp), suspendRetAddr);
 
-    auto *executionCtx = coro->GetExecutionCtx();
     // Note: We don't inline async functions, so they are always on the top frame and,
     // therefore we don't call GetMethod and GC won't start.
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return asyncContext->GetReturnValue(executionCtx)->GetCoreType();
 }
 
-extern "C" uintptr_t EtsAsyncDispatchImpl(EtsCoroutine *coro, ObjectHeader *asyncContextObj, void *fp)
+extern "C" uintptr_t EtsAsyncDispatchImpl(EtsExecutionContextWrapper *executionCtxWrapper,
+                                          ObjectHeader *asyncContextObj, void *fp)
 {
     if (asyncContextObj == nullptr) {
         return 0U;
@@ -171,7 +172,8 @@ extern "C" uintptr_t EtsAsyncDispatchImpl(EtsCoroutine *coro, ObjectHeader *asyn
     auto *asyncContext = EtsAsyncContext::FromCoreType(asyncContextObj);
     CFrame cframe(fp);
     auto resumeAddr = ToUintPtr(GetCodeEntryPoint(cframe)) + asyncContext->GetPc();
-    RestoreLiveVRegs(coro, asyncContext, cframe);
+    auto *executionCtx = EtsExecutionContext::FromMT(executionCtxWrapper);
+    RestoreLiveVRegs(executionCtx, asyncContext, cframe);
     return resumeAddr;
 }
 #endif

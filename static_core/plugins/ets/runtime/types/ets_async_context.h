@@ -140,6 +140,8 @@ public:
     }
 
 private:
+    static EtsAsyncContext *GetFromRefStorage(EtsExecutionContext *executionCtx);
+
     ObjectPointer<EtsPromise> awaitee_;
     ObjectPointer<EtsPromise> returnValue_;
 

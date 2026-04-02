@@ -90,6 +90,13 @@ public:
         return manager_;
     }
 
+    virtual ObjectHeader *GetSuspensionContext() const
+    {
+        return nullptr;
+    }
+
+    virtual void SetSuspensionContext([[maybe_unused]] mem::Reference *asyncContext) {}
+
     virtual void ExecuteJob(Job *job);
 
     virtual void UpdateCachedObjects() {}
@@ -100,6 +107,8 @@ public:
 
     /// @brief list unhandled language specific events on program exit
     virtual void ListUnhandledEventsOnProgramExit() {}
+
+    void VisitGCRoots(const GCRootVisitor &cb) override;
 
 protected:
     // CC-OFFNXT(G.FUN.01-CPP) solid logic

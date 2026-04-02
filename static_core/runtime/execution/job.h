@@ -217,6 +217,9 @@ protected:
     void InvokeEntrypointImpl(bool resumedFrame);
 
 private:
+    virtual void PreInvokeExecutionContextUpdate() {};
+    virtual void PostInvokeExecutionContextUpdate() {};
+
     /// job's stuff
     PandaString name_;
     Id id_;
