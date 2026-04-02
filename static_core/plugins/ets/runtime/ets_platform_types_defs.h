@@ -228,6 +228,7 @@
     AN("Lstd/core/JSONStringifyIgnore;", coreJSONStringifyIgnore)                                                     \
     AN("Lstd/core/JSONParseIgnore;", coreJSONParseIgnore)                                                             \
     AN("Lstd/core/JSONRename;", coreJSONRename)                                                                       \
+    AN("Lstd/core/JSONStringifyGetter;", coreJSONStringifyGetter)                                                     \
     /* RegExp */                                                                                                      \
     TP("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                         \
     TP("Lstd/core/RegExp;", coreRegExp)                                                                               \

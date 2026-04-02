@@ -33,6 +33,18 @@ export @interface JSONStringifyIgnore {
 export @interface JSONParseIgnore {
 }
 
+/**
+ * Marks a zero-argument instance 'get' method to be called by JSON.stringifyWithGetters().
+ * The method name is used as the JSON key and the return value as the corresponding value.
+ * 
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export @interface JSONStringifyGetter {
+}
+
+
 function findFieldByName(fields: Array<reflect.InstanceField>, name: string): reflect.InstanceField | undefined {
     return fields.find((fld) => fld.getName() == name)
 }
@@ -43,6 +55,8 @@ class JSONAPI {
     public native static getJSONParseIgnore(field: reflect.InstanceField): boolean
 
     public native static getJSONRename(field: reflect.InstanceField): string | undefined
+
+    public native static getJSONStringifyGetter(method: reflect.InstanceMethod): boolean
 }
 
 class FieldMetadata {
@@ -647,6 +661,105 @@ export class JSON {
     private static native stringifyFast(obj: Any): string
 
     /**
+     * Converts an object to a JavaScript Object Notation (JSON) string,
+     * invoking any instance methods annotated with @JSONStringifyGetter and
+     * including their return values in the output. Each annotated method's name
+     * is used as the JSON key, and its return value is used as the corresponding value.
+     *
+     * @param { Any } obj - An object to be converted.
+     *
+     * @returns String - JSON representation of Object, including annotated getter values
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public static stringifyWithGetters(obj: Any): String {
+        if (obj === undefined) {
+            return ''
+        }
+        return new JSONWriter(undefined, undefined, true).write(obj)
+    }
+
+    /**
+     * Converts an object to a JavaScript Object Notation (JSON) string,
+     * invoking any instance methods annotated with @JSONStringifyGetter and
+     * including their return values in the output. Each annotated method's name
+     * is used as the JSON key, and its return value is used as the corresponding value.
+     *
+     * @param { Any } obj - An object to be converted.
+     *
+     * @param { ((key: string, value: Any) => Any) | undefined | null } replacer - A function that transforms the results.
+     *
+     * @param { int | string } [space] - A string or number that's used to insert white space
+     * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.
+     *
+     * @returns String - JSON representation of Object, including annotated getter values
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public static stringifyWithGetters(
+                obj: Any,
+                replacer: ((key: string, value: Any) => Any) | undefined | null,
+                space?: int | string): string {
+        if (obj === undefined) {
+            return ''
+        }
+        const replacerOpt: ((key: string, value: Any) => Any) | undefined = (replacer === null) ? undefined : replacer
+        let spaceOpt: String | undefined
+        if (space instanceof Int) {
+            spaceOpt = JSON.spaceFromNumber(space)
+        } else {
+            spaceOpt = space
+        }
+        return new JSONWriter(replacerOpt, spaceOpt, true).write(obj)
+    }
+
+    /**
+     * Converts an object to a JavaScript Object Notation (JSON) string,
+     * invoking any instance methods annotated with @JSONStringifyGetter and
+     * including their return values in the output. Each annotated method's name
+     * is used as the JSON key, and its return value is used as the corresponding value.
+     *
+     * @param { Any } obj - An object to be converted.
+     *
+     * @param { Array<double | string> | Array<string> | Array<double> } replacer - An array with elements indicating names of the properties in the object
+     * that should be included in the resulting JSON string.
+     * Annotated getter methods whose names appear in this array are also included.
+     *
+     * @param { int | string } [space] - A string or number that's used to insert white space
+     * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.
+     *
+     * @returns String - JSON representation of Object, including annotated getter values
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public static stringifyWithGetters(
+                obj: Any,
+                replacer: Array<double | string> | Array<string> | Array<double>,
+                space?: int | string): string {
+        if (obj === undefined) {
+            return ''
+        }
+        const filter: FixedArray<string> = new FixedArray<string>(replacer.length)
+        let index: int = 0
+        for (let element of replacer) {
+            filter[index++] = `${element}`
+        }
+        let spaceOpt: String | undefined
+        if (space instanceof Int) {
+            spaceOpt = JSON.spaceFromNumber(space)
+        } else {
+            spaceOpt = space
+        }
+        return new JSONWriter(filter, spaceOpt, true).write(obj)
+    }
+
+    /**
      * Converts an object to a JavaScript Object Notation (JSON) string.
      *
      * @param obj: Object An object to be converted.
@@ -850,10 +963,6 @@ export class JSON {
         JSON.checkType(type, new Map<Class, TypeColor>())
 
         let bigIntOpt: int = options ? options.bigIntMode : 0
-        if (bigIntOpt > 2 || bigIntOpt < 0) {
-            throw new Error('bigIntMode value should be from 0 to 2, current value is' + bigIntOpt)
-        }
-
         let jsonValue = UnifiedJsonParser.parseToJSONValue(json)
         const parsingResult = new JSONValueParser(reviver, bigIntOpt).parse(jsonValue, type) as T
 
@@ -862,6 +971,57 @@ export class JSON {
         } else {
             return parsingResult
         }
+    }
+
+    /**
+     * Parses a JSON string and populates the fields of an existing instance.
+     * Unlike parse<T>(json, type), this does NOT require a default constructor.
+     * Fields whose keys are absent from the JSON retain their current values
+     * on the instance (merge semantics).
+     *
+     * @param { string } json - JSON string to parse
+     * @param { T } instance - Existing instance whose fields will be populated
+     * @returns The same instance after population
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public static parseUpdate<T>(json: string, instance: T): T {
+        return JSON.parseUpdate<T>(json, undefined, instance)
+    }
+
+    /**
+     * Parses a JSON string and populates the fields of an existing instance,
+     * with an optional reviver and parse options.
+     * Unlike parse<T>(json, type), this does NOT require a default constructor.
+     * Fields whose keys are absent from the JSON retain their current values
+     * on the instance (merge semantics).
+     *
+     * @param { string } json - JSON string to parse
+     * @param { ((key: string, value: Any) => Any) | undefined } reviver - Optional function to transform each parsed value, or undefined
+     * @param { T } instance - Existing instance whose fields will be populated
+     * @param { jsonx.ParseOptions } [options] - Optional ParseOptions (e.g. bigIntMode)
+     * @returns The same instance after population
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public static parseUpdate<T>(
+        json: string,
+        reviver: ((key: string, value: Any) => Any) | undefined,
+        instance: T,
+        options?: jsonx.ParseOptions
+    ): T {
+        let bigIntOpt: int = options ? options.bigIntMode : 0
+        const jsonValue = UnifiedJsonParser.parseToJSONValue(json)
+        const result = new JSONValueParser(reviver, bigIntOpt).parseInto(jsonValue, instance as object) as T
+
+        if (reviver !== undefined) {
+            return reviver('', result) as T
+        }
+        return result
     }
 
     /**
@@ -1082,8 +1242,16 @@ class DoubleArrayHandle implements ArrayHandle {
 
 class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_CLASS = Class.from<JSValue>()
-    private static readonly GETTER_METHOD_PREFIX = '%%get-'
+    // Length of the bytecode getter prefix "%%get-" (GETTER_BEGIN in ets_type.h)
+    private static readonly GETTER_PREFIX_LEN: int = 6
     private static readonly maxSpaceLength = 10
+
+    private static truncateSpace(space: String | undefined): String | undefined {
+        if (space !== undefined && space.length > JSONWriter.maxSpaceLength) {
+            return space.substring(0, JSONWriter.maxSpaceLength)
+        }
+        return space
+    }
 
     private readonly replacer: ((key: String, value: Any) => Any) | undefined
     private readonly fieldsFilter: FixedArray<string>
@@ -1092,38 +1260,33 @@ class JSONWriter {
     private readonly useReplacer: boolean
     private readonly useFieldsFilter: boolean
     private readonly useIndent: boolean
+    private readonly useAnnotatedGetters: boolean
 
     private indentLevel: int = 0
 
     private readonly path = new Set<Any>()
     private buffer = new StringBuilder()
 
-    public constructor(replacer?: (key: String, value: Any) => Any, space?: String) {
+    public constructor(replacer?: (key: String, value: Any) => Any, space?: String, useAnnotatedGetters: boolean = false) {
         this.replacer = replacer
         this.fieldsFilter = []
-        if (space !== undefined && space.length > JSONWriter.maxSpaceLength) {
-            this.space = space.substring(0, JSONWriter.maxSpaceLength)
-        } else {
-            this.space = space
-        }
+        this.space = JSONWriter.truncateSpace(space)
 
         this.useReplacer = this.replacer != undefined
         this.useFieldsFilter = false
         this.useIndent = !(this.space == undefined || this.space == '')
+        this.useAnnotatedGetters = useAnnotatedGetters
     }
 
-    public constructor(filter: FixedArray<string>, space?: String) {
+    public constructor(filter: FixedArray<string>, space?: String, useAnnotatedGetters: boolean = false) {
         this.replacer = undefined
         this.fieldsFilter = filter
-        if (space !== undefined && space.length > JSONWriter.maxSpaceLength) {
-            this.space = space.substring(0, JSONWriter.maxSpaceLength)
-        } else {
-            this.space = space
-        }
+        this.space = JSONWriter.truncateSpace(space)
 
         this.useReplacer = false
         this.useFieldsFilter = true
         this.useIndent = !(this.space == undefined || this.space == '')
+        this.useAnnotatedGetters = useAnnotatedGetters
     }
 
     public write(obj: Any): String {
@@ -1465,6 +1628,20 @@ class JSONWriter {
             }
         }
 
+        if (this.useAnnotatedGetters) {
+            const annotatedGetters = JSONWriter.getGetterKeyValuePairsAll(
+                objCls,
+                obj,
+                this.useFieldsFilter,
+                this.fieldsFilter
+            )
+            if (annotatedGetters.length > 0) {
+                this.path.add(obj)
+                fieldDumped = this.writeClassFields(annotatedGetters, fieldDumped)
+                this.path.delete(obj)
+            }
+        }
+
         const interfaceFields = this.collectInterfaceFields(obj, objCls, writableFields)
         if (interfaceFields.length > 0) {
             this.path.add(obj)
@@ -1610,18 +1787,50 @@ class JSONWriter {
         fieldsFilter: FixedArray<string>) {
 
         const namesAndValues = new Array<[string, Any]>()
-        const prefixLength = JSONWriter.GETTER_METHOD_PREFIX.getLength()
         const clsMethods = cls.getInstanceMethods()
         for (const method of clsMethods) {
-            let name = method.getName()
-            if (name.startsWith(JSONWriter.GETTER_METHOD_PREFIX, 0)) {
-                name = name.substring(prefixLength)
+            if (!method.isGetter()) {
+                continue
+            }
+            const name = method.getName().substring(JSONWriter.GETTER_PREFIX_LEN)
+            if (useFieldsFilter && !JSONWriter.searchField(fieldsFilter, name)) {
+                continue
+            }
+            const value = method.invoke(obj)
+            namesAndValues.push([name, value])
+        }
+        return namesAndValues
+    }
+
+    /**
+    * @brief Returns values of `@JSONStringifyGetter`-annotated `get` accessor properties
+    * across the class hierarchy.
+    * A method is included only if it both carries the `@JSONStringifyGetter` annotation
+    * AND has the `%%get-` bytecode name prefix (length 6) that identifies a `get` accessor.
+    * The prefix is stripped to produce the JSON key (e.g. `%%get-area` → key `"area"`).
+    */
+    private static getGetterKeyValuePairsAll(cls: Class, obj: Object, useFieldsFilter: boolean,
+        fieldsFilter: FixedArray<string>): Array<[string, Any]> {
+
+        const namesAndValues = new Array<[string, Any]>()
+        let currentClass: Class | undefined = cls
+        while (currentClass != undefined) {
+            const clsMethods = currentClass.getInstanceMethods()
+            for (const method of clsMethods) {
+                if (!method.isGetter()) {
+                    continue
+                }
+                if (!JSONAPI.getJSONStringifyGetter(method)) {
+                    continue
+                }
+                const name = method.getName().substring(JSONWriter.GETTER_PREFIX_LEN)
                 if (useFieldsFilter && !JSONWriter.searchField(fieldsFilter, name)) {
                     continue
                 }
                 const value = method.invoke(obj)
                 namesAndValues.push([name, value])
             }
+            currentClass = currentClass.getSuper()
         }
         return namesAndValues
     }
@@ -2962,6 +3171,9 @@ class JSONValueParser {
                 }
             }
             return num
+
+        } else if (value instanceof JSONString && Types.isCharType(type)) {
+            return (value as JSONString).value.charAt(0)
         } else if (value instanceof JSONString && (type === TypeColor.STRING_CLASS || type.isEnum())) {
             const str = (value as JSONString).value
             if (type.isEnum()) {
@@ -3065,6 +3277,25 @@ class JSONValueParser {
         return obj
     }
 
+    private static extractRawValue(value: JSONValue): Any {
+        if (value instanceof JSONString) {
+            return value.value
+        }
+        if (value instanceof JSONNumber) {
+            return value.value
+        }
+        if (value instanceof JSONTrue) {
+            return true
+        }
+        if (value instanceof JSONFalse) {
+            return false
+        }
+        if (value instanceof JSONNull) {
+            return null
+        }
+        return value
+    }
+
     private static classGetDefaultCtor(cls: Class): reflect.Constructor {
         for (const ctor of cls.getConstructors()) {
             if (ctor.getParametersNum() == 0) {
@@ -3074,9 +3305,108 @@ class JSONValueParser {
         throw new Error(`class ${cls.getName()} doesn't have default ctor`)
     }
 
+    public parseInto(value: JSONValue, instance: object): Any {
+        const classType = Class.of(instance)
+        if (value instanceof JSONObject && this.isParseableObjectType(classType)) {
+            return this.parseObjectInto(value as JSONObject, instance)
+        }
+        return this.parse(value, classType)
+    }
+
+    private parseObjectInto(jsonObj: JSONObject, existingObj: object): object {
+        const classType = Class.of(existingObj)
+
+        let setClassFieldFn = (field: reflect.InstanceField, obj: object, fieldVal: Any) => {
+            field.setValue(obj, fieldVal)
+        }
+
+        if (this.reviver != undefined) {
+            setClassFieldFn = (field: reflect.InstanceField, obj: object, fieldVal: Any): void => {
+                const revivedVal = this.reviver!(field.getName(), fieldVal)
+                if (revivedVal === undefined) {
+                    return
+                }
+                field.setValue(obj, revivedVal)
+            }
+        }
+
+        const jsonObjFields = jsonObj.getFields()
+
+        for (const classField of reflect.getInstanceFieldsRecursive(classType)) {
+            if (JSONAPI.getJSONParseIgnore(classField)) {
+                continue
+            }
+
+            let jsonFieldVal = jsonObjFields.get(classField.getName())
+            if (jsonFieldVal === undefined) {
+                const fieldRename = JSONAPI.getJSONRename(classField)
+                if (fieldRename !== undefined) {
+                    jsonFieldVal = jsonObjFields.get(fieldRename)
+                }
+            }
+            // Key absent in JSON → skip to preserve the existing field value (merge semantics)
+            if (jsonFieldVal === undefined) {
+                continue
+            }
+
+            const fieldType = classField.getType()
+            if (jsonFieldVal instanceof JSONObject && this.isParseableObjectType(fieldType)) {
+                const existingFieldVal = classField.getValue(existingObj)
+                if (existingFieldVal !== null && existingFieldVal !== undefined) {
+                    this.parseObjectInto(jsonFieldVal as JSONObject, existingFieldVal as object)
+                    continue
+                }
+            }
+            let classFieldVal: Any
+            if (this.reviver !== undefined) {
+                try {
+                    classFieldVal = this.parse(jsonFieldVal, fieldType)
+                } catch (e) {
+                    if (jsonFieldVal instanceof JSONObject || jsonFieldVal instanceof JSONArray) {
+                        throw new JSONTypeError(`Incorrect field: '${classType.getName()}.${classField.getName()}'. ${e.message}`)
+                    }
+                    classFieldVal = JSONValueParser.extractRawValue(jsonFieldVal)
+                }
+            } else {
+                classFieldVal = this.parse(jsonFieldVal, fieldType)
+            }
+            setClassFieldFn(classField, existingObj, classFieldVal)
+        }
+
+        for (const method of classType.getInstanceMethods()) {
+            const methodName = method.getName()
+            if (!methodName.startsWith(JSONValueParser.SETTER_PREFIX)) {
+                continue
+            }
+            const propName = methodName.substring(JSONValueParser.SETTER_PREFIX.length)
+            const jsonFieldVal = jsonObjFields.get(propName)
+            if (jsonFieldVal === undefined) {
+                continue
+            }
+            const propType = method.getParameterType(0)!
+            const classFieldVal = this.parse(jsonFieldVal, propType)
+
+            if (this.reviver !== undefined) {
+                const revivedVal = this.reviver!(propName, classFieldVal)
+                const setterArgs: FixedArray<Any> = [revivedVal]
+                method.invoke(existingObj, setterArgs)
+            } else {
+                const setterArgs: FixedArray<Any> = [classFieldVal]
+                method.invoke(existingObj, setterArgs)
+            }
+        }
+
+        return existingObj
+    }
+
     private parseArray(jVal: JSONArray, aType: Class): Object | null {
         const len = jVal.values.length
         const componentType = aType.getFixedArrayComponentType()!
+
+        if (componentType.isPrimitive()) {
+            return this.parsePrimitiveFixedArray(jVal, componentType, len)
+        }
+
         const arr = reflect.internals.createFixedArray(componentType, len) as FixedArray<Any>
 
         let setArrayElementFn = (a: FixedArray<Any>, i: int, v: Any) => { a[i] = v }
@@ -3089,10 +3419,51 @@ class JSONValueParser {
         }
 
         for (let i = 0; i < len; i++) {
-            let elem = this.parse(jVal.values.at(i) as JSONValue, aType.getFixedArrayComponentType()!)
+            let elem = this.parse(jVal.values.at(i) as JSONValue, componentType)
             setArrayElementFn(arr, i, elem)
         }
         return arr
+    }
+
+    private parsePrimitiveFixedArray(jVal: JSONArray, componentType: Class, len: int): Object {
+        const parsed = new Array<Any>()
+        for (let i = 0; i < len; i++) {
+            let elem = this.parse(jVal.values.at(i) as JSONValue, componentType)
+            if (this.reviver !== undefined) {
+                const revivedVal = this.reviver!(`${i}`, elem)
+                if (revivedVal !== undefined) {
+                    elem = revivedVal
+                }
+            }
+            parsed.push(elem)
+        }
+
+        const typedArr = reflect.internals.createFixedArray(componentType, len)
+        for (let i = 0; i < len; i++) {
+            const idx: long = i.toLong()
+            const elem = parsed.at(i)
+            if (elem instanceof Numeric) {
+                if (Types.isIntType(componentType)) {
+                    ValueAPISetElementInt(typedArr, idx, elem.toInt())
+                } else if (Types.isDoubleType(componentType)) {
+                    ValueAPISetElementDouble(typedArr, idx, elem.toDouble())
+                } else if (Types.isLongType(componentType)) {
+                    ValueAPISetElementLong(typedArr, idx, elem.toLong())
+                } else if (Types.isFloatType(componentType)) {
+                    ValueAPISetElementFloat(typedArr, idx, elem.toFloat())
+                } else if (Types.isShortType(componentType)) {
+                    ValueAPISetElementShort(typedArr, idx, elem.toShort())
+                } else if (Types.isByteType(componentType)) {
+                    ValueAPISetElementByte(typedArr, idx, elem.toByte())
+                }
+            } else if (elem instanceof Boolean) {
+                ValueAPISetElementBoolean(typedArr, idx, elem.toBoolean())
+            } else if (elem instanceof Char) {
+                ValueAPISetElementChar(typedArr, idx, elem.toChar())
+            }
+        }
+
+        return typedArr
     }
 }
 

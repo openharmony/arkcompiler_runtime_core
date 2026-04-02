@@ -1759,6 +1759,16 @@ intrinsics:
       args: [ std.core.reflect.InstanceField ]
     impl: ark::ets::intrinsics::StdCoreJSONGetJSONRename
 
+  - name: StdCoreJSONGetJSONStringifyGetter
+    space: ets
+    class_name: std.core.JSONAPI
+    method_name: getJSONStringifyGetter
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.reflect.InstanceMethod ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONStringifyGetter
+
 
 #################
 # std.core.Date #
