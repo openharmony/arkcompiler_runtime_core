@@ -11,16 +11,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */          
-{%- for c in cases %}
+ */
+
+{% for c in cases %}
+
+{% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
+
+{% set logic_data -%}
+{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
+{% endset -%}
+
 /*---
-desc: The integer value of an enum constant is set implicitly if an enumeration constant specifies no value.
+desc: {{c.desc}}
+tags: [compile-only, negative]
+expected_out: {{c.stdout[decl_id]}}
+test_suffix: "{{c.test_suffix}}_{{decl_id}}"
 ---*/
 
-{{c.decl}}
+{{decl}}
 
 function main() {
-    {{c.use|indent}}
+{{logic_data}}
 }
-{%- endfor %}
 
+{% endfor %}
+{% endfor %}

@@ -1,0 +1,308 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      using floating-point literals in initializers
+    decl_variants:
+      - |-
+        enum Enum: double { first = 1.23, second = 17.682, third = 53.4 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum.first.valueOf(), 1.23)
+        arktest.assertEQ(Enum.second.valueOf(), 17.682)
+        arktest.assertEQ(Enum.third.valueOf(), 53.4)
+    test_suffix: "ufplii1"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      >-
+        using floating-point literals in initializers,
+        values can be the same
+    decl_variants:
+      - |-
+        enum Enum: double { first = 1.23, second = 17.682, third = 1.23 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum.first.valueOf(), 1.23)
+        arktest.assertEQ(Enum.second.valueOf(), 17.682)
+        arktest.assertEQ(Enum.third.valueOf(), 1.23)
+        arktest.assertEQ(Enum.first, Enum.third)
+    test_suffix: "ufplii2"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      all have constant expression initializers
+    decl_variants:
+      - |-
+        enum Enum: double { first = 1.23, second = 1.234 - 1, third = 1.234 - 1.1 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum.first.valueOf(), 1.23)
+        arktest.assertEQ(Enum.second.valueOf(), 1.234 - 1)
+        arktest.assertEQ(Enum.third.valueOf(), 1.234 - 1.1)
+    test_suffix: "ahcei"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      >-
+        all have not a constant expression initializers,
+        using const variables in initializer expressions
+    decl_variants:
+      - |-
+        const a: double = 54.6
+        const b: double = -25.7 + 9
+        enum Enum: double { first = a, second = b, third = b - 1 }
+    sub_cases_logic:
+      - |-
+        const v1: double = a
+        const v2: double = b
+        const v3: double = b - 1
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "ahnacei1"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      >-
+        all have not a constant expression initializers,
+        using variables in initializer expressions
+    decl_variants:
+      - |-
+        let a: double = 54.6
+        let b: double = -25.7 + 9
+        enum Enum: double { first = a, second = b, third = b - 1 }
+    sub_cases_logic:
+      - |-
+        const v1: double = a
+        const v2: double = b
+        const v3: double = b - 1
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "ahnacei2"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      using enum members values in initializers expressions
+    decl_variants:
+      - |-
+        enum Enum: double { A = 5, B = (1 << 1) * 2,
+          C = (1 << 3) * 3, D = (B | C), E = ((B | C) << 32) * 2,
+          F = A % 4, G = (A + F) / 3, H = (G | (F & A)), I = F ^ A,
+          J = ~A, K = -B, L = E >> 2, M = E >>> 2 }
+    sub_cases_logic:
+      - |-
+        const a: double = 5
+        const b: double = (1 << 1) * 2
+        const c: double = (1 << 3) * 3
+        const d: double = (b | c)
+        const e: double = ((b | c) << 32) * 2
+        const f: double = a % 4
+        const g: double = (a + f) / 3
+        const h: double = (g | (f & a))
+        const i: double = f ^ a
+        const j: double = ~a
+        const k: double = -b
+        const l: double = e >> 2
+        const m: double = e >>> 2
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.G instanceof Enum)
+        arktest.assertTrue(Enum.H instanceof Enum)
+        arktest.assertTrue(Enum.I instanceof Enum)
+        arktest.assertTrue(Enum.J instanceof Enum)
+        arktest.assertTrue(Enum.K instanceof Enum)
+        arktest.assertTrue(Enum.L instanceof Enum)
+        arktest.assertTrue(Enum.M instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof double)
+        arktest.assertTrue(Enum.B.valueOf() instanceof double)
+        arktest.assertTrue(Enum.C.valueOf() instanceof double)
+        arktest.assertTrue(Enum.D.valueOf() instanceof double)
+        arktest.assertTrue(Enum.E.valueOf() instanceof double)
+        arktest.assertTrue(Enum.F.valueOf() instanceof double)
+        arktest.assertTrue(Enum.G.valueOf() instanceof double)
+        arktest.assertTrue(Enum.H.valueOf() instanceof double)
+        arktest.assertTrue(Enum.I.valueOf() instanceof double)
+        arktest.assertTrue(Enum.J.valueOf() instanceof double)
+        arktest.assertTrue(Enum.K.valueOf() instanceof double)
+        arktest.assertTrue(Enum.L.valueOf() instanceof double)
+        arktest.assertTrue(Enum.M.valueOf() instanceof double)
+        arktest.assertEQ(Enum.A, a, "failed check: Enum.A == a")
+        arktest.assertEQ(Enum.B, b, "failed check: Enum.B == b")
+        arktest.assertEQ(Enum.C, c, "failed check: Enum.C == c")
+        arktest.assertEQ(Enum.D, d, "failed check: Enum.D == d")
+        arktest.assertEQ(Enum.E, e, "failed check: Enum.E == e")
+        arktest.assertEQ(Enum.F, f, "failed check: Enum.F == f")
+        arktest.assertEQ(Enum.G, g, "failed check: Enum.G == g")
+        arktest.assertEQ(Enum.H, h, "failed check: Enum.H == h")
+        arktest.assertEQ(Enum.I, i, "failed check: Enum.I == i")
+        arktest.assertEQ(Enum.J, j, "failed check: Enum.J == j")
+        arktest.assertEQ(Enum.K, k, "failed check: Enum.K == k")
+        arktest.assertEQ(Enum.L, l, "failed check: Enum.L == l")
+        arktest.assertEQ(Enum.M, m, "failed check: Enum.M == m")
+    test_suffix: "uemviie"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      using other enum members values as enum members initializers
+    decl_variants:
+      - |-
+        enum Enum1: double { first = 1.23, second = 17.682, third = 53.4 }
+        enum Enum2: double { first = Enum1.second, second = Enum1.third, third = Enum1.first }
+      - |-
+        enum Enum1: double { first = 1.23, second = 17.682, third = 53.4 }
+        enum Enum2: double { first = Enum1.second.valueOf(), second = Enum1.third.valueOf(), third = Enum1.first }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum1.first instanceof Enum1)
+        arktest.assertTrue(Enum1.second instanceof Enum1)
+        arktest.assertTrue(Enum1.third instanceof Enum1)
+        arktest.assertFalse(Enum1.first instanceof Enum2)
+        arktest.assertFalse(Enum1.second instanceof Enum2)
+        arktest.assertFalse(Enum1.third instanceof Enum2)
+        arktest.assertTrue(Enum1.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum1.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum1.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum1.first.valueOf(), 1.23)
+        arktest.assertEQ(Enum1.second.valueOf(), 17.682)
+        arktest.assertEQ(Enum1.third.valueOf(), 53.4)
+        arktest.assertTrue(Enum2.first instanceof Enum2)
+        arktest.assertTrue(Enum2.second instanceof Enum2)
+        arktest.assertTrue(Enum2.third instanceof Enum2)
+        arktest.assertFalse(Enum2.first instanceof Enum1)
+        arktest.assertFalse(Enum2.second instanceof Enum1)
+        arktest.assertFalse(Enum2.third instanceof Enum1)
+        arktest.assertTrue(Enum2.first.valueOf() instanceof double)
+        arktest.assertTrue(Enum2.second.valueOf() instanceof double)
+        arktest.assertTrue(Enum2.third.valueOf() instanceof double)
+        arktest.assertEQ(Enum2.first.valueOf(), 17.682)
+        arktest.assertEQ(Enum2.second.valueOf(), 53.4)
+        arktest.assertEQ(Enum2.third.valueOf(), 1.23)
+    test_suffix: "uoemvaemi"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      using different expression values types assignable to type double
+    decl_variants:
+      - |-
+        function f1(): byte {
+            return 11
+        }
+        function f2(): short {
+            return 13
+        }
+        function f3(): int {
+            return 15
+        }
+        function f4(): long {
+            return 9223372036854775807
+        }
+        function f5(): float {
+            return 20.5f
+        }
+        function f6(): double {
+            return 23.47
+        }
+        enum Enum: double { A = f1(), B = f2(),
+          C = f3(), D = f4(),
+          E = f5(), F = f6() }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof double)
+        arktest.assertTrue(Enum.B.valueOf() instanceof double)
+        arktest.assertTrue(Enum.C.valueOf() instanceof double)
+        arktest.assertTrue(Enum.D.valueOf() instanceof double)
+        arktest.assertTrue(Enum.E.valueOf() instanceof double)
+        arktest.assertTrue(Enum.F.valueOf() instanceof double)
+        arktest.assertEQ(Enum.A.valueOf(), 11 as double)
+        arktest.assertEQ(Enum.B.valueOf(), 13 as double)
+        arktest.assertEQ(Enum.C.valueOf(), 15 as double)
+        arktest.assertEQ(Enum.D.valueOf(), 9223372036854775807 as double)
+        arktest.assertEQ(Enum.E.valueOf(), 20.5f as double)
+        arktest.assertEQ(Enum.F.valueOf(), 23.47)
+    test_suffix: "udevtattd"

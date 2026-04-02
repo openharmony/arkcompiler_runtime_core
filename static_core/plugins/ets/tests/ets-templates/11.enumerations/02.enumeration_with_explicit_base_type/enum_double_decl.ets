@@ -11,17 +11,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */          
 
-{%- for c in cases %}
+{% for c in cases %}
+
+{% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
+
+{% for scl in c.sub_cases_logic %}
+{% set scl_id = loop.index0 %}
+
 /*---
-desc: The double value of an enum constant is set implicitly if an enumeration constant specifies no value.
-tags: [compile-only, negative]
+desc: {{c.desc}}
+params: {{c.params}}
+test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
 ---*/
 
-{{c.decl}}
+{{decl}}
 
-function main() {
-    {{c.use|indent}}
+function main(): void {
+  {{scl|indent(width=2)}}
 }
-{%- endfor %}
+
+{% endfor %}
+{% endfor %}
+{% endfor %}
