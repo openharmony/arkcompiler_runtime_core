@@ -38,6 +38,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -191,7 +192,7 @@ napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, [[maybe_unused]] nap
         ani_function aniFunction = nullptr;
         ani_status status =
             aniEnv->Namespace_FindFunction(aniNsp, functionName.c_str(), signatureName.c_str(), &aniFunction);
-        AniCheckAndThrowToDynamic(env, status,
+        AniCheckAndThrowToDynamic(env, status, INTEROP_METHOD_NOT_FOUND,
                                   "Failed to find function when namespace invoke function;functionName=" +
                                       functionName + ";signatureName=" + signatureName);
         return aniFunction;

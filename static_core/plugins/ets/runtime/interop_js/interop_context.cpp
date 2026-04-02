@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include <string>
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_call_stack.h"
@@ -38,6 +39,7 @@
 #include "plugins/ets/runtime/interop_js/handshake.h"
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 #include "plugins/ets/runtime/interop_js/timer_helper/interop_timer_helper.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #if defined(PANDA_USE_ETS_UTILS)
 #include "console.h"
@@ -118,7 +120,7 @@ static bool RegisterTimerModule()
     ASSERT(status == ANI_OK);
 
     if (count != 1) {
-        INTEROP_LOG(ERROR) << "RegisterTimerModule: No VM found";
+        INTEROP_LOG(ERROR) << "RegisterTimerModule: No VM found. Error code: " << std::to_string(INTEROP_VM_NOT_FOUND);
         return false;
     }
 
@@ -492,6 +494,11 @@ bool InteropCtx::PushOntoFinalizationRegistry(EtsExecutionContext *executionCtx,
 EtsObject *InteropCtx::CreateETSCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject)
 {
     ASSERT_MANAGED_CODE();
+    if (LIKELY(PlatformTypes(executionCtx)
+                   ->coreError->GetRuntimeClass()
+                   ->IsAssignableFrom(etsObject->GetClass()->GetRuntimeClass()))) {
+        return etsObject;
+    }
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(executionCtx->GetMT());
     VMHandle<ObjectHeader> etsObjectHandle(executionCtx->GetMT(), etsObject->GetCoreType());
 
@@ -579,6 +586,13 @@ void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, const char *ms
     ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, msg);
 }
 
+void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, int32_t errorCode, const std::string &msg)
+{
+    ASSERT_MANAGED_CODE();
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, errorCode, msg);
+}
+
 void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)
 {
     INTEROP_LOG(INFO) << "ThrowJSError: " << msg;
@@ -586,11 +600,27 @@ void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)
     NAPI_CHECK_FATAL(napi_throw_error(env, nullptr, msg.c_str()));
 }
 
+void InteropCtx::ThrowJSError(napi_env env, int32_t code, const std::string &msg)
+{
+    std::string errorCode = std::to_string(code);
+    INTEROP_LOG(INFO) << "ThrowJSError: " << msg << ". Error code: " << errorCode;
+    ASSERT(!NapiIsExceptionPending(env));
+    NAPI_CHECK_FATAL(napi_throw_error(env, errorCode.c_str(), msg.c_str()));
+}
+
 void InteropCtx::ThrowJSTypeError(napi_env env, const std::string &msg)
 {
     INTEROP_LOG(INFO) << "ThrowJSTypeError: " << msg;
     ASSERT(!NapiIsExceptionPending(env));
     NAPI_CHECK_FATAL(napi_throw_type_error(env, nullptr, msg.c_str()));
+}
+
+void InteropCtx::ThrowJSTypeError(napi_env env, int32_t code, const std::string &msg)
+{
+    std::string errorCode = std::to_string(code);
+    INTEROP_LOG(INFO) << "ThrowJSTypeError: " << msg << ". Error code: " << errorCode;
+    ASSERT(!NapiIsExceptionPending(env));
+    NAPI_CHECK_FATAL(napi_throw_type_error(env, errorCode.c_str(), msg.c_str()));
 }
 
 void InteropCtx::ThrowJSValue(napi_env env, napi_value val)
@@ -683,7 +713,7 @@ void InteropCtx::ForwardJSException(EtsExecutionContext *executionCtx)
     NAPI_CHECK_FATAL(napi_get_last_error_info(env, &info));
     if (info->error_code != napi_ok && info->error_code != napi_pending_exception) {
         INTEROP_LOG(INFO) << "Napi last error: " << info->error_message;
-        ThrowETSError(executionCtx, info->error_message);
+        ThrowETSError(executionCtx, INTEROP_NAPI_ERROR_OCCURRED, info->error_message);
         return;
     }
     napi_value excval;
@@ -696,7 +726,7 @@ void JSConvertTypeCheckFailed(const char *typeName)
 {
     auto ctx = InteropCtx::Current();
     auto env = ctx->GetJSEnv();
-    InteropCtx::ThrowJSTypeError(env, typeName + std::string(" expected"));
+    InteropCtx::ThrowJSTypeError(env, INTEROP_INVALID_ARGUMENT_VALUE, typeName + std::string(" expected"));
 }
 
 static std::optional<std::string> GetErrorStack(napi_env env, napi_value jsErr)
@@ -768,6 +798,57 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
 [[noreturn]] void InteropCtx::Fatal(const char *msg)
 {
     INTEROP_LOG(ERROR) << "InteropCtx::Fatal: " << msg;
+
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
+
+    INTEROP_LOG(ERROR) << "======================== ETS stack ============================";
+    auto istk = ctx->GetOrCreateCallStack().GetRecords();
+    auto istkIt = istk.rbegin();
+
+    auto printIstkFrames = [&istkIt, &istk](void *fp) {
+        while (istkIt != istk.rend() && fp == istkIt->frame) {
+            INTEROP_LOG(ERROR) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
+            istkIt++;
+        }
+    };
+
+    for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
+        printIstkFrames(istkIt->frame);
+        Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
+        INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
+                           << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
+    }
+    ASSERT(istkIt == istk.rend() || !istkIt->isStaticFrame);
+    printIstkFrames(nullptr);
+
+    auto env = ctx->GetJSEnv();
+    INTEROP_LOG(ERROR) << (env != nullptr ? "<ets-entrypoint>" : "current js env is nullptr!");
+
+    if (executionCtx->GetMT()->HasPendingException()) {
+        auto exc = EtsObject::FromCoreType(executionCtx->GetMT()->GetException());
+        INTEROP_LOG(ERROR) << "With pending exception: " << exc->GetClass()->GetDescriptor();
+    }
+
+    if (env != nullptr) {
+        INTEROP_LOG(ERROR) << "======================== JS stack =============================";
+        std::optional<std::string> jsStk = NapiTryDumpStack(env);
+        if (jsStk.has_value()) {
+            INTEROP_LOG(ERROR) << jsStk.value();
+        } else {
+            INTEROP_LOG(ERROR) << "JS stack print failed";
+        }
+    }
+
+    INTEROP_LOG(ERROR) << "======================== Native stack =========================";
+    PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::ETS_INTEROP_JS, false).GetStream());
+    std::abort();
+}
+
+[[noreturn]] void InteropCtx::Fatal(int32_t code, const char *msg)
+{
+    INTEROP_LOG(ERROR) << "InteropCtx::Fatal: " << msg << ". Error code: " << code;
 
     auto executionCtx = EtsExecutionContext::GetCurrent();
     auto ctx = InteropCtx::Current(executionCtx);
@@ -931,7 +1012,8 @@ bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void 
         // throw some errors
     }
     if (!RegisterAppStateCallback(InteropCtx::Current()->GetJSEnv())) {
-        INTEROP_LOG(ERROR) << "RegisterAppStateCallback failed";
+        INTEROP_LOG(ERROR) << "RegisterAppStateCallback failed. Error code: "
+                           << std::to_string(INTEROP_NAPI_ERROR_OCCURRED);
         return false;
     }
 

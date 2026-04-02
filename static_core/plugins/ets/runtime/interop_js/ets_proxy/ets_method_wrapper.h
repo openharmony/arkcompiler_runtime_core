@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,8 @@ class EtsClassWrapper;
 
 using LazyEtsMethodWrapperLink = TypedPointer<EtsMethodSet, EtsMethodWrapper>;
 using EtsMethodWrappersCache = WrappersCache<EtsMethodSet *, EtsMethodWrapper>;
-using EtsMethodAndClassWrapper = std::tuple<EtsMethod *, const char *, EtsClassWrapper *>;
-using FindMethodFunc = std::function<std::tuple<EtsMethod *, const char *, EtsClassWrapper *>(void *, size_t)>;
+using EtsMethodAndClassWrapper = std::tuple<EtsMethod *, const char *, int, EtsClassWrapper *>;
+using FindMethodFunc = std::function<std::tuple<EtsMethod *, const char *, int, EtsClassWrapper *>(void *, size_t)>;
 
 class EtsMethodWrapper {
 public:

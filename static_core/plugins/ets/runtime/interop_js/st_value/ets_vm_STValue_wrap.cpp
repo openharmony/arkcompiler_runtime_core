@@ -33,6 +33,7 @@
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -73,7 +74,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
         double input;
         NAPI_CHECK_FATAL(napi_get_value_double(env, jsArgv[0], &input));
         if (input < INT8_MIN || input > INT8_MAX) {
-            STValueThrowJSError(env, "Value is out of range for byte type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for byte type.");
             return nullptr;
         }
         return CreateSTValueInstance(env, static_cast<ani_byte>(input));
@@ -84,7 +85,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
     } else if constexpr (std::is_same_v<T, ani_char>) {
         std::string variableChar = GetString(env, jsArgv[0]);
         if (variableChar.length() != 1) {
-            STValueThrowJSError(env, "input string length must be 1.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "input string length must be 1.");
             return nullptr;
         }
         return CreateSTValueInstance(env, static_cast<ani_char>(variableChar[0]));
@@ -92,7 +93,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
         double input;
         NAPI_CHECK_FATAL(napi_get_value_double(env, jsArgv[0], &input));
         if (input < INT16_MIN || input > INT16_MAX) {
-            STValueThrowJSError(env, "Value is out of range for short type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for short type.");
             return nullptr;
         }
         return CreateSTValueInstance(env, static_cast<ani_short>(input));
@@ -100,7 +101,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
         double input;
         NAPI_CHECK_FATAL(napi_get_value_double(env, jsArgv[0], &input));
         if (input < INT32_MIN || input > INT32_MAX) {
-            STValueThrowJSError(env, "Value is out of range for int type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for int type.");
             return nullptr;
         }
         return CreateSTValueInstance(env, static_cast<ani_int>(input));
@@ -113,7 +114,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
             static_cast<double>(BASE << EXPONENT) - 1;  // NOLINT(hicpp-signed-bitwise)
         static constexpr double MIN_SAFE_INTEGER = -MAX_SAFE_INTEGER;
         if (input < MIN_SAFE_INTEGER || input > MAX_SAFE_INTEGER) {
-            STValueThrowJSError(env, "Value is out of range for safe long type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for safe long type.");
             return nullptr;
         }
         return CreateSTValueInstance(env, static_cast<ani_long>(input));
@@ -128,7 +129,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
         NAPI_CHECK_FATAL(napi_get_value_double(env, jsArgv[0], &nativeDouble));
         return CreateSTValueInstance(env, static_cast<ani_double>(nativeDouble));
     } else {
-        STValueThrowJSError(env, "Unsupported input type");
+        STValueThrowJSError(env, INTEROP_UNSUPPORTED_TYPE_CONVERSION, "Unsupported input type");
         return nullptr;
     }
 }
@@ -210,7 +211,7 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
             static_cast<double>(BASE << EXPONENT) - 1;  // NOLINT(hicpp-signed-bitwise)
         static constexpr double MIN_SAFE_INTEGER = -MAX_SAFE_INTEGER;
         if (result < MIN_SAFE_INTEGER || result > MAX_SAFE_INTEGER) {
-            STValueThrowJSError(env, "Value is out of range for safe long type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for safe long type.");
             return nullptr;
         }
         res = static_cast<ani_long>(result);
@@ -244,7 +245,7 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
             staticBigIntObject, "operatorGreaterThan", "C{std.core.BigInt}:z", &isGreaterThanInt64Max, int64MaxAniObj);
         ANI_CHECK_ERROR_RETURN(env, status);
         if (isGreaterThanInt64Max == ANI_TRUE) {
-            STValueThrowJSError(env, "Value is out of range for long type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for long type.");
             return nullptr;
         }
 
@@ -260,14 +261,14 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
                                                                                "C{std.core.BigInt}:z",
                                                                                &isLessThanInt64Min, int64MinObjAni));
         if (isLessThanInt64Min == ANI_TRUE) {
-            STValueThrowJSError(env, "Value is out of range for long type.");
+            STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Value is out of range for long type.");
             return nullptr;
         }
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Long(staticBigIntObject, "getLong", ":l", &res));
     } else {
-        STValueThrowJSError(env, "input is neither a number or a bigint.");
+        STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "input is neither a number or a bigint.");
         return nullptr;
     }
 

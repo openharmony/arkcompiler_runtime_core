@@ -43,6 +43,7 @@
 #include "runtime/include/runtime.h"
 
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -96,7 +97,7 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info)
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_FindMethod(clsClass, "<ctor>", ctorString.c_str(), &ctorMethod));
 
     if (ctorMethod == nullptr) {
-        STValueThrowJSError(env, "Instantiate ctor is Null!;");
+        STValueThrowJSError(env, INTEROP_METHOD_NOT_FOUND, "Instantiate ctor is Null!;");
         return nullptr;
     }
 
@@ -134,7 +135,7 @@ napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info in
     napi_valuetype lengthType {};
     napi_typeof(env, jsArgv[0], &lengthType);
     if (lengthType != napi_number) {
-        STValueThrowJSError(env, "length type is not number type;");
+        STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "length type is not number type;");
         return nullptr;
     }
     uint32_t arrLength;
@@ -238,7 +239,8 @@ napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 0) {
-        InteropCtx::ThrowJSError(env, "NewSTArray: bad args, actual args count: " + std::to_string(jsArgc));
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
+                                 "NewSTArray: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
     EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
@@ -251,7 +253,7 @@ napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info)
     EtsObject *arrayInstance = arrayClass->CreateInstance();
     if (UNLIKELY(arrayInstance == nullptr)) {
         ASSERT(execCtx->GetMT()->HasPendingException());
-        InteropCtx::ThrowJSError(env, "Failed to create st.Array");
+        InteropCtx::ThrowJSError(env, INTEROP_OBJECT_CREATION_FAILED, "Failed to create st.Array");
         return nullptr;
     }
 
@@ -264,7 +266,7 @@ EtsObject *CreateInstanceWithInt(napi_env env, EtsClass *etsClass, int32_t value
 {
     EtsMethod *ctor = etsClass->GetDirectMethod(panda_file_items::CTOR.data(), "I:V");
     if (UNLIKELY(ctor == nullptr) || !ctor->IsPublic()) {
-        InteropCtx::ThrowJSError(env, "No default public constructor in");
+        InteropCtx::ThrowJSError(env, INTEROP_METHOD_NOT_FOUND, "No default public constructor in");
         return nullptr;
     }
 
@@ -297,7 +299,8 @@ napi_value STValueNewSTSetImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 0) {
-        InteropCtx::ThrowJSError(env, "NewSTSet: bad args, actual args count: " + std::to_string(jsArgc));
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
+                                 "NewSTSet: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
     EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
@@ -310,7 +313,7 @@ napi_value STValueNewSTSetImpl(napi_env env, napi_callback_info info)
     EtsObject *setInstance = CreateInstanceWithInt(env, setClass, 8);
     if (UNLIKELY(setInstance == nullptr)) {
         ASSERT(execCtx->GetMT()->HasPendingException());
-        InteropCtx::ThrowJSError(env, "Failed to create st.Set");
+        InteropCtx::ThrowJSError(env, INTEROP_OBJECT_CREATION_FAILED, "Failed to create st.Set");
         return nullptr;
     }
 
@@ -327,7 +330,8 @@ napi_value STValueNewSTMapImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 0) {
-        InteropCtx::ThrowJSError(env, "NewSTMap: bad args, actual args count: " + std::to_string(jsArgc));
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
+                                 "NewSTMap: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
     EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
@@ -340,7 +344,7 @@ napi_value STValueNewSTMapImpl(napi_env env, napi_callback_info info)
     EtsObject *mapInstance = CreateInstanceWithInt(env, mapClass, 8);
     if (UNLIKELY(mapInstance == nullptr)) {
         ASSERT(execCtx->GetMT()->HasPendingException());
-        InteropCtx::ThrowJSError(env, "Failed to create st.Map");
+        InteropCtx::ThrowJSError(env, INTEROP_OBJECT_CREATION_FAILED, "Failed to create st.Map");
         return nullptr;
     }
 
@@ -373,14 +377,14 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
     napi_valuetype lengthType {};
     napi_typeof(env, jsArgv[0], &lengthType);
     if (lengthType != napi_number) {
-        STValueThrowJSError(env, "length type is not number type;");
+        STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "length type is not number type;");
         return nullptr;
     }
 
     int32_t arrLength;
     NAPI_CHECK_FATAL(napi_get_value_int32(env, jsArgv[0], &arrLength));
     if (arrLength < 0) {
-        STValueThrowJSError(env, "length must be non-negative;");
+        STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "length must be non-negative;");
         return nullptr;
     }
 

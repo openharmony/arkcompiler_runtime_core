@@ -36,6 +36,7 @@
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -1256,7 +1257,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
     napi_value newValue = jsArgv[1];
     auto *newValueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, newValue));
     if (UNLIKELY(newValueData == nullptr)) {
-        STValueThrowJSError(env, "arg value is not an STValue instance");
+        STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "arg value is not an STValue instance");
         return nullptr;
     }
 
@@ -1484,14 +1485,14 @@ napi_value STValueFindClassImpl(napi_env env, napi_callback_info info)
 
         // 2. check error
         if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
-            AniCheckAndThrowToDynamic(env, aniStatus,
+            AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_CLASS_FAILED,
                                       "FindClass failed, invalid className: className=" + className +
                                           ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
         if (aniStatus != ani_status::ANI_NOT_FOUND) {
-            AniCheckAndThrowToDynamic(env, aniStatus,
+            AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_CLASS_FAILED,
                                       "FindClass failed: className=" + className +
                                           ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
@@ -1504,8 +1505,9 @@ napi_value STValueFindClassImpl(napi_env env, napi_callback_info info)
             return ref;
         }
 
-        AniCheckAndThrowToDynamic(
-            env, aniStatus, "FindClass failed: className=" + className + ", aniStatus=" + std::to_string(aniStatus));
+        AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_CLASS_FAILED,
+                                  "FindClass failed: className=" + className +
+                                      ", aniStatus=" + std::to_string(aniStatus));
         return nullptr;
     };
 
@@ -1526,14 +1528,14 @@ napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info)
 
         // 2. check error
         if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
-            AniCheckAndThrowToDynamic(env, aniStatus,
+            AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_NAMESPACE_FAILED,
                                       "FindNamespace failed, invalid namespaceName: namespaceName=" + namespaceName +
                                           ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
         if (aniStatus != ani_status::ANI_NOT_FOUND) {
-            AniCheckAndThrowToDynamic(env, aniStatus,
+            AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_NAMESPACE_FAILED,
                                       "FindNamespace failed: namespaceName=" + namespaceName +
                                           ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
@@ -1546,7 +1548,7 @@ napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info)
             return ref;
         }
 
-        AniCheckAndThrowToDynamic(env, aniStatus,
+        AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_NAMESPACE_FAILED,
                                   "FindNamespace failed: namespaceName=" + namespaceName +
                                       ", aniStatus=" + std::to_string(aniStatus));
         return nullptr;
@@ -1569,15 +1571,16 @@ napi_value STValueFindEnumImpl(napi_env env, napi_callback_info info)
 
         // 2. check error
         if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
-            AniCheckAndThrowToDynamic(env, aniStatus,
+            AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_ENUM_FAILED,
                                       "FindEnum failed, invalid enumName: enumName=" + enumName +
                                           ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
         if (aniStatus != ani_status::ANI_NOT_FOUND) {
-            AniCheckAndThrowToDynamic(
-                env, aniStatus, "FindEnum failed: enumName=" + enumName + ", aniStatus=" + std::to_string(aniStatus));
+            AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_ENUM_FAILED,
+                                      "FindEnum failed: enumName=" + enumName +
+                                          ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
@@ -1588,7 +1591,7 @@ napi_value STValueFindEnumImpl(napi_env env, napi_callback_info info)
             return ref;
         }
 
-        AniCheckAndThrowToDynamic(env, aniStatus,
+        AniCheckAndThrowToDynamic(env, aniStatus, INTEROP_FIND_ENUM_FAILED,
                                   "FindEnum failed: enumName=" + enumName + ", aniStatus=" + std::to_string(aniStatus));
         return nullptr;
     };

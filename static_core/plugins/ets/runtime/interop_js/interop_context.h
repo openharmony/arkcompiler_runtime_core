@@ -341,9 +341,12 @@ public:
     {
         ThrowETSError(executionCtx, msg.c_str());
     }
+    static void ThrowETSError(EtsExecutionContext *executionCtx, int32_t errorCode, const std::string &msg);
 
     PANDA_PUBLIC_API static void ThrowJSError(napi_env env, const std::string &msg);
+    PANDA_PUBLIC_API static void ThrowJSError(napi_env env, int32_t code, const std::string &msg);
     static void ThrowJSTypeError(napi_env env, const std::string &msg);
+    static void ThrowJSTypeError(napi_env env, int32_t code, const std::string &msg);
     static void ThrowJSValue(napi_env env, napi_value val);
     static napi_value CreateJSTypeError(napi_env env, const std::string &code, const std::string &msg);
 
@@ -367,11 +370,15 @@ public:
         return !executionCtx->GetMT()->HasPendingException() && NapiIsExceptionPending(env);
     }
 
-    // Die and print execution stacks
     [[noreturn]] PANDA_PUBLIC_API static void Fatal(const char *msg);
     [[noreturn]] static void Fatal(const std::string &msg)
     {
         Fatal(msg.c_str());
+    }
+    [[noreturn]] PANDA_PUBLIC_API static void Fatal(int32_t code, const char *msg);
+    [[noreturn]] static void Fatal(int32_t code, const std::string &msg)
+    {
+        Fatal(code, msg.c_str());
     }
 
     void SetPendingNewInstance(EtsHandle<EtsObject> handle)

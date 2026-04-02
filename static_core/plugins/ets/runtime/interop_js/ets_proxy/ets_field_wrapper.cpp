@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_field_wrapper.h"
+#include <string>
 
 #include "libarkfile/file.h"
 #include "plugins/ets/runtime/ets_class_root.h"
@@ -21,8 +22,9 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "runtime/mem/local_object_handle.h"
 
 #include "runtime/mem/vm_handle-inl.h"
@@ -61,7 +63,7 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     void *data;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &jsThis, &data));
     if (UNLIKELY(argc != 0)) {
-        InteropCtx::ThrowJSError(env, "getter called in wrong context");
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT, "getter called in wrong context");
         return napi_value {};
     }
 
@@ -96,7 +98,7 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     void *data;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, &jsValue, &jsThis, &data));
     if (UNLIKELY(argc != 1)) {
-        InteropCtx::ThrowJSError(env, "setter called in wrong context");
+        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT, "setter called in wrong context");
         return napi_value {};
     }
 
@@ -263,8 +265,9 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
         case panda_file::Type::TypeId::REFERENCE:
             return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorREFERENCE>());
         default:
-            InteropCtx::Fatal(std::string("DoMakeNapiProperty: unsupported typeid ") +
-                              panda_file::Type::GetSignatureByTypeId(type));
+            InteropCtx::Fatal(INTEROP_UNSUPPORTED_TYPE_CONVERSION,
+                              std::string("DoMakeNapiProperty: unsupported typeid ") +
+                                  panda_file::Type::GetSignatureByTypeId(type));
     }
     UNREACHABLE();
 }

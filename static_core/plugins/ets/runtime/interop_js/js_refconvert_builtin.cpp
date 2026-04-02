@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string>
+#include "interop_js/interop_error.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -75,7 +77,7 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     auto etsClass = etsClassLinker->GetClass(descriptor.data());
     if (UNLIKELY(etsClass == nullptr)) {
-        ctx->Fatal(std::string("nonexisting class ") + descriptor.data());
+        ctx->Fatal(INTEROP_CLASS_NOT_FOUND, std::string("nonexisting class ") + descriptor.data());
     }
 
     // create ets_proxy bound to js builtin-constructor
@@ -83,7 +85,8 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
     std::unique_ptr<ets_proxy::EtsClassWrapper> wrapper =
         ets_proxy::EtsClassWrapper::Create(ctx, etsClass, jsBuiltinName, overloads);
     if (UNLIKELY(wrapper == nullptr)) {
-        ctx->Fatal(std::string("ets_proxy creation failed for ") + etsClass->GetDescriptor());
+        ctx->Fatal(INTEROP_PROXY_CREATION_FAILED,
+                   std::string("ets_proxy creation failed for ") + etsClass->GetDescriptor());
     }
     return cache->Insert(etsClass, std::move(wrapper));
 }
@@ -97,7 +100,7 @@ class CompatConvertorsRegisterer {
 private:
     [[noreturn]] void NotImplemented(char const *name) __attribute__((noinline))
     {
-        InteropCtx::Fatal(std::string("compat.") + name + " box is not implemented");
+        InteropCtx::Fatal(INTEROP_FEATURE_NOT_IMPLEMENTED, std::string("compat.") + name + " box is not implemented");
     }
 
     EtsObject *NotAssignable(char const *name) __attribute__((noinline))
@@ -460,7 +463,7 @@ private:
             }
             default:
                 ASSERT(!IsNullOrUndefined(env, jsValue));
-                InteropCtx::Fatal("Bad jsType in Object value matcher");
+                InteropCtx::Fatal(INTEROP_INVALID_ARGUMENT_VALUE, "Bad jsType in Object value matcher");
         };
     }
 

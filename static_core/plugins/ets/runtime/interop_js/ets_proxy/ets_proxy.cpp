@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
+#include <string>
 
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -22,6 +23,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 
 namespace ark::ets::interop::js::ets_proxy {
@@ -47,8 +49,9 @@ napi_value GetETSFunction(napi_env env, std::string_view packageName, std::strin
     napi_value jsMethod;
     const napi_status resolveStatus = napi_get_named_property(env, jsClass, methodName.data(), &jsMethod);
     if (UNLIKELY(napi_ok != resolveStatus || GetValueType(env, jsMethod) != napi_function)) {
-        InteropCtx::ThrowJSError(env, "GetETSFunction: class " + std::string(classDescriptor) + " doesn't contain " +
-                                          std::string(methodName) + " method");
+        InteropCtx::ThrowJSError(env, INTEROP_METHOD_NOT_FOUND,
+                                 "GetETSFunction: class " + std::string(classDescriptor) + " doesn't contain " +
+                                     std::string(methodName) + " method");
         return nullptr;
     }
     NAPI_CHECK_FATAL(napi_object_seal(env, jsMethod));
@@ -96,7 +99,7 @@ napi_value CreateEtsRecordInstance(napi_env env)
     EtsObject *etsInstance = etsClass->CreateInstance();
     if (UNLIKELY(etsInstance == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
-        InteropCtx::ThrowJSError(env, "Failed to create ETS record instance");
+        InteropCtx::ThrowJSError(env, INTEROP_OBJECT_CREATION_FAILED, "Failed to create ETS record instance");
         return nullptr;
     }
 
@@ -112,7 +115,8 @@ napi_value GetETSInstance(napi_env env, std::string_view classDescriptor)
         return CreateEtsRecordInstance(env);
     }
 
-    InteropCtx::ThrowJSError(env, "Unsupported ETS instance type: " + std::string(classDescriptor));
+    InteropCtx::ThrowJSError(env, INTEROP_UNSUPPORTED_TYPE_CONVERSION,
+                             "Unsupported ETS instance type: " + std::string(classDescriptor));
     return nullptr;
 }
 
@@ -217,7 +221,8 @@ napi_value GetETSModule(napi_env env, const std::string &moduleName)
 {
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     if (executionCtx == nullptr) {
-        return InteropCtx::CreateJSTypeError(env, "Static context not loaded", "");
+        return InteropCtx::CreateJSTypeError(env, std::to_string(INTEROP_STATIC_CONTEXT_NOT_LOADED),
+                                             "Static context not loaded");
     }
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
     InteropCtx *ctx = InteropCtx::Current(executionCtx);

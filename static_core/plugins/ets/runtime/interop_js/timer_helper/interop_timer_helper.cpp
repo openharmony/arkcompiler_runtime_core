@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include <array>
 #include <iostream>
+#include <string>
 #include <node_api.h>
 #include "interop_timer_helper.h"
 #include "timer.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -54,7 +56,9 @@ napi_value Init(napi_env env, napi_value exports)
     };
 
     if (napi_define_properties(env, exports, desc.size(), desc.data()) != napi_ok) {
-        std::cerr << MODULE_PREFIX << "Failed to define properties" << std::endl;
+        std::cerr << MODULE_PREFIX
+                  << "Failed to define properties. Error code: " << std::to_string(INTEROP_NAPI_ERROR_OCCURRED)
+                  << std::endl;
         std::abort();  // CC-OFF(G.STD.16-CPP) fatal error
     }
 

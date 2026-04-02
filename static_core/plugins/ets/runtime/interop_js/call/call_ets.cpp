@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/interop_js/call/arg_convertors.h"
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -168,7 +169,7 @@ bool CallETSHandler::CheckNumArgs(size_t numArgs) const
                           " hasRestParam=" + std::to_string(static_cast<int>(hasRestParams)) +
                           " numMandatoryParams=" + std::to_string(numMandatoryParams) + " ets_method='" +
                           std::string(method->GetFullName(true)) + "'";
-        InteropCtx::ThrowJSTypeError(ctx_->GetJSEnv(), msg);
+        InteropCtx::ThrowJSTypeError(ctx_->GetJSEnv(), INTEROP_BAD_ARGUMENTS_COUNT, msg);
         return false;
     }
     return true;

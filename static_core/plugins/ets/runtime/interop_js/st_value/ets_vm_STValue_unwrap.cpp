@@ -36,6 +36,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -125,7 +126,8 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
     }
 
     if (data->IsAniNullOrUndefined(env)) {
-        STValueThrowJSError(env, "\'this\' STValue instance does not wrap a value of type std.core.String");
+        STValueThrowJSError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
+                            "\'this\' STValue instance does not wrap a value of type std.core.String");
         return nullptr;
     }
 
@@ -138,7 +140,8 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_InstanceOf(aniObject, stringClass, &isString));
 
     if (isString == ANI_FALSE) {
-        STValueThrowJSError(env, "\'this\' STValue instance does not wrap a value of type std.core.String");
+        STValueThrowJSError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
+                            "\'this\' STValue instance does not wrap a value of type std.core.String");
         return nullptr;
     }
 
@@ -223,7 +226,7 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (data->IsAniNullOrUndefined(env)) {
-        STValueThrowJSError(env, "Expected BigInt object, but got different type.");
+        STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Expected BigInt object, but got different type.");
         return nullptr;
     }
     auto aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
@@ -233,14 +236,14 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
     ani_boolean isBigInt = ANI_FALSE;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_InstanceOf(aniObject, bigIntClass, &isBigInt));
     if (isBigInt == ANI_FALSE) {
-        STValueThrowJSError(env, "Expected BigInt object, but got different type.");
+        STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Expected BigInt object, but got different type.");
         return nullptr;
     }
 
     ani_ref stringRef;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     if (aniEnv->Object_CallMethodByName_Ref(aniObject, "toString", ":C{std.core.String}", &stringRef) != ANI_OK) {
-        STValueThrowJSError(env, "Failed to call toString on BigInt object.");
+        STValueThrowJSError(env, INTEROP_INVALID_ARGUMENT_VALUE, "Failed to call toString on BigInt object.");
         return nullptr;
     }
 

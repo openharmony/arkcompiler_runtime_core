@@ -14,11 +14,13 @@
  */
 
 #include "plugins/ets/runtime/interop_js/interop_stacks.h"
+#include <string>
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/include/method.h"
 #include "runtime/tooling/debugger.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -26,7 +28,7 @@ InteropCallStack::InteropCallStack()
 {
     void *pool = ark::os::mem::MapRWAnonymousWithAlignmentRaw(POOL_SIZE, ark::os::mem::GetPageSize());
     if (pool == nullptr) {
-        InteropFatal("InteropCallStack alloc failed");
+        InteropFatal(INTEROP_INTEROP_CALL_STACK_ALLOCATION_FAILED, "InteropCallStack alloc failed");
     }
     startAddr_ = reinterpret_cast<Record *>(pool);
     endAddr_ = reinterpret_cast<Record *>(ToUintPtr(pool) + POOL_SIZE);

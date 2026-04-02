@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #include "runtime/mem/vm_handle-inl.h"
 
@@ -105,10 +106,11 @@ napi_value EtsMethodWrapper::GetterSetterCallHandler(napi_env env, napi_callback
     FindMethodFunc findMethodFunc = [](void *data, size_t argc) {
         auto fieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
         if (fieldWrapper == nullptr) {
-            return EtsMethodAndClassWrapper(nullptr, "method didn't bind a EtsFieldWrapper", nullptr);
+            return EtsMethodAndClassWrapper(nullptr, "method didn't bind a EtsFieldWrapper",
+                                            INTEROP_FIELD_ACCESS_FAILED, nullptr);
         }
         auto etsMethodSet = fieldWrapper->GetGetterSetterMethod(argc);
-        return EtsMethodAndClassWrapper(etsMethodSet->GetMethod(argc), nullptr, fieldWrapper->GetOwner());
+        return EtsMethodAndClassWrapper(etsMethodSet->GetMethod(argc), nullptr, INTEROP_OK, fieldWrapper->GetOwner());
     };
 
     return EtsMethodWrapper::DoEtsMethodCall<IS_STATIC>(env, cinfo, findMethodFunc);
@@ -130,11 +132,11 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
 
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
-    auto [etsMethod, errorMessage, etsClassWrapper] = findMethodFunc(data, argc);
+    auto [etsMethod, errorMessage, errorCode, etsClassWrapper] = findMethodFunc(data, argc);
 
-    ASSERT(nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);
+    ASSERT(nullptr != etsMethod || nullptr != errorMessage || INTEROP_OK != errorCode || etsClassWrapper != nullptr);
     if (UNLIKELY(nullptr == etsMethod || nullptr == etsClassWrapper)) {
-        ctx->ThrowJSTypeError(env, errorMessage);
+        ctx->ThrowJSTypeError(env, errorCode, errorMessage);
         return nullptr;
     }
 
@@ -170,10 +172,11 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     return CallETSInstance(executionCtx, ctx, method, *jsArgs, etsThis);
 }
 
-static std::tuple<EtsMethod *, const char *> FindSuitableMethod(const EtsMethodSet *methodSet, uint32_t parametersNum)
+static std::tuple<EtsMethod *, const char *, int> FindSuitableMethod(const EtsMethodSet *methodSet,
+                                                                     uint32_t parametersNum)
 {
     if (nullptr == methodSet) {
-        return {nullptr, "no method found"};
+        return {nullptr, "no method found", INTEROP_METHOD_NOT_FOUND};
     }
 
     EtsMethod *etsMethod = methodSet->GetMethod(parametersNum);
@@ -187,14 +190,14 @@ static std::tuple<EtsMethod *, const char *> FindSuitableMethod(const EtsMethodS
     }
 
     if (UNLIKELY(nullptr != methodSet && !methodSet->IsValid())) {
-        return {nullptr, "method has unsupported overloads"};
+        return {nullptr, "method has unsupported overloads", INTEROP_UNSUPPORTED_METHOD_OVERLOAD};
     }
 
     if (UNLIKELY(nullptr == etsMethod)) {
-        return {nullptr, "no suitable method found for this number of arguments"};
+        return {nullptr, "no suitable method found for this number of arguments", INTEROP_METHOD_NOT_FOUND};
     }
 
-    return {etsMethod, nullptr};
+    return {etsMethod, nullptr, INTEROP_OK};
 }
 
 template <bool IS_STATIC>
@@ -208,16 +211,18 @@ napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_in
         auto lazyLink = reinterpret_cast<LazyEtsMethodWrapperLink *>(data);
         auto methodWrapper = EtsMethodWrapper::ResolveLazyLink(ctx, *lazyLink);
         if (methodWrapper == nullptr) {
-            return EtsMethodAndClassWrapper(nullptr, "method didn't bind a LazyEtsMethodWrapperLink", nullptr);
+            return EtsMethodAndClassWrapper(nullptr, "method didn't bind a LazyEtsMethodWrapperLink",
+                                            INTEROP_METHOD_NOT_FOUND, nullptr);
         }
         auto result = FindSuitableMethod(methodWrapper->etsMethodSet_, argc);
         auto etsMethod = std::get<0>(result);
         auto errorMessage = std::get<1>(result);
+        auto errorCode = std::get<2>(result);
         auto classWrapper = methodWrapper->owner_;
         if (etsMethod == nullptr) {
-            return EtsMethodAndClassWrapper(nullptr, errorMessage, nullptr);
+            return EtsMethodAndClassWrapper(nullptr, errorMessage, errorCode, nullptr);
         }
-        return EtsMethodAndClassWrapper(etsMethod, errorMessage, classWrapper);
+        return EtsMethodAndClassWrapper(etsMethod, errorMessage, errorCode, classWrapper);
     };
 
     return EtsMethodWrapper::DoEtsMethodCall<IS_STATIC>(env, cinfo, findMethodFunc);

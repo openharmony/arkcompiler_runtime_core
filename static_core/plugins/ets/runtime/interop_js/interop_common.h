@@ -20,6 +20,7 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
@@ -66,6 +67,8 @@ constexpr std::string_view IS_STATIC_PROXY = "_isStaticProxy";
 
 [[noreturn]] PANDA_PUBLIC_API void InteropFatal(const char *message);
 [[noreturn]] PANDA_PUBLIC_API void InteropFatal(const std::string &message);
+[[noreturn]] PANDA_PUBLIC_API void InteropFatal(int32_t code, const char *message);
+[[noreturn]] PANDA_PUBLIC_API void InteropFatal(int32_t code, const std::string &message);
 [[noreturn]] PANDA_PUBLIC_API void InteropFatal(const char *message, napi_status status);
 
 std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsVal);

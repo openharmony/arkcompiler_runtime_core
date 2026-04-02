@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <string>
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/mem/local_object_handle.h"
@@ -21,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -174,7 +176,8 @@ public:
                 return {};
             }
             if (UNLIKELY(result < 0)) {
-                InteropCtx::ThrowETSError(executionCtx, "cannot work with arrays of negative length");
+                InteropCtx::ThrowETSError(executionCtx, INTEROP_INVALID_ARGUMENT_VALUE,
+                                          "cannot work with arrays of negative length");
                 return {};
             }
             length = static_cast<size_t>(result);
@@ -262,7 +265,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
 
     napi_env env = ctx_->GetJSEnv();
     if (UNLIKELY(GetValueType<true>(env, jsFn_) != napi_function)) {
-        ctx_->ThrowJSTypeError(env, "call target is not a function");
+        ctx_->ThrowJSTypeError(env, INTEROP_CALL_TARGET_IS_NOT_A_FUNCTION, "call target is not a function");
         return std::nullopt;
     }
 
@@ -527,9 +530,8 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             auto *refconvProxy = static_cast<ets_proxy::JSRefConvertJSProxy *>(refconv);
             ASSERT(refconvProxy != nullptr);
             std::string methodNameStr = refconvProxy->GetJSMethodName(st->GetMethod());
-            const char *methodName = methodNameStr.c_str();
             napi_value jsFn;
-            if (!NapiGetNamedProperty(env, jsThis, methodName, &jsFn)) {
+            if (!NapiGetNamedProperty(env, jsThis, methodNameStr.c_str(), &jsFn)) {
                 ASSERT(NapiIsExceptionPending(env));
                 return false;
             }
@@ -589,7 +591,7 @@ static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
     if (protoReader.GetClass() == PlatformTypes()->interopJSValue->GetRuntimeClass()) {
         return reinterpret_cast<void *>(JSRuntimeCallJSByValueBridge);
     }
-    InteropFatal("Bad jscall signature");
+    InteropFatal(INTEROP_JSCALL_SIGNATURE_INVALID, "Bad jscall signature");
 }
 
 static void *SelectNewCallJSEntrypoint(InteropCtx *ctx, Method *method)
@@ -662,7 +664,7 @@ static uint8_t InitCallJSClass(bool isNewCall)
             ep = isNewCall ? SelectNewCallJSEntrypoint(ctx, &method) : SelectCallJSEntrypoint(ctx, &method);
         }
         if (ep == nullptr) {
-            InteropFatal("Bad interop call bridge signature");
+            InteropFatal(INTEROP_CALL_BRIDGE_SIGNATURE_INVALID, "Bad interop call bridge signature");
         }
         method.SetCompiledEntryPoint(ep);
         method.SetNativePointer(nullptr);

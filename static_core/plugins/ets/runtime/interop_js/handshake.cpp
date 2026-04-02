@@ -14,7 +14,9 @@
  */
 
 #include "plugins/ets/runtime/interop_js/handshake.h"
+#include <string>
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "hybrid/ecma_vm_interface.h"
 
 #include "interfaces/inner_api/napi/native_node_hybrid_api.h"
@@ -34,16 +36,16 @@ void Handshake::VmHandshake(napi_env env, InteropCtx *ctx)
     void *jsvmIface;
     auto status = napi_vm_handshake(env, ctx->GetSTSVMInterface(), &jsvmIface);
     if (status != napi_status::napi_ok) {
-        InteropCtx::ThrowJSError(env, "Handshake error: napi_vm_handshake failed");
+        InteropCtx::ThrowJSError(env, INTEROP_VM_HANDSHAKE_FAILED, "Handshake error: napi_vm_handshake failed");
         return;
     }
     if (jsvmIface == nullptr) {
-        InteropCtx::ThrowJSError(env, "Handshake error: got null VMInterfaceType");
+        InteropCtx::ThrowJSError(env, INTEROP_VM_HANDSHAKE_FAILED, "Handshake error: got null VMInterfaceType");
         return;
     }
     auto *iface = static_cast<arkplatform::VMInterface *>(jsvmIface);
     if (iface->GetVMType() != arkplatform::VMInterface::VMInterfaceType::ECMA_VM_IFACE) {
-        InteropCtx::ThrowJSError(env, "Handshake error: got wrong VMInterfaceType");
+        InteropCtx::ThrowJSError(env, INTEROP_VM_HANDSHAKE_FAILED, "Handshake error: got wrong VMInterfaceType");
         return;
     }
     ctx->CreateXGCVmAdaptor<XGCVmAdaptor>(env, static_cast<arkplatform::EcmaVMInterface *>(jsvmIface));
