@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
@@ -36,11 +37,12 @@ class WorkflowConfigTest(unittest.TestCase):
         'PANDA_BUILD': Path.cwd().as_posix(),
         'WORK_DIR': Path.cwd().as_posix()
     }
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
     sys_argv: ClassVar[list[str]] = ["runner.sh", "config-1", "test_suite1"]
 
     @staticmethod
     def prepare_test() -> tuple[TestSuiteOptions, WorkflowOptions]:
-        args = get_args()
+        args = get_args(WorkflowConfigTest.env_properties)
         general = GeneralOptions(args, IOptions())
         test_suite = TestSuiteOptions(args, general)
         workflow = WorkflowOptions(cfg_content=args, parent_test_suite=test_suite)

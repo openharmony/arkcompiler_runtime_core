@@ -23,6 +23,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from runner.common_exceptions import InvalidConfiguration
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -34,10 +35,11 @@ class TestsLoadingTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def get_config() -> Config:
-        args = get_args()
+        args = get_args(TestsLoadingTest.env_properties)
         return Config(args)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)

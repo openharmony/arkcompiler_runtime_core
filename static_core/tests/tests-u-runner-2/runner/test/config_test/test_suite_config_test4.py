@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.test import test_utils
@@ -36,6 +37,7 @@ class TestSuiteConfigTest4(unittest.TestCase):
         'WORK_DIR': (Path.cwd() / f"work-{test_utils.random_suffix()}").as_posix()
     }
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
     test_suite_gen = "test-suite-generator"
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
@@ -50,7 +52,7 @@ class TestSuiteConfigTest4(unittest.TestCase):
         """
         expected_gen = {"collection1": TestSuiteConfigTest4.test_suite_gen,
                         "collection2": TestSuiteConfigTest4.test_suite_gen}
-        args = get_args()
+        args = get_args(TestSuiteConfigTest4.env_properties)
         config = Config(args)
         collections_gens = {col.name: col.generator_class for col in config.test_suite.collections}
         try:
@@ -70,7 +72,7 @@ class TestSuiteConfigTest4(unittest.TestCase):
         Gen class is specified for collection1, gen class for collection 2 will be copied from test suite params
         """
         col1_gen = "col1-generator"
-        args = get_args()
+        args = get_args(TestSuiteConfigTest4.env_properties)
         config = Config(args)
         collections_gens = {col.name: col.generator_class for col in config.test_suite.collections}
 
@@ -94,7 +96,7 @@ class TestSuiteConfigTest4(unittest.TestCase):
         """
         col1_gen = "col1-generator"
         col2_gen = "col2-generator"
-        args = get_args()
+        args = get_args(TestSuiteConfigTest4.env_properties)
 
         config = Config(args)
         collections_gens = {col.name: col.generator_class for col in config.test_suite.collections}

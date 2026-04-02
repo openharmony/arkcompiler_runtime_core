@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import ClassVar, cast
 from unittest.mock import MagicMock, patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.options.cli_options import get_args
 from runner.options.config import Config
@@ -36,10 +37,11 @@ class ValidatorsChainTest(unittest.TestCase):
                                                                                "test_validators_data")
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def get_runner_config() -> Config:
-        return Config(get_args())
+        return Config(get_args(ValidatorsChainTest.env_properties))
 
     @staticmethod
     def run_test() -> TestStandardFlow:

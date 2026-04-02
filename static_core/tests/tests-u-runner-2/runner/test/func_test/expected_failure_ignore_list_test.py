@@ -22,6 +22,7 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.options.cli_options import get_args
 from runner.options.config import Config
@@ -38,11 +39,12 @@ class FailuresFromIgnoreTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
     step_fields: ClassVar[StepFields]
 
     @staticmethod
     def get_config() -> Config:
-        args = get_args()
+        args = get_args(FailuresFromIgnoreTest.env_properties)
         config = Config(args)
         return config
 
