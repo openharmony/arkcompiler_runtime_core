@@ -431,7 +431,7 @@ extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[m
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    common_vm::BaseRuntime::WriteBarrier(obj, field, ref);
+    common_vm::BaseRuntime::WriteBarrier(obj, field, ref, Mutator::GetCurrent());
 #else
     UNREACHABLE();
 #endif
@@ -442,8 +442,9 @@ extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj,
                                         [[maybe_unused]] ark::ObjectHeader *ref2)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1);
-    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2);
+    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1, Mutator::GetCurrent());
+    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2,
+                                         Mutator::GetCurrent());
 #else
     UNREACHABLE();
 #endif
