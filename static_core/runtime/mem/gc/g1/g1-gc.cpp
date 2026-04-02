@@ -850,7 +850,7 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunFullGC(ark::GCTask &task)
 {
     ScopedTiming t("Run Full GC", *this->GetTiming());
-    GetG1ObjectAllocator()->template ReleaseEmptyRegions<RegionFlag::IS_OLD, OSPagesPolicy::NO_RETURN>();
+    GetG1ObjectAllocator()->template ReleaseTenuredRegions<OSPagesPolicy::NO_RETURN>();
     LOG_DEBUG_GC << "Explicit Full GC invocation due to a reason: " << task.reason;
     this->SetFullGC(true);
     FullMarking(task);

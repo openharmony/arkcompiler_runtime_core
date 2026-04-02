@@ -219,85 +219,6 @@ void Region::Destroy()
     RmvFlag(RegionFlag::IS_INVALID);
 }
 
-void RegionBlock::Init(uintptr_t regionsBegin, uintptr_t regionsEnd)
-{
-    os::memory::LockHolder lock(lock_);
-    ASSERT(occupied_.Empty());
-    ASSERT(Region::IsAlignment(regionsBegin, regionSize_));
-    ASSERT((regionsEnd - regionsBegin) % regionSize_ == 0);
-    size_t numRegions = (regionsEnd - regionsBegin) / regionSize_;
-    if (numRegions > 0) {
-        size_t size = numRegions * sizeof(Region *);
-        auto data = reinterpret_cast<Region **>(allocator_->Alloc(size));
-        memset_s(data, size, 0, size);
-        occupied_ = Span<Region *>(data, numRegions);
-        regionsBegin_ = regionsBegin;
-        regionsEnd_ = regionsEnd;
-    }
-}
-
-Region *RegionBlock::AllocRegion()
-{
-    os::memory::LockHolder lock(lock_);
-    // NOTE(yxr) : find a unused region, improve it
-    for (size_t i = 0; i < occupied_.Size(); ++i) {
-        if (occupied_[i] == nullptr) {
-            auto *region = RegionAt(i);
-            occupied_[i] = region;
-            numUsedRegions_++;
-            return region;
-        }
-    }
-    return nullptr;
-}
-
-Region *RegionBlock::AllocLargeRegion(size_t largeRegionSize)
-{
-    os::memory::LockHolder lock(lock_);
-    // NOTE(yxr) : search continuous unused regions, improve it
-    size_t allocRegionNum = largeRegionSize / regionSize_;
-    size_t left = 0;
-    while (left + allocRegionNum <= occupied_.Size()) {
-        bool found = true;
-        size_t right = left;
-        while (right < left + allocRegionNum) {
-            if (occupied_[right] != nullptr) {
-                found = false;
-                break;
-            }
-            ++right;
-        }
-        if (found) {
-            // mark those regions as 'used'
-            auto *region = RegionAt(left);
-            for (size_t i = 0; i < allocRegionNum; i++) {
-                occupied_[left + i] = region;
-            }
-            numUsedRegions_ += allocRegionNum;
-            return region;
-        }
-        // next round
-        left = right + 1;
-    }
-    return nullptr;
-}
-
-void RegionBlock::FreeRegion(Region *region, bool releasePages)
-{
-    os::memory::LockHolder lock(lock_);
-    size_t regionIdx = RegionIndex(region);
-    size_t regionNum = region->Size() / regionSize_;
-    ASSERT(regionIdx + regionNum <= occupied_.Size());
-    for (size_t i = 0; i < regionNum; i++) {
-        ASSERT(occupied_[regionIdx + i] == region);
-        occupied_[regionIdx + i] = nullptr;
-    }
-    numUsedRegions_ -= regionNum;
-    if (releasePages) {
-        os::mem::ReleasePages(ToUintPtr(region), region->End());
-    }
-}
-
 Region *RegionPool::NewRegion(RegionSpace *space, SpaceType spaceType, AllocatorType allocatorType, size_t regionSize,
                               RegionFlag edenOrOldOrNonmovable, RegionFlag properties, OSPagesAllocPolicy allocPolicy)
 {
@@ -317,31 +238,21 @@ Region *RegionPool::NewRegion(RegionSpace *space, SpaceType spaceType, Allocator
         return nullptr;
     }
 
-    // 1.get region from pre-allocated region block(e.g. a big mmaped continuous space)
     void *region = nullptr;
     RegionFlag zeroed = RegionFlag::IS_UNUSED;
-    if (block_.GetFreeRegionsNum() > 0) {
-        region = (regionSize <= regionSize_) ? block_.AllocRegion() : block_.AllocLargeRegion(regionSize);
-    }
-    if (region != nullptr) {
-        IsYoungRegionFlag(edenOrOldOrNonmovable) ? spaces_->IncreaseYoungOccupiedInSharedPool(regionSize)
-                                                 : spaces_->IncreaseTenuredOccupiedInSharedPool(regionSize);
-    } else if (extend_) {  // 2.mmap region directly, this is more flexible for memory usage
-        Pool pool(0, nullptr);
+    // mmap region directly, this is more flexible for memory usage
+    Pool pool(0, nullptr);
 
-        if (IsYoungRegionFlag(edenOrOldOrNonmovable)) {
-            pool = spaces_->TryAllocPoolForYoung(regionSize, spaceType, allocatorType, this);
-        } else {
-            pool = spaces_->TryAllocPoolForTenured(regionSize, spaceType, allocatorType, this, allocPolicy);
-        }
-
-        if (pool.IsZeroed()) {
-            zeroed = RegionFlag::IS_ZEROED;
-        }
-
-        region = pool.GetMem();
+    if (IsYoungRegionFlag(edenOrOldOrNonmovable)) {
+        pool = spaces_->TryAllocPoolForYoung(regionSize, spaceType, allocatorType, this);
+    } else {
+        pool = spaces_->TryAllocPoolForTenured(regionSize, spaceType, allocatorType, this, allocPolicy);
     }
 
+    if (pool.IsZeroed()) {
+        zeroed = RegionFlag::IS_ZEROED;
+    }
+    region = pool.GetMem();
     if (UNLIKELY(region == nullptr)) {
         return nullptr;
     }
@@ -377,12 +288,7 @@ Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t regionSiz
 void RegionPool::PromoteYoungRegion(Region *region)
 {
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-    if (block_.IsAddrInRange(region)) {
-        spaces_->ReduceYoungOccupiedInSharedPool(region->Size());
-        spaces_->IncreaseTenuredOccupiedInSharedPool(region->Size());
-    } else {
-        spaces_->PromoteYoungPool(region->Size());
-    }
+    spaces_->PromoteYoungPool(region->Size());
     // Change region type
     region->AddFlag(RegionFlag::IS_PROMOTED);
     region->RmvFlag(RegionFlag::IS_EDEN);
@@ -396,10 +302,6 @@ bool RegionPool::HaveTenuredSize(size_t size) const
 
 bool RegionPool::HaveFreeRegions(size_t numRegions, size_t regionSize) const
 {
-    if (block_.GetFreeRegionsNum() >= numRegions) {
-        return true;
-    }
-    numRegions -= block_.GetFreeRegionsNum();
     return PoolManager::GetMmapMemPool()->HaveEnoughPoolsInObjectSpace(numRegions, regionSize);
 }
 
@@ -424,6 +326,7 @@ Region *RegionSpace::NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovab
         ASSERT(regionSize == region->Size());
         regionPool_->NewRegion(region, this, regionSize, edenOrOldOrNonmovable, properties);
     } else {
+        ASSERT(regionPool_ != nullptr);
         region = regionPool_->NewRegion(this, spaceType_, allocatorType_, regionSize, edenOrOldOrNonmovable, properties,
                                         allocPolicy);
     }
@@ -438,21 +341,6 @@ Region *RegionSpace::NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovab
         youngRegionsInUse_.fetch_add(1, std::memory_order_relaxed);
     }
     return region;
-}
-
-void RegionSpace::PromoteYoungRegion(Region *region)
-{
-    ASSERT(region->GetSpace() == this);
-    ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-    if (region->IsTLAB()) {
-        region->AddFlag(RegionFlag::IS_MIXEDTLAB);
-        region->SetTop(ToUintPtr(region->GetLastTLAB()->GetEndAddr()));
-    }
-    regionPool_->PromoteYoungRegion(region);
-    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
-    // on other reads or writes
-    [[maybe_unused]] auto previousRegionsInUse = youngRegionsInUse_.fetch_sub(1, std::memory_order_relaxed);
-    ASSERT(previousRegionsInUse > 0);
 }
 
 void RegionSpace::FreeAllRegions()

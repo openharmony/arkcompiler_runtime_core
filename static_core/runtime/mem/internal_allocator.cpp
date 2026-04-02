@@ -259,6 +259,7 @@ void InternalAllocator<CONFIG>::FreeViaPandaAllocators(void *ptr)
     AllocatorType allocType = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetType();
     switch (allocType) {
         case AllocatorType::RUNSLOTS_ALLOCATOR:
+            ASSERT(runslotsAllocator_ != nullptr);
             if (PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
                 runslotsAllocator_) {
                 LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via RunSlotsAllocator";
@@ -268,18 +269,21 @@ void InternalAllocator<CONFIG>::FreeViaPandaAllocators(void *ptr)
                 // It is a thread-local internal allocator instance
                 LocalSmallObjectAllocator *localAllocator =
                     ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
+                ASSERT(localAllocator != nullptr);
                 ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
                        localAllocator);
                 localAllocator->Free(ptr);
             }
             break;
         case AllocatorType::FREELIST_ALLOCATOR:
+            ASSERT(freelistAllocator_ != nullptr);
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via FreeListAllocator";
             ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
                    freelistAllocator_);
             freelistAllocator_->Free(ptr);
             break;
         case AllocatorType::HUMONGOUS_ALLOCATOR:
+            ASSERT(humongousAllocator_ != nullptr);
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via HumongousObjAllocator";
             ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
                    humongousAllocator_);
