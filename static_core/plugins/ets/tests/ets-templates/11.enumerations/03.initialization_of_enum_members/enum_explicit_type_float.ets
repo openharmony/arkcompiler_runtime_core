@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,21 +16,23 @@
 {% for c in cases %}
 
 {% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
 
-{% set logic_data -%}
-{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
-{% endset -%}
+{% for scl in c.sub_cases_logic %}
+{% set scl_id = loop.index0 %}
 
 /*---
 desc: {{c.desc}}
-tags: [compile-only, negative]
+params: {{c.params}}
+test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
 ---*/
 
 {{decl}}
 
-function main() {
-{{logic_data}}
+function main(): void {
+  {{scl|indent(width=2)}}
 }
 
+{% endfor %}
 {% endfor %}
 {% endfor %}
