@@ -11,16 +11,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */          
+ */
+
 {%- for c in cases %}
 /*---
-desc: Type annotation for enumeration for types int, long and double.
+desc: |-
+    A compile-time error occurs in the following situations:
+    • Explicit type is different from any numeric or string type.
+assert: Checking unsupported enum explicit type annotations
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0327: Unsupported enum type annotation. Supported enum types are: integral types, floating point types and string."
 ---*/
 
 {{c.decl}}
 
 function main() {
-    {{c.use|indent}}
 }
 {%- endfor %}
-

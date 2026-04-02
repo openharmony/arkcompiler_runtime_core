@@ -15,429 +15,397 @@ cases:
   - desc: |-
       >-
         Checking for enum with explicit int type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: int { Red, Green = 10, Blue,
           First = -2147483648, Second = 12345, Third = 2147483647,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: int { Red, Green = 10, Blue,
-          First = -2147483648, Second = 12345, Third = 2147483647,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof int)
-        arktest.assertEQ(Enum.Red.toString(), "0")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof int)
-        arktest.assertEQ(Enum.Green.toString(), "10")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof int)
-        arktest.assertEQ(Enum.Blue.toString(), "11")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.First.valueOf() instanceof int)
-        arktest.assertEQ(Enum.First.toString(), "-2147483648")
+        arktest.assertEQ(Enum[Enum.First], "First")
         arktest.assertTrue(Enum.Second.valueOf() instanceof int)
-        arktest.assertEQ(Enum.Second.toString(), "12345")
+        arktest.assertEQ(Enum[Enum.Second], "Second")
         arktest.assertTrue(Enum.Third.valueOf() instanceof int)
-        arktest.assertEQ(Enum.Third.toString(), "2147483647")
+        arktest.assertEQ(Enum[Enum.Third], "Third")
         arktest.assertTrue(Enum.One.valueOf() instanceof int)
-        arktest.assertEQ(Enum.One.toString(), "1")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof int)
-        arktest.assertEQ(Enum.one.toString(), "1")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof int)
-        arktest.assertEQ(Enum.oNe.toString(), "1")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "0")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "10")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "11")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "-2147483648")
+        arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "12345")
+        arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "2147483647")
+        arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof int)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
       >-
         Checking for enum with explicit long type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: long { Red, Green = 10, Blue,
           First = -9223372036854775808, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: long { Red, Green = 10, Blue,
-          First = -9223372036854775808, Second = 12345,
-          Third = 9223372036854775807,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof long)
-        arktest.assertEQ(Enum.Red.toString(), "0")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof long)
-        arktest.assertEQ(Enum.Green.toString(), "10")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof long)
-        arktest.assertEQ(Enum.Blue.toString(), "11")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.First.valueOf() instanceof long)
-        arktest.assertEQ(Enum.First.toString(), "-9223372036854775808")
+        arktest.assertEQ(Enum[Enum.First], "First")
         arktest.assertTrue(Enum.Second.valueOf() instanceof long)
-        arktest.assertEQ(Enum.Second.toString(), "12345")
+        arktest.assertEQ(Enum[Enum.Second], "Second")
         arktest.assertTrue(Enum.Third.valueOf() instanceof long)
-        arktest.assertEQ(Enum.Third.toString(), "9223372036854775807")
+        arktest.assertEQ(Enum[Enum.Third], "Third")
         arktest.assertTrue(Enum.One.valueOf() instanceof long)
-        arktest.assertEQ(Enum.One.toString(), "1")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof long)
-        arktest.assertEQ(Enum.one.toString(), "1")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof long)
-        arktest.assertEQ(Enum.oNe.toString(), "1")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "0")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "10")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "11")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "-9223372036854775808")
+        arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "12345")
+        arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "9223372036854775807")
+        arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof long)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
       >-
         Checking for enum with explicit byte type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: byte { Red, Green = 10, Blue,
           First = -128, Second = 123, Third = 127,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: byte { Red, Green = 10, Blue,
-          First = -128, Second = 123, Third = 127,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.Red.toString(), "0")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.Green.toString(), "10")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.Blue.toString(), "11")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.First.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.First.toString(), "-128")
+        arktest.assertEQ(Enum[Enum.First], "First")
         arktest.assertTrue(Enum.Second.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.Second.toString(), "123")
+        arktest.assertEQ(Enum[Enum.Second], "Second")
         arktest.assertTrue(Enum.Third.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.Third.toString(), "127")
+        arktest.assertEQ(Enum[Enum.Third], "Third")
         arktest.assertTrue(Enum.One.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.One.toString(), "1")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.one.toString(), "1")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof byte)
-        arktest.assertEQ(Enum.oNe.toString(), "1")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "0")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "10")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "11")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "-128")
+        arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "123")
+        arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "127")
+        arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof byte)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
       >-
         Checking for enum with explicit short type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: short { Red, Green = 10, Blue,
           First = -32768, Second = 12345, Third = 32767,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: short { Red, Green = 10, Blue,
-          First = -32768, Second = 12345, Third = 32767,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof short)
-        arktest.assertEQ(Enum.Red.toString(), "0")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof short)
-        arktest.assertEQ(Enum.Green.toString(), "10")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof short)
-        arktest.assertEQ(Enum.Blue.toString(), "11")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.First.valueOf() instanceof short)
-        arktest.assertEQ(Enum.First.toString(), "-32768")
+        arktest.assertEQ(Enum[Enum.First], "First")
         arktest.assertTrue(Enum.Second.valueOf() instanceof short)
-        arktest.assertEQ(Enum.Second.toString(), "12345")
+        arktest.assertEQ(Enum[Enum.Second], "Second")
         arktest.assertTrue(Enum.Third.valueOf() instanceof short)
-        arktest.assertEQ(Enum.Third.toString(), "32767")
+        arktest.assertEQ(Enum[Enum.Third], "Third")
         arktest.assertTrue(Enum.One.valueOf() instanceof short)
-        arktest.assertEQ(Enum.One.toString(), "1")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof short)
-        arktest.assertEQ(Enum.one.toString(), "1")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof short)
-        arktest.assertEQ(Enum.oNe.toString(), "1")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "0")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "10")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "11")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "-32768")
+        arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "12345")
+        arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "32767")
+        arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof short)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
       >-
         Checking for enum with explicit double type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: double { Red = 1.5, Green = 10.3, Blue = 7.6,
           First = -214748.3648, Second = 123.45, Third = 2147483.647,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: double { Red = 1.5, Green = 10.3, Blue = 7.6,
-          First = -214748.3648, Second = 123.45, Third = 2147483.647,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof double)
-        arktest.assertEQ(Enum.Red.toString(), "1.5")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof double)
-        arktest.assertEQ(Enum.Green.toString(), "10.3")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof double)
-        arktest.assertEQ(Enum.Blue.toString(), "7.6")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.First.valueOf() instanceof double)
-        arktest.assertEQ(Enum.First.toString(), "-214748.3648")
+        arktest.assertEQ(Enum[Enum.First], "First")
         arktest.assertTrue(Enum.Second.valueOf() instanceof double)
-        arktest.assertEQ(Enum.Second.toString(), "123.45")
+        arktest.assertEQ(Enum[Enum.Second], "Second")
         arktest.assertTrue(Enum.Third.valueOf() instanceof double)
-        arktest.assertEQ(Enum.Third.toString(), "2147483.647")
+        arktest.assertEQ(Enum[Enum.Third], "Third")
         arktest.assertTrue(Enum.One.valueOf() instanceof double)
-        arktest.assertEQ(Enum.One.toString(), "1")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof double)
-        arktest.assertEQ(Enum.one.toString(), "1")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof double)
-        arktest.assertEQ(Enum.oNe.toString(), "1")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "1.5")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "10.3")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "7.6")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "-214748.3648")
+        arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "123.45")
+        arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "2147483.647")
+        arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof double)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
       >-
         Checking for enum with explicit float type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: float { Red = 1.5f, Green = 10.3f, Blue = 7.6f,
           First = -214748.3648f, Second = 123.45f, Third = 2147483.647f,
-          One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: float { Red = 1.5f, Green = 10.3f, Blue = 7.6f,
-          First = -214748.3648f, Second = 123.45f, Third = 2147483.647f,
-          One = 1, one = 1, oNe = 1 }
+          One = 1.0f, one = 1.0f, oNe = 1.0f }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof float)
-        arktest.assertEQ(Enum.Red.toString(), "1.5")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof float)
-        arktest.assertEQ(Enum.Green.toString(), "10.3")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof float)
-        arktest.assertEQ(Enum.Blue.toString(), "7.6")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.First.valueOf() instanceof float)
-        arktest.assertEQ(Enum.First.toString(), "-214748.3648")
+        arktest.assertEQ(Enum[Enum.First], "First")
         arktest.assertTrue(Enum.Second.valueOf() instanceof float)
-        arktest.assertEQ(Enum.Second.toString(), "123.45")
+        arktest.assertEQ(Enum[Enum.Second], "Second")
         arktest.assertTrue(Enum.Third.valueOf() instanceof float)
-        arktest.assertEQ(Enum.Third.toString(), "2147483.647")
+        arktest.assertEQ(Enum[Enum.Third], "Third")
         arktest.assertTrue(Enum.One.valueOf() instanceof float)
-        arktest.assertEQ(Enum.One.toString(), "1")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof float)
-        arktest.assertEQ(Enum.one.toString(), "1")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof float)
-        arktest.assertEQ(Enum.oNe.toString(), "1")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "1.5")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "10.3")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "7.6")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "-214748.3648")
+        arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "123.45")
+        arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "2147483.647")
+        arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof float)
-        arktest.assertEQ(c.toString(), "1")
+        arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
       >-
         Checking for enum with explicit string type constant
-        to string conversion.
+        get name.
     decl_variants:
       - |-
         enum Enum: string { Red = "reD", Green = "grEen", Blue = "Blue",
           Complex =
           "\x17\x2b\xef\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!",
           One = "one", one = "one", oNe = "one" }
-      - |-
-        const enum Enum: string { Red = "reD", Green = "grEen", Blue = "Blue",
-          Complex =
-          "\x17\x2b\xef\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!",
-          One = "one", one = "one", oNe = "one" }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.Red.valueOf() instanceof string)
-        arktest.assertEQ(Enum.Red.toString(), "reD")
+        arktest.assertEQ(Enum[Enum.Red], "Red")
         arktest.assertTrue(Enum.Green.valueOf() instanceof string)
-        arktest.assertEQ(Enum.Green.toString(), "grEen")
+        arktest.assertEQ(Enum[Enum.Green], "Green")
         arktest.assertTrue(Enum.Blue.valueOf() instanceof string)
-        arktest.assertEQ(Enum.Blue.toString(), "Blue")
+        arktest.assertEQ(Enum[Enum.Blue], "Blue")
         arktest.assertTrue(Enum.Complex.valueOf() instanceof string)
-        arktest.assertEQ(Enum.Complex.toString(),
-        "\x17\x2b\xef\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!")
+        arktest.assertEQ(Enum[Enum.Complex], "Complex")
         arktest.assertTrue(Enum.One.valueOf() instanceof string)
-        arktest.assertEQ(Enum.One.toString(), "one")
+        arktest.assertEQ(Enum[Enum.One], "One")
         arktest.assertTrue(Enum.one.valueOf() instanceof string)
-        arktest.assertEQ(Enum.one.toString(), "one")
+        arktest.assertEQ(Enum[Enum.one], "one")
         arktest.assertTrue(Enum.oNe.valueOf() instanceof string)
-        arktest.assertEQ(Enum.oNe.toString(), "one")
+        arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(), "reD")
+        arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(), "grEen")
+        arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(), "Blue")
+        arktest.assertEQ(Enum[c], "Blue")
         c = Enum.Complex
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(),
-        "\x17\x2b\xef\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!")
+        arktest.assertEQ(Enum[c], "Complex")
         c = Enum.One
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(), "one")
+        arktest.assertEQ(Enum[c], "One")
         c = Enum.one
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(), "one")
+        arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
         arktest.assertTrue(c.valueOf() instanceof string)
-        arktest.assertEQ(c.toString(), "one")
+        arktest.assertEQ(Enum[c], "oNe")

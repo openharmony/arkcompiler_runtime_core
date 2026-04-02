@@ -21,10 +21,6 @@ cases:
         enum Enum: int { Red, Green = 10, Blue,
           First = -2147483648, Second = 12345, Third = 2147483647,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: int { Red, Green = 10, Blue,
-          First = -2147483648, Second = 12345, Third = 2147483647,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         let c = Enum.fromValue(0)
@@ -70,11 +66,6 @@ cases:
     decl_variants:
       - |-
         enum Enum: long { Red, Green = 10, Blue,
-          First = -9223372036854775807-1, Second = 12345,
-          Third = 9223372036854775807,
-          One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: long { Red, Green = 10, Blue,
           First = -9223372036854775807-1, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }
@@ -125,10 +116,6 @@ cases:
         enum Enum: byte { Red, Green = 10, Blue,
           First = -128, Second = 123, Third = 127,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: byte { Red, Green = 10, Blue,
-          First = -128, Second = 123, Third = 127,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         let c = Enum.fromValue(0)
@@ -146,17 +133,17 @@ cases:
         arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(c, Enum.Blue)
         arktest.assertEQ(Enum[c], "Blue")
-        c = Enum.fromValue(-2147483648)
+        c = Enum.fromValue(-128)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(c, Enum.First)
         arktest.assertEQ(Enum[c], "First")
-        c = Enum.fromValue(12345)
+        c = Enum.fromValue(123)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(c, Enum.Second)
         arktest.assertEQ(Enum[c], "Second")
-        c = Enum.fromValue(2147483647)
+        c = Enum.fromValue(127)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(c, Enum.Third)
@@ -176,10 +163,6 @@ cases:
         enum Enum: short { Red, Green = 10, Blue,
           First = -32768, Second = 12345, Third = 32767,
           One = 1, one = 1, oNe = 1 }
-      - |-
-        const enum Enum: short { Red, Green = 10, Blue,
-          First = -32768, Second = 12345, Third = 32767,
-          One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
       - |-
         let c = Enum.fromValue(0)
@@ -197,7 +180,7 @@ cases:
         arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(c, Enum.Blue)
         arktest.assertEQ(Enum[c], "Blue")
-        c = Enum.fromValue(-2147483648)
+        c = Enum.fromValue(-32768)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(c, Enum.First)
@@ -207,7 +190,7 @@ cases:
         arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(c, Enum.Second)
         arktest.assertEQ(Enum[c], "Second")
-        c = Enum.fromValue(2147483647)
+        c = Enum.fromValue(32767)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(c, Enum.Third)
@@ -225,10 +208,6 @@ cases:
     decl_variants:
       - |-
         enum Enum: double { Red = 1.5, Green = 10.3, Blue = 7.6,
-          First = -214748.3648, Second = 123.45, Third = 2147483.647,
-          One = 1.0, one = 1.0, oNe = 1.0 }
-      - |-
-        const enum Enum: double { Red = 1.5, Green = 10.3, Blue = 7.6,
           First = -214748.3648, Second = 123.45, Third = 2147483.647,
           One = 1.0, one = 1.0, oNe = 1.0 }
     sub_cases_logic:
@@ -278,10 +257,6 @@ cases:
         enum Enum: float { Red = 1.5f, Green = 10.3f, Blue = 7.6f,
           First = -214748.3648f, Second = 123.45f, Third = 2147483.647f,
           One = 1.0f, one = 1.0f, oNe = 1.0f }
-      - |-
-        const enum Enum: float { Red = 1.5f, Green = 10.3f, Blue = 7.6f,
-          First = -214748.3648f, Second = 123.45f, Third = 2147483.647f,
-          One = 1.0f, one = 1.0f, oNe = 1.0f }
     sub_cases_logic:
       - |-
         let c = Enum.fromValue(1.5f)
@@ -327,11 +302,6 @@ cases:
     decl_variants:
       - |-
         enum Enum: string { Red = "reD", Green = "grEen", Blue = "Blue",
-          Complex =
-          "\x17\x2b\xef\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!",
-          One = "one", one = "one", oNe = "one" }
-      - |-
-        const enum Enum: string { Red = "reD", Green = "grEen", Blue = "Blue",
           Complex =
           "\x17\x2b\xef\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!",
           One = "one", one = "one", oNe = "one" }

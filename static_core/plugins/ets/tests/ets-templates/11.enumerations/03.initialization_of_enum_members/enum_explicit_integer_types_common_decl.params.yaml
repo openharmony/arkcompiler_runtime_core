@@ -1,0 +1,869 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        An initializer can be omitted if an enumeration base type is an
+        integer type.
+        If initializers for all members are omitted, then the first member
+        is assigned the value zero. The other member is assigned the value
+        of the immediately preceding member plus one.
+    params: |-
+      initializers for all members are omitted
+    check_variants:
+      - {check_type: "long"}
+      - {check_type: "int"}
+      - {check_type: "short"}
+      - {check_type: "byte"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first, second, third }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.first.valueOf(), 0)
+        arktest.assertEQ(Enum.second.valueOf(), 1)
+        arktest.assertEQ(Enum.third.valueOf(), 2)
+    test_suffix: "ifamao"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers
+    check_variants:
+      - {check_type: "long"}
+      - {check_type: "int"}
+      - {check_type: "short"}
+      - {check_type: "byte"}
+    decl_variants:
+      - |-
+        enum Color: [check_type] { Red, Blue = 5, Green }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Color.Red instanceof Color)
+        arktest.assertTrue(Color.Blue instanceof Color)
+        arktest.assertTrue(Color.Green instanceof Color)
+        arktest.assertTrue(Color.Red.valueOf() instanceof [check_type])
+        arktest.assertTrue(Color.Blue.valueOf() instanceof [check_type])
+        arktest.assertTrue(Color.Green.valueOf() instanceof [check_type])
+        arktest.assertEQ(Color.Red.valueOf(), 0)
+        arktest.assertEQ(Color.Blue.valueOf(), 5)
+        arktest.assertEQ(Color.Green.valueOf(), 6)
+    test_suffix: "phcei1"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        values can be the same
+    check_variants:
+      - {check_type: "long"}
+      - {check_type: "int"}
+      - {check_type: "short"}
+      - {check_type: "byte"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { A, B = -1, C, D }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.B.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.C.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.D.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.A.valueOf(), 0)
+        arktest.assertEQ(Enum.B.valueOf(), -1)
+        arktest.assertEQ(Enum.C.valueOf(), 0)
+        arktest.assertEQ(Enum.D.valueOf(), 1)
+        arktest.assertTrue(Enum.C == Enum.A)
+    test_suffix: "phcei2"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        values can be the same
+    check_variants:
+      - {check_type: "long"}
+      - {check_type: "int"}
+      - {check_type: "short"}
+      - {check_type: "byte"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { A, B, C = (1 << 3) * 3, D,
+          E = (5 | 10), F = ((3 | 7) << 2) * 3, G = 7 % 4,
+          H = (3 + 5) / 3, I = (17 | (7 & 5)), J = 15 ^ 9,
+          K = ~3, L = 5 >>> 2, M = 17 >> 3, N }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.G instanceof Enum)
+        arktest.assertTrue(Enum.H instanceof Enum)
+        arktest.assertTrue(Enum.I instanceof Enum)
+        arktest.assertTrue(Enum.J instanceof Enum)
+        arktest.assertTrue(Enum.K instanceof Enum)
+        arktest.assertTrue(Enum.L instanceof Enum)
+        arktest.assertTrue(Enum.M instanceof Enum)
+        arktest.assertTrue(Enum.N instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.B.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.C.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.D.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.E.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.F.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.G.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.H.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.I.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.J.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.K.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.L.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.M.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.N.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.A, 0)
+        arktest.assertEQ(Enum.B, 1)
+        arktest.assertEQ(Enum.C, 24)
+        arktest.assertEQ(Enum.D, 25)
+        arktest.assertEQ(Enum.E, 15)
+        arktest.assertEQ(Enum.F, 84)
+        arktest.assertEQ(Enum.G, 3)
+        arktest.assertEQ(Enum.H, 2)
+        arktest.assertEQ(Enum.I, 21)
+        arktest.assertEQ(Enum.J, 6)
+        arktest.assertEQ(Enum.K, -4)
+        arktest.assertEQ(Enum.L, 1)
+        arktest.assertEQ(Enum.M, 2)
+        arktest.assertEQ(Enum.N, 3)
+    test_suffix: "phcei3"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        using cast expression in constant expression
+    check_variants:
+      - {check_type: "long", v1_type: "byte", v2_type: "short",
+        v3_type: "int", v4_type: "long"}
+      - {check_type: "int", v1_type: "byte", v2_type: "short",
+        v3_type: "int", v4_type: "byte"}
+      - {check_type: "short", v1_type: "byte", v2_type: "short",
+        v3_type: "byte", v4_type: "short"}
+      - {check_type: "byte", v1_type: "byte", v2_type: "byte",
+        v3_type: "byte", v4_type: "byte"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { A = 5 as [v1_type], B, C,
+          D = 10 as [v2_type], E, F,
+          G = 15 as [v3_type], H, I,
+          J = 20 as [v4_type], K, L }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.G instanceof Enum)
+        arktest.assertTrue(Enum.H instanceof Enum)
+        arktest.assertTrue(Enum.I instanceof Enum)
+        arktest.assertTrue(Enum.J instanceof Enum)
+        arktest.assertTrue(Enum.K instanceof Enum)
+        arktest.assertTrue(Enum.L instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.B.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.C.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.D.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.E.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.F.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.G.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.H.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.I.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.J.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.K.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.L.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.A, 5)
+        arktest.assertEQ(Enum.B, 6)
+        arktest.assertEQ(Enum.C, 7)
+        arktest.assertEQ(Enum.D, 10)
+        arktest.assertEQ(Enum.E, 11)
+        arktest.assertEQ(Enum.F, 12)
+        arktest.assertEQ(Enum.G, 15)
+        arktest.assertEQ(Enum.H, 16)
+        arktest.assertEQ(Enum.I, 17)
+        arktest.assertEQ(Enum.J, 20)
+        arktest.assertEQ(Enum.K, 21)
+        arktest.assertEQ(Enum.L, 22)
+    test_suffix: "phcei4"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        checking for min value in enum
+    check_variants:
+      - {check_type: "long", min_value: "-9223372036854775808"}
+      - {check_type: "int", min_value: "-2147483648"}
+      - {check_type: "short", min_value: "-32768"}
+      - {check_type: "byte", min_value: "-128"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first, second = [min_value], third}
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = 0
+        const v2: [check_type] = [min_value]
+        const v3: [check_type] = [min_value] + 1
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "cfmin"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        checking for max value in enum
+    check_variants:
+      - {check_type: "long", max_value: "9223372036854775807"}
+      - {check_type: "int", max_value: "2147483647"}
+      - {check_type: "short", max_value: "32767"}
+      - {check_type: "byte", max_value: "127"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [max_value] - 2, second, third }
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = [max_value] - 2
+        const v2: [check_type] = [max_value] - 1
+        const v3: [check_type] = [max_value]
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "cfmax"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      all have constant expression initializers
+    check_variants:
+      - {check_type: "long", check_value: "2147483648"}
+      - {check_type: "int", check_value: "2147483647"}
+      - {check_type: "short", check_value: "32767"}
+      - {check_type: "byte", check_value: "127"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [check_value], second = [check_value] - 1,
+          third = [check_value] - 2 }
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = [check_value]
+        const v2: [check_type] = [check_value] - 1
+        const v3: [check_type] = [check_value] - 2
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "ahcei"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      checking integer type overflow on max value
+    check_variants:
+      - {check_type: "long", max_value: "9223372036854775807"}
+      - {check_type: "int", max_value: "2147483647"}
+      - {check_type: "short", max_value: "32767"}
+      - {check_type: "byte", max_value: "127"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [max_value] - 1, second, third }
+    sub_cases_logic:
+      - |-
+        let v1: [check_type] = [max_value] - 1
+        let v2: [check_type] = v1
+        v2++
+        let v3: [check_type] = v2
+        v3++
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "citoomaxv1"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      checking integer type overflow on max value
+    check_variants:
+      - {check_type: "long", max_value: "9223372036854775807", type_conversion_expr: ""}
+      - {check_type: "int", max_value: "2147483647", type_conversion_expr: ""}
+      - {check_type: "short", max_value: "32767", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", max_value: "127", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [max_value] - 10, second,
+          third = (first + 110)[type_conversion_expr] }
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = [max_value] - 10
+        const v2: [check_type] = (v1 + 1)[type_conversion_expr]
+        const v3: [check_type] = (v1 + 110)[type_conversion_expr]
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "citoomaxv2"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      Checking integer type overflow on min value
+    check_variants:
+      - {check_type: "long", min_value: "-9223372036854775808", type_conversion_expr: ""}
+      - {check_type: "int", min_value: "-2147483648", type_conversion_expr: ""}
+      - {check_type: "short", min_value: "-32768", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", min_value: "-128", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first, second = [min_value], third = (second - 1)[type_conversion_expr] }
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = 0
+        const v2: [check_type] = [min_value]
+        const v3: [check_type] = (v2 - 1)[type_conversion_expr]
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "citoominv1"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      Checking integer type overflow on min value
+    check_variants:
+      - {check_type: "long", min_value: "-9223372036854775808", type_conversion_expr: ""}
+      - {check_type: "int", min_value: "-2147483648", type_conversion_expr: ""}
+      - {check_type: "short", min_value: "-32768", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", min_value: "-128", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [min_value] + 10, second,
+          third = (first - 110)[type_conversion_expr]}
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = [min_value] + 10
+        const v2: [check_type] = (v1 + 1)[type_conversion_expr]
+        const v3: [check_type] = (v1 - 110)[type_conversion_expr]
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "citoominv2"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        all have not a constant expression initializers,
+        using const variables in initializer expressions
+    check_variants:
+      - {check_type: "long", check_value: "2147483648", type_conversion_expr: ""}
+      - {check_type: "int", check_value: "2147483647", type_conversion_expr: ""}
+      - {check_type: "short", check_value: "32767", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", check_value: "127", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        const a: [check_type] = [check_value]
+        const b: [check_type] = [check_value] - 1
+        enum Enum: [check_type] { first = a, second = b, third = (b - 1)[type_conversion_expr] }
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = a
+        const v2: [check_type] = b
+        const v3: [check_type] = (b - 1)[type_conversion_expr]
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "ahnacei1"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        all have not a constant expression initializers,
+        using variables in initializer expressions
+    check_variants:
+      - {check_type: "long", check_value: "2147483648", type_conversion_expr: ""}
+      - {check_type: "int", check_value: "2147483647", type_conversion_expr: ""}
+      - {check_type: "short", check_value: "32767", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", check_value: "127", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        let a: [check_type] = [check_value]
+        let b: [check_type] = [check_value] - 1
+        enum Enum: [check_type] { first = a, second = b, third = (b - 1)[type_conversion_expr] }
+    sub_cases_logic:
+      - |-
+        const v1: [check_type] = a
+        const v2: [check_type] = b
+        const v3: [check_type] = (b - 1)[type_conversion_expr]
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+    test_suffix: "ahnacei2"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        all have explicit initializers,
+        using enum members values in initializers expressions
+    check_variants:
+      - {check_type: "long", shift_value: "32", type_conversion_expr: ""}
+      - {check_type: "int", shift_value: "16", type_conversion_expr: ""}
+      - {check_type: "short", shift_value: "8", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", shift_value: "1", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { A = 5, B = (1 << 1) * 2,
+          C = (1 << 3) * 3, D = (B | C)[type_conversion_expr],
+          E = (((B | C) << [shift_value]) * 2)[type_conversion_expr],
+          F = (A % 4)[type_conversion_expr],
+          G = ((A + F) / 3)[type_conversion_expr],
+          H = (G | (F & A))[type_conversion_expr],
+          I = (F ^ A)[type_conversion_expr],
+          J = (~A)[type_conversion_expr],
+          K = (-B)[type_conversion_expr],
+          L = (E >> 2)[type_conversion_expr],
+          M = (E >>> 2)[type_conversion_expr] }
+    sub_cases_logic:
+      - |-
+        const a: [check_type] = 5
+        const b: [check_type] = (1 << 1) * 2
+        const c: [check_type] = (1 << 3) * 3
+        const d: [check_type] = (b | c)[type_conversion_expr]
+        const e: [check_type] = (((b | c) << [shift_value]) * 2)[type_conversion_expr]
+        const f: [check_type] = (a % 4)[type_conversion_expr]
+        const g: [check_type] = ((a + f) / 3)[type_conversion_expr]
+        const h: [check_type] = (g | (f & a))[type_conversion_expr]
+        const i: [check_type] = (f ^ a)[type_conversion_expr]
+        const j: [check_type] = (~a)[type_conversion_expr]
+        const k: [check_type] = (-b)[type_conversion_expr]
+        const l: [check_type] = (e >> 2)[type_conversion_expr]
+        const m: [check_type] = (e >>> 2)[type_conversion_expr]
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.G instanceof Enum)
+        arktest.assertTrue(Enum.H instanceof Enum)
+        arktest.assertTrue(Enum.I instanceof Enum)
+        arktest.assertTrue(Enum.J instanceof Enum)
+        arktest.assertTrue(Enum.K instanceof Enum)
+        arktest.assertTrue(Enum.L instanceof Enum)
+        arktest.assertTrue(Enum.M instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.B.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.C.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.D.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.E.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.F.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.G.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.H.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.I.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.J.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.K.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.L.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.M.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.A, a, "failed check: Enum.A == a")
+        arktest.assertEQ(Enum.B, b, "failed check: Enum.B == b")
+        arktest.assertEQ(Enum.C, c, "failed check: Enum.C == c")
+        arktest.assertEQ(Enum.D, d, "failed check: Enum.D == d")
+        arktest.assertEQ(Enum.E, e, "failed check: Enum.E == e")
+        arktest.assertEQ(Enum.F, f, "failed check: Enum.F == f")
+        arktest.assertEQ(Enum.G, g, "failed check: Enum.G == g")
+        arktest.assertEQ(Enum.H, h, "failed check: Enum.H == h")
+        arktest.assertEQ(Enum.I, i, "failed check: Enum.I == i")
+        arktest.assertEQ(Enum.J, j, "failed check: Enum.J == j")
+        arktest.assertEQ(Enum.K, k, "failed check: Enum.K == k")
+        arktest.assertEQ(Enum.L, l, "failed check: Enum.L == l")
+        arktest.assertEQ(Enum.M, m, "failed check: Enum.M == m")
+    test_suffix: "uemviie"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have not a constant expression initializers,
+        part do not have initializers,
+        values can be the same
+    check_variants:
+      - {check_type: "long", check_value: "2147483648", type_conversion_expr: ""}
+      - {check_type: "int", check_value: "2147483647", type_conversion_expr: ""}
+      - {check_type: "short", check_value: "32767", type_conversion_expr: ".toShort()"}
+      - {check_type: "byte", check_value: "127", type_conversion_expr: ".toByte()"}
+    decl_variants:
+      - |-
+        let a: [check_type] = [check_value]
+        let b: [check_type] = [check_value] - 1
+        enum Enum: [check_type] { A, B, C = a, D = (a - b)[type_conversion_expr] }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.B.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.C.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.D.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.A.valueOf(), 0)
+        arktest.assertEQ(Enum.B.valueOf(), 1)
+        arktest.assertEQ(Enum.C.valueOf(), a)
+        arktest.assertEQ(Enum.D.valueOf(), 1)
+    test_suffix: "phnacei"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have not a constant expression initializers,
+        part do not have initializers,
+        using other enum members values as enum members initializers
+    check_variants:
+      - {check_type: "long"}
+      - {check_type: "int"}
+      - {check_type: "short"}
+      - {check_type: "byte"}
+    decl_variants:
+      - |-
+        enum Enum1: [check_type] { first = 123, second, third }
+        enum Enum2: [check_type] { first = Enum1.second, second = Enum1.third, third = Enum1.first }
+      - |-
+        enum Enum1: [check_type] { first = 123, second, third }
+        enum Enum2: [check_type] { first = Enum1.second.valueOf(), second = Enum1.third.valueOf(), third = Enum1.first }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum1.first instanceof Enum1)
+        arktest.assertTrue(Enum1.second instanceof Enum1)
+        arktest.assertTrue(Enum1.third instanceof Enum1)
+        arktest.assertFalse(Enum1.first instanceof Enum2)
+        arktest.assertFalse(Enum1.second instanceof Enum2)
+        arktest.assertFalse(Enum1.third instanceof Enum2)
+        arktest.assertTrue(Enum1.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum1.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum1.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum1.first.valueOf(), 123)
+        arktest.assertEQ(Enum1.second.valueOf(), 124)
+        arktest.assertEQ(Enum1.third.valueOf(), 125)
+        arktest.assertTrue(Enum2.first instanceof Enum2)
+        arktest.assertTrue(Enum2.second instanceof Enum2)
+        arktest.assertTrue(Enum2.third instanceof Enum2)
+        arktest.assertFalse(Enum2.first instanceof Enum1)
+        arktest.assertFalse(Enum2.second instanceof Enum1)
+        arktest.assertFalse(Enum2.third instanceof Enum1)
+        arktest.assertTrue(Enum2.first.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum2.second.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum2.third.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum2.first.valueOf(), 124)
+        arktest.assertEQ(Enum2.second.valueOf(), 125)
+        arktest.assertEQ(Enum2.third.valueOf(), 123)
+    test_suffix: "uoemvaemi"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have not a constant expression initializers,
+        part do not have initializers,
+        using different expression values types assignable to type base type
+    check_variants:
+      - {check_type: "long", f1_return_type: "byte", f2_return_type: "short",
+        f3_return_type: "int", f4_return_type: "long"}
+      - {check_type: "int", f1_return_type: "byte", f2_return_type: "short",
+        f3_return_type: "int", f4_return_type: "byte"}
+      - {check_type: "short", f1_return_type: "byte", f2_return_type: "short",
+        f3_return_type: "byte", f4_return_type: "short"}
+      - {check_type: "byte", f1_return_type: "byte", f2_return_type: "byte",
+        f3_return_type: "byte", f4_return_type: "byte"}
+    decl_variants:
+      - |-
+        function f1(): [f1_return_type] {
+            return 11
+        }
+        function f2(): [f2_return_type] {
+            return 13
+        }
+        function f3(): [f3_return_type] {
+            return 15
+        }
+        function f4(): [f4_return_type] {
+            return 17
+        }
+        enum Enum: [check_type] { A = f1(), B = f2(),
+          C = f3(), D = f4() }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.B.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.C.valueOf() instanceof [check_type])
+        arktest.assertTrue(Enum.D.valueOf() instanceof [check_type])
+        arktest.assertEQ(Enum.A.valueOf(), 11)
+        arktest.assertEQ(Enum.B.valueOf(), 13)
+        arktest.assertEQ(Enum.C.valueOf(), 15)
+        arktest.assertEQ(Enum.D.valueOf(), 17)
+    test_suffix: "udevtatti"
