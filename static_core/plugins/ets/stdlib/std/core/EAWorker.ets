@@ -29,6 +29,8 @@ export enum WorkerPriority {
     PRIORITY_LOW = 1,
     PRIORITY_DEFAULT = 2,
     PRIORITY_HIGH = 3,
+    PRIORITY_DEADLINE_REQUEST = 4,
+    PRIORITY_USER_INTERACTION = 5,
 }
 
 const INVALID_WORKER_ID = -1;

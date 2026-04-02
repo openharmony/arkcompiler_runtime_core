@@ -160,7 +160,7 @@ export namespace taskpool {
         }
 
         private updateCurrentWorkerPriority(taskPriority: Priority): void {
-            this.setPriority(GlobalQueueWorker.workerPriorityMap[taskPriority.valueOf()]);
+            this.setPriority(GlobalQueueWorker.getWorkerPriority(taskPriority));
         }
 
         public isWorkerActive(): boolean {
@@ -390,12 +390,23 @@ export namespace taskpool {
         private blockedExpandTimerId: int = -1;
         // managerWorker only: worker ids that already triggered a special expansion.
         private blockedExpandedWorkerIds: Set<int> = new Set<int>();
-        private static readonly workerPriorityMap: WorkerPriority[] = [
-            WorkerPriority.PRIORITY_HIGH,
-            WorkerPriority.PRIORITY_DEFAULT,
-            WorkerPriority.PRIORITY_LOW,
-            WorkerPriority.PRIORITY_IDLE
-        ];
+        private static getWorkerPriority(taskPriority: Priority): WorkerPriority {
+            switch (taskPriority) {
+                case Priority.USER_INTERACTION:
+                    return WorkerPriority.PRIORITY_USER_INTERACTION;
+                case Priority.DEADLINE_REQUEST:
+                    return WorkerPriority.PRIORITY_DEADLINE_REQUEST;
+                case Priority.HIGH:
+                    return WorkerPriority.PRIORITY_HIGH;
+                case Priority.MEDIUM:
+                    return WorkerPriority.PRIORITY_DEFAULT;
+                case Priority.LOW:
+                    return WorkerPriority.PRIORITY_LOW;
+                case Priority.IDLE:
+                    return WorkerPriority.PRIORITY_IDLE;
+            }
+            return WorkerPriority.PRIORITY_DEFAULT;
+        }
     }
 
     /**
@@ -403,6 +414,10 @@ export namespace taskpool {
      * @see taskpool.Task
      */
     export enum Priority {
+        /// the task priority is user interaction
+        USER_INTERACTION = -2,
+        /// the task priority is deadline request
+        DEADLINE_REQUEST = -1,
         /// the task priority is high
         HIGH = 0,
         /// the task priority is medium, default priority
@@ -835,7 +850,7 @@ export namespace taskpool {
             }
             if (!isTaskPoolUseLaunch) {
                 initGlobalTaskQueues();
-                globalTaskQueue?.get(priority)?.push(this.task);
+                globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.push(this.task);
                 let count = allTasks.get(this.task) ?? 0;
                 allTasks.set(this.task, count + 1);
                 const newWaitingTasksNum = waitingTasksNum.fetchAdd(1);
@@ -2790,6 +2805,14 @@ export namespace taskpool {
         isGlobalTaskQueuesInitialized.set(true);
     }
 
+    // Temporarily reuse the HIGH queue for USER_INTERACTION and DEADLINE_REQUEST; dedicated queues will be added later.
+    function normalizeTaskQueuePriority(priority: Priority): Priority {
+        if (priority == Priority.USER_INTERACTION || priority == Priority.DEADLINE_REQUEST) {
+            return Priority.HIGH;
+        }
+        return priority;
+    }
+
     /**
      * @brief Get task from new task queues with priority logic
      * Uses condition variable to wait when no tasks are available to avoid busy waiting
@@ -2924,7 +2947,7 @@ export namespace taskpool {
             return false;
         }
 
-        globalTaskQueue.get(priority!)?.push(task);
+        globalTaskQueue.get(normalizeTaskQueuePriority(priority!))?.push(task);
         ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
             ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
         });
@@ -2932,7 +2955,7 @@ export namespace taskpool {
     }
 
     function getGlobalTaskImplNonBlocking(priority: Priority): Task | undefined {
-        let queue = globalTaskQueue.get(priority);
+        let queue = globalTaskQueue.get(normalizeTaskQueuePriority(priority));
         if (queue == undefined || queue.size == 0) {
             return undefined;
         }
@@ -2971,7 +2994,7 @@ export namespace taskpool {
      * @returns Number of tasks in the queue
      */
     function getGlobalTaskQueueSize(priority: Priority): int {
-        let queue = globalTaskQueue.get(priority);
+        let queue = globalTaskQueue.get(normalizeTaskQueuePriority(priority));
         return queue?.size ?? 0;
     }
 
