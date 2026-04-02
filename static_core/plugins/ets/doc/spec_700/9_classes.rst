@@ -1006,8 +1006,7 @@ A class can contain declarations of the following members:
 -  Methods,
 -  Accessors,
 -  Constructors,
--  Method overloads (see :ref:`Explicit Class Method Overload`),
--  Constructor overloads (see :ref:`Explicit Constructor Overload`), and
+-  Method overloads (see :ref:`Explicit Class Method Overload`), and
 -  Single static initialization block (see :ref:`Static Initialization`).
 
 The syntax is presented below:
@@ -1021,7 +1020,6 @@ The syntax is presented below:
    constructor
    method overload
    class method
-   constructor overload
    static block
    initialization
    syntax
@@ -1667,17 +1665,10 @@ The initializer of a non-static field declaration is evaluated at runtime.
 The assignment is performed each time an instance of the class is created (see
 :ref:`New Expressions`).
 
-The instance field initializer expression cannot use the following directly in
-any form:
-
-- ``super``; or
-- ``this``.
-
-If the initializer expression contains one of the above patterns, then a
+If the initializer expression uses ``super`` or ``this`` in any form, then a
 :index:`compile-time warning` occurs.
 
-If allowed in the code, the above restrictions can break the consistency of
-class instances as shown in the following examples:
+If such use occurs then runtime error can occur as shown in the following examples:
 
 .. index::
    non-static field declaration
@@ -1700,24 +1691,24 @@ class instances as shown in the following examples:
    :linenos:
 
     class C {
-        a = this        // Compile-time warning
+        f0 = this // Compile-time warning as 'this' is used
 
-        f1 = this.foo() // Compile-time warning as 'this' method is invoked
+        f1 = this.init_f1() // Compile-time warning as method of 'this' method is invoked
 
-        f2 = "a string field"
-
-        foo (): string {
-           // Type safety requires fields to be initialized before access
-           console.log (this.f1, this.f2)
-           return this.f2
+        init_f1 (): string {
+           console.log (this.f1) // this.f1 was not yet initialized, a runtime error occurs
+           return "a string field"
         }
-
     }
 
     class B {}
     function foo (f: () => B) { return f() }
     class A {
-        field1 = foo(() => this.field2) // Compile-time warning as 'this' is used in the initializer code
+        field1 = foo(() => this.field2) 
+            // Compile-time warning as 'this' is used in the initializer code
+            // At runtime the lambda call will lead to a runtime error as
+            // this.field2 was not yet initialized
+
         field2 = new B
     }
 
@@ -1750,9 +1741,7 @@ field of type ``T`` with any form of access.
 *Field with late initialization* must be an *instance field*. Otherwise,
 a :index:`compile-time error` occurs.
 
-.. , e.g. if a field with late initialization is defined as ``static``,
-
-*Field with late initialization* must of a *nullish type* (see
+*Field with late initialization* cannot be of a *nullish type* (see
 :ref:`Nullish Types`). Otherwise, a :index:`compile-time error` occurs.
 
 As all other fields, a *field with late initialization* must be initialized
@@ -2809,8 +2798,6 @@ for a subtype, but is available for a call in all derived class constructors via
         }
     }
 
-An optional identifier in *constructor declaration* is an experimental feature
-discussed in :ref:`Named Constructors`.
 Constructors are called by the following:
 
 .. index::
@@ -3152,11 +3139,6 @@ The example below represents *primary* and *secondary* constructors:
       constructor (color: number) {
         this(0, 0, color) // Calls same class primary constructor
       }
-
-      // Secondary named constructor:
-      constructor zero(color: number) {
-        this(0, 0, color) // Calls same class primary constructor
-      }
     }
 
 .. index::
@@ -3209,13 +3191,9 @@ There are two kinds of *explicit constructor calls*:
 
 A :index:`compile-time error` occurs if:
 
- - *Superclass constructor call* refers to an inaccessible direct superclass
+-  *Superclass constructor call* refers to an inaccessible direct superclass
    constructor.
- - *Explicit constructor call* is used as expression.
-
-In order to call a named constructor (:ref:`Named Constructors`), the name of
-the constructor must be provided while calling a superclass or another
-same-class constructor.
+-  *Explicit constructor call* is used as expression.
 
 A :index:`compile-time error` occurs if arguments of an explicit constructor
 call refer to one of the following:
@@ -3226,28 +3204,19 @@ call refer to one of the following:
 .. code-block:: typescript
    :linenos:
 
-   class Base {
-       constructor () {}
-       constructor base() {}
-   }
-   class Derived1 extends Base {
-       constructor () {
-           super()        // Call Base class constructor
-       }
-   }
-   class Derived2 extends Base {
-       constructor () {
-           super.base()   // Call Base class named constructor
-       }
-   }
-   class Derived3 extends Base {
-       constructor () {
-           this.derived() // Call same class named constructor
-       }
-       constructor derived() {
-           super ()      // Call Base class constructor
-       }
-   }
+    class Base {
+        constructor () {}
+    }
+    class Derived extends Base {
+        constructor () {
+            super()        // Call Base class constructor
+        }
+    }
+    class Derived2 extends Base {
+        constructor (x: number) {
+            super()        // Call Base class constructor
+        }
+    }
 
 Semantic check for a ``super`` call is performed in accordance with
 :ref:`Compatibility of Call Arguments`.

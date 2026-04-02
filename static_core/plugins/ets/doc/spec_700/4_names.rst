@@ -230,7 +230,7 @@ by signatures if signatures are not overload-equivalent
    (see :ref:`Implicit Function Overloading`);
 -  Methods of the same class with the same name (see
    :ref:`Implicit Method Overloading`);
--  Unnamed constructors of the same class.
+-  Constructors of the same class.
 
 .. index::
    distinguishable declaration

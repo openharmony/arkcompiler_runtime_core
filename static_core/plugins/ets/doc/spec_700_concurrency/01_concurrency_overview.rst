@@ -85,8 +85,8 @@ Overview of concurrency features
 following:
 
 - :ref:`Asynchronous execution` primitives: ``async`` / ``await`` / ``Promise``;
-- :ref:`Parallel execution` API: ``EAWorker API`` / ``Taskpool API`` / 
-  ``launch API``, including the structured concurrency support;
+- :ref:`Parallel execution` API: ``EAWorker API`` / ``Taskpool API``,
+  including the structured concurrency support;
 - :ref:`Synchronization` API: locks API, atomics API and other means of
   synchronization;
 
