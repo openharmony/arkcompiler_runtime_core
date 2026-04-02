@@ -16,23 +16,24 @@
 #
 import json
 import re
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 from yaml.scanner import ScannerError
 
-from runner.common_exceptions import InvalidConfiguration, InvalidTestMarkUpException
+from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import BaseEnum
 from runner.logger import Log
 from runner.options.options_step import StepKind
-from runner.utils import ExpectedData, ExpectedField
+from runner.utils import ExpectedField
 
 METADATA_PATTERN = re.compile(r"(?<=/\*---)(.*?)(?=---\*/)", flags=re.DOTALL)
 DOTS_WHITESPACES_PATTERN = r"(\.\w+)*"
 PACKAGE_PATTERN = re.compile(f"\\n\\s*package[\\t\\f\\v  ]+(?P<package_name>\\w+{DOTS_WHITESPACES_PATTERN})\\b")
 SPEC_CHAPTER_PATTERN = re.compile(r"^\d{1,2}\.?\d{0,3}\.?\d{0,3}\.?\d{0,3}\.?\d{0,3}$")
+RawData = str | list[str] | dict | None
 
 __LOGGER = Log.get_logger(__file__)
 
@@ -44,7 +45,7 @@ class Tags:
         NOT_A_TEST = "not-a-test"
         NEGATIVE = "negative"
 
-    def __init__(self, tags: list[str] | None = None) -> None:
+    def __init__(self, tags: str | list[str] | None = None) -> None:
         self.__values: dict[Tags.EtsTag, bool] = {
             Tags.EtsTag.COMPILE_ONLY: Tags.__contains(Tags.EtsTag.COMPILE_ONLY.value, tags),
             Tags.EtsTag.NEGATIVE: Tags.__contains(Tags.EtsTag.NEGATIVE.value, tags),
@@ -83,30 +84,34 @@ class Tags:
         return []
 
     @staticmethod
-    def __contains(tag: str, tags: list[str] | None) -> bool:
+    def __contains(tag: str, tags: str | list[str] | None) -> bool:
         return tag in tags if tags is not None else False
 
 
-@dataclass
-class TestMetadata:     # type: ignore[explicit-any]
-    tags: Tags = field(default_factory=Tags)
-    desc: str | None = None
+class TestMetadata(BaseModel):   # type: ignore[explicit-any]
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+    )
+
+    tags: Tags = Field(default_factory=Tags)
+    desc: str | None = Field(default=None, alias='description')
     test_suffix: str | None = None
     file_name: str | None = None
     files: list[str] | None = None
-    assertion: str | None = None
+    assertion: str | None = Field(default=None, alias="assert")
     params: Any | None = None   # type: ignore[explicit-any]
     name: str | None = None
     entry_point: str | None = None
     test_cli: list[str] | None = None
     package: str | None = None
-    ark_options: list[str] = field(default_factory=list)
+    ark_options: list[str] = Field(default_factory=list)
     timeout: int | None = None
-    es2panda_options: list[str] = field(default_factory=list)
+    es2panda_options: list[str] = Field(default_factory=list, alias="flags")
     spec: str | None = None
     arktsconfig: Path | None = None
-    expected_out: ExpectedField = field(default_factory=dict)
-    expected_error: ExpectedField = field(default_factory=dict)
+    expected_out: ExpectedField = Field(default_factory=dict)
+    expected_error: ExpectedField = Field(default_factory=dict)
     # Test262 specific metadata keys
     description: str | None = None
     defines: str | None = None
@@ -120,24 +125,6 @@ class TestMetadata:     # type: ignore[explicit-any]
     locale: str | None = None
     # ark_tests/parser
     issues: str | None = None
-
-    @staticmethod
-    def normalize_expected_field(exp_field: ExpectedData) -> dict[str, list[str]]:
-        """
-        we expect expected_out/ expected_err to be in format {step_name | step_kind: list[str]},
-        if step_name/ step_kind is not set explicitly - consider expected output to be related to compiler step
-        """
-        if isinstance(exp_field, list):
-            return {StepKind.COMPILER.value: exp_field}
-        if isinstance(exp_field, str):
-            return {StepKind.COMPILER.value: [exp_str for exp_str in exp_field.splitlines() if exp_str.strip()]}
-        if isinstance(exp_field, dict):
-            normalized: dict[str, list[str]] = {}
-            for key, val in exp_field.items():
-                normalized[key] = [val] if isinstance(val, str) else val
-            return normalized
-
-        raise InvalidTestMarkUpException("Incorrect format of the expected_out or expected_error field in test mark-up")
 
     @classmethod
     def get_metadata(cls, path: Path) -> 'TestMetadata':
@@ -159,44 +146,30 @@ class TestMetadata:     # type: ignore[explicit-any]
     @classmethod
     def create_filled_metadata(cls, metadata: dict[str, Any],       # type: ignore[explicit-any]
                                path: Path) -> 'TestMetadata':
-        metadata['tags'] = Tags(metadata.get('tags'))
-        metadata['entry_point'] = metadata.get('entry_point')
-        metadata['test_cli'] = metadata.get('test_cli')
-        if 'assert' in metadata:
-            metadata['assertion'] = metadata.get('assert')
-            del metadata['assert']
-        if 'description' in metadata:
-            metadata['desc'] = metadata['description']
-        if 'flags' in metadata:
-            flags_list = metadata['flags']
-            if flags_list and isinstance(flags_list, list):
-                metadata.update({'es2panda_options': flags_list})
-            del metadata['flags']
-        if isinstance(type(metadata.get('ark_options')), str):
-            metadata['ark_options'] = [metadata['ark_options']]
+        try:
+            parsed_metadata = cls.model_validate(metadata)
+        except ValidationError as err:
+            raise InvalidConfiguration(f"Incorrect test metadata in test {path}") from err
 
-        expected_out = metadata.get('expected_out')
-        expected_error = metadata.get('expected_error')
+        package = parsed_metadata.package
+        arktsconfig = parsed_metadata.arktsconfig
 
-        if expected_out is not None:
-            metadata['expected_out'] = TestMetadata.normalize_expected_field(expected_out)
-        if expected_error is not None:
-            metadata['expected_error'] = TestMetadata.normalize_expected_field(expected_error)
-        arktsconfig = metadata.get('arktsconfig')
-        package = metadata.get("package")
         if arktsconfig is not None:
             arktsconfig_path = (path.parent / arktsconfig).resolve()
-            metadata['arktsconfig'] = arktsconfig_path if arktsconfig_path.exists() else None
+            parsed_metadata = parsed_metadata.model_copy(
+                update={"arktsconfig": arktsconfig_path if arktsconfig_path.exists() else None})
+
             package = cls.get_package_statement_from_arktsconfig(path, arktsconfig_path)
-        metadata['package'] = cls.get_package_statement_from_source(path) if package is None else package
-        return TestMetadata(**metadata)
+        if package is None:
+            package = cls.get_package_statement_from_source(path)
+
+        parsed_metadata = parsed_metadata.model_copy(update={"package": package})
+        return parsed_metadata
 
     @classmethod
     def create_empty_metadata(cls, path: Path, find_package: bool = True) -> 'TestMetadata':
-        metadata = cls()
-        if metadata.package is None and find_package:
-            metadata.package = cls.get_package_statement_from_source(path)
-        return metadata
+        package = cls.get_package_statement_from_source(path) if find_package else None
+        return cls(package=package)
 
     @classmethod
     def get_package_statement_from_source(cls, path: Path) -> str | None:
@@ -214,6 +187,63 @@ class TestMetadata:     # type: ignore[explicit-any]
             data = json.load(json_handler)
         package = data.get("compilerOptions", {}).get('package', None)
         return f"{package}.{path.stem}" if package is not None else None
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def _normalize_tags(cls, value: RawData) -> Tags:
+        if isinstance(value, (list, str)) or value is None:
+            return Tags(value)
+        raise ValueError("tags must be a list of strings")
+
+    @field_validator("ark_options", mode="before")
+    @classmethod
+    def _normalize_ark_options(cls, value: RawData) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return value
+        if isinstance(value, str):
+            return [value]
+        raise ValueError("ark_options must be a string or a list of strings")
+
+    @field_validator("desc", mode="before")
+    @classmethod
+    def _normalize_desc(cls, value: RawData) -> str | None:
+        if value is None or isinstance(value, str):
+            return value
+        if isinstance(value, dict):
+            return str(value)
+        raise ValueError("Unsupported description format")
+
+    @field_validator("expected_out", "expected_error", mode="before")
+    @classmethod
+    def _normalize_expected_field(cls, value: RawData) -> ExpectedField:
+        """
+        we expect expected_out/ expected_err to be in format {step_name | step_kind: list[str]},
+        if step_name/ step_kind is not set explicitly - consider expected output to be related to compiler step
+        """
+        if value is None:
+            return {}
+        if isinstance(value, list):
+            return {StepKind.COMPILER.value: value}
+        if isinstance(value, str):
+            return {StepKind.COMPILER.value: [exp_str for exp_str in value.splitlines() if exp_str.strip()]}
+        if isinstance(value, dict):
+            normalized: dict[str, list[str]] = {}
+            for key, val in value.items():
+                normalized[key] = [val] if isinstance(val, str) else val
+            return normalized
+
+        raise ValueError("Incorrect format of the expected_out or expected_error field in test mark-up")
+
+    @field_validator("test_cli", "files", "es2panda_options", mode="before")
+    @classmethod
+    def _check_fields_lists(cls, value: RawData) -> list[str] | None:
+        if value is None:
+            return None
+        if isinstance(value, list):
+            return value
+        raise ValueError("Expected list of strings")
 
     def get_package_name(self) -> str:
         return self.package if self.package is not None else ""

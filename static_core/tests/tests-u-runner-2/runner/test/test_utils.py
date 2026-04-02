@@ -135,8 +135,12 @@ def data_folder(main_path: str, test_data_folder: str = "data") -> Path:
     return Path(main_path).parent / test_data_folder
 
 
-def parametrized_test_cases(test_cases: list[tuple[list[str]]]) -> Callable:
-    def decorator(func: Callable) -> Callable:
+TestFunc = Callable[..., None]  # type: ignore[explicit-any]
+TestFuncDecorator = Callable[[TestFunc], TestFunc]
+
+
+def parametrized_test_cases(test_cases: list[tuple[Any, ...]]) -> TestFuncDecorator:   # type: ignore[explicit-any]
+    def decorator(func: TestFunc) -> TestFunc:
         @functools.wraps(func)
         def wrapper(self: 'unittest.TestCase') -> None:
             for i, test_case in enumerate(test_cases):

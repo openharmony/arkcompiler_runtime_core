@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,6 +44,11 @@ function activate_venv()
     if [[ -d "${VENV_DIR}" ]]; then
         source "${VENV_DIR}/bin/activate"
         echo "${VENV_DIR} activated"
+
+        # tmp fix for CI to install required modules for init pipeline
+        if ! python -c "import pydantic" >/dev/null 2>&1; then
+            python -m pip install "pydantic==2.12.5" "pydantic-core==2.41.5"
+        fi
     fi
 }
 
