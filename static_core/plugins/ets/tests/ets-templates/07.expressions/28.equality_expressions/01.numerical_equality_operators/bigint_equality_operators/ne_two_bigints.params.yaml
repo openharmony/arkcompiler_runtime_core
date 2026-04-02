@@ -1,0 +1,122 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+    # primitive values
+    - a: 1n
+      values:
+          - 0n
+          - -0n
+          - new BigInt(0)
+          - new BigInt(-0.0)
+          - new BigInt(-(new BigInt(0)))
+    - a: -1n
+      values:
+          - 1n
+          - new BigInt(1)
+          - new BigInt(0.1e1f)
+          - new BigInt(+1n)
+    # from int
+    - a: 2147483646n
+      values:
+          - 2147483647n # Int.MAX_VALUE
+          - new BigInt(2147483647)
+          - new BigInt(new BigInt(2147483647))
+    - a: 2147483648n
+      values:
+          - 2147483647n # Int.MAX_VALUE
+          - new BigInt(2147483647)
+          - new BigInt(new BigInt(2147483647))
+    - a: -2147483647n
+      values:
+          - -2147483648n # Int.MIN_VALUE
+          - new BigInt(-2147483648)
+          - new BigInt(-2147483648n)
+    - a: -2147483649n
+      values:
+          - -2147483648n # Int.MIN_VALUE
+          - new BigInt(-2147483648)
+          - new BigInt(-2147483648n)
+    # from long
+    - a: 9223372036854775808n
+      values:
+          - 9223372036854775807n # Long.MAX_VALUE
+          - new BigInt(9223372036854775807)
+          - new BigInt(9223372036854775807n)
+    - a: 9223372036854775806n
+      values:
+          - 9223372036854775807n # Long.MAX_VALUE
+          - new BigInt(9223372036854775807)
+          - new BigInt(9223372036854775807n)
+    - a: -9223372036854775807n
+      values:
+          - -9223372036854775808n # Long.MIN_VALUE
+          - new BigInt(-9223372036854775808)
+          - new BigInt(-9223372036854775808n)
+    - a: -9223372036854775809n
+      values:
+          - -9223372036854775808n # Long.MIN_VALUE
+          - new BigInt(-9223372036854775808)
+          - new BigInt(-9223372036854775808n)
+    # from float
+    - a: 16777216n
+      values:
+          - 16777215n # max safe integer in float
+          - new BigInt(16777215.0f)
+          - new BigInt(16777215)
+          - new BigInt(16777215n)
+    - a: 16777214n
+      values:
+          - 16777215n # max safe integer in float
+          - new BigInt(16777215.0f)
+          - new BigInt(16777215)
+          - new BigInt(16777215n)
+    # from double
+    - a: 9007199254740992n
+      values:
+          - 9007199254740991n # max safe integer in double
+          - new BigInt(9007199254.740991e6)
+          - new BigInt(9007199254740991)
+          - new BigInt(9007199254740991n)
+    - a: 9007199254740990n
+      values:
+          - 9007199254740991n # max safe integer in double
+          - new BigInt(9007199254.740991e6)
+          - new BigInt(9007199254740991)
+          - new BigInt(9007199254740991n)
+    - a: -9007199254740990n
+      values:
+          - -9007199254740991n # min safe integer in double
+          - new BigInt(-9007199254740991)
+          - new BigInt(-9007199254740991n)
+    - a: -9007199254740992n
+      values:
+          - -9007199254740991n # min safe integer in double
+          - new BigInt(-9007199254740991)
+          - new BigInt(-9007199254740991n)
+    # from bigint
+    - a: 94876543875610289630123457n
+      values:
+          - 94876543875610289630123456n
+          - new BigInt(94876543875610289630123456n)
+          - new BigInt(new BigInt(94876543875610289630123456n))
+    - a: 94876543875610289630123455n
+      values:
+          - 94876543875610289630123456n
+          - new BigInt(94876543875610289630123456n)
+          - new BigInt(new BigInt(94876543875610289630123456n))
+    - a: -1010101010101010101010101010101010102n
+      values:
+          - -1010101010101010101010101010101010101n
+          - new BigInt(-1010101010101010101010101010101010101n)
+          - new BigInt(-(new BigInt(1010101010101010101010101010101010101n)))

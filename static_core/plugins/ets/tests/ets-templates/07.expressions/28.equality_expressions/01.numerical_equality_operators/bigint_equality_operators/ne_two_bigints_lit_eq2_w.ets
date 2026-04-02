@@ -12,33 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-{%- for c in cases %}
-
+{% yaml 'ne_two_bigints_lit.params.yaml' as yaml_file %}
 /*---
 desc: >-
     Value equality is used for operands of bigint type.
     Two bigints are equal if they have the same value.
+expected_out: { compiler: ["Warning W65001: The equality expression is always false."] }
 ---*/
 
-function eq(a: bigint, b: bigint): boolean {
-    return a == b && b == a
-        && a === b && b === a
-        && !(a != b) && !(b != a)
-        && !(a !== b) && !(b !== a)
-}
+function main(): int {
+    let tests = new arktest.ArkTestsuite('Bigint equality. Literals')
 
-let ba: bigint[] = [
-    {%- for v in c['values'] %}
-    {{v}}{{ ", " if not loop.last }}
-    {%- endfor %}
-]
-
-function main(): void {
-	for (let i: int = 0; i < ba.length - 1; i++) {
-		for (let j: int = i + 1; j < ba.length; j++) {
-			arktest.assertTrue(eq(ba[i], ba[j]))
-		}
-	}
-}
+{%- for c in yaml_file.cases %}
+    tests.addTest('{{loop.index}}', () => {
+{%- for b in c['values'] %}
+        arktest.assertNE({{c.a}}, {{b}})
+        arktest.assertFalse({{c.a}} == {{b}})
 {%- endfor %}
+    })
+{%- endfor %}
+    return tests.run()
+}
