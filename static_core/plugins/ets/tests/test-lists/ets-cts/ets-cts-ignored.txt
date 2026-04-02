@@ -222,9 +222,6 @@
 07.expressions/07.spread_expression/spex_61.ets
 07.expressions/07.spread_expression/spex_62.ets
 
-#32641
-07.expressions/09.this_expression/this_in_object_literal.ets
-
 #32421
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_0.ets
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_1.ets
