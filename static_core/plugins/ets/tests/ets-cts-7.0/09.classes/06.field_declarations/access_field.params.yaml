@@ -1,0 +1,558 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access outside the class
+    decl: |-
+      class A {
+        x: int = 5
+      }
+    logic: |-
+      let a: A = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      a.x = 6
+      arktest.assertEQ(a.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      inherit field from superclass, access outside the class
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      class B extends A {
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: A = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      a.x = 6
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      b.x = 7
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 7)
+      arktest.assertEQ(c.x, 5)
+      c.x = 4
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 7)
+      arktest.assertEQ(c.x, 4)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class in class method
+    decl: |-
+      class A {
+        x: int = 5
+        foo(): void {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      a.foo()
+      arktest.assertEQ(a.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class in getter
+    decl: |-
+      class A {
+        x: int = 5
+        get field(): int {
+          return this.x + 1
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(a.field, 6)
+      arktest.assertEQ(a.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class in setter
+    decl: |-
+      class A {
+        x: int = 5
+        set field(a: int) {
+          this.x = a
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      a.field = 6
+      arktest.assertEQ(a.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single class, access within the class in constructor
+    decl: |-
+      class A {
+        x: int = 5
+        constructor() {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: A = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 6)
+      a.x = 7
+      arktest.assertEQ(a.x, 7)
+      arktest.assertEQ(b.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      simple, single interface, access within interface
+    decl: |-
+      interface I {
+        x: int
+        methI(): void {
+          this.x++
+        }
+      }
+      class A implements I {
+        x: int = 5
+      }
+    logic: |-
+      let a: I = new A()
+      let b: A = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      a.methI()
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 5)
+      b.methI()
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      inherit field from superclass, access within the class in class method
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      class B extends A {
+        foo(): void {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: A = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      b.foo()
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 5)
+      c.x = 4
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 4)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      inherit field from superclass, access within the class in getter
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      class B extends A {
+        get field(): int {
+          return this.x + 1
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: A = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      arktest.assertEQ(b.field, 6)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      inherit field from superclass, access within the class in setter
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      class B extends A {
+        set field(a: int) {
+          this.x = a
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: A = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      b.field = 6
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 5)
+      c.x = 4
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 4)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      inherit field from superclass, access within the class in constructor
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      class B extends A {
+        constructor() {
+          super()
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: B = new B()
+      let d: A = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertTrue(d.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 6)
+      arktest.assertEQ(d.x, 6)
+      b.x = 7
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 7)
+      arktest.assertEQ(c.x, 6)
+      arktest.assertEQ(d.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      implementing property from single interface, access within the class in class method
+    decl: |-
+      interface I {
+        x: int
+      }
+      class A implements I {
+        x: int = 5
+        foo(): void {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: I = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      a.foo()
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      implementing property from single interface, access within the class in constructor
+    decl: |-
+      interface I {
+        x: int
+      }
+      class A implements I {
+        x: int = 5
+        constructor() {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: A = new A()
+      let c: I = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 6)
+      a.x = 7
+      arktest.assertEQ(a.x, 7)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      two superinterfaces with same property, access within the class in class method
+    decl: |-
+      interface I1 {
+        x: int
+      }
+      interface I2 {
+        x: int
+      }
+      class A implements I1, I2 {
+        x: int = 5
+        foo(): void {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: I1 = new A()
+      let c: I2 = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      a.foo()
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      two superinterfaces with same property, access within the class in constructor
+    decl: |-
+      interface I1 {
+        x: int
+      }
+      interface I2 {
+        x: int
+      }
+      class A implements I1, I2 {
+        x: int = 5
+        constructor() {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: A = new A()
+      let c: I1 = new A()
+      let d: I2 = new A()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertTrue(d.x instanceof int)
+      arktest.assertEQ(a.x, 6)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 6)
+      arktest.assertEQ(d.x, 6)
+      a.x = 7
+      arktest.assertEQ(a.x, 7)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 6)
+      arktest.assertEQ(d.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      >-
+        two superinterfaces with same property,
+        one superclass with same field name,
+        access within the class in class method
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      interface I1 {
+        x: int
+      }
+      interface I2 {
+        x: int
+      }
+      class B extends A implements I1, I2 {
+        foo(): void {
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: A = new B()
+      let d: I1 = new B()
+      let e: I2 = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertTrue(d.x instanceof int)
+      arktest.assertTrue(e.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 5)
+      arktest.assertEQ(c.x, 5)
+      arktest.assertEQ(d.x, 5)
+      arktest.assertEQ(e.x, 5)
+      b.foo()
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 5)
+      arktest.assertEQ(d.x, 5)
+      arktest.assertEQ(e.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification
+        of a class name, while an instance field can be accessed with
+        the object reference qualification
+    params: |-
+      >-
+        two superinterfaces with same property,
+        one superclass with same field name,
+        access within the class in constructor
+    decl: |-
+      class A {
+        x: int = 5
+      }
+      interface I1 {
+        x: int
+      }
+      interface I2 {
+        x: int
+      }
+      class B extends A implements I1, I2 {
+        constructor() {
+          super()
+          this.x++
+        }
+      }
+    logic: |-
+      let a: A = new A()
+      let b: B = new B()
+      let c: B = new B()
+      let d: A = new B()
+      let e: I1 = new B()
+      let f: I2 = new B()
+      arktest.assertTrue(a.x instanceof int)
+      arktest.assertTrue(b.x instanceof int)
+      arktest.assertTrue(c.x instanceof int)
+      arktest.assertTrue(d.x instanceof int)
+      arktest.assertTrue(e.x instanceof int)
+      arktest.assertTrue(f.x instanceof int)
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 6)
+      arktest.assertEQ(c.x, 6)
+      arktest.assertEQ(d.x, 6)
+      arktest.assertEQ(e.x, 6)
+      arktest.assertEQ(f.x, 6)
+      b.x = 7
+      arktest.assertEQ(a.x, 5)
+      arktest.assertEQ(b.x, 7)
+      arktest.assertEQ(c.x, 6)
+      arktest.assertEQ(d.x, 6)
+      arktest.assertEQ(e.x, 6)
+      arktest.assertEQ(f.x, 6)

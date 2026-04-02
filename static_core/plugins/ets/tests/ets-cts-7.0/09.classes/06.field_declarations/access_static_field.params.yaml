@@ -1,0 +1,787 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access outside the class
+    decl: |-
+      class A {
+        static x: int = 5
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      A.x = 6
+      arktest.assertEQ(A.x, 6)
+      A.x = 5
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        accessing outside the class
+    decl: |-
+      class A {
+        static x: int = 5
+      }
+      class B extends A {
+        static x: int = A.x + 1
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      arktest.assertEQ(B.x, 6)
+      A.x = 7
+      arktest.assertEQ(A.x, 7)
+      arktest.assertEQ(B.x, 6)
+      B.x = 8
+      arktest.assertEQ(A.x, 7)
+      arktest.assertEQ(B.x, 8)
+      A.x = 5
+      B.x = 6
+      arktest.assertEQ(A.x, 5)
+      arktest.assertEQ(B.x, 6)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in class method
+    decl: |-
+      class A {
+        static x: int = 5
+        foo(): void {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      let a: A = new A()
+      a.foo()
+      arktest.assertEQ(A.x, 6)
+      A.x = 5
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in getter
+    decl: |-
+      class A {
+        static x: int = 5
+        get field(): int {
+          return A.x + 1
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      let a: A = new A()
+      arktest.assertEQ(a.field, 6)
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in setter
+    decl: |-
+      class A {
+        static x: int = 5
+        set field(a: int) {
+          A.x = a
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      let a: A = new A()
+      a.field = 6
+      arktest.assertEQ(A.x, 6)
+      A.x = 5
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in constructor
+    decl: |-
+      class A {
+        static x: int = 5
+        constructor() {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      let a: A = new A()
+      arktest.assertEQ(A.x, 6)
+      A.x = 5
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      >-
+        simple, single class,
+        access within the class in instance field initializer expression
+    decl: |-
+      class A {
+        static x: int = 5
+        y: int = A.x
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      let a: A = new A()
+      arktest.assertEQ(a.y, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      >-
+        simple, single class,
+        access within the class in static field initializer expression
+    decl: |-
+      class A {
+        static x: int = 5
+        static y: int = A.x + 1
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertTrue(A.y instanceof int)
+      arktest.assertEQ(A.x, 5)
+      arktest.assertEQ(A.y, 6)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      >-
+        simple, single class,
+        access within the class in static class method
+    decl: |-
+      class A {
+        static x: int = 5
+        static foo(): void {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      A.foo()
+      arktest.assertEQ(A.x, 6)
+      A.x = 5
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in static getter
+    decl: |-
+      class A {
+        static x: int = 5
+        static get field(): int {
+          return A.x + 1
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      arktest.assertEQ(A.field, 6)
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in static setter
+    decl: |-
+      class A {
+        static x: int = 5
+        static set field(a: int) {
+          A.x = a
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      A.field = 6
+      arktest.assertEQ(A.x, 6)
+      A.x = 5
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      Any static field can be accessed only with the qualification of a class name.
+    params: |-
+      simple, single class, access within the class in static block
+    decl: |-
+      class A {
+        static x: int = 4
+        static {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in class method
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        foo(): void {
+          B.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      a.foo()
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 6)
+      B.x = 5
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in class method
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        foo(): void {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      a.foo()
+      arktest.assertEQ(A.x, 6.7)
+      arktest.assertEQ(B.x, 5)
+      A.x = 5.7
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in getter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        get field(): int {
+          return B.x + 1
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      arktest.assertEQ(a.field, 6)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in getter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        get field(): number {
+          return A.x + 1.0
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      arktest.assertEQ(a.field, 6.7)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in setter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        set field(a: int) {
+          B.x = a
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      a.field = 6
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 6)
+      B.x = 5
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in setter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        set field(a: number) {
+          A.x = a
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      a.field = 6.5
+      arktest.assertEQ(A.x, 6.5)
+      arktest.assertEQ(B.x, 5)
+      A.x = 5.7
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in constructor
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        constructor() {
+          super()
+          B.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 6)
+      B.x = 5
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in constructor
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        constructor() {
+          super()
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      let a: B = new B()
+      arktest.assertEQ(A.x, 6.7)
+      arktest.assertEQ(B.x, 5)
+      A.x = 5.7
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      using subclass, access within the class in instance field initializer expression
+    decl: |-
+      class A {
+        static x: int = 5
+      }
+      class B extends A {
+        y: int = A.x + 1
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertEQ(A.x, 5)
+      let a: B = new B()
+      arktest.assertTrue(a.y instanceof int)
+      arktest.assertEQ(A.x, 5)
+      arktest.assertEQ(a.y, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using subclass,
+        access within the class in static field initializer expression
+    decl: |-
+      class A {
+        static x: int = 5
+      }
+      class B extends A {
+        static y: int = A.x + 1
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof int)
+      arktest.assertTrue(B.y instanceof int)
+      arktest.assertEQ(A.x, 5)
+      arktest.assertEQ(B.y, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static class method
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static foo(): void {
+          B.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      B.foo()
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 6)
+      B.x = 5
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static class method
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static foo(): void {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      B.foo()
+      arktest.assertEQ(A.x, 6.7)
+      arktest.assertEQ(B.x, 5)
+      A.x = 5.7
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static getter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static get field(): int {
+          return B.x + 1
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      arktest.assertEQ(B.field, 6)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static getter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static get field(): number {
+          return A.x + 1.0
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      arktest.assertEQ(B.field, 6.7)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static setter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static set field(a: int) {
+          B.x = a
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      B.field = 6
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 6)
+      B.x = 5
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static setter
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static set field(a: number) {
+          A.x = a
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+      B.field = 6.5
+      arktest.assertEQ(A.x, 6.5)
+      arktest.assertEQ(B.x, 5)
+      A.x = 5.7
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 5)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static block
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static {
+          B.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 5.7)
+      arktest.assertEQ(B.x, 6)
+
+  - desc: |-
+      >-
+        Any static field can be accessed only with the qualification of a class name.
+        Static members of a superclass are not inherited. The subclass which wants
+        to use static members of its superclass must use explicit qualification using
+        the superclass name.
+    params: |-
+      >-
+        using same name for static field in subclass,
+        access within the class in static block
+    decl: |-
+      class A {
+        static x: number = 5.7
+      }
+      class B extends A {
+        static x: int = 5
+        static {
+          A.x++
+        }
+      }
+    logic: |-
+      arktest.assertTrue(A.x instanceof number)
+      arktest.assertTrue(B.x instanceof int)
+      arktest.assertEQ(A.x, 6.7)
+      arktest.assertEQ(B.x, 5)
