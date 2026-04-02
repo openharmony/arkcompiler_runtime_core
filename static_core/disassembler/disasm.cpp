@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,10 +57,15 @@ struct Options {
 
 static void PrintHelp(ark::PandArgParser &paParser)
 {
+    auto helpString = paParser.GetHelpString();
     std::cerr << "Usage:" << std::endl;
-    std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;
+    std::cerr << "ark_disasm_static [options] input_file output_file" << std::endl << std::endl;
     std::cerr << "Supported options:" << std::endl << std::endl;
-    std::cerr << paParser.GetHelpString() << std::endl;
+    std::cerr << helpString;
+    std::cerr << "Tail arguments:" << std::endl;
+    std::cerr << "input_file: Path to the source binary code" << std::endl;
+    std::cerr << "output_file: Path to the generated assembly code" << std::endl;
+    std::cerr << std::endl;
 }
 
 static void Disassemble(const Options &options)
