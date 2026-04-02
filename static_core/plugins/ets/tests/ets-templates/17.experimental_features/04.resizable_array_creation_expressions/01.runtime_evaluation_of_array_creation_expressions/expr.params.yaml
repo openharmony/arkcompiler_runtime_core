@@ -46,8 +46,7 @@ cases:
           arktest.assertEQ(res, "12")
           arktest.assertEQ(v, null)
 
-    - desc: |- # 24859 undefined register, Register type conflict
-      defs: |-
+    - defs: |- # 24859 undefined register, Register type conflict
           type UT = number[][] | null
           let res: string = ""
           function foo(p: int): int {
@@ -88,7 +87,6 @@ cases:
           arktest.assertEQ(res, "42")
           arktest.assertEQ(v.length, 42)
           arktest.assertTrue(v[41] instanceof A)
-
 
     - defs: |-
           let cntr: int = 0
@@ -156,9 +154,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -205,9 +203,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -230,9 +228,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -254,9 +252,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - use: |-
           let v: int[] = new int[33](0)  // initialized with 0

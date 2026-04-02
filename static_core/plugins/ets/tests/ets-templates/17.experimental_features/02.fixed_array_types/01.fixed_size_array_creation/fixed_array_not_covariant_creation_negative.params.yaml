@@ -19,10 +19,10 @@ cases:
      expected_out: "Semantic error ESE0318: Type 'Cat' cannot be assigned to type 'Dog'"
 
    - logic: "let a = new FixedArray<Dog>(30, (inx: int) => new Animal)"
-     expected_out: "Semantic error ESE0318: Type 'Animal' cannot be assigned to type 'Dog'"
+     expected_out: "Semantic error ESE17070: Lambda expression is not supported as fixed size array argument."
 
    - logic: "let a = new FixedArray<Dog>(30, (inx: int) => new Cat)"
-     expected_out: "Semantic error ESE0318: Type 'Cat' cannot be assigned to type 'Dog'"
+     expected_out: "Semantic error ESE17070: Lambda expression is not supported as fixed size array argument."
 
    - logic: "let dogs: FixedArray<Dog> = [new Dog, new Animal, new Dog]"
      expected_out: "Semantic error ESE0227: Array element at index 1 with type 'Animal' is not compatible with the target array element type 'Dog'"
