@@ -13,15 +13,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+desc: Inheritance multiple default method from superinterface with override-equivalent signature.
+assert: >-
+      It is possible for an interface to inherit several methods
+      with override-equivalent signatures (link to signatures).
+tags: [compile-only]
 ---*/
 
-{{c.decl}}
+interface A {
+  foo(): int {
+    return 1;
+  }
+}
 
-{% endfor %}
+interface B extends A {
+  foo(): int {
+    return 2;
+  }
+}
+
+interface C extends B {
+  foo(): int {
+    return 3;
+  }
+}
+
+interface D extends A, B, C {
+  foo(): int {
+    return 4;
+  }
+}

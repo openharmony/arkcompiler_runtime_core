@@ -644,8 +644,8 @@
 10.interfaces/03.interface_members/hidden_members_2.ets
 10.interfaces/03.interface_members/object_public_methods_n_2.ets
 
-#16840
-10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
+#33901
+10.interfaces/04.interface_properties/interface_property_declaration_n_6.ets
 
 #33639
 11.enumerations/enum_decl_22.ets
@@ -923,6 +923,9 @@
 
 #33241
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets
+
+#16840
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method.ets
 
 #32086 overload functions from the same scope
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_0.ets

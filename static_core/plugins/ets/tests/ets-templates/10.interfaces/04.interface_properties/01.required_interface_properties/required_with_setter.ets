@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+desc: A class that implements an interface with properties can also use a field or an accessor notation
 ---*/
 
-{{c.decl}}
+interface I {
+  set text(s: string)
+}
 
-{% endfor %}
+class C implements I {
+  private _text: string = "str"
+  get text(): string {
+    return this._text
+  }
+  set text(i: string) {
+    this._text = i
+  }
+}
+
+function main() {
+  let i: I = new C()
+  arktest.assertEQ(i.text, "str")
+  i.text = "str2"
+  arktest.assertEQ(i.text, "str2")
+}

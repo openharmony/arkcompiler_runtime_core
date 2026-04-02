@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,19 @@ desc: >-
     Verify that a compilation error occurs when a class implements
     two interfaces with the same-named constants with different types.
 tags: [compile-only, negative]
+expected_error: >-
+    Semantic error ESE0141: f(): Double in classA cannot override f(): String in InterfaceB because
+    overriding return type is not compatible with the other return type.
 ---*/
 
 interface InterfaceA {
-  readonly CONFLICT_CONSTANT: number;
+  readonly f: number;
 }
 
 interface InterfaceB {
-  readonly CONFLICT_CONSTANT: string;
+  readonly f: string;
 }
 
 class classA implements InterfaceA, InterfaceB {
-  readonly CONFLICT_CONSTANT: number = 123;
+  readonly f: number = 123;
 }

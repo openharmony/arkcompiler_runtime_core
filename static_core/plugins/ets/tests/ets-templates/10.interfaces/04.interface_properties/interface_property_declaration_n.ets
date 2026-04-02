@@ -16,10 +16,9 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: >-
-    Interface property is an accessor which can be declared in the form of a field declaration,
-    or getter/setter declarations.
-    {{c.doc}}
+desc: {{c.doc}}
+expected_error: {{c.error}}
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Nan empty interface inherits an empty interface.
+desc: >-
+    An ordinary interface method declaration specifies the method name and signature, and is called abstract.
+    Its implicit accessibility is public.
+    {{c.doc}}
 ---*/
 
-interface ParentEmptyInterface {}
+{{c.decl}}
 
-interface EmptyInterface extends ParentEmptyInterface {}
-
-function main(): void {
-  const obj: EmptyInterface = {};
-  arktest.assertTrue(obj instanceof ParentEmptyInterface)
-}
+{% endfor %}
