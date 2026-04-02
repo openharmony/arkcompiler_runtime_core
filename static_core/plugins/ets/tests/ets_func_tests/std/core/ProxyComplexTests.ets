@@ -36,7 +36,7 @@ interface A extends A1, A2 {
 
 class AImpl implements A {
     override foo(x: Base): double { return 1.2 }
-    override foo(x: number): double { return x }
+    override foo(x: number): double { return 100 }
 }
 
 class AImplChild extends AImpl {
@@ -722,15 +722,15 @@ function testA1IfaceAImpl(proxyObj: A1) {
     testIsLastEventMethod()
 }
 
-function testA2IfaceAImpl(proxyObj: A2) {
-    arktest.assertEQ(proxyObj.foo(100), 100)
+function testA2IfaceAImpl(proxyObj: A2, val: double) {
+    arktest.assertEQ(proxyObj.foo(100), val)
     testIsLastEventMethod()
 }
 
 function testAIfaceAImpl(proxyObj: A, val1: double, val2: double, val3: double) {
     arktest.assertEQ(proxyObj.foo(new Derived), val1)
     testIsLastEventMethod()
-    arktest.assertEQ(proxyObj.foo(val2), val2)
+    arktest.assertEQ(proxyObj.foo(0.01), val2)
     testIsLastEventMethod()
     arktest.assertEQ(proxyObj.foo(c'1'), val3)
     testIsLastEventMethod()
@@ -741,15 +741,15 @@ function singleInterfaceTest1() {
     let proxyObj = createProxy([ Class.from<A>() ], new Handler<A>(target), Class.of(target).getLinker())
     testAIfaceAImpl(proxyObj as A, 1.2, 100, -1.1)
     testA1IfaceAImpl(proxyObj as A1)
-    testA2IfaceAImpl(proxyObj as A2)
+    testA2IfaceAImpl(proxyObj as A2, 100)
 }
 
 function singleInterfaceTargetsChain() {
     let target = new AImplChild
     let proxyObj = createProxy([ Class.from<A>() ], new Handler<A>(target), Class.of(target).getLinker())
-    testAIfaceAImpl(proxyObj as A, 42, 100, -1.1)
+    testAIfaceAImpl(proxyObj as A, 42, 42, -1.1)
     testA1IfaceAImpl(proxyObj as A1)
-    testA2IfaceAImpl(proxyObj as A2)
+    testA2IfaceAImpl(proxyObj as A2, 42)
 }
 
 function testD2IFace(proxyObj: D2, val1: double, val2: double, val3: double) {
@@ -817,7 +817,7 @@ function testE4Iface(proxyObj: E4) {
     testIsLastEventMethod()
     arktest.assertEQ(proxyObj.foo(new Derived), 777.111)
     testIsLastEventMethod()
-    arktest.assertEQ(proxyObj.foo(1000), 444.111)
+    arktest.assertEQ(proxyObj.foo(1000), 777.111)
     testIsLastEventMethod()
     arktest.assertEQ(proxyObj.foo(c'f'), 777.222)
     testIsLastEventMethod()
