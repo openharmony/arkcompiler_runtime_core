@@ -1,0 +1,83 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          function foo(p: int) { return 1 }
+          function bar(p: string) { return 2 }
+
+          overload fb { foo, bar }
+          overload fb { bar, foo }
+
+    - decl: |-
+          function foo(p: int) { return 1 }
+          function bar(p: string) { return 2 }
+
+          overload fb { bow }
+
+          function bow() { return 3 }
+
+          overload fb { foo, bar }
+
+    - decl: |-
+          class A {
+              meth1(p: int) { return 1 }
+              meth2(p: string) { return 2 }
+
+              overload fb { meth1, meth2 }
+
+              meth3(p: int) { return 3 }
+              meth4(p: string) { return 4 }
+
+              overload fb { meth3, meth4 }
+          }
+
+    - decl: |-
+          interface I {
+              meth1(p: int) { return 1 }
+              meth2(p: string) { return 2 }
+
+              overload fb { meth1, meth2 }
+
+              meth3(p: int) { return 3 }
+              meth4(p: string) { return 4 }
+
+              overload fb { meth3, meth4 }
+          }
+
+    - decl: |-
+          interface I {
+              meth1()
+              meth2()
+
+              overload fb { meth1, meth2 }
+
+              meth3()
+              meth4()
+
+              overload fb { meth3, meth4 }
+          }
+
+    - decl: |-
+          interface I {
+              meth1(p: int)
+              meth2(p: string) {}
+
+              overload fb { meth1, meth2 }
+
+              meth3(p: int) {}
+              meth4(p: string)
+
+              overload fb { meth3, meth4 }
+          }

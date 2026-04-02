@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*---
+desc: >-
+    ArkTS provides extended semantics for conditional-and and conditional-or expressions for better alignment.
+---*/
+
+class A {}
+class B {}
+type UT = A | B | null
+
+type TT = [number, string]
+
+interface I {}
+class AB implements I {}
+type NI = I | null
+
+enum Color { Red, Green, Blue }
+
+let res: int
+
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Extended_Conditional_expressions_do_true_cycle");
+
+    {% for c in cases %}
+        testSuite.addTest("Conditional_expression_do_true_cycle{{loop.index}}", () => {
+ 	        let v: {{c.type}} = {{c.val}}  // truthy
+            res = 0
+
+            do {
+                if (++res > 1) {
+                    break
+                }
+            } while (v)
+
+            arktest.assertEQ(res, 2)
+ 	    }); 
+    {%- endfor %}
+
+    return testSuite.run();
+}
