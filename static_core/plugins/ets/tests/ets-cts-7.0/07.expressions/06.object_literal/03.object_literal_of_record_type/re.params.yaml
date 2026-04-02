@@ -1,0 +1,649 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - use: |-
+          // empty records
+          let a: Record<number, string> = {}
+          let b: Record<number, string> = {}
+      checks:
+          - call: a instanceof Record
+            value: 'true'
+          - call: b instanceof Record
+            value: 'true'
+          - call: a != b
+            value: 'true'
+
+    - use: |-
+          // number to string
+          let a: Record<number, string> = {
+              0: "Zero",
+              1: "One",
+              3.14159: "PI",
+          }
+      checks:
+          - call: a[0]
+            value: '"Zero"'
+          - call: a[1]
+            value: '"One"'
+          - call: a[3.14159]
+            value: '"PI"'
+          - call: a[42]
+            value: 'undefined'
+      after: |-
+          a = {}
+      second_checks:
+          - call: a[0]
+            value: 'undefined'
+          - call: a[1]
+            value: 'undefined'
+          - call: a[3.14159]
+            value: 'undefined'
+
+    - decl: |-
+          function foo(p: string): string {
+              return p + p
+          }
+      use: |-
+          // number to string expression
+          let a: Record<number, string> = {
+              0: foo("Zero"),
+              1: foo("One"),
+              3.14159: "P" + foo("I"),
+          }
+      checks:
+          - call: a[0]
+            value: '"ZeroZero"'
+          - call: a[1]
+            value: '"OneOne"'
+          - call: a[3.14159]
+            value: '"PII"'
+          - call: a[42]
+            value: 'undefined'
+      after: |-
+          a = {}
+      second_checks:
+          - call: a[0]
+            value: 'undefined'
+          - call: a[1]
+            value: 'undefined'
+          - call: a[3.14159]
+            value: 'undefined'
+
+    - use: |-
+          // string to number
+          let a: Record<string, number> = {
+              "Zero": 0b0,
+              "One": 1.0,
+              "Two": 2e00,
+              "Minus PI": -3.14159,
+          }
+      checks:
+          - call: a["Zero"]
+            value: '0'
+          - call: a["One"]
+            value: '1'
+          - call: a["Two"]
+            value: '2'
+          - call: a["Minus PI"]
+            value: '-3.14159'
+          - call: a["PI"]
+            value: 'undefined'
+      after: |-
+          a = {}
+      second_checks:
+          - call: a["Zero"]
+            value: 'undefined'
+          - call: a["One"]
+            value: 'undefined'
+          - call: a["Two"]
+            value: 'undefined'
+          - call: a["Minus PI"]
+            value: 'undefined'
+
+    - use: |-
+          // string literals to number
+          let a: Record<"Zero" | "One" | "Two", number> = {
+              "Zero": 0b0,
+              "One": 1.0,
+              "Two": 2e00,
+          }
+      checks:
+          - call: a["Zero"]
+            value: '0'
+          - call: a["One"]
+            value: '1'
+          - call: a["Two"]
+            value: '2'
+
+    - use: |-
+          // string literals and string to number
+          let a: Record<string | "Zero" | "One" | "Two", number> = {
+              "": 0x00,
+              " ": 0x01,
+              "One": 1.0,
+              "Two": 2e00,
+              "PI constant value": 3.14159,
+          }
+      checks:
+          - call: a["Zero"]
+            value: 'undefined'
+          - call: a["One"]
+            value: '1'
+          - call: a["Two"]
+            value: '2'
+          - call: a[""]
+            value: '0'
+          - call: a[" "]
+            value: '1'
+          - call: a["PI constant value"]
+            value: '3.14159'
+
+    - use: |-
+          // string literals to Record
+          let a: Record<"a" | "b" | "c", Record<number, boolean>> = {
+              "c": { 1: false,
+                     42: true,
+              },
+              "b": {},
+              "a": { 1: true,
+                     42: false,
+              },
+          }
+      checks:
+          - call: a["a"][1]!
+            value: 'true'
+          - call: '!(a["a"][42]!)'
+            value: 'true'
+          - call: a["b"][123]
+            value: 'undefined'
+          - call: '!(a["c"][1]!)'
+            value: 'true'
+          - call: a["c"][42]!
+            value: 'true'
+
+    - use: |-
+          // string to Record
+          let a: Record<string, Record<number, boolean>> = {
+              "c": { 1: false,
+                     42: true,
+              },
+              "b": {},
+          }
+      checks:
+          - call: a["b"]![123]
+            value: 'undefined'
+          - call: '!(a["c"]![1]!)'
+            value: 'true'
+          - call: a["c"]![42]!
+            value: 'true'
+
+    - use: |-
+          // short to Error
+          let a: Record<Short, Error> = {
+              1: new Error,
+              22: new Error,
+              333: new Error,
+          }
+      checks:
+          - call: a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error
+            value: 'true'
+          - call: a[1] != a[22] && a[1] != a[333]
+            value: 'true'
+          - call: a[2]
+            value: 'undefined'
+
+    - use: |-
+          // byte to union
+          let a: Record<Byte, Double | Boolean | null> = {
+              0: 3.14159,
+              50: false,
+              100: null,
+              127: 127.0,
+          }
+      checks:
+          - call: a[0]
+            value: '3.14159'
+          - call: a[50]
+            value: 'false'
+          - call: a[100]
+            value: 'null'
+          - call: a[127]
+            value: '127.0'
+          - call: a[1]
+            value: 'undefined'
+
+    - decl: |-
+          // union to union
+          enum Color { Red, Green, Blue }
+          type Keys = "A" | "B"
+          type Values = Color | string
+      use: |-
+          let a: Record<Keys, Values> = {
+              "A" : Color.Blue,
+              "B": "green"
+            }
+      checks:
+          - call: a["A"]
+            value: 'Color.Blue'
+          - call: a["B"]
+            value: '"green"'
+      after: |-
+          a["A"] = Color.Red
+      second_checks:
+          - call: a["A"]
+            value: 'Color.Red'
+
+    - decl: |-
+          // infer Record type from function signature
+          type R = Record<string, string>
+          function foo(p: R): R {
+              if (p["A"] == "B") {
+                  return { "exitCode": "0" }
+              } else {
+                  return { "exitCode": "1" }
+              }
+          }
+      checks:
+          - call: 'foo({ "A": "B" })["exitCode"]'
+            value: '"0"'
+          - call: 'foo({ "A": "C" })["exitCode"]'
+            value: '"1"'
+
+    - use: |-
+          // string to array
+          let r: Record<string, string[]> = {
+              "\u0000": [""],
+              "\u0001": ["", "1"],
+              "\u0002": ["", "1", "2"],
+              "wrong key": [] as string[]
+          }
+      checks:
+          - call: r["\u0000"]![0]
+            value: '""'
+          - call: r["\u0001"]![0]
+            value: '""'
+          - call: r["\u0001"]![1]
+            value: '"1"'
+          - call: r["\u0002"]![0]
+            value: '""'
+          - call: r["\u0002"]![1]
+            value: '"1"'
+          - call: r["\u0002"]![2]
+            value: '"2"'
+          - call: r["wrong key"]!.length
+            value: '0'
+          - call: r["bad key"]
+            value: 'undefined'
+
+    - use: |-
+          // string literals to tuple
+          let r: Record<"Q"|"W"|"E", [number, bigint]> = {
+              "Q": [1e0, 1n],
+              "W": [1e10, 111111111n],
+              "E": [1e20, 111111111111111111n]
+          }
+      checks:
+          - call: r["Q"][0]
+            value: '1'
+          - call: r["Q"][1]
+            value: '1n'
+          - call: r["W"][0]
+            value: '1e10'
+          - call: r["W"][1]
+            value: '111111111n'
+          - call: r["E"][0]
+            value: '1e20'
+          - call: r["E"][1]
+            value: '111111111111111111n'
+
+    - use: |-
+          // string literals to function
+          let r: Record<"add" | "mul", (p: number) => number> = {
+              "add": (p: number): number => p + p,
+              "mul": (p: number): number => p * p
+          }
+      checks:
+          - call: r["add"](42)
+            value: '84'
+          - call: r["mul"](12)
+            value: '144'
+      after: |-
+          r["add"] = (p: number): number => p + p + p
+      second_checks:
+          - call: r["add"](3)
+            value: '9'
+
+    - use: |-
+          // string to function
+          let r: Record<string, (p: number) => number> = {
+              "add": (p: number): number => p + p,
+              "mul": (p: number): number => p * p
+          }
+      checks:
+          - call: r["add"]!(42)
+            value: '84'
+          - call: r["mul"]!(12)
+            value: '144'
+          - call: r["div"]
+            value: 'undefined'
+
+    - use: |-
+          // number to union
+          let r: Record<number, string|double|null|undefined> = {
+              1: "1",
+              2: 2.5,
+              3: null,
+              4: undefined,
+          }
+      checks:
+          - call: r[1]
+            value: '"1"'
+          - call: r[2]
+            value: '2.5'
+          - call: r[3]
+            value: 'null'
+          - call: r[4]
+            value: 'undefined'
+          - call: r[5]
+            value: 'undefined'
+
+    - use: |-
+          // string literals to union
+          let r: Record<"1"|"2"|"3"|"4", Char|Boolean|Long|Error> = {
+              "1": c'1',
+              "2": false,
+              "3": Long.MAX_VALUE,
+              "4": new Error()
+          }
+      checks:
+          - call: r["1"]
+            value: "c'1'"
+          - call: r["2"]
+            value: 'false'
+          - call: r["3"]
+            value: 'Long.MAX_VALUE'
+          - call: r["4"] instanceof Error
+            value: 'true'
+
+    - decl: |-
+          class Test {
+              me: int;
+              constructor(e: int) {
+                  this.me = e;
+              }
+          }
+      use: |-
+          // string literals to union
+          let r: Record<"hw"|"HW"|"hW", Test> = {
+              "hw": new Test(100),
+              "HW": new Test(150),
+              "hW": new Test(225)
+          }
+      checks:
+          - call: r["hw"].me
+            value: '100'
+          - call: r["HW"].me
+            value: '150'
+          - call: r["hW"].me
+            value: '225'
+
+    - decl: |-
+          enum Queen { Dont, Stop, Me, Now }
+      use: |-
+          let r: Record<"Dont"|"Stop"|"Me"|"Now", Queen> = {
+              "Dont": Queen.Now,
+              "Stop": Queen.Me,
+              "Me": Queen.Stop,
+              "Now": Queen.Dont
+          }
+      checks:
+          - call: r["Dont"]
+            value: 'Queen.Now'
+          - call: r["Stop"]
+            value: 'Queen.Me'
+          - call: r["Me"]
+            value: 'Queen.Stop'
+          - call: r["Now"]
+            value: 'Queen.Dont'
+
+    - use: |-
+          let r: Record<"concat"|"remove", (f: string, s: string) => string> = {
+              "concat": (f: string, s: string): string => f + s,
+              "remove": (f: string, s: string): string => f.replace(s, '')
+          }
+      checks:
+          - call: 'r["concat"]("Hello, ", "world!")'
+            value: '"Hello, world!"'
+          - call: 'r["remove"]("What are you doing?", " doing")'
+            value: '"What are you?"'
+
+    - use: |-
+          let r: Record<"Nor"|"Shall"|"Death"|"Brag", Record<"Thou"|"Wanderst"|"In"|"His"|"Shade", int>> = {
+              "Nor": {
+                  "Thou": 1,
+                  "Wanderst": 2,
+                  "In": 3,
+                  "His": 4,
+                  "Shade": 5,
+              },
+              "Shall": {
+                  "Thou": 10,
+                  "Wanderst": 20,
+                  "In": 30,
+                  "His": 40,
+                  "Shade": 50,
+              },
+              "Death": {
+                  "Thou": 100,
+                  "Wanderst": 200,
+                  "In": 300,
+                  "His": 400,
+                  "Shade": 500,
+              },
+              "Brag": {
+                  "Thou": 1000,
+                  "Wanderst": 2000,
+                  "In": 3000,
+                  "His": 4000,
+                  "Shade": 5000,
+              }
+          }
+      checks:
+          - call: r["Nor"]["Thou"]
+            value: '1'
+          - call: r["Nor"]["Wanderst"]
+            value: '2'
+          - call: r["Nor"]["In"]
+            value: '3'
+          - call: r["Nor"]["His"]
+            value: '4'
+          - call: r["Nor"]["Shade"]
+            value: '5'
+          - call: r["Shall"]["Thou"]
+            value: '10'
+          - call: r["Shall"]["Wanderst"]
+            value: '20'
+          - call: r["Shall"]["In"]
+            value: '30'
+          - call: r["Shall"]["His"]
+            value: '40'
+          - call: r["Shall"]["Shade"]
+            value: '50'
+          - call: r["Death"]["Thou"]
+            value: '100'
+          - call: r["Death"]["Wanderst"]
+            value: '200'
+          - call: r["Death"]["In"]
+            value: '300'
+          - call: r["Death"]["His"]
+            value: '400'
+          - call: r["Death"]["Shade"]
+            value: '500'
+          - call: r["Brag"]["Thou"]
+            value: '1000'
+          - call: r["Brag"]["Wanderst"]
+            value: '2000'
+          - call: r["Brag"]["In"]
+            value: '3000'
+          - call: r["Brag"]["His"]
+            value: '4000'
+          - call: r["Brag"]["Shade"]
+            value: '5000'
+
+    - decl: |-
+          let r: Record<"Please"|"Read"|"Beware"|"Of"|"Pity", string> = {
+              "Please": "Book",
+              "Read": "Written by",
+              "Beware": "Stefan",
+              "Of": "Zweig",
+              "Pity": "in 1939"
+          }
+      checks:
+          - call: r["Please"]
+            value: '"Book"'
+          - call: r["Read"]
+            value: '"Written by"'
+          - call: r["Beware"]
+            value: '"Stefan"'
+          - call: r["Of"]
+            value: '"Zweig"'
+          - call: r["Pity"]
+            value: '"in 1939"'
+
+    - decl: |-
+          class VulkanAPI {
+              callMeOrDie(): boolean {
+                  let r: Record<"Chill"|"Just"|"Joking :)", boolean> = {
+                      "Chill": true,
+                      "Just": true,
+                      "Joking :)": false
+                  }
+
+                   arktest.assertEQ(r["Chill"], true)
+                   arktest.assertEQ(r["Just"], true)
+                   arktest.assertEQ(!r["Joking :)"], true)
+                   return true
+              }
+          }
+      use: |-
+          let api: VulkanAPI = {}
+      checks:
+          - call: api.callMeOrDie()
+            value: 'true'
+
+    - decl: |-
+          enum AB { A, B }
+      use: |-
+          const m: Record<AB, number> = {
+              AB.A: 1,
+              AB.B: 2
+          }
+      checks:
+          - call: m[AB.A]
+            value: '1'
+          - call: m[AB.B]
+            value: '2'
+
+    - decl: |-
+          enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
+      use: |-
+          const m: Record<DoubleEnum, string> = {
+              DoubleEnum.a: "a",
+              DoubleEnum.b: "b",
+              DoubleEnum.c: "c"
+          }
+      checks:
+          - call: m[DoubleEnum.a]
+            value: '"a"'
+          - call: m[DoubleEnum.b]
+            value: '"b"'
+          - call: m[DoubleEnum.c]
+            value: '"c"'
+
+    - decl: |-
+          enum StringEnum {a = "a", b = "b"}
+      use: |-
+          const m: Record<StringEnum, string> = {
+              StringEnum.a: "a",
+              StringEnum.b: "b"
+          }
+      checks:
+          - call: m[StringEnum.a]
+            value: '"a"'
+          - call: m[StringEnum.b]
+            value: '"b"'
+
+    - decl: |-
+          enum LongEnum { A = 0x7FFF_FFFF_1, B}
+      use: |-
+          const m: Record<LongEnum, number> = {
+              LongEnum.A: 1,
+              LongEnum.B: 2
+          }
+      checks:
+          - call: m[LongEnum.A]
+            value: '1'
+          - call: m[LongEnum.B]
+            value: '2'
+
+    - use: |-
+          // Record reassignment with new literal
+          let a: Record<string, number> = {
+              "x": 1,
+              "y": 2,
+          }
+      checks:
+          - call: a["x"]
+            value: '1'
+          - call: a["y"]
+            value: '2'
+      after: |-
+          a = {
+              "x": 10,
+              "y": 20,
+              "z": 30,
+          }
+      second_checks:
+          - call: a["x"]
+            value: '10'
+          - call: a["y"]
+            value: '20'
+          - call: a["z"]
+            value: '30'
+
+    - use: |-
+          // Record with nullable values
+          let a: Record<string, number|null> = {
+              "present": 42,
+              "absent": null,
+          }
+      checks:
+          - call: a["present"]
+            value: '42'
+          - call: a["absent"]
+            value: 'null'
+          - call: a["missing"]
+            value: 'undefined'
+
+    - decl: |-
+          function sumRecord(r: Record<string, number>): number {
+              return r["a"]! + r["b"]!
+          }
+      checks:
+          - call: 'sumRecord({ "a": 10, "b": 20 })'
+            value: '30'
+          - call: 'sumRecord({ "a": -5, "b": 5 })'
+            value: '0'
+

@@ -1,0 +1,98 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# Type erasure for function types: parameter types are erased to Any, return type
+# to never. Signature structure (mandatory/optional/rest pattern) is preserved.
+# instanceof checks match by function subtyping
+#
+# M - mandatory
+# O - optional
+
+cases:
+  - func_type: '(x: Object) => string' # One param function all mandatory, structure: 1M
+    func: '(x: Object) => {return "s"}'
+    rhs_types:
+      - { type: '((x: Object) => string)', res: 'true' } # Same structure 1M
+      - { type: '((x: string) => Object)', res: 'true' } # Same structure 1M, param/return types erased
+      - { type: '((x: Object) => ''a'')', res: 'true' } # Same structure 1M, return type erased
+      - { type: '((x: Any) => Object)', res: 'true' } # Same structure 1M, param/return types erased
+      - { type: '((x?: Object) => string)', res: 'false' } # Different structure: 1O != 1M
+      - { type: '(() => string)', res: 'false' } # Different structure: 0 params != 1M
+      - { type: '((x: Object, y: Object) => string)', res: 'true' } # Subtyping m<=n: 1M <= 2M, kind S[1]=M matches F[1]=M
+      - { type: '((x: Object, y?: Object) => string)', res: 'true' } # Subtyping m<=n: 1M <= 1M+1O, kind S[1]=M matches F[1]=M
+      - { type: '((x: Object, ...y: Array) => string)', res: 'true' } # Subtyping m<=n: 1M <= 1M+rest, kind S[1]=M matches F[1]=M
+#9
+  - func_type: '(x: number[]) => null' # Structure: 1M
+    func: '(x: number[]) => {}'
+    rhs_types:
+      - { type: '((...x: Array) => null)', res: 'false' } # Different structure: rest != 1M
+
+
+  - func_type: '(x: number, y: string) => undefined' # Structure: 2M
+    func: '(x: number, y: string) => {return undefined}'
+    rhs_types:
+      - { type: '(x: float, y: Any) => undefined', res: 'true' } # Same structure 2M, param types erased
+      - { type: '(x: Object, y: ''a'') => undefined', res: 'true' } # Same structure 2M, param types erased
+      - { type: '(x: float, y: ''a'') => undefined', res: 'true' } # Same structure 2M, param types erased
+#13
+  - decl: | # Optional params
+      class Parent {}
+      class Child extends Parent {}
+      class GrandChild extends Child {}
+    func_type: '(x: Parent, y?: Child, z?: GrandChild) => GrandChild' # Structure: 1M+2O
+    func: '(x: Parent, y?: Child, z?: GrandChild) => {return new GrandChild()}'
+    rhs_types:
+      - { type: '(x: Parent, y?: Child, z?: GrandChild) => GrandChild', res: 'true' } # Same structure 1M+2O
+      - { type: '(x: GrandChild, y?: GrandChild, z?: GrandChild) => Parent', res: 'true' } # Same structure 1M+2O, types erased
+      - { type: '(x: Parent) => GrandChild', res: 'false' } # Different structure: 1M != 1M+2O
+      - { type: '(x: Parent, y?: Child) => GrandChild', res: 'false' } # Different structure: 1M+1O != 1M+2O
+      - { type: '(x: Parent, y?: Parent, z?: GrandChild) => GrandChild', res: 'true' } # Same structure 1M+2O, param types erased
+      - { type: '(x: Parent, y: Child, z?: GrandChild) => GrandChild', res: 'false' } # Different structure: 2M+1O != 1M+2O
+      - { type: '(x?: Parent, y?: Child, z?: GrandChild) => GrandChild', res: 'false' } # Different structure: 3O != 1M+2O
+
+#20
+  - func_type: '(x: bigint, y: char = c''a'') => void' # Structure: 1M+1O (default makes param optional)
+    func: '(x: bigint, y: char = c''a'') => {}'
+    rhs_types:
+      - { type: '(x: bigint, y?: char) => void', res: 'true' } # Same structure 1M+1O
+      - { type: '(x: bigint, y: char) => void', res: 'false' } # Different structure: 2M != 1M+1O
+      - { type: '(x: bigint) => void', res: 'false' } # Different structure: 1M != 1M+1O
+      - { type: '(x: bigint, y: Any = c''a'') => void', res: 'true' } # Same structure 1M+1O, param type erased
+
+#24
+  - func_type: '(x: boolean, ...y: Object[]) => Object' # Structure: 1M+rest
+    func: '(x: boolean, ...y: Object[]) => {return new Object()}'
+    rhs_types:
+      - { type: '(x: boolean, ...y: Array) => Object', res: 'true' } # Same structure 1M+rest
+      - { type: '(x: boolean, ...y: Array) => Any', res: 'true' } # Same structure 1M+rest, return type erased
+      - { type: '(x: boolean, y: Array) => Object', res: 'false' } # Different structure: 2M != 1M+rest
+      - { type: '(x: boolean, y: Array, ...z: Array) => Object', res: 'false' } # Different structure: 2M+rest != 1M+rest
+
+#29
+  - func_type: '(x: Array<number>, y: string, z: null) => undefined' # Structure: 3M
+    func: '(x: Array<number>, y: string, z: null) => {return undefined}'
+    rhs_types:
+      - { type: '(x: Array, y: string, z: null) => undefined', res: 'true' } # Same structure 3M
+      - { type: '(x: Array, y: ''a'', z: null) => void', res: 'true' } # Same structure 3M, types erased
+      - { type: '(x: FixedArray<number>, y: string, z: null) => undefined', res: 'true' } # Same structure 3M, param types erased
+      - { type: '(x: Array, y: string, z: never) => undefined', res: 'true' } # Same structure 3M
+
+#34
+  - func_type: '(x: [int, string]) => [string, int]' # Specific tuple cases, structure: 1M
+    func: '(x: [int, string]) => {return [x[1], x[0]]}'
+    rhs_types:
+      - { type: '((x: Tuple) => Tuple)', res: 'true' } # Same structure 1M, types erased
+      - { type: '((x: Tuple) => Array)', res: 'true' } # Same structure 1M, types erased
+      - { type: '((x: Array) => Array)', res: 'true' } # Same structure 1M, types erased
+

@@ -1,0 +1,130 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # List of operations from table in chapter 7.22, every entry corresponds to line in table
+table_lines:
+  - operator: [ { sign: "*", name: "mul" }, { sign: "/", name: "div" }, { sign: "%", name: "rem" } ]
+    type1: ["byte", "short", "int"]
+    type2: ["byte", "short", "int"]
+    result_type: "int"
+
+  - operator: [ { sign: "*", name: "mul1" }, { sign: "/", name: "div1" }, { sign: "%", name: "rem1" } ]
+    type1: ["byte", "short", "int", "long"]
+    type2: ["long"]
+    result_type: "long"
+
+  - operator: [ { sign: "*", name: "mul2" }, { sign: "/", name: "div2" }, { sign: "%", name: "rem2" } ]
+    type1: ["byte", "short", "int", "long", "float"]
+    type2: ["float"]
+    result_type: "float"
+
+  - operator: [ { sign: "*", name: "mul3" }, { sign: "/", name: "div3" }, { sign: "%", name: "rem3" } ]
+    type1: ["byte", "short", "int", "long", "float", "double"]
+    type2: ["double"]
+    result_type: "double"
+
+  - operator: [ { sign: "*", name: "mul4" }, { sign: "/", name: "div4" }, { sign: "%", name: "rem4" } ]
+    type1: ["bigint"]
+    type2: ["bigint"]
+    bigint_suffix: "n"
+    result_type: "bigint"
+
+  - operator: [ { sign: "**", name: "exp" } ]
+    type1: ["byte", "short", "int", "long", "float", "double"]
+    type2: ["byte", "short", "int", "long", "float", "double"]
+    result_type: "double"
+
+  - operator: [ { sign: "**", name: "exp1" } ]
+    type1: ["bigint"]
+    type2: ["bigint"]
+    bigint_suffix: "n"
+    result_type: "bigint"
+
+  - operator: [ { sign: "+", name: "add" }, { sign: "-", name: "subtract" } ]
+    type1: ["byte", "short", "int"]
+    type2: ["byte", "short", "int"]
+    result_type: "int"
+
+
+  - operator: [ { sign: "+", name: "add1" }, { sign: "-", name: "subtract1" } ]
+    type1: ["byte", "short", "int", "long"]
+    type2: ["long"]
+    result_type: "long"
+
+  - operator: [ { sign: "+", name: "add2" }, { sign: "-", name: "subtract2" } ]
+    type1: ["byte", "short", "int", "long", "float"]
+    type2: ["float"]
+    result_type: "float"
+
+  - operator: [ { sign: "+", name: "add3" }, { sign: "-", name: "subtract3" } ]
+    type1: ["byte", "short", "int", "long", "float", "double"]
+    type2: ["double"]
+    result_type: "double"
+
+  - operator: [ { sign: "+", name: "add4" }, { sign: "-", name: "subtract4" } ]
+    type1: ["bigint"]
+    type2: ["bigint"]
+    bigint_suffix: "n"
+    result_type: "bigint"
+
+  - operator: [ { sign: "<<", name: "lshift_b" }, { sign: ">>", name: "rshift_b" } ]
+    type1: ["bigint"]
+    type2: ["bigint"]
+    bigint_suffix: "n"
+    result_type: "bigint"
+
+  # ‘<<’, ‘>>’, ‘>>>’ - 1st is byte, short, int, float - 2nd is any numeric
+  - operator: [ { sign: "<<", name: "lshift" }, { sign: ">>", name: "rshift" }, { sign: ">>>", name: "urshift" } ]
+    type1: ["byte", "short", "int", "float"]
+    type2: ["byte", "short", "int", "long", "float", "double"]
+    order_matters: "true"
+    result_type: "int"
+
+  # ‘<<’, ‘>>’, ‘>>>’ - 1st is long, double - 2nd is any numeric
+  - operator: [ { sign: "<<", name: "lshift1" }, { sign: ">>", name: "rshift1" }, { sign: ">>>", name: "urshift1" } ]
+    type1: ["long", "double"]
+    type2: ["byte", "short", "int", "long", "float", "double"]
+    order_matters: "true"
+    result_type: "long"
+
+  - operator: [ { sign: "<", name: "less" }, { sign: "<=", name: "leq" }, { sign: ">", name: "greater" }, { sign: ">=", name: "geq" } ]
+    type1: ["byte", "short", "int", "long", "float", "double"]
+    type2: ["byte", "short", "int", "long", "float", "double"]
+    result_type: "boolean"
+
+  - operator: [ { sign: "==", name: "eq" }, { sign: "!=", name: "neq" }, { sign: "===", name: "eq_ext" }, { sign: "!==", name: "neq_ext" } ]
+    type1: ["byte", "short", "int", "long", "float", "double"]
+    type2: ["byte", "short", "int", "long", "float", "double"]
+    result_type: "boolean"
+
+  - operator: [ { sign: "==", name: "eq1" }, { sign: "!=", name: "neq1" }, { sign: "===", name: "eq_ext1" }, { sign: "!==", name: "neq_ext1" } ]
+    type1: ["bigint"]
+    type2: ["bigint"]
+    bigint_suffix: "n"
+    result_type: "boolean"
+
+  - operator: [ { sign: "&", name: "and_bit" }, { sign: "^", name: "xor" }, { sign: "|", name: "or_bit" } ]
+    type1: ["byte", "short", "int", "float"]
+    type2: ["byte", "short", "int", "float"]
+    result_type: "int"
+
+  - operator: [ { sign: "&", name: "and_bit1" }, { sign: "^", name: "xor1" }, { sign: "|", name: "or_bit1" } ]
+    type1: ["long", "double"]
+    type2: ["long", "double"]
+    result_type: "long"
+
+  - operator: [ { sign: "&", name: "and_bit2" }, { sign: "^", name: "xor2" }, { sign: "|", name: "or_bit2" } ]
+    type1: ["bigint"]
+    type2: ["bigint"]
+    bigint_suffix: "n"
+    result_type: "bigint"

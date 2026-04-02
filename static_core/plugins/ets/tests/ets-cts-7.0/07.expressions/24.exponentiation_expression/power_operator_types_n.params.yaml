@@ -1,0 +1,150 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Invalid type combinations for ** operator (all should fail at compile time)
+cases:
+  # bigint mixed with numeric types (not allowed)
+  - description: "bigint ** int"
+    type1: "bigint"
+    type2: "int"
+    val1: "2n"
+    val2: "3"
+
+  - description: "int ** bigint"
+    type1: "int"
+    type2: "bigint"
+    val1: "2"
+    val2: "3n"
+
+  - description: "bigint ** byte"
+    type1: "bigint"
+    type2: "byte"
+    val1: "2n"
+    val2: "3"
+
+  - description: "byte ** bigint"
+    type1: "byte"
+    type2: "bigint"
+    val1: "2"
+    val2: "3n"
+
+  - description: "bigint ** short"
+    type1: "bigint"
+    type2: "short"
+    val1: "2n"
+    val2: "3"
+
+  - description: "short ** bigint"
+    type1: "short"
+    type2: "bigint"
+    val1: "2"
+    val2: "3n"
+
+  - description: "bigint ** long"
+    type1: "bigint"
+    type2: "long"
+    val1: "2n"
+    val2: "3"
+
+  - description: "long ** bigint"
+    type1: "long"
+    type2: "bigint"
+    val1: "2"
+    val2: "3n"
+
+  - description: "bigint ** float"
+    type1: "bigint"
+    type2: "float"
+    val1: "2n"
+    val2: "3.0f"
+
+  - description: "float ** bigint"
+    type1: "float"
+    type2: "bigint"
+    val1: "2.0f"
+    val2: "3n"
+
+  - description: "bigint ** double"
+    type1: "bigint"
+    type2: "double"
+    val1: "2n"
+    val2: "3.0"
+
+  - description: "double ** bigint"
+    type1: "double"
+    type2: "bigint"
+    val1: "2.0"
+    val2: "3n"
+
+  # string with numeric types (not allowed)
+  - description: "string ** int"
+    type1: "string"
+    type2: "int"
+    val1: '"2"'
+    val2: "3"
+
+  - description: "int ** string"
+    type1: "int"
+    type2: "string"
+    val1: "2"
+    val2: '"3"'
+
+  - description: "string ** double"
+    type1: "string"
+    type2: "double"
+    val1: '"2"'
+    val2: "3.0"
+
+  - description: "string ** string"
+    type1: "string"
+    type2: "string"
+    val1: '"2"'
+    val2: '"3"'
+
+  # char with numeric types (not allowed)
+  - description: "char ** int"
+    type1: "char"
+    type2: "int"
+    val1: "c'2'"
+    val2: "3"
+
+  - description: "int ** char"
+    type1: "int"
+    type2: "char"
+    val1: "2"
+    val2: "c'3'"
+
+  - description: "char ** char"
+    type1: "char"
+    type2: "char"
+    val1: "c'2'"
+    val2: "c'3'"
+
+  # boolean with numeric types (not allowed)
+  - description: "boolean ** int"
+    type1: "boolean"
+    type2: "int"
+    val1: "true"
+    val2: "3"
+
+  - description: "int ** boolean"
+    type1: "int"
+    type2: "boolean"
+    val1: "2"
+    val2: "true"
+
+  - description: "boolean ** boolean"
+    type1: "boolean"
+    type2: "boolean"
+    val1: "true"
+    val2: "false"

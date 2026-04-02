@@ -1,0 +1,59 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # identity
+  - { op: '-', type1: double, v1: 0.00000000000000000000001, type2: double, v2: 0.00000000000000000000001, res: 0.0 }
+
+  # widening primitive
+  - { op: '*', type1: byte, v1: 1, type2: short, v2: 1, res: 1 }
+  - { op: '+', type1: short, v1: 100, type2: double, v2: 100.0, res: 200.0 }
+  - { op: '/', type1: double, v1: 100.0, type2: long, v2: 2, res: 50.0 }
+
+  # enumerations
+  - defs: |-
+      enum IntEnum1 {One = 1, Two, Three}
+    op: '+'
+    type1: IntEnum1
+    v1: IntEnum1.One
+    type2: IntEnum1
+    v2: IntEnum1.Two
+    res: 3
+
+  - defs: |-
+      enum IntEnum2 {One = 1, Two, Three}
+    op: '*'
+    type1: IntEnum2
+    v1: IntEnum2.One
+    type2: IntEnum2
+    v2: IntEnum2.Three
+    res: 3
+      
+  - defs: |-
+      enum IntEnum3 {One = 1, Two, Three}
+    op: '/'
+    type1: IntEnum3
+    v1: IntEnum3.Two
+    type2: IntEnum3
+    v2: IntEnum3.One
+    res: 2
+
+  - defs: |-
+      enum IntEnum4 {One, Two, Three}
+    op: '>'
+    type1: IntEnum4
+    v1: IntEnum4.Two
+    type2: IntEnum4
+    v2: IntEnum4.One
+    res: "true"

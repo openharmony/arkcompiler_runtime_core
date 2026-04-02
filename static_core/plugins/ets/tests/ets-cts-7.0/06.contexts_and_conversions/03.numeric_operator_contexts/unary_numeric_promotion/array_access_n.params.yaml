@@ -1,0 +1,29 @@
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+#0
+  - { type: long, val: 10, len: 10, expected: "Semantic error ESE0318: Type 'Array<Long>' cannot be assigned to type 'FixedArray<Long>'" }
+#1
+  - { type: float, val: 10.1, len: 10, expected: "Semantic error ESE0318: Type 'Array<Float>' cannot be assigned to type 'FixedArray<Float>'" }
+#2
+  - { type: double, val: 20.1, len: 20, expected: "Semantic error ESE0318: Type 'Array<Double>' cannot be assigned to type 'FixedArray<Double>'" }
+#3
+  - { type: Long, val: new Long(1 as long), len: 1, expected: "Semantic error ESE0318: Type 'Array<Long>' cannot be assigned to type 'FixedArray<Long>'" }
+#4
+  - { type: Float, val: new Float(1.1.toFloat()), len: 1, expected: "Semantic error ESE0318: Type 'Array<Float>' cannot be assigned to type 'FixedArray<Float>'" }
+#5
+  - { type: Double, val: new Double(2.1 as double), len: 2, expected: "Semantic error ESE0318: Type 'Array<Double>' cannot be assigned to type 'FixedArray<Double>'" }
+#6
+  - { type: Floating, val: 0.0, len: 0, expected: "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces." }
