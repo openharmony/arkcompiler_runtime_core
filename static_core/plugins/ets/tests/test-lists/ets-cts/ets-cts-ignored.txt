@@ -33,6 +33,9 @@
 #31037
 03.types/19.union_types/union_of_gen_in_lambda_func_params.ets
 
+#33158
+03.types/19.union_types/ut_45.ets
+
 #30677
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets

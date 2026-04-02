@@ -51,3 +51,14 @@ cases:
           arktest.assertEQ( a, "str" )
           a = true
           arktest.assertTrue( a )
+
+    - doc: |-
+          Use custom union type as interface field type
+      decl: |-
+          type Additive = "+" | "-"
+          interface IAdditive {
+            key: Additive
+          }
+      use: |-
+          let a: IAdditive = {key: '+'}
+          arktest.assertEQ( a.key, "+" )

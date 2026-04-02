@@ -118,3 +118,10 @@ types:
           let z: UT = x as never
       stdout: |-
           "Semantic error ESE0304: Cannot cast 'null' or 'undefined' to non-nullish type."
+    #18
+    - decl: |-
+        function never() {}
+      use: |-
+        never()
+      stdout: |-
+        "Semantic error ESE0350: Class 'never' is already defined with different type."
