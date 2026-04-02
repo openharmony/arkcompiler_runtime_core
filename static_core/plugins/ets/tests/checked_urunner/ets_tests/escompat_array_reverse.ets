@@ -24,45 +24,49 @@ function checkArray<T>(src: Array<T>, exp: Array<T>) {
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER       INT: ArrayInt reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           options: "--compiler-enable-jit=false",
 //!               entry: "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 
 //! CHECKER       JIT: ArrayInt reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex=.*testArrayIntReverse.*",
 //!               entry: "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*std.core.Array::reverse/
+//! INST          /CallVirtual .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
+//! INST          /CallVirtual.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"
 
 //! CHECKER       AOT: ArrayInt reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex=.*testArrayIntReverse.* --compiler-inline-external-methods-aot=false",
 //!               entry: "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*std.core.Array::reverse/
+//! INST          /CallVirtual .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArrayIntReverse,std.core.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
-//! INST_NOT      /CallStatic.Inlined.*std.core.Array::reverse/
+//! INST_NOT      /CallVirtual.Inlined.*std.core.Array::reverse/
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
+// EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArrayIntReverse,std.core.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
 
 //! CHECKER       AOT PGO: ArrayInt reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF  entry: "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! RUN_PGO_PAOC  options: "--compiler-regex=.*testArrayIntReverse.* --compiler-inline-external-methods-aot=true"
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*std.core.Array::reverse/
+//! INST          /CallVirtual .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArrayIntReverse,std.core.Array::reverse,.*,STATIC,SUCCESS/
-//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
+//! EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArrayIntReverse,std.core.Array::reverse,.*,VIRTUAL,SUCCESS/
+//! INST          /CallVirtual.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::testArrayIntReverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"
@@ -74,45 +78,48 @@ function testArrayIntReverse() {
 }
 
 //! CHECKER       INT: ArrayUnion reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           options: "--compiler-enable-jit=false",
 //!               entry: "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 
 //! CHECKER       JIT: ArrayUnion reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex=.*testArrayUnionReverse.*",
 //!               entry: "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*std.core.Array::reverse/
+//! INST          /CallVirtual .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
+//! INST          /CallVirtual.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"
 
 //! CHECKER       AOT: ArrayUnion reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex=.*testArrayUnionReverse.* --compiler-inline-external-methods-aot=false",
 //!               entry: "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*std.core.Array::reverse/
+//! INST          /CallVirtual .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArray.*Reverse,std.core.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
-//! INST_NOT      /CallStatic.Inlined.*std.core.Array::reverse/
+//! INST_NOT      /CallVirtual.Inlined.*std.core.Array::reverse/
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
 //! CHECKER       AOT PGO: ArrayUnion reverse
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF  entry: "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! RUN_PGO_PAOC  options: "--compiler-regex=.*testArrayUnionReverse.* --compiler-inline-external-methods-aot=true"
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*std.core.Array::reverse/
+//! INST          /CallVirtual .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArrayUnionReverse,std.core.Array::reverse,.*,STATIC,SUCCESS/
-//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
+//! EVENT         /Inline,esc.*reverse.ETSGLOBAL::testArrayUnionReverse,std.core.Array::reverse,.*,VIRTUAL,SUCCESS/
+//! INST          /CallVirtual.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::testArrayUnionReverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"

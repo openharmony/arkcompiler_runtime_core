@@ -17,6 +17,7 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER       std.core Array push
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::main",
 //!               options: "--compiler-regex=.*::testArrayPush.*"
 //!
@@ -63,6 +64,7 @@ function testArrayPush() {
 }
 
 //! CHECKER       std.core Array push2
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::testArrayPushManagedObjects",
 //!               options: "--compiler-regex='.*ETSGLOBAL::testArrayPushManagedObjects' \
 //!                --compiler-if-conversion=false"

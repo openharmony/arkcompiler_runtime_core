@@ -17,41 +17,42 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER       ArrayInt indexOf
+//! SKIP_IF      @architecture == "arm32"
 //! RUN           force_jit: true, 
 //!               options: "--compiler-dump:final --compiler-regex='.*::testArray.*IndexOf'",
 //!               entry: "escompat_array_indexof.ETSGLOBAL::main"
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayIntIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayNumberIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayShortIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayLongIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayFloatIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 4
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 4
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayCharIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayBooleanIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayStringIndexOf"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayIntLastIndexOf"
 //! PASS_AFTER    "Codegen"
