@@ -147,8 +147,8 @@ private:
             auto *vm = PandaEtsVM::FromAniVM(etsVM);
             auto *jobMan = vm->GetJobManager();
             auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
-            [[maybe_unused]] bool isJsEnvNewCreate = ifaceTable->IsJSEnvNewCreate();
-            ASSERT(isJsEnvNewCreate == false);
+            [[maybe_unused]] bool isJsEnvCreatedExternally = ifaceTable->IsJsEnvCreatedExternally();
+            ASSERT(isJsEnvCreatedExternally == true);
             etsVM->DetachCurrentThread();
         });
 

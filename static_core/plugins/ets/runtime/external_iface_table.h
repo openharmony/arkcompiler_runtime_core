@@ -31,7 +31,7 @@ public:
     using ClearInteropHandleScopesFunction = std::function<void(Frame *)>;
     using CreateJSRuntimeFunction = std::function<JSEnv()>;
     using CleanUpJSEnvFunction = std::function<void(JSEnv)>;
-    using IsJSEnvNewCreateFunction = std::function<bool()>;
+    using IsJsEnvCreatedExternallyFunction = std::function<bool()>;
     using GetJSEnvFunction = std::function<JSEnv()>;
     using CreateInteropCtxFunction = std::function<void(EtsExecutionContext *, JSEnv, bool)>;
 
@@ -73,10 +73,10 @@ public:
         cleanUpJSEnv_ = std::move(cb);
     }
 
-    void SetIsJSEnvNewCreateFunction(IsJSEnvNewCreateFunction &&cb)
+    void SetIsJsEnvCreatedExternallyFunction(IsJsEnvCreatedExternallyFunction &&cb)
     {
-        ASSERT(!isJSEnvNewCreate_);
-        isJSEnvNewCreate_ = std::move(cb);
+        ASSERT(!isJsEnvCreatedExternally_);
+        isJsEnvCreatedExternally_ = std::move(cb);
     }
 
     void SetGetJSEnvFunction(GetJSEnvFunction &&cb)
@@ -106,10 +106,10 @@ public:
         }
     }
 
-    bool IsJSEnvNewCreate()
+    bool IsJsEnvCreatedExternally()
     {
-        if (isJSEnvNewCreate_) {
-            return isJSEnvNewCreate_();
+        if (isJsEnvCreatedExternally_) {
+            return isJsEnvCreatedExternally_();
         }
         return true;
     }
@@ -129,10 +129,10 @@ public:
         createInteropCtx_ = std::move(cb);
     }
 
-    void CreateInteropCtx(EtsExecutionContext *executionCtx, JSEnv jsEnv, bool isJsEnvNewCreate = true)
+    void CreateInteropCtx(EtsExecutionContext *executionCtx, JSEnv jsEnv, bool isJsEnvCreatedExternally = false)
     {
         if (createInteropCtx_) {
-            createInteropCtx_(executionCtx, jsEnv, isJsEnvNewCreate);
+            createInteropCtx_(executionCtx, jsEnv, isJsEnvCreatedExternally);
         }
     }
 
@@ -141,7 +141,7 @@ private:
     ClearInteropHandleScopesFunction clearInteropHandleScopes_ = nullptr;
     CreateJSRuntimeFunction createJSRuntime_ = nullptr;
     CleanUpJSEnvFunction cleanUpJSEnv_ = nullptr;
-    IsJSEnvNewCreateFunction isJSEnvNewCreate_ = nullptr;
+    IsJsEnvCreatedExternallyFunction isJsEnvCreatedExternally_ = nullptr;
     GetJSEnvFunction getJSEnv_ = nullptr;
     CreateInteropCtxFunction createInteropCtx_ = nullptr;
 };

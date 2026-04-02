@@ -205,14 +205,14 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
     ASSERT(exclusiveCoro == Coroutine::GetCurrent());
 
     if (interopEnabled) {
-        bool isJsEnvNewCreate = false;
+        bool isJsEnvCreatedExternally = true;
         auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
         if (jsEnv == nullptr) {
             jsEnv = ifaceTable->CreateJSRuntime();
-            isJsEnvNewCreate = true;
+            isJsEnvCreatedExternally = false;
             ASSERT(jsEnv != nullptr);
         }
-        ifaceTable->CreateInteropCtx(EtsExecutionContext::FromMT(exclusiveCoro), jsEnv, isJsEnvNewCreate);
+        ifaceTable->CreateInteropCtx(EtsExecutionContext::FromMT(exclusiveCoro), jsEnv, isJsEnvCreatedExternally);
     }
     *result = EtsExecutionContext::FromMT(exclusiveCoro)->GetPandaAniEnv();
 
@@ -244,10 +244,11 @@ static ani_status DetachCurrentThread(ani_vm *vm)
     auto *jobMan = etsVM->GetJobManager();
 
     auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
+    bool isJsEnvCreatedExternally = ifaceTable->IsJsEnvCreatedExternally();
     auto *jsEnv = ifaceTable->GetJSEnv();
     auto result = jobMan->DetachExclusiveWorker();
     if (jsEnv != nullptr) {
-        if (ifaceTable->IsJSEnvNewCreate()) {
+        if (!isJsEnvCreatedExternally) {
             ifaceTable->CleanUpJSEnv(jsEnv);
         }
     }
