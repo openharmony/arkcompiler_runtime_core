@@ -13,29 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{%- for c in cases %}
+
 /*---
 desc: A single method in a subclass can override several methods of a superclass.
 ---*/
 
-class A {}
-class B extends A {}
-class C extends A {}
+{{c.decl}}
 
-class Base {
-    foo(p: B): string { return "fooB" }
-    foo(p: C): string { return "fooC" }
-}
+{{c.use}}
 
-class Derived {
-    foo(p: A): string { return "fooA" }
-}
-
-function main(): void {
-    let d = new Derived();
-    let a = new A();
-    let b = new B();
-    let c = new C();
-    arktest.assertEQ(d.foo(a), "fooA", "foo from Derived call expected");
-    arktest.assertEQ(d.foo(b), "fooA", "foo from Derived call expected");
-    arktest.assertEQ(d.foo(c), "fooA", "foo from Derived call expected");
-}
+{% endfor %}

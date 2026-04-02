@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 cases:
   - doc: |-
       CTE due to different return types.
-    tags: compile-only, negative
     decl: |-
       class A {}
       class B extends A {}
@@ -32,12 +31,10 @@ cases:
       }
     use: |-
       new Derived<A, B>();
-    expected_error: |-
-      /* @@@ label Error TypeError: Cannot override */
+    expected_out: "Semantic error ESE0141: foo(i: T, j: S): Int in Derived<T,S> cannot override foo(i: T, j: S): void in Base<T,S> because overriding return type is not compatible with the other return type."
 
   - doc: |-
       CTE as return type A contravariant to B.
-    tags: compile-only, negative
     decl: |-
       class A {}
       class B extends A {}
@@ -63,6 +60,4 @@ cases:
       }
     use: |-
       new Derived<Number, String>();
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
-      /* @@@ label2 Error TypeError: Cannot override */
+    expected_out: "Semantic error ESE0141: foo(i: T, j: S): A in Derived<T,S> cannot override foo(i: T, j: S): B in Base<T,S> because overriding return type is not compatible with the other return type."
