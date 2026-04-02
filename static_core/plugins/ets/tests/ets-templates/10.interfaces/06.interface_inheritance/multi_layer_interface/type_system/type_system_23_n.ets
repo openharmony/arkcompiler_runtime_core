@@ -17,8 +17,8 @@
 desc: Multiple inheritance conflict detection.
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE0141: draw(): void in E cannot override draw():
-    String in B because overriding return type is not compatible with the other return type.
+    Semantic error ESE985118: Class member draw with type void in E cannot implement draw with type String property from interface B
+    because the implementing return type is not compatible with the interface return type.
 ---*/
 
 let a: number = 10;

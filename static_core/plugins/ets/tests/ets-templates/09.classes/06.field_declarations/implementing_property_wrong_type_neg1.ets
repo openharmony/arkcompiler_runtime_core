@@ -20,7 +20,9 @@ desc: >-
     types of the field and all properties must be the same.
     Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Expected CTE output is unknown"
+expected_out: >-
+  Semantic error ESE985118: Class member f with type B1 in CC1 cannot implement f with type B2 property from interface II2
+  because the implementing return type is not compatible with the interface return type.
 ---*/
 
 // Two unrelated interfaces

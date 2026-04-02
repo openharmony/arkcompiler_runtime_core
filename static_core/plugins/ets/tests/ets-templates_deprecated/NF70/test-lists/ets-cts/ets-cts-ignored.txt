@@ -850,9 +850,6 @@
 08.statements/13.switch_statements/switch_with_expression_neg_4.ets
 08.statements/13.switch_statements/switch_with_expression_neg_5.ets
 
-#32625
-09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/implementing_property_neg_simple_wrong_type_n.ets
-
 #32724
 09.classes/06.field_declarations/access_field_neg_7.ets
 09.classes/06.field_declarations/access_field_neg_8.ets
@@ -895,10 +892,6 @@
 09.classes/06.field_declarations/access_static_field_neg_51.ets
 09.classes/06.field_declarations/access_static_field_neg_52.ets
 09.classes/06.field_declarations/access_static_field_neg_53.ets
-
-#32625
-09.classes/06.field_declarations/implementing_property_wrong_type_neg1.ets
-09.classes/06.field_declarations/implementing_property_wrong_type_neg2.ets
 
 #31341
 09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_70.ets
@@ -1018,10 +1011,6 @@
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_10.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_11.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_12.ets
-
-#32625
-09.classes/06.field_declarations/06.override_fields/implementing_property_neg_obcf_wrong_type_n1.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_neg_obcf_wrong_type_n2.ets
 
 #33480
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_gc_obcfwok.ets
