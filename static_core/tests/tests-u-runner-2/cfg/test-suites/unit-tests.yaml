@@ -53,4 +53,32 @@ collections:
         parameters:
             aot-test-suite-args:
                 - "--panda-files=${parameters.work-dir}/intermediate/ets-common-tests/devirt_adv_tests/ext_module_interface/test_3_interface_ext_module.ets.abc"
+    ets-common-tests/gc:
+        parameters:
+            ark-test-suite-args:
+                - "--run-gc-in-place"
+                - "--gc-trigger-type=debug-never"
+            aot-args:
+                - "--compiler-inlining=false"
+    ets-common-tests/gc/finalization_registry_coro_test.ets:
+        parameters:
+            ark-test-suite-args:
+                - "--coroutine-workers-count=10"
+                - "--run-gc-in-place"
+            aot-args:
+                - "--compiler-inlining=false"
+    ets-common-tests/gc/weak_ref_test_g1.ets:
+        parameters:
+            ark-test-suite-args:
+                - "--max-free=1"
+                - "--run-gc-in-place"
+            aot-args:
+                - "--compiler-inlining=false"
+    ets-common-tests/gc/weak_ref_test_cmc.ets:
+        parameters:
+            ark-test-suite-args:
+                - "--max-free=1"
+                - "--run-gc-in-place"
+            aot-args:
+                - "--compiler-inlining=false"
     ets_test_suite/strings: |-

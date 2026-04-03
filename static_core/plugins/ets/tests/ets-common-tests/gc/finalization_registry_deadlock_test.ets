@@ -25,7 +25,7 @@ function runGC(): void {
         let fullGcId = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        throw new Error("Unexpected error during GC");
+        throw new Error('Unexpected error during GC');
     }
 }
 
@@ -36,14 +36,14 @@ async function deadlockTest(): Promise<void> {
             if (tag == 1) {
                 await p;
             } else if (tag == 2) {
-                resolve!("Panda");
+                resolve!('Panda');
             }
         })
     });
     // Regarding the implementation, after GC the callback will be executed 
     // first for register with number 1 and then for number 2
-    finreg.register(new Object(), 2);
-    finreg.register(new Object(), 1);
+    finreg.register({}, 2);
+    finreg.register({}, 1);
 }
 
 function main(): void {
