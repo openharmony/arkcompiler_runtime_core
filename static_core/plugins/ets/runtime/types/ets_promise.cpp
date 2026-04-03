@@ -83,7 +83,7 @@ void EtsPromise::LaunchCallback(EtsExecutionContext *executionCtx, EtsObject *ca
     auto handledCb = EtsHandle<EtsObject>(executionCtx, callback);
 
     if (!handledCb->GetClass()->IsFunction()) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                           "Method have to be instance of function");
     }
 

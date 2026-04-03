@@ -187,7 +187,7 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     if (argsSize != parametersNum) {
         PandaStringStream pss;
         pss << "Expected " << parametersNum << " arguments, " << argsSize << " given.";
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, pss.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, pss.str());
         return nullptr;
     }
 

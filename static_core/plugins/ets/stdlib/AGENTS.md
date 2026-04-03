@@ -12,13 +12,13 @@ This is the **ETS (Extended TypeScript) Standard Library** for the **ArkCompiler
 
 The stdlib is organized into several layers:
 
-- **`std/core/`** - Core ArkTS types (Array, String, Promise, primitive wrappers, reflection types)
+- **`std/core/`** - Core ArkTS types (Array, String, Promise, Error, primitive wrappers, reflection types)
 - **`std/concurrency/`** - Multi-threading primitives (taskpool, workers, AsyncLock, Atomics)
 - **`std/containers/`** - Data structures (HashMap, TreeMap, TreeSet, Queue, LinkedList)
 - **`std/interop/`** - JavaScript-ETS interoperation bridge
 - **`std/testing/`** - ArkTest unit testing framework
 - **`std/debug/`** - Debug utilities (not implicitly imported)
-- **`escompat/`** - ECMAScript compatibility layer (TypedArrays, Error, Functions, Global)
+- **`escompat/`** - ECMAScript compatibility layer (TypedArrays, Functions, Global)
 - **`native/core/`** - C++ native implementations (Intl, RegExp, Process)
 
 ### Module System

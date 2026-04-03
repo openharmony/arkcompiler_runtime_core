@@ -83,7 +83,7 @@ extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsOb
     } else if (!(fieldType->IsPrimitive() && argType->IsBoxed() &&
                  helpers::ResolveAndSetPrimitive(
                      executionCtx, {thisObjH.GetPtr(), argH.GetPtr(), argType, fieldType->GetEtsType(), field}))) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                           "Value is not assignable to the provided field");
     }
 }
