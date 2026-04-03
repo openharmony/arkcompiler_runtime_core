@@ -327,6 +327,10 @@ void AllocationBuffer::ClearThreadLocalRegion()
 
 void AllocationBuffer::Unregister()
 {
+    // Null the pointer, the region stays in ToSpace::tlToRegionList_ and will be promoted by GC thread
+    // This is needed to prevent race between mutator and GC threads
+    tlToRegion_ = RegionDesc::NullRegion();
+
     Heap::GetHeap().UnregisterAllocBuffer(*this);
 }
 
