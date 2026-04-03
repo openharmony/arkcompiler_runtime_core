@@ -214,17 +214,18 @@ MarkingCollector::MarkingRefFieldVisitor ArkCollector::CreateMarkingObjectRefFie
 {
     MarkingRefFieldVisitor visitor;
 
-    auto func = [obj = visitor.GetClosure(), &markStack](RefField<> &field) {
-        const GCReason gcReason = GCReason::GC_REASON_YOUNG;
-        MarkingRefField(*obj, field, markStack, gcReason);
-    };
-    visitor.SetVisitor(func);
     if (gcReason_ == GCReason::GC_REASON_YOUNG) {
+        auto func = [this, obj = visitor.GetClosure(), &markStack](RefField<> &field) {
+            MarkingRefField(*obj, field, markStack, GCReason::GC_REASON_YOUNG);
+        };
+        visitor.SetVisitor(func);
         visitor.SetWeakVisitor(func);
     } else {
+        visitor.SetVisitor([obj = visitor.GetClosure(), &markStack](RefField<> &field) {
+            MarkingRefField(*obj, field, markStack, GCReason::GC_REASON_HEU);
+        });
         visitor.SetWeakVisitor([obj = visitor.GetClosure(), &weakStack](RefField<> &field) {
-            const GCReason gcReason = GCReason::GC_REASON_HEU;
-            MarkWeakRefField(*obj, field, weakStack, gcReason);
+            MarkWeakRefField(*obj, field, weakStack, GCReason::GC_REASON_HEU);
         });
     }
     return visitor;
