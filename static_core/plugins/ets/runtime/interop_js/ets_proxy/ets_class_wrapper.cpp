@@ -640,16 +640,33 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(napi_en
     }
 
     // Process methods
+    GetterSetterPropsMap propMap;
+    ProcessMethods(env, methods, jsProps, propMap);
+
+    jsProps.reserve(jsProps.size() + propMap.size());
+    for (auto &item : propMap) {
+        jsProps.emplace_back(item.second);
+    }
+
+    return jsProps;
+}
+
+void EtsClassWrapper::ProcessMethods(napi_env &env, Span<EtsMethodSet *> methods,
+                                     std::vector<napi_property_descriptor> &jsProps, GetterSetterPropsMap &propMap)
+{
     numMethods_ = methods.size();
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     etsMethodWrappers_ = std::make_unique<LazyEtsMethodWrapperLink[]>(numMethods_);
     Span<LazyEtsMethodWrapperLink> etsMethodWrappers(etsMethodWrappers_.get(), numMethods_);
     size_t methodIdx = 0;
-    GetterSetterPropsMap propMap;
     for (auto &method : methods) {
         ASSERT(!method->IsConstructor());
         auto lazyLink = &etsMethodWrappers[methodIdx++];
         lazyLink->Set(method);
+        // Skip ETS-defined toJSON; unified toJSON is attached per-instance in JSCtorCallback
+        if (strcmp(method->GetName(), "toJSON") == 0) {
+            continue;
+        }
         jsProps.emplace_back(EtsMethodWrapper::MakeNapiProperty(method, lazyLink));
         if (strcmp(method->GetName(), ITERATOR_METHOD) == 0) {
             auto iterator = EtsClassWrapper::GetGlobalSymbolIterator(env);
@@ -659,12 +676,6 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(napi_en
             BuildGetterSetterFieldProperties(propMap, method);
         }
     }
-    jsProps.reserve(jsProps.size() + propMap.size());
-    for (auto &item : propMap) {
-        jsProps.emplace_back(item.second);
-    }
-
-    return jsProps;
 }
 
 void EtsClassWrapper::BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method)
@@ -847,6 +858,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 
     napi_value jsCtor {};
     _this->DefineJSClass(env, jsProps, &jsCtor);
+    _this->InitToJSON(env, jsCtor);
 
     if (etsClass->GetRuntimeClass()->IsObjectClass() || etsClass->GetRuntimeClass()->IsAnyClass()) {
         SetNullPrototype(env, jsCtor);
@@ -1122,12 +1134,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     NAPI_CHECK_FATAL(napi_strict_equals(env, jsNewtarget, GetJsCtor(env), &notExtensible));
 
     EtsClass *instanceClass {};
-
     if (LIKELY(notExtensible)) {
-#if !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)
-        // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
-        NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
-#endif  // PANDA_TARGET_OHOS
         instanceClass = etsClass_;
     } else {
         if (UNLIKELY(jsproxyWrapper_ == nullptr)) {
@@ -1143,17 +1150,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
         return false;
     }
 
-    // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily
-    SharedReference *sharedRef;
-    if (LIKELY(notExtensible)) {
-        sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject, jsThis);
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-        // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
-        NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
-#endif  // PANDA_TARGET_OHOS
-    } else {
-        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject, jsThis);
-    }
+    SharedReference *sharedRef = SetupSharedReference(ctx, etsObject, jsThis, notExtensible);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return false;
@@ -1166,6 +1163,118 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
 
     napi_value callRes = CallETSInstance(executionCtx, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());
     return callRes != nullptr;
+}
+
+void EtsClassWrapper::InitToJSON(napi_env env, napi_value jsCtor)
+{
+    napi_value toJsonFn;
+    NAPI_CHECK_FATAL(
+        napi_create_function(env, "toJSON", NAPI_AUTO_LENGTH, EtsClassWrapper::ToJSONCallback, this, &toJsonFn));
+    // Attach to prototype
+    napi_value prototype;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &prototype));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, prototype, "toJSON", toJsonFn));
+    NAPI_CHECK_FATAL(napi_create_reference(env, toJsonFn, 1, &this->toJsonFnRef_));
+}
+
+SharedReference *EtsClassWrapper::SetupSharedReference(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
+                                                       napi_value jsThis, bool notExtensible)
+{
+    napi_env env = ctx->GetJSEnv();
+    SharedReference *sharedRef;
+    if (LIKELY(notExtensible)) {
+        sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject, jsThis);
+        NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
+    } else {
+        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject, jsThis);
+    }
+    return sharedRef;
+}
+
+/*static*/
+napi_value EtsClassWrapper::ToJSONCallback(napi_env env, napi_callback_info cinfo)
+{
+    INTEROP_TRACE();
+    ASSERT_SCOPED_NATIVE_CODE();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+
+    napi_value jsThis;
+    void *data;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, nullptr, nullptr, &jsThis, &data));
+
+    auto *etsClassWrapper = reinterpret_cast<EtsClassWrapper *>(data);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
+
+    EtsObject *etsThis = etsClassWrapper->UnwrapEtsProxy(ctx, jsThis);
+    if (UNLIKELY(etsThis == nullptr)) {
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
+        }
+        ASSERT(InteropCtx::SanityJSExceptionPending());
+        return nullptr;
+    }
+
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> objHandle(executionCtx, etsThis);
+
+    auto jsonStr = SerializeETSObject(executionCtx, ctx, objHandle);
+    if (!jsonStr.has_value()) {
+        return nullptr;
+    }
+
+    return JSJsonParse(env, jsonStr.value());
+}
+
+/*static*/
+std::optional<PandaString> EtsClassWrapper::SerializeETSObject(EtsExecutionContext *executionCtx, InteropCtx *ctx,
+                                                               EtsHandle<EtsObject> &objHandle)
+{
+    auto *platformTypes = PlatformTypes(executionCtx);
+    Value arg(objHandle.GetPtr()->GetCoreType());
+    Value result;
+    auto method = platformTypes->coreJSONStringify;
+    ASSERT(method != nullptr);
+    result = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), &arg);
+
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
+        ctx->ForwardEtsException(executionCtx);
+        return std::nullopt;
+    }
+
+    auto *etsResult = EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());
+    ASSERT(etsResult->GetClass()->IsStringClass());
+    return EtsString::FromEtsObject(etsResult)->GetMutf8();
+}
+
+/*static*/
+napi_value EtsClassWrapper::JSJsonParse(napi_env env, const PandaString &jsonStr)
+{
+    napi_value jsJsonStr;
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, jsonStr.c_str(), jsonStr.size(), &jsJsonStr));
+
+    napi_value global;
+    napi_value jsonObj;
+    napi_value parseFn;
+    napi_value jsResult;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "JSON", &jsonObj));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsonObj, "parse", &parseFn));
+
+    napi_status status = napi_call_function(env, jsonObj, parseFn, 1, &jsJsonStr, &jsResult);
+    if (status != napi_ok) {
+        bool isException;
+        napi_is_exception_pending(env, &isException);
+        if (isException) {
+            napi_value exception;
+            napi_get_and_clear_last_exception(env, &exception);
+            // If it's not a valid JSON literal, we treat it as a raw string
+            return jsJsonStr;
+        }
+    }
+
+    return jsResult;
 }
 
 }  // namespace ark::ets::interop::js::ets_proxy

@@ -221,6 +221,8 @@
     SM("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;:V", coreStdProcessListUnhandledPromises)   \
     SM("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V", coreStdProcessHandleUncaughtError)      \
     /* JSON */                                                                                                        \
+    TP("Lstd/core/JSON;", coreJSON)                                                                                   \
+    SM("Lstd/core/JSON;", "stringify", "LY;:Lstd/core/String;", coreJSONStringify)                                    \
     TP("Lstd/core/JsonReplacer;", coreJsonReplacer)                                                                   \
     TP("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                       \
     TP("Lstd/core/JsonSerializable;", coreJsonSerializable)                                                           \
