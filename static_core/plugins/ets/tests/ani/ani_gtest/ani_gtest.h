@@ -159,21 +159,38 @@ public:
 
     void ThrowError()
     {
+        ASSERT_EQ(ThrowError(env_), ANI_OK);
+    }
+
+    static ani_status ThrowError(ani_env *env)
+    {
         ani_ref undef {};
-        ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
+        ani_status s = env->GetUndefined(&undef);
+        if (s != ANI_OK) {
+            return s;
+        }
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("std.core.Error", &cls), ANI_OK);
+        if ((s = env->FindClass("std.core.Error", &cls)) != ANI_OK) {
+            return s;
+        }
+
         ani_method ctor {};
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor), ANI_OK);
+        if ((s = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor)) !=
+            ANI_OK) {
+            return s;
+        }
 
         ani_object err {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ASSERT_EQ(env_->Object_New(cls, ctor, &err, undef, undef), ANI_OK);
-        ASSERT_EQ(env_->ThrowError(static_cast<ani_error>(err)), ANI_OK);
+        if ((s = env->Object_New(cls, ctor, &err, undef, undef)) != ANI_OK) {
+            return s;
+        }
 
-        ASSERT_EQ(env_->Reference_Delete(err), ANI_OK);
-        ASSERT_EQ(env_->Reference_Delete(undef), ANI_OK);
+        s = env->ThrowError(static_cast<ani_error>(err));
+        (void)env->Reference_Delete(err);
+        (void)env->Reference_Delete(undef);
+        return s;
     }
 
 protected:
