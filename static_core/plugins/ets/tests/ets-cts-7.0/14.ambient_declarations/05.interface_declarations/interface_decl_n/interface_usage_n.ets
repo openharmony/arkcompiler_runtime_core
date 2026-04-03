@@ -18,7 +18,9 @@ limitations under the License.
 desc: Ambient Interface implementations
 files: ['./interface_declarations.ets']
 tags: [negative]
-expected_error: "Unhandled exception: std.core.LinkerVerificationError"
+expected_error:
+    runtime:
+        - "Unhandled exception: std.core.LinkerVerificationError"
 ---*/
 
 import { {{c.import}} } from './interface_declarations.d'

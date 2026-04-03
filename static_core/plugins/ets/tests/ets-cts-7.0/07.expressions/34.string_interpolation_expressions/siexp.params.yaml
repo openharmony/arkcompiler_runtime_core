@@ -138,7 +138,7 @@ cases:
         let TString = 'String'
 
     - use: |-
-        let a: AClass = new AClass        
+        let a: AClass = new AClass
         const v = `${AClass.hello}, ${a.world}!`
         const expected = 'Hello, World!'
       defs: |-
@@ -149,7 +149,7 @@ cases:
         }
 
     - use: |-
-        let a: IPerson = {name: 'Bob', id: 25}        
+        let a: IPerson = {name: 'Bob', id: 25}
         const v = `Hello ${a.name}, ${a.id}!`
         const expected = 'Hello Bob, 25!'
       defs: |-
@@ -159,7 +159,7 @@ cases:
         }
 
     - use: |-
-        let a: IPerson = {name: 'Bob', id: 25}  
+        let a: IPerson = {name: 'Bob', id: 25}
         let name: string
         let id: int
         const v = `Hello ${name = a.name}, ${id = a.id}!`
@@ -174,7 +174,7 @@ cases:
         arktest.assertEQ(id, 25)
 
     - use: |-
-        let a: IPerson = {id: 25}  
+        let a: IPerson = {id: 25}
         let name: string | undefined = 'Bob'
         let id: int
         const v = `Hello ${name = a.name}, ${id = a.id}!`
@@ -189,7 +189,7 @@ cases:
         arktest.assertEQ(id, 25)
 
     - use: |-
-        let a: IPerson = {id: 25}  
+        let a: IPerson = {id: 25}
         let name: string | undefined = 'Bob'
         let id: int
         const v = `Hello ${name = (a.name == undefined ? 'Mary' : a.name)}, ${id = a.id}!`
@@ -204,7 +204,7 @@ cases:
         arktest.assertEQ(id, 25)
 
     - use: |-
-        let a: IPerson = {id: 25}  
+        let a: IPerson = {id: 25}
         let id: int
         const v = `Hello ${a.name ?? 'Jane'}, ${id = a.id}!`
         const expected = 'Hello Jane, 25!'
@@ -215,7 +215,7 @@ cases:
         }
       xcheck: |-
         arktest.assertEQ(id, 25)
-        
+
 
     - use: |-
         const v = `___${Flags.Read}___${Flags.Write}___${Flags.Full}`
@@ -253,7 +253,7 @@ cases:
 
     - use: |-
         const v = `...${null}...${undefined}...`
-        const expected = '...null...undefined...'      
+        const expected = '...null...undefined...'
 
     - use: |-
         const v = kis(5)
@@ -269,11 +269,11 @@ cases:
       defs: |-
         const cl: (k: int) => int = k => ++k
         const kis: (k:int) => string = k => `${k}0_${k++}0_${++k}0_${cl(k)}0`
-        
+
 
     - use: |-
         const xx = (({ markers: [...kinds.map(k => `${k}0;`)]} as IOP).markers ?? [''])
-        const v = xx instanceof Array ? xx[2] : 'empty'
+        const v = xx instanceof Array ? (xx as Array<Any>)[2] : 'empty'
         const expected = 'three0;'
       defs: |-
         const kinds = ['one', 'two', 'three']

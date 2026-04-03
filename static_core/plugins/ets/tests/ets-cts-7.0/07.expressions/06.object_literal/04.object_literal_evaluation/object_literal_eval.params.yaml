@@ -399,7 +399,7 @@ cases:
       let sequence: string = ''
 
       class C {
-          readonly x: number
+          x: number
           constructor() {
               sequence += 'c'
               this.x = 0

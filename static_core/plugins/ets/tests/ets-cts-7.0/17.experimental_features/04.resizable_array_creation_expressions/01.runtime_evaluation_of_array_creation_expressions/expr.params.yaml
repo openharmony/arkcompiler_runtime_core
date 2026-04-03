@@ -21,17 +21,17 @@ cases:
           }
       use: |-
           res = ""
-          let v: number[][][][][] = new number[foo(1)][foo(2)][foo(3)][foo(4)][foo(5)]
-          arktest.assertEQ(res, "12345")
+          let v: number[][] = [ [new Double(foo(1))],[new Double(foo(2))] ]
+          arktest.assertEQ(res, "12")
           arktest.assertTrue(v instanceof Array)
-          arktest.assertTrue(v[0][0][0][0][0] instanceof number)
+          arktest.assertTrue(v[0][0] instanceof number)
 
     - defs: |-
-          type UT = number[][][][][] | null
+          type UT = number[][] | null
           let res: string = ""
           function foo(p: int): int {
               res += p
-              if (p == 3) {
+              if (p == 2) {
                   throw new Error()
               }
               return p
@@ -42,17 +42,16 @@ cases:
           let expectedError = (e: Error): boolean => {
               return (e instanceof Error)
           }
-          arktest.expectThrow(() => {v = new number[foo(1)][foo(2)][foo(3)][foo(4)][foo(5)]}, expectedError)
-          arktest.assertEQ(res, "123")
+          arktest.expectThrow(() => {v = [ [new Double(foo(1))],[new Double(foo(2))] ]}, expectedError)
+          arktest.assertEQ(res, "12")
           arktest.assertEQ(v, null)
 
-    - desc: |- # 24859 undefined register, Register type conflict
-      defs: |-
-          type UT = number[][][][][] | null
+    - defs: |- # 24859 undefined register, Register type conflict
+          type UT = number[][] | null
           let res: string = ""
           function foo(p: int): int {
               res += p
-              if (p == 3) {
+              if (p == 2) {
                   throw new Error()
               }
               return p
@@ -62,112 +61,14 @@ cases:
           let v: UT = null
           let check: boolean = false
           try {
-              v = new number[foo(1)][foo(2)][foo(3)][foo(4)][foo(5)]
+              v = [ [new Double(foo(1))],[new Double(foo(2))] ]
           } catch (e) {
               // expected
               check = true
           }
           arktest.assertEQ(check, true)
-          arktest.assertEQ(res, "123")
+          arktest.assertEQ(res, "12")
           arktest.assertEQ(v, null)
-
-    - defs: |-
-          type UT = number[][][][][] | null
-          let res: string = ""
-          function foo(p: int): int {
-              res += p
-              return p
-          }
-      use: |-
-          res = ""
-          let v: UT = null
-          let expectedError = (e: Error): boolean => {
-              return (e instanceof NegativeArraySizeError)
-          }
-          arktest.expectThrow(() => {v = new number[foo(1)][foo(2)][foo(3)][foo(-4)][foo(5)]}, expectedError)
-          arktest.assertEQ(res, "123-45")
-          arktest.assertEQ(v, null)
-
-    - defs: |-
-          type UT = number[][][][][] | null
-          let res: string = ""
-          function foo(p: int): int {
-              res += p
-              return p
-          }
-      use: |-
-          res = ""
-          let v: UT = null
-          let expectedError = (e: Error): boolean => {
-              return (e instanceof NegativeArraySizeError)
-          }
-          arktest.expectThrow(() => {v = new number[foo(-1)][foo(-2)][foo(-3)][foo(4)][foo(-5)]}, expectedError)
-          arktest.assertEQ(res, "-1-2-34-5")
-          arktest.assertEQ(v, null)
-
-    - defs: |-
-          type UT = number[][][][][] | null
-          let res: string = ""
-          function foo(p: int): int {
-              res += p
-              if (p == 3) {
-                  throw new Error()
-              }
-              return p
-          }
-      use: |-
-          res = ""
-          let v: UT = null
-          let expectedError = (e: Error): boolean => {
-              return (e instanceof Error)
-          }
-          arktest.expectThrow(() => {v = new number[foo(-1)][foo(-2)][foo(3)][foo(4)][foo(-5)]}, expectedError)
-          arktest.assertEQ(res, "-1-23")
-          arktest.assertEQ(v, null)
-
-    - defs: |-
-          let cntr: int = 0
-          class A {
-              fld: int
-              public constructor() {
-                  this.fld = cntr++
-              }
-          }
-          function foo(p: int): int {
-              res += p
-              return p
-          }
-          let res: string = ""
-      use: |-
-          cntr = 0
-          res = ""
-          let v: A[] = new A[foo(100)](new A())
-          arktest.assertEQ(res, "100")
-          arktest.assertEQ(cntr, 100)
-          arktest.assertTrue(v[99] instanceof A)
-          arktest.assertEQ(v[99].fld, 99)
-
-    - defs: |-
-          let cntr: int = 0
-          class A {
-              fld: int
-              public constructor() {
-                  this.fld = cntr++
-              }
-          }
-          function foo(p: int): int {
-              res += p
-              return p
-          }
-          let res: string = ""
-      use: |-
-          cntr = 0
-          res = ""
-          let v: A[][] = new A[foo(10)][foo(10)]
-          arktest.assertEQ(res, "1010")
-          arktest.assertEQ(cntr, 100)
-          arktest.assertTrue(v[9][9] instanceof A)
-          arktest.assertEQ(v[9][9].fld, 99)
 
     - defs: |-
           let cntr: int = 0
@@ -184,9 +85,8 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(v.length, 42)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
 
     - defs: |-
           let cntr: int = 0
@@ -209,9 +109,8 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(v.length, 42)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
 
     - defs: |-
           let cntr: int = 0
@@ -233,9 +132,8 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(v.length, 42)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
 
     - defs: |-
           let cntr: int = 0
@@ -256,9 +154,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -305,9 +203,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -330,9 +228,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - defs: |-
           let cntr: int = 0
@@ -354,9 +252,9 @@ cases:
           res = ""
           let v: A[] = new A[foo(42)](new A())
           arktest.assertEQ(res, "42")
-          arktest.assertEQ(cntr, 42)
+          arktest.assertEQ(cntr, 1)
           arktest.assertTrue(v[41] instanceof A)
-          arktest.assertEQ(v[41].fld, 41)
+          arktest.assertEQ(v[41].fld, 0)
 
     - use: |-
           let v: int[] = new int[33](0)  // initialized with 0

@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: Method declaration with return type.
-assert: >-
+desc: >-
+    Method declaration with return type.
     If a method is declared to have a return type, then a compile-time error occurs if the body of the method
     can complete normally.
 tags: [compile-only]
 ---*/
 
 class A {
-  run(): int {
-    return 5;
-  }
+    run(): int {
+        return 5;
+    }
 }

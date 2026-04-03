@@ -16,6 +16,7 @@
 /*---
 desc: An empty interface inherits an interface that contains a never type.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0319: Type '\"anything\"' is not compatible with type 'never' at property 'value'"
 ---*/
 
 interface ParentInterface {

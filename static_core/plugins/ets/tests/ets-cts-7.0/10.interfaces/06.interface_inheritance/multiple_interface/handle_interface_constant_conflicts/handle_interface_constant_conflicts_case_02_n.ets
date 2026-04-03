@@ -18,6 +18,8 @@ desc: >-
     Verify that a class implementing two interfaces with the same constant name but different values ("A" and "B")
     causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0136: Method CONSTANT(): "A"|"B" in TestClass not overriding any method
 ---*/
 
 interface InterfaceA {

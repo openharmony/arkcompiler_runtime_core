@@ -14,19 +14,20 @@
  */
 
 /*---
-desc: If the value of an array index expression is negative,
-  or greater than, or equal to the length of the array,
-  then an array indexing expression throws RangeError.
+desc: >-
+    If the value of an array index expression is negative,
+    or greater than, or equal to the length of the array,
+    then an array indexing expression throws RangeError.
 ---*/
 
 function main() {
 
-  let v: byte[][][] = new byte[10][10][10];
-  let a = 1;
-  let b = 1;
+    let v: byte[][][] = [[[new Byte(0)]]];
+    let a = 1;
+    let b = 1;
 
-  let i: int = (a = 2) + v[0].length + (v[0][0] = new byte[10](0)).length + (b = 2);
-  arktest.assertEQ(a, 2);
-  arktest.assertEQ(b, 2);
+    let i: int = (a = 2) + v[0].length + (v[0][0] = new byte[10](0)).length + (b = 2);
+    arktest.assertEQ(a, 2);
+    arktest.assertEQ(b, 2);
     
 }

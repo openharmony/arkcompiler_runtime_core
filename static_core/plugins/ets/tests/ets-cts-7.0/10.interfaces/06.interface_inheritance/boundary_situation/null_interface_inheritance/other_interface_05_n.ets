@@ -18,6 +18,8 @@ desc: >-
     If the interface type contains methods (i.e., non-attribute members),
     you cannot assign values to it using object literals.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0319: Type '"str"' is not compatible with type '(() => String)' at property 'greet'
 ---*/
 
 interface ParentInterface {

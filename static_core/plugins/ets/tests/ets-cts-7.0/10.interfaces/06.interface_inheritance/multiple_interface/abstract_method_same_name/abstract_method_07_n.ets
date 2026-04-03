@@ -18,6 +18,9 @@ desc: >-
       The method with the same name has different parameter types and return types.
       Return types: number is not a subtype of string.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildClass is not abstract
+    and does not override abstract method process(data: String): String in Parent1
 ---*/
 
 interface Parent1 {

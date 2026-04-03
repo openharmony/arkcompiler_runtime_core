@@ -1,0 +1,27 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - {check_type: "Any",    base_value: "null",                   derived_value: "42"}
+  - {check_type: "Object", base_value: "5",                      derived_value: "\"derived\""}
+  - {check_type: "number", base_value: "1.0",                    derived_value: "2.0"}
+  - {check_type: "double", base_value: "1.1",                    derived_value: "2.2"}
+  - {check_type: "float",  base_value: "1.0f",                   derived_value: "2.0f"}
+  - {check_type: "long",   base_value: "100",                    derived_value: "200"}
+  - {check_type: "int",    base_value: "1",                      derived_value: "2"}
+  - {check_type: "short",  base_value: "10",                     derived_value: "20"}
+  - {check_type: "byte",   base_value: "10",                     derived_value: "20"}
+  - {check_type: "string", base_value: "\"base\"",               derived_value: "\"derived\""}
+  - {check_type: "bigint", base_value: "1n",                     derived_value: "2n"}
+  - {check_type: "char",   base_value: "c'a'",                   derived_value: "c'b'"}
+  - {check_type: "boolean",base_value: "false",                  derived_value: "true"}

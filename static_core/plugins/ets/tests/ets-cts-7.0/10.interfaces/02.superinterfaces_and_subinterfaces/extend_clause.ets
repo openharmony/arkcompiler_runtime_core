@@ -14,9 +14,11 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Declaring subinterface
-assert: If an extends clause is provided, then the interface being declared extends each of the other named interfaces and therefore inherits the member types, instance methods, and constants of each of the other named interfaces.
-tags: [compile-only]
+desc: >-
+    Declaring subinterface
+    If an extends clause is provided, then the interface being declared extends each of the other named
+    interfaces and therefore inherits the member types, instance methods,
+    and constants of each of the other named interfaces.
 ---*/
 
 interface A {
@@ -27,14 +29,18 @@ interface A {
 
 interface B {
   bar(): int {
-    return 5;
+    return 6;
   }
 }
 
 interface C extends A, B {}
 
 class D implements C {
-    public sum(): void {
-        let r: int = this.foo() + this.bar();
-    }
+  public sum(): int {
+    return this.foo() + this.bar();
+  }
+}
+
+function main() {
+  arktest.assertEQ(new D().sum(), 11)
 }

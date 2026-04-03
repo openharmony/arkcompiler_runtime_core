@@ -14,22 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Method call by his name.
-assert: The identifier in a classMethodDeclaration is the name of the method which may be used to refer to the method.
+desc: >-
+    Method call by his name.
+    The identifier in a classMethodDeclaration is the name of the method which may be used to refer to the method.
 ---*/
 
 class A {
-  public run(): int {
-    return 5;
-  }
+    public run(): int {
+        return 5;
+    }
 
-  public stop(): int {
-    return 0;
-  }
+    public stop(): int {
+        return 0;
+    }
 }
 
 function main(): void {
-  let instance: A = new A();
+    let instance: A = new A();
 
-  arktest.assertEQ( instance.run(), 5 );
+    arktest.assertEQ( instance.run(), 5 );
 }

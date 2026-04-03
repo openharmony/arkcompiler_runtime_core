@@ -13,103 +13,110 @@
 
 ---
 cases:
-  # classes
+# classes
+#0
   - use: |-
       let v: A<X,X> = new A<X,X>(new X(), new X())
-
+#1
   - use: |-
       let v: A<Int,X|null> = new A<Int,X|null>(new Int(), new X())
-
+#2
   - use: |-
       let v: A<Int|null,X|null> = new A<Int|null,X|null>(null, null)
-
+#3
   - use: |-
       let v: A<X,X|null> = new A<X,X|null>(new X(), new X())
     bound: ' extends X|null'
-
+#4
   - use: |-
       let v: A<Object,X|null> = new A<Object,X|null>(new X(), null)
     bound: ' extends Object|null'
 
-  # interfaces
+# interfaces
+#5
   - use: |-
       let v: A<I,I> = new A<I,I>(new X(), new X())
-
+#6
   - use: |-
       let v: A<I|null,I|null> = new A<I|null,I|null>(null, new Y())
-
+#7
   - use: |-
       let v: A<Y,I|null> = new A<Y,I|null>(new Y(), new Y())
     bound: ' extends I|null'
 
-  # arrays
+# arrays
+#8
   - use: |-
       let v: A<int[],X[]> = new A<int[],X[]>(new int[1](0), new X[0](new X()))
-
+#9
   - use: |-
       let v: A<int[]|null,X[]|null> = new A<int[]|null,X[]|null>(null, new X[0](new X()))
 
 # aliases
+#10
   - use: |-
       let v: A<B,B> = new A<B,B>([Color.Red], [Color.Blue])
     decl: type B = Color[]
-
+#11
   - use: |-
-      let v: A<B,B> = new A<B,B>(null, new X[1][0])
+      let v: A<B,B> = new A<B,B>(null, [ [new X()],[new X()] ])
     decl: type B = X[][]|null
-
+#12
   - use: |-
       let v: A<Y,B> = new A<Y,B>(new Y(), new Y[0](new Y()))
     decl: type B = Y[]
 
-  # tuples
+# tuples
+#13
   - use: |-
       let v: A<[X, X], X> = new A<[X, X], X>([new X(), new X()], new X())
-
+#14
   - use: |-
       let v: A<Int, [X, X] | null> = new A<Int, [X, X] | null>(new Int(), [new X(), new X()])
-
+#15
   - use: |-
       let v: A<Int | null, [X, X] | null> = new A<Int|null, [X, X] | null>(null, null)
-
+#16
   - use: |-
       let v: A<[X, X], X | null> = new A<[X, X], X | null>([new X(), new X()], new X())
-
+#17
   - use: |-
       let v: A<Object, [X, X] | null> = new A<Object, [X, X] | null>(new X(), null)
 
-  # FixedArray
+# FixedArray
+#19
   - use: |-
       let v: A<FixedArray<X>, FixedArray<X>> = new A<FixedArray<X>, FixedArray<X>>([new X()], [new X()])
-
+#20
   - use: |-
       let v: A<Int, FixedArray<X> | null> = new A<Int, FixedArray<X> | null>(new Int(), [new X()])
-
+#21
   - use: |-
       let v: A<Int|null,X|null> = new A<Int|null,X|null>(null, null)
-
+#22
   - use: |-
       let v: A<FixedArray<X>, FixedArray<X> | null> = new A<FixedArray<X>, FixedArray<X> | null>([new X()], [new X()])
-
+#23
   - use: |-
       let v: A<Object, FixedArray<X> | null> = new A<Object, FixedArray<X> | null>([new X()], null)
 
-  # type argument is specific type
+# type argument is specific type
+#24
   - use: |-
       let v: A<Any, Any> = new A<Any, Any>(new X(), new X())
-
+#25
   - use: |-
       let v: A<undefined, undefined> = new A<undefined, undefined>(undefined, undefined)
-
+#26
   - use: |-
       let v: A<null, null> = new A<null, null>(null, null)
-
+#27
   - use: |-
       let v: A<string, string> = new A<string, string>("string", "string")
-
+#28
   - use: |-
       let v: A<bigint, bigint> = new A<bigint, bigint>(123n, 123n)
-
+#29
   - use: |-
       let v: A<B<keyof Keys>, B<keyof Keys>> = new A<B<'key'>, B<'key'>>(new B<'key'>, new B<'key'>)
     decl: |-

@@ -18,6 +18,9 @@ desc: >-
     Verify that a class implementing an interface with a constant and having an optional static property
     with the same name causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0141: CONSTANT(): String|undefined in TestClass cannot override CONSTANT(): String
+    in InterfaceA because overriding return type is not compatible with the other return type.
 ---*/
 
 interface InterfaceA {

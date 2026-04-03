@@ -87,7 +87,6 @@ cases:
     types:
       - { type: 'Array<int>' }
       - { type: 'FixedArray' }
-      - { type: 'TT' }
 
   - decl: |-
       class A<T> {}

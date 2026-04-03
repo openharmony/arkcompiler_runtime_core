@@ -31,7 +31,7 @@ function main(): void {
   const combinedItem: EmptyInterface = {
     key: "exampleKey"
   };
-  let resule = processCombinedType(combinedItem);
+  let result = processCombinedType(combinedItem);
 
-  arktest.assertEQ(resule, "Key: exampleKey");
+  arktest.assertEQ(result, "Key: exampleKey");
 }

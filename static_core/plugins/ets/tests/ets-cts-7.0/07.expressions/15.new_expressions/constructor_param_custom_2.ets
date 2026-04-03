@@ -35,9 +35,9 @@ class C {
   }
 
   static foo() {
-    let arr = new Array<C>()
-    arr.push(new C(1))
-    arktest.assertEQ(arr.length, 1)
+    let arr: Array<C> = new C[5](new C(1))
+    arr[0] = new C(1)
+    arktest.assertEQ(arr.length, 5)
     arktest.assertEQ(arr.at(0).j, 1)
   }
 }

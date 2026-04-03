@@ -121,3 +121,17 @@ return_test_cases:
       }
     use: |
       new A()
+
+  # return object expression literal (exercises SetPreferredType on object expr in return statement)
+  - decl: |
+      interface DataResult {
+        appendText: string
+        advanceCount: int
+      }
+      function makeResult(): DataResult {
+        return { appendText: "hello", advanceCount: 3 }
+      }
+    use: |
+      let r = makeResult()
+      arktest.assertEQ(r.appendText, "hello")
+      arktest.assertEQ(r.advanceCount, 3)

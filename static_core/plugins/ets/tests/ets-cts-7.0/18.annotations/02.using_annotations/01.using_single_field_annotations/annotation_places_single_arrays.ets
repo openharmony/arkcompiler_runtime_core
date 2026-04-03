@@ -28,6 +28,8 @@ tags: [compile-only]
    field1: {{ case.type }} = {{ case.value }}
 }
 
+let var_name1: @SomeAnnotation({{ case.value }}) ({{ case.type }})
+
 @SomeAnnotation({{ case.value }})
 const c: string = "some_string"
 

@@ -14,11 +14,20 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Use well-formed parameterized type in type arguments.
-assert: If a typeReference has type arguments, it must denote a well-formed parameterized type (link to parameterized types), and none of the type arguments may be wildcard type arguments, or a compile-time error occurs.
-tags: [compile-only]
+desc: >-
+    A compile-time error occurs if type arguments (see Type Arguments) of typeReference
+    denote a parameterized type that is not well-formed (see Generic Instantiations).
+    Generic parameter extends class with 'final' modifier
 ---*/
 
-interface A<T> { }
+final class C {
+  f: int = 7
+}
+interface I<T extends C> {
+  foo(i: T) { return i.f }
+}
 
-interface B extends A<Boolean> { }
+function main() {
+  let i: I<C> = {}
+  arktest.assertEQ(i.foo(new C()), 7)
+}

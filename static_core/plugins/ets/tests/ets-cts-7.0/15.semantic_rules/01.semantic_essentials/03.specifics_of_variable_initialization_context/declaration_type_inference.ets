@@ -20,7 +20,7 @@ desc: >-
 ---*/
 
 {%- for c in cases %}
-function foo{{loop.index}}(x: {{c.type}}) {
+function foo{{loop.index}}(x?: {{c.type}}) {
     let v = x
     const c = x
 }

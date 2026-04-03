@@ -15,12 +15,13 @@
 
 {% for case in cases %}
 /*---
-desc: Incorrect char literals
+desc: Invalid char literals
 tags: [negative, compile-only]
+expected_out: "{{case.exp_out}}"
 ---*/
 
 function main(): void {
     let c: char;
-    c = {{case}};
+    c = {{case.value}};
 }
 {% endfor %}

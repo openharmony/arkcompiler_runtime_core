@@ -33,9 +33,9 @@ class C {
 }
 
 function main(): void {
-  let arr = new Array<C>()
-  arr.push(new C({{c.value}}))
-  arktest.assertEQ(arr.length, 1)
+  let arr: Array<C> = new C[5](new C({{c.value}}))
+  arr[0] = new C({{c.value}})
+  arktest.assertEQ(arr.length, 5)
   arktest.assertEQ(arr.at(0).i, {{c.value}})
 }
 

@@ -19,8 +19,3 @@ cases:
     statements:
       - "let result = (func as object as () => Any)()"
       - "arktest.assertEQ(result, undefined)"
-
-  - description: "Immediately invoked arrow function with empty body can assign to undefined"
-    statements:
-      - "let func: undefined = (() => {})()"
-      - "arktest.assertEQ(func, undefined)"

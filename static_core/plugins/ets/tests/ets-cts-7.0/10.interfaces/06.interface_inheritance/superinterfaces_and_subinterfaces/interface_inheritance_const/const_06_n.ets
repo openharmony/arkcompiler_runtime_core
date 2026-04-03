@@ -18,6 +18,8 @@ desc: ->
       CTE expected if class uses name for a field/method already mentioned in the superinterface
       with a private modifier
 tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0224: Identifier expected, got 'private'.
 ---*/
 
 interface I {

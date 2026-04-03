@@ -13,100 +13,106 @@
 
 ---
 cases:
-  # classes
+# classes
+#0
   - use: |-
       let v: A<X> = new A<X> (new X())
-
+#1
   - use: |-
       let v: A<X|null> = new A<X|null> (new X())
-
+#2
   - use: |-
       let v: A<X|null> = new A<X|null> (null)
-
+#3
   - use: |-
       let v: A<X> = new A<X> (new X())
     bound: ' extends X'
-
+#4
   - use: |-
       let v: A<X|null> = new A<X|null> (new X())
     bound: ' extends X|null'
-
+#5
   - use: |-
       let v: A<X|null> = new A<X|null> (null)
     bound: ' extends Object|null'
 
-  # interfaces
+# interfaces
+#6
   - use: |-
       let v: A<I> = new A<I> (new X())
-
+#7
   - use: |-
       let v: A<I|null> = new A<I|null> (new Y())
-
+#8
   - use: |-
       let v: A<I|null> = new A<I|null> (null)
-
+#9
   - use: |-
       let v: A<I> = new A<I> (new X())
     bound: ' extends I'
-
+#10
   - use: |-
       let v: A<I|null> = new A<I|null> (new Y())
     bound: ' extends I|null'
-
+#11
   - use: |-
       let v: A<I|null> = new A<I|null> (null)
     bound: ' extends Object|null'
 
-  # arrays
+# arrays
+#12
   - use: |-
       let v: A<X[]> = new A<X[]> (new X[0](new X()))
-
+#13
   - use: |-
       let v: A<X[]|null> = new A<X[]|null> (new X[0](new X()))
-
+#14
   - use: |-
       let v: A<X[]|null> = new A<X[]|null> (null)
-
+#15
   - use: |-
       let v: A<X[]|null> = new A<X[]|null> (new X[0](new X()))
     bound: ' extends X[]|null'
-
+#16
   - use: |-
       let v: A<X[]|null> = new A<X[]|null> (null)
     bound: ' extends Object|null'
-
+#17
   - use: |-
       let v: A<X[]> = new A<X[]> (new X[0](new X()))
 
 # aliases
+#18
   - use: |-
-      let v: A<B> = new A<B> (new X[0] [0])
+      let v: A<B> = new A<B> ([ [new X()],[new X()] ])
     decl: type B = X[][]|null
-
+#19
   - use: |-
       let v: A<B|null> = new A<B|null> (null)
     decl: type B = I[]|null
-
+#20
   - use: |-
       let v: A<B> = new A<B> (new Y[0](new Y()))
     decl: type B = Y[]
 
-  # tuples
+# tuples
+#21
   - use: |-
       let v: A<[X, X]> = new A<[X, X]> ([new X(), new X()])
-
+#22
   - use: |-
       let v: A<[X, X]|null> = new A<[X, X]|null> ([new X(), new X()])
-
+#23
   - use: |-
       let v: A<[X, X]|null> = new A<[X, X]|null> (null)
 
-  # FixedArray
+# FixedArray
+#24
   - use: |-
       let v: A<FixedArray<X>> = new A<FixedArray<X>> ([new X()])
-
+#25
   - use: |-
       let v: A<FixedArray<X>|null> = new A<FixedArray<X>|null> ([new X()])
-
+#26
   - use: |-
       let v: A<FixedArray<X>|null> = new A<FixedArray<X>|null> (null)

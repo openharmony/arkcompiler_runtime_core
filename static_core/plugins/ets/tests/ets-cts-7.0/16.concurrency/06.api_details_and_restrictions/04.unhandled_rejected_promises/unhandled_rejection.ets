@@ -17,7 +17,8 @@
 desc: Run async without waiting; main completes immediately.
 assert: stdout contains the text message
 tags: [no-warmup]
-expected_out: main finished (unhandled_rejection.ets)
+expected_out:
+    runtime: main finished (unhandled_rejection.ets)
 ---*/
 
 async function throwNow(): Promise<void> {

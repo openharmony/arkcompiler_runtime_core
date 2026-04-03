@@ -16,6 +16,9 @@
 /*---
 desc: An empty interface inherits an interface that contains a tuple type, illegal.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0319: Type '"pending"' is not compatible with type '"active"|"inactive"'
+    at property 'status'
 ---*/
 
 interface ParentInterface {

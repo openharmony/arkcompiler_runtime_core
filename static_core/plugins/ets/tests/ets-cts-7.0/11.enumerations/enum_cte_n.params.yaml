@@ -305,7 +305,7 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "ciast"
     ids: "63-64"
 
@@ -380,7 +380,7 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "weibt"
     ids: "74-80"
 
@@ -476,6 +476,42 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "mot"
     ids: "86-100"
+
+  - desc: |-
+      >-
+        If an enumeration declaration is prefixed with the keyword const,
+        then a compile-time error occurs. This restriction is temporary,
+        and the semantics of const enum is to be made available in the
+        future versions of ArkTS.
+        params: const enum
+    check_variants:
+      - decl_data: |-
+          const enum E { A = 5 }
+      - decl_data: |-
+          const enum E: long { A = 5 }
+      - decl_data: |-
+          const enum E: int { A = 5 }
+      - decl_data: |-
+          const enum E: short { A = 5 }
+      - decl_data: |-
+          const enum E: byte { A = 5 }
+      - decl_data: |-
+          const enum E: double { A = 5.5 }
+      - decl_data: |-
+          const enum E: float { A = 5.5f }
+      - decl_data: |-
+          const enum E { A = "ac" }
+      - decl_data: |-
+          const enum E: string { A = "ac" }
+      - decl_data: |-
+          const enum Empty {}
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "ce"

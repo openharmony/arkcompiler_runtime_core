@@ -31,12 +31,6 @@ class Base1 implements IBase1 {
   }
 }
 
-class Base2 implements IBase2 {
-  method(): string {
-    return "Base2 method";
-  }
-}
-
 class Derived extends Base1 implements IBase2 {
   method(): string {
     return "Derived method";

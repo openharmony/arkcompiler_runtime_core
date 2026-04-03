@@ -51,3 +51,5 @@ cases:
   - { use: "32768", use_type: ": short | int", expected_type: int }
   - { use: "2147483648", use_type: ": int | long", expected_type: long }
   - { use: "Double.MAX_VALUE", use_type: ": float | double", expected_type: double }
+  # value fits within float
+  - { use: "1.0", use_type: ": float | double", expected_type: double }

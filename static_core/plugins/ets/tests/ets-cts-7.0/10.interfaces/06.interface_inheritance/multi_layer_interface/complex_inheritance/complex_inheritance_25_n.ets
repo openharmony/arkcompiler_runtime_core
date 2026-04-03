@@ -16,6 +16,8 @@
 /*---
 desc: Static class method is not implementing interface non-static method
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: Parent is not abstract and does not override abstract method greet(): String in G
 ---*/
 
 interface G {

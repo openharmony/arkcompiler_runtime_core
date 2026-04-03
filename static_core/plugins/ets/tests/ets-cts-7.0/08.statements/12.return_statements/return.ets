@@ -22,7 +22,7 @@ desc: Return statement
 {{ case.decl }}
 
 function main(): void {
-    {{ case.use }}
+    {{ case.use | indent(4) }}
 }
 
 {% endfor %}

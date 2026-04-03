@@ -19,6 +19,9 @@ tags:
 - compile-only
 - not-a-test
 - negative
+expected_out: >-
+    Semantic error ESE0141: greet(): Double in Child cannot override greet():
+    String in Parent because overriding return type is not compatible with the other return type.
 ---*/
 
 import { Parent } from "./parentModule.ets";

@@ -13,8 +13,7 @@
 
 ---
 cases:
-  - { assign: bars, call: 1, res: -1}
-  - { assign: bars, call: "1, \"some str\"", res: -1}
-  - { assign: barf, call: 1, res: -1}
-  - { assign: barl, call: 1, res: -1}
-  - { assign: barretstr, call: 1, res: "\"str\""}
+  - { assign: bars, type: "((p1: Int, p2: String) => Int)"}
+  - { assign: barf, type: "((p1: Float) => Int)"}
+  - { assign: barl, type: "((p1: Long) => Int)"}
+  - { assign: barretstr, type: "((p1: Int) => String)"}

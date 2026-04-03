@@ -1,0 +1,192 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # variable as non-nullish expression
+    - decl: |-
+          let v: string|int|boolean = 'a'  // top-level variable
+      main: |-
+          arktest.assertEQ('b' + v!, 'ba')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          class A {
+              fld: string|int|boolean = 'a'
+          }
+      main: |-
+          let v: A|null|undefined = new A   // local variable, smart-casting
+          let w = v!.fld
+          arktest.assertEQ(w, 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          class A {
+              meth(): string|int|boolean {
+                  return 42
+              }
+          }
+      main: |-
+          let v: A|null|undefined = new A  // local variable, smart-casting
+          let w = v!.meth()
+          arktest.assertEQ(w, 42)
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - main: |-
+          let v: Array<string|int|null|undefined>|null|undefined = [42]  // local variable, smart-casting
+          let w = v![0]
+          arktest.assertEQ(w, 42)
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - main: |-
+          let v: FixedArray<int>|null|undefined = [42]  // local variable, smart-casting
+          let w = v![0]
+          arktest.assertEQ(w, 42)
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - main: |-
+          let v: string[]|null|undefined = ['a']  // local variable, smart-casting
+          let w = v![0]
+          arktest.assertEQ(w, 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          let v: Array<string[]> = [['a', 'b', 'c']]
+      main: |-
+          let w = v[0]![1]
+          arktest.assertEQ(w, 'b')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - main: |-
+          let v: Record<int, string>|null|undefined = { 42: 'a' }  // local variable, smart-casting
+          let w = v![42]
+          arktest.assertEQ(w, 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          function foo(p: int): string {
+              return '<' + p + '>'
+          }
+      main: |-
+          let v: ((p: int) => string)|null|undefined = foo  // local variable, smart-casting
+          let w = v!(42)
+          arktest.assertEQ(w, '<42>')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - main: |-
+          let v: [string, int]|null|undefined = ['a', 42]  // local variable, smart-casting
+          let w = v![0]
+          arktest.assertEQ(w, 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    # generic type as non-nullish expression
+    - decl: |-
+          function foo<T extends Object>(p: T): string {
+              return '' + p!  // non-nullish due to constraint
+          }
+      main: |-
+          arktest.assertEQ(foo(42), '42')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          function foo<T extends Object>(p: [T, T, T]): T {
+              return p[1]
+          }
+          let v: [int, int, int] = [1, 2, 3]
+      main: |-
+          arktest.assertEQ(foo<int>(v)!, 2)  // non-nullish due to constraint
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    # call expression as non-nullish expression
+    - decl: |-
+          function foo(): string {
+              return 'a'
+          }
+      main: |-
+          arktest.assertEQ(foo()!, 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          class A {
+              meth(): string|int|boolean {
+                  return 42
+              }
+          }
+      main: |-
+          arktest.assertEQ(new A().meth()!, 42)
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    # non-nullish function argument for nullish parameter
+    - decl: |-
+          function foo(p: string|int|null) {
+              return '' + p
+          }
+          let v: string = 'a'
+      main: |-
+          arktest.assertEQ(foo(v!), 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          function foo(p: string|int|null) {
+              return '' + p
+          }
+      main: |-
+          let v: string|int|null = 'a' // local variable, smart-casting
+          arktest.assertEQ(foo(v!), 'a')
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    # extra '!' generates warning
+    - decl: |-
+          let v: int|string|undefined|null = 42
+      main: |-
+          let w = v!
+          arktest.assertEQ(w!, 42)  // second '!' generates warning
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          function foo(): int|string|undefined {
+              return 42
+          }
+      main: |-
+          let w: int|string|undefined = foo()!   // local variable, smart-casting
+          arktest.assertEQ(w!, 42)
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+
+    - decl: |-
+          class A {
+              static meth(): string|int|boolean|null {
+                  return 'a'
+              }
+          }
+      main: |-
+          arktest.assertEQ(A.meth()!!, 'a') // second '!' generates warning
+      warning: |-
+          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish

@@ -26,10 +26,10 @@ cases:
     value: '[new E<A>(), new E<A>()]'
     type2: 'FixedArray<E<B>>'
   
-  - decl:  'class E<out T> {}'
-    type1: 'FixedArray<E<B>>'
-    value: '[new E<B>(), new E<B>()]'
-    type2: 'FixedArray<E<A>>'
+  - decl:  'class E2<out T> {}'
+    type1: 'FixedArray<E2<B>>'
+    value: '[new E2<B>(), new E2<B>()]'
+    type2: 'FixedArray<E2<A>>'
 
   # Union Type Subtyping
   - type1: 'string'
@@ -44,30 +44,30 @@ cases:
     value: 'new B()'
     type2: 'A | B'
   
-  - decl:  'class E<out T> {}'
-    type1: 'E<B>'
-    value: 'new E<B>()'
-    type2: 'E<A>'
+  - decl:  'class E3<out T> {}'
+    type1: 'E3<B>'
+    value: 'new E3<B>()'
+    type2: 'E3<A>'
 
-  - decl:  'class E<in T> {}'
-    type1: 'E<A>'
-    value: 'new E<A>()'
-    type2: 'E<B>'
+  - decl:  'class E4<in T> {}'
+    type1: 'E4<A>'
+    value: 'new E4<A>()'
+    type2: 'E4<B>'
 
   # Literal Type subtyping
   - type1: '"hello"'
     value: '"hello"'
     type2: 'string'
 
-  - decl:  'class E<out T> {}'
-    type1: 'E<"hello">'
-    value: 'new E<"hello">()'
-    type2: 'E<string>'
+  - decl:  'class E5<out T> {}'
+    type1: 'E5<"hello">'
+    value: 'new E5<"hello">()'
+    type2: 'E5<string>'
 
-  - decl:  'class E<in T> {}'
-    type1: 'E<string>'
-    value: 'new E<string>()'
-    type2: 'E<"hello">'
+  - decl:  'class E6<in T> {}'
+    type1: 'E6<string>'
+    value: 'new E6<string>()'
+    type2: 'E6<"hello">'
 
   # Function Types
   - type1: '(p: A) => B'
@@ -82,28 +82,27 @@ cases:
     value: '(q: A): B => { return new B()}'
     type2: '(q: B, p?: A) => A'
   
-  - decl:  'class E<in T> {}'
-    type1: '(p: E<B>) => E<A>'
-    value: '(p: E<B>): E<A> => { return new E<A>()}'
-    type2: '(p: E<A>) => E<B>'
+  - decl:  'class E7<in T> {}'
+    type1: '(p: E7<B>) => E7<A>'
+    value: '(p: E7<B>): E7<A> => { return new E7<A>()}'
+    type2: '(p: E7<A>) => E7<B>'
 
-  - decl:  'class E<out T> {}'
-    type1: '(p: E<A>) => E<B>'
-    value: '(p: E<A>): E<B> => { return new E<B>()}'
-    type2: '(p: E<B>) => E<A>'
+  - decl:  'class E8<out T> {}'
+    type1: '(p: E8<A>) => E8<B>'
+    value: '(p: E8<A>): E8<B> => { return new E8<B>()}'
+    type2: '(p: E8<B>) => E8<A>'
 
   # Object Type subtyping
   - type1: 'A'
     value: '{name: "Alice"}'
     type2: 'Object'
 
-  - decl:  'class E<out T> {}'
-    type1: 'E<B>'
-    value: 'new E<B>()'
+  - decl:  'class E9<out T> {}'
+    type1: 'E9<B>'
+    value: 'new E9<B>()'
     type2: 'Object'
 
-  - decl:  'class E<in T> {}'
-    type1: 'E<A>'
-    value: 'new E<A>()'
+  - decl:  'class E10<in T> {}'
+    type1: 'E10<A>'
+    value: 'new E10<A>()'
     type2: 'Object'
-

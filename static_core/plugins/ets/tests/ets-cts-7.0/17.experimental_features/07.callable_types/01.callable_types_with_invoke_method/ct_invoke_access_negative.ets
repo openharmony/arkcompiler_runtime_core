@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
+{% for c in cases %}
 
 /*---
 desc: >-
@@ -20,11 +20,14 @@ desc: >-
     in a type call expression in either case above. If the signature has
     parameters, then the call must contain corresponding arguments.
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 {{c.decl}}
 
 function main(): void {
+    {% if c.use %}
     {{c.use|indent}}
+    {%- endif %}
 }
 {%- endfor %}

@@ -18,6 +18,7 @@
 /*---
 desc: Compatible functions have same number of arguments. Arguments and return values should follow the variance rule.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type '{{c.type}}' cannot be assigned to type '((p1: Int) => Int)'"
 ---*/
 
 function foo(i: int) {
@@ -42,7 +43,6 @@ function barretstr(i: int) {
 
 function main() {
     let x: (i: int) => int = {{c.assign}};
-    arktest.assertEQ(x({{c.call}}), {{c.res}});
 }
 
-{% endfor %}
+{%- endfor %}

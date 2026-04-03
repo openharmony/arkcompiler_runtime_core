@@ -13,6 +13,7 @@
 
 ---
 function_decls:
+#0
     - decl: |-
           let i = 0
           let foo = (): void => {
@@ -22,7 +23,7 @@ function_decls:
           i = 0
           foo()
           arktest.assertTrue(i == 1)
-
+#1
     - decl: |-
           let i = 0
           let foo = (): void => {
@@ -33,7 +34,7 @@ function_decls:
           i = 0
           foo()
           arktest.assertTrue(i == 1)
-
+#2
     - decl: |-
           let s = "foo"
           let foo = (): string => {
@@ -42,7 +43,7 @@ function_decls:
       call: |-
           let v: string = foo()
           arktest.assertTrue(foo() == "foo")
-
+#3
     - decl: |-
           let s: int = 42
           let foo = (): int => {
@@ -51,7 +52,7 @@ function_decls:
       call: |-
           let v: int = foo()
           arktest.assertTrue(foo() == 42)
-
+#4
     - decl: |-
           let s: number = 1.0
           let foo = (): number => {
@@ -60,7 +61,7 @@ function_decls:
       call: |-
           let v: number = foo()
           arktest.assertTrue(foo() == 1.0)
-
+#5
     - decl: |-
           let s = new Error()
           let foo = (): Error => {
@@ -69,7 +70,7 @@ function_decls:
       call: |-
           let v: Error = foo()
           arktest.assertTrue(foo() instanceof Error)
-
+#6
     - decl: |-
           let s: number[] = [1.0, 2.0, 3.0]
           let foo = (): number[] => {
@@ -78,7 +79,7 @@ function_decls:
       call: |-
           let v = foo()
           arktest.assertTrue(v instanceof Array && v[0] instanceof number && v.length == 3)
-
+#7
     - decl: |-
           let s: Boolean[] = new Boolean[0](false)
           let foo = (): boolean[] => {
@@ -87,34 +88,37 @@ function_decls:
       call: |-
           let v = foo()
           arktest.assertTrue(v instanceof Array && v.length == 0)
-
+#8
     - decl: |-
-          let s: Long[][] = new Long[1][1]
+          let s: Long[][] = [ [new Long(0)],[new Long(0)] ]
           let foo = (): long[][] => {
               if (s != null)
                   return s
               else
-                  return new Long[2][2]
+                  return [
+                        [new Long(0), new Long(0)],
+                        [new Long(0), new Long(0)]
+                    ]
           }
       call: |-
           let v: Long[][] = foo()
           arktest.assertTrue(foo() instanceof Array)
-
+#9
     - decl: |-
-          let s: long[][] = new long[1][1]
+          let s: long[][] = [ [new Long(0)],[new Long(0)] ]
           let foo = (): Error[][]|long[][] => {  
               if (s != null)
                   return s
               else
-                  return new Error[1][1]
+                  return [ [new Error()],[new Error()] ]
           }
       call: |-
           let v: long[][] = foo() as long[][]
           v[0][0] = 0
           arktest.assertEQ(v[0][0], 0)
-
+#10
     - decl: |-
-          let s: Long[][] = new Long[1][1]
+          let s: Long[][] = [ [new Long(0)],[new Long(0)] ]
           let foo = (): Error[]|Long[][] => {  
               if (s == null)
                   return s
@@ -124,9 +128,9 @@ function_decls:
       call: |-
           let v: Error[] = foo() as Error[]
           arktest.assertEQ(v.length, 1)
-
+#11
     - decl: |-
-          let s: Long[][] | null = new Long[1][1]
+          let s: Long[][] | null = [ [new Long(0)],[new Long(0)] ]
           let foo = (): Error|Long[][]|null => {  
               if (s != null)
                   return s
@@ -136,7 +140,7 @@ function_decls:
       call: |-
           let v = foo()
           arktest.assertTrue(v instanceof Object)
-
+#12
     - decl: |-
           class A {}
           class B extends A {}
@@ -154,7 +158,7 @@ function_decls:
       call: |-
           let v: A = foo()
           arktest.assertTrue(foo() instanceof A)
-
+#13
     - decl: |-
           class A {}
           class B extends A {}
@@ -172,7 +176,7 @@ function_decls:
           let v: B[] = new B[1](new B())
           v[0] = foo()
           arktest.assertTrue(foo() instanceof D)
-
+#14
     - decl: |-
           let s = new Object()
           let foo = (): boolean|boolean[] => {    

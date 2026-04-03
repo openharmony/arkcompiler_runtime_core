@@ -16,6 +16,7 @@
 /*---
 desc: Test sub interfaces cannot contain optional methods.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY129375: Optional methods are not supported."
 ---*/
 
 interface ParentInterface {

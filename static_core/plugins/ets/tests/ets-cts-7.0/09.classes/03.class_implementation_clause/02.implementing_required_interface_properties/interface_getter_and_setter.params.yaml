@@ -23,7 +23,6 @@ cases:
       }
     doc: initialize property using writable form
 
-
   - decl: |-
       interface I {
         get f(): int
@@ -35,3 +34,14 @@ cases:
       }
     doc: initialize property using both getter and setter
 
+  - decl: |-
+      interface J {
+        get n(): number
+        set n(x: string)
+      }
+      class E implements J {
+        value: string = ""
+        get n(): number { return Number.parseFloat(this.value) }
+        set n(x: string) { this.value = x }      
+      }
+    doc: different getter and setter types

@@ -84,7 +84,7 @@ cases:
     - { val: 'new short[0]((0).toShort())', type: 'short[]' }
     - { val: 'new int[0](0)', type: 'int[]' }
     - { val: '[]', type: 'long[]' }
-    - { val: 'new float[0][0]', type: 'float[][]' }
+    - { val: '[ [new Float(0)],[new Float(0)] ]', type: 'float[][]' }
     - { val: 'new double[0](0)', type: 'double[]' }
 
     - { val: 'new Object()', type: 'Object' }

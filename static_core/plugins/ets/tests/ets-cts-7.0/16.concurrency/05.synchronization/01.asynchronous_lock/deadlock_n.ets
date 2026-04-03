@@ -17,7 +17,8 @@
 
 /*---
 desc: {{c.desc}}
-expected_error: [{{c.expected_error}}]
+expected_error:
+    runtime: {{c.expected_error}}
 tags: [no-warmup, negative]
 ---*/
 

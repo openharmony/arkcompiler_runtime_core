@@ -299,3 +299,22 @@ cases:
         arktest.assertEQ(r!['a'], undefined)
         arktest.assertEQ(r!['b']!['bb1'], undefined)
         arktest.assertEQ(r!['b']!['bb2'], 42)
+
+    - decl: |-
+        interface IA {
+          flag: '0'
+        }
+        interface IB {
+          flag: '1'
+        }
+        type TIA = IA
+        type TIB = IB
+        type FLAGS = TIA | TIB 
+        type FM = Record<string, FLAGS>
+      use: |-
+        let mf: FM = {
+          '0': {flag: '0'}, 
+          '1': {flag: '1'}
+        }
+        arktest.assertTrue(mf['0'] instanceof IA)
+        arktest.assertTrue(mf['1'] instanceof IB)

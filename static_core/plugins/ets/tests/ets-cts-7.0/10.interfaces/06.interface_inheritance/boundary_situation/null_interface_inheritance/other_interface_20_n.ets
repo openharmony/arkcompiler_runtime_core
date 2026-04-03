@@ -16,6 +16,7 @@
 /*---
 desc: Null interface inherits an interface containing an unknown type.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY102460: 'any' and 'unknown' types are not supported. Specify types explicitly."
 ---*/
 
 interface ParentInterface {

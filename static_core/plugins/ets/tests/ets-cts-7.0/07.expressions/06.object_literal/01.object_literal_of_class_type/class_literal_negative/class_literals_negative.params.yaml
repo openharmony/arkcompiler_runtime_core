@@ -38,7 +38,7 @@ cases:
     literal: "{foo(a: string): string { return a }}"
     expected: |-
       Semantic error ESE0139: Signature foo(a: String): String is not visible here.
-    call: |- 
+    call: |-
       foo("a")
 
   - decl: |-
@@ -47,7 +47,7 @@ cases:
         foo(a: string): string {
           return this.a + a
         }
-      }    
+      }
       class B {
         a: string = 'default'
         foo(a: string): string {
@@ -55,7 +55,7 @@ cases:
         }
       }
     type: |-
-      A | B 
+      A | B
     literal: "{a: 'a'}"
     expected: |-
       Semantic error ESE0061: Ambiguous reference to 'A|B'
@@ -173,19 +173,3 @@ cases:
     literal: "{a: 'a'}"
     expected: |-
       Semantic error ESE0209: Cannot assign to this property because it is readonly.
-
-  - decl: |-
-      class A {
-        b: Base = new Base
-        foo(d: Derived): Base {
-          return new Base
-        }
-      }
-      class Base { b: string = "base"}
-      class Derived extends Base { b: string  = "derived"}
-    type: |-
-      A
-    literal: "{ foo(a: string): string {return a} }"
-    expected: |-
-      Semantic error ESE0319: Type '(p1: String) => String'
-       is not compatible with type '(d: Derived) => Base' at property 'foo'

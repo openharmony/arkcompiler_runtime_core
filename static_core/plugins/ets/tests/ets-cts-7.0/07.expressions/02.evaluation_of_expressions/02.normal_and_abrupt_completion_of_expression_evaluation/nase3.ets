@@ -14,16 +14,19 @@
  */
 
 /*---
-desc: NegativeArraySizeError is thrown by an array creation expression
-  if any dimension expression has a value that is less than zero.
+desc: >-
+    NegativeArraySizeError is thrown by an array creation expression
+    if any dimension expression has a value that is less than zero.
 ---*/
 
 function main() {
-  let a: int = 1;
-  let b: int = 1;
-  let sz: int = -0x80000000;
-  let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }
-  arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[2][sz] + (b = 2); }, expectedException)
-  arktest.assertEQ(a, 2, "a value not changed")
-  arktest.assertEQ(b, 1, "b value changed")
+
+    let a: int = 1;
+    let b: int = 1;
+    let sz: int = -0x80000000;
+    let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }
+    arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[sz](1) + (b = 2); }, expectedException)
+    arktest.assertEQ(a, 2, "a value not changed")
+    arktest.assertEQ(b, 1, "b value changed")
+
 }

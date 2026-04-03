@@ -1,0 +1,879 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# List of operations with illegal types per table in chapter 7.22
+# Note for &&, || - no illegal types are possible per 15.14.1 Extended Conditional Expressions
+operations:
+  - op: { sign: "*", name: "mul" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+
+  - op: { sign: "/", name: "div" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+
+  - op: { sign: "%", name: "rem" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+
+  - op: { sign: "**", name: "exp" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["int", "1"],
+        expected_out: "'Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type.'"
+      }
+      - {
+        type2: ["bigint", "1n"], type1: ["int", "1"],
+        expected_out: "'Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type.'"
+      }
+
+  - op: { sign: "+", name: "add" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type2: ["bigint", "1n"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+
+  - op: { sign: "-", name: "subtract" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+      - {
+        type2: ["bigint", "1n"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'"
+      }
+
+  - op: { sign: "<<", name: "lshift" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+
+  - op: { sign: ">>", name: "rshift" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+
+  - op: { sign: ">>>", name: "urshift" }
+    pairs:
+      - {
+        type1: ["byte", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type2: ["byte", "1"], type1: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["long", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["float", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["double", "1"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+      - {
+        type1: ["bigint", "1n"], type2: ["boolean", "true"],
+        expected_out: "'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'"
+      }
+
+  - op: { sign: "<", name: "less" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+
+  - op: { sign: "<=", name: "leq" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+
+  - op: { sign: ">", name: "greater" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+
+  - op: { sign: ">=", name: "geq" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+
+  - op: { sign: "==", name: "eq" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'BigInt' and 'Boolean'."
+
+  - op: { sign: "!=", name: "neq" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'BigInt' and 'Boolean'."
+
+  - op: { sign: "===", name: "eq_ext" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'BigInt' and 'Boolean'."
+
+  - op: { sign: "!==", name: "neq_ext" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Byte' and 'Boolean'."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Boolean' and 'Byte'."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Long' and 'Boolean'."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Float' and 'Boolean'."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Double' and 'Boolean'."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'BigInt' and 'Boolean'."
+
+  - op: { sign: "&", name: "and_bit" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+
+  - op: { sign: "^", name: "xor" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+
+  - op: { sign: "|", name: "or_bit" }
+    pairs:
+      - type1: ["byte", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type2: ["byte", "1"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["long", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["float", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["double", "1"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+      - type1: ["bigint", "1n"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."
+
+  - op: { sign: "<", name: "less1" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Int' and 'Boolean'."
+      - type2: ["EAB", "EAB.A"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Int'."
+
+  - op: { sign: "<=", name: "leq1" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Int' and 'Boolean'."
+
+  - op: { sign: ">", name: "greater1" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Int' and 'Boolean'."
+
+  - op: { sign: ">=", name: "geq1" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Int' and 'Boolean'."
+
+  - op: { sign: "<", name: "less2" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Int' and 'Boolean'."
+      - type2: ["EN", "EN.a"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Int'."
+
+  - op: { sign: "<=", name: "leq2" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Int' and 'Boolean'."
+
+  - op: { sign: ">", name: "greater2" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'Int' and 'Boolean'."
+
+  - op: { sign: ">=", name: "geq2" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Int' and 'Boolean'."
+
+  - op: { sign: "==", name: "eq1" }
+    pairs:
+      - type1: ["char", "c'0'"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Char' and 'Boolean'."
+      - type2: ["char", "c'0'"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'Char'."
+
+  - op: { sign: "!=", name: "neq1" }
+    pairs:
+      - type1: ["char", "c'0'"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Char' and 'Boolean'."
+
+  - op: { sign: "===", name: "eq_ext1" }
+    pairs:
+      - type1: ["char", "c'0'"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'Char' and 'Boolean'."
+
+  - op: { sign: "!==", name: "neq_ext1" }
+    pairs:
+      - type1: ["char", "c'0'"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Char' and 'Boolean'."
+
+  - op: { sign: "==", name: "eq2" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'EAB' and 'Boolean'."
+      - type2: ["EAB", "EAB.A"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'EAB'."
+
+  - op: { sign: "!=", name: "neq2" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'EAB' and 'Boolean'."
+
+  - op: { sign: "===", name: "eq_ext2" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'EAB' and 'Boolean'."
+
+  - op: { sign: "!==", name: "neq_ext2" }
+    decl: |-
+      enum EAB {A, B}
+    pairs:
+      - type1: ["EAB", "EAB.A"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'EAB' and 'Boolean'."
+
+  - op: { sign: "==", name: "eq3" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'EN' and 'Boolean'."
+      - type2: ["EN", "EN.a"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'EN'."
+
+  - op: { sign: "!=", name: "neq3" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'EN' and 'Boolean'."
+
+  - op: { sign: "===", name: "eq_ext3" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'EN' and 'Boolean'."
+
+  - op: { sign: "!==", name: "neq_ext3" }
+    decl: |-
+      enum EN {a = 0, b = 1}
+    pairs:
+      - type1: ["EN", "EN.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'EN' and 'Boolean'."
+
+  - op: { sign: "==", name: "eq4" }
+    decl: |-
+      function foo1() {}
+      type foo_type = () => void
+    pairs:
+      - type1: ["foo_type", "foo1"]
+        type2: ["byte", "1"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'foo_type' and 'Byte'."
+      - type2: ["foo_type", "foo1"]
+        type1: ["byte", "1"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Byte' and 'foo_type'."
+      - type1: ["foo_type", "foo1"]
+        type2: ["null", "null"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'foo_type' and 'null'."
+      - type1: ["foo_type", "foo1"]
+        type2: ["undefined", "undefined"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'foo_type' and 'undefined'."
+
+  - op: { sign: "!=", name: "neq4" }
+    decl: |-
+      function foo1() {}
+      type foo_type = () => void
+    pairs:
+      - type1: ["foo_type", "foo1"]
+        type2: ["byte", "1"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'foo_type' and 'Byte'."
+
+  - op: { sign: "===", name: "eq_ext4" }
+    decl: |-
+      function foo1() {}
+      type foo_type = () => void
+    pairs:
+      - type1: ["foo_type", "foo1"]
+        type2: ["byte", "1"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'foo_type' and 'Byte'."
+
+  - op: { sign: "!==", name: "neq_ext4" }
+    decl: |-
+      function foo1() {}
+      type foo_type = () => void
+    pairs:
+      - type1: ["foo_type", "foo1"]
+        type2: ["byte", "1"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'foo_type' and 'Byte'."
+
+  - op: { sign: "<", name: "less3" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'String' and 'Boolean'."
+      - type2: ["ES", "ES.a"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'String'."
+
+  - op: { sign: "<=", name: "leq3" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'String' and 'Boolean'."
+
+  - op: { sign: ">", name: "greater3" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'String' and 'Boolean'."
+
+  - op: { sign: ">=", name: "geq3" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'String' and 'Boolean'."
+
+  - op: { sign: "==", name: "eq5" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'ES' and 'Boolean'."
+      - type2: ["ES", "ES.a"]
+        type1: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'ES'."
+
+  - op: { sign: "!=", name: "neq5" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'ES' and 'Boolean'."
+
+  - op: { sign: "===", name: "eq_ext5" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '===' cannot be applied to types 'ES' and 'Boolean'."
+
+  - op: { sign: "!==", name: "neq_ext5" }
+    decl: |-
+      enum ES {a = "0", b = "1"}
+    pairs:
+      - type1: ["ES", "ES.a"]
+        type2: ["boolean", "true"]
+        expected_out: |-
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'ES' and 'Boolean'."

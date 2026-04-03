@@ -21,8 +21,8 @@ desc: >-
 ---*/
 
 interface Vehicle {
-    getHorsePower(rpm: int, torq: int): int {
-        return (rpm * torq) / 5;
+    getHorsePower(rpm: int, torque: int): int {
+        return (rpm * torque) / 5;
     }
 }
 
@@ -32,8 +32,8 @@ class A implements Vehicle {
 
 class B implements Vehicle {
     // default interface method overridden
-    public getHorsePower(rpm: int, torq: int): int {
-        return rpm * torq;
+    public getHorsePower(rpm: int, torque: int): int {
+        return rpm * torque;
     }
 }
 

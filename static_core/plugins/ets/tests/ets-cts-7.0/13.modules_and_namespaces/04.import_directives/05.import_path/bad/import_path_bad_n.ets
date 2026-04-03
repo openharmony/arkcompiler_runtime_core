@@ -16,9 +16,10 @@
 {% for stmt in import_stmts %}
 
 /*---
-desc: Import path is a string literal that determines where and how an imported module is to be searched for.
+desc: >-
+    Import path is a string literal that determines where and how an imported module is to be searched for.
+    {{stmt}}
 tags: [compile-only, negative]
-params: {{stmt}}
 ---*/
 
 {{stmt}}

@@ -14,6 +14,7 @@
 ---
 function_decls:
     # instance
+#0
     - decl: |-
           class A {
             i = 0
@@ -25,7 +26,7 @@ function_decls:
           let a = new A()
           a.foo()
           arktest.assertEQ(a.i, 1)
-
+#1
     - decl: |-
           class A {
             i = 0
@@ -38,7 +39,7 @@ function_decls:
           let a = new A()
           a.foo()
           arktest.assertEQ(a.i, 1)
-
+#2
     - decl: |-
           class A {
             s = "foo"
@@ -51,7 +52,7 @@ function_decls:
           let v = a.foo()
           arktest.assertEQ(new A().foo(), "foo")
           arktest.assertEQ(v, "foo")
-
+#3
     - decl: |-
           class A {
             s: int = 42
@@ -64,7 +65,7 @@ function_decls:
           let v = a.foo()
           arktest.assertEQ(new A().foo(), 42)
           arktest.assertEQ(v, 42)
-
+#4
     - decl: |-
           class A {
             s: number = 1.0
@@ -77,7 +78,7 @@ function_decls:
           let v = a.foo()
           arktest.assertEQ(new A().foo(), 1.0)
           arktest.assertEQ(v, 1.0)
-
+#5
     - decl: |-
           class A {
             s = new Error()
@@ -90,7 +91,7 @@ function_decls:
           let v = a.foo()
           arktest.assertTrue(new A().foo() instanceof Error)
           arktest.assertTrue(v instanceof Error)
-
+#6
     - decl: |-
           class A {
             s: number[] = [1.0, 2.0, 3.0]
@@ -102,7 +103,7 @@ function_decls:
           let a = new A()
           let v = a.foo()
           arktest.assertTrue(v instanceof Array && v[0] instanceof number && v.length == 3)
-
+#7
     - decl: |-
           class A {
             s: Boolean[] = new Boolean[0](false)
@@ -114,30 +115,33 @@ function_decls:
           let a = new A()
           let v = a.foo()
           arktest.assertTrue(v instanceof Array && v.length == 0)
-
+#7
     - decl: |-
           class A {
-            s: Long[][] = new Long[1][1]
+            s: Long[][] = [ [new Long(0)],[new Long(0)] ]
             foo(): long[][] {
                 if (this.s != null)
                     return this.s
                 else
-                    return new Long[2][2]
+                    return [
+                        [new Long(0), new Long(0)],
+                        [new Long(0), new Long(0)]
+                    ]
             }
           }
       call: |-
           let a = new A()
           let v = a.foo()
           arktest.assertTrue(new A().foo() instanceof Array)
-
+#8
     - decl: |-
           class A {
-            s: long[][] = new long[1][1]
+            s: long[][] = [ [new Long(0)],[new Long(0)] ]
             foo(): Error[][] | long[][] {
                 if (this.s != null)
                     return this.s
                 else
-                    return new Error[1][1]
+                    return [ [new Error()],[new Error()] ]
             }
           }
       call: |-
@@ -145,10 +149,10 @@ function_decls:
           let v = a.foo() as long[][]
           v[0][0] = 0
           arktest.assertEQ(v[0][0], 0)
-
+#9
     - decl: |-
           class A {
-            s: Long[][] = new Long[1][1]
+            s: Long[][] = [ [new Long(0)],[new Long(0)] ]
             foo(): Error[] | long[][] {
                 if (this.s == null)
                     return this.s
@@ -160,10 +164,10 @@ function_decls:
           let a = new A()
           let v = a.foo() as Error[]
           arktest.assertEQ(v.length, 1)
-
+#10
     - decl: |-
           class A {
-            s: Long[][] | null = new Long[1][1]
+            s: Long[][] | null = [ [new Long(0)],[new Long(0)] ]
             foo(): Error | long[][] | null {
                 if (this.s != null)
                     return this.s
@@ -175,7 +179,7 @@ function_decls:
           let a = new A()
           let v = a.foo()
           arktest.assertTrue(v instanceof Object)
-
+#11
     - decl: |-
           class A {}
           class B extends A {}
@@ -196,7 +200,7 @@ function_decls:
           let v: A = new D().foo()
           arktest.assertTrue(v instanceof A)
           arktest.assertTrue(new D().foo() instanceof A)
-
+#12
     - decl: |-
           class A {}
           class B extends A {}
@@ -217,7 +221,7 @@ function_decls:
           v[0] = new E().foo()
           arktest.assertTrue(new E().foo() instanceof D)
           arktest.assertTrue(v[0] instanceof D)
-
+#13
     - decl: |-
           class A {
             s = 0
@@ -232,7 +236,7 @@ function_decls:
           let v: Promise<Boolean> = new A().foo()
           arktest.assertTrue(v instanceof Promise)
           arktest.assertTrue(new A().foo() instanceof Promise)
-
+#14
     - decl: |-
           class A {
             s = new Object()
@@ -246,7 +250,7 @@ function_decls:
       call: |-
           let v = new A().foo()
           arktest.assertTrue(v instanceof boolean|Array)
-
+#15
     - decl: |-
           class B<T, U> {}
           class A {
@@ -261,7 +265,7 @@ function_decls:
       call: |-
           let v = new A().foo<Boolean>()
           arktest.assertTrue(v instanceof B)
-
+#16
     - decl: |-
           class A {
             foo(): A {
@@ -273,6 +277,7 @@ function_decls:
           arktest.assertTrue(a.foo() instanceof A)
 
     #static
+#17
     - decl: |-
           class A {
             static i = 0
@@ -283,7 +288,7 @@ function_decls:
       call: |-
           A.foo()
           arktest.assertEQ(A.i, 1)
-
+#18
     - decl: |-
           class A {
             static i = 0
@@ -295,7 +300,7 @@ function_decls:
       call: |-
           A.foo()
           arktest.assertEQ(A.i, 1)
-
+#19
     - decl: |-
           class A {
             static foo(): string {
@@ -305,7 +310,7 @@ function_decls:
           }
       call: |-
           arktest.assertEQ(A.foo(), "foo")
-
+#20
     - decl: |-
           class A {
             static foo(): number {
@@ -315,7 +320,7 @@ function_decls:
           }
       call: |-
           arktest.assertEQ(A.foo(), 1.0)
-
+#21
     - decl: |-
           class A {
             static foo(): Error {
@@ -325,7 +330,7 @@ function_decls:
           }
       call: |-
           arktest.assertTrue(A.foo() instanceof Error)
-
+#22
     - decl: |-
           class A {
             static foo(): number[] {
@@ -336,7 +341,7 @@ function_decls:
       call: |-
           let v = A.foo()
           arktest.assertTrue(v instanceof Array && v[0] instanceof number && v.length == 3)
-
+#23
     - decl: |-
           class A {
             static foo(): boolean[] {
@@ -347,39 +352,42 @@ function_decls:
       call: |-
           let v = A.foo()
           arktest.assertTrue(v instanceof Array && v.length == 0)
-
+#24
     - decl: |-
           class A {
             static foo(): long[][] {
-                let s: Long[][] = new Long[1][1]
+                let s: Long[][] = [ [new Long(0)],[new Long(0)] ]
                 if (s != null)
                     return s
                 else
-                    return new Long[2][2]
+                    return [
+                        [new Long(0), new Long(0)],
+                        [new Long(0), new Long(0)]
+                    ]
             }
           }
       call: |-
           arktest.assertTrue(A.foo() instanceof Array)
-
+#25
     - decl: |-
           class A {
             static foo(): Error[][]|long[][] {
-                let s: long[][] = new long[1][1]
+                let s: long[][] = [ [new Long(0)],[new Long(0)] ]
                 if (s != null)
                     return s
                 else
-                    return new Error[1][1]
+                    return [ [new Error()],[new Error()] ]
             }
           }
       call: |-
           let v = A.foo() as long[][]
           v[0][0] = 0
           arktest.assertEQ(v[0][0], 0)
-
+#26
     - decl: |-
           class A {
             static foo(): Error[]|Long[][] {
-                let s: Long[][] = new Long[1][1]
+                let s: Long[][] = [ [new Long(0)],[new Long(0)] ]
                 if (s == null)
                     return s
                 else
@@ -389,11 +397,11 @@ function_decls:
       call: |-
           let v = A.foo() as Error[]
           arktest.assertEQ(v.length, 1)
-
+#27
     - decl: |-
           class A {
             static foo(): Error|Long[][] {
-                let s: Long[][] | null = new Long[1][1]
+                let s: Long[][] | null = [ [new Long(0)],[new Long(0)] ]
                 if (s != null)
                     return s
                 else
@@ -403,7 +411,7 @@ function_decls:
       call: |-
           let v = A.foo()
           arktest.assertTrue(v instanceof Object)
-
+#28
     - decl: |-
           class A {}
           class B extends A {}
@@ -423,7 +431,7 @@ function_decls:
       call: |-
           let v: A = D.foo()
           arktest.assertTrue(v instanceof A)
-
+#29
     - decl: |-
           class A {}
           class B extends A {}
@@ -443,7 +451,7 @@ function_decls:
           let v: B[] = new B[1](new B())
           v[0] = E.foo()
           arktest.assertTrue(v[0] instanceof D)
-
+#30
     - decl: |-
           class A {
            static foo(): boolean|boolean[] {  
@@ -457,7 +465,7 @@ function_decls:
       call: |-
           let v = A.foo()
           arktest.assertTrue(v instanceof boolean|Array)
-
+#31
     - decl: |-
           class B<T, U> {}
           class A {

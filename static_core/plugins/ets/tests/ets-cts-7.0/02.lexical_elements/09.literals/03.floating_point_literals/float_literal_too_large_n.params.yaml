@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of invalid integer literals
+--- # List of invalid floating-point literals
 
 cases:
   - { type: ":Float", lit: "3.402823E+39f"}

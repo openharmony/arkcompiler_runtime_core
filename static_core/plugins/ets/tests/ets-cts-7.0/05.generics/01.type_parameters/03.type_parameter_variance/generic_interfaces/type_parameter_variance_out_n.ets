@@ -17,8 +17,8 @@
 
 /*---
 desc: Test of covariant _out_ type parameter modifier.
+tags: [compile-only]
 expected_out: {{c.stdout}}
-tags: [compile-only, negative]
 ---*/
 
 interface I<out T> {

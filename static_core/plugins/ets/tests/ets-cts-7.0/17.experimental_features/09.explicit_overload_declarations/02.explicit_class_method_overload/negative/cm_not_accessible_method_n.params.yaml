@@ -1,0 +1,27 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - { list: 'fooA', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'NS1.bar', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'NS1.foo', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'noName', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'fooC, fooA', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'fooC, NS1.bar', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'fooC, NS1.foo', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'fooC, noName', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'fooA, fooC', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
+  - { list: 'NS1.bar, fooC', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'NS1.foo, fooC', expected_out: "Syntax error ESY0324: The overloaded method name in class/interface method overload declaration must be identifier." }
+  - { list: 'noName, fooC', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }

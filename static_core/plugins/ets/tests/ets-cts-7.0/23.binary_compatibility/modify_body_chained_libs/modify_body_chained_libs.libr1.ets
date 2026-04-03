@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*---
+desc: Lib1 - old version, imports from lib2
+tags:
+- compile-only
+- not-a-test
+files: [./modify_body_chained_libs.libr2.ets]
+---*/
+
+import { helper } from "./modify_body_chained_libs.libr2.ets";
+
+export function calc(): int {
+    return helper() + 10;
+}
+
+export function unused_calc(): int {
+    return helper() + 100;
+}

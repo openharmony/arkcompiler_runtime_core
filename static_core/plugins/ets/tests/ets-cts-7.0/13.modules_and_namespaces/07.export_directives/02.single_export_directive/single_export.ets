@@ -32,7 +32,7 @@ let varBool: boolean = false;
 let varArray: number[] = Array.create<number>(10, 0);
 let varBigInt: BigInt = new BigInt(42);
 
-const enum EnumColor { Red, Green, Blue }
+export const enum EnumColor { Red, Green, Blue }
 let varEnum: EnumColor = EnumColor.Green;
 
 
@@ -40,7 +40,7 @@ function FuncSum(x: number, y: number): number {
     return x + y;
 }
 
-interface SimpleInterface {
+export interface SimpleInterface {
     field: string;
     method(): string;
 }

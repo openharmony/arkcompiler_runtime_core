@@ -11,15 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-modules:
-  - y
-  - bar
-  - b
-  - Z
-  - z
-  - J
-  - zz
-  - j
-  - zz
-  - F
-  - f
+cases:
+  - {entity: y, exp_out:   "Semantic error ESE0355: Imported element not exported 'y'"}
+  - {entity: bar, exp_out: "Semantic error ESE0355: Imported element not exported 'bar'"}
+  - {entity: Z, exp_out:   "Semantic error ESE0355: Imported element not exported 'Z'"}
+  - {entity: J, exp_out:   "Semantic error ESE0355: Imported element not exported 'J'"}
+  - {entity: F, exp_out:   "Semantic error ESE0355: Imported element not exported 'F'"}
+
+  - {entity: b, exp_out:  "Semantic error ESE0356: Cannot find imported element 'b'"}
+  - {entity: z, exp_out:  "Semantic error ESE0356: Cannot find imported element 'z'"}
+  - {entity: zz, exp_out: "Semantic error ESE0356: Cannot find imported element 'zz'"}
+  - {entity: j, exp_out:  "Semantic error ESE0356: Cannot find imported element 'j'"}
+  - {entity: zz, exp_out: "Semantic error ESE0356: Cannot find imported element 'zz'"}
+  - {entity: f, exp_out:  "Semantic error ESE0356: Cannot find imported element 'f'"}

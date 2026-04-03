@@ -1,0 +1,803 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0f (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Enumeration base type can be set explicitly.
+        A compile-time error occurs in the following situations:
+        • Explicit type is different from any numeric or string type.
+        • Type of explicit member initializer is not assignable
+        (see Assignability) to the base type;
+        • Enumeration member has no explicit initializer and the base type
+        is not an integer type (see Initialization of Enumeration Members).
+    params: |-
+      all float enum members values should be set explicitly
+    decl_variants:
+      - |-
+        enum Color: float { Red = 1.1f, Green = 1.2f, Blue = 1.3f }
+        enum Color2: float { Red = 1.1f, Green = 1.2f, Blue = 1.3f }
+    sub_cases_logic:
+      - |-
+        let r: Color = Color.Red
+        let g: Color = Color.Green
+        let b: Color = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r, 1.1f)
+        arktest.assertEQ(g, 1.2f)
+        arktest.assertEQ(b, 1.3f)
+      - |-
+        let r = Color.Red
+        let g = Color.Green
+        let b = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r, 1.1f)
+        arktest.assertEQ(g, 1.2f)
+        arktest.assertEQ(b, 1.3f)
+      - |-
+        arktest.assertTrue(Color.Red instanceof Color)
+        arktest.assertTrue(Color.Green instanceof Color)
+        arktest.assertTrue(Color.Blue instanceof Color)
+        arktest.assertFalse(Color.Red instanceof Color2)
+        arktest.assertFalse(Color.Green instanceof Color2)
+        arktest.assertFalse(Color.Blue instanceof Color2)
+        arktest.assertTrue(Color.Red.valueOf() instanceof float)
+        arktest.assertTrue(Color.Green.valueOf() instanceof float)
+        arktest.assertTrue(Color.Blue.valueOf() instanceof float)
+        arktest.assertEQ(Color.Red, 1.1f)
+        arktest.assertEQ(Color.Green, 1.2f)
+        arktest.assertEQ(Color.Blue, 1.3f)
+    test_suffix: "afemvsbse"
+
+  - desc: |-
+      >-
+        Enumeration base type can be set explicitly.
+        A compile-time error occurs in the following situations:
+        • Explicit type is different from any numeric or string type.
+        • Type of explicit member initializer is not assignable
+        (see Assignability) to the base type;
+        • Enumeration member has no explicit initializer and the base type
+        is not an integer type (see Initialization of Enumeration Members).
+    params: |-
+      >-
+        types of all initializer expressions are assignable to enum base type,
+        using different integer literals
+    decl_variants:
+      - |-
+        enum Enum: float { first = 0b0011, second = 0o731,
+          third = 0xCAFE_BAD3_7FFF, fourth = 9_372_036_854_775_805 }
+    sub_cases_logic:
+      - |-
+        const v1: float = 0b0011
+        const v2: float = 0o731
+        const v3: float = 0xCAFE_BAD3_7FFF
+        const v4: float = 9_372_036_854_775_805
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.fourth instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertTrue(Enum.fourth.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first.valueOf(), v1)
+        arktest.assertEQ(Enum.second.valueOf(), v2)
+        arktest.assertEQ(Enum.third.valueOf(), v3)
+        arktest.assertEQ(Enum.fourth.valueOf(), v4)
+    test_suffix: "udil"
+
+  - desc: |-
+      >-
+        Enumeration base type can be set explicitly.
+        A compile-time error occurs in the following situations:
+        • Explicit type is different from any numeric or string type.
+        • Type of explicit member initializer is not assignable
+        (see Assignability) to the base type;
+        • Enumeration member has no explicit initializer and the base type
+        is not an integer type (see Initialization of Enumeration Members).
+    params: |-
+      >-
+        types of all initializer expressions are assignable to enum base type,
+        using different floating-point literals
+    decl_variants:
+      - |-
+        enum Enum: float { A = 3.14f, B = 3.141_592f,
+          C = .5f, D = 1e10f, E = 3.4028235e+38f }
+    sub_cases_logic:
+      - |-
+        const v1: float = 3.14f
+        const v2: float = 3.141_592f
+        const v3: float = .5f
+        const v4: float = 1e10f
+        const v5: float = 3.4028235e+38f
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof float)
+        arktest.assertTrue(Enum.B.valueOf() instanceof float)
+        arktest.assertTrue(Enum.C.valueOf() instanceof float)
+        arktest.assertTrue(Enum.D.valueOf() instanceof float)
+        arktest.assertTrue(Enum.E.valueOf() instanceof float)
+        arktest.assertEQ(Enum.A.valueOf(), v1)
+        arktest.assertEQ(Enum.B.valueOf(), v2)
+        arktest.assertEQ(Enum.C.valueOf(), v3)
+        arktest.assertEQ(Enum.D.valueOf(), v4)
+        arktest.assertEQ(Enum.E.valueOf(), v5)
+    test_suffix: "udfpl"
+
+  - desc: |-
+      >-
+        Enumeration base type can be set explicitly.
+        A compile-time error occurs in the following situations:
+        • Explicit type is different from any numeric or string type.
+        • Type of explicit member initializer is not assignable
+        (see Assignability) to the base type;
+        • Enumeration member has no explicit initializer and the base type
+        is not an integer type (see Initialization of Enumeration Members).
+    params: |-
+      >-
+        types of all initializer expressions are assignable to enum base type,
+        using different values types
+    decl_variants:
+      - |-
+        const v1: byte = 11
+        const v2: short = 13
+        const v3: int = 15
+        const v4: long = 17
+        const v5: float = 1.8f
+        enum Enum: float { A = v1, B = v2, C = v3, D = v4, E = v5 }
+      - |-
+        let v1: byte = 11
+        let v2: short = 13
+        let v3: int = 15
+        let v4: long = 17
+        let v5: float = 1.8f
+        enum Enum: float { A = v1, B = v2, C = v3, D = v4, E = v5 }
+      - |-
+        enum Enum: float { A = 11 as byte, B = 13 as short,
+          C = 15 as int, D = 17 as long, E = 1.8f }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof float)
+        arktest.assertTrue(Enum.B.valueOf() instanceof float)
+        arktest.assertTrue(Enum.C.valueOf() instanceof float)
+        arktest.assertTrue(Enum.D.valueOf() instanceof float)
+        arktest.assertTrue(Enum.E.valueOf() instanceof float)
+        arktest.assertEQ(Enum.A.valueOf(), 11)
+        arktest.assertEQ(Enum.B.valueOf(), 13)
+        arktest.assertEQ(Enum.C.valueOf(), 15)
+        arktest.assertEQ(Enum.D.valueOf(), 17)
+        arktest.assertEQ(Enum.E.valueOf(), 1.8f)
+    test_suffix: "udvt"
+
+  - desc: |-
+      Using in string operator contexts
+    params: ""
+    decl_variants:
+      - |-
+        enum Enum: float { first = -1.1f, second = -1.2f, third = -42.43f }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ("_" + Enum.first, "_-1.1")
+        arktest.assertEQ("_" + Enum.second, "_-1.2")
+        arktest.assertEQ("_" + Enum.third, "_-42.43")
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first + "_", "-1.1_")
+        arktest.assertEQ(Enum.second + "_", "-1.2_")
+        arktest.assertEQ(Enum.third + "_", "-42.43_")
+    test_suffix: "uisoc"
+
+  - desc: |-
+      Using in numeric operator contexts
+    params: ""
+    decl_variants:
+      - |-
+        enum Enum: float { first = -1.5f, second = 7.6f, third = -42.59f }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first, -1.5f)
+        arktest.assertEQ(Enum.second, 7.6f)
+        arktest.assertEQ(Enum.third, -42.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first + 1, -0.5f)
+        arktest.assertEQ(Enum.second + 1, 8.6f)
+        arktest.assertEQ(Enum.third + 1, -41.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first + 1.0f, -0.5f)
+        arktest.assertEQ(Enum.second + 1.0f, 8.6f)
+        arktest.assertEQ(Enum.third + 1.0f, -41.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(1 + Enum.first, -0.5f)
+        arktest.assertEQ(1 + Enum.second, 8.6f)
+        arktest.assertEQ(1 + Enum.third, -41.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(1.0f + Enum.first, -0.5f)
+        arktest.assertEQ(1.0f + Enum.second, 8.6f)
+        arktest.assertEQ(1.0f + Enum.third, -41.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertTrue(Enum.first == -1.5f)
+        arktest.assertTrue(Enum.second == 7.6f)
+        arktest.assertTrue(Enum.third == -42.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertTrue(Enum.first === -1.5f)
+        arktest.assertTrue(Enum.second === 7.6f)
+        arktest.assertTrue(Enum.third === -42.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first + Enum.second + Enum.third, -1.5f + 7.6f - 42.59f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first + Enum.second - Enum.third, -1.5f + 7.6f + 42.59f)
+    test_suffix: "uinoc1"
+
+  - desc: |-
+      Using in numeric operator contexts
+    params: ""
+    decl_variants:
+      - |-
+        enum Enum: float { first = -1.1f, second = -1.2f, third = -42.43f }
+    sub_cases_logic:
+      - |-
+        let v1: float = Enum.first
+        let v2: float = Enum.second
+        let v3: float = Enum.third
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first.valueOf(), -1.1f)
+        arktest.assertEQ(Enum.second.valueOf(), -1.2f)
+        arktest.assertEQ(Enum.third.valueOf(), -42.43f)
+        arktest.assertEQ(v1, -1.1f)
+        arktest.assertEQ(v2, -1.2f)
+        arktest.assertEQ(v3, -42.43f)
+    test_suffix: "uinoc2"
+
+  - desc: |-
+      Checking in switch statement
+    params: ""
+    decl_variants:
+      - |-
+        enum Color: float { Red = 5.7f, Green = 7.8f, Blue = -53.2f }
+
+        function check_switch(v: Color): string {
+          let res: string = ""
+          switch (v) {
+            case Color.Red:
+              arktest.assertTrue(v instanceof Color)
+              arktest.assertTrue(v.valueOf() instanceof float)
+              arktest.assertEQ(v.valueOf(), 5.7f)
+              res = "red"
+              break
+            case Color.Green:
+              arktest.assertTrue(v instanceof Color)
+              arktest.assertTrue(v.valueOf() instanceof float)
+              arktest.assertEQ(v.valueOf(), 7.8f)
+              res = "green"
+              break
+            case Color.Blue:
+              arktest.assertTrue(v instanceof Color)
+              arktest.assertTrue(v.valueOf() instanceof float)
+              arktest.assertEQ(v.valueOf(), -53.2f)
+              res = "blue"
+              break
+            default:
+              arktest.assertTrue(false, "shouldn't be execute")
+          }
+          return res
+        }
+    sub_cases_logic:
+      - |-
+        arktest.assertEQ(check_switch(Color.Red), "red")
+        arktest.assertEQ(check_switch(Color.Green), "green")
+        arktest.assertEQ(check_switch(Color.Blue), "blue")
+    test_suffix: "ciss"
+
+  - desc: |-
+      Checking const variables of enum type
+    params: ""
+    decl_variants:
+      - |-
+        enum Color: float { Red = 5.7f, Green = 7.8f, Blue = -53.2f }
+        enum Color2: float { Red = 5.7f, Green = 7.8f, Blue = -53.2f }
+
+        // Checks access to common union member
+        function get_value(v: Color | Color2): float {
+          return v.valueOf()
+        }
+
+        // Checks that equality expression use the actual type of operand
+        function get_name(v: Any): string {
+          if (v == Color.Red) {
+            return "red"
+          }
+          else if (v == Color.Green) {
+            return "green"
+          }
+          else if (v == Color.Blue) {
+            return "blue"
+          }
+          else {
+            arktest.assertTrue(false, "shouldn't be execute")
+            return ""
+          }
+        }
+
+        // Used for checking that value is unchanged outside after
+        // changing value inside function
+        function change_value(v: Color): void {
+          if (v == Color.Red) {
+            v = Color.Green
+          }
+          else if (v == Color.Green) {
+            v = Color.Blue
+          }
+          else if (v == Color.Blue) {
+            v = Color.Red
+          }
+          else {
+            arktest.assertTrue(false, "shouldn't be execute")
+          }
+        }
+
+        // Used for checking enum member in runtime
+        function get_enum_member(v: string): Color {
+          if (v == "red") {
+            return Color.Red
+          }
+          else if (v == "green") {
+            return Color.Green
+          }
+          else if (v == "blue") {
+            return Color.Blue
+          }
+          else {
+            arktest.assertTrue(false, "shouldn't be execute")
+            return Color.Red
+          }
+        }
+    sub_cases_logic:
+      - |-
+        const r: Color = Color.Red
+        const g: Color = Color.Green
+        const b: Color = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+      - |-
+        const r = Color.Red
+        const g = Color.Green
+        const b = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+      - |-
+        const r = get_enum_member("red")
+        const g = get_enum_member("green")
+        const b = get_enum_member("blue")
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+    test_suffix: "ccvoet"
+
+  - desc: |-
+      >-
+        Checking variables of enum type.
+        If a variable has no default value, then its value must be set
+        by the Simple Assignment Operator before any use of the variable.
+    params: ""
+    decl_variants:
+      - |-
+        enum Color: float { Red = 5.7f, Green = 7.8f, Blue = -53.2f }
+        enum Color2: float { Red = 5.7f, Green = 7.8f, Blue = -53.2f }
+
+        // Checks access to common union member
+        function get_value(v: Color | Color2): float {
+          return v.valueOf()
+        }
+
+        // Checks that equality expression use the actual type of operand
+        function get_name(v: Any): string {
+          if (v == Color.Red) {
+            return "red"
+          }
+          else if (v == Color.Green) {
+            return "green"
+          }
+          else if (v == Color.Blue) {
+            return "blue"
+          }
+          else {
+            arktest.assertTrue(false, "shouldn't be execute")
+            return ""
+          }
+        }
+
+        // Used for checking that value is unchanged outside after
+        // changing value inside function
+        function change_value(v: Color): void {
+          if (v == Color.Red) {
+            v = Color.Green
+          }
+          else if (v == Color.Green) {
+            v = Color.Blue
+          }
+          else if (v == Color.Blue) {
+            v = Color.Red
+          }
+          else {
+            arktest.assertTrue(false, "shouldn't be execute")
+          }
+        }
+
+        // Used for checking enum member in runtime
+        function get_enum_member(v: string): Color {
+          if (v == "red") {
+            return Color.Red
+          }
+          else if (v == "green") {
+            return Color.Green
+          }
+          else if (v == "blue") {
+            return Color.Blue
+          }
+          else {
+            arktest.assertTrue(false, "shouldn't be execute")
+            return Color.Red
+          }
+        }
+    sub_cases_logic:
+      - |-
+        let r: Color = Color.Red
+        let g: Color = Color.Green
+        let b: Color = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        r = Color.Blue
+        g = Color.Red
+        b = Color.Green
+        arktest.assertEQ(r.valueOf(), -53.2f)
+        arktest.assertEQ(g.valueOf(), 5.7f)
+        arktest.assertEQ(b.valueOf(), 7.8f)
+        arktest.assertEQ(get_value(r), -53.2f)
+        arktest.assertEQ(get_value(g), 5.7f)
+        arktest.assertEQ(get_value(b), 7.8f)
+        arktest.assertEQ(get_name(r), "blue")
+        arktest.assertEQ(get_name(g), "red")
+        arktest.assertEQ(get_name(b), "green")
+      - |-
+        let r = Color.Red
+        let g = Color.Green
+        let b = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        r = Color.Blue
+        g = Color.Red
+        b = Color.Green
+        arktest.assertEQ(r.valueOf(), -53.2f)
+        arktest.assertEQ(g.valueOf(), 5.7f)
+        arktest.assertEQ(b.valueOf(), 7.8f)
+        arktest.assertEQ(get_value(r), -53.2f)
+        arktest.assertEQ(get_value(g), 5.7f)
+        arktest.assertEQ(get_value(b), 7.8f)
+        arktest.assertEQ(get_name(r), "blue")
+        arktest.assertEQ(get_name(g), "red")
+        arktest.assertEQ(get_name(b), "green")
+      - |-
+        let r: Color
+        let g: Color
+        let b: Color
+        r = Color.Red
+        g = Color.Green
+        b = Color.Blue
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        r = Color.Blue
+        g = Color.Red
+        b = Color.Green
+        arktest.assertEQ(r.valueOf(), -53.2f)
+        arktest.assertEQ(g.valueOf(), 5.7f)
+        arktest.assertEQ(b.valueOf(), 7.8f)
+        arktest.assertEQ(get_value(r), -53.2f)
+        arktest.assertEQ(get_value(g), 5.7f)
+        arktest.assertEQ(get_value(b), 7.8f)
+        arktest.assertEQ(get_name(r), "blue")
+        arktest.assertEQ(get_name(g), "red")
+        arktest.assertEQ(get_name(b), "green")
+      - |-
+        let r = get_enum_member("red")
+        let g = get_enum_member("green")
+        let b = get_enum_member("blue")
+        arktest.assertTrue(r instanceof Color)
+        arktest.assertTrue(g instanceof Color)
+        arktest.assertTrue(b instanceof Color)
+        arktest.assertFalse(r instanceof Color2)
+        arktest.assertFalse(g instanceof Color2)
+        arktest.assertFalse(b instanceof Color2)
+        arktest.assertTrue(r.valueOf() instanceof float)
+        arktest.assertTrue(g.valueOf() instanceof float)
+        arktest.assertTrue(b.valueOf() instanceof float)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        arktest.assertEQ(get_value(r), 5.7f)
+        arktest.assertEQ(get_value(g), 7.8f)
+        arktest.assertEQ(get_value(b), -53.2f)
+        arktest.assertEQ(get_name(r), "red")
+        arktest.assertEQ(get_name(g), "green")
+        arktest.assertEQ(get_name(b), "blue")
+        change_value(r)
+        change_value(g)
+        change_value(b)
+        arktest.assertEQ(r.valueOf(), 5.7f)
+        arktest.assertEQ(g.valueOf(), 7.8f)
+        arktest.assertEQ(b.valueOf(), -53.2f)
+        r = Color.Blue
+        g = Color.Red
+        b = Color.Green
+        arktest.assertEQ(r.valueOf(), -53.2f)
+        arktest.assertEQ(g.valueOf(), 5.7f)
+        arktest.assertEQ(b.valueOf(), 7.8f)
+        arktest.assertEQ(get_value(r), -53.2f)
+        arktest.assertEQ(get_value(g), 5.7f)
+        arktest.assertEQ(get_value(b), 7.8f)
+        arktest.assertEQ(get_name(r), "blue")
+        arktest.assertEQ(get_name(g), "red")
+        arktest.assertEQ(get_name(b), "green")
+    test_suffix: "cvoet"
+
+  - desc: |-
+      Checking enumeration methods
+    decl_variants:
+      - |-
+        enum Enum: float { first = -1.2f, second = 27.3f, third = 6.57f }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first.valueOf(), -1.2f)
+        arktest.assertEQ(Enum.second.valueOf(), 27.3f)
+        arktest.assertEQ(Enum.third.valueOf(), 6.57f)
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum.first.toString(), "-1.2")
+        arktest.assertEQ(Enum.second.toString(), "27.3")
+        arktest.assertEQ(Enum.third.toString(), "6.57")
+    test_suffix: "cem"

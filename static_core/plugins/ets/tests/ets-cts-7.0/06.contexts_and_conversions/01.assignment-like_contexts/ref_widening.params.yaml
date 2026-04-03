@@ -15,7 +15,7 @@
 cases:
 #0-1
   - { stype: 'Object[]', src: 'new Object[1](new Object())', dtype: Object }
-  - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: Object }
+  - { stype: 'Object[][]', src: '[ [new Object ()],[new Object()] ]', dtype: Object }
 #2-3
   - { stype: '() => void', src: '() => { return; }', dtype: Object }
   - { stype: '(() => void)[]', src: '[]', dtype: Object }

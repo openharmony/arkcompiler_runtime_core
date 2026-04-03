@@ -16,6 +16,7 @@
 /*---
 desc: An empty interface inherits an interface that contains read-only properties.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
 ---*/
 
 interface ParentInterface {

@@ -59,3 +59,11 @@ export function foo09(i: Object): int {
 export function foo10(i: number[]): int {
     return 10;
 }
+
+export function foo11(i: int): int {
+    return 11;
+}
+
+export function foo12(i: int, j: int): int {
+    return 12;
+}

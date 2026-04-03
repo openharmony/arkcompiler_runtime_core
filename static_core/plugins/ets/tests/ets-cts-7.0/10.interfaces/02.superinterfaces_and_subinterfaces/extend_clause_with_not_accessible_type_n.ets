@@ -14,14 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Declaring subinterface.
-assert: Each typeReference in the extends clause of an interface declaration must name an accessible interface type (link to access control), or a compile-time error occurs.
+desc: >-
+    Declaring subinterface. Each typeReference in the extends clause of an interface declaration
+    must name an accessible interface type (link to access control), or a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "TBD: issue #33800"
 ---*/
 
 interface A {
   x: int = 1;
-  
 }
 
 interface B {

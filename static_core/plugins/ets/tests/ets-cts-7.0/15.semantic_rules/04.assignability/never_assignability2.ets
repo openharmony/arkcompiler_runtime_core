@@ -15,26 +15,27 @@
 
 /*---
 desc: Type T1 is assignable to type T2 if T1 is type never;
-params: Error expected
 tags: ['negative']
+expected_error:
+  runtime: 
+    - "Error: This function never returns"
 ---*/
 
 const n: number = neverFunction(), m = neverFunction();
 let a: string = neverFunction();
 
 class MyClass {
-  i: Any = neverFunction();
-  static j: int = neverFunction();
-  constructor() {
-    test(this.i);
-    test(MyClass.j);
-  }
+    i: Any = neverFunction();
+    static j: int = neverFunction();
+    constructor() {
+        test(this.i);
+        test(MyClass.j);
+    }
 }
 
 function neverFunction(): never {
-  throw new Error("This function never returns");
+    throw new Error("This function never returns");
 }
 
 function test(param: Any) {
-
 }

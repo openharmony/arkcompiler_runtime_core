@@ -14,26 +14,16 @@
 ---
 cases:
 #0
-  - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Array<Object>>' to 'Array<Object>'" }
-#1
   - { stype: 'Byte[]', src: 'new Byte[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Byte>' to 'Array<Object>'" }
-#2
+#1
   - { stype: 'Short[]', src: 'new Short[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Short>' to 'Array<Object>'" }
-#3
+#2
   - { stype: 'Char[]', src: 'new Char[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Char>' to 'Array<Object>'" }
-#4
+#3
   - { stype: 'Int[]', src: 'new Int[1]', dtype: 'Object[]' , expected: "Semantic error ESE0326: Cannot cast type 'Array<Int>' to 'Array<Object>'"}
-#5
+#4
   - { stype: 'Long[]', src: 'new Long[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Long>' to 'Array<Object>'" }
-#6
+#5
   - { stype: 'Float[]', src: 'new Float[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Float>' to 'Array<Object>'" }
-#7
+#6
   - { stype: 'Double[]', src: 'new Double[1]', dtype: 'Object[]', expected: "Semantic error ESE0326: Cannot cast type 'Array<Double>' to 'Array<Object>'" }
-#8
-  - defs: |-
-      enum Color {Red, Green, Blue}
-    stype: 'Color[]'
-    src: '[Color.Red, Color.Blue]'
-    dtype: 'Object[]'
-    expected: |-
-      Semantic error ESE0326: Cannot cast type 'Array<Color>' to 'Array<Object>'

@@ -14,30 +14,30 @@
  */
 
 /*---
-desc: Override method declaration.
-assert: >-
+desc: >-
+    Override method declaration.
     The usage of the modifier override is optional but strongly recommended
     as it makes the overriding explicit.
 ---*/
 
 class A {
-  foo(): int {
-    return 1;
-  }
+    foo(): int {
+        return 1;
+    }
 }
 
 final class B extends A {
-  foo(): int {
-    return 5;
-  }
+    foo(): int {
+        return 5;
+    }
 }
 
 function getB(): B {
-  return new B
+    return new B
 }
 
 function main(): void {
-  let instance: A = getB();
+    let instance: A = getB();
 
-  arktest.assertEQ(instance.foo(), 5);
+    arktest.assertEQ(instance.foo(), 5);
 }

@@ -17,17 +17,15 @@
 /*---
 desc:
     Constant expression with number conversion as annotation initializer.
-tags: [compile-only]
 ---*/
 
 @interface MyAnno {
-    id: {{c.type}}
-    idN: number
+    id: {{c.type}} = {{c.value}}
 }
 
-const myId: {{c.type}} = {{c.value}}
+@MyAnno({{c.value}})
+class Class1 {}
 
-@MyAnno({id: myId, idN: myId})
-class NewClass{}
-
-{% endfor %}
+@MyAnno({ id: {{c.value}} })
+class Class2 {}
+{%- endfor %}

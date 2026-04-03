@@ -56,24 +56,23 @@ cases:
       - float
       - double
 
-  - decl: 'enum SomeEnum: int {a = 0, b = 1, c = 2}'
-    type1: SomeEnum
-    value: SomeEnum.a
+  - decl: 'enum SomeEnum2: int {a = 0, b = 1, c = 2}'
+    type1: SomeEnum2
+    value: SomeEnum2.a
     type2:
       - long
       - float
       - double
     
-  - decl: 'enum SomeEnum: long {a = 0, b = 1, c = 2}'
-    type1: SomeEnum
-    value: SomeEnum.a
+  - decl: 'enum SomeEnum3: long {a = 0, b = 1, c = 2}'
+    type1: SomeEnum3
+    value: SomeEnum3.a
     type2:
       - float
       - double
 
-  - decl: 'enum SomeEnum: double {a = 0.0, b = 1.0, c = 2.0}'
-    type1: SomeEnum
-    value: SomeEnum.a
+  - decl: 'enum SomeEnum4: double {a = 0.0, b = 1.0, c = 2.0}'
+    type1: SomeEnum4
+    value: SomeEnum4.a
     type2:
       - double
-

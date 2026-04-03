@@ -15,10 +15,9 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    if the expression 'e' is not a nullable type, then the operator '!' has no effect.
-    If the result of the evaluation of e is not equal to null or undefined, then the
-    result of e! is the outcome of the evaluation of e. If the result of the evaluation
-    of e is equal to null or undefined, then NullPointerError is thrown.
+    If the result of the evaluation of expr in expr! is not equal to null
+    or undefined, then the result of ensure-not-nullish expression is
+    the outcome of the evaluation of expr, otherwise NullPointerError is thrown.
 tags: [{{c.warmup}}]
 ---*/
 {{c.decl}}

@@ -16,12 +16,13 @@
 /*---
 desc: Extend class.
 assert: The extends clause in a normal class declaration specifies the direct superclass of the current class.
-tags: [compile-only]
 ---*/
 
-class A {
+class A {}
 
-}
+final class C extends A {}
 
-final class C extends A {
+function main(): void {
+    let c = new C;
+    arktest.assertTrue(c instanceof A);
 }

@@ -92,8 +92,8 @@ cases:
   - desc: |-
       Checking for initialization with field initializer.
     check_variants:
-      - {check_type: "C", data_type: "int", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
+      - {check_type: "C", data_type: "int", init_value: "new C(5)",
+        check_value: "5", cv_decl_data: "class C {readonly data: int;\n constructor(v: int) { this.data = v } }"}
     decl_variants:
       - |-
         [cv_decl_data]
@@ -191,8 +191,8 @@ cases:
   - desc: |-
       Checking for initialization from constructor.
     check_variants:
-      - {check_type: "C", data_type: "int", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
+      - {check_type: "C", data_type: "int", init_value: "new C(5)",
+        check_value: "5", cv_decl_data: "class C {readonly data: int;\n constructor(v: int) { this.data = v } }"}
     decl_variants:
       - |-
         [cv_decl_data]
@@ -271,11 +271,11 @@ cases:
     decl_variants:
       - |-
         class A {
-          readonly field: [type]
+          readonly field: [type] = [check_value]
         }
     sub_cases_logic:
       - |-
-        let a: A = {field: [check_value]}
+        let a: A = new A();
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
 
@@ -317,29 +317,33 @@ cases:
     decl_variants:
       - |-
         class A {
-          readonly field: [type] = [base_value]
+          readonly field: [type] = [check_value]
+          field2: [type] = [base_value]
         }
     sub_cases_logic:
       - |-
-        let a: A = {field: [check_value]}
+        let a: A = {field2: [check_value]}
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
+        arktest.assertEQ(a.field2, [check_value])
 
   - desc: |-
       Checking for initialization from object literal.
     check_variants:
-      - {check_type: "C", data_type: "int",
-        base_init_value: "{data: 0}", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
+      - {check_type: "C", data_type: "int", init_value: "new C(5)",
+        check_value: "5", cv_decl_data: "class C {readonly data: int;\n constructor(v: int) { this.data = v } }"}
     decl_variants:
       - |-
         [cv_decl_data]
         class A {
-          readonly field: [check_type] = [base_init_value]
+          readonly field: [check_type];
+          constructor(a: [check_type]) {
+            this.field = a;
+          }
         }
     sub_cases_logic:
       - |-
-        let a: A = {field: [init_value]}
+        let a: A = new A([init_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
@@ -418,8 +422,8 @@ cases:
   - desc: |-
       Checking for initialization optional readonly field.
     check_variants:
-      - {check_type: "C", data_type: "int", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
+      - {check_type: "C", data_type: "int", init_value: "new C(5)",
+        check_value: "5", cv_decl_data: "class C {readonly data: int;\n constructor(v: int) { this.data = v } }"}
     decl_variants:
       - |-
         [cv_decl_data]
@@ -661,9 +665,12 @@ cases:
       - |-
         class A<T> {
           readonly field?: T
+          constructor(a?: T) {
+             this.field = a
+          }
         }
     sub_cases_logic:
       - |-
-        let a: A<[type]> = {field: [check_value]}
+        let a: A<[type]> = new A<[type]>([check_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])

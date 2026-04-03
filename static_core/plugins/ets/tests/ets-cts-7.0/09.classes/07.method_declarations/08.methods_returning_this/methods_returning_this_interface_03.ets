@@ -14,9 +14,9 @@
  */
 
 /*---
-desc: methods returning this, implements multiple interfaces with the same method that return this, negative.
-tags: [negative, compile-only]
+desc: methods returning this, implements multiple interfaces with the same method that return this
 ---*/
+
 interface I {
     foo(): this {
         return this
@@ -30,4 +30,11 @@ interface II {
 }
 
 class C implements I, II {
+    foo(): this {
+        return this
+    }    
+}
+
+function main() {
+    arktest.assertTrue(new C().foo() instanceof C)
 }

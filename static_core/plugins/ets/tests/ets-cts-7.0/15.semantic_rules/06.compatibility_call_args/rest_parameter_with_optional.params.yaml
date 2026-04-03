@@ -31,14 +31,14 @@ cases:
       }
 
   - assertions:
-      - call: foo("mandatory")
+      - call: foo2("mandatory")
         result: 1
 
-      - call: foo("mandatory", 1)
+      - call: foo2("mandatory", 1)
         result: 0
 
     definition: |-
-      function foo(x: string, a?: number, ...rest: string[]) {
+      function foo2(x: string, a?: number, ...rest: string[]) {
           if (a == undefined && rest.length == 0) {
               return 1
           }
@@ -48,17 +48,17 @@ cases:
       }
 
   - assertions:
-      - call: foo()
+      - call: foo3()
         result: 2
 
-      - call: foo(1)
+      - call: foo3(1)
         result: 1
 
-      - call: foo(1, "asdsad")
+      - call: foo3(1, "asdsad")
         result: 0
 
     definition: |-
-      function foo(a?: number, b?: string, ...rest: string[]) {
+      function foo3(a?: number, b?: string, ...rest: string[]) {
           if (a == undefined && b == undefined && rest.length == 0) {
             return 2;
           }
@@ -71,17 +71,17 @@ cases:
       }
 
   - assertions:
-      - call: foo("mandatory")
+      - call: foo4("mandatory")
         result: 2
 
-      - call: foo("mandatory", 1)
+      - call: foo4("mandatory", 1)
         result: 1
 
-      - call: foo("mandatory", 1, "asdsad")
+      - call: foo4("mandatory", 1, "asdsad")
         result: 0
 
     definition: |-
-      function foo(x: string, a?: number, b?: string, ...rest: string[]) {
+      function foo4(x: string, a?: number, b?: string, ...rest: string[]) {
           if (a == undefined && b == undefined && rest.length == 0) {
             return 2;
           }
@@ -94,20 +94,20 @@ cases:
       }
 
   - assertions:
-      - call: foo()
+      - call: foo5()
         result: 3
 
-      - call: foo(1)
+      - call: foo5(1)
         result: 2
 
-      - call: foo(1, "asdasd")
+      - call: foo5(1, "asdasd")
         result: 1
 
-      - call: foo(1, "asdsad", 2)
+      - call: foo5(1, "asdsad", 2)
         result: 0
 
     definition: |-
-      function foo(a?: number, b?: string, c?: number, ...rest: string[]) {
+      function foo5(a?: number, b?: string, c?: number, ...rest: string[]) {
           if (a == undefined && b == undefined && c == undefined && rest.length == 0) {
             return 3;
           }
@@ -123,20 +123,20 @@ cases:
       }
 
   - assertions:
-      - call: foo("mandatory")
+      - call: foo6("mandatory")
         result: 3
 
-      - call: foo("mandatory", 1)
+      - call: foo6("mandatory", 1)
         result: 2
 
-      - call: foo("mandatory", 1, "asdasd")
+      - call: foo6("mandatory", 1, "asdasd")
         result: 1
 
-      - call: foo("mandatory", 1, "asdsad", 2)
+      - call: foo6("mandatory", 1, "asdsad", 2)
         result: 0
 
     definition: |-
-      function foo(x: string, a?: number, b?: string, c?: number, ...rest: string[]) {
+      function foo6(x: string, a?: number, b?: string, c?: number, ...rest: string[]) {
           if (a == undefined && b == undefined && c == undefined && rest.length == 0) {
             return 3;
           }
@@ -152,20 +152,20 @@ cases:
       }
 
   - assertions:
-      - call: foo("mandatory", "mandatory")
+      - call: foo7("mandatory", "mandatory")
         result: 3
 
-      - call: foo("mandatory", "mandatory", 1)
+      - call: foo7("mandatory", "mandatory", 1)
         result: 2
 
-      - call: foo("mandatory", "mandatory", 1, "asdasd")
+      - call: foo7("mandatory", "mandatory", 1, "asdasd")
         result: 1
 
-      - call: foo("mandatory", "mandatory", 1, "asdsad", 2)
+      - call: foo7("mandatory", "mandatory", 1, "asdsad", 2)
         result: 0
 
     definition: |-
-      function foo(x: string, y: string, a?: number, b?: string, c?: number, ...rest: string[]) {
+      function foo7(x: string, y: string, a?: number, b?: string, c?: number, ...rest: string[]) {
           if (a == undefined && b == undefined && c == undefined && rest.length == 0) {
             return 3;
           }

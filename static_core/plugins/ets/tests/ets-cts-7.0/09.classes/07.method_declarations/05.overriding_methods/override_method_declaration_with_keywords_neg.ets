@@ -16,24 +16,24 @@
 {% for c in cases %}
 
 /*---
-desc: Override method declaration with keyword {{c.modifier}}.
-assert: >-
+desc: >-
+    Override method declaration with keyword {{c.modifier}}. 
     It is compile-time error if a method declaration that contains the keyword override also contains any one of the
     keywords abstract, static, final, native or async.
-params: {{c.modifier}}
+    {{c.modifier}}
 tags: [compile-only, negative]
 ---*/
 
 class A {
-  foo(): int {
-    return 1;
-  }
+    foo(): int {
+        return 1;
+    }
 }
 
 final class B extends A {
-  {{c.function|indent}}
+    {{c.function|indent}}
 }
 
 {{c.expected_error}}
 
-{% endfor %}
+{%- endfor %}

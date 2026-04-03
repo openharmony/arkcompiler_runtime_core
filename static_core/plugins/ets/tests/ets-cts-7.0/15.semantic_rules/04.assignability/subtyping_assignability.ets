@@ -13,29 +13,38 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: Type T1 is assignable to type T2 if T1 is a subtype of T2
 ---*/
 
 class A {
-  name: string = ''
-  constructor() {}
-  constructor(name: string) {
-    this.name = name
-  }
+    name: string = ''
+    constructor() {}
+    constructor(name: string) {
+        this.name = name
+    }
 }
 class B extends A {
     constructor() { super() }
     constructor(name: string) {
-      super(name)
+        super(name)
   }
 }
 
+{% for c in cases %}
 {{c.decl}}
+{%- endfor %}
 
-let t1: {{c.type1}} = {{c.value}}
-let t2: {{c.type2}} = t1
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Subtyping_assignability");
+
+    {%- for c in cases %}
+        testSuite.addTest("assign_{{loop.index}}", () => {
+            let t1: {{c.type1}} = {{c.value}}
+            let t2: {{c.type2}} = t1
+        });
+    {%- endfor %}
+
+    return testSuite.run();
+}

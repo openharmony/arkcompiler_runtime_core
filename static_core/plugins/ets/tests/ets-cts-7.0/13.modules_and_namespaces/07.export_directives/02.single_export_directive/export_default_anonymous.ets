@@ -22,6 +22,9 @@ files: ['./export_default_anonymous/export_string.ets',
 './export_default_anonymous/export_lambda.ets',
 './export_default_anonymous/export_array.ets',
 './export_default_anonymous/export_add_expressions.ets']
+expected_error:
+    compiler:
+        - "Warning: default element has already imported"
 ---*/
 
 import { default as export_string } from "./export_default_anonymous/export_string.ets";

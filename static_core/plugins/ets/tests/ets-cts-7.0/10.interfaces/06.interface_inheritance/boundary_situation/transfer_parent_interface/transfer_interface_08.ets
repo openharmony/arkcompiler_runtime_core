@@ -34,6 +34,6 @@ function main(): void {
     data: "Hello, World!",
   };
 
-  let resule = processData(input);
-  arktest.assertEQ(resule, "Processing data: Hello, World!");
+  let result = processData(input);
+  arktest.assertEQ(result, "Processing data: Hello, World!");
 }

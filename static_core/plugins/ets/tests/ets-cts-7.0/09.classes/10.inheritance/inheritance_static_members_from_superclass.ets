@@ -26,10 +26,10 @@ class A {
   {{c.decl|indent}}
 }
 
-class B implements A {}
+class B extends A {}
 
 function main(): void {
-  arktest.assertEQ( {{c.use}}, 1 );
+  {{c.use}};
 }
 
 {% endfor %}

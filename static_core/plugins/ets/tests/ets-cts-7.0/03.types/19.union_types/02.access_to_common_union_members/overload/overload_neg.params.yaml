@@ -64,3 +64,27 @@ cases:
       tags: compile-only, negative
       stdout: |-
           "Semantic error ESE0391: Overload declaration cannot be called by union."
+
+    - decl: |-
+          class A {
+              meth(p: int): number {
+                  return 1
+              }
+              meth(p: Object): number {
+                  return 2
+              }
+          }
+          class B {
+              meth(p: Object): number {
+                  return 3
+              }
+          }
+          let u1: A|B = new A
+          let u2: A|B = new B
+      use: |-
+          arktest.assertEQ(u1.meth(1), 2, "u1.meth(1)")
+          arktest.assertEQ(u1.meth(new Object()), 2, "u1.meth(new Object())")
+          arktest.assertEQ(u2.meth(new Object()), 3, "u2.meth(new Object())")
+      tags: compile-only, negative
+      stdout: |-
+          "Semantic error ESE0244: Member type must be the same for all union objects."

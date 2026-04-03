@@ -16,6 +16,9 @@
 /*---
 desc: Methods with the same name have different return types (number is not a subtype of string).
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildClass is not abstract
+    and does not override abstract method getValue(): String in Parent1
 ---*/
 
 interface Parent1 {

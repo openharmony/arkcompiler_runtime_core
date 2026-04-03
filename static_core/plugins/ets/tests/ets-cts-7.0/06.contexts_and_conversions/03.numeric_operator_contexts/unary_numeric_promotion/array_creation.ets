@@ -18,12 +18,15 @@
 desc: >-
     Unary numeric promotion is performed on expressions in the following situation:
     Each dimension expression in an array creation expression
-params: {{c.type}}
+    {{c.type}}
 ---*/
 
+type TP = {{c.type}}[][]
+
 function main(): void {
-  let v: {{c.type}} = {{c.val}};
-  let arr: FixedArray<FixedArray<{{c.type}}>> = new {{c.type}}[v][v];
-  arktest.assertEQ(arr.length, {{c.len}})
+    let v: {{c.type}} = {{c.val}};
+    let x: TP = [[new {{c.type}}(v)],[new {{c.type}}(v)]]
+    let arr = x
+    arktest.assertEQ(arr.length, {{c.len}})
 }
-{% endfor %}
+{%- endfor %}

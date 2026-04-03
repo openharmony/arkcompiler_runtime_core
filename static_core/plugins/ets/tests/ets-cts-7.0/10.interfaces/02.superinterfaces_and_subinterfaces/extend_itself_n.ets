@@ -14,11 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Interface extends itself.
-assert: It is a compile-time error if an interface depends on itself.
+desc: A compile-time error occurs if an interface depends on itself.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0310: Cyclic inheritance involving A."
 ---*/
 
-interface A extends A {
-
-}
+interface A extends A { }

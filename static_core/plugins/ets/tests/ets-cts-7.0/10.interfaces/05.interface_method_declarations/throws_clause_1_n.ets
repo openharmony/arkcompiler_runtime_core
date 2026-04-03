@@ -16,6 +16,7 @@
 /*---
 desc: Throws clause should produce CTE
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0224: Identifier expected, got 'identification literal'."
 ---*/
 
 interface A {

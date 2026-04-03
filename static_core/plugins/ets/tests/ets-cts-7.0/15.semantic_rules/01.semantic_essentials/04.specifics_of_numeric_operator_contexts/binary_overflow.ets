@@ -13,18 +13,25 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+
 /*---
-desc: Testing overflow for binary operator '{{c.op}}' with {{c.type1}} and {{c.type2}}. 
-      On overflow, the type must be converted to int.
+desc: Testing overflow for binary operators. On overflow, the type must be converted to int.
 ---*/
 
-function main() {
-    let a: {{c.type1}} = {{c.val1}};
-    let b: {{c.type2}} = {{c.val2}};
-    let result = a {{c.op}} b;
+function main(): int {
     
-    arktest.assertEQ(result, {{c.expected}});
-    arktest.assertTrue(result instanceof int, "The type does not match the expected type");
+    let testSuite = new arktest.ArkTestsuite("Binary_overflows");
+
+    {%- for c in cases %}
+        testSuite.addTest("overflow_{{c.type1}}_{{c.type2}}_{{loop.index}}", () => {
+            let a: {{c.type1}} = {{c.val1}};
+            let b: {{c.type2}} = {{c.val2}};
+            let result = a {{c.op}} b;
+    
+            arktest.assertEQ(result, {{c.expected}});
+            arktest.assertTrue(result instanceof int, "The type does not match the expected type");
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-{%- endfor %}

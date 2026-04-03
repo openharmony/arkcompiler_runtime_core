@@ -27,6 +27,7 @@ desc: |-
 
     {{c.doc}}
 tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
 let res: number = 0;
@@ -50,12 +51,5 @@ class Gen2<T,S> {
 }
 
 {{c.decl}}
-
-function main() {
-    res = 0
-    {{c.use|indent}}
-}
-
-{{c.expected_error}}
 
 {%- endfor %}

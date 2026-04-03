@@ -1,0 +1,708 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        An initializer can be omitted if an enumeration base type is an
+        integer type.
+        If initializers for all members are omitted, then the first member
+        is assigned the value zero. The other member is assigned the value
+        of the immediately preceding member plus one.
+    params: |-
+      initializers for all members are omitted
+    decl_variants:
+      - |-
+        enum Enum { first, second, third }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), 0)
+        arktest.assertEQ(Enum.second.valueOf(), 1)
+        arktest.assertEQ(Enum.third.valueOf(), 2)
+    test_suffix: "ifamao"
+    ids: "0"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers
+    decl_variants:
+      - |-
+        enum Color { Red, Blue = 5, Green }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Color.Red instanceof Color)
+        arktest.assertTrue(Color.Blue instanceof Color)
+        arktest.assertTrue(Color.Green instanceof Color)
+        arktest.assertTrue(Color.Red.valueOf() instanceof int)
+        arktest.assertTrue(Color.Blue.valueOf() instanceof int)
+        arktest.assertTrue(Color.Green.valueOf() instanceof int)
+        arktest.assertEQ(Color.Red.valueOf(), 0)
+        arktest.assertEQ(Color.Blue.valueOf(), 5)
+        arktest.assertEQ(Color.Green.valueOf(), 6)
+    test_suffix: "phcei1"
+    ids: "1"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        values can be the same
+    decl_variants:
+      - |-
+        enum Enum: int { A, B = -1, C, D }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertTrue(Enum.D.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A.valueOf(), 0)
+        arktest.assertEQ(Enum.B.valueOf(), -1)
+        arktest.assertEQ(Enum.C.valueOf(), 0)
+        arktest.assertEQ(Enum.D.valueOf(), 1)
+        arktest.assertTrue(Enum.C == Enum.A)
+    test_suffix: "phcei2"
+    ids: "2"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        values can be the same
+    decl_variants:
+      - |-
+        enum Enum { A, B, C = (1 << 3) * 3, D,
+          E = (5 | 10), F = ((3 | 7) << 2) * 3, G = 7 % 4,
+          H = (3 + 5) / 3, I = (17 | (7 & 5)), J = 15 ^ 9,
+          K = ~3, L = -5 >>> 2, M = 17 >> 3, N }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.G instanceof Enum)
+        arktest.assertTrue(Enum.H instanceof Enum)
+        arktest.assertTrue(Enum.I instanceof Enum)
+        arktest.assertTrue(Enum.J instanceof Enum)
+        arktest.assertTrue(Enum.K instanceof Enum)
+        arktest.assertTrue(Enum.L instanceof Enum)
+        arktest.assertTrue(Enum.M instanceof Enum)
+        arktest.assertTrue(Enum.N instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertTrue(Enum.D.valueOf() instanceof int)
+        arktest.assertTrue(Enum.E.valueOf() instanceof int)
+        arktest.assertTrue(Enum.F.valueOf() instanceof int)
+        arktest.assertTrue(Enum.G.valueOf() instanceof int)
+        arktest.assertTrue(Enum.H.valueOf() instanceof int)
+        arktest.assertTrue(Enum.I.valueOf() instanceof int)
+        arktest.assertTrue(Enum.J.valueOf() instanceof int)
+        arktest.assertTrue(Enum.K.valueOf() instanceof int)
+        arktest.assertTrue(Enum.L.valueOf() instanceof int)
+        arktest.assertTrue(Enum.M.valueOf() instanceof int)
+        arktest.assertTrue(Enum.N.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A, 0)
+        arktest.assertEQ(Enum.B, 1)
+        arktest.assertEQ(Enum.C, 24)
+        arktest.assertEQ(Enum.D, 25)
+        arktest.assertEQ(Enum.E, 15)
+        arktest.assertEQ(Enum.F, 84)
+        arktest.assertEQ(Enum.G, 3)
+        arktest.assertEQ(Enum.H, 2)
+        arktest.assertEQ(Enum.I, 21)
+        arktest.assertEQ(Enum.J, 6)
+        arktest.assertEQ(Enum.K, -4)
+        arktest.assertEQ(Enum.L, 1073741822)
+        arktest.assertEQ(Enum.M, 2)
+        arktest.assertEQ(Enum.N, 3)
+    test_suffix: "phcei3"
+    ids: "3"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        using cast expression in constant expression
+    decl_variants:
+      - |-
+        enum Enum { A = 5 as int, B, C }
+      - |-
+        enum Enum { A = 5 as byte, B, C }
+      - |-
+        enum Enum { A = 5 as short, B, C }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A, 5)
+        arktest.assertEQ(Enum.B, 6)
+        arktest.assertEQ(Enum.C, 7)
+    test_suffix: "phcei4"
+    ids: "4-6"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        checking for int.MIN_VALUE in enum
+    decl_variants:
+      - |-
+        enum Enum { first, second = -2147483648, third}
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), 0)
+        arktest.assertEQ(Enum.second.valueOf(), -2147483648)
+        arktest.assertEQ(Enum.third.valueOf(), -2147483647)
+    test_suffix: "cfmin"
+    ids: "7"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have constant expression initializers,
+        part do not have initializers,
+        checking for Int.MAX_VALUE in enum
+    decl_variants:
+      - |-
+        enum Enum { first = 0x7fffffff - 2, second, third }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), 2147483645)
+        arktest.assertEQ(Enum.second.valueOf(), 2147483646)
+        arktest.assertEQ(Enum.third.valueOf(), 2147483647)
+    test_suffix: "cfmax"
+    ids: "8"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      checking int type overflow on max value
+    decl_variants:
+      - |-
+        enum Enum { first = 2147483647 - 1, second, third }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), 2147483647 - 1)
+        arktest.assertEQ(Enum.second.valueOf(), 2147483647)
+        arktest.assertEQ(Enum.third.valueOf(), 2147483647 + 1)
+    test_suffix: "citoomaxv1"
+    ids: "9"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      checking int type overflow on max value
+    decl_variants:
+      - |-
+        enum Enum { first = 2147483647 - 10, second, third = first + 110 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), 2147483647 - 10)
+        arktest.assertEQ(Enum.second.valueOf(), 2147483647 - 9)
+        arktest.assertEQ(Enum.third.valueOf(), 2147483647 + 100)
+    test_suffix: "citoomaxv2"
+    ids: "10"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      Checking int type overflow on min value
+    decl_variants:
+      - |-
+        enum Enum { first, second = -2147483648, third = second - 1 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), 0)
+        arktest.assertEQ(Enum.second.valueOf(), -2147483648)
+        arktest.assertEQ(Enum.third.valueOf(), -2147483648 - 1)
+    test_suffix: "citoominv1"
+    ids: "11"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      Checking int type overflow on min value
+    decl_variants:
+      - |-
+        enum Enum { first = -2147483648 + 10, second, third = first - 110}
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), -2147483648 + 10);
+        arktest.assertEQ(Enum.second.valueOf(), -2147483648 + 11);
+        arktest.assertEQ(Enum.third.valueOf(), -2147483648 - 100);
+    test_suffix: "citoominv2"
+    ids: "12"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        all have not a constant expression initializers,
+        using const variables in initializer expressions
+    decl_variants:
+      - |-
+        const a: int = 2147483647
+        const b: int = 2147483647 - 1
+        enum Enum { first = a, second = b, third = b - 1 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), a)
+        arktest.assertEQ(Enum.second.valueOf(), b)
+        arktest.assertEQ(Enum.third.valueOf(), b - 1)
+    test_suffix: "ahnacei1"
+    ids: "13"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        all have not a constant expression initializers,
+        using variables in initializer expressions
+    decl_variants:
+      - |-
+        let a: int = 2147483647
+        let b: int = 2147483647 - 1
+        enum Enum { first = a, second = b, third = b - 1 }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum.first.valueOf(), a)
+        arktest.assertEQ(Enum.second.valueOf(), b)
+        arktest.assertEQ(Enum.third.valueOf(), b - 1)
+    test_suffix: "ahnacei2"
+    ids: "14"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        all have explicit initializers,
+        using enum members values in initializers expressions
+    decl_variants:
+      - |-
+        enum Enum { A = 5, B = (1 << 1) * 2, C = (1 << 3) * 3,
+          D = (B | C), E = ((B | C) << 2) * 3, F = A % 4,
+          G = (A + F) / 3, H = (G | (F & A)), I = F ^ A,
+          J = ~A, K = -B, L = -A >>> G }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.G instanceof Enum)
+        arktest.assertTrue(Enum.H instanceof Enum)
+        arktest.assertTrue(Enum.I instanceof Enum)
+        arktest.assertTrue(Enum.J instanceof Enum)
+        arktest.assertTrue(Enum.K instanceof Enum)
+        arktest.assertTrue(Enum.L instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertTrue(Enum.D.valueOf() instanceof int)
+        arktest.assertTrue(Enum.E.valueOf() instanceof int)
+        arktest.assertTrue(Enum.F.valueOf() instanceof int)
+        arktest.assertTrue(Enum.G.valueOf() instanceof int)
+        arktest.assertTrue(Enum.H.valueOf() instanceof int)
+        arktest.assertTrue(Enum.I.valueOf() instanceof int)
+        arktest.assertTrue(Enum.J.valueOf() instanceof int)
+        arktest.assertTrue(Enum.K.valueOf() instanceof int)
+        arktest.assertTrue(Enum.L.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A, 5)
+        arktest.assertEQ(Enum.B, 4)
+        arktest.assertEQ(Enum.C, 24)
+        arktest.assertEQ(Enum.D, 28)
+        arktest.assertEQ(Enum.E, 336)
+        arktest.assertEQ(Enum.F, 1)
+        arktest.assertEQ(Enum.G, 2)
+        arktest.assertEQ(Enum.H, 3)
+        arktest.assertEQ(Enum.I, 4)
+        arktest.assertEQ(Enum.J, ~5)
+        arktest.assertEQ(Enum.J, -6)
+        arktest.assertEQ(Enum.K, -4)
+        arktest.assertEQ(Enum.L, -5 >>> 2)
+        arktest.assertEQ(Enum.L, 1073741822)
+    test_suffix: "ahei"
+    ids: "15"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have not a constant expression initializers,
+        part do not have initializers,
+        values can be the same
+    decl_variants:
+      - |-
+        let a: int = 2147483647
+        let b: int = 2147483647 - 1
+        enum Enum { A, B, C = a, D = a - b }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertTrue(Enum.D.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A.valueOf(), 0)
+        arktest.assertEQ(Enum.B.valueOf(), 1)
+        arktest.assertEQ(Enum.C.valueOf(), a)
+        arktest.assertEQ(Enum.D.valueOf(), 1)
+    test_suffix: "phnacei1"
+    ids: "16"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have not a constant expression initializers,
+        part do not have initializers,
+        using other enum members values as enum members initializers
+    decl_variants:
+      - |-
+        enum Enum1 { first = 123, second, third }
+        enum Enum2 { first = Enum1.second, second = Enum1.third, third = Enum1.first }
+      - |-
+        enum Enum1 { first = 123, second, third }
+        enum Enum2 { first = Enum1.second.valueOf(), second = Enum1.third.valueOf(), third = Enum1.first }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum1.first instanceof Enum1)
+        arktest.assertTrue(Enum1.second instanceof Enum1)
+        arktest.assertTrue(Enum1.third instanceof Enum1)
+        arktest.assertFalse(Enum1.first instanceof Enum2)
+        arktest.assertFalse(Enum1.second instanceof Enum2)
+        arktest.assertFalse(Enum1.third instanceof Enum2)
+        arktest.assertTrue(Enum1.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum1.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum1.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum1.first.valueOf(), 123)
+        arktest.assertEQ(Enum1.second.valueOf(), 124)
+        arktest.assertEQ(Enum1.third.valueOf(), 125)
+        arktest.assertTrue(Enum2.first instanceof Enum2)
+        arktest.assertTrue(Enum2.second instanceof Enum2)
+        arktest.assertTrue(Enum2.third instanceof Enum2)
+        arktest.assertFalse(Enum2.first instanceof Enum1)
+        arktest.assertFalse(Enum2.second instanceof Enum1)
+        arktest.assertFalse(Enum2.third instanceof Enum1)
+        arktest.assertTrue(Enum2.first.valueOf() instanceof int)
+        arktest.assertTrue(Enum2.second.valueOf() instanceof int)
+        arktest.assertTrue(Enum2.third.valueOf() instanceof int)
+        arktest.assertEQ(Enum2.first.valueOf(), 124)
+        arktest.assertEQ(Enum2.second.valueOf(), 125)
+        arktest.assertEQ(Enum2.third.valueOf(), 123)
+    test_suffix: "phnacei2"
+    ids: "17-18"
+
+  - desc: |-
+      >-
+        If some but not all members have their values set explicitly,
+        then the values of the members are set by the following rules:
+        • If an initializer is not a constant expression (see Constant
+        Expressions), all subsequent members must be explicitly initialized.
+        Otherwise, a compile-time error occurs.
+        • The member which is the first and has no explicit initializer
+        gets zero value.
+        • Member with an explicit initializer has that explicit value.
+        • Member that is not the first and has no explicit initializer
+        takes the value of the immediately preceding constant
+        plus one.
+    params: |-
+      >-
+        part have not a constant expression initializers,
+        part do not have initializers,
+        using different expression values types assignable to type int
+    decl_variants:
+      - |-
+        function foo_byte(): byte {
+            return 5
+        }
+        function foo_short(): short {
+            return 7
+        }
+        function foo_int(): int {
+            return 9
+        }
+        function foo_long(): long {
+            return 13
+        }
+        enum Enum { A, B, C = foo_byte(), D = foo_short(),
+          E = foo_int(), F = foo_long().toInt() }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.A instanceof Enum)
+        arktest.assertTrue(Enum.B instanceof Enum)
+        arktest.assertTrue(Enum.C instanceof Enum)
+        arktest.assertTrue(Enum.D instanceof Enum)
+        arktest.assertTrue(Enum.E instanceof Enum)
+        arktest.assertTrue(Enum.F instanceof Enum)
+        arktest.assertTrue(Enum.A.valueOf() instanceof int)
+        arktest.assertTrue(Enum.B.valueOf() instanceof int)
+        arktest.assertTrue(Enum.C.valueOf() instanceof int)
+        arktest.assertTrue(Enum.D.valueOf() instanceof int)
+        arktest.assertTrue(Enum.E.valueOf() instanceof int)
+        arktest.assertTrue(Enum.F.valueOf() instanceof int)
+        arktest.assertEQ(Enum.A, 0)
+        arktest.assertEQ(Enum.B, 1)
+        arktest.assertEQ(Enum.C, 5)
+        arktest.assertEQ(Enum.D, 7)
+        arktest.assertEQ(Enum.E, 9)
+        arktest.assertEQ(Enum.F, 13)
+    test_suffix: "phnacei3"
+    ids: "19"

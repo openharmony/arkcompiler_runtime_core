@@ -15,10 +15,9 @@ limitations under the License.
 
 /*---
 desc: nullable Cast T | null -> T. null value
-tags: [compile-only, negative]
 ---*/
 
 function main(): void {
   let a: Int | null = null;
-  let b: Int = a as Int;
+  arktest.expectThrow(() => { let b: Int = a as Int; }, (e) => e instanceof ClassCastError);
 }

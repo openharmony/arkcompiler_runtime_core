@@ -19,7 +19,6 @@ desc: >-
     A widening reference conversion exists from any reference type S to any reference
     type T, provided S is a subtype of T.
 tags: [compile-only, negative]
-expected_out: "{{t.expected}}"
 ---*/
 
 {{t.defs}}

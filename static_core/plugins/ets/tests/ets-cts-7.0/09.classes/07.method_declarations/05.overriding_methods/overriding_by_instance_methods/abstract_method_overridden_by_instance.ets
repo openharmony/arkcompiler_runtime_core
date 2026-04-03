@@ -14,24 +14,33 @@
  */
 
 /*---
-desc: Overriding abstract method.
-assert: A compile-time error occurs if an abstract method overrides a non-abstract instance method
+desc: >-
+    Overriding abstract method.
+    A compile-time error occurs if an abstract method overrides a non-abstract instance method
 tags: []
 ---*/
 
 abstract class A {
-  abstract run(): number;
+    abstract run(): number;
 }
-
+//with override directive
 class B extends A {
-  override run(): number {
-    let result = 5 + 5;
-    return result;
-  };
+    override run(): number {
+       let result = 5 + 5;
+       return result;
+    };
+}
+//without override directive
+class C extends A {
+    run(): number {
+       let result = 6 + 6;
+       return result;
+    };
 }
 
 function main(): void {
-  let b: A = new B();
-  arktest.assertEQ(b.run(), 10);
+    let b: A = new B();
+    let c: A = new C();
+    arktest.assertEQ(b.run(), 10);
+    arktest.assertEQ(c.run(), 12);
 }
-

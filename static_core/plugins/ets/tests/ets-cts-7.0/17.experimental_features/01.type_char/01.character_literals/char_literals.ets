@@ -14,10 +14,16 @@
  */
 
 /*---
-desc: Correct char literals
+desc: Valid char literals
 ---*/
 
 function main() {
+    // basic check for spec examples
+    let spec_examples: Char[] = [c'a', c'\n', c'\x7F', c'\u0000']
+    for (let i = 0; i < spec_examples.length; i++) {
+        arktest.assertTrue(spec_examples[i] instanceof char, "expect instance of char at index " + i)
+    }
+
     // check escaped characters
     let escaped_chars: Char[] = [c'\b', c'\f', c'\n', c'\r', c'\t', c'\v', c'\\', c'\'', c'\"']
     let escaped_vals: Int[] = [8, 12, 10, 13, 9, 11, 92, 39, 34]

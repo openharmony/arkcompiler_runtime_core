@@ -1,0 +1,151 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        A compile-time error occurs in the following situations:
+        • Enumeration member has no explicit initializer and the base type
+        is not an integer type (see Initialization of Enumeration Members).
+        params: all double enum members values should be set explicitly
+    decl_variants:
+      - |-
+        enum Enum: double { first }
+      - |-
+        enum Enum: double { first = 1.2, second = 3.4, third }
+    stdout:
+      - |-
+        "Syntax error ESY0276: All items of non-Integer enumeration should be explicitly initialized."
+    test_suffix: "ademvsbse"
+
+  - desc: |-
+      >-
+        A compile-time error occurs in the following situations:
+        • Type of explicit member initializer is not assignable (see Assignability) to the base type
+        params: wrong init type
+    decl_variants:
+      - |-
+        enum Enum: double { first = "abc" }
+      - |-
+        enum Enum: double { first = false }
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "wit"
+
+  - desc: |-
+      >-
+        A compile-time error occurs in the following situations:
+        • Type of explicit member initializer is not assignable (see Assignability) to the base type
+        params: mixing of types
+    decl_variants:
+      - |-
+        enum Enum: double { first = 1.5, second = "abc" }
+      - |-
+        enum Enum: double { first = "abc", second = 1.5 }
+    stdout:
+      - |-
+        "Expected CTE output is unknown"
+      - |-
+        "Expected CTE output is unknown"
+    test_suffix: "mot"
+
+  - desc: |-
+      Same enumeration type name
+    decl_variants:
+      - |-
+        enum Enum: double { first = 42.32, second = 1.7 }
+        enum Enum: double { first = 15.7, second = 3.4 }
+    stdout:
+      - |-
+        "Semantic error ESE0351: Variable 'Enum' has already been declared."
+    test_suffix: "setn"
+
+  - desc: |-
+      Wrong type
+    decl_variants:
+      - |-
+        enum Enum1: double { first = 42.32, second = 3.4 }
+        enum Enum2: double { first = 42.32, second = 3.4 }
+    logic: |-
+      let v: Enum2 = Enum1.first
+    stdout:
+      - |-
+        "Semantic error ESE0318: Type 'Enum1' cannot be assigned to type 'Enum2'"
+    test_suffix: "wt"
+
+  - desc: |-
+      Not allowed conversion
+    decl_variants:
+      - |-
+        enum Enum1: double { first = -1.4, second = -42.32 }
+        enum Enum2: double { first = -1.4, second = -42.32 }
+    logic: |-
+      let v: Enum1 = Enum1.first
+      let q: Enum2 = v as Enum2
+    positive:  |-
+    stdout:
+      - |-
+        "Warning W0326: Attempting to cast type 'Enum1' to 'Enum2' can throw 'CastClassError' exception at runtime"
+    test_suffix: "nac"
+
+  - desc: |-
+      Modifying const variable of enum type
+    decl_variants:
+      - |-
+        enum Enum: double { first = 1.5, second = 3.6, third = 5.7 }
+        const e: Enum = Enum.first
+      - |-
+        enum Enum: double { first = 1.5, second = 3.6, third = 5.7 }
+        const e = Enum.first
+    logic: |-
+      e = Enum.second
+    stdout:
+      - |-
+        "Semantic error ESE4001: Cannot assign to a constant variable e"
+      - |-
+        "Semantic error ESE4001: Cannot assign to a constant variable e"
+    test_suffix: "mcvoet"
+
+  - desc: |-
+      >-
+        If a variable has no default value, then its value must be set
+        by the Simple Assignment Operator before any use of the variable.
+        params: using variable of enum type before it is initialized
+    decl_variants:
+      - |-
+        enum Color: double { Red = 1.3, Green = 3.7, Blue = 5.4 }
+    logic: |-
+      let v: Color
+      arktest.assertTrue(v instanceof Color)
+    stdout:
+      - |-
+        "Semantic error ESE0375: Variable 'v' is used before being assigned."
+    test_suffix: "uvoet"
+
+  - desc: |-
+      >-
+        A constant declaration introduces a named variable with a mandatory
+        explicit value.
+        params: const enum variable without initializer
+    decl_variants:
+      - |-
+        enum Color: double { Red = 1.3, Green = 3.7, Blue = 5.4 }
+    logic: |-
+      const v: Color
+    stdout:
+      - |-
+        "Semantic error ESE0363: Missing initializer in const declaration"
+    test_suffix: "cevwi"

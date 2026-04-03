@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+
 /*---
-desc: Compound assignment {{c.op}} for int with overflow - {{c.description}}
+desc: Compound assignment for int with overflow
 ---*/
 
-function main() {
-    let a: int = {{c.initial}};
-    a {{c.op}} {{c.operand}};
-    arktest.assertEQ(a, {{c.expected}});
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Compound_assignment_int");
+
+    {%- for c in cases %}
+        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
+            let a: int = {{c.initial}};
+            a {{c.op}} {{c.operand}};
+            arktest.assertEQ(a, {{c.expected}});
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-{%- endfor %}

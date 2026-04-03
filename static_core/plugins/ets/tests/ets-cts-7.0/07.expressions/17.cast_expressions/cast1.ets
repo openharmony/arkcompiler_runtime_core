@@ -18,15 +18,12 @@ desc: >-
     A compile-time error occurs if the casting conversion (see Casting Conversions)
     cannot convert the operand’s compile-time type to the target type
     specified by the cast operator
-tags: [compile-only, negative]
 ---*/
 
 class A {}
 class B {}
- 
+
 function main(): void {
   let b: B = new B()
-
-  let a = b as A
-  arktest.assertTrue( a instanceof A )
+  arktest.expectThrow(() => { let a = b as A }, (e) => e instanceof ClassCastError);
 }

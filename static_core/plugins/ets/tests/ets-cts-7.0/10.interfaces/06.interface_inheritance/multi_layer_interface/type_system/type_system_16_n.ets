@@ -16,6 +16,9 @@
 /*---
 desc: Verify the correctness of the type system through complex generic interfaces and class implementations.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0141: first(): Int in StringNumberPair cannot override first():
+    String in Pair<T,U> because overriding return type is not compatible with the other return type.
 ---*/
 
 interface Pair<T, U> {

@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+
 /*---
-desc: Compound assignment {{c.op}} for byte with overflow - {{c.description}}
+desc: Compound assignment for byte with overflow
 ---*/
 
-function main() {
-    let a: byte = {{c.initial}};
-    a {{c.op}} {{c.operand}};
-    arktest.assertEQ(a, {{c.expected}});
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Compound_assignment_byte");
+
+    {%- for c in cases %}
+        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
+            let a: byte = {{c.initial}};
+            a {{c.op}} {{c.operand}};
+            arktest.assertEQ(a, {{c.expected}});
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-{%- endfor %}

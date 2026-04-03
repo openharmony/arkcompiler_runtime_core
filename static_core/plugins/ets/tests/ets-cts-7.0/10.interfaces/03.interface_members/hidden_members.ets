@@ -13,19 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for im in interface_members %}
+{% for c in cases %}
+
 /*---
-desc: Hide inheritance members.
-assert: The interface inherits, from the interfaces it extends, all members of those interfaces, except for fields that it hides.
-tags: [compile-only]
+desc: >-
+    An interface can be declared direct extension of one or more other interfaces.
+    If so, the interface inherits all members from the interfaces it extends.
+    Inherited members can be optionally overridden or hidden.
+    {{c.doc}}
 ---*/
 
-interface A {
-  {{im}}
-}
-
-interface B extends A {
-  {{im}}
-}
-
+{{c.decl}}
 {% endfor %}

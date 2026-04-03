@@ -29,14 +29,14 @@ desc: >-
 
 class C<T> extends Array<T> {
   j: T
-  constructor(i: Object) { }
+  constructor() { }
   private constructor(j: T) {
     this.j = j
   }
   static foo() {
-    let arr = new Array<C<number>>()
-    arr.push(new C<number>(1))
-    arktest.assertEQ(arr.length, 1)
+    let arr: Array<C<number>> = new C<number>[5](new C<number>(0))
+    arr[0] = new C<number>(1)
+    arktest.assertEQ(arr.length, 5)
     arktest.assertEQ(arr.at(0).j, 1)
   }
 }
