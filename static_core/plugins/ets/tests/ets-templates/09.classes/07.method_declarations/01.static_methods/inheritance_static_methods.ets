@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,10 +18,9 @@ limitations under the License.
 /*---
 desc: Inheritance static method of superclass.
 assert: >-
-    A class C inherits from its direct superclass all concrete methods m (both static and instance) of the superclass
-    for which all of the following are true. m is a member of the direct superclass of C. m is public, protected,
-    or declared with package access in the same package as C. No method declared in C has a signature that is a
-    subsignature of the signature of m.
+    Static members of a superclass are not inherited. The subclass which wants
+    to use static members of its superclass must use explicit qualification
+    using the superclass name. That applies to static methods.
 params: {{mod}}
 ---*/
 
