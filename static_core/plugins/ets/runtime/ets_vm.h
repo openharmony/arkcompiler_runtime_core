@@ -430,6 +430,9 @@ private:
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
                         common_vm::VMInterface *vmIface);
 
+    // Time to turn off GC for cold startup on PostFork
+    static constexpr uint64_t DISABLE_GC_DURATION_MS = 2ULL * 1000;
+
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
     PandaUniquePtr<EtsClassLinker> classLinker_;
