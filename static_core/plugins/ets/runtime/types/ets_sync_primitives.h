@@ -15,6 +15,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 
+#include "runtime/execution/job_events.h"
 #include "runtime/execution/job_execution_context.h"
 #include "libarkbase/mem/object_pointer.h"
 #include "libarkbase/macros.h"
@@ -77,16 +78,13 @@ public:
      */
     static ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList *waiters, EtsWaitersList::Node *awaitee)
     {
-        auto *executionCtx = EtsExecutionContext::GetCurrent();
-        ASSERT(executionCtx != nullptr);
-        auto *jobManager = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-        auto &event = awaitee->GetEvent();
+        ASSERT(awaitee->GetEvent()->GetType() == JobEvent::Type::BLOCKING);
+        auto *event = static_cast<BlockingEvent *>(awaitee->GetEvent());
         // Need to lock event before PushBack
         // to avoid use-after-free in JobEvent::Happen method
-        event.Lock();
+        event->Lock();
         waiters->PushBack(awaitee);
-        ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
-        jobManager->Await(&event);
+        event->Wait();
     }
 
     /**
@@ -96,7 +94,7 @@ public:
     static ALWAYS_INLINE void ResumeCoroutine(EtsWaitersList *waiters)
     {
         auto *awaitee = waiters->PopFront();
-        awaitee->GetEvent().Happen();
+        awaitee->GetEvent()->Happen();
     }
 
     void SuspendCoroutine(EtsWaitersList::Node *awaitee)
@@ -181,14 +179,20 @@ public:
 
     static EtsEvent *Create(EtsExecutionContext *executionCtx);
 
-private:
-    static constexpr uint32_t STATE_BIT = 1U;
-    static constexpr uint32_t FIRE_STATE = 1U;
-    static constexpr uint32_t ONE_WAITER = 2U;
+protected:
+    static constexpr uint32_t DEPENDENCY_BIT = 1U;
+    static constexpr uint32_t STATE_BIT = 2U;
+    static constexpr uint32_t FIRE_STATE = 2U;
+    static constexpr uint32_t ONE_WAITER = 4U;
 
     static bool IsFireState(uint32_t state)
     {
         return (state & STATE_BIT) == FIRE_STATE;
+    }
+
+    static bool HasDependencyBit(uint32_t state)
+    {
+        return (state & DEPENDENCY_BIT) != 0;
     }
 
     static uint32_t GetNumberOfWaiters(uint32_t state)
@@ -196,7 +200,7 @@ private:
         return state >> STATE_BIT;
     }
 
-    std::atomic<uint32_t> state_;
+    std::atomic<uint32_t> state_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
     friend class test::EtsSyncPrimitivesTest;
 };
@@ -437,6 +441,51 @@ private:
     static constexpr uint64_t ONE_READER = 1ULL << STATE_BITS;
     static constexpr uint64_t ONE_WRITER = 1ULL << (STATE_BITS + READER_BITS);
 };
+
+/**
+ * @brief Event registry for tracking async dependencies.
+ *
+ * This class extends EtsEvent to add dependency tracking for async operations (primarily Promise completion).
+ * It is used to coordinate between a Promise and jobs/callbacks that depend on its resolution.
+ *
+ * Dependency Lifetime (JobEvent passed to AddDependency):
+ * - Caller retains ownership until AddDependency is called
+ * - After AddDependency: ownership transfers to EtsEventWithDependencies
+ *   - If event already fired: dependency is happened and deleted immediately in AddDependency
+ *   - Otherwise: stored in waiters list until ResolveDependencies, then deleted there
+ * - Caller must NOT delete the JobEvent after passing to AddDependency
+ *
+ * Dependency Registration:
+ * - Jobs call AddDependency() to register themselves as waiting for this event
+ * - Each dependency is a JobEvent representing a dependent job
+ * - Dependencies are stored in the waiters list and will be resolved when the event fires
+ *
+ * Resolution:
+ * - For stackless: ResolveDependencies() is called when Promise resolves/rejects
+ * - For stackful: Fire() is called (inherits from EtsEvent)
+ * - Both methods unblock all waiting jobs and clean up the dependency events
+ */
+// NOTE(panferovi): make protected inheritance since stackful will support suspend/dispatch bytecodes
+class EtsEventWithDependencies : public EtsEvent {
+public:
+    void AddDependency(JobEvent *dependency);
+
+    void ResolveDependencies();
+
+    static EtsEventWithDependencies *Create(EtsExecutionContext *executionCtx);
+
+    static EtsEventWithDependencies *FromCoreType(ObjectHeader *eventRegistry)
+    {
+        return reinterpret_cast<EtsEventWithDependencies *>(eventRegistry);
+    }
+
+    ObjectHeader *GetCoreType() const
+    {
+        return EtsEvent::GetCoreType();
+    }
+};
+
+static_assert(sizeof(EtsEventWithDependencies) == sizeof(EtsEvent));
 
 }  // namespace ark::ets
 

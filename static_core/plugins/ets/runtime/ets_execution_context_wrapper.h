@@ -55,6 +55,8 @@ public:
 
     void CacheBuiltinClasses() override;
 
+    void OnJobCompletion(Value result) override;
+
 protected:
     // we would like everyone to use the factory to create a EtsExecutionContextWrapper
     explicit EtsExecutionContextWrapper(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Job *job);

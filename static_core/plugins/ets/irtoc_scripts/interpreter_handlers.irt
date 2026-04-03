@@ -547,7 +547,6 @@ macro(:handle_ets_async_dispatch) do |v, size|
   async_ctx := vreg_value(v).ref
 
   If(async_ctx, 0).EQ {
-    acc_null := nullptr
     pc_null := AddI(pc).Imm(size).ptr
   } Else {
     ref_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_VALUES_OFFSET).ref
@@ -593,12 +592,8 @@ macro(:handle_ets_async_dispatch) do |v, size|
     ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET, Cast(0).i64)
     ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET, Cast(0).i64)
 
-    awaitee := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAITEE_OFFSET).ref
-    promise_value := LoadI(AddI(awaitee).Imm(EtsConstants::ETS_PROMISE_VALUE_OFFSET).ptr).SetNeedReadBarrier(true).ref
-    acc_value := Cast(promise_value).ptr
     pc_normal := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET).i64).ptr
   }
 
   pc := Phi(pc_null, pc_normal).ptr
-  set_acc_object(Phi(acc_null, acc_value).ptr)
 end

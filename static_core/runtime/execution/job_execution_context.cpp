@@ -16,6 +16,7 @@
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/job_manager.h"
 #include "runtime/execution/job.h"
+#include "runtime/execution/job_events.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/thread_scopes.h"
 
@@ -59,6 +60,13 @@ void JobExecutionContext::ExecuteJob(Job *job)
 
     SetJob(parentJ);
     job->SetExecutionContext(nullptr);
+}
+
+void JobExecutionContext::OnJobCompletion([[maybe_unused]] Value result)
+{
+    if (GetJob()->GetCompletionEvent() != nullptr) {
+        GetJob()->GetCompletionEvent()->Happen();
+    }
 }
 
 }  // namespace ark

@@ -23,14 +23,14 @@ namespace ark {
 class Frame;
 class ManagedThread;
 
-extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev);
+extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev, CallFlags callFlags);
 
 extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
-                                                   Method *method, Frame *prev);
+                                                   Method *method, Frame *prev, CallFlags callFlags);
 
 extern "C" PANDA_PUBLIC_API Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs,
                                                                           uint32_t numActualArgs, Method *method,
-                                                                          Frame *prev);
+                                                                          Frame *prev, CallFlags callFlags);
 
 extern "C" Frame *CreateFrameForMethod(Method *method, Frame *prev);
 

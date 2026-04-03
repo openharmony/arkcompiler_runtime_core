@@ -251,7 +251,8 @@ Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *if
         methodToInvoke = platformTypes->coreReflectProxyInvoke;
     }
 
-    return methodToInvoke->GetPandaMethod()->Invoke(executionCtx->GetMT(), invokeArgs.data(), true);
+    auto proxyFlag = CallFlags {CallFlags::IS_PROXY};
+    return methodToInvoke->GetPandaMethod()->Invoke(executionCtx->GetMT(), invokeArgs.data(), proxyFlag);
 }
 
 /*

@@ -71,7 +71,7 @@ static inline bool Launch(EtsExecutionContext *executionCtx, Method *method, con
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         // OOM
         if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
-            Job::Destroy(job);
+            jobMan->DestroyJob(job);
         }
         etsVm->GetGlobalObjectStorage()->Remove(promiseRef);
     }
@@ -107,7 +107,7 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     // NOTE(panferovi): issue with raw args and thisObj??
     auto *mutex = EtsMutex::Create(executionCtx);
     promiseHandle->SetMutex(executionCtx, mutex);
-    auto *event = EtsEvent::Create(executionCtx);
+    auto *event = EtsEventWithDependencies::Create(executionCtx);
     promiseHandle->SetEvent(executionCtx, event);
     bool successfulLaunch = Launch(executionCtx, method, promiseHandle, std::move(values));
     if (UNLIKELY(!successfulLaunch)) {

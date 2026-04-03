@@ -20,6 +20,8 @@
 
 namespace ark {
 
+class JobExecutionContext;
+
 /**
  * @brief A Job that can be suspended and resumed asynchronously.
  *
@@ -38,6 +40,14 @@ namespace ark {
  */
 class SuspendableJob : public Job {
 public:
+    SuspendableJob(PandaString name, Id id, EntrypointInfo &&epInfo, JobPriority priority, Type type, bool abortFlag)
+        : Job(std::move(name), id, std::move(epInfo), priority, type, abortFlag)
+    {
+    }
+    NO_COPY_SEMANTIC(SuspendableJob);
+    DEFAULT_MOVE_SEMANTIC(SuspendableJob);
+    ~SuspendableJob() override = default;
+
     mem::Reference *GetSuspensionContext()
     {
         return suspensionCtx_;
@@ -46,6 +56,18 @@ public:
     void SetSuspensionContext(mem::Reference *suspensionCtx)
     {
         suspensionCtx_ = suspensionCtx;
+    }
+
+    static SuspendableJob *FromJob(Job *job)
+    {
+        return static_cast<SuspendableJob *>(job);
+    }
+
+    static SuspendableJob *FromExecutionContext(JobExecutionContext *executionCtx);
+
+    void InvokeEntrypoint() override
+    {
+        InvokeEntrypointImpl(true);
     }
 
 private:

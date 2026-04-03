@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,14 @@
  * limitations under the License.
  */
 
-#include "runtime/execution/job_events.h"
-#include "runtime/execution/job_execution_context.h"
-#include "runtime/execution/job_manager.h"
-#include "runtime/include/thread_scopes.h"
+#include "runtime/execution/stackless/suspendable_job.h"
+#include "execution/job_execution_context.h"
 
 namespace ark {
 
-void JobEvent::Happen()
+SuspendableJob *SuspendableJob::FromExecutionContext(JobExecutionContext *executionCtx)
 {
-    SetHappened();
-    jobManager_->UnblockWaiters(this);
-}
-
-void BlockingEvent::Wait()
-{
-    auto *executionCtx = JobExecutionContext::GetCurrent();
-    ScopedNativeCodeThread nativeCode(executionCtx);
-    jobManager_->Await(this);
+    return FromJob(executionCtx->GetJob());
 }
 
 }  // namespace ark

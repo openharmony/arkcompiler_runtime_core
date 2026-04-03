@@ -669,7 +669,8 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
     return str;
 }
 
-extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev)
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
+extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev, CallFlags callFlags)
 {
     uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
     if (LIKELY(method)) {
@@ -680,11 +681,13 @@ extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *met
     if (UNLIKELY(frame == nullptr)) {
         return nullptr;
     }
-    return new (frame) Frame(Frame::ToExt(frame, extSz), method, prev, nregs);
+    auto frameFlags = callFlags.IsResumed() ? Frame::IS_RESUMED : 0;
+    return new (frame) Frame(Frame::ToExt(frame, extSz), method, prev, nregs, 0, frameFlags);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
-                                                   Method *method, Frame *prev)
+                                                   Method *method, Frame *prev, CallFlags callFlags)
 {
     auto *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
@@ -694,11 +697,13 @@ extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs
     if (UNLIKELY(mem == nullptr)) {
         return nullptr;
     }
-    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs, numActualArgs);
+    auto frameFlags = callFlags.IsResumed() ? Frame::IS_RESUMED : 0;
+    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs, numActualArgs, frameFlags);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 extern "C" Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
-                                                         Method *method, Frame *prev)
+                                                         Method *method, Frame *prev, CallFlags callFlags)
 {
     uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
     size_t allocSz = Frame::GetAllocSize(size, extSz);
@@ -708,20 +713,21 @@ extern "C" Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t
     if (UNLIKELY(mem == nullptr)) {
         return nullptr;
     }
-    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs, numActualArgs);
+    auto frameFlags = callFlags.IsResumed() ? Frame::IS_RESUMED : 0;
+    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs, numActualArgs, frameFlags);
 }
 
 template <bool IS_DYNAMIC = false>
 static Frame *CreateFrame(uint32_t nregs, Method *method, Frame *prev)
 {
-    return CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
+    return CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev, CallFlags {});
 }
 
 template <bool IS_DYNAMIC>
 static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
 {
-    auto frame =
-        CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs, method, prev);
+    auto frame = CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs, method,
+                                                  prev, CallFlags {});
     if (UNLIKELY(frame == nullptr)) {
         return nullptr;
     }

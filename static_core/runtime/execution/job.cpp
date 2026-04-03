@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "runtime/include/runtime.h"
-#include "runtime/include/managed_thread.h"
-#include "runtime/include/thread_scopes.h"
 #include "runtime/execution/job.h"
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/job_events.h"
+#include "runtime/include/method.h"
+#include "runtime/include/managed_thread.h"
+#include "runtime/include/runtime.h"
+#include "runtime/include/thread_scopes.h"
 
 #include <utility>
 #include <variant>
@@ -62,15 +63,21 @@ Job::ManagedEntrypointInfo::~ManagedEntrypointInfo()
 
 void Job::InvokeEntrypoint()
 {
+    InvokeEntrypointImpl(false);
+}
+
+void Job::InvokeEntrypointImpl(bool resumedFrame)
+{
     ASSERT(HasEntrypoint());
     ASSERT(GetExecutionContext() == JobExecutionContext::GetCurrent());
 
     if (HasManagedEntrypoint()) {
         auto executionCtx = GetExecutionContext();
         ASSERT(executionCtx != nullptr);
-        auto invokeMethod = [this, executionCtx]() {
+        auto invokeMethod = [this, executionCtx, resumedFrame]() {
             auto &args = GetManagedEntrypointArguments();
-            Value result = GetManagedEntrypoint()->Invoke(executionCtx, args.data());
+            auto callFlags = resumedFrame ? CallFlags {CallFlags::IS_RESUMED} : CallFlags {};
+            Value result = GetManagedEntrypoint()->Invoke(executionCtx, args.data(), callFlags);
             if (GetStatus() != Job::Status::BLOCKED) {
                 executionCtx->OnJobCompletion(result);
             }
@@ -84,20 +91,6 @@ void Job::InvokeEntrypoint()
     } else if (HasNativeEntrypoint()) {
         GetNativeEntrypoint()(GetNativeEntrypointParam());
     }
-}
-
-/* static */
-Job *Job::Create(PandaString name, Id id, EntrypointInfo &&epInfo, JobPriority priority, Type type, bool abortFlag)
-{
-    mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    auto *job = allocator->New<Job>(std::move(name), id, std::move(epInfo), priority, type, abortFlag);
-    return job;
-}
-
-/* static */
-void Job::Destroy(Job *job)
-{
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(job);
 }
 
 }  // namespace ark

@@ -34,9 +34,9 @@ class EtsWaitersList : public EtsObject {
 public:
     class Node {
     public:
-        explicit Node(JobManager *jobManager) : event_(jobManager) {}
+        explicit Node(JobEvent *event) : event_(event) {}
 
-        GenericEvent &GetEvent()
+        JobEvent *GetEvent()
         {
             return event_;
         }
@@ -44,7 +44,7 @@ public:
     private:
         friend class EtsWaitersList;
         Node *next_ = nullptr;
-        GenericEvent event_;
+        JobEvent *event_;
     };
 
     void PushBack(Node *node)

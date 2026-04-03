@@ -34,18 +34,11 @@ namespace test {
 class EtsJobTest;
 }  // namespace test
 
-class EtsJob : public ObjectHeader {
+class EtsJob : public EtsObject {
 public:
     static constexpr EtsInt STATE_RUNNING = 0;
     static constexpr EtsInt STATE_FINISHED = 1;
     static constexpr EtsInt STATE_FAILED = 2;
-
-    EtsJob() = delete;
-    EtsJob(EtsJob &) = delete;
-    ~EtsJob() = default;
-
-    NO_COPY_SEMANTIC(EtsJob);
-    NO_MOVE_SEMANTIC(EtsJob);
 
     PANDA_PUBLIC_API static EtsJob *Create(EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent());
 
@@ -58,24 +51,19 @@ public:
         return reinterpret_cast<EtsJob *>(job);
     }
 
-    ObjectHeader *GetCoreType() const
-    {
-        return static_cast<ObjectHeader *>(const_cast<EtsJob *>(this));
-    }
-
     EtsObject *AsObject()
     {
-        return EtsObject::FromCoreType(this);
+        return this;
     }
 
     const EtsObject *AsObject() const
     {
-        return EtsObject::FromCoreType(this);
+        return this;
     }
 
     static EtsJob *FromEtsObject(EtsObject *job)
     {
-        return reinterpret_cast<EtsJob *>(job);
+        return static_cast<EtsJob *>(job);
     }
 
     EtsMutex *GetMutex(EtsExecutionContext *executionCtx)

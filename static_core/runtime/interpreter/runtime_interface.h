@@ -257,29 +257,32 @@ public:
     }
 
     template <bool IS_DYNAMIC = false>
-    static Frame *CreateFrame(uint32_t nregs, Method *method, Frame *prev)
+    static Frame *CreateFrame(uint32_t nregs, Method *method, Frame *prev, CallFlags callFlags = CallFlags {})
     {
-        return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
+        return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev, callFlags);
     }
 
     template <bool IS_DYNAMIC = false>
-    static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
+    static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev,
+                                            CallFlags callFlags = CallFlags {})
     {
         return ark::CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs,
-                                                     method, prev);
+                                                     method, prev, callFlags);
     }
 
     ALWAYS_INLINE static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
-                                                                 Method *method, Frame *prev)
+                                                                 Method *method, Frame *prev,
+                                                                 CallFlags callFlags = CallFlags {})
     {
-        return ark::CreateFrameWithActualArgsAndSize(size, nregs, numActualArgs, method, prev);
+        return ark::CreateFrameWithActualArgsAndSize(size, nregs, numActualArgs, method, prev, callFlags);
     }
 
     template <bool IS_DYNAMIC = false>
-    static Frame *CreateNativeFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
+    static Frame *CreateNativeFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev,
+                                                  CallFlags callFlags = CallFlags {})
     {
         return ark::CreateNativeFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs,
-                                                           numActualArgs, method, prev);
+                                                           numActualArgs, method, prev, callFlags);
     }
 
     ALWAYS_INLINE static void FreeFrame(ManagedThread *thread, Frame *frame)

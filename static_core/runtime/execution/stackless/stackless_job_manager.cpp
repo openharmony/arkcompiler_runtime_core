@@ -145,8 +145,10 @@ LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
     }
 
     job->SetAffinityMask(affinityMask);
-    LOG_IF(params.startEvent != nullptr, FATAL, EXECUTION) << "Launch with startEvent is not supported yet";
-
+    if (params.startEvent != nullptr) {
+        w->AddJobWithDependency(job, params.startEvent);
+        return LaunchResult::OK;
+    }
     w->AddRunnableJob(job);
     return LaunchResult::OK;
 }
@@ -182,6 +184,12 @@ void StacklessJobManager::UnblockWaiters(JobEvent *blocker)
     for (auto *w : workers_) {
         w->UnblockWaiters(blocker);
     }
+}
+
+void StacklessJobManager::AwaitAsynchronous(JobEvent *awaitee)
+{
+    ASSERT(awaitee != nullptr);
+    GetCurrentWorker()->AddJobWithDependency(Job::GetCurrent(), awaitee);
 }
 
 JobExecutionContext *StacklessJobManager::AttachExclusiveWorker(Runtime *runtime, PandaVM *vm)
@@ -447,7 +455,8 @@ void StacklessJobManager::RemoveJobFromRegistry(Job *job)
 {
     {
         os::memory::LockHolder lh(jobRegistryLock_);
-        jobRegistry_.erase(job);
+        [[maybe_unused]] auto removed = jobRegistry_.erase(job);
+        ASSERT(removed != 0);
     }
     CheckProgramCompletion();
 }
@@ -465,15 +474,20 @@ bool StacklessJobManager::EnumerateJobsImpl(const EnumerateJobsCallback &cb) con
 
 void StacklessJobManager::WaitForMutatorJobsCompletion()
 {
-    os::memory::LockHolder lkCompletion(programCompletionLock_);
-    while (!AllJobsAreExecuted()) {
-        programCompletionEvent_.SetNotHappened();
-        programCompletionEvent_.Lock();
-        programCompletionLock_.Unlock();
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        GetCurrentWorker()->ExecuteJobs();
+        {
+            os::memory::LockHolder lkCompletion(programCompletionLock_);
+            if (AllJobsAreExecuted()) {
+                return;
+            }
+            programCompletionEvent_.SetNotHappened();
+            programCompletionEvent_.Lock();
+        }
         GetCurrentWorker()->WaitForEvent(&programCompletionEvent_);
         LOG(DEBUG, COROUTINES) << "StacklessJobManager::WaitForMutatorJobsCompletion(): possibly "
                                   "spurious wakeup from wait...";
-        programCompletionLock_.Lock();
     }
 }
 
