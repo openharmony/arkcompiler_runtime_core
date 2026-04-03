@@ -202,6 +202,25 @@ private:
     bool worldStopped_;
 };
 
+void MarkingCollector::TracingSerial(GlobalMarkStack &globalMarkStack)
+{
+    // serial marking with a single mark task.
+    // NOTE: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
+    // use monitor, but this need to add template param to `ProcessMarkStack`.
+    // So for convenience just use a fake dummy parallel one.
+    ParallelMarkingMonitor dummyMonitor(0, 0);
+    ParallelLocalMarkStack markStack(&globalMarkStack, &dummyMonitor);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    if (gcReason_ == GCReason::GC_REASON_XREF) {
+        ProcessMarkStack<true>(0, markStack);
+    } else {
+        ProcessMarkStack<false>(0, markStack);
+    }
+#else
+    ProcessMarkStack<false>(0, markStack);
+#endif
+}
+
 void MarkingCollector::TracingImpl(GlobalMarkStack &globalMarkStack, bool parallel, bool Remark)
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, ("CMCGC::TracingImpl_" + std::to_string(globalMarkStack.Count())).c_str(),
@@ -249,21 +268,7 @@ void MarkingCollector::TracingImpl(GlobalMarkStack &globalMarkStack, bool parall
         } while (monitor.WaitNextStepOrFinished());
         monitor.WaitAllFinished();
     } else {
-        // serial marking with a single mark task.
-        // NOTE: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
-        // use monitor, but this need to add template param to `ProcessMarkStack`.
-        // So for convenience just use a fake dummy parallel one.
-        ParallelMarkingMonitor dummyMonitor(0, 0);
-        ParallelLocalMarkStack markStack(&globalMarkStack, &dummyMonitor);
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-        if (gcReason_ == GCReason::GC_REASON_XREF) {
-            ProcessMarkStack<true>(0, markStack);
-        } else {
-            ProcessMarkStack<false>(0, markStack);
-        }
-#else
-        ProcessMarkStack<false>(0, markStack);
-#endif
+        TracingSerial(globalMarkStack);
     }
 }
 
@@ -669,10 +674,20 @@ void MarkingCollector::RunGarbageCollection(uint64_t gcIndex, GCReason reason, G
 
     ReclaimGarbageMemory(reason);
 
+    // Call Recalculate byte-level heap footprint after ReclaimGarbageMemory
+    // (garbage regions have been already reclaimed here).
+    // Now safe to call RecalculateFootprint, because no mutator can allocate concurrently
+    Heap::GetHeap().GetAllocator().RecalculateFootprint();
+
     PostGarbageCollection(gcIndex);
     MutatorManager::Instance().DestroyExpiredMutators();
     gcStats.gcEndTime = TimeUtil::NanoSeconds();
 
+    UpdateGCCompletionStats(gcStats);
+}
+
+void MarkingCollector::UpdateGCCompletionStats(GCStats &gcStats)
+{
     uint64_t gcTimeNs = gcStats.gcEndTime - gcStats.gcStartTime;
     double rate = (static_cast<double>(gcStats.collectedBytes) / gcTimeNs) * (static_cast<double>(NS_PER_S) / MB);
     {

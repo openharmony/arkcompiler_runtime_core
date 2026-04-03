@@ -38,6 +38,19 @@ public:
     void StopGCWork();
     void RequestGC(GCReason reason, bool async, GCType gcType);
     void WaitForGCFinish();
+
+    // Blocks until gcCompletedCount >= targetCount or GC exits
+    void WaitForGCCompletionCount(uint64_t targetCount);
+
+    // Returns the number of completed GC cycles (both sync and async)
+    uint64_t GetGcCompletedCount() const
+    {
+        // Atomic with acquire order reason: acquire/release atomic flags ensures
+        // that after the new counter value is read all memory changes made before
+        // the counter update in another thread would be actual and visible now
+        return gcCompletedCount_.load(std::memory_order_acquire);
+    }
+
     // gc main loop
     void RunTaskLoop();
     uint32_t GetGCThreadCount(const bool isConcurrent) const;
@@ -138,6 +151,8 @@ private:
     // finishedGcIndex records the currently finished gcIndex
     // may be read by mutator but only be written by gc thread sequentially
     std::atomic<uint64_t> finishedGcIndex_ = {0};
+    // Counts ALL completed GC cycles (both sync and async), used by StdGCWaitForFinishGC
+    std::atomic<uint64_t> gcCompletedCount_ = {0};
     // protect condition_variable gcFinishedCondVar's status.
     ark::os::memory::Mutex gcFinishedCondMutex_;
     // notified when GC finished, requires gcFinishedCondMutex

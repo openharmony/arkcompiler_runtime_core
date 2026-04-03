@@ -1,2 +1,6 @@
 ets-common-tests/gc/test_finreg_coros_cmc.ets
 ets-common-tests/gc/weak_ref_test_cmc.ets
+ets-common-tests/gc/concurrent_start_gc_cmc.ets
+ets-common-tests/gc/postpone_gc_test_cmc.ets
+ets-common-tests/gc/free_heap_size_test_cmc.ets
+ets-common-tests/gc/heap_info_test_cmc.ets

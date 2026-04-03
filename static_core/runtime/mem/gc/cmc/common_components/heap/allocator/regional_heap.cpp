@@ -182,6 +182,10 @@ HeapAddress RegionalHeap::Allocate(size_t size, AllocType allocType)
     if (internalAddr == 0) {
         return 0;
     }
+    // Increments value of footprintBytes_ counter of heap usage on each non-TL allocation.
+    // TL allocations don't call OnAllocate, so RecalculateFootprint is used for that
+    // (see MarkingCollector::RunGarbageCollection, call Heap::GetHeap().GetAllocator().RecalculateFootprint)
+    OnAllocate(allocSize);
 #if defined(COMMON_TSAN_SUPPORT)
     Sanitizer::TsanAllocObject(reinterpret_cast<void *>(internalAddr), allocSize);
 #endif
@@ -206,6 +210,7 @@ HeapAddress RegionalHeap::AllocateNoGC(size_t size, AllocType allocType)
     if (internalAddr == 0) {
         return 0;
     }
+    OnAllocate(allocSize);  // The same usage as in RegionalHeap::Allocate
 #if defined(COMMON_TSAN_SUPPORT)
     Sanitizer::TsanAllocObject(reinterpret_cast<void *>(internalAddr), allocSize);
 #endif

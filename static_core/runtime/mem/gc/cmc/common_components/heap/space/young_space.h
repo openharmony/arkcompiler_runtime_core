@@ -84,6 +84,12 @@ public:
         return tlRegionList_.GetAllocatedSize(false) + recentFullRegionList_.GetAllocatedSize();
     }
 
+    // Returns allocated size in bytes
+    size_t CountAllocatedBytes() const
+    {
+        return tlRegionList_.GetAllocatedSize(false) + recentFullRegionList_.GetAllocatedSize(false);
+    }
+
     size_t GetRecentAllocatedSize() const
     {
         return recentFullRegionList_.GetAllocatedSize();
