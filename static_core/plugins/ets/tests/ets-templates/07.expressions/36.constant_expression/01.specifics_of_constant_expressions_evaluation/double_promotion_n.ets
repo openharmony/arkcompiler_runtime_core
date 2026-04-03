@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,14 @@
  */
 
 /*---
-desc: NullPointerError is thrown by an array access expression
-  if the array reference expression has the null value.
+desc: >-
+    Exponentiation operator always produces double result type, so assigning
+    to an integer type causes a compile-time error.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Int'"
 ---*/
 
-function main() {
-
-  let a = 1;
-  let b = 1;
-  let byt: byte;
-  let foo = (i: byte): byte[]|null => { return i <= 0 ? null : [i] };
-
-  let v: String = "X" + (a = 2) + (byt = foo(42 as byte)![0]) + (b = 2);
-  arktest.assertEQ(a, 2);
-  arktest.assertEQ(b, 2);
-    
+function main(): void {
+    const r = 2 ** 3
+    let i: int = r
 }

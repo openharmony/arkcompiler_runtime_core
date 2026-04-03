@@ -15,20 +15,23 @@
 
 /*---
 desc: >-
-    If the form of primaryExpression is super,
-    then the pattern "super?." is handled as a compile-time error.
+    If the form of primaryExpression is thisExpression,
+    then the pattern "this?." is handled as a compile-time error.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY115549: 'this?.' optional chaining is not supported."
 ---*/
 
-class Parent {
-    get x(): int {
-        return 13;
+class Invalid {
+    x: undefined = undefined;
+    f(): undefined {
+        return this?.x;
     }
 }
 
-class Sibling extends Parent {
-    f(): int | undefined {
-        return super?.x;
-    }
+function main() {
+
+    let a: Invalid = new Invalid();
+    arktest.assertEQ(a.f(), undefined);
+    
 }
 

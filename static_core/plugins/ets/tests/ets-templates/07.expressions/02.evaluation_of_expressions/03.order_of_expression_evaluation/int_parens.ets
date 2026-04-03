@@ -13,14 +13,60 @@
  * limitations under the License.
  */
 
-{% for ia in int_assoc %}
-
 /*---
-desc: Integer addition and multiplication are associative
+desc: Integer addition and multiplication are associative.
 ---*/
 
-function main(): void {
-  arktest.assertEQ( {{ia.left}}, {{ia.right}} );
-}
+const suite = new arktest.ArkTestsuite("Integer associativity with parentheses")
 
-{% endfor %}
+suite.addTest("Addition: (2+3)+4+5", () => {
+  arktest.assertEQ(2+3+4+5, (2+3)+4+5)
+})
+
+suite.addTest("Addition: (2+3)+(4+5)", () => {
+  arktest.assertEQ(2+3+4+5, (2+3)+(4+5))
+})
+
+suite.addTest("Addition: 2+(3+4)+5", () => {
+  arktest.assertEQ(2+3+4+5, 2+(3+4)+5)
+})
+
+suite.addTest("Addition: 2+3+(4+5)", () => {
+  arktest.assertEQ(2+3+4+5, 2+3+(4+5))
+})
+
+suite.addTest("Addition: (((2+3)+4)+5)", () => {
+  arktest.assertEQ(2+3+4+5, (((2+3)+4)+5))
+})
+
+suite.addTest("Addition: ((2+3)+4)+5", () => {
+  arktest.assertEQ(2+3+4+5, ((2+3)+4)+5)
+})
+
+suite.addTest("Multiplication: (2*3)*4*5", () => {
+  arktest.assertEQ(2*3*4*5, (2*3)*4*5)
+})
+
+suite.addTest("Multiplication: (2*3)*(4*5)", () => {
+  arktest.assertEQ(2*3*4*5, (2*3)*(4*5))
+})
+
+suite.addTest("Multiplication: 2*(3*4)*5", () => {
+  arktest.assertEQ(2*3*4*5, 2*(3*4)*5)
+})
+
+suite.addTest("Multiplication: 2*3*(4*5)", () => {
+  arktest.assertEQ(2*3*4*5, 2*3*(4*5))
+})
+
+suite.addTest("Multiplication: (((2*3)*4)*5)", () => {
+  arktest.assertEQ(2*3*4*5, (((2*3)*4)*5))
+})
+
+suite.addTest("Multiplication: ((2*3)*4)*5", () => {
+  arktest.assertEQ(2*3*4*5, ((2*3)*4)*5)
+})
+
+function main() {
+  suite.run()
+}
