@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetSizeTest");
+    let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueGetSizeTest');
 
-    ArrayBlockingQueueTestsuite.addAsyncTest("GetSizeTestInt003", async () =>
-    {
+    arrayConcurrentQueueTestsuite.addAsyncTest('GetSizeTestInt003', async () => {
         const elementsNum: int = 100;
-        let queueInt = new containers.stackless.ArrayBlockingQueue<int>(elementsNum * 2);
-        let promises = new Array<Promise<void>>(elementsNum);
+        let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(elementsNum * 2);
+        let promises: Promise<void>[] = new Array<Promise<void>>(elementsNum);
         for (let i: int = 0; i < elementsNum; ++i) {
             promises[i] = queueInt.push(i);
             arktest.assertTrue(queueInt.add(i));
@@ -30,8 +28,8 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; i++) {
             await promises[i];
         }
-        arktest.assertEQ(queueInt.size, elementsNum * 2)
+        arktest.assertEQ(queueInt.size, elementsNum * 2);
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayConcurrentQueueTestsuite.run();
 }

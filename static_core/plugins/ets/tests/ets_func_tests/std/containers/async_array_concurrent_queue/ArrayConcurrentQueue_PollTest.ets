@@ -16,14 +16,15 @@
 const elementsNum: int = 10;
 const stressNum: int = 100;
 
-let sMTQueueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(stressNum);
+let sharedQueueInt: containers.stackless.ArrayConcurrentQueue<int> =
+    new containers.stackless.ArrayConcurrentQueue<int>(stressNum);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePollTest");
+    let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueuePollTest');
 
-    ArrayBlockingQueueTestsuite.addTest("PollTest001", () =>
-    {
-        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(200);
+    arrayConcurrentQueueTestsuite.addTest('PollTest001', () => {
+        let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(200);
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertTrue(queueInt.add(i));
         }
@@ -38,9 +39,10 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 0);
         arktest.assertEQ(queueInt.poll(), undefined);
     });
-    ArrayBlockingQueueTestsuite.addTest("PollStressTest004", () =>
-    {
-        let queueInt: containers.stackless.ArrayBlockingQueue<int> = new containers.stackless.ArrayBlockingQueue<int>(stressNum);
+
+    arrayConcurrentQueueTestsuite.addTest('PollStressTest004', () => {
+        let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }
@@ -49,35 +51,35 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.size, 0);
     });
-    ArrayBlockingQueueTestsuite.addAsyncTest("ThreadsPollStressTest003", async () =>
-    {
-        while (!sMTQueueInt.isEmpty()) {
-            await sMTQueueInt.pop();
+
+    arrayConcurrentQueueTestsuite.addAsyncTest('ThreadsPollStressTest003', async () => {
+        while (!sharedQueueInt.isEmpty()) {
+            await sharedQueueInt.pop();
         }
         for (let i = 0; i < stressNum; i++) {
-            sMTQueueInt.add(i);
+            sharedQueueInt.add(i);
         }
-        let jobs = new Array<Job<void>>(100);
-        let p = 0;
+        let jobs: Job<void>[] = new Array<Job<void>>(100);
+        let jobIndex = 0;
         for (let i = 0; i < stressNum; i++) {
-            jobs[p++] = launch(sQueuePollData);
+            jobs[jobIndex++] = launch(sharedQueuePollData);
         }
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        arktest.assertEQ(sMTQueueInt.size, 0);
+        arktest.assertEQ(sharedQueueInt.size, 0);
     });
 
-    ArrayBlockingQueueTestsuite.addTest("AddElementInEmptyQueueInt004", () =>
-    {
-        let size = 10;
-        let queue = new containers.stackless.ArrayBlockingQueue<int>(size);
+    arrayConcurrentQueueTestsuite.addTest('AddElementInEmptyQueueInt004', () => {
+        let queueSize = 10;
+        let queue: containers.stackless.ArrayConcurrentQueue<int> =
+            new containers.stackless.ArrayConcurrentQueue<int>(queueSize);
         arktest.assertEQ(queue.poll(), undefined);
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayConcurrentQueueTestsuite.run();
 }
 
-function sQueuePollData() {
-    sMTQueueInt.poll();
+function sharedQueuePollData() {
+    sharedQueueInt.poll();
 }
