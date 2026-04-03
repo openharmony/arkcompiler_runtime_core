@@ -17,7 +17,7 @@
 /*---
 desc: Checking for changing the value in derived class (in constructor of derived class).
 expected_out: >- 
-    TODO: The error is not known
+    Semantic error ESE4002: Cannot assign to a readonly field fieldA
 tags: [compile-only, negative]
 ---*/
 
