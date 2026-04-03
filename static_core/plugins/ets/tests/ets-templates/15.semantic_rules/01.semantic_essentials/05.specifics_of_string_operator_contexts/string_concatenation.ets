@@ -24,13 +24,20 @@ enum Direction {
     Down
 }
 
+class A {
+    //An operand of a reference type is converted by applying the method call toString()
+    toString() {
+        return 1 + ""
+    }
+}
+
 function main() {
     let b: byte = 1
-    let s: short = 2
+    const s: short = 2
     let i: int = 3
     let l: long = 4
     let s1 = "ok"
-    let s2 = `lorem
+    const s2 = `lorem
     ipsum`
     let nil = null
     
@@ -40,4 +47,6 @@ function main() {
     arktest.assertTrue((b * i + s1 + l) instanceof string)
     arktest.assertTrue((s1 + Direction.Up) instanceof string)
     arktest.assertTrue((s1 + nil) instanceof string)
+    arktest.assertEQ(1 + 2 + "3", "33")
+    arktest.assertEQ(new A() + "2", "12")
 }

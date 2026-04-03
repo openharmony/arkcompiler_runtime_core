@@ -14,20 +14,30 @@
  */
 
 /*---
-desc: Compound assignment for short with overflow
+desc: Ensuring that method override in subclasses keeps conditional types unchanged.
+tags: [compile-only, negative]
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+type ConditionalType<T> = T extends string ? number : boolean;
 
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+class Base {
+    methodOne(p: Base): ConditionalType<string> {
+        return 1;
+    }
+}
+
+class Derived extends Base {
+    override methodOne(p: Base): ConditionalType<string> {
+        return 2;
+    }
+}
+
+function main(): void {
+    let a = new Base();
+    let b = new Derived();
+
+    let resultA = a.methodOne(a);
+    let resultB = b.methodOne(a);
+
+    arktest.assertEQ(typeof resultA, typeof resultB);
 }

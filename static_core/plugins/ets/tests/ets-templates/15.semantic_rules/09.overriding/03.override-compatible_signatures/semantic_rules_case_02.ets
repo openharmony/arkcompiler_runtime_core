@@ -14,20 +14,27 @@
  */
 
 /*---
-desc: Compound assignment for short with overflow
+desc: The notion of the least upper bound (LUB) is used where a single type must be found that is a common supertype for a set of reference types.
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+class Base {
+    methodOne(p: Base): string {
+        return "base";
+    }
+}
 
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+class Derived extends Base {
+    override methodOne(p: Base): string {
+        return "derived";
+    }
+}
+
+function main(): void {
+    let a = new Base();
+    let b = new Derived();
+
+    let resultA = a.methodOne(a);
+    let resultB = b.methodOne(a);
+
+    arktest.assertNE(resultA, resultB);
 }

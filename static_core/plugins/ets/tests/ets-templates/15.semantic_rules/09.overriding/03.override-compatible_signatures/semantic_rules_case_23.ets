@@ -14,20 +14,28 @@
  */
 
 /*---
-desc: Compound assignment for short with overflow
+desc: Ensuring that method override in subclasses keeps union return types unchanged.
+tags: [compile-only, negative]
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+class Base {
+    methodOne(p: Base): number{
+        return 1;
+    }
+}
 
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+class Derived extends Base {
+    override methodOne(p: Base): string {
+        return "derived";
+    }
+}
+
+function main(): void {
+    let a = new Base();
+    let b = new Derived();
+
+    let resultA = a.methodOne(a);
+    let resultB = b.methodOne(a);
+
+    arktest.assertEQ(resultA, resultB);
 }

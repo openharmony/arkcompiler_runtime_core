@@ -12,22 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /*---
-desc: Compound assignment for short with overflow
+desc: Ensuring that method override in subclasses keeps never return types unchanged.
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+class Base {
+    methodOne(p: Base): never {
+        throw new Error("Never");
+    }
+}
 
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+class Derived extends Base {
+    override methodOne(p: Base): never {
+        throw new Error("Never");
+    }
+}
+
+function main(): void {
+    let a = new Base();
+    let b = new Derived();
+
+    try {
+        a.methodOne(a);
+    } catch (e) {
+    }
+
+    try {
+        b.methodOne(a);
+    } catch (e) {
+    }
 }

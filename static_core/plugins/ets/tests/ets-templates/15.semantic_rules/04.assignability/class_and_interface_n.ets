@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,29 @@
  * limitations under the License.
  */
 
+{% for type in cases %}
+
 /*---
-desc: Compound assignment for short with overflow
+desc: Type T1 is compatible with type T2 if there is an implicit conversion (see Implicit Conversions)
+      that allows converting type T1 to type T2.
+      Class does not implement interface.
+tags: [negative, compile-only]
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+type TPL = [ number, string ]
+type FUNC = () => boolean
 
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+interface I {
+  i: {{type}};
 }
+
+class A {
+  i: {{type}};
+}
+
+function main() {
+  let i: I;
+  i = new A();
+}
+
+{% endfor %}

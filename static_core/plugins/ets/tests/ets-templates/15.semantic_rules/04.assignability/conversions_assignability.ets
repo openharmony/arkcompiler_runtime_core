@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-{% for case in cases %}
-{% for type2 in case.type2 %}
 
 /*---
 desc: Type T1 is assignable to type T2 if implicit conversion is present
 ---*/
-
+{%- for case in cases %}
 {{case.decl}}
+{%- endfor %}
 
-let t1: {{case.type1}} = {{case.value}}
-let t2: {{type2}} = t1
+function main(): int {
 
-{% endfor %}
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Conversions_assignability");
+
+    {%- for case in cases %}
+        testSuite.addTest("assign_{{loop.index}}", () => {
+            let t1: {{case.type1}} = {{case.value}}
+            
+            {%- for type2 in case.type2 %}
+            let t2_{{loop.index}}: {{type2}} = t1
+            {%- endfor %}
+        });
+    {%- endfor %}
+
+    return testSuite.run();
+}

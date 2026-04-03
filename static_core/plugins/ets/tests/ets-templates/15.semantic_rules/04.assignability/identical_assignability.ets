@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,28 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: Type T1 is assignable to type T2 if T1 is identical to T2
 ---*/
 
 class C {
-  name: string = ''
-  constructor() {}
-  constructor(name: string) {
-    this.name = name
-  }
+    name: string = ''
+    constructor() {}
+    constructor(name: string) {
+        this.name = name
+    }
 }
 
-let t1: {{c.type1}} = {{c.value}}
-let t2: {{c.type2 if c.type2 else c.type1}} = t1
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Identical_assignability");
+
+    {%- for c in cases %}
+        testSuite.addTest("assign_{{loop.index}}", () => {
+           let t1: {{c.type1}} = {{c.value}}
+           let t2: {{c.type2 if c.type2 else c.type1}} = t1
+        });
+    {%- endfor %}
+
+    return testSuite.run();
+}
