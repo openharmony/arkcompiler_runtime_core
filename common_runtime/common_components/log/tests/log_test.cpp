@@ -14,7 +14,7 @@
  */
 
 #include "common_components/log/log.h"
-#include "common_components/log/log_base.h"
+#include "common_interfaces/log/log_base.h"
 #include "common_components/tests/test_helper.h"
 
 using namespace common_vm;

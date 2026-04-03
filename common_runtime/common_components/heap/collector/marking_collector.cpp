@@ -250,7 +250,8 @@ void MarkingCollector::TracingImpl(GlobalMarkStack &globalMarkStack, bool parall
                 threadPool->PostTask(
                     std::make_unique<ConcurrentMarkingTask<true>>(0, *this, monitor, globalMarkStack));
             } else {
-                threadPool->PostTask(std::make_unique<ConcurrentMarkingTask<false>>(0, *this, monitor, globalMarkStack));
+                threadPool->PostTask(
+                    std::make_unique<ConcurrentMarkingTask<false>>(0, *this, monitor, globalMarkStack));
             }
 #else
             threadPool->PostTask(std::make_unique<ConcurrentMarkingTask<false>>(0, *this, monitor, globalMarkStack));
@@ -612,7 +613,7 @@ void MarkingCollector::UpdateGCStats()
                      << ", recent-allocated " << recentBytes << "), update target footprint "
                      << oldTargetFootprint << " -> " << gcStats.targetFootprint
                      << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold;
-    VLOG(INFO, oss.str().c_str());
+    VLOG(DEBUG, oss.str().c_str());
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::UpdateGCStats END", (
                     "allocated bytes:" + std::to_string(bytesAllocated) +
                     ";survive bytes:" + std::to_string(survivedBytes) +
@@ -668,7 +669,7 @@ void MarkingCollector::RunGarbageCollection(uint64_t gcIndex, GCReason reason, G
     auto gcReasonName = std::string(g_gcRequests[gcReason_].name);
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
     auto currentThreshold = Heap::GetHeap().GetCollector().GetGCStats().GetThreshold();
-    VLOG(INFO, "Begin GC log. GCReason: %s, GCType: %s, Current allocated %s, Current threshold %s, gcIndex=%llu",
+    VLOG(DEBUG, "Begin GC log. GCReason: %s, GCType: %s, Current allocated %s, Current threshold %s, gcIndex=%llu",
         gcReasonName.c_str(), GCTypeToString(gcType), Pretty(currentAllocatedSize).c_str(),
         Pretty(currentThreshold).c_str(), gcIndex);
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::RunGarbageCollection", (
@@ -704,7 +705,7 @@ void MarkingCollector::RunGarbageCollection(uint64_t gcIndex, GCReason reason, G
         const int prec = 3;
         oss << "total gc time: " << Pretty(gcTimeNs / NS_PER_US) << " us, collection rate ";
         oss << std::setprecision(prec) << rate << " MB/s";
-        VLOG(INFO, oss.str().c_str());
+        VLOG(DEBUG, oss.str().c_str());
     }
 
     g_gcCount++;

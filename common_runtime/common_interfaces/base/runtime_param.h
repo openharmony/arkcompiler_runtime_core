@@ -17,6 +17,7 @@
 #define COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_PARAM_H
 
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/log/log_base.h"
 
 namespace common_vm {
 /*
@@ -174,6 +175,7 @@ struct GCParam {
 struct RuntimeParam {
     struct HeapParam heapParam;
     struct GCParam gcParam;
+    struct LogOptions logOptions;
 };
 }  // namespace common_vm
 

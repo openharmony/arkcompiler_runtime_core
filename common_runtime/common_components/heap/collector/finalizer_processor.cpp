@@ -137,7 +137,7 @@ void FinalizerProcessor::Init()
     MutatorManager::Instance().MutatorManagementRLock();
     fpMutator_ = mutator;
     MutatorManager::Instance().MutatorManagementRUnlock();
-    VLOG(INFO, "FinalizerProcessor thread started");
+    VLOG(DEBUG, "FinalizerProcessor thread started");
 }
 
 void FinalizerProcessor::Fini()
@@ -146,7 +146,7 @@ void FinalizerProcessor::Fini()
     fpMutator_ = nullptr;
     MutatorManager::Instance().MutatorManagementRUnlock();
     MutatorManager::Instance().DestroyRuntimeMutator(ThreadType::FP_THREAD);
-    VLOG(INFO, "FinalizerProcessor thread stopped");
+    VLOG(DEBUG, "FinalizerProcessor thread stopped");
 }
 
 void FinalizerProcessor::WaitStop()

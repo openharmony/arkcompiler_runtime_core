@@ -21,7 +21,7 @@
 
 #include <securec.h>
 
-#include "common_components/log/log_base.h"
+#include "common_interfaces/log/log_base.h"
 #include "common_components/base/time_utils.h"
 
 #ifdef ENABLE_HILOG
@@ -95,6 +95,8 @@ public:
                 return "[sa] ";
             case Component::COMMON:  // LCOV_EXCL_BR_LINE
                 return "[common] ";
+            case Component::MM_OBJ_EVENTS:  // LCOV_EXCL_BR_LINE
+                return "[mm-obj-events] ";
             case Component::ALL:  // LCOV_EXCL_BR_LINE
                 return "[default] ";
             default:  // LCOV_EXCL_BR_LINE
@@ -181,27 +183,67 @@ private:
 };
 #endif
 
+class DummyStream {
+public:
+    explicit operator bool() const
+    {
+        return true;
+    }
+};
+
+template <class T>
+DummyStream operator<<(DummyStream s, [[maybe_unused]] const T &v)
+{
+    return s;
+}
+
 #if defined(ENABLE_HILOG)
-#define ARK_LOG(level, component) \
+#define ARK_LOG_IMPL(level, component) \
     common_vm::Log::LogIsLoggable(Level::level, component) && common_vm::HiLog<LOG_##level, (component)>()
 #elif defined(ENABLE_ANLOG)
 // CC-OFFNXT(G.PRE.02-CPP) macro definition
-#define ARK_LOG(level, component) common_vm::AndroidLog<(Level::level)>()
+#define ARK_LOG_IMPL(level, component) common_vm::AndroidLog<(Level::level)>()
 #else
 #if defined(OHOS_UNIT_TEST)
-#define ARK_LOG(level, component)                                                             \
+#define ARK_LOG_IMPL(level, component)                                                        \
     ((Level::level >= Level::INFO) || common_vm::Log::LogIsLoggable(Level::level, component)) && \
         common_vm::StdLog<(Level::level), (component)>()
 #else
 // CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
-#define ARK_LOG(level, component)                                                  \
+#define ARK_LOG_IMPL(level, component)                                             \
     /* CC-OFFNXT(G.PRE.02) level is enum and can not be enclosed to parentheses */ \
     common_vm::Log::LogIsLoggable(Level::level, component) && common_vm::StdLog<(Level::level), (component)>()
 #endif
 #endif
 
+#define ARK_LOG(level, component) ARK_LOG_##level(component)
+
+#ifndef NDEBUG
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_VERBOSE(component) ARK_LOG_IMPL(VERBOSE, component)
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_DEBUG(component) ARK_LOG_IMPL(DEBUG, component)
+#else
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_VERBOSE(component) false && common_vm::DummyStream()
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_DEBUG(component) false && common_vm::DummyStream()
+#endif
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_INFO(component) ARK_LOG_IMPL(INFO, component)
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_WARN(component) ARK_LOG_IMPL(WARN, component)
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_ERROR(component) ARK_LOG_IMPL(ERROR, component)
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_FATAL_WITHOUT_ABORT(component) ARK_LOG_IMPL(FATAL_WITHOUT_ABORT, component)
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG_FATAL(component) ARK_LOG_IMPL(FATAL, component)
+
 #define LOG_COMMON(level) ARK_LOG(level, Component::COMMON)
 #define LOG_GC(level) ARK_LOG(level, Component::GC)
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define LOG_MM_OBJ_EVENTS(level) ARK_LOG(level, Component::MM_OBJ_EVENTS) << "[CMC] "
 
 #define LOGD_IF(cond) (UNLIKELY_CC(cond)) && LOG_COMMON(DEBUG)
 #define LOGI_IF(cond) (UNLIKELY_CC(cond)) && LOG_COMMON(INFO)

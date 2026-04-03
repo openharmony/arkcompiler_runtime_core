@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_BASE_H
-#define COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_BASE_H
- 
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_LOG_LOG_BASE_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_LOG_LOG_BASE_H
+
 #include <cstdint>
 #include <iostream>
 #include <sstream>
- 
+
 #include "common_interfaces/base/common.h"
- 
+
+namespace common_vm {
+
 enum class Level: uint8_t {
     VERBOSE,
     DEBUG,
@@ -31,7 +33,7 @@ enum class Level: uint8_t {
     FATAL_WITHOUT_ABORT,
     FATAL,
 };
- 
+
 using ComponentMark = uint64_t;
 enum class Component: uint64_t {
     NONE = 0ULL,
@@ -47,11 +49,11 @@ enum class Component: uint64_t {
     SA = 1ULL << 9ULL,
     PGO = 1ULL << 10ULL,
     COMMON = 1ULL << 11ULL,
+    MM_OBJ_EVENTS = 1ULL << 12ULL,
     NO_TAG = 0xFFFFFFFFULL >> 1ULL,
     ALL = 0xFFFFFFFFULL,
 };
- 
-namespace common_vm {
+
 #ifdef ENABLE_HILOG
 
 #if ECMASCRIPT_ENABLE_VERBOSE_LEVEL_LOG
@@ -63,10 +65,9 @@ namespace common_vm {
 #endif  // ENABLE_HILOG
 
 struct LogOptions {
-    Level level;
-    ComponentMark component;
+    Level level = Level::ERROR;
+    ComponentMark component = static_cast<ComponentMark>(Component::COMMON);
 };
 }  // namespace common_vm
 
-#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_BASE_H
- 
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_LOG_LOG_BASE_H

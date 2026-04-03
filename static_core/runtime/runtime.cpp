@@ -82,9 +82,7 @@
 #include "syspara/parameters.h"
 #endif
 
-#if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/base_runtime.h"
-#endif  // ARK_USE_COMMON_RUNTIME
+#include "runtime/common_runtime.h"
 
 namespace ark {
 
@@ -385,15 +383,6 @@ void Runtime::StopCoverageListener()
     instance_->GetTools().DestroyCoverageListener();
 }
 
-static void InitCommonRuntime()
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    auto *baseRuntime = common_vm::BaseRuntime::GetInstance();
-    ASSERT(baseRuntime != nullptr);
-    baseRuntime->Init();
-#endif  // ARK_USE_COMMON_RUNTIME
-}
-
 /* static */
 // CC-OFFNXT(huge_method, G.FUN.01) solid logic
 bool Runtime::Create(const RuntimeOptions &options)
@@ -430,7 +419,7 @@ bool Runtime::Create(const RuntimeOptions &options)
         LOG(ERROR, RUNTIME) << "Failed to create runtime instance";
         return false;
     }
-    InitCommonRuntime();
+    common_runtime::InitCommonRuntime();
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -568,16 +557,6 @@ bool Runtime::DestroyUnderLockHolder()
     return true;
 }
 
-static void FinishCommonRuntime()
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    auto *baseRuntime = common_vm::BaseRuntime::GetInstance();
-    ASSERT(baseRuntime != nullptr);
-    baseRuntime->Fini();
-    common_vm::BaseRuntime::DestroyInstance();
-#endif  // ARK_USE_COMMON_RUNTIME
-}
-
 /* static */
 bool Runtime::Destroy()
 {
@@ -666,7 +645,7 @@ bool Runtime::Destroy()
 
     DestroyUnderLockHolder();
     RuntimeInternalAllocator::Destroy();
-    FinishCommonRuntime();
+    common_runtime::FinishCommonRuntime();
     os::CpuAffinityManager::Finalize();
 
     return true;
