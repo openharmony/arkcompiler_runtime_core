@@ -1118,12 +1118,6 @@
 #33351
 17.experimental_features/enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_10.ets
 
-#29160
-17.experimental_features/enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_4.ets
-17.experimental_features/enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_5.ets
-17.experimental_features/enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_6.ets
-17.experimental_features/enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_7.ets
-
 #33437
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_29.ets
 
