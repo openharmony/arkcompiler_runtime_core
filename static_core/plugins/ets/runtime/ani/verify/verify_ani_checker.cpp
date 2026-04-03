@@ -813,6 +813,31 @@ public:
         return {};
     }
 
+    std::optional<PandaString> VerifyReadFieldByName(const char *name, EtsType fieldType)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr) {
+            return "wrong object for field";
+        }
+
+        EtsField *field = class_->GetFieldIDByName(name, nullptr);
+
+        if (field == nullptr) {
+            return {};
+        }
+
+        err = DoVerifyFieldByName(field, fieldType, false);
+        if (err) {
+            return err;
+        }
+
+        return {};
+    }
+
     std::optional<PandaString> VerifyReadStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
     {
         if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
@@ -849,6 +874,35 @@ public:
         if (vfield->GetEtsField()->IsReadonly()) {
             return "field is read-only";
         }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyWriteFieldByName(const char *name, EtsType fieldType)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr) {
+            return "wrong object for field";
+        }
+
+        EtsField *field = class_->GetFieldIDByName(name, nullptr);
+
+        if (field == nullptr) {
+            return {};
+        }
+
+        err = DoVerifyFieldByName(field, fieldType, false);
+        if (err) {
+            return err;
+        }
+
+        if (field->IsReadonly()) {
+            return "field is read-only";
+        }
+
         return {};
     }
 
@@ -955,6 +1009,26 @@ public:
         if (etsMethod->GetReturnValueType() != returnType) {
             return "wrong return type";
         }
+        return {};
+    }
+
+    std::optional<PandaString> DoVerifyFieldByName(EtsField *field, EtsType expectedType, bool isStaticField)
+    {
+        if (field->IsStatic() != isStaticField) {
+            return isStaticField ? "wrong static field" : "wrong field";
+        }
+
+        if (field->GetEtsType() != expectedType) {
+            PandaStringStream ss;
+            ss << "wrong field type: " << EtsTypeToString(field->GetEtsType())
+               << ", expected: " << EtsTypeToString(expectedType);
+            return ss.str();
+        }
+
+        if (!field->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            return "wrong object for field";
+        }
+
         return {};
     }
 
@@ -1215,6 +1289,12 @@ static std::optional<PandaString> VerifyReadField(Verifier &v, const ANIArg &arg
     return v.VerifyReadField(arg.GetValueField(), arg.GetReturnType());
 }
 
+static std::optional<PandaString> VerifyReadFieldByName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_FIELD_BY_NAME);
+    return v.VerifyReadFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
+}
+
 static std::optional<PandaString> VerifyReadStaticField(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_STATIC_FIELD);
@@ -1225,6 +1305,12 @@ static std::optional<PandaString> VerifyWriteField(Verifier &v, const ANIArg &ar
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_FIELD);
     return v.VerifyWriteField(arg.GetValueField(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyWriteFieldByName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_FIELD_BY_NAME);
+    return v.VerifyWriteFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
 static std::optional<PandaString> VerifyWriteStaticField(Verifier &v, const ANIArg &arg)

@@ -40,8 +40,10 @@
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
     X(VERIFY_READ_FIELD,                    VerifyReadField)                      \
+    X(VERIFY_READ_FIELD_BY_NAME,            VerifyReadFieldByName)                \
     X(VERIFY_READ_STATIC_FIELD,             VerifyReadStaticField)                \
     X(VERIFY_WRITE_FIELD,                   VerifyWriteField)                     \
+    X(VERIFY_WRITE_FIELD_BY_NAME,           VerifyWriteFieldByName)               \
     X(VERIFY_WRITE_STATIC_FIELD,            VerifyWriteStaticField)               \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
@@ -358,6 +360,15 @@ public:
             return ANIArg(ArgValueByField(vfield), name, Action::VERIFY_WRITE_FIELD, fieldType);
         }
         return ANIArg(ArgValueByField(vfield), name, Action::VERIFY_READ_FIELD, fieldType);
+    }
+
+    static ANIArg MakeForFieldByName(const char *name, std::string_view argName, EtsType fieldType,
+                                     AccessMode accessMode)
+    {
+        if (accessMode == AccessMode::READWRITE) {
+            return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_WRITE_FIELD_BY_NAME, fieldType);
+        }
+        return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_READ_FIELD_BY_NAME, fieldType);
     }
 
     static ANIArg MakeForStaticField(VStaticField *vstaticField, std::string_view name, EtsType staticFieldType,
