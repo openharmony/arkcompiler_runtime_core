@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,7 @@ public:
     template <class Callback>
     void RunProcessingInLoop(Callback callback);
     void FinishProcessingInLoop();
+    void Restart();
 
 private:
     std::list<WaitValue> waitList_;
@@ -120,6 +121,13 @@ inline void WaitList<T>::FinishProcessingInLoop()
     os::memory::LockHolder lh(loopMutex_);
     finish_ = true;
     loopCondVar_.SignalAll();
+}
+
+template <class T>
+inline void WaitList<T>::Restart()
+{
+    os::memory::LockHolder lh(loopMutex_);
+    finish_ = false;
 }
 
 template <class T>

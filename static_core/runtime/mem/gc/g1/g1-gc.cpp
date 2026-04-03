@@ -2228,7 +2228,7 @@ void G1GC<LanguageConfig>::VerifyHeapBeforeConcurrent()
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::VerifyHeapAfterRemark()
 {
-    trace::ScopedTrace AfterRemarkHeapVerifierTrace("AfterRemarkG1HeapVerifier");
+    trace::ScopedTrace afterRemarkHeapVerifierTrace("AfterRemarkG1HeapVerifier");
     size_t failCount = this->VerifyHeap();
     if (this->GetSettings()->FailOnHeapVerification() && failCount > 0) {
         LOG(FATAL, GC) << "Heap corrupted after ConcurrentMark + Remark, HeapVerifier found " << failCount
@@ -2463,10 +2463,11 @@ void G1GC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PreZygoteFork()
 {
-    GC::PreZygoteFork();
     this->DestroyWorkersTaskPool();
     this->DisableWorkerThreads();
     updateRemsetWorker_->DestroyWorker();
+    // As GC::PreZygoteFork() waits tasks to be finished, need to destroy workers before calling to escape deadlock
+    GC::PreZygoteFork();
     // don't use thread while we are in zygote
     updateRemsetWorker_->SetUpdateConcurrent(false);
 }

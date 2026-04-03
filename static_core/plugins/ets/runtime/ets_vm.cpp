@@ -491,10 +491,14 @@ void PandaEtsVM::PostForkStart()
         size_t startupLimit = startupTargetFootprint / 2;
         mm_->GetGCTrigger()->SetMinTargetFootprint(startupTargetFootprint);
         originSize_ = mm_->GetGC()->AdjustStartupLimit(startupLimit);
-        constexpr uint64_t DISABLE_GC_DURATION_NS = 2000ULL * 1000 * 1000;
-        auto task = MakePandaUnique<GCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE,
-                                            time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS);
-        mm_->GetGC()->AddGCTask(true, std::move(task));
+        [[maybe_unused]] auto waiterId = mm_->GetGC()->GetWorkersTaskQueue()->AddBackgroundTaskInWaitList(
+            [this]() {
+                PostForkEnd();
+                this->GetGC()->AddGCTask(false, MakePandaUnique<GCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE));
+            },
+            DISABLE_GC_DURATION_MS);
+        LOG_IF(waiterId == taskmanager::INVALID_WAITER_ID, FATAL, GC)
+            << "Failed to create task to turn on GC after start-up";
         LOG(DEBUG, GC) << "Add Startup Complete GCTask";
     }
 }
