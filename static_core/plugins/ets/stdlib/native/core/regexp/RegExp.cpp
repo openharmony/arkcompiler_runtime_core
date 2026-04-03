@@ -63,7 +63,6 @@ constexpr uint32_t WIDE_CHAR_SIZE = 2;
 constexpr uint16_t UTF16_CONVERT_FIRST_BIT_MASK = 255U;
 constexpr uint16_t UTF16_CONVERT_SECOND_BIT_SHIFT = 8U;
 
-// NOTE(kparshukov): legacy, remove #20259
 constexpr auto FLAG_GLOBAL = (1U << 0U);
 constexpr auto FLAG_IGNORECASE = (1U << 1U);
 constexpr auto FLAG_MULTILINE = (1U << 2U);
