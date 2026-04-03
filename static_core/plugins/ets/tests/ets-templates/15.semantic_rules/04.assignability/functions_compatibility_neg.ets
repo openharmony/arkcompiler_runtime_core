@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 /*---
 desc: Compatible functions have same number of arguments. Arguments and return values should follow the variance rule.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type '{{c.type}}' cannot be assigned to type '((p1: Int) => Int)'"
 ---*/
 
 function foo(i: int) {
@@ -42,7 +43,6 @@ function barretstr(i: int) {
 
 function main() {
     let x: (i: int) => int = {{c.assign}};
-    arktest.assertEQ(x({{c.call}}), {{c.res}});
 }
 
-{% endfor %}
+{%- endfor %}

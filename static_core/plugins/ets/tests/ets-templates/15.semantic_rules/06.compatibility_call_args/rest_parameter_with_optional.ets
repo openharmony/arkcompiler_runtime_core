@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,27 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 
 /*---
 desc: Type of each argument corresponding to the rest parameter without the spread operator
       must be compatible with the element type of the array rest type parameter.
 ---*/
-
+{% for c in cases %}
 {{ c.definition }}
+{%- endfor %}
 
-function main() {
-    {%- for assertion in c.assertions%}
-    arktest.assertEQ({{ assertion.call }}, {{ assertion.result }} )
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Rest_parameter_with_optional");
+
+    {% for c in cases %}
+        testSuite.addTest("case_{{loop.index}}", () => {
+            {%- for assertion in c.assertions%}
+            arktest.assertEQ({{ assertion.call }}, {{ assertion.result }} )
+            {%- endfor %}
+        }); 
     {%- endfor %}
-}
 
-{% endfor %}
+    return testSuite.run();
+}

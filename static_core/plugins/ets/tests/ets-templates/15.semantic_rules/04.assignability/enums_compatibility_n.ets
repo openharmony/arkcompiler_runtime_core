@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,25 @@
  */
 
 /*---
-desc: Compound assignment for short with overflow
+desc: Enum values from different enum types are considered incompatible.
+tags: [negative, compile-only]
+expected_out: 
+  compiler:
+   - "Semantic error ESE0318: Type 'Month' cannot be assigned to type 'Day'"
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+enum Day {
+    Mon,
+    Tue,
+    Wed
+}
+enum Month {
+    Jan,
+    Feb,
+    Mar
+}
 
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+function main() {
+    let day = Day.Wed;
+    day = Month.Jan;
 }

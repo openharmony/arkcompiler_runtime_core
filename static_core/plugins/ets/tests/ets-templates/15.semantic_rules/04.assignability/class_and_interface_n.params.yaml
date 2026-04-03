@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,33 @@
 
 ---
 cases:
-  - { assign: bars, type: "((p1: Int, p2: String) => Int)"}
-  - { assign: barf, type: "((p1: Float) => Int)"}
-  - { assign: barl, type: "((p1: Long) => Int)"}
-  - { assign: barretstr, type: "((p1: Int) => String)"}
+  - string
+  - String
+  - int
+  - Int
+  - number
+  - Number
+  - float
+  - Float
+  - double
+  - Double
+  - byte
+  - Byte
+  - short
+  - Short
+  - long
+  - Long
+  - char
+  - Char
+  - boolean
+  - Boolean
+  - byte[]
+  - Array<Number>
+  - string|undefined
+  - string|null|undefined
+  - TPL
+  - FUNC
+  - "null"
+  - "undefined"
+  - "never"
+  - "void"

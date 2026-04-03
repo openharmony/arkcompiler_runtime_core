@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,35 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+
 /*---
-desc: Testing overflow for unary operator with {{c.type}}
+desc: Testing overflow for unary operator
 ---*/
 
-function main() {
-    let x: {{c.type}} = {{c.value}};
-    {%- if c.operator == "prefix" %}
-    let result = --x;
-    {%- elif c.operator == "postfix" %}
-    let result = x--;
-    {%- endif %}
+function main(): int {
     
-    arktest.assertEQ(result, {{c.expected_value}});
+    let testSuite = new arktest.ArkTestsuite("Decrement_unary_overflow");
 
-    {%- if c.operator == "prefix" %}
-    arktest.assertEQ(x, {{c.expected_value}});
-    {%- elif c.operator == "postfix" %}
-    arktest.assertEQ(x, {{c.expected_x_value}});
-    {%- endif %}
+    {%- for c in cases %}
+        testSuite.addTest("unary_{{c.operator}}_{{loop.index}}", () => {
+            let x: {{c.type}} = {{c.value}};
+            {%- if c.operator == "prefix" %}
+            let result = --x;
+            {%- elif c.operator == "postfix" %}
+            let result = x--;
+            {%- endif %}
+    
+            arktest.assertEQ(result, {{c.expected_value}});
 
-    arktest.assertTrue(result instanceof {{c.type}}, "The type does not match the expected type");
+            {%- if c.operator == "prefix" %}
+            arktest.assertEQ(x, {{c.expected_value}});
+            {%- elif c.operator == "postfix" %}
+            arktest.assertEQ(x, {{c.expected_x_value}});
+            {%- endif %}
+
+            arktest.assertTrue(result instanceof {{c.type}}, "The type does not match the expected type");
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-{%- endfor %}

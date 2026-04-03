@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,30 +15,33 @@
 
 /*---
 desc: Compatible functions have same number of arguments. Arguments and return values should follow the variance rule.
-tags: []
 ---*/
 
 function foo(i: int) {
     return 1;
 }
 
-function bars(i: int, j: string) {
+function foo2(i: int): Int {
     return 2;
 }
 
-function barf(i: float) {
+function foo3(i: int|string): Int {
     return 3;
 }
 
-function barl(i: long) {
+function foo4(i: int|string, j?: int): Int {
     return 4;
 }
 
-function barretstr(i: int) {
-    return "str";
-}
 
 function main() {
-    let x: (i: int) => int = foo;
+    let x: (i: int) => int
+    x = foo
     arktest.assertEQ(1, x(1));
+    x = foo2
+    arktest.assertEQ(2, x(1));
+    x = foo3
+    arktest.assertEQ(3, x('1'));
+    x = foo4
+    arktest.assertEQ(4, x('1'));
 }

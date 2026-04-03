@@ -14,20 +14,27 @@
  */
 
 /*---
-desc: Compound assignment for short with overflow
+desc: Ensuring that method override in subclasses keeps void return types unchanged.
 ---*/
 
-function main(): int {
-    
-    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
-
-    {%- for c in cases %}
-        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
-            let a: short = {{c.initial}};
-            a {{c.op}} {{c.operand}};
-            arktest.assertEQ(a, {{c.expected}});
-        });
-    {%- endfor %}
-  
-    return testSuite.run();
+class Base {
+    methodOne(p: Base): void {
+        console.log("Base methodOne called");
+    }
 }
+
+class Derived extends Base {
+    override methodOne(p: Base): void {
+        console.log("Derived methodOne called");
+    }
+}
+
+function main(): void {
+    let a = new Base();
+    let b = new Derived();
+
+    a.methodOne(a);
+    b.methodOne(a);
+}
+
+main();
