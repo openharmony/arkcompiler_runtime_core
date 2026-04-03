@@ -6729,6 +6729,152 @@ TEST_F(IrBuilderTest, CallVirtRange)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+namespace {
+std::string CreateAnyStringId32Source()
+{
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr size_t WARMUP_STRING_COUNT = 1024;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr size_t WARMUP_STRING_LENGTH = 2048;
+    std::string source = R"(
+        .record R {}
+
+        .function void warmup() <static, access.function=public> {
+    )";
+
+    for (size_t i = 0; i < WARMUP_STRING_COUNT; ++i) {
+        source += "    lda.str \"";
+        source += std::string(WARMUP_STRING_LENGTH, static_cast<char>('a' + (i % 26U)));
+        source += std::to_string(i);
+        source += "\"\n";
+        source += "    sta.obj v0\n";
+    }
+
+    source += R"(
+            return.void
+        }
+        .function void testLdbynameId32(R a0) <static, access.function=public> {
+            any.ldbyname a0, "lengthpropid32", 0x0
+            return.void
+        }
+
+        .function void testStbynameId32(R a0, R a1) <static, access.function=public> {
+            lda.obj a1
+            any.stbyname a0, "lengthpropid32", 0x0
+            return.void
+        }
+
+        .function void testCallThisShortId32(R a0, R a1) <static, access.function=public> {
+            lda.obj a1
+            sta.obj v1
+            any.call.this.short "callthispropid32", a0, v1, 0x0
+            return.void
+        }
+    )";
+
+    return source;
+}
+
+bool IsLargeConstInput(Inst *inst)
+{
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr uint64_t MAX_UINT16 = 0xFFFFU;
+    for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
+        auto *input = inst->GetInput(i).GetInst();
+        if (input->IsConst() && input->CastToConstant()->GetIntValue() > MAX_UINT16) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool IsTargetIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId intrinsicId)
+{
+    return inst->IsIntrinsic() && inst->CastToIntrinsic()->GetIntrinsicId() == intrinsicId;
+}
+
+bool DumpInstConstInputs(Inst *inst)
+{
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr uint64_t MAX_UINT16 = 0xFFFFU;
+    bool found = false;
+    for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
+        auto *input = inst->GetInput(i).GetInst();
+        if (!input->IsConst()) {
+            continue;
+        }
+        found = true;
+        auto value = input->CastToConstant()->GetIntValue();
+        std::cerr << " 0x" << std::hex << value << std::dec;
+        if (value <= MAX_UINT16) {
+            std::cerr << " [const input <= MAX_UINT16, may cause test failure; "
+                         "increase WARMUP_STRING_COUNT and WARMUP_STRING_LENGTH in test code if this happens]";
+        }
+    }
+    return found;
+}
+
+void DumpConstInputs(Graph *graph, RuntimeInterface::IntrinsicId intrinsicId, const char *name)
+{
+    std::cerr << name << " const inputs:";
+    bool found = false;
+    for (auto bb : graph->GetBlocksRPO()) {
+        for (auto inst : bb->AllInsts()) {
+            if (!IsTargetIntrinsic(inst, intrinsicId)) {
+                continue;
+            }
+            found = DumpInstConstInputs(inst) || found;
+        }
+    }
+    if (!found) {
+        std::cerr << " <none>";
+    }
+    std::cerr << std::endl;
+}
+
+bool HasLargeStringIdInput(Graph *graph, RuntimeInterface::IntrinsicId intrinsicId)
+{
+    for (auto bb : graph->GetBlocksRPO()) {
+        for (auto inst : bb->AllInsts()) {
+            if (!IsTargetIntrinsic(inst, intrinsicId)) {
+                continue;
+            }
+            if (IsLargeConstInput(inst)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+}  // namespace
+
+TEST_F(IrBuilderTest, AnyByNameId32)
+{
+    auto source = CreateAnyStringId32Source();
+    ASSERT_TRUE(Parse(source.c_str()));
+
+    auto *ldGraph = CreateGraph();
+    ASSERT_NE(BuildGraph("testLdbynameId32", ldGraph), nullptr);
+    DumpConstInputs(ldGraph, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYNAME, "Ldbyname");
+    EXPECT_TRUE(HasLargeStringIdInput(ldGraph, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYNAME));
+
+    auto *stGraph = CreateGraph();
+    ASSERT_NE(BuildGraph("testStbynameId32", stGraph), nullptr);
+    DumpConstInputs(stGraph, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYNAME, "Stbyname");
+    EXPECT_TRUE(HasLargeStringIdInput(stGraph, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYNAME));
+}
+
+TEST_F(IrBuilderTest, AnyCallThisId32)
+{
+    auto source = CreateAnyStringId32Source();
+    ASSERT_TRUE(Parse(source.c_str()));
+
+    auto *graph = CreateGraph();
+    ASSERT_NE(BuildGraph("testCallThisShortId32", graph), nullptr);
+    DumpConstInputs(graph, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_SHORT, "CallThisShort");
+    EXPECT_TRUE(HasLargeStringIdInput(graph, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_SHORT));
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler

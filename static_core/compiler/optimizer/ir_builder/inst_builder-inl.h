@@ -1686,7 +1686,7 @@ template <bool IS_ACC_WRITE>
 void InstBuilder::BuildLoadFromAnyByName(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto stringId = bcInst->GetId(0).AsIndex();
+    auto stringId = bcInst->GetId(0).AsRawValue();
 
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
@@ -1717,7 +1717,7 @@ template <bool IS_ACC_READ>
 void InstBuilder::BuildStoreFromAnyByName(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto stringId = bcInst->GetId(0).AsIndex();
+    auto stringId = bcInst->GetId(0).AsRawValue();
 
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
@@ -1848,7 +1848,7 @@ void InstBuilder::BuildAnyCallHelper(const BytecodeInstruction *bcInst, RuntimeI
     intrinsic->AddInputType(DataType::REFERENCE);
     if constexpr (IS_THIS) {
         // StringId, also `any.*.this` opcodes require method to resolve string
-        intrinsic->AppendInput(graph_->FindOrCreateConstant(bcInst->GetId(0).AsIndex()));
+        intrinsic->AppendInput(graph_->FindOrCreateConstant(bcInst->GetId(0).AsRawValue()));
         intrinsic->AddInputType(DataType::INT32);
         intrinsic->SetMethodFirstInput();
         intrinsic->SetMethod(GetMethod());
