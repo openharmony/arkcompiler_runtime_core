@@ -32,12 +32,13 @@ class A<T> extends Array<T> {
 }
 
 class C<T> {
-  foo() {
-    let arr = new Array<T>()
-    arktest.assertEQ(arr.length, 0)
+  foo(element: T) {
+    let arr = new T[5](element)
+    arktest.assertEQ(arr.length, 5)
   }
 }
 
 function main(): void {
-  new C<A<Object>>().foo()
+  let i: A<Object> = new A<Object>(1)
+  new C<A<Object>>().foo(i)
 }
