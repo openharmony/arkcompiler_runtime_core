@@ -83,6 +83,10 @@
 #endif
 
 #include "runtime/common_runtime.h"
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "common_components/heap/heap.h"
+#include "common_interfaces/base_runtime.h"
+#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
 
@@ -1244,7 +1248,12 @@ PandaString Runtime::GetMemoryStatistics()
 
 PandaString Runtime::GetFinalStatistics()
 {
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto stats = common_vm::Heap::GetHeap().GetCollector().GetGCStats();
+    return PandaString(stats.GetFinalStatistics());
+#else
     return pandaVm_->GetGCStats()->GetFinalStatistics(pandaVm_->GetHeapManager());
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 void Runtime::NotifyAboutLoadedModules()

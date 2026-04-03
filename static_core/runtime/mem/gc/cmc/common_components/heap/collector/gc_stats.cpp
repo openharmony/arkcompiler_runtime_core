@@ -20,8 +20,9 @@
 
 #include "libarkbase/utils/logger.h"
 
-#include <cmath>
 #include <iomanip>
+
+#include <cmath>
 
 namespace ark::common_vm {
 size_t g_gcCount = 0;
@@ -139,4 +140,58 @@ void GCStats::Dump() const
                   ";total GC time:" + FormatTimeMs(totalTimeNs))
                      .c_str());
 }
+
+std::string GCStats::GetFinalStatistics() const
+{
+    constexpr uint64_t mb = 1024L * 1024L;
+    constexpr uint64_t nsToS = 1000L * 1000L * 1000L;
+    constexpr uint64_t nsToMs = 1000L * 1000L;
+    const auto &heap = common_vm::Heap::GetHeap();
+    auto totalTimeGc = totalSTWTime;
+    auto totalAllocated = heap.GetAccumulatedAllocateSize();
+    auto totalFreed = heap.GetAccumulatedFreeSize();
+    auto totalObjects = collectedObjects;
+
+    auto usedMemory = heap.GetUsedPageSize();
+    auto remainMemory = heap.GetRemainHeapSize();
+    auto currentMemory = heap.GetCurrentCapacity();
+    auto maxMemory = heap.GetMaxCapacity();
+
+    const int precision = 2;
+    std::stringstream statistic;
+    statistic << std::fixed << std::setprecision(precision);
+
+    statistic << "Total time spent in GC: " << FormatTimeMs(totalTimeGc) << "\n";
+
+    const double meanGcSizeThroughput =
+        (static_cast<double>(totalFreed) / mb) / (static_cast<double>(totalTimeGc) / nsToS);
+    const double meanGcObjectThroughput = totalObjects / (static_cast<double>(totalTimeGc) / nsToMs);
+    statistic << "Mean GC size throughput " << meanGcSizeThroughput << " MB/s"
+              << "\n";
+    statistic << "Mean GC object throughput: " << meanGcObjectThroughput << " objects/ms\n";
+    statistic << "Total number of allocations " << totalObjects << "\n";
+    statistic << "Total bytes allocated " << FormatMemory(totalAllocated) << "\n";
+    statistic << "Total bytes freed " << FormatMemory(totalFreed) << "\n\n";
+
+    statistic << "Free memory before heap grow " << FormatMemory(currentMemory - usedMemory) << "\n";
+    statistic << "Free memory until OOME " << FormatMemory(remainMemory) << "\n";
+    statistic << "Consumed memory " << FormatMemory(currentMemory) << "\n";
+
+    statistic << "Total mutator paused time: " << FormatTimeMs(totalTimeGc) << "\n";
+    statistic << "Total time waiting for GC to complete: " << FormatTimeMs(totalTimeGc) << "\n";
+    statistic << "Total GC count: " << g_gcCount << "\n";
+    statistic << "Total GC time: " << FormatTimeMs(totalTimeGc) << "\n";
+    statistic << "Total blocking GC count: " << g_gcCount << "\n";
+    statistic << "Total blocking GC time: " << FormatTimeMs(totalTimeGc) << "\n";
+    // NOTE(kparshukov): calculate histogram after merging into static_core
+    statistic << "Histogram of GC count per 10000 ms: " << g_gcCount << ":1\n";
+    statistic << "Histogram of blocking GC count per 10000 ms: " << g_gcCount << ":1\n";
+
+    statistic << "Native bytes registered: " << 0L << "\n\n";  // dead stats, added to save output format
+
+    statistic << "Max memory " << FormatMemory(maxMemory) << "\n";
+
+    return statistic.str();
+}
+
 }  // namespace ark::common_vm
