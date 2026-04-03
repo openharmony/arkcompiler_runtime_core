@@ -86,16 +86,18 @@ class VmbRunner:
             msg = e.out
             if BUStatus.COMPILATION_FAILED == bu.status:
                 bu.result.compile_status = 1
-                log.error('%s: compilation failed', bu.name)
+                log.error('%s: compilation failed for bench unit %s', msg, bu.name)
             else:
                 bu.status = BUStatus.EXECUTION_FAILED
-        if isinstance(e, RuntimeError):
-            bu.status = BUStatus.ERROR
-        elif isinstance(e, TimeoutExpired):
-            bu.status = BUStatus.TIMEOUT
+                log.error('%s: execution failed for bench unit %s', msg, bu.name)
+        else:
+            if isinstance(e, RuntimeError):
+                bu.status = BUStatus.ERROR
+            elif isinstance(e, TimeoutExpired):
+                bu.status = BUStatus.TIMEOUT
+            log.error(e)
         if self.fail_logs:
             bu.save_fail_log(self.fail_logs, msg)
-        log.error(e)
 
     def run_one_unit(self, bu: BenchUnit) -> None:
         timer_unit = Timer()
