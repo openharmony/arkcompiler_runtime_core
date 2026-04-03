@@ -141,7 +141,7 @@ let bigValue = bigWrap.toBigInt(); // 9007199254740991n
 示例代码：
 ```typescript
 let byteWrap = ESValue.wrapByte(100);
-let byteValue = byteWrap.toByte(); // 100
+let byteValue = byteWrap.unwrap(); // 100
 ```
 ---
 ### wrapShort
@@ -163,7 +163,7 @@ let byteValue = byteWrap.toByte(); // 100
 示例代码：
 ```typescript
 let shortWrap = ESValue.wrapShort(20000);
-let shortValue = shortWrap.toShort(); // 20000
+let shortValue = shortWrap.unwrap(); // 20000
 ```
 ---
 ### wrapInt
@@ -185,7 +185,7 @@ let shortValue = shortWrap.toShort(); // 20000
 示例代码：
 ```typescript
 let intWrap = ESValue.wrapInt(2147483647);
-let intValue = intWrap.toInt(); // 2147483647
+let intValue = intWrap.unwrap(); // 2147483647
 ```
 ---
 ### wrapLong
@@ -207,7 +207,7 @@ let intValue = intWrap.toInt(); // 2147483647
 示例代码：
 ```typescript
 let longWrap = ESValue.wrapLong(9223372036854775807);
-let longValue = longWrap.toLong(); // 9223372036854775807
+let longValue = longWrap.unwrap(); // 9223372036854775807
 ```
 ---
 ### wrapLongLossy
@@ -228,7 +228,8 @@ let longValue = longWrap.toLong(); // 9223372036854775807
 
 示例代码：
 ```typescript
-let lossyWrap = ESValue.wrapLongLossy(Number.MAX_SAFE_INTEGER + 100);
+let lon = Number.MAX_SAFE_INTEGER + 100;
+let lossyWrap = ESValue.wrapLongLossy(lon as long);
 let lossyValue = lossyWrap.isNumber(); // true
 ```
 ---
@@ -250,8 +251,9 @@ let lossyValue = lossyWrap.isNumber(); // true
 
 示例代码：
 ```typescript
-let floatWrap = ESValue.wrapFloat(3.1415927);
-floatValue = floatWrap.toFloat(); // 3.1415927
+let flo: float = 3.1415927;
+let floatWrap = ESValue.wrapFloat(flo);
+let floatValue = floatWrap.unwrap(); // 3.1415927
 ```
 ---
 ### wrapDouble
@@ -273,7 +275,7 @@ floatValue = floatWrap.toFloat(); // 3.1415927
 示例代码：
 ```typescript
 let doubleWrap = ESValue.wrapDouble(3.14159265358);
-let doubleValue = doubleWrap.toDouble(); // 3.14159265358
+let doubleValue = doubleWrap.unwrap(); // 3.14159265358
 ```
 ---
 ### wrap
@@ -294,6 +296,14 @@ let doubleValue = doubleWrap.toDouble(); // 3.14159265358
 
 示例代码：
 ```typescript
+// file1.ets
+class A{
+}
+export let dynamicObject = new A();
+// file2.ets
+'use static'
+import { dynamicObject } from 'file1';
+
 let objVal = ESValue.wrap(dynamicObject);
 let raw = objVal.isObject(); // true
 ```
@@ -443,7 +453,7 @@ class A {};
 export let a = new A();
 // file2.ets
 let module = ESValue.load('file1');
-let obj = module.load('a');
+let obj = module.getProperty('a');
 let isECMAObj = obj.isECMAObject(); // true
 ```
 ---
@@ -460,9 +470,7 @@ let isECMAObj = obj.isECMAObject(); // true
 示例代码：
 ```typescript
 let staticObj = ESValue.instantiateEmptyObject();
-let ecmaObj = createECMAObject();
 let isStaObj = staticObj.isObject(); // true
-let isECMAObj = ecmaObj.isObject(); // true
 ```
 ---
 ### isFunction
@@ -477,6 +485,11 @@ let isECMAObj = ecmaObj.isObject(); // true
 
 示例代码：
 ```typescript
+// file1.ts
+export function foo(){}
+// file2.ets
+let module = ESValue.load('file1');
+let func = module.getProperty('foo');
 let isFunc = func.isFunction(); // true
 ```
 ---
@@ -772,7 +785,7 @@ arr.invokeMethod('push', ESValue.wrapNumber(2));
 示例代码：
 ```typescript
 // file1.js
-export let A = {
+export let A: Record<string, number> = {
     'property1': 1,
     'property2': 2
 };
@@ -803,7 +816,7 @@ export let jsArray = ['foo', 1, true];
 // file2.ets
 let module = ESValue.load('file1');
 let jsArray = module.getProperty('jsArray');
-let val = jsArray.getProperty(2);
+let val = jsArray.getProperty(2); // true
 ```
 ---
 ### getProperty (ESValue版本)
@@ -829,7 +842,7 @@ export let jsArray = ['foo', 1, true];
 // file2.ets
 let module = ESValue.load('file1');
 let jsArray = module.getProperty('jsArray');
-let val = jsArray.getProperty(ESValue.wrapNumber(2));
+let val = jsArray.getProperty(ESValue.wrapNumber(2)); // true
 ```
 ---
 ### setProperty (string版本)
@@ -846,11 +859,12 @@ let val = jsArray.getProperty(ESValue.wrapNumber(2));
 示例代码：
 ```typescript
 // file1.ts
-export let A = {
+export let A: Record<string, number> = {
     'property1': 1,
 };
 // file2.ets
 let module = ESValue.load('file1');
+let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = 'property1';
 jsObjectA.setProperty(property, value);
@@ -892,11 +906,12 @@ jsArray1.setProperty(2, value);
 示例代码：
 ```typescript
 // file1.ts
-export let A = {
+export let A: Record<string, number> = {
     'property1': 1,
 };
 // file2.ets
 let module = ESValue.load('file1');
+let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = ESValue.wrapString('property1');
 jsObjectA.setProperty(property, value);
@@ -1041,7 +1056,7 @@ let hasIdx = obj.hasOwnProperty('idx');
 示例代码：
 ```typescript
 // file1.ts
-export let jsFunc = function () { return 6; };
+export function jsFunc (): number { return 6; };
 // file2.ets
 let module = ESValue.load('file1');
 let jsFunc = module.getProperty('jsFunc');
@@ -1067,9 +1082,27 @@ let result = jsFunc.invoke();
 
 示例代码：
 ```typescript
+// file1.ts
+export let customIterable = {
+    [Symbol.iterator]: function() {
+        let step = 0;
+        return {
+            next: function() {
+                if (step < 3) {
+                    step++;
+                    return { value: step * 10, done: false };
+                }
+                return { value: undefined, done: true };
+            }
+        };
+    }
+};
+// file2.ets
+let module = ESValue.load('file1');
+let iterableObj = module.getProperty('customIterable');
 let global = ESValue.getGlobal();
-let symbol = global.getProperty("Symbol");
-let symbolIterator = symbol.getProperty("iterator");
+let symbol = global.getProperty('Symbol');
+let symbolIterator = symbol.getProperty('iterator');
 let symbolIteratorMethod = iterableObj.getProperty(symbolIterator);
 let iterator = symbolIteratorMethod.invokeWithRecv(iterableObj);
 ```
@@ -1168,7 +1201,7 @@ export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
 // file2.ets
 let module = ESValue.load('file1');
 let jsIterableObject = module.getProperty('testItetatorObject');
-let resultkey: String =  = new String();
+let resultkey: String = new String();
 let resultValue: number = 0;
 for (const entry of jsIterableObject.entries()) {
     resultkey += entry[0].toString();
@@ -1201,7 +1234,7 @@ export class User {
 // file2.ets
 let module = ESValue.load('file1');
 let jsUser = module.getProperty('User');
-let user = jsUser.instantiate(num);
+let user = jsUser.instantiate(100);
 let res =  user.instanceOf(jsUser);
 ```
 ---
@@ -1273,14 +1306,13 @@ let global = ESValue.getGlobal();
 示例代码：
 ```typescript
 // file1.ts
-export async function sleepRetNumber(ms: number): Promise<number> {
-    await sleep(ms);
-    return 0xcafe;
+export async function getPromiseNumber(): Promise<number> {
+    return Promise.resolve(42);
 }
 // file2.ets
 let module = ESValue.load('file1');
-let sleepRetNumber = module.getProperty('sleepRetNumber');
-let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
+let sleepRetNumber = module.getProperty('getPromiseNumber');
+let res = sleepRetNumber.invoke().isPromise();
 ```
 ---
 ### toPromise
@@ -1314,11 +1346,13 @@ export async function chainPromise(): Promise<number> {
         .then(x => x);
 }
 // file2.ets
-let module = ESValue.load('file1');
-let chainFunc = module.getProperty('chainPromise');
-let p = chainFunc.invoke().toPromise();
-let resESValue = await p; 
-let res = resESValue.toNumber(); // 4
+async function foo(){
+    let module = ESValue.load('file1');
+    let chainFunc = module.getProperty('chainPromise');
+    let p = chainFunc.invoke().toPromise();
+    let resESValue = await p; 
+    let res = resESValue.toNumber(); // 4
+}
 ```
 ---
 ### $_iterator

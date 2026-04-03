@@ -13,13 +13,15 @@ Return Value:
 |   ESValue   | The ESValue object storing the dynamic undefined value |
 
 Example:
-
 ```typescript
 let undefinedVal = ESValue.Undefined;
 let isUndefinedVal = undefinedVal.isUndefined(); // true
 ```
----
+
+-----
+
 ### Null
+
 `public static get Null(): ESValue`  
 Get the ESValue object that stores a dynamic null value.
 
@@ -31,12 +33,15 @@ Return Value:
 
 Example:
 
-```typescript
+```ts
 let nullVal = ESValue.Null;
 let isNullVal = nullVal.isNull(); // true
 ```
----
+
+-----
+
 ### wrapBoolean
+
 `public static wrapBoolean(b: boolean): ESValue`  
 Wrap a boolean value into an ESValue object.
 
@@ -59,8 +64,10 @@ let trueVal = ESValue.wrapBoolean(true);
 let boolVal = trueVal.toBoolean(); // true
 ```
 
----
+-----
+
 ### wrapString
+
 `public static wrapString(s: string): ESValue`  
 Wrap a string into an ESValue object.
 
@@ -83,8 +90,10 @@ let strWrap = ESValue.wrapString('Hello');
 let strValue = strWrap.toString(); // 'Hello'
 ```
 
----
+-----
+
 ### wrapNumber
+
 `public static wrapNumber(n: number): ESValue`  
 Wrap a number into an ESValue object.
 
@@ -107,8 +116,10 @@ let numWrap = ESValue.wrapNumber(3.1415);
 let numValue = numWrap.toNumber(); // 3.1415
 ```
 
----
+-----
+
 ### wrapBigInt
+
 `public static wrapBigInt(bi: bigint): ESValue`  
 Wrap a big integer into an ESValue object.
 
@@ -131,8 +142,10 @@ let bigWrap = ESValue.wrapBigInt(9007199254740991n);
 let bigValue = bigWrap.toBigInt(); // 9007199254740991n
 ```
 
----
+-----
+
 ### wrapByte
+
 `public static wrapByte(b: byte): ESValue`  
 Wrap a byte integer value into an ESValue object.
 
@@ -140,7 +153,7 @@ Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :------------: | :----: | :------: | :-----------------------: |
-| b | byte | Yes | The 8-bit integer to be wrapped (-128~127) |
+| b | byte | Yes | The 8-bit integer to be wrapped (-128\~127) |
 
 Return Value:
 
@@ -152,11 +165,13 @@ Example:
 
 ```typescript
 let byteWrap = ESValue.wrapByte(100);
-let byteValue = byteWrap.toByte(); // 100
+let byteValue = byteWrap.unwrap(); // 100
 ```
 
----
+-----
+
 ### wrapShort
+
 `public static wrapShort(s: short): ESValue`  
 Wrap a short integer value into an ESValue object.
 
@@ -164,7 +179,7 @@ Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :------------: | :----: | :------: | :-------------------------: |
-| s | short | Yes | The 16-bit integer to be wrapped (-32768~32767) |
+| s | short | Yes | The 16-bit integer to be wrapped (-32768\~32767) |
 
 Return Value:
 
@@ -176,11 +191,13 @@ Example:
 
 ```typescript
 let shortWrap = ESValue.wrapShort(20000);
-let shortValue = shortWrap.toShort(); // 20000
+let shortValue = shortWrap.unwrap(); // 20000
 ```
 
----
+-----
+
 ### wrapInt
+
 `public static wrapInt(i: int): ESValue`  
 Wrap an integer value into an ESValue object.
 
@@ -200,11 +217,13 @@ Example:
 
 ```typescript
 let intWrap = ESValue.wrapInt(2147483647);
-let intValue = intWrap.toInt(); // 2147483647
+let intValue = intWrap.unwrap(); // 2147483647
 ```
 
----
+-----
+
 ### wrapLong
+
 `public static wrapLong(l: long): ESValue`  
 Wrap a long integer value into an ESValue object.
 
@@ -224,10 +243,13 @@ Example:
 
 ```typescript
 let longWrap = ESValue.wrapLong(9223372036854775807);
-let longValue = longWrap.toLong(); // 9223372036854775807
+let longValue = longWrap.unwrap(); // 9223372036854775807
 ```
----
+
+-----
+
 ### wrapLongLossy
+
 `public static wrapLongLossy(l: long): ESValue`  
 Wrap a long integer value into an ESValue object with lossy conversion.
 
@@ -246,12 +268,15 @@ Return Value:
 Example:
 
 ```typescript
-let lossyWrap = ESValue.wrapLongLossy(Number.MAX_SAFE_INTEGER + 100);
+let lon = Number.MAX_SAFE_INTEGER + 100;
+let lossyWrap = ESValue.wrapLongLossy(lon as long);
 let lossyValue = lossyWrap.isNumber(); // true
 ```
 
----
+-----
+
 ### wrapFloat
+
 `public static wrapFloat(f: float): ESValue`  
 Wrap a single-precision floating-point value into an ESValue object.
 
@@ -270,12 +295,15 @@ Return Value:
 Example:
 
 ```typescript
-let floatWrap = ESValue.wrapFloat(3.1415927);
-floatValue = floatWrap.toFloat(); // 3.1415927
+let flo: float = 3.1415927;
+let floatWrap = ESValue.wrapFloat(flo);
+let floatValue = floatWrap.unwrap(); // 3.1415927
 ```
 
----
+-----
+
 ### wrapDouble
+
 `public static wrapDouble(d: double): ESValue`  
 Wrap a double-precision floating-point value into an ESValue object.
 
@@ -295,11 +323,13 @@ Example:
 
 ```typescript
 let doubleWrap = ESValue.wrapDouble(3.14159265358);
-let doubleValue = doubleWrap.toDouble(); // 3.14159265358
+let doubleValue = doubleWrap.unwrap(); // 3.14159265358
 ```
 
----
+-----
+
 ### wrap
+
 `public static wrap(o: Any): ESValue`  
 Wrap the original value type into an ESValue object.
 
@@ -313,16 +343,27 @@ Return Value:
 
 |    Type     |           Description           |
 | :---------: | :----------------------: |
-|   ESValue   | The ESValue object storing the dynamic double value |
+|   ESValue   | The ESValue object storing the dynamic primitive value |
 
 Example:
+
 ```typescript
+// file1.ets
+class A{
+}
+export let dynamicObject = new A();
+// file2.ets
+'use static'
+import { dynamicObject } from 'file1';
+
 let objVal = ESValue.wrap(dynamicObject);
 let raw = objVal.isObject(); // true
 ```
 
----
+-----
+
 ### unwrap
+
 `public unwrap(): Any`  
 Unwrap ESValue into the original value type.
 
@@ -338,8 +379,11 @@ Example:
 let numVal = ESValue.wrapNumber(42);
 let raw = numVal.unwrap(); // 42 (number)
 ```
----
+
+-----
+
 ### isBoolean
+
 `public isBoolean(): boolean`  
 Determine whether the object stored in the ESValue object is of Boolean type.
 
@@ -356,8 +400,10 @@ let val = ESValue.wrapBoolean(true);
 let isBool = val.isBoolean(); // true
 ```
 
----
+-----
+
 ### isString
+
 `public isString(): boolean`  
 Determine whether the object stored in the ESValue object is of string type.
 
@@ -373,8 +419,11 @@ Example:
 let val = ESValue.wrapString('text');
 let isStringValue = val.isString(); // true
 ```
----
+
+-----
+
 ### isNumber
+
 `public isNumber(): boolean`  
 Determine whether the object stored in the ESValue object is of number type.
 
@@ -390,8 +439,11 @@ Example:
 let val = ESValue.wrapNumber(3.14);
 let isNumValue = val.isNumber(); // true
 ```
----
+
+-----
+
 ### isBigInt
+
 `public isBigInt(): boolean`  
 Determine whether the object stored in the ESValue object is of bigint type.
 
@@ -408,8 +460,10 @@ let val = ESValue.wrapBigInt(100n);
 let isBigIntValue = val.isBigInt(); // true
 ```
 
----
+-----
+
 ### isUndefined
+
 `public isUndefined(): boolean`  
 Determine whether the object stored in the ESValue object is an undefined value.
 
@@ -426,8 +480,10 @@ let val = ESValue.Undefined;
 let isUndefinedValue = val.isUndefined(); // true
 ```
 
----
+-----
+
 ### isNull
+
 `public isNull(): boolean`  
 Determine whether the object stored in the ESValue object is a null value.
 
@@ -444,8 +500,10 @@ let val = ESValue.Null;
 let isNullValue = val.isNull(); // true
 ```
 
----
+-----
+
 ### isStaticObject
+
 `public isStaticObject(): boolean`  
 Determine whether the object stored in the ESValue object is a type created in ArkTS-Sta.
 
@@ -462,8 +520,10 @@ let obj = ESValue.instantiateEmptyObject();
 let isStaticObj = obj.isStaticObject(); // true
 ```
 
----
+-----
+
 ### isECMAObject
+
 `public isECMAObject(): boolean`  
 Determine whether the object stored in the ESValue object is of ECMA type.
 
@@ -481,12 +541,14 @@ class A {};
 export let a = new A();
 // file2.ets
 let module = ESValue.load('file1');
-let obj = module.load('a');
+let obj = module.getProperty('a');
 let isECMAObj = obj.isECMAObject(); // true
 ```
 
----
+-----
+
 ### isObject
+
 `public isObject(): boolean`  
 Determine whether the object stored in the ESValue object is of Object type.
 
@@ -500,12 +562,13 @@ Example:
 
 ```typescript
 let staticObj = ESValue.instantiateEmptyObject();
-let ecmaObj = createECMAObject();
 let isStaObj = staticObj.isObject(); // true
-let isECMAObj = ecmaObj.isObject(); // true
 ```
----
+
+-----
+
 ### isFunction
+
 `public isFunction(): boolean`  
 Determine whether the object stored in the ESValue object is of Function type.
 
@@ -518,10 +581,18 @@ Return Value:
 Example:
 
 ```typescript
+// file1.ts
+export function foo(){}
+// file2.ets
+let module = ESValue.load('file1');
+let func = module.getProperty('foo');
 let isFunc = func.isFunction(); // true
 ```
----
+
+-----
+
 ### toBoolean
+
 `public toBoolean(): boolean`  
 Determine whether the object stored in the ESValue object is of Boolean type; if so, return it as a Boolean object, otherwise throw an exception.
 
@@ -538,8 +609,10 @@ let val = ESValue.wrapBoolean(true);
 let boolVal = val.toBoolean(); // true
 ```
 
----
+-----
+
 ### toString
+
 `public toString(): string`  
 Determine whether the object stored in the ESValue object is of string type; if so, return it as a string object, otherwise throw an exception.
 
@@ -555,8 +628,11 @@ Example:
 let val = ESValue.wrapString('hello');
 let strValue = val.toString(); // 'hello'
 ```
----
+
+-----
+
 ### toNumber
+
 `public toNumber(): number`  
 Determine whether the object stored in the ESValue object is of number type; if so, return it as a number object, otherwise throw an exception.
 
@@ -572,8 +648,11 @@ Example:
 let val = ESValue.wrapNumber(42);
 let numVal = val.toNumber(); // 42
 ```
----
+
+-----
+
 ### toBigInt
+
 `public toBigInt(): bigint`  
 Determine whether the object stored in the ESValue object is of bigint type; if so, return it as a bigint object, otherwise throw an exception.
 
@@ -589,8 +668,11 @@ Example:
 let val = ESValue.wrapBigInt(100n);
 let bigValue = val.toBigInt(); // 100n
 ```
----
+
+-----
+
 ### toUndefined
+
 `public toUndefined(): undefined`  
 Determine whether the object stored in the ESValue object is of undefined type; if so, return it as an undefined object, otherwise throw an exception.
 
@@ -607,8 +689,10 @@ let val = ESValue.Undefined;
 let undefValue = val.toUndefined(); // undefined
 ```
 
----
+-----
+
 ### toNull
+
 `public toNull(): null`  
 Determine whether the object stored in the ESValue object is of null type; if so, return it as a null object, otherwise throw an exception.
 
@@ -625,8 +709,10 @@ let val = ESValue.Null;
 let nullValue = val.toNull(); // null
 ```
 
----
+-----
+
 ### toStaticObject
+
 `public toStaticObject(): object`  
 Determine whether the object stored in the ESValue object is a static object and return the static object, otherwise throw an exception.
 
@@ -644,8 +730,10 @@ let objA = ESValue.wrap(new A());
 let obj = objA.toStaticObject();
 ```
 
----
+-----
+
 ### areEqual
+
 `public static areEqual(ev1: ESValue, ev2: ESValue): boolean`  
 Determine whether the objects stored in two ESValue objects are equal.
 
@@ -667,11 +755,13 @@ Example:
 ```typescript
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
-let res = ESValue.areEqual(val1, val2);
+let res = ESValue.areEqual(val1, val2); // true (abstract equality)
 ```
 
----
+-----
+
 ### areStrictlyEqual
+
 `public static areStrictlyEqual(ev1: ESValue, ev2: ESValue): boolean`  
 Determine whether the objects stored in two ESValue objects are strictly equal.
 
@@ -696,8 +786,10 @@ let val2 = ESValue.wrapString('42');
 let res = ESValue.areStrictlyEqual(val1, val2); // false
 ```
 
----
+-----
+
 ### isEqualTo
+
 `public isEqualTo(other: ESValue): boolean`  
 Determine whether the object stored in one ESValue is strictly equal to the object stored in another ESValue.
 
@@ -721,8 +813,10 @@ let val2 = ESValue.wrapString('42');
 let res = val1.isEqualTo(val2); // true
 ```
 
----
+-----
+
 ### isStrictlyEqualTo
+
 `public isStrictlyEqualTo(other: ESValue): boolean`  
 Determine whether the value stored in one ESValue is equal to the object stored in another ESValue.
 
@@ -746,8 +840,10 @@ let val2 = ESValue.wrapNumber(42);
 let res = val1.isStrictlyEqualTo(val2); // true
 ```
 
----
+-----
+
 ### instantiate
+
 `public instantiate(...args: FixedArray<StaticOrESValue>): ESValue`  
 Instantiate a class and return it wrapped as an ESValue object. The parameters are the parameters required by the constructor.
 
@@ -755,7 +851,7 @@ Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :--------------------: | :----------------------------: | :------: | :---------------------: |
-| ...args (dynamic) | FixedArray<StaticOrESValue> | No | The parameter list of the constructor |
+| ...args (dynamic) | FixedArray\<StaticOrESValue\> | No | The parameter list of the constructor |
 
 Return Value:
 
@@ -781,8 +877,10 @@ let dynUser = module.getProperty('User');
 let instance = dynUser.instantiate('hello', ESValue.wrapNumber(32));
 ```
 
----
+-----
+
 ### instantiateEmptyObject
+
 `public static instantiateEmptyObject(): ESValue`  
 Initialize an ArkTS-Dyn object and return it wrapped as an ESValue object.
 
@@ -799,8 +897,10 @@ let obj = ESValue.instantiateEmptyObject();
 obj.setProperty('key', ESValue.wrapString('value'));
 ```
 
----
+-----
+
 ### instantiateEmptyArray
+
 `public static instantiateEmptyArray(): ESValue`  
 Initialize an empty ArkTS-Dyn Array object and return it wrapped as an ESValue object.
 
@@ -818,8 +918,10 @@ arr.invokeMethod('push', ESValue.wrapNumber(1));
 arr.invokeMethod('push', ESValue.wrapNumber(2));
 ```
 
----
+-----
+
 ### getProperty (string version)
+
 `public getProperty(name: string): ESValue`  
 Use the value of `name` as the property name to get the property value of the dynamic object stored in `this`.
 
@@ -839,7 +941,7 @@ Example:
 
 ```typescript
 // file1.js
-export let A = {
+export let A: Record<string, number> = {
     'property1': 1,
     'property2': 2
 };
@@ -847,8 +949,10 @@ export let A = {
 let jsObjectA = module.getProperty('A');
 ```
 
----
+-----
+
 ### getProperty (number version)
+
 `public getProperty(index: number): ESValue`  
 Use the `index` value as the property name to get the array value or property value from the dynamic object stored in `this`.
 
@@ -872,11 +976,13 @@ export let jsArray = ['foo', 1, true];
 // file2.ets
 let module = ESValue.load('file1');
 let jsArray = module.getProperty('jsArray');
-let val = jsArray.getProperty(2);
+let val = jsArray.getProperty(2); // true
 ```
 
----
+-----
+
 ### getProperty (ESValue version)
+
 `public getProperty(property: ESValue): ESValue`  
 Use the dynamic object stored in `property` as the property name to get the attribute value of the dynamic object stored in `this`.
 
@@ -900,11 +1006,13 @@ export let jsArray = ['foo', 1, true];
 // file2.ets
 let module = ESValue.load('file1');
 let jsArray = module.getProperty('jsArray');
-let val = jsArray.getProperty(ESValue.wrapNumber(2));
+let val = jsArray.getProperty(ESValue.wrapNumber(2)); // true
 ```
 
----
+-----
+
 ### setProperty (string version)
+
 `public setProperty(name: string, value: StaticOrESValue): void`  
 Use the `name` value as the property name, and the dynamic object stored in `value` as the property value. Set the property value of the dynamic object stored in `this`.
 
@@ -919,18 +1027,21 @@ Example:
 
 ```typescript
 // file1.ts
-export let A = {
+export let A: Record<string, number> = {
     'property1': 1,
 };
 // file2.ets
 let module = ESValue.load('file1');
+let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = 'property1';
 jsObjectA.setProperty(property, value);
 ```
 
----
+-----
+
 ### setProperty (number version)
+
 `public setProperty(index: number, value: StaticOrESValue): void`  
 Use the `index` value as the property name, and the dynamic object stored in `value` as the property value. Set the property value of the dynamic object stored in `this`.
 
@@ -953,8 +1064,10 @@ let value = ESValue.wrapBoolean(false);
 jsArray1.setProperty(2, value);
 ```
 
----
+-----
+
 ### setProperty (ESValue version)
+
 `public setProperty(property: ESValue, value: StaticOrESValue): void`  
 Use the dynamic object stored in `property` as the property name, and the dynamic object stored in `value` as the property value, to set the property of the dynamic object stored in `this`.
 
@@ -969,18 +1082,21 @@ Example:
 
 ```typescript
 // file1.ts
-export let A = {
+export let A: Record<string, number> = {
     'property1': 1,
 };
 // file2.ets
 let module = ESValue.load('file1');
+let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = ESValue.wrapString('property1');
 jsObjectA.setProperty(property, value);
 ```
 
----
+-----
+
 ### hasProperty (ESValue version)
+
 `public hasProperty(property: ESValue): boolean`  
 Use the dynamic object stored in `property` as the property value, and check whether the dynamic object stored in `this` contains the specified property.
 
@@ -1012,8 +1128,10 @@ let key = module.getProperty('key');
 let hasIdx = obj.hasProperty(key);
 ```
 
----
+-----
+
 ### hasProperty (string version)
+
 `public hasProperty(name: string): boolean`  
 Using `name` as the property name, check whether the dynamic object stored in `this` contains the specified property.
 
@@ -1043,8 +1161,10 @@ let obj = module.getProperty('dyObj');
 let hasIdx = obj.hasProperty('idx');
 ```
 
----
+-----
+
 ### hasOwnProperty (ESValue version)
+
 `public hasOwnProperty(property: ESValue): boolean`  
 Using a dynamic object stored in `property` as the property value, check whether the object saved in `this` contains the specified property itself (excluding the prototype chain).
 
@@ -1076,8 +1196,10 @@ let key = module.getProperty('key');
 let hasIdx = obj.hasOwnProperty(key);
 ```
 
----
+-----
+
 ### hasOwnProperty (string version)
+
 `public hasOwnProperty(name: string): boolean`  
 Use `name` as the attribute value to check whether the dynamic object stored in `this` contains the specified property itself (excluding the prototype chain).
 
@@ -1107,8 +1229,10 @@ let obj = module.getProperty('dyObj');
 let hasIdx = obj.hasOwnProperty('idx');
 ```
 
----
+-----
+
 ### invoke
+
 `public invoke(...args: FixedArray<StaticOrESValue>): ESValue`  
 Execute the function or method of the dynamic object stored in `this`, with `args` being wrapped ESValue objects.
 
@@ -1116,7 +1240,7 @@ Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :----------------: | :--------------: | :------: | :-----------------: |
-| ...args | FixedArray<StaticOrESValue> | No | The function parameter list |
+| ...args | FixedArray\<StaticOrESValue\> | No | The function parameter list |
 
 Return Value:
 
@@ -1128,14 +1252,17 @@ Example:
 
 ```typescript
 // file1.ts
-export let jsFunc = function () { return 6; };
+export function jsFunc (): number { return 6; };
 // file2.ets
 let module = ESValue.load('file1');
 let jsFunc = module.getProperty('jsFunc');
 let result = jsFunc.invoke();
 ```
----
+
+-----
+
 ### invokeWithRecv
+
 `public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue`  
 Use `recv` as this and `args` as parameters to execute the method stored in ESValue. `args` is a wrapped ESValue object.
 
@@ -1144,7 +1271,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :------------: | :---------------: | :------: | :-----------------: |
 | recv | ESValue | Yes | The this value |
-| ...args | FixedArray<StaticOrESValue> | No | The function parameter list |
+| ...args | FixedArray\<StaticOrESValue\> | No | The function parameter list |
 
 Return Value:
 
@@ -1155,14 +1282,35 @@ Return Value:
 Example:
 
 ```typescript
+// file1.ts
+export let customIterable = {
+    [Symbol.iterator]: function() {
+        let step = 0;
+        return {
+            next: function() {
+                if (step < 3) {
+                    step++;
+                    return { value: step * 10, done: false };
+                }
+                return { value: undefined, done: true };
+            }
+        };
+    }
+};
+// file2.ets
+let module = ESValue.load('file1');
+let iterableObj = module.getProperty('customIterable');
 let global = ESValue.getGlobal();
-let symbol = global.getProperty("Symbol");
-let symbolIterator = symbol.getProperty("iterator");
+let symbol = global.getProperty('Symbol');
+let symbolIterator = symbol.getProperty('iterator');
 let symbolIteratorMethod = iterableObj.getProperty(symbolIterator);
 let iterator = symbolIteratorMethod.invokeWithRecv(iterableObj);
 ```
----
+
+-----
+
 ### invokeMethod
+
 `public invokeMethod(method: string, ...args: FixedArray<StaticOrESValue>): ESValue`  
 Use the method name `mothod` and `args` as parameters to get the method saved in `this` dynamic object and execute it. `args` are wrapped ESValue objects.
 
@@ -1171,7 +1319,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :------------: | :---------------: | :------: | :-----------------: |
 | method | string | Yes | The method name |
-| ...args | FixedArray<StaticOrESValue> | No | The method parameter list |
+| ...args | FixedArray\<StaticOrESValue\> | No | The method parameter list |
 
 Return Value:
 
@@ -1193,8 +1341,11 @@ let module = ESValue.load('file1');
 let jsObjWithFunc = module.getProperty('objWithFunc');
 let result = jsObjWithFunc.invokeMethod('func');
 ```
----
+
+-----
+
 ### keys
+
 `public keys(): IterableIterator<ESValue>`  
 Get an iterator of the own enumerable property names of the dynamic object saved in this, where the values obtained from iteration are dynamic objects wrapped by ESValue.
 
@@ -1202,7 +1353,7 @@ Return Value:
 
 | Type | Description |
 | :-------------------------: | :-------------------------: |
-| IterableIterator<ESValue> | The property name iterator wrapped by ESValue |
+| IterableIterator\<ESValue\> | The property name iterator wrapped by ESValue |
 
 Example:
 
@@ -1218,8 +1369,10 @@ for (const key of jsIterableObject.keys()) {
 }
 ```
 
----
+-----
+
 ### values
+
 `public values(): IterableIterator<ESValue>`  
 Obtain an iterator of the enumerable property values of the dynamic object saved in this, where the iterated values are ESValue-wrapped dynamic objects.
 
@@ -1227,7 +1380,7 @@ Return Value:
 
 | Type | Description |
 | :-------------------------: | :-------------------------: |
-| IterableIterator<ESValue> | The property value iterator wrapped by ESValue |
+| IterableIterator\<ESValue\> | The property value iterator wrapped by ESValue |
 
 Example:
 
@@ -1243,16 +1396,18 @@ for (const value of jsIterableObject.values()) {
 }
 ```
 
----
+-----
+
 ### entries
-`public entries(): IterableIterator<[ESValue, ESValue]>` 
+
+`public entries(): IterableIterator<[ESValue, ESValue]>`
 Get an iterator over the own enumerable key-value pairs of this stored dynamic object, where the key-value pairs obtained from iteration are dynamic objects wrapped in ESValue.
 
 Return Value:
 
 | Type | Description |
 | :-------------------------------------: | :-------------------------: |
-| IterableIterator<[ESValue, ESValue]> | The tuple iterator of [property name wrapped by ESValue, property value wrapped by ESValue] |
+| IterableIterator\<[ESValue, ESValue]\> | The tuple iterator of [property name wrapped by ESValue, property value wrapped by ESValue] |
 
 Example:
 
@@ -1262,7 +1417,7 @@ export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
 // file2.ets
 let module = ESValue.load('file1');
 let jsIterableObject = module.getProperty('testItetatorObject');
-let resultkey: String =  = new String();
+let resultkey: String = new String();
 let resultValue: number = 0;
 for (const entry of jsIterableObject.entries()) {
     resultkey += entry[0].toString();
@@ -1270,8 +1425,10 @@ for (const entry of jsIterableObject.entries()) {
 }
 ```
 
----
+-----
+
 ### instanceOf
+
 `public instanceOf(type: ESValue | Type): boolean`  
 Check whether the dynamic object stored in `this` object is an instance of the dynamic type stored in the `type` object.
 
@@ -1297,11 +1454,14 @@ export class User {
 // file2.ets
 let module = ESValue.load('file1');
 let jsUser = module.getProperty('User');
-let user = jsUser.instantiate(num);
+let user = jsUser.instantiate(100);
 let res =  user.instanceOf(jsUser);
 ```
----
+
+-----
+
 ### typeOf
+
 `public typeOf(): String`  
 Get the type string of the dynamic object stored in `this`.
 
@@ -1317,8 +1477,11 @@ Example:
 ESValue.wrapNumber(42).typeOf();   // 'number'
 ESValue.Null.typeOf();       // 'null'
 ```
----
+
+-----
+
 ### load
+
 `public static load(module: string): ESValue`  
 Load the ArkTS-Dyn module according to the specified path name and return the object wrapped by ESValue.
 
@@ -1343,9 +1506,11 @@ let num = 1;
 let module = ESValue.load('file1');
 ```
 
----
+-----
+
 ### getGlobal
-public static getGlobal(): ESValue
+
+`public static getGlobal(): ESValue`
 Get the globalThis object of ArkTS-Dyn and return the object wrapped by ESValue.
 
 Return Value:
@@ -1360,8 +1525,10 @@ Example:
 let global = ESValue.getGlobal();
 ```
 
----
+-----
+
 ### isPromise
+
 `public isPromise(): boolean`  
 Determine whether the dynamic object stored in `this` is a Promise object.
 
@@ -1375,20 +1542,21 @@ Example:
 
 ```typescript
 // file1.ts
-export async function sleepRetNumber(ms: number): Promise<number> {
-    await sleep(ms);
-    return 0xcafe;
+export async function getPromiseNumber(): Promise<number> {
+    return Promise.resolve(42);
 }
 // file2.ets
 let module = ESValue.load('file1');
-let sleepRetNumber = module.getProperty('sleepRetNumber');
-let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
+let sleepRetNumber = module.getProperty('getPromiseNumber');
+let res = sleepRetNumber.invoke().isPromise();
 ```
 
----
+-----
+
 ### toPromise
+
 `public toPromise(): Promise<ESValue>`  
-Determine whether the object stored in the ESValue is of Promise type. If so, return it as a Promise<ESValue>; otherwise, throw an exception.
+Determine whether the object stored in the ESValue is of Promise type. If so, return it as a Promise\<ESValue\>; otherwise, throw an exception.
 Currently supported dynamic Promise operations for toPromise include:
 
 | Type | Syntax Example | Behavior Description |
@@ -1416,15 +1584,19 @@ export async function chainPromise(): Promise<number> {
         .then(x => x);
 }
 // file2.ets
-let module = ESValue.load('file1');
-let chainFunc = module.getProperty('chainPromise');
-let p = chainFunc.invoke().toPromise();
-let resESValue = await p;
-let res = resESValue.toNumber(); // 4
+async function foo(){
+    let module = ESValue.load('file1');
+    let chainFunc = module.getProperty('chainPromise');
+    let p = chainFunc.invoke().toPromise();
+    let resESValue = await p; 
+    let res = resESValue.toNumber(); // 4
+}
 ```
 
----
-### $_iterator
+-----
+
+### $\_iterator
+
 `public $_iterator(): IterableIterator<ESValue>`  
 Get an iterator object from the dynamic object stored in `this`, where the iterated values are dynamic objects wrapped in ESValue.
 
@@ -1432,7 +1604,7 @@ Return Value:
 
 | Type | Description |
 | :-------------------------: | :------------------------------------------------: |
-| IterableIterator<ESValue> | The iterable iterator interface that implements the internal members of the ESValue object |
+| IterableIterator\<ESValue\> | The iterable iterator interface that implements the internal members of the ESValue object |
 
 Example:
 
