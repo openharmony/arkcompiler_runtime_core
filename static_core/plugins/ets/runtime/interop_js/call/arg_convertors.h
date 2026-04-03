@@ -49,11 +49,11 @@ template <typename FStore>
 
     // start fastpath
     auto coro = EtsCoroutine::GetCurrent();
-    if (IsUndefined<true>(env, jsVal)) {
+    if (IsUndefined(env, jsVal)) {
         storeRes(nullptr);
         return true;
     }
-    if (IsNull<true>(env, jsVal)) {
+    if (IsNull(env, jsVal)) {
         if (LIKELY(klass->IsAssignableFrom(PlatformTypes(coro)->coreNull->GetRuntimeClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
             return true;

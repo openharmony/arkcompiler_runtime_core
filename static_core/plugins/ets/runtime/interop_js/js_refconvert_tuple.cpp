@@ -51,9 +51,9 @@ static EtsObject *UnwrapJsValue(napi_env env, napi_value jsValue)
     auto ctx = InteropCtx::Current(executionCtx);
 
     EtsObject *etsObject;
-    if (IsUndefined<true>(env, jsValue)) {
+    if (IsUndefined(env, jsValue)) {
         etsObject = nullptr;
-    } else if (IsNull<true>(env, jsValue)) {
+    } else if (IsNull(env, jsValue)) {
         etsObject = ctx->GetNullValue();
     } else {
         auto refconv = JSRefConvertResolve(ctx, PlatformTypes(executionCtx)->coreObject->GetRuntimeClass());
