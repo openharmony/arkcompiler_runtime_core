@@ -82,6 +82,14 @@ let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
 let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]); // BooleanInvoke(b1: boolean, b2: boolean): boolean
+
+// stvalue_invoke.ets ArkTS-Sta
+export namespace Invoke{
+  // boolean type
+  export function BooleanInvoke(b1 : Boolean, b2 : Boolean) : Boolean{
+      return b1 & b2;
+  }    
+}
 ```
 For more detailed information on the name mangling rules and usage, please refer to: [Mangling Rules](https://gitcode.com/openharmony/arkcompiler_runtime_core/blob/OpenHarmony_feature_20250702/static_core/plugins/ets/runtime/ani/docs/mangling.md)。
 

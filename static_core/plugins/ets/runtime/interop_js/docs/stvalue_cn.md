@@ -120,10 +120,18 @@ ArkTS中常用类型的**类型Mangling参考**如下所示：
 // ArkTS-Dyn
 import {STValue, SType} from "static.@ohos.lang.interop";
 
-let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
+let nsp = STValue.findNamespace('stvalue_invoke.Invoke'); // 对应静态文件的相对路径
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
 let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]); // BooleanInvoke(b1: boolean, b2: boolean): boolean
+
+// stvalue_invoke.ets ArkTS-Sta
+export namespace Invoke{
+  // boolean type
+  export function BooleanInvoke(b1 : Boolean, b2 : Boolean) : Boolean{
+      return b1 & b2;
+  }    
+}
 ```
 ---
 ### 其它注意事项
@@ -142,7 +150,7 @@ import {STValue, SType} from "static.@ohos.lang.interop";
 
 let tns = STValue.findNamespace('stvalue_test.testNameSpace');
 let student = tns.namespaceGetVariable('student', SType.REFERENCE);
-let JOSNCls = STValue.findClass("escompat.JSON");
+let JSONCls = STValue.findClass("escompat.JSON");
 // 调用stringify，函数签名表示入参为Object类型，返回值为String类型
 let stringfyRes = JSONCls.classInvokeStaticMethod('stringify', 'C{std.core.Object}:C{std.core.String}', [student]);
 let str = stringfyRes.unwrapToString(); // {"name":"student"}
