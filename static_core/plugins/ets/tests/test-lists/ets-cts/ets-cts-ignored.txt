@@ -471,6 +471,11 @@
 09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_1.ets
 09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_2.ets
 
+#33993
+09.classes/04.class_members/static_accessor_not_inherited_n.ets
+09.classes/04.class_members/static_field_not_inherited_n.ets
+09.classes/04.class_members/static_method_not_inherited_n.ets
+
 #33804
 09.classes/06.field_declarations/access_static_field_neg_23.ets
 09.classes/06.field_declarations/access_static_field_neg_24.ets
