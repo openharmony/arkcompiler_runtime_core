@@ -17,35 +17,36 @@
   {% for operator in line['operator'] %}
 
 /*---
-desc: Binary operations types per table in chapter 7.22 for non-numeric types.
+desc: Binary operations types per table in chapter 7.22 for numeric types and bigint.
 test_suffix: "{{operator.name}}"
 ---*/
 
-{{line.decl}}
-
 function main(): int {
-  let testSuite = new arktest.ArkTestsuite("non_numeric_type_{{operator.name}}");
+  let testSuite = new arktest.ArkTestsuite("numeric_type_{{operator.name}}");
 
   {% for type1 in line['type1'] %}
     {% for type2 in line['type2'] %}
-        testSuite.addTest("non_numeric_type_{{operator.name}}_{{type1.t}}_{{type2.t}}", () => {
-          let operand1: {{type1.t}} = {{type1.i}}
-          let operand2: {{type2.t}} = {{type2.i}}
+        testSuite.addTest("numeric_type_{{operator.name}}_{{type1}}_{{type2}}", () => {
+          let operand1: {{type1}} = 1{{line.bigint_suffix}}
+          let operand2: {{type2}} = 1{{line.bigint_suffix}}
 
           let result1 = operand1 {{operator.sign}} operand2
 
           arktest.assertTrue(result1 instanceof {{line.result_type}},
-            "At <{{type1.t}}> {{operator.sign}} <{{type2.t}}> expected result type <{{line.result_type}}>")
+            "At <{{type1}}> {{operator.sign}} <{{type2}}> expected result type <{{line.result_type}}>")
 
-          let result2 = operand2 {{operator.sign}} operand1
+          {% if "true" not in line.order_matters %}
+              let result2 = operand2 {{operator.sign}} operand1
 
-          arktest.assertTrue(result2 instanceof {{line.result_type}},
-            "At <{{type2.t}}> {{operator.sign}} <{{type1.t}}> expected result type <{{line.result_type}}>")
+              arktest.assertTrue(result2 instanceof {{line.result_type}},
+                "At <{{type2}}> {{operator.sign}} <{{type1}}> expected result type <{{line.result_type}}>")
+          {% endif %}
         });
     {% endfor %}
   {% endfor %}
 
-    return testSuite.run()
+  return testSuite.run()
 }
+
   {% endfor %}
 {% endfor %}
