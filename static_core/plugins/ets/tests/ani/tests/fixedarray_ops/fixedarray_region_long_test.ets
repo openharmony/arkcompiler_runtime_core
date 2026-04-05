@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<long> = [1, 2, 3, 4, 5]
+    public static array: ValueArray<long> = [1, 2, 3, 4, 5]
 
     public static changeStaticArray() {
         ArrayClass.array[2] = 222
@@ -32,18 +32,18 @@ class ArrayClass {
     }
 }
 
-function getArray(): FixedArray<long> {
-    let a: FixedArray<long> = [1, 2, 3, 4, 5]
+function getArray(): ValueArray<long> {
+    let a: ValueArray<long> = [1, 2, 3, 4, 5]
     return a
 }
 
-function checkArray(a: FixedArray<long>): boolean {
+function checkArray(a: ValueArray<long>): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
 
-function getSpecialArray(): FixedArray<long> {
+function getSpecialArray(): ValueArray<long> {
 	let min: long = new Long(-9223372036854775808)
 	let max: long = new Long(9223372036854775807)
-    let a: FixedArray<long> = [min, max, 0, 0, 0]
+    let a: ValueArray<long> = [min, max, 0, 0, 0]
     return a
 }

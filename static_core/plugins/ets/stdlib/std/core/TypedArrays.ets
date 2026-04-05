@@ -22,6 +22,8 @@
 
 package std.core
 
+import { stub } from "arkruntime"
+
 class Int8ArrayIteratorKeys implements IterableIterator<int> {
     private length: int
     private idx: int = 0
@@ -705,7 +707,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<byte>): Int8Array {
         let res = new Int8Array(items.length.toInt())
-        res.ofByte(items)
+        res.ofByte(stub.toValueArray(items))
         return res
     }
 
@@ -721,7 +723,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Int8Array {
         let res = new Int8Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         return res
     }
 
@@ -737,13 +739,13 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Int8Array {
         let res = new Int8Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         return res
     }
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
-    private final native ofByte(items: FixedArray<byte>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
+    private final native ofByte(items: ValueArray<byte>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -770,7 +772,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from(arr: FixedArray<int>): Int8Array {
         let result = new Int8Array(arr.length)
-        result.ofInt(arr)
+        result.ofInt(stub.toValueArray(arr))
         return result
     }
 
@@ -1584,7 +1586,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @since 24
      */
     public filter(fn: (val: number, index: int, array: Int8Array) => boolean): Int8Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -2453,7 +2455,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<short>): Int16Array {
         let res = new Int16Array(items.length.toInt())
-        res.ofShort(items)
+        res.ofShort(stub.toValueArray(items))
         return res
     }
 
@@ -2469,7 +2471,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Int16Array {
         let res = new Int16Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         return res
     }
 
@@ -2485,13 +2487,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Int16Array {
         let res = new Int16Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         return res
     }
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
-    private final native ofShort(items: FixedArray<short>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
+    private final native ofShort(items: ValueArray<short>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -2518,7 +2520,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from(arr: FixedArray<int>): Int16Array {
         let result = new Int16Array(arr.length)
-        result.ofInt(arr)
+        result.ofInt(stub.toValueArray(arr))
         return result
     }
 
@@ -3332,7 +3334,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @since 24
      */
     public filter(fn: (val: number, index: int, array: Int16Array) => boolean): Int16Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -4201,7 +4203,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Int32Array {
         let res = new Int32Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         return res
     }
 
@@ -4217,12 +4219,12 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Int32Array {
         let res = new Int32Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         return res
     }
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -4249,7 +4251,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from(arr: FixedArray<int>): Int32Array {
         let result = new Int32Array(arr.length)
-        result.ofInt(arr)
+        result.ofInt(stub.toValueArray(arr))
         return result
     }
 
@@ -5048,7 +5050,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @since 24
      */
     public filter(fn: (val: number, index: int, array: Int32Array) => boolean): Int32Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -5920,7 +5922,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<int>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         return res
     }
 
@@ -5936,7 +5938,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<long>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        res.ofLong(items)
+        res.ofLong(stub.toValueArray(items))
         return res
     }
 
@@ -5968,13 +5970,13 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<number>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         return res
     }
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
-    private final native ofLong(items: FixedArray<long>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
+    private final native ofLong(items: ValueArray<long>): void
     private final native ofBigInt(items: FixedArray<Object>): void
 
     /**
@@ -6802,7 +6804,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @since 24
      */
     public filter(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): BigInt64Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(new BigInt(this.getUnsafe(i)), i, this)
@@ -7655,7 +7657,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Float32Array {
         let res = new Float32Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         return res
     }
 
@@ -7671,7 +7673,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<float>): Float32Array {
         let res = new Float32Array(items.length.toInt())
-        res.ofFloat(items)
+        res.ofFloat(stub.toValueArray(items))
         return res
     }
 
@@ -7687,13 +7689,13 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Float32Array {
         let res = new Float32Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         return res
     }
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
-    private final native ofFloat(items: FixedArray<float>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
+    private final native ofFloat(items: ValueArray<float>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -7720,7 +7722,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from(arr: FixedArray<number>): Float32Array {
         let result = new Float32Array(arr.length)
-        result.ofNumber(arr)
+        result.ofNumber(stub.toValueArray(arr))
         return result
     }
 
@@ -8537,7 +8539,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @since 24
      */
     public filter(fn: (val: number, index: int, array: Float32Array) => boolean): Float32Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -9312,7 +9314,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Float64Array {
         let res = new Float64Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         return res
     }
 
@@ -9328,12 +9330,12 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Float64Array {
         let res = new Float64Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         return res
     }
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -9360,7 +9362,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from(arr: FixedArray<number>): Float64Array {
         let result = new Float64Array(arr.length)
-        result.ofNumber(arr)
+        result.ofNumber(stub.toValueArray(arr))
         return result
     }
 
@@ -10133,7 +10135,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @since 24
      */
     public filter(fn: (val: number, index: int, array: Float64Array) => boolean): Float64Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)

@@ -924,16 +924,6 @@ intrinsics:
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::LoadLibraryWithPermissionCheck
 
-  - name: StdCoreInitializePrimitivesInClass
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: initializePrimitivesInClass
-    static: true
-    signature:
-      ret: void
-      args: [ ]
-    impl: ark::ets::intrinsics::InitializePrimitivesInClass
-
 ###################
 # std.core.JSON #
 ###################
@@ -7577,6 +7567,16 @@ intrinsics:
       ret: u1
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassIsPrimitive
+
+  - name: StdCoreClassInitializeStatics
+    space: ets
+    class_name: std.core.Class
+    method_name: initializeStatics
+    static: true
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassInitializeStatics
 
 ##########################
 # std.core.RuntimeLinker #

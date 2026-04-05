@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,11 @@ public:
     bool ShouldInitializeIntrinsics() const
     {
         return shouldInitializeIntrinsics_;
+    }
+
+    bool IsMockRuntime() const
+    {
+        return isMockRuntime_;
     }
 
     void *GetMobileLog()
@@ -113,6 +118,11 @@ public:
     void SetShouldInitializeIntrinsics(bool value)
     {
         shouldInitializeIntrinsics_ = value;
+    }
+
+    void SetIsMockRuntime()
+    {
+        isMockRuntime_ = true;
     }
 
     bool UseMallocForInternalAllocations() const
@@ -217,6 +227,7 @@ private:
 
     bool shouldLoadBootPandaFiles_ {true};
     bool shouldInitializeIntrinsics_ {true};
+    bool isMockRuntime_ {false};
     void *mlogBufPrintPtr_ {nullptr};
     std::string fingerPrint_ {"unknown"};
     void *unwindstack_ {nullptr};

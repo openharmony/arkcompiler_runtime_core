@@ -388,6 +388,7 @@ static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, logger::Opti
     runtimeOptions.SetInternalAllocatorType(cliOptions.GetInternalAllocatorType());
     runtimeOptions.SetInternalMemorySizeLimit(cliOptions.GetInternalMemorySizeLimit());
 
+    runtimeOptions.SetIsMockRuntime();
     runtimeOptions.SetVerificationMode(cliOptions.IsDebugMode() ? "debug" : "ahead-of-time");
     runtimeOptions.SetVerificationConfigFile(cliOptions.GetConfigFile());
     runtimeOptions.SetVerificationCacheFile(cliOptions.GetCacheFile());

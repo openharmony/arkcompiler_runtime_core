@@ -19,6 +19,8 @@
 
 package std.core;
 
+import { stub } from "arkruntime";
+
 /**
  * Performance-oriented class for string construction
  * @syscap SystemCapability.Utils.Lang
@@ -50,6 +52,23 @@ export final class StringBuilder {
      * @since 24
      */
     constructor(fromChars: FixedArray<char>) {
+        let s: String = new String(fromChars);
+        this.buf[this.index++] = s;
+        this.length = s.getLength();
+        if (!s.isCompressed()) {
+            this.compress = false;
+        }
+    }
+
+    /**
+     * Construct a new builder instance with the provided array of chars
+     *
+     * @param { ValueArray<char> } fromChars array that will be used to initialize the builder
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    constructor(fromChars: ValueArray<char>) {
         let s: String = new String(fromChars);
         this.buf[this.index++] = s;
         this.length = s.getLength();

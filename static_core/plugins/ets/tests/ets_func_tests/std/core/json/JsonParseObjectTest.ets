@@ -77,7 +77,7 @@ function testJsonParseObjectAsFixedArray(): void {
 
 	arktest.expectError(() => {
 		const obj = JSON.parse<object>(OBJ_JSON, Class.from<FixedArray<int>>())
-	}, 'i32[] is expected, but get std.core.JSONObject')
+	}, 'std.core.Int[] is expected, but get std.core.JSONObject')
 }
 
 function testJsonParseObjectAsNull(): void {

@@ -307,7 +307,7 @@ export abstract class Type extends Object {
                 return TypeAPI.isValueType(td, contextLinker) ? DoubleType.VAL : DoubleType.REF
 
             case TypeKind.CLASS:
-                return new ClassType(td, contextLinker)
+                return Type.resolveBoxedPrimitiveType(td) ?? new ClassType(td, contextLinker)
             case TypeKind.STRING:
                 return StringType.REF
             case TypeKind.INTERFACE:
@@ -331,6 +331,21 @@ export abstract class Type extends Object {
                 return new EnumType(td, contextLinker)
             default:
                 throw new TypeError("Unexpected TypeKind " + kind)
+        }
+    }
+
+    private static resolveBoxedPrimitiveType(td: RuntimeTypeDescriptor): Type | undefined {
+        const tdStr: string = td
+        switch (tdStr) {
+            case TypeAPI.getTypeDescriptor(new Boolean()): return BooleanType.REF
+            case TypeAPI.getTypeDescriptor(new Byte()): return ByteType.REF
+            case TypeAPI.getTypeDescriptor(new Short()): return ShortType.REF
+            case TypeAPI.getTypeDescriptor(new Int()): return IntType.REF
+            case TypeAPI.getTypeDescriptor(new Long()): return LongType.REF
+            case TypeAPI.getTypeDescriptor(new Float()): return FloatType.REF
+            case TypeAPI.getTypeDescriptor(new Double()): return DoubleType.REF
+            case TypeAPI.getTypeDescriptor(new Char()): return CharType.REF
+            default: return undefined
         }
     }
 
@@ -488,6 +503,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<boolean>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Boolean()))
+    }
+
+    public static of(v: ValueArray<boolean>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BOOLEAN)
     }
 
@@ -502,6 +521,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<byte>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Byte()))
+    }
+
+    public static of(v: ValueArray<byte>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
     }
 
@@ -516,6 +539,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<char>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Char()))
+    }
+
+    public static of(v: ValueArray<char>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
     }
 
@@ -530,6 +557,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<short>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Short()))
+    }
+
+    public static of(v: ValueArray<short>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.SHORT)
     }
 
@@ -544,6 +575,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<int>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Int()))
+    }
+
+    public static of(v: ValueArray<int>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.INT)
     }
 
@@ -558,6 +593,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<long>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Long()))
+    }
+
+    public static of(v: ValueArray<long>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.LONG)
     }
 
@@ -572,6 +611,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<float>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Float()))
+    }
+
+    public static of(v: ValueArray<float>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.FLOAT)
     }
 
@@ -586,6 +629,10 @@ export abstract class Type extends Object {
      * @since 24
      */
     public static of(v: FixedArray<double>): Type {
+        return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Double()))
+    }
+
+    public static of(v: ValueArray<double>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.DOUBLE)
     }
 

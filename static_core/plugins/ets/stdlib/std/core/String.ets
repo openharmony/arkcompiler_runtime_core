@@ -62,8 +62,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public native constructor()
 
+
     /**
-     * Constructs String from chars array initializer
+     * Constructs String from chars array initializer (FixedArray)
      *
      * @param { FixedArray<char> } data initializer
      * @syscap SystemCapability.Utils.Lang
@@ -71,6 +72,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @since 24
      */
     public native constructor(data: FixedArray<char>)
+
+    /**
+     * Constructs String from chars array initializer (ValueArray)
+     *
+     * @param { ValueArray<char> } data initializer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public native constructor(data: ValueArray<char>)
+
     // let a = new char[1]
     // let b = new String(a)
     /**
@@ -404,7 +416,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public getChars(begin: int, end: int): char[] {
         // #24515: Need to remove the following function call after primitive type refactoring
-        let ret : FixedArray<char> = this.getCharsImpl(begin, end);
+        let ret : ValueArray<char> = this.getCharsImpl(begin, end);
         let tmpForceBox : Array<char> = new Array<char>(ret.length);
         for (let i = 0; i < tmpForceBox.length; i++) {
             tmpForceBox[i] = ret[i]
@@ -412,7 +424,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         return tmpForceBox;
     }
 
-    private native getCharsImpl(begin: int, end: int): FixedArray<char>;
+    private native getCharsImpl(begin: int, end: int): ValueArray<char>;
 
     /**
      * Gets the byte sequence that is representing the part of
@@ -430,7 +442,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public getBytes(begin: int, end: int): byte[] {
         // #24515: Need to remove the following function call after primitive type refactoring
-        let ret : FixedArray<byte> = this.getBytesImpl(begin, end);
+        let ret : FixedArray<byte> = arkruntime.stub.toFixedArray(this.getBytesImpl(begin, end));
         let tmpForceBox: Array<byte> = new Array<byte>(ret.length);
         for (let i = 0; i < tmpForceBox.length; i++) {
             tmpForceBox[i] = ret[i]
@@ -438,7 +450,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         return tmpForceBox;
     }
 
-    private native getBytesImpl(begin: int, end: int): FixedArray<byte>;
+    private native getBytesImpl(begin: int, end: int): ValueArray<byte>;
 
     /**
      * Compares the given StringBuilder to this String. The
@@ -780,7 +792,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @since 24
      */
     public replaceChar(oldCh: char, newCh: char): String {
-        let newChars: FixedArray<char> = this.getCharsImpl(0, this.getLength());
+        let newChars: ValueArray<char> = this.getCharsImpl(0, this.getLength());
         for (let i: int = 0; i < newChars.length; i++) {
             if (newChars[i] == oldCh) {
                 newChars[i] = newCh;

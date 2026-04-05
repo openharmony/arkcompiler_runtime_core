@@ -791,7 +791,7 @@ export function with(self: FixedArray<boolean>, index: int, value: boolean): Fix
  * @since 24
  */
 export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
-    return new ArrayValuesIterator_boolean(self);
+    return new ArrayValuesIterator_boolean_FixedArray(self);
 }
 
 /**
@@ -804,7 +804,7 @@ export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
  * @since 24
  */
 export function entries(self: FixedArray<boolean>): IterableIterator<[int, boolean]> {
-    return new ArrayEntriesIterator_boolean(self);
+    return new ArrayEntriesIterator_boolean_FixedArray(self);
 }
 
 /**
@@ -860,7 +860,7 @@ export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValu
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<boolean>, fn: (v: boolean, k: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -962,7 +962,7 @@ export function keys(self: FixedArray<boolean>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
+class ArrayValuesIterator_boolean_FixedArray implements IterableIterator<boolean> {
     private parent: FixedArray<boolean>
     private idx: int = 0
     private isDone: boolean = false
@@ -988,7 +988,7 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
     }
 }
 
-class ArrayEntriesIterator_boolean implements IterableIterator<[int, boolean]> {
+class ArrayEntriesIterator_boolean_FixedArray implements IterableIterator<[int, boolean]> {
     private parent: FixedArray<boolean>
     private idx: int = 0
     private isDone: boolean = false
@@ -1735,7 +1735,7 @@ export function with(self: FixedArray<byte>, index: int, value: byte): FixedArra
  * @since 24
  */
 export function values(self: FixedArray<byte>): IterableIterator<byte> {
-    return new ArrayValuesIterator_byte(self);
+    return new ArrayValuesIterator_byte_FixedArray(self);
 }
 
 /**
@@ -1748,7 +1748,7 @@ export function values(self: FixedArray<byte>): IterableIterator<byte> {
  * @since 24
  */
 export function entries(self: FixedArray<byte>): IterableIterator<[int, byte]> {
-    return new ArrayEntriesIterator_byte(self);
+    return new ArrayEntriesIterator_byte_FixedArray(self);
 }
 
 /**
@@ -1804,7 +1804,7 @@ export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: 
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<byte>, fn: (v: byte, k: int, array: FixedArray<byte>) => boolean): FixedArray<byte> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -1906,7 +1906,7 @@ export function keys(self: FixedArray<byte>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_byte implements IterableIterator<byte> {
+class ArrayValuesIterator_byte_FixedArray implements IterableIterator<byte> {
     private parent: FixedArray<byte>
     private idx: int = 0
     private isDone: boolean = false
@@ -1932,7 +1932,7 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
     }
 }
 
-class ArrayEntriesIterator_byte implements IterableIterator<[int, byte]> {
+class ArrayEntriesIterator_byte_FixedArray implements IterableIterator<[int, byte]> {
     private parent: FixedArray<byte>
     private idx: int = 0
     private isDone: boolean = false
@@ -2679,7 +2679,7 @@ export function with(self: FixedArray<short>, index: int, value: short): FixedAr
  * @since 24
  */
 export function values(self: FixedArray<short>): IterableIterator<short> {
-    return new ArrayValuesIterator_short(self);
+    return new ArrayValuesIterator_short_FixedArray(self);
 }
 
 /**
@@ -2692,7 +2692,7 @@ export function values(self: FixedArray<short>): IterableIterator<short> {
  * @since 24
  */
 export function entries(self: FixedArray<short>): IterableIterator<[int, short]> {
-    return new ArrayEntriesIterator_short(self);
+    return new ArrayEntriesIterator_short_FixedArray(self);
 }
 
 /**
@@ -2748,7 +2748,7 @@ export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue:
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<short>, fn: (v: short, k: int, array: FixedArray<short>) => boolean): FixedArray<short> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -2850,7 +2850,7 @@ export function keys(self: FixedArray<short>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_short implements IterableIterator<short> {
+class ArrayValuesIterator_short_FixedArray implements IterableIterator<short> {
     private parent: FixedArray<short>
     private idx: int = 0
     private isDone: boolean = false
@@ -2876,7 +2876,7 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
     }
 }
 
-class ArrayEntriesIterator_short implements IterableIterator<[int, short]> {
+class ArrayEntriesIterator_short_FixedArray implements IterableIterator<[int, short]> {
     private parent: FixedArray<short>
     private idx: int = 0
     private isDone: boolean = false
@@ -3623,7 +3623,7 @@ export function with(self: FixedArray<int>, index: int, value: int): FixedArray<
  * @since 24
  */
 export function values(self: FixedArray<int>): IterableIterator<int> {
-    return new ArrayValuesIterator_int(self);
+    return new ArrayValuesIterator_int_FixedArray(self);
 }
 
 /**
@@ -3636,7 +3636,7 @@ export function values(self: FixedArray<int>): IterableIterator<int> {
  * @since 24
  */
 export function entries(self: FixedArray<int>): IterableIterator<[int, int]> {
-    return new ArrayEntriesIterator_int(self);
+    return new ArrayEntriesIterator_int_FixedArray(self);
 }
 
 /**
@@ -3692,7 +3692,7 @@ export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: i
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<int>, fn: (v: int, k: int, array: FixedArray<int>) => boolean): FixedArray<int> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -3794,7 +3794,7 @@ export function keys(self: FixedArray<int>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_int implements IterableIterator<int> {
+class ArrayValuesIterator_int_FixedArray implements IterableIterator<int> {
     private parent: FixedArray<int>
     private idx: int = 0
     private isDone: boolean = false
@@ -3820,7 +3820,7 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
     }
 }
 
-class ArrayEntriesIterator_int implements IterableIterator<[int, int]> {
+class ArrayEntriesIterator_int_FixedArray implements IterableIterator<[int, int]> {
     private parent: FixedArray<int>
     private idx: int = 0
     private isDone: boolean = false
@@ -4567,7 +4567,7 @@ export function with(self: FixedArray<long>, index: int, value: long): FixedArra
  * @since 24
  */
 export function values(self: FixedArray<long>): IterableIterator<long> {
-    return new ArrayValuesIterator_long(self);
+    return new ArrayValuesIterator_long_FixedArray(self);
 }
 
 /**
@@ -4580,7 +4580,7 @@ export function values(self: FixedArray<long>): IterableIterator<long> {
  * @since 24
  */
 export function entries(self: FixedArray<long>): IterableIterator<[int, long]> {
-    return new ArrayEntriesIterator_long(self);
+    return new ArrayEntriesIterator_long_FixedArray(self);
 }
 
 /**
@@ -4636,7 +4636,7 @@ export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: 
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<long>, fn: (v: long, k: int, array: FixedArray<long>) => boolean): FixedArray<long> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -4738,7 +4738,7 @@ export function keys(self: FixedArray<long>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_long implements IterableIterator<long> {
+class ArrayValuesIterator_long_FixedArray implements IterableIterator<long> {
     private parent: FixedArray<long>
     private idx: int = 0
     private isDone: boolean = false
@@ -4764,7 +4764,7 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
     }
 }
 
-class ArrayEntriesIterator_long implements IterableIterator<[int, long]> {
+class ArrayEntriesIterator_long_FixedArray implements IterableIterator<[int, long]> {
     private parent: FixedArray<long>
     private idx: int = 0
     private isDone: boolean = false
@@ -5519,7 +5519,7 @@ export function with(self: FixedArray<float>, index: int, value: float): FixedAr
  * @since 24
  */
 export function values(self: FixedArray<float>): IterableIterator<float> {
-    return new ArrayValuesIterator_float(self);
+    return new ArrayValuesIterator_float_FixedArray(self);
 }
 
 /**
@@ -5532,7 +5532,7 @@ export function values(self: FixedArray<float>): IterableIterator<float> {
  * @since 24
  */
 export function entries(self: FixedArray<float>): IterableIterator<[int, float]> {
-    return new ArrayEntriesIterator_float(self);
+    return new ArrayEntriesIterator_float_FixedArray(self);
 }
 
 /**
@@ -5588,7 +5588,7 @@ export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue:
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<float>, fn: (v: float, k: int, array: FixedArray<float>) => boolean): FixedArray<float> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -5690,7 +5690,7 @@ export function keys(self: FixedArray<float>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_float implements IterableIterator<float> {
+class ArrayValuesIterator_float_FixedArray implements IterableIterator<float> {
     private parent: FixedArray<float>
     private idx: int = 0
     private isDone: boolean = false
@@ -5716,7 +5716,7 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
     }
 }
 
-class ArrayEntriesIterator_float implements IterableIterator<[int, float]> {
+class ArrayEntriesIterator_float_FixedArray implements IterableIterator<[int, float]> {
     private parent: FixedArray<float>
     private idx: int = 0
     private isDone: boolean = false
@@ -6471,7 +6471,7 @@ export function with(self: FixedArray<double>, index: int, value: double): Fixed
  * @since 24
  */
 export function values(self: FixedArray<double>): IterableIterator<double> {
-    return new ArrayValuesIterator_double(self);
+    return new ArrayValuesIterator_double_FixedArray(self);
 }
 
 /**
@@ -6484,7 +6484,7 @@ export function values(self: FixedArray<double>): IterableIterator<double> {
  * @since 24
  */
 export function entries(self: FixedArray<double>): IterableIterator<[int, double]> {
-    return new ArrayEntriesIterator_double(self);
+    return new ArrayEntriesIterator_double_FixedArray(self);
 }
 
 /**
@@ -6540,7 +6540,7 @@ export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<double>, fn: (v: double, k: int, array: FixedArray<double>) => boolean): FixedArray<double> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -6642,7 +6642,7 @@ export function keys(self: FixedArray<double>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_double implements IterableIterator<double> {
+class ArrayValuesIterator_double_FixedArray implements IterableIterator<double> {
     private parent: FixedArray<double>
     private idx: int = 0
     private isDone: boolean = false
@@ -6668,7 +6668,7 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
     }
 }
 
-class ArrayEntriesIterator_double implements IterableIterator<[int, double]> {
+class ArrayEntriesIterator_double_FixedArray implements IterableIterator<[int, double]> {
     private parent: FixedArray<double>
     private idx: int = 0
     private isDone: boolean = false
@@ -7415,7 +7415,7 @@ export function with(self: FixedArray<char>, index: int, value: char): FixedArra
  * @since 24
  */
 export function values(self: FixedArray<char>): IterableIterator<char> {
-    return new ArrayValuesIterator_char(self);
+    return new ArrayValuesIterator_char_FixedArray(self);
 }
 
 /**
@@ -7428,7 +7428,7 @@ export function values(self: FixedArray<char>): IterableIterator<char> {
  * @since 24
  */
 export function entries(self: FixedArray<char>): IterableIterator<[int, char]> {
-    return new ArrayEntriesIterator_char(self);
+    return new ArrayEntriesIterator_char_FixedArray(self);
 }
 
 /**
@@ -7484,7 +7484,7 @@ export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: 
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<char>, fn: (v: char, k: int, array: FixedArray<char>) => boolean): FixedArray<char> {
-    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -7586,7 +7586,7 @@ export function keys(self: FixedArray<char>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
-class ArrayValuesIterator_char implements IterableIterator<char> {
+class ArrayValuesIterator_char_FixedArray implements IterableIterator<char> {
     private parent: FixedArray<char>
     private idx: int = 0
     private isDone: boolean = false
@@ -7612,12 +7612,7580 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
     }
 }
 
-class ArrayEntriesIterator_char implements IterableIterator<[int, char]> {
+class ArrayEntriesIterator_char_FixedArray implements IterableIterator<[int, char]> {
     private parent: FixedArray<char>
     private idx: int = 0
     private isDone: boolean = false
 
     constructor(parent: FixedArray<char>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, char]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, char]>()
+        }
+        const i = this.idx++;
+        const vl: [int, char] = [i, this.parent[i]]
+        return new IteratorResult<[int, char]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, char]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<boolean>): ValueArray<boolean> {
+    const ret : ValueArray<boolean> = new ValueArray<boolean>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<boolean> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Boolean } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<boolean>, index: int): Boolean {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<boolean>, target: int): ValueArray<boolean> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<boolean>, target: int, start: int): ValueArray<boolean> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<boolean>, target: int, start: int, end?: int): ValueArray<boolean> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<boolean>, value: boolean, start?: int, end?: int): ValueArray<boolean> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Boolean | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): Boolean | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Boolean | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<boolean>, predicate: (elem: boolean, index: int, array: ValueArray<boolean>) => boolean): Boolean | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<boolean>, predicate: (element: boolean, index: int, array: ValueArray<boolean>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { boolean } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = boolean>(self: ValueArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: ValueArray<boolean>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<boolean> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: ValueArray<boolean>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<boolean>, callbackfn: (value: boolean, index: int, array: ValueArray<boolean>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<boolean> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<boolean>, start: int): ValueArray<boolean> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<boolean> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<boolean>, start?: int, end?: int): ValueArray<boolean> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<boolean> = new ValueArray<boolean>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `lastIndexOf` on.
+ * @param { boolean } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<boolean>, element: boolean, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<boolean>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<boolean>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<boolean>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<boolean>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<boolean>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<boolean>, start: int): ValueArray<boolean> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<boolean> } items The elements to add to the array.
+ * @returns { ValueArray<boolean> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<boolean>, start: int, delete: int, ...items: FixedArray<boolean>): ValueArray<boolean> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<boolean> = new ValueArray<boolean>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<boolean> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<boolean>, start?: int, delete?: int): ValueArray<boolean> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `includes` on.
+ * @param { boolean } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<boolean>, val: boolean, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `indexOf` on.
+ * @param { boolean } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<boolean>, val: boolean, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<boolean> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<boolean>): ValueArray<boolean> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<boolean> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<boolean>, comparator: (a: boolean, b: boolean) => int): ValueArray<boolean> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `reverse` on.
+ * @returns { ValueArray<boolean> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<boolean>): ValueArray<boolean> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<boolean> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<boolean>): ValueArray<boolean> {
+    let arr : ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { boolean } value The new value to insert at the given index.
+ * @returns { ValueArray<boolean> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<boolean>, index: int, value: boolean): ValueArray<boolean> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `values` on.
+ * @returns { IterableIterator<boolean> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<boolean>): IterableIterator<boolean> {
+    return new ArrayValuesIterator_boolean_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<boolean> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<boolean>): IterableIterator<[int, boolean]> {
+    return new ArrayEntriesIterator_boolean_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<boolean> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<boolean> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<boolean>, callbackfn: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): ValueArray<boolean> {
+    const len = self.length;
+    let res : ValueArray<boolean> = new ValueArray<boolean>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<boolean> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { boolean } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<boolean>, fn: (v: boolean, k: int, array: ValueArray<boolean>) => boolean): ValueArray<boolean> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<boolean> = new ValueArray<boolean>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<boolean>, fst: ValueArray<boolean>, ...more: FixedArray<ValueArray<boolean>>): ValueArray<boolean> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<boolean> = new ValueArray<boolean>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): ValueArray<boolean> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<boolean> = new ValueArray<boolean>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<boolean>, comparator: (a: boolean, b: boolean) => int, start?: int, end?: int): ValueArray<boolean> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: boolean, r: boolean): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<boolean>): ValueArray<boolean> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<boolean>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_boolean_ValueArray implements IterableIterator<boolean> {
+    private parent: ValueArray<boolean>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<boolean>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<boolean> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<boolean>()
+        }
+        return new IteratorResult<boolean>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<boolean> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_boolean_ValueArray implements IterableIterator<[int, boolean]> {
+    private parent: ValueArray<boolean>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<boolean>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, boolean]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, boolean]>()
+        }
+        const i = this.idx++;
+        const vl: [int, boolean] = [i, this.parent[i]]
+        return new IteratorResult<[int, boolean]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, boolean]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<byte>): ValueArray<byte> {
+    const ret : ValueArray<byte> = new ValueArray<byte>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<byte> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Byte } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<byte>, index: int): Byte {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<byte> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<byte>, target: int): ValueArray<byte> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<byte> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<byte>, target: int, start: int): ValueArray<byte> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<byte> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<byte>, target: int, start: int, end?: int): ValueArray<byte> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<byte> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<byte>, value: byte, start?: int, end?: int): ValueArray<byte> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<byte> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Byte | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): Byte | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<byte> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<byte> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Byte | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<byte>, predicate: (elem: byte, index: int, array: ValueArray<byte>) => boolean): Byte | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<byte> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<byte> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<byte> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<byte>, predicate: (element: byte, index: int, array: ValueArray<byte>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<byte> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { byte } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: ValueArray<byte>) => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<byte> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = byte>(self: ValueArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: ValueArray<byte>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<byte> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: ValueArray<byte>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<byte> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<byte>, callbackfn: (value: byte, index: int, array: ValueArray<byte>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<byte> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<byte> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<byte>, start: int): ValueArray<byte> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<byte> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<byte> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<byte>, start?: int, end?: int): ValueArray<byte> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<byte> = new ValueArray<byte>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<byte> } self The array to operate `lastIndexOf` on.
+ * @param { byte } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<byte>, element: byte, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<byte> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<byte>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<byte> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<byte>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<byte>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<byte>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<byte>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<byte>, start: int): ValueArray<byte> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<byte> } items The elements to add to the array.
+ * @returns { ValueArray<byte> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<byte>, start: int, delete: int, ...items: FixedArray<byte>): ValueArray<byte> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<byte> = new ValueArray<byte>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<byte> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<byte>, start?: int, delete?: int): ValueArray<byte> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<byte> } self The array to operate `includes` on.
+ * @param { byte } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<byte>, val: byte, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<byte> } self The array to operate `indexOf` on.
+ * @param { byte } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<byte>, val: byte, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<byte> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<byte>): ValueArray<byte> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<byte> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<byte>, comparator: (a: byte, b: byte) => int): ValueArray<byte> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<byte> } self The array to operate `reverse` on.
+ * @returns { ValueArray<byte> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<byte>): ValueArray<byte> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<byte> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<byte> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<byte>): ValueArray<byte> {
+    let arr : ValueArray<byte> = new ValueArray<byte>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<byte> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { byte } value The new value to insert at the given index.
+ * @returns { ValueArray<byte> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<byte>, index: int, value: byte): ValueArray<byte> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<byte> } self The array to operate `values` on.
+ * @returns { IterableIterator<byte> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<byte>): IterableIterator<byte> {
+    return new ArrayValuesIterator_byte_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<byte> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<byte>): IterableIterator<[int, byte]> {
+    return new ArrayEntriesIterator_byte_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<byte> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<byte> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<byte>, callbackfn: (value: byte, index: int, array: ValueArray<byte>) => byte): ValueArray<byte> {
+    const len = self.length;
+    let res : ValueArray<byte> = new ValueArray<byte>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<byte> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { byte } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: ValueArray<byte>) => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<byte>, fn: (v: byte, k: int, array: ValueArray<byte>) => boolean): ValueArray<byte> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<byte> = new ValueArray<byte>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<byte>, fst: ValueArray<byte>, ...more: FixedArray<ValueArray<byte>>): ValueArray<byte> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<byte> = new ValueArray<byte>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<byte>, ...items: FixedArray<ConcatArray<byte>>): ValueArray<byte> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<byte> = new ValueArray<byte>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<byte>, comparator: (a: byte, b: byte) => int, start?: int, end?: int): ValueArray<byte> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: byte, r: byte): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<byte>): ValueArray<byte> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<byte>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_byte_ValueArray implements IterableIterator<byte> {
+    private parent: ValueArray<byte>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<byte>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<byte> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<byte>()
+        }
+        return new IteratorResult<byte>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<byte> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_byte_ValueArray implements IterableIterator<[int, byte]> {
+    private parent: ValueArray<byte>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<byte>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, byte]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, byte]>()
+        }
+        const i = this.idx++;
+        const vl: [int, byte] = [i, this.parent[i]]
+        return new IteratorResult<[int, byte]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, byte]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<short>): ValueArray<short> {
+    const ret : ValueArray<short> = new ValueArray<short>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<short> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Short } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<short>, index: int): Short {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<short> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<short>, target: int): ValueArray<short> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<short> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<short>, target: int, start: int): ValueArray<short> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<short> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<short>, target: int, start: int, end?: int): ValueArray<short> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<short> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<short>, value: short, start?: int, end?: int): ValueArray<short> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<short> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Short | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): Short | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<short> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<short> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Short | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<short>, predicate: (elem: short, index: int, array: ValueArray<short>) => boolean): Short | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<short> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<short> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<short> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<short>, predicate: (element: short, index: int, array: ValueArray<short>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<short> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { short } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: ValueArray<short>) => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<short> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = short>(self: ValueArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: ValueArray<short>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<short> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: ValueArray<short>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<short> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<short>, callbackfn: (value: short, index: int, array: ValueArray<short>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<short> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<short> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<short>, start: int): ValueArray<short> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<short> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<short> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<short>, start?: int, end?: int): ValueArray<short> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<short> = new ValueArray<short>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<short> } self The array to operate `lastIndexOf` on.
+ * @param { short } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<short>, element: short, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<short> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<short>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<short> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<short>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<short> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<short>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<short> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<short>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<short> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<short>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<short> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<short>, start: int): ValueArray<short> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<short> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<short> } items The elements to add to the array.
+ * @returns { ValueArray<short> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<short>, start: int, delete: int, ...items: FixedArray<short>): ValueArray<short> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<short> = new ValueArray<short>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<short> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<short> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<short>, start?: int, delete?: int): ValueArray<short> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<short> } self The array to operate `includes` on.
+ * @param { short } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<short>, val: short, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<short> } self The array to operate `indexOf` on.
+ * @param { short } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<short>, val: short, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<short> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<short> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<short>): ValueArray<short> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<short> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<short> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<short>, comparator: (a: short, b: short) => int): ValueArray<short> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<short> } self The array to operate `reverse` on.
+ * @returns { ValueArray<short> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<short>): ValueArray<short> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<short> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<short> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<short>): ValueArray<short> {
+    let arr : ValueArray<short> = new ValueArray<short>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<short> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { short } value The new value to insert at the given index.
+ * @returns { ValueArray<short> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<short>, index: int, value: short): ValueArray<short> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<short> } self The array to operate `values` on.
+ * @returns { IterableIterator<short> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<short>): IterableIterator<short> {
+    return new ArrayValuesIterator_short_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<short> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<short>): IterableIterator<[int, short]> {
+    return new ArrayEntriesIterator_short_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<short> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<short> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<short>, callbackfn: (value: short, index: int, array: ValueArray<short>) => short): ValueArray<short> {
+    const len = self.length;
+    let res : ValueArray<short> = new ValueArray<short>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<short> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { short } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: ValueArray<short>) => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<short>, fn: (v: short, k: int, array: ValueArray<short>) => boolean): ValueArray<short> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<short> = new ValueArray<short>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<short>, fst: ValueArray<short>, ...more: FixedArray<ValueArray<short>>): ValueArray<short> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<short> = new ValueArray<short>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<short>, ...items: FixedArray<ConcatArray<short>>): ValueArray<short> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<short> = new ValueArray<short>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<short>, comparator: (a: short, b: short) => int, start?: int, end?: int): ValueArray<short> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: short, r: short): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<short>): ValueArray<short> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<short>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_short_ValueArray implements IterableIterator<short> {
+    private parent: ValueArray<short>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<short>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<short> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<short>()
+        }
+        return new IteratorResult<short>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<short> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_short_ValueArray implements IterableIterator<[int, short]> {
+    private parent: ValueArray<short>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<short>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, short]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, short]>()
+        }
+        const i = this.idx++;
+        const vl: [int, short] = [i, this.parent[i]]
+        return new IteratorResult<[int, short]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, short]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<int>): ValueArray<int> {
+    const ret : ValueArray<int> = new ValueArray<int>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<int> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Int } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<int>, index: int): Int {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<int> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<int>, target: int): ValueArray<int> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<int> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<int>, target: int, start: int): ValueArray<int> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<int> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<int>, target: int, start: int, end?: int): ValueArray<int> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<int> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<int>, value: int, start?: int, end?: int): ValueArray<int> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<int> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Int | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): Int | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<int> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<int> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Int | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<int>, predicate: (elem: int, index: int, array: ValueArray<int>) => boolean): Int | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<int> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<int> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<int> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<int>, predicate: (element: int, index: int, array: ValueArray<int>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<int> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { int } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: ValueArray<int>) => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<int> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = int>(self: ValueArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: ValueArray<int>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<int> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: ValueArray<int>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<int> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<int>, callbackfn: (value: int, index: int, array: ValueArray<int>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<int> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<int> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<int>, start: int): ValueArray<int> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<int> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<int> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<int>, start?: int, end?: int): ValueArray<int> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<int> = new ValueArray<int>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<int> } self The array to operate `lastIndexOf` on.
+ * @param { int } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<int>, element: int, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<int> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<int>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<int> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<int>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<int> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<int>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<int> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<int>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<int> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<int>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<int> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<int>, start: int): ValueArray<int> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<int> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<int> } items The elements to add to the array.
+ * @returns { ValueArray<int> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<int>, start: int, delete: int, ...items: FixedArray<int>): ValueArray<int> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<int> = new ValueArray<int>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<int> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<int> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<int>, start?: int, delete?: int): ValueArray<int> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<int> } self The array to operate `includes` on.
+ * @param { int } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<int>, val: int, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<int> } self The array to operate `indexOf` on.
+ * @param { int } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<int>, val: int, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<int> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<int> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<int>): ValueArray<int> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<int> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<int> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<int>, comparator: (a: int, b: int) => int): ValueArray<int> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<int> } self The array to operate `reverse` on.
+ * @returns { ValueArray<int> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<int>): ValueArray<int> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<int> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<int> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<int>): ValueArray<int> {
+    let arr : ValueArray<int> = new ValueArray<int>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<int> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { int } value The new value to insert at the given index.
+ * @returns { ValueArray<int> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<int>, index: int, value: int): ValueArray<int> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<int> } self The array to operate `values` on.
+ * @returns { IterableIterator<int> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<int>): IterableIterator<int> {
+    return new ArrayValuesIterator_int_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<int> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<int>): IterableIterator<[int, int]> {
+    return new ArrayEntriesIterator_int_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<int> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<int> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<int>, callbackfn: (value: int, index: int, array: ValueArray<int>) => int): ValueArray<int> {
+    const len = self.length;
+    let res : ValueArray<int> = new ValueArray<int>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<int> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { int } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: ValueArray<int>) => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<int>, fn: (v: int, k: int, array: ValueArray<int>) => boolean): ValueArray<int> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<int> = new ValueArray<int>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<int>, fst: ValueArray<int>, ...more: FixedArray<ValueArray<int>>): ValueArray<int> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<int> = new ValueArray<int>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<int>, ...items: FixedArray<ConcatArray<int>>): ValueArray<int> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<int> = new ValueArray<int>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<int>, comparator: (a: int, b: int) => int, start?: int, end?: int): ValueArray<int> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: int, r: int): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<int>): ValueArray<int> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<int>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_int_ValueArray implements IterableIterator<int> {
+    private parent: ValueArray<int>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<int>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<int> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<int>()
+        }
+        return new IteratorResult<int>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<int> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_int_ValueArray implements IterableIterator<[int, int]> {
+    private parent: ValueArray<int>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<int>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, int]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, int]>()
+        }
+        const i = this.idx++;
+        const vl: [int, int] = [i, this.parent[i]]
+        return new IteratorResult<[int, int]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, int]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<long>): ValueArray<long> {
+    const ret : ValueArray<long> = new ValueArray<long>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<long> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Long } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<long>, index: int): Long {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<long> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<long>, target: int): ValueArray<long> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<long> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<long>, target: int, start: int): ValueArray<long> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<long> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<long>, target: int, start: int, end?: int): ValueArray<long> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<long> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<long>, value: long, start?: int, end?: int): ValueArray<long> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<long> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Long | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): Long | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<long> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<long> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Long | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<long>, predicate: (elem: long, index: int, array: ValueArray<long>) => boolean): Long | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<long> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<long> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<long> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<long>, predicate: (element: long, index: int, array: ValueArray<long>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<long> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { long } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: ValueArray<long>) => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<long> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = long>(self: ValueArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: ValueArray<long>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<long> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: ValueArray<long>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<long> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<long>, callbackfn: (value: long, index: int, array: ValueArray<long>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<long> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<long> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<long>, start: int): ValueArray<long> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<long> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<long> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<long>, start?: int, end?: int): ValueArray<long> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<long> = new ValueArray<long>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<long> } self The array to operate `lastIndexOf` on.
+ * @param { long } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<long>, element: long, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<long> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<long>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<long> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<long>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<long> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<long>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<long> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<long>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<long> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<long>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<long> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<long>, start: int): ValueArray<long> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<long> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<long> } items The elements to add to the array.
+ * @returns { ValueArray<long> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<long>, start: int, delete: int, ...items: FixedArray<long>): ValueArray<long> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<long> = new ValueArray<long>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<long> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<long> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<long>, start?: int, delete?: int): ValueArray<long> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<long> } self The array to operate `includes` on.
+ * @param { long } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<long>, val: long, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<long> } self The array to operate `indexOf` on.
+ * @param { long } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<long>, val: long, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<long> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<long> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<long>): ValueArray<long> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<long> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<long> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<long>, comparator: (a: long, b: long) => int): ValueArray<long> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<long> } self The array to operate `reverse` on.
+ * @returns { ValueArray<long> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<long>): ValueArray<long> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<long> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<long> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<long>): ValueArray<long> {
+    let arr : ValueArray<long> = new ValueArray<long>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<long> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { long } value The new value to insert at the given index.
+ * @returns { ValueArray<long> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<long>, index: int, value: long): ValueArray<long> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<long> } self The array to operate `values` on.
+ * @returns { IterableIterator<long> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<long>): IterableIterator<long> {
+    return new ArrayValuesIterator_long_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<long> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<long>): IterableIterator<[int, long]> {
+    return new ArrayEntriesIterator_long_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<long> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<long> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<long>, callbackfn: (value: long, index: int, array: ValueArray<long>) => long): ValueArray<long> {
+    const len = self.length;
+    let res : ValueArray<long> = new ValueArray<long>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<long> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { long } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: ValueArray<long>) => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<long>, fn: (v: long, k: int, array: ValueArray<long>) => boolean): ValueArray<long> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<long> = new ValueArray<long>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<long>, fst: ValueArray<long>, ...more: FixedArray<ValueArray<long>>): ValueArray<long> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<long> = new ValueArray<long>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<long>, ...items: FixedArray<ConcatArray<long>>): ValueArray<long> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<long> = new ValueArray<long>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<long>, comparator: (a: long, b: long) => int, start?: int, end?: int): ValueArray<long> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: long, r: long): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<long>): ValueArray<long> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<long>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_long_ValueArray implements IterableIterator<long> {
+    private parent: ValueArray<long>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<long>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<long> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<long>()
+        }
+        return new IteratorResult<long>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<long> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_long_ValueArray implements IterableIterator<[int, long]> {
+    private parent: ValueArray<long>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<long>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, long]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, long]>()
+        }
+        const i = this.idx++;
+        const vl: [int, long] = [i, this.parent[i]]
+        return new IteratorResult<[int, long]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, long]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<float>): ValueArray<float> {
+    const ret : ValueArray<float> = new ValueArray<float>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<float> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Float } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<float>, index: int): Float {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<float> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<float>, target: int): ValueArray<float> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<float> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<float>, target: int, start: int): ValueArray<float> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<float> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<float>, target: int, start: int, end?: int): ValueArray<float> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<float> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<float>, value: float, start?: int, end?: int): ValueArray<float> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<float> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Float | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): Float | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<float> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<float> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Float | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<float>, predicate: (elem: float, index: int, array: ValueArray<float>) => boolean): Float | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<float> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<float> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<float> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<float>, predicate: (element: float, index: int, array: ValueArray<float>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<float> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { float } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: ValueArray<float>) => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<float> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = float>(self: ValueArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: ValueArray<float>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<float> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: ValueArray<float>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<float> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<float>, callbackfn: (value: float, index: int, array: ValueArray<float>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<float> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<float> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<float>, start: int): ValueArray<float> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<float> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<float> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<float>, start?: int, end?: int): ValueArray<float> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<float> = new ValueArray<float>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<float> } self The array to operate `lastIndexOf` on.
+ * @param { float } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<float>, element: float, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<float> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<float>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<float> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<float>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<float> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<float>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<float> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<float>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<float> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<float>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<float> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<float>, start: int): ValueArray<float> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<float> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<float> } items The elements to add to the array.
+ * @returns { ValueArray<float> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<float>, start: int, delete: int, ...items: FixedArray<float>): ValueArray<float> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<float> = new ValueArray<float>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<float> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<float> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<float>, start?: int, delete?: int): ValueArray<float> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<float> } self The array to operate `includes` on.
+ * @param { float } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<float>, val: float, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    if (isNaN(val)) {
+        for (let i = fi; i < len; i++) {
+            if (isNaN(self[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<float> } self The array to operate `indexOf` on.
+ * @param { float } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<float>, val: float, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<float> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<float> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<float>): ValueArray<float> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<float> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<float> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<float>, comparator: (a: float, b: float) => int): ValueArray<float> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<float> } self The array to operate `reverse` on.
+ * @returns { ValueArray<float> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<float>): ValueArray<float> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<float> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<float> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<float>): ValueArray<float> {
+    let arr : ValueArray<float> = new ValueArray<float>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<float> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { float } value The new value to insert at the given index.
+ * @returns { ValueArray<float> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<float>, index: int, value: float): ValueArray<float> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<float> } self The array to operate `values` on.
+ * @returns { IterableIterator<float> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<float>): IterableIterator<float> {
+    return new ArrayValuesIterator_float_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<float> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<float>): IterableIterator<[int, float]> {
+    return new ArrayEntriesIterator_float_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<float> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<float> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<float>, callbackfn: (value: float, index: int, array: ValueArray<float>) => float): ValueArray<float> {
+    const len = self.length;
+    let res : ValueArray<float> = new ValueArray<float>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<float> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { float } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: ValueArray<float>) => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<float>, fn: (v: float, k: int, array: ValueArray<float>) => boolean): ValueArray<float> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<float> = new ValueArray<float>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<float>, fst: ValueArray<float>, ...more: FixedArray<ValueArray<float>>): ValueArray<float> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<float> = new ValueArray<float>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<float>, ...items: FixedArray<ConcatArray<float>>): ValueArray<float> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<float> = new ValueArray<float>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<float>, comparator: (a: float, b: float) => int, start?: int, end?: int): ValueArray<float> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: float, r: float): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<float>): ValueArray<float> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<float>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_float_ValueArray implements IterableIterator<float> {
+    private parent: ValueArray<float>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<float>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<float> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<float>()
+        }
+        return new IteratorResult<float>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<float> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_float_ValueArray implements IterableIterator<[int, float]> {
+    private parent: ValueArray<float>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<float>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, float]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, float]>()
+        }
+        const i = this.idx++;
+        const vl: [int, float] = [i, this.parent[i]]
+        return new IteratorResult<[int, float]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, float]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<double>): ValueArray<double> {
+    const ret : ValueArray<double> = new ValueArray<double>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<double> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Double } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<double>, index: int): Double {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<double> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<double>, target: int): ValueArray<double> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<double> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<double>, target: int, start: int): ValueArray<double> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<double> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<double>, target: int, start: int, end?: int): ValueArray<double> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<double> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<double>, value: double, start?: int, end?: int): ValueArray<double> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<double> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Double | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): Double | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<double> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<double> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Double | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<double>, predicate: (elem: double, index: int, array: ValueArray<double>) => boolean): Double | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<double> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<double> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<double> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<double>, predicate: (element: double, index: int, array: ValueArray<double>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<double> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { double } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: ValueArray<double>) => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<double> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = double>(self: ValueArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: ValueArray<double>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<double> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: ValueArray<double>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<double> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<double>, callbackfn: (value: double, index: int, array: ValueArray<double>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<double> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<double> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<double>, start: int): ValueArray<double> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<double> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<double> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<double>, start?: int, end?: int): ValueArray<double> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<double> = new ValueArray<double>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<double> } self The array to operate `lastIndexOf` on.
+ * @param { double } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<double>, element: double, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<double> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<double>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<double> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<double>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<double> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<double>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<double> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<double>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<double> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<double>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<double> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<double>, start: int): ValueArray<double> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<double> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<double> } items The elements to add to the array.
+ * @returns { ValueArray<double> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<double>, start: int, delete: int, ...items: FixedArray<double>): ValueArray<double> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<double> = new ValueArray<double>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<double> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<double> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<double>, start?: int, delete?: int): ValueArray<double> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<double> } self The array to operate `includes` on.
+ * @param { double } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<double>, val: double, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    if (isNaN(val)) {
+        for (let i = fi; i < len; i++) {
+            if (isNaN(self[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<double> } self The array to operate `indexOf` on.
+ * @param { double } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<double>, val: double, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<double> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<double> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<double>): ValueArray<double> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<double> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<double> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<double>, comparator: (a: double, b: double) => int): ValueArray<double> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<double> } self The array to operate `reverse` on.
+ * @returns { ValueArray<double> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<double>): ValueArray<double> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<double> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<double> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<double>): ValueArray<double> {
+    let arr : ValueArray<double> = new ValueArray<double>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<double> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { double } value The new value to insert at the given index.
+ * @returns { ValueArray<double> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<double>, index: int, value: double): ValueArray<double> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<double> } self The array to operate `values` on.
+ * @returns { IterableIterator<double> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<double>): IterableIterator<double> {
+    return new ArrayValuesIterator_double_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<double> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<double>): IterableIterator<[int, double]> {
+    return new ArrayEntriesIterator_double_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<double> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<double> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<double>, callbackfn: (value: double, index: int, array: ValueArray<double>) => double): ValueArray<double> {
+    const len = self.length;
+    let res : ValueArray<double> = new ValueArray<double>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<double> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { double } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: ValueArray<double>) => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<double>, fn: (v: double, k: int, array: ValueArray<double>) => boolean): ValueArray<double> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<double> = new ValueArray<double>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<double>, fst: ValueArray<double>, ...more: FixedArray<ValueArray<double>>): ValueArray<double> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<double> = new ValueArray<double>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<double>, ...items: FixedArray<ConcatArray<double>>): ValueArray<double> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<double> = new ValueArray<double>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<double>, comparator: (a: double, b: double) => int, start?: int, end?: int): ValueArray<double> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: double, r: double): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<double>): ValueArray<double> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<double>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_double_ValueArray implements IterableIterator<double> {
+    private parent: ValueArray<double>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<double>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<double> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<double>()
+        }
+        return new IteratorResult<double>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<double> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_double_ValueArray implements IterableIterator<[int, double]> {
+    private parent: ValueArray<double>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<double>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[int, double]> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<[int, double]>()
+        }
+        const i = this.idx++;
+        const vl: [int, double] = [i, this.parent[i]]
+        return new IteratorResult<[int, double]>(vl);
+    }
+
+    override $_iterator(): IterableIterator<[int, double]> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+function cloneArray(self: ValueArray<char>): ValueArray<char> {
+    const ret : ValueArray<char> = new ValueArray<char>(self.length);;
+    for (let i = 0; i < self.length; i++) {
+        ret[i] = self[i];
+    }
+    return ret;
+}
+
+/**
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
+ *
+     @param { ValueArray<char> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Char } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function at(self: ValueArray<char>, index: int): Char {
+    let len = self.length;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        throw new RangeError("Invalid index");
+    }
+
+    return self[k];
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<char> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { ValueArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<char>, target: int): ValueArray<char> {
+    copyWithin(self, target, 0, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<char> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { ValueArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<char>, target: int, start: int): ValueArray<char> {
+    copyWithin(self, target, start, self.length);
+    return self;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
+ *
+     * @param { ValueArray<char> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { ValueArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function copyWithin(self: ValueArray<char>, target: int, start: int, end?: int): ValueArray<char> {
+    target = normalizeIndex(target, self.length)
+    start = normalizeIndex(start, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    if (end <= start) {
+        return self;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = self[start++];
+            self[target++] = read;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > self.length) {
+            len = self.length - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = self[start + len - 1 - i];
+            self[target + len - 1 - i] = read;
+        }
+    }
+
+    return self;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index.
+ *
+     * @param { ValueArray<char> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { ValueArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function fill(self: ValueArray<char>, value: char, start?: int, end?: int): ValueArray<char> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
+
+    for (let i = start; i < end; i++) {
+        self[i] = value;
+    }
+    return self;
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
+ *
+     * @param { ValueArray<char> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Char | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function find(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): Char | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
+ *
+     * @param { ValueArray<char> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findIndex(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): int {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
+ *
+     * @param { ValueArray<char> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Char | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLast(self: ValueArray<char>, predicate: (elem: char, index: int, array: ValueArray<char>) => boolean): Char | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate(val, i, self)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Determines whether all the members of an array satisfy the specified test.
+ *
+     * @param { ValueArray<char> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function every(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate(self[i], i, self)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+     * @param { ValueArray<char> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function some(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate(self[i], i, self)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
+ *
+     * @param { ValueArray<char> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function findLastIndex(self: ValueArray<char>, predicate: (element: char, index: int, array: ValueArray<char>) => boolean): int {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate(self[i], i, self)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<char> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { char } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce(self: ValueArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: ValueArray<char>) => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+     * @param { ValueArray<char> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduce<U = char>(self: ValueArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: ValueArray<char>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { ValueArray<char> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reduceRight<U>(self: ValueArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: ValueArray<char>) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+     * @param { ValueArray<char> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function forEach(self: ValueArray<char>, callbackfn: (value: char, index: int, array: ValueArray<char>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<char> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { ValueArray<char> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<char>, start: int): ValueArray<char> {
+    return slice(self, start, Int.MAX_VALUE);
+}
+
+/**
+ * Returns a copy of a section of an array.
+ *
+     * @param { ValueArray<char> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { ValueArray<char> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function slice(self: ValueArray<char>, start?: int, end?: int): ValueArray<char> {
+    const len: int = self.length;
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res : ValueArray<char> = new ValueArray<char>(count)
+    copyTo(self, res, 0, relStart, relStart + count);
+    return res
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
+ *
+     * @param { ValueArray<char> } self The array to operate `lastIndexOf` on.
+ * @param { char } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function lastIndexOf(self: ValueArray<char>, element: char, fromIndex?: int): int {
+    if (self.length == 0) {
+        return -1;
+    }
+    let n = fromIndex ?? self.length - 1;
+    let k: int;
+    if (n >= 0) {
+        k = min(self.length - 1, n);
+    } else {
+        k = self.length + n;
+    }
+
+    while (k >= 0) {
+        if (self[k] === element) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
+ *
+     * @param { ValueArray<char> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function join(self: ValueArray<char>, sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
+    const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
+        const tmp = self[i]
+        sb.append(sepReal);
+        sb.append(tmp)
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+     * @param { ValueArray<char> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toString(self: ValueArray<char>): string {
+    return join(self, ",");
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<char> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<char>, locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<char> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<char>, locales: Object): string {
+    return toLocaleString(self, new Object(), new Object())
+}
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+     * @param { ValueArray<char> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toLocaleString(self: ValueArray<char>): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x = self[i] as Any;
+        if ((null !== x) && (undefined !== x)) {
+            sb.append((x! as object).toLocaleString()) // #26217
+        }
+    }
+    return sb.toString()
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<char> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<char>, start: int): ValueArray<char> {
+    return toSpliced(self, start, self.length)
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<char> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<char> } items The elements to add to the array.
+ * @returns { ValueArray<char> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<char>, start: int, delete: int, ...items: FixedArray<char>): ValueArray<char> {
+    const len = self.length;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res : ValueArray<char> = new ValueArray<char>(len - delete + items.length);
+    for (let i = 0; i < start; i++) {
+        res[i] = self[i]
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = self[i]
+    }
+    return res;
+}
+
+/**
+ * Returns a new array with some elements removed and/or replaced at a given index.
+ *
+     * @param { ValueArray<char> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { ValueArray<char> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSpliced(self: ValueArray<char>, start?: int, delete?: int): ValueArray<char> {
+    const len = self.length;
+    return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
+ *
+     * @param { ValueArray<char> } self The array to operate `includes` on.
+ * @param { char } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function includes(self: ValueArray<char>, val: char, fromIndex?: int): boolean {
+    const len = self.length;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+    for (let i = fi; i < len; i++) {
+        if (val == self[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
+ *
+     * @param { ValueArray<char> } self The array to operate `indexOf` on.
+ * @param { char } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function indexOf(self: ValueArray<char>, val: char, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
+        if (val === self[i]) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns a new array with the elements sorted in ascending order.
+ *
+     * @param { ValueArray<char> } self The array to operate `toSorted` on.
+ * @returns { ValueArray<char> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<char>): ValueArray<char> {
+    let arr = cloneArray(self);
+    sort(arr)
+    return arr
+}
+
+/**
+ * Returns a new array with the elements sorted using the provided comparator function.
+ *
+     * @param { ValueArray<char> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { ValueArray<char> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toSorted(self: ValueArray<char>, comparator: (a: char, b: char) => int): ValueArray<char> {
+    let arr = cloneArray(self);
+    sort(arr, comparator)
+    return arr
+}
+
+/**
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
+ *
+     * @param { ValueArray<char> } self The array to operate `reverse` on.
+ * @returns { ValueArray<char> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function reverse(self: ValueArray<char>): ValueArray<char> {
+    for (let i = 0; i < self.length / 2; i++) {
+        const tmp = self[i];
+        const idx_r = self.length - 1 - i;
+        const val_r = self[idx_r];
+        self[i] = val_r;
+        self[idx_r] = tmp;
+    }
+    return self;
+}
+
+/**
+ * Returns a new array with the elements in reversed order.
+ *
+     * @param { ValueArray<char> } self The array to operate `toReversed` on.
+ * @returns { ValueArray<char> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function toReversed(self: ValueArray<char>): ValueArray<char> {
+    let arr : ValueArray<char> = new ValueArray<char>(self.length)
+    for (let i = 0; i < self.length; i++) {
+        arr[self.length - 1 - i] = self[i]
+    }
+    return arr
+}
+
+/**
+ * Returns a new Array with the element at the given index replaced with the given value.
+ *
+     * @param { ValueArray<char> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { char } value The new value to insert at the given index.
+ * @returns { ValueArray<char> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function with(self: ValueArray<char>, index: int, value: char): ValueArray<char> {
+    if (index < 0) {
+        index += self.length;
+    }
+    if (index < 0 || index >= self.length) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = cloneArray(self);
+    arr[index] = value;
+    return arr
+}
+
+/**
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { ValueArray<char> } self The array to operate `values` on.
+ * @returns { IterableIterator<char> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function values(self: ValueArray<char>): IterableIterator<char> {
+    return new ArrayValuesIterator_char_ValueArray(self);
+}
+
+/**
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { ValueArray<char> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function entries(self: ValueArray<char>): IterableIterator<[int, char]> {
+    return new ArrayEntriesIterator_char_ValueArray(self);
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param { ValueArray<char> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { ValueArray<char> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function map(self: ValueArray<char>, callbackfn: (value: char, index: int, array: ValueArray<char>) => char): ValueArray<char> {
+    const len = self.length;
+    let res : ValueArray<char> = new ValueArray<char>(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn(self[i], i, self);
+    }
+    return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+ *
+ * @param { ValueArray<char> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { char } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
+export function reduceRight(self: ValueArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: ValueArray<char>) => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i, self)
+    }
+    return acc
+}
+
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+export function filter(self: ValueArray<char>, fn: (v: char, k: int, array: ValueArray<char>) => boolean): ValueArray<char> {
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    let cnt = 0
+
+    for (let i: int = 0; i < self.length; i++) {
+        const val = self[i];
+        if (fn(val, i, self)) {
+            mask[i] = true
+            cnt++;
+        }
+    }
+    const res : ValueArray<char> = new ValueArray<char>(cnt);
+    let idx_store = 0;
+    for (let i: int = 0; i < self.length; i++) {
+        if (mask[i]) {
+            res[idx_store++] = self[i]
+        }
+    }
+    return res;
+}
+
+export function concat(self: ValueArray<char>, fst: ValueArray<char>, ...more: FixedArray<ValueArray<char>>): ValueArray<char> {
+    const lnMin = self.length + fst.length;
+    let ln = lnMin;
+    for (let i = 0; i < more.length; i++) {
+        ln += more[i].length
+    }
+    const r : ValueArray<char> = new ValueArray<char>(ln);
+    try {
+        copyTo(self, r, 0, 0, self.length);
+        copyTo(fst, r, self.length, 0, fst.length);
+        let idx = lnMin;
+        for (let i = 0; i < more.length; i++) {
+            copyTo(more[i], r, idx, 0, more[i].length);
+            idx += more[i].length;
+        }
+    } catch (e) {
+        // impossible
+    }
+    return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: ValueArray<char>, ...items: FixedArray<ConcatArray<char>>): ValueArray<char> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length
+    }
+
+    const buf : ValueArray<char> = new ValueArray<char>(totalAdd);
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<char>, comparator: (a: char, b: char) => int, start?: int, end?: int): ValueArray<char> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: char, r: char): boolean => {
+        return comparator(l, r ) < 0;
+    });
+    return self;
+}
+
+/**
+ * Reorders elements of `this` using comparator function.
+ *
+ * @param comparator function that defines the sort order.
+ *
+ * @note Mutating method
+ */
+export function sort(self: ValueArray<char>): ValueArray<char> {
+    sort(self, 0, self.length);
+    return self;
+}
+
+export function keys(self: ValueArray<char>): IterableIterator<int> {
+    return new BuiltinArrayKeysIterator(self.length);
+}
+
+class ArrayValuesIterator_char_ValueArray implements IterableIterator<char> {
+    private parent: ValueArray<char>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<char>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<char> {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
+            return new IteratorResult<char>()
+        }
+        return new IteratorResult<char>(this.parent[this.idx++])
+    }
+
+    override $_iterator(): IterableIterator<char> {
+        return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length
+    }
+}
+
+class ArrayEntriesIterator_char_ValueArray implements IterableIterator<[int, char]> {
+    private parent: ValueArray<char>
+    private idx: int = 0
+    private isDone: boolean = false
+
+    constructor(parent: ValueArray<char>) {
         this.parent = parent
     }
 

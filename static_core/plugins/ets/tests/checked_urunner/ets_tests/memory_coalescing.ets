@@ -64,7 +64,7 @@ class A {
 
 export class Test {
 
-    private static __noinline__fnSum(u: FixedArray<double>, v: FixedArray<double>): void {
+    private static __noinline__fnSum(u: ValueArray<double>, v: ValueArray<double>): void {
         let t: double = 0;
         for (let j: int = 0; j < u.length; j = j + 2) {
             t += u[j];
@@ -76,12 +76,12 @@ export class Test {
         }
     }
 
-    private static __noinline__fnMem(u: FixedArray<double>, v: FixedArray<double>, i: int): void {
+    private static __noinline__fnMem(u: ValueArray<double>, v: ValueArray<double>, i: int): void {
         u[i] = v[i];
     }
 
     // memory coalescing can't be performed over CallStatic that is barrier
-    private static __noinline__fnSumMem(u: FixedArray<double>, v: FixedArray<double>): void {
+    private static __noinline__fnSumMem(u: ValueArray<double>, v: ValueArray<double>): void {
         let t: double = 0;
         for (let j: int = 0; j < u.length; j = j + 2) {
             t += u[j];
@@ -96,7 +96,7 @@ export class Test {
     }
 
     // memory coalescing can't be performed over GC call that is barrier
-    private static __noinline__fnSumGC(u: FixedArray<double>, v: FixedArray<double>): void {
+    private static __noinline__fnSumGC(u: ValueArray<double>, v: ValueArray<double>): void {
         try {
             let t: double = 0;
             for (let j: int = 0; j < u.length; j = j + 2) {
@@ -114,7 +114,7 @@ export class Test {
     }
 
     // memory coalescing over NullCheck can be performed for Load and can't for Store
-    private static __noinline__fnSumCls(u: FixedArray<double>, v: FixedArray<double>, o: A, d: int): void {
+    private static __noinline__fnSumCls(u: ValueArray<double>, v: ValueArray<double>, o: A, d: int): void {
         let t: double = 0;
         for (let j: int = 0; j < u.length; j = j + 2) {
             t += u[j];
@@ -130,8 +130,8 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: FixedArray<double> = new FixedArray<double>(n);
-        let v: FixedArray<double> = new FixedArray<double>(n);
+        let u: ValueArray<double> = new ValueArray<double>(n);
+        let v: ValueArray<double> = new ValueArray<double>(n);
         let vv1: double = 0;
         let vv2: double = 0;
         let vv3: double = 0;

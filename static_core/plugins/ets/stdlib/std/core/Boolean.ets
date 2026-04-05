@@ -32,6 +32,17 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     private value: boolean;
 
     /**
+     * Constructs a new Boolean with default value false
+     *
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public constructor() {
+        this.value = false
+    }
+
+    /**
      * Constructs a new Boolean with provided value
      *
      * @param { boolean } value value to construct class instance with

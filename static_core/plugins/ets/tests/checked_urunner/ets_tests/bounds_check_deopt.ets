@@ -24,7 +24,7 @@
 //! INST_NOT     "DeoptimizeIf"
 //! EVENT        /Compilation,bounds_check_deopt.ETSGLOBAL::__noinline__branchLocalUpperNoDeopt,.*,COMPILED/
 //! EVENT_NOT    /Deoptimization.*/
-function __noinline__branchLocalUpperNoDeopt(arr: FixedArray<int>): int {
+function __noinline__branchLocalUpperNoDeopt(arr: ValueArray<int>): int {
     let sum: int = 0;
     for (let i: int = 0; i < arr.length; ++i) {
         if (i < arr.length - 4) {
@@ -35,7 +35,7 @@ function __noinline__branchLocalUpperNoDeopt(arr: FixedArray<int>): int {
 }
 
 function testBranchLocalUpperNoDeopt(): int {
-    let arr: FixedArray<int> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let arr: ValueArray<int> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     return __noinline__branchLocalUpperNoDeopt(arr);
 }
 
@@ -47,7 +47,7 @@ function testBranchLocalUpperNoDeopt(): int {
 //! PASS_AFTER   "ChecksElimination"
 //! INST         "DeoptimizeIf"
 //! INST_NOT     "BoundsCheck"
-function __noinline__branchLocalBlockMerge(arr: FixedArray<int>, size: int, take: boolean): int {
+function __noinline__branchLocalBlockMerge(arr: ValueArray<int>, size: int, take: boolean): int {
     let sum: int = 0;
     for (let i: int = 0; i < size; ++i) {
         if (take) {
@@ -65,7 +65,7 @@ function __noinline__branchLocalBlockMerge(arr: FixedArray<int>, size: int, take
 //! EVENT        /Compilation,bounds_check_deopt.ETSGLOBAL::__noinline__branchLocalBlockMerge,.*,COMPILED/
 //! EVENT_NOT    /Deoptimization.*/
 function testBranchLocalBlockMergeInBounds(): int {
-    let arr: FixedArray<int> = [0, 1, 2, 3];
+    let arr: ValueArray<int> = [0, 1, 2, 3];
     return __noinline__branchLocalBlockMerge(arr, 3, true);
 }
 
@@ -76,7 +76,7 @@ function testBranchLocalBlockMergeInBounds(): int {
 //! EVENT        /Compilation,bounds_check_deopt.ETSGLOBAL::__noinline__branchLocalBlockMerge,.*,COMPILED/
 //! EVENT        /DeoptimizationReason,bounds_check_deopt.ETSGLOBAL::__noinline__branchLocalBlockMerge,BOUNDS_CHECK/
 function testBranchLocalBlockMergeOutOfBounds(): int {
-    let arr: FixedArray<int> = [0, 1, 2, 3];
+    let arr: ValueArray<int> = [0, 1, 2, 3];
     try {
         __noinline__branchLocalBlockMerge(arr, 4, true);
     } catch (e) {

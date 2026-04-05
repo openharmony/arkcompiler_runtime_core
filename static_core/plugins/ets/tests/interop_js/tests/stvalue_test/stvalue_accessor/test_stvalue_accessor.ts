@@ -22,9 +22,9 @@ let ns = STValue.findNamespace('stvalue_accessor.magicNamespace');
 let SType = etsVm.SType;
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 let mediaEnum = STValue.findEnum('stvalue_accessor.MEDIA');
-let zeroFixedArray = tns.namespaceGetVariable('zeroFixedArray', SType.REFERENCE);
-let intFixedArray = tns.namespaceGetVariable('intFixedArray', SType.REFERENCE);
-let boolFixedArray = tns.namespaceGetVariable('boolFixedArray', SType.REFERENCE);
+let zeroValueArray = tns.namespaceGetVariable('zeroValueArray', SType.REFERENCE);
+let intValueArray = tns.namespaceGetVariable('intValueArray', SType.REFERENCE);
+let boolValueArray = tns.namespaceGetVariable('boolValueArray', SType.REFERENCE);
 let strFixedArray = tns.namespaceGetVariable('strFixedArray', SType.REFERENCE);
 let stuFixedArray = tns.namespaceGetVariable('stuFixedArray', SType.REFERENCE);
 let zeroArray = tns.namespaceGetVariable('zeroArray', SType.REFERENCE);
@@ -41,10 +41,10 @@ let stuArray = tns.namespaceGetVariable('stuArray', SType.REFERENCE);
 let studentCls = STValue.findClass('stvalue_accessor.Student');
 
 function testFixedArrayGetLength(): void {
-    ASSERT_TRUE(zeroFixedArray.fixedArrayGetLength() === 0);
+    ASSERT_TRUE(zeroValueArray.fixedArrayGetLength() === 0);
     ASSERT_TRUE(strFixedArray.fixedArrayGetLength() === 3);
-    ASSERT_TRUE(boolFixedArray.fixedArrayGetLength() === 4);
-    ASSERT_TRUE(intFixedArray.fixedArrayGetLength() === 5);
+    ASSERT_TRUE(boolValueArray.fixedArrayGetLength() === 4);
+    ASSERT_TRUE(intValueArray.fixedArrayGetLength() === 5);
 
     try {
         ASSERT_TRUE(colorEnum.fixedArrayGetLength() === 1);
@@ -241,17 +241,17 @@ function testObjectGetAndSetProperty(): void {
 }
 
 function testFixedArrayGetAndSet(): void {
-    ASSERT_TRUE(intFixedArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 1);
-    ASSERT_TRUE(boolFixedArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === false);
+    ASSERT_TRUE(intValueArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 1);
+    ASSERT_TRUE(boolValueArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === false);
     ASSERT_TRUE(strFixedArray.fixedArrayGet(1, SType.REFERENCE).unwrapToString() === 'cd');
     ASSERT_TRUE(stuFixedArray.fixedArrayGet(0, SType.REFERENCE).objectGetProperty('age', SType.INT).unwrapToNumber() === 28);
 
-    intFixedArray.fixedArraySet(0, STValue.wrapInt(10), SType.INT);
-    boolFixedArray.fixedArraySet(3, STValue.wrapBoolean(true), SType.BOOLEAN);
+    intValueArray.fixedArraySet(0, STValue.wrapInt(10), SType.INT);
+    boolValueArray.fixedArraySet(3, STValue.wrapBoolean(true), SType.BOOLEAN);
     strFixedArray.fixedArraySet(1, STValue.wrapString('xy'), SType.REFERENCE);
 
-    ASSERT_TRUE(intFixedArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 10);
-    ASSERT_TRUE(boolFixedArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === true);
+    ASSERT_TRUE(intValueArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 10);
+    ASSERT_TRUE(boolValueArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === true);
 
     try {
         strFixedArray.fixedArraySet(0, STValue.getNull(), SType.REFERENCE);
@@ -259,11 +259,11 @@ function testFixedArrayGetAndSet(): void {
     } catch (e: Error) { }
 
     try {
-        intFixedArray.fixedArrayGet(5, SType.INT);
+        intValueArray.fixedArrayGet(5, SType.INT);
     } catch (e: Error) { }
 
     try {
-        intFixedArray.fixedArrayGet(-1, SType.INT);
+        intValueArray.fixedArrayGet(-1, SType.INT);
     } catch (e: Error) { }
 
     try {
@@ -272,11 +272,11 @@ function testFixedArrayGetAndSet(): void {
     } catch (e: Error) { }
 
     try {
-        intFixedArray.fixedArraySet(0, STValue.wrapNumber(111), SType.FLOAT);
+        intValueArray.fixedArraySet(0, STValue.wrapNumber(111), SType.FLOAT);
     } catch (e: Error) { }
 
     try {
-        intFixedArray.fixedArraySet(0, STValue.wrapString('11'), SType.INT);
+        intValueArray.fixedArraySet(0, STValue.wrapString('11'), SType.INT);
     } catch (e: Error) { }
 
     try {
@@ -284,7 +284,7 @@ function testFixedArrayGetAndSet(): void {
     } catch (e: Error) { }
 
     try {
-        boolFixedArray.fixedArrayGet(3, SType.BOOLEAN, STValue.wrapNumber(111));
+        boolValueArray.fixedArrayGet(3, SType.BOOLEAN, STValue.wrapNumber(111));
     } catch (e: Error) { }
 
 }

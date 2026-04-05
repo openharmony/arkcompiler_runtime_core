@@ -110,7 +110,7 @@ export class ArrayBuffer
             }
         }
         this.isResizable = (maxByteLength != undefined)
-        this.data = new FixedArray<byte>(this.isResizable ? maxByteLength! : length)
+        this.data = new ValueArray<byte>(this.isResizable ? maxByteLength! : length)
         this._byteLength = length
         this.dataAddress = 0 // not needed in managed code
     }
@@ -367,14 +367,30 @@ export class ArrayBuffer
     /**
      * Allocates non-movable array of fixed length
      */
-    private native static allocateNonMovable(length: int): FixedArray<byte>
+    private native static allocateNonMovable(length: int): ValueArray<byte>
 
     /**
      * Returns native address of non-movable array
      *
      * @param array FixedArray to read native address from, must be allocated in non-movable memory
      */
-    private native static getAddress(array: FixedArray<byte>): long
+    private native static getAddress(array: ValueArray<byte>): long
+
+    /**
+     * Creates a new ArrayBuffer from an array of bytes.
+     *
+     * @param { ValueArray<byte> } arr Source byte array.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public static from(arr: ValueArray<byte>): ArrayBuffer {
+        const bf = new ArrayBuffer(arr.length)
+        copyTo(arr, bf.data!, 0, 0, arr.length)
+        return bf
+    }
 
     /**
      * Creates a new ArrayBuffer from an array of bytes.
@@ -388,7 +404,7 @@ export class ArrayBuffer
      */
     public static from(arr: FixedArray<byte>): ArrayBuffer {
         const bf = new ArrayBuffer(arr.length)
-        copyTo(arr, bf.data!, 0, 0, arr.length)
+        copyTo(arkruntime.stub.toValueArray(arr), bf.data!, 0, 0, arr.length)
         return bf
     }
 
@@ -502,7 +518,7 @@ export class ArrayBuffer
 
 
     // Fields' order is important due to alignment
-    private data: FixedArray<byte> | undefined
+    private data: ValueArray<byte> | undefined
     private weakRef: Object | undefined
     /**
      * Pointer to underlying array, which is either non-movable array or native.

@@ -75,9 +75,9 @@ export class Student extends Child {
 export namespace testNameSpace {
   export let student: Student = new Student();
   // fixedArrayGetLength
-  export let zeroFixedArray: FixedArray<int> = [];
-  export let intFixedArray: FixedArray<int> = [1, 2, 3, 4, 5];
-  export let boolFixedArray: FixedArray<boolean> = [true, false, true, false];
+  export let zeroValueArray: ValueArray<int> = [];
+  export let intValueArray: ValueArray<int> = [1, 2, 3, 4, 5];
+  export let boolValueArray: ValueArray<boolean> = [true, false, true, false];
   export let strFixedArray: FixedArray<string> = ['ab', 'cd', 'ef'];
   export let stuFixedArray: FixedArray<Student> = [student];
   // ArrayGet/SetElement

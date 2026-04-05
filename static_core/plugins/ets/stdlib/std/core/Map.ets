@@ -74,7 +74,7 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
 type DataArrType = FixedArray<Any>
 
 type At = int  // (index + pair) if positive, special values otherwise.
-type BucketsArrType = FixedArray<At>
+type BucketsArrType = ValueArray<At>
 
 final class Const {
     // DataArrType
@@ -392,7 +392,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private allocDataAndBuckets(capacity: int): [DataArrType, BucketsArrType] {
         const data: DataArrType = new FixedArray<Any>(pairs(capacity) + 2)  // extra two elements at the end are: links to buckets and nested data.
-        const buckets: BucketsArrType = new FixedArray<int>(pairs(capacity) + 1)  // extra element at the end is: iterators counter.
+        const buckets: BucketsArrType = new ValueArray<int>(pairs(capacity) + 1)  // extra element at the end is: iterators counter.
         data.setBucketsToData(buckets)
         return [data, buckets]
     }

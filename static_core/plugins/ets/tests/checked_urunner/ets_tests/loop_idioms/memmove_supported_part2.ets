@@ -93,8 +93,8 @@ let GLOBAL_OFFS: int = 1;
 
 class TestSupported {
     static testNoAliasLocals(): int {
-        let src: FixedArray<int> = [1, 2, 3, 4];
-        let dst: FixedArray<int> = new FixedArray<int>(4);
+        let src: ValueArray<int> = [1, 2, 3, 4];
+        let dst: ValueArray<int> = new ValueArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -125,12 +125,12 @@ class TestSupported {
     }
 
     static testNoAliasLocalAndParam(): int {
-        let src: FixedArray<int> = [1, 2, 3, 4];
+        let src: ValueArray<int> = [1, 2, 3, 4];
         return check(TestSupported.__noinline__testNoAliasLocalAndParam(src), src);
     }
 
-    static __noinline__testNoAliasLocalAndParam(src: FixedArray<int>): FixedArray<int> {
-        let dst: FixedArray<int> = new FixedArray<int>(4);
+    static __noinline__testNoAliasLocalAndParam(src: ValueArray<int>): ValueArray<int> {
+        let dst: ValueArray<int> = new ValueArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -138,8 +138,8 @@ class TestSupported {
     }
 
     static testBackwardsClosed(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         let x = GLOBAL_OFFS;
         for (let i: int = src.length - 1; i >= 0; i--) {
@@ -158,8 +158,8 @@ class TestSupported {
     }
 
     static testBackwardsOpen(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let x = GLOBAL_OFFS;
         for (let i: int = src.length - 1; i > 0; i--) {
             dst[i - 1] = src[i];
@@ -177,8 +177,8 @@ class TestSupported {
     }
 
     static testForwardClosed(): int {
-        let src: FixedArray<int> = [6, 7, 8];
-        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
+        let src: ValueArray<int> = [6, 7, 8];
+        let dst: ValueArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         let x = GLOBAL_OFFS;
         for (let i: int = 0; i <= src.length - 1; i++) {

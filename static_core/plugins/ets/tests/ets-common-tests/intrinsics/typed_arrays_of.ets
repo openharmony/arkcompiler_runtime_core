@@ -14,9 +14,9 @@
  */
 
 function testIU8OfInt() {
-    checkIntArray(new FixedArray<int>(0), Int8Array.of());
-    checkIntArray(new FixedArray<int>(0), Uint8Array.of());
-    checkIntArray(new FixedArray<int>(0), Uint8ClampedArray.of());
+    checkIntArray(new ValueArray<int>(0), Int8Array.of());
+    checkIntArray(new ValueArray<int>(0), Uint8Array.of());
+    checkIntArray(new ValueArray<int>(0), Uint8ClampedArray.of());
 
     let arr = prepareTestData(127, 1);
     checkIntArray(arr, Int8Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
@@ -48,34 +48,16 @@ function testIU8OfInt() {
 }
 
 function testIU16OfInt() {
-    checkIntArray(new FixedArray<int>(0), Int16Array.of());
-    checkIntArray(new FixedArray<int>(0), Uint16Array.of());
+    checkIntArray(new ValueArray<int>(0), Int16Array.of());
+    checkIntArray(new ValueArray<int>(0), Uint16Array.of());
 
-    let arr = prepareTestData(127, 1);
-    checkIntArray(arr, Int16Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106,
-        107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127));
-    checkIntArray(arr, Uint16Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106,
-        107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127));
+    let arr = prepareTestData16(127, 1);
+    checkIntArray(arr, makeInt16Array(127, 1));
+    checkIntArray(arr, makeUint16Array(127, 1));
 
-    arr = prepareTestData(127, 128);
-    checkIntArray(arr, Int16Array.of(128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144,
-        145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167,
-        168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
-        191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213,
-        214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236,
-        237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254));
-    checkIntArray(arr, Uint16Array.of(128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144,
-        145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167,
-        168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
-        191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213,
-        214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236,
-        237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254));
+    arr = prepareTestData16(127, 128);
+    checkIntArray(arr, makeInt16Array(127, 128));
+    checkIntArray(arr, makeUint16Array(127, 128));
 
     checkIntArray([0, 1,    -1,    -1, 1,    -1, 0], Int16Array.of(0, 1, -1, 65535, -65535, 2147483647, -2147483648));
     checkIntArray([0, 1, 65535, 65535, 1, 65535, 0], Uint16Array.of(0, 1, -1, 65535, -65535, 2147483647, -2147483648));
@@ -90,40 +72,16 @@ function testIU16OfInt() {
 }
 
 function testIU32OfInt() {
-    checkIntArray(new FixedArray<int>(0), Int32Array.of());
-    checkIntArray(new FixedArray<int>(0), Uint32Array.of());
+    checkIntArray(new ValueArray<int>(0), Int32Array.of());
+    checkIntArray(new ValueArray<int>(0), Uint32Array.of());
 
-    let arr = prepareTestData(127, 1);
-    checkIntArray(arr, Int32Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106,
-        107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127));
-    checkIntArray(arr, Uint32Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106,
-        107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127));
+    let arr = prepareTestData32(127, 1);
+    checkIntArray(arr, makeInt32Array(127, 1));
+    checkIntArray(arr, makeUint32Array(127, 1));
 
-    arr = prepareTestData(127, 16536);
-    checkIntArray(arr, Int32Array.of(16536, 16537, 16538, 16539, 16540, 16541, 16542, 16543, 16544, 16545, 16546, 16547,
-        16548, 16549, 16550, 16551, 16552, 16553, 16554, 16555, 16556, 16557, 16558, 16559, 16560, 16561, 16562, 16563,
-        16564, 16565, 16566, 16567, 16568, 16569, 16570, 16571, 16572, 16573, 16574, 16575, 16576, 16577, 16578, 16579,
-        16580, 16581, 16582, 16583, 16584, 16585, 16586, 16587, 16588, 16589, 16590, 16591, 16592, 16593, 16594, 16595,
-        16596, 16597, 16598, 16599, 16600, 16601, 16602, 16603, 16604, 16605, 16606, 16607, 16608, 16609, 16610, 16611,
-        16612, 16613, 16614, 16615, 16616, 16617, 16618, 16619, 16620, 16621, 16622, 16623, 16624, 16625, 16626, 16627,
-        16628, 16629, 16630, 16631, 16632, 16633, 16634, 16635, 16636, 16637, 16638, 16639, 16640, 16641, 16642, 16643,
-        16644, 16645, 16646, 16647, 16648, 16649, 16650, 16651, 16652, 16653, 16654, 16655, 16656, 16657, 16658, 16659,
-        16660, 16661, 16662));
-    checkIntArray(arr, Uint32Array.of(16536, 16537, 16538, 16539, 16540, 16541, 16542, 16543, 16544, 16545, 16546, 16547,
-        16548, 16549, 16550, 16551, 16552, 16553, 16554, 16555, 16556, 16557, 16558, 16559, 16560, 16561, 16562, 16563,
-        16564, 16565, 16566, 16567, 16568, 16569, 16570, 16571, 16572, 16573, 16574, 16575, 16576, 16577, 16578, 16579,
-        16580, 16581, 16582, 16583, 16584, 16585, 16586, 16587, 16588, 16589, 16590, 16591, 16592, 16593, 16594, 16595,
-        16596, 16597, 16598, 16599, 16600, 16601, 16602, 16603, 16604, 16605, 16606, 16607, 16608, 16609, 16610, 16611,
-        16612, 16613, 16614, 16615, 16616, 16617, 16618, 16619, 16620, 16621, 16622, 16623, 16624, 16625, 16626, 16627,
-        16628, 16629, 16630, 16631, 16632, 16633, 16634, 16635, 16636, 16637, 16638, 16639, 16640, 16641, 16642, 16643,
-        16644, 16645, 16646, 16647, 16648, 16649, 16650, 16651, 16652, 16653, 16654, 16655, 16656, 16657, 16658, 16659,
-        16660, 16661, 16662));
+    arr = prepareTestData32(127, 16536);
+    checkIntArray(arr, makeInt32Array(127, 16536));
+    checkIntArray(arr, makeUint32Array(127, 16536));
 
     checkIntArray([0, 1, -1, 65535, -65535, 2147483647, -2147483648],
         Int32Array.of(0, 1, -1, 65535, -65535, 2147483647, -2147483648));
@@ -166,7 +124,7 @@ function testIU32OfNumber() {
 }
 
 function testF32OfNumber() {
-    checkNumberArray(new FixedArray<number>(0), Float32Array.of());
+    checkNumberArray(new ValueArray<double>(0), Float32Array.of());
 
     let arr = prepareTestData(127, 1.0);
     checkNumberArray(arr, Float32Array.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
@@ -190,7 +148,7 @@ function testF32OfNumber() {
 }
 
 function testF64OfNumber() {
-    checkNumberArray(new FixedArray<number>(0), Float64Array.of());
+    checkNumberArray(new ValueArray<double>(0), Float64Array.of());
 
     let arr = prepareTestData(127, 1.0);
     checkNumberArray(arr, Float64Array.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
@@ -245,8 +203,8 @@ function testIU64OfBigInt() {
             18401708077435846657n));
 }
 
-function prepareTestData(length: int, from: int): FixedArray<int> {
-    let fixarr: FixedArray<int> = new FixedArray<int>(length);
+function prepareTestData(length: int, from: int): ValueArray<int> {
+    let fixarr: ValueArray<int> = new ValueArray<int>(length);
     let v: int = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = v++;
@@ -254,8 +212,8 @@ function prepareTestData(length: int, from: int): FixedArray<int> {
     return fixarr;
 }
 
-function prepareTestData(length: int, from: number): FixedArray<number> {
-    let fixarr: FixedArray<number> = new FixedArray<number>(length);
+function prepareTestData(length: int, from: number): ValueArray<double> {
+    let fixarr: ValueArray<double> = new ValueArray<double>(length);
     let v: number = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = v++;
@@ -263,7 +221,67 @@ function prepareTestData(length: int, from: number): FixedArray<number> {
     return fixarr;
 }
 
-function checkNumberArray(expected: FixedArray<number>, data: ArrayLike<number>): void {
+function prepareTestData16(length: int, from: int): ValueArray<int> {
+    let fixarr: ValueArray<int> = new ValueArray<int>(length);
+    let v: int = from;
+    for (let i = 0; i < length; i++) {
+        fixarr[i] = ((v << 16) >> 16);
+        v++;
+    }
+    return fixarr;
+}
+
+function prepareTestData32(length: int, from: int): ValueArray<int> {
+    let fixarr: ValueArray<int> = new ValueArray<int>(length);
+    let v: int = from;
+    for (let i = 0; i < length; i++) {
+        fixarr[i] = (v << 0) >> 0;
+        v++;
+    }
+    return fixarr;
+}
+
+function makeInt16Array(length: int, from: int): Int16Array {
+    let arr = new Int16Array(length);
+    let v: int = from;
+    for (let i = 0; i < length; i++) {
+        arr[i] = ((v << 16) >> 16);
+        v++;
+    }
+    return arr;
+}
+
+function makeUint16Array(length: int, from: int): Uint16Array {
+    let arr = new Uint16Array(length);
+    let v: int = from;
+    for (let i = 0; i < length; i++) {
+        arr[i] = ((v << 16) >>> 16);
+        v++;
+    }
+    return arr;
+}
+
+function makeInt32Array(length: int, from: int): Int32Array {
+    let arr = new Int32Array(length);
+    let v: int = from;
+    for (let i = 0; i < length; i++) {
+        arr[i] = v;
+        v++;
+    }
+    return arr;
+}
+
+function makeUint32Array(length: int, from: int): Uint32Array {
+    let arr = new Uint32Array(length);
+    let v: int = from;
+    for (let i = 0; i < length; i++) {
+        arr[i] = v;
+        v++;
+    }
+    return arr;
+}
+
+function checkNumberArray(expected: ValueArray<double>, data: ArrayLike<number>): void {
     arktest.assertEQ(data.length, expected.length, 'Unexpected array length');
     for (let i: int = 0; i < expected.length; i++) {
         arktest.assertTrue((isNaN(data[i]) && isNaN(expected[i])) || (data[i] == expected[i]),
@@ -271,7 +289,7 @@ function checkNumberArray(expected: FixedArray<number>, data: ArrayLike<number>)
     }
 }
 
-function checkIntArray(expected: FixedArray<int>, data: ArrayLike<number>): void {
+function checkIntArray(expected: ValueArray<int>, data: ArrayLike<number>): void {
     arktest.assertEQ(data.length, expected.length, 'Unexpected array length');
     for (let i: int = 0; i < expected.length; i++) {
         arktest.assertTrue(data[i] == expected[i],

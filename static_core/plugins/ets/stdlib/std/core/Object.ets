@@ -95,21 +95,21 @@ export class Object {
                 return res.toString()
             }
 
-            if (thisObj instanceof FixedArray<boolean>) {
+            if (thisObj instanceof ValueArray<boolean>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<byte>) {
+            } else if (thisObj instanceof ValueArray<byte>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<char>) {
+            } else if (thisObj instanceof ValueArray<char>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<short>) {
+            } else if (thisObj instanceof ValueArray<short>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<int>) {
+            } else if (thisObj instanceof ValueArray<int>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<long>) {
+            } else if (thisObj instanceof ValueArray<long>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<float>) {
+            } else if (thisObj instanceof ValueArray<float>) {
                 return join(thisObj, ",")
-            } else if (thisObj instanceof FixedArray<double>) {
+            } else if (thisObj instanceof ValueArray<double>) {
                 return join(thisObj, ",")
             } else {
                 throw new TypeError("unexpected FixedArray type: " + thisType.getName())

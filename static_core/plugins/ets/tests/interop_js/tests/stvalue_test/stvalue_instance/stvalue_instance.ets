@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveBooleanArray(arr: FixedArray<boolean>): boolean {
+    export function checkFixPrimitiveBooleanArray(arr: ValueArray<boolean>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -58,7 +58,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveByteArray(arr: FixedArray<byte>): boolean {
+    export function checkFixPrimitiveByteArray(arr: ValueArray<byte>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -70,7 +70,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveCharArray(arr: FixedArray<char>): boolean {
+    export function checkFixPrimitiveCharArray(arr: ValueArray<char>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -82,7 +82,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveShortArray(arr: FixedArray<short>): boolean {
+    export function checkFixPrimitiveShortArray(arr: ValueArray<short>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -94,7 +94,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveIntArray(arr: FixedArray<int>): boolean {
+    export function checkFixPrimitiveIntArray(arr: ValueArray<int>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -106,7 +106,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveLongArray(arr: FixedArray<long>): boolean {
+    export function checkFixPrimitiveLongArray(arr: ValueArray<long>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -118,7 +118,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveFloatArray(arr: FixedArray<float>): boolean {
+    export function checkFixPrimitiveFloatArray(arr: ValueArray<float>): boolean {
         if (arr.length !== 5) {
             return false;
         }
@@ -130,7 +130,7 @@ export namespace Instance {
         return true;
     }
 
-    export function checkFixPrimitiveDoubleArray(arr: FixedArray<double>): boolean {
+    export function checkFixPrimitiveDoubleArray(arr: ValueArray<double>): boolean {
         if (arr.length !== 5) {
             return false;
         }

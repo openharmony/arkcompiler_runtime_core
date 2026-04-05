@@ -145,7 +145,7 @@ export final class Class {
     public static readonly PRIMITIVE_VOID: Class = Class.of(null)
 
     static {
-        initializePrimitivesInClass()
+        Class.initializeStatics()
     }
 
     private constructor() { throw new Error("Class constructor called") }
@@ -586,6 +586,5 @@ export final class Class {
     private native getStaticFieldByNameInternal(name: string, publicOnly: boolean): reflect.StaticField | undefined
     private native getConstructorsInternal(publicOnly: boolean): FixedArray<reflect.Constructor>
     private native getUnionConstituentTypesInternal(): FixedArray<Class>
+    private native static initializeStatics(): void
 }
-
-native function initializePrimitivesInClass(): void

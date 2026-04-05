@@ -544,13 +544,13 @@ function testPrimitive() {
     let componentType3 = classType3.getFixedArrayComponentType()!
     let componentType4 = classType4.getFixedArrayComponentType()!
 
-    arktest.assertTrue(componentType1.isPrimitive())
+    arktest.assertFalse(componentType1.isPrimitive())
     arktest.assertFalse(componentType2.isPrimitive())
-    arktest.assertTrue(componentType3.isPrimitive())
+    arktest.assertFalse(componentType3.isPrimitive())
     arktest.assertFalse(componentType4.isPrimitive())
 
-    arktest.assertEQ(componentType1, Class.PRIMITIVE_INT)
-    arktest.assertEQ(componentType3, Class.PRIMITIVE_BOOLEAN)
+    arktest.assertEQ(componentType1.getName(), 'std.core.Int')
+    arktest.assertEQ(componentType3.getName(), 'std.core.Boolean')
 
     arktest.assertEQ(componentType2.getName(), 'std.core.Int')
     arktest.assertEQ(componentType4.getName(), 'std.core.Boolean')

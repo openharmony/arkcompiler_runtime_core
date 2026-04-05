@@ -15,6 +15,8 @@
 
 package std.concurrency;
 
+import { stub } from "arkruntime";
+
 /**
  * @class LaunchParams Class for coroutine launch params.
  * @internal
@@ -108,7 +110,7 @@ export class WorkerGroup {
      * @returns an ID of the worker group to be used in launch()
      */
     static generateGroupId(domain: WorkerDomain, hint?: Array<WorkerId>): WorkerGroupId {
-        return WorkerGroup.generateGroupIdImpl(domain.valueOf(), hint ?? Array<WorkerId>());
+        return stub.toFixedArray(WorkerGroup.generateGroupIdImpl(domain.valueOf(), hint ?? Array<WorkerId>()));
     }
 
      /**
@@ -119,7 +121,7 @@ export class WorkerGroup {
      *
      * @returns an ID of the worker group to be used in launch()
      */
-    private static native generateGroupIdImpl(domain: int, hint: Array<int>): FixedArray<long>;
+    private static native generateGroupIdImpl(domain: int, hint: Array<int>): ValueArray<long>;
 }
 
 /**
@@ -142,11 +144,11 @@ export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     return job.Await();
 }
 
+native function launchInternalJobNative<R>(coroFun: () => R, abortFlag: boolean, gid: ValueArray<long>): Job<R>;
+
 function launchInternal<R>(coroFun: () => R, launchParams?: LaunchParams): Job<R> {
   if (launchParams) {
-    return launchInternalJobNative<R>(coroFun, launchParams.abortFlag, launchParams.workerGroupId);
+    return launchInternalJobNative<R>(coroFun, launchParams.abortFlag, stub.toValueArray(launchParams.workerGroupId));
   }
-  return launchInternalJobNative<R>(coroFun, false, WorkerGroup.ANY_ID);
+  return launchInternalJobNative<R>(coroFun, false, stub.toValueArray(WorkerGroup.ANY_ID));
 }
-
-native function launchInternalJobNative<R>(coroFun: () => R, abortFlag: boolean, gid: WorkerGroupId): Job<R>;

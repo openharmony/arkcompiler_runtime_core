@@ -119,7 +119,7 @@ class C implements I {
         return 4
     }
 
-    public method_rest(...numbers: FixedArray<int>): int
+    public method_rest(...numbers: ValueArray<int>): int
     {
         let res = 0
         for (let n of numbers) {

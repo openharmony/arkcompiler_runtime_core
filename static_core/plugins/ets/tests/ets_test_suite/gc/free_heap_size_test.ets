@@ -15,7 +15,7 @@
 
 function AllocMemoryAndReturnFreeHeapSize(): long {
     const ALLOC_SIZE: int = 10000;
-    let mem: FixedArray<long> = new FixedArray<long>(ALLOC_SIZE);
+    let mem: ValueArray<long> = new ValueArray<long>(ALLOC_SIZE);
     return GC.getFreeHeapSize();
 }
 

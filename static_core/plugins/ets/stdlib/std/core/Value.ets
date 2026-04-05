@@ -176,7 +176,15 @@ export abstract class Value extends Object {
         return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
     }
 
+    public static of(v: ValueArray<boolean>): Value {
+        return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
+    }
+
     public static of(v: FixedArray<byte>): Value {
+        return new ArrayValue(ArrayType.BYTE_VAL, v)
+    }
+
+    public static of(v: ValueArray<byte>): Value {
         return new ArrayValue(ArrayType.BYTE_VAL, v)
     }
 
@@ -184,7 +192,15 @@ export abstract class Value extends Object {
         return new ArrayValue(ArrayType.CHAR_VAL, v)
     }
 
+    public static of(v: ValueArray<char>): Value {
+        return new ArrayValue(ArrayType.CHAR_VAL, v)
+    }
+
     public static of(v: FixedArray<short>): Value {
+        return new ArrayValue(ArrayType.SHORT_VAL, v)
+    }
+
+    public static of(v: ValueArray<short>): Value {
         return new ArrayValue(ArrayType.SHORT_VAL, v)
     }
 
@@ -192,7 +208,15 @@ export abstract class Value extends Object {
         return new ArrayValue(ArrayType.INT_VAL, v)
     }
 
+    public static of(v: ValueArray<int>): Value {
+        return new ArrayValue(ArrayType.INT_VAL, v)
+    }
+
     public static of(v: FixedArray<long>): Value {
+        return new ArrayValue(ArrayType.LONG_VAL, v)
+    }
+
+    public static of(v: ValueArray<long>): Value {
         return new ArrayValue(ArrayType.LONG_VAL, v)
     }
 
@@ -200,7 +224,15 @@ export abstract class Value extends Object {
         return new ArrayValue(ArrayType.FLOAT_VAL, v)
     }
 
+    public static of(v: ValueArray<float>): Value {
+        return new ArrayValue(ArrayType.FLOAT_VAL, v)
+    }
+
     public static of(v: FixedArray<double>): Value {
+        return new ArrayValue(ArrayType.DOUBLE_VAL, v)
+    }
+
+    public static of(v: ValueArray<double>): Value {
         return new ArrayValue(ArrayType.DOUBLE_VAL, v)
     }
 

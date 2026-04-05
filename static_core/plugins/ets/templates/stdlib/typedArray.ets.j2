@@ -22,6 +22,8 @@
 
 package std.core
 
+import { stub } from "arkruntime"
+
 {%- for N, U, T, BT, S in [
     ('Int8', 'Uint8', 'byte', 'Byte', 1),
     ('Int16', 'Uint16', 'short', 'Short', 2),
@@ -902,37 +904,37 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public static of(...items: FixedArray<{{argType}}>): {{N}}Array {
         let res = new {{N}}Array(items.length.toInt())
         {%- if argType == 'byte' %}
-        res.ofByte(items)
+        res.ofByte(stub.toValueArray(items))
         {%- elif argType == 'short' %}
-        res.ofShort(items)
+        res.ofShort(stub.toValueArray(items))
         {%- elif argType == 'int' %}
-        res.ofInt(items)
+        res.ofInt(stub.toValueArray(items))
         {%- elif argType == 'long' %}
-        res.ofLong(items)
+        res.ofLong(stub.toValueArray(items))
         {%- elif argType == 'float' %}
-        res.ofFloat(items)
+        res.ofFloat(stub.toValueArray(items))
         {%- elif argType == 'bigint' %}
         res.ofBigInt(items)
         {%- else %}
-        res.ofNumber(items)
+        res.ofNumber(stub.toValueArray(items))
         {%- endif %}
         return res
     }
         {%- endif %}
     {%- endfor %}
 
-    private final native ofInt(items: FixedArray<int>): void
-    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofInt(items: ValueArray<int>): void
+    private final native ofNumber(items: ValueArray<number>): void
 
     {%- if N == 'Int8' %}
-    private final native ofByte(items: FixedArray<byte>): void
+    private final native ofByte(items: ValueArray<byte>): void
     {%- elif N == 'Int16' %}
-    private final native ofShort(items: FixedArray<short>): void
+    private final native ofShort(items: ValueArray<short>): void
     {%- elif N == 'BigInt64' %}
-    private final native ofLong(items: FixedArray<long>): void
+    private final native ofLong(items: ValueArray<long>): void
     private final native ofBigInt(items: FixedArray<Object>): void
     {%- elif N == 'Float32' %}
-    private final native ofFloat(items: FixedArray<float>): void
+    private final native ofFloat(items: ValueArray<float>): void
     {%- endif %}
 
     /**
@@ -961,11 +963,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public static from(arr: FixedArray<{{updatedElementCompat}}>): {{N}}Array {
         let result = new {{N}}Array(arr.length)
         {%- if updatedElementCompat == 'number' %}
-        result.ofNumber(arr)
+        result.ofNumber(stub.toValueArray(arr))
         {%- elif updatedElementCompat == 'BigInt' %}
         result.ofBigInt(arr)
         {%- else %}
-        result.ofInt(arr)
+        result.ofInt(stub.toValueArray(arr))
         {%- endif %}
         return result
     }
@@ -1914,7 +1916,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @since 24
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{N}}Array {
-        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)

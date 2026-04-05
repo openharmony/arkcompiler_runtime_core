@@ -23,7 +23,7 @@ export native function leakLinker(): RuntimeLinker
 
 export native function leakClassArray(): FixedArray<Class>
 
-export native function leakByteArray(): FixedArray<byte>
+export native function leakByteArray(): ValueArray<byte>
 
 }
 

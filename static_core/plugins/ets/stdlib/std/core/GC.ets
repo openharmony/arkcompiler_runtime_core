@@ -191,7 +191,7 @@ export namespace GC {
      *
      * @returns pinned array of boolean
      */
-    export native function allocatePinnedBooleanArray(length: long): FixedArray<boolean>;
+    export native function allocatePinnedBooleanArray(length: long): ValueArray<boolean>;
 
     /**
      * Allocate array of byte and pin (GC will not move pinned array)
@@ -206,7 +206,7 @@ export namespace GC {
      *
      * @returns pinned array of byte
      */
-    export native function allocatePinnedByteArray(length: long): FixedArray<byte>;
+    export native function allocatePinnedByteArray(length: long): ValueArray<byte>;
 
     /**
      * Allocate array of char and pin (GC will not move pinned array)
@@ -221,7 +221,7 @@ export namespace GC {
      *
      * @returns pinned array of char
      */
-    export native function allocatePinnedCharArray(length: long): FixedArray<char>;
+    export native function allocatePinnedCharArray(length: long): ValueArray<char>;
 
     /**
      * Allocate array of short and pin (GC will not move pinned array)
@@ -236,7 +236,7 @@ export namespace GC {
      *
      * @returns pinned array of short
      */
-    export native function allocatePinnedShortArray(length: long): FixedArray<short>;
+    export native function allocatePinnedShortArray(length: long): ValueArray<short>;
 
     /**
      * Allocate array of int and pin (GC will not move pinned array)
@@ -251,7 +251,7 @@ export namespace GC {
      *
      * @returns pinned array of int
      */
-    export native function allocatePinnedIntArray(length: long): FixedArray<int>;
+    export native function allocatePinnedIntArray(length: long): ValueArray<int>;
 
     /**
      * Allocate array of long and pin (GC will not move pinned array)
@@ -266,7 +266,9 @@ export namespace GC {
      *
      * @returns pinned array of long
      */
-    export native function allocatePinnedLongArray(length: long): FixedArray<long>;
+    export native function allocatePinnedLongArray(length: long): ValueArray<long>;
+
+
 
     /**
      * Allocate array of float and pin (GC will not move pinned array)
@@ -281,7 +283,9 @@ export namespace GC {
      *
      * @returns pinned array of float
      */
-    export native function allocatePinnedFloatArray(length: long): FixedArray<float>;
+    export native function allocatePinnedFloatArray(length: long): ValueArray<float>;
+
+
 
     /**
      * Allocate array of double and pin (GC will not move pinned array)
@@ -296,7 +300,9 @@ export namespace GC {
      *
      * @returns pinned array of double
      */
-    export native function allocatePinnedDoubleArray(length: long): FixedArray<double>;
+    export native function allocatePinnedDoubleArray(length: long): ValueArray<double>;
+
+
 
     /**
      * Returns encoded space type
