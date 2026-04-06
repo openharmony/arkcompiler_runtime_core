@@ -245,7 +245,7 @@ static_core/plugins/ets/tests/interop_js/xgc/                                 @i
 static_core/plugins/ets/tests/native/promise/                                 @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis ^kurnevichstanislav
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev ^ivan-tyulyandin ^magikarp777
+static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
