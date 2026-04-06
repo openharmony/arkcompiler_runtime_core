@@ -78,6 +78,8 @@ public:
 
     void ProcessClearedReferences();
 
+    void ProcessReferencesAfterCopy();
+
 private:
     template <bool NEED_BARRIER, typename Handler>
     void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler);

@@ -28,6 +28,7 @@ public:
     virtual void UpdateAndSweep(const WeakRefFieldVisitor &visitor) = 0;
     virtual void VisitPreforwardRoots(const RefFieldVisitor &visitor) = 0;
     virtual void ProcessFinalizationRegistryCleanup() = 0;
+    virtual void ProcessReferencesAfterCopy() = 0;
     // Deleted copy operations
     VMInterface(const VMInterface &) = delete;
     VMInterface &operator=(const VMInterface &) = delete;

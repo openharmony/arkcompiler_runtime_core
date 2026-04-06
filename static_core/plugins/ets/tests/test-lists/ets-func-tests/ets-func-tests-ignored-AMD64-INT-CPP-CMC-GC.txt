@@ -10,7 +10,3 @@ ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
 
 #33648
 ets_func_tests/std/debug/CountInstancesOfClass.ets
-
-#27650
-ets_func_tests/std/containers/WeakMapGCTest.ets
-ets_func_tests/std/containers/WeakSetGCTest.ets
