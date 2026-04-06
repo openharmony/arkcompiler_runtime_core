@@ -38,8 +38,8 @@ set +e
 cd "${RUNNER_DIR}" || exit 1
 
 run "Pylint /runner, main.py" pylint --rcfile .pylintrc runner main.py --ignore=test
-# Disable duplicate code and protected access for tests
-run "Pylint on tests" pylint --rcfile .pylintrc runner/test/ --disable=protected-access --disable=duplicate-code
+# Disable duplicate code, protected access, too many public methods for tests
+run "Pylint on tests" pylint --rcfile .pylintrc runner/test/ --disable=protected-access --disable=duplicate-code --disable=too-many-public-methods
 
 run "MyPy main.py" mypy main.py
 run "MyPy /runner" mypy -p runner

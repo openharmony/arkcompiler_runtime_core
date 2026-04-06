@@ -539,3 +539,73 @@ class ValidatorsChainTest(unittest.TestCase):
         self.assertFalse(test_result.passed)
 
         clear_after_test()
+
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "panda_extended", "test_suite1", "--test-file", "test_negative_steps.ets"], True),
+        (["runner.sh", "panda_extended", "test_suite1", "--test-file", "test_negative_steps_fail.ets"], False),
+    ])
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_steps_negative(self, argv: Callable, expected_res: bool, mock_popen: MagicMock) -> None:
+        """
+        Case 0:
+        test-file: test_negative_steps is negative. expected rt != 0 in the last runtime step
+        expected result: test passes
+
+        Case 1:
+        test-file: test_negative_steps_fail is negative. expected rt != 0 in the first runtime step,
+        but the step passes as the failure is configured to occur on the last runtime step
+        expected result: test fails
+        """
+        with patch('sys.argv', argv):
+            mock1 = MagicMock(name="popen1")
+            mock2 = MagicMock(name="popen2")
+
+            for m, rc, out in ((mock1, 0, ("", "")), (mock2, 1, ("", ""))):
+                m.__enter__.return_value = m
+                m.communicate.return_value = out
+                m.returncode = rc
+
+            mock_popen.side_effect = [mock1, mock1, mock1, mock1, mock1, mock2]
+
+            test_result = self.run_test()
+            self.assertEqual(test_result.passed, expected_res)
+
+            clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda_extended", "test_suite1", "--test-file", "test_several_negative_steps.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_step_runner.subprocess.Popen")
+    def test_several_negative_steps(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test_several_negative_steps.ets,
+        verifier-2 step is expected to fail with stderr
+        runtime-2 step is expected to fail
+        both steps are in the negative_steps field
+        expected result: test passes
+        """
+        mock1 = MagicMock(name="popen1")
+        mock2 = MagicMock(name="popen2")
+        mock3 = MagicMock(name="popen3")
+
+        for m, rc, out in ((mock1, 0, ("", "")), (mock2, 1, ("", "verifier error")), (mock3, 1, ("", ""))):
+            m.__enter__.return_value = m
+            m.communicate.return_value = out
+            m.returncode = rc
+
+        mock_popen.side_effect = [mock1, mock1, mock1, mock1, mock2, mock3]
+
+        test_result = self.run_test()
+        self.assertTrue(test_result.passed)
+
+        clear_after_test()
