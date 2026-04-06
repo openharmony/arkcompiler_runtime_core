@@ -5954,6 +5954,16 @@ intrinsics:
     codegen_arch: [amd64]
     codegen_func: CreateAsyncContextInit
 
+  - name: StdPromiseAwaitSync
+    space: ets
+    class_name: std.core.Promise
+    method_name: awaitSync
+    static: false
+    signature:
+      ret: Y
+      args: []
+    impl: ark::ets::intrinsics::EtsAwaitPromiseSync
+
 ######################
 # std.core.Coroutine #
 ######################
