@@ -71,7 +71,7 @@ class EtsTemplatesGenerator(IGenerator):
             shutil.rmtree(self._target)
         test_source = self._source
         if self.test_file and fnmatch.fnmatchcase(self.test_file, self.filter):
-            test_source = self._source / self.test_file
+            test_source = self._test_root / self.test_file
         self.__dfs(test_source, set())
 
         _LOGGER.default(f"Generation finished! Generated {len(self.generated_tests)} test files")
@@ -79,16 +79,23 @@ class EtsTemplatesGenerator(IGenerator):
 
     def _get_matched_paths(self) -> set[Path]:
         matched: set[Path] = set()
-        test_root = Path(self._test_root)
+        suite_root = Path(self._test_root).resolve()
+        source_root = Path(self._source).resolve()
         flt = self.filter
 
         patterns = [flt, f"{flt}/**/*"]
 
         for pattern in patterns:
-            for rel in glob.iglob(pattern, root_dir=str(test_root), recursive=True):
-                p = test_root / rel
-                if p.is_file() and str(p).endswith(self.extension):
-                    matched.add(p)
+            for rel in glob.iglob(pattern, root_dir=str(suite_root), recursive=True):
+                p = suite_root / rel
+                if not p.is_file():
+                    continue
+                if not str(p).endswith(self.extension):
+                    continue
+                if not p.is_relative_to(source_root):
+                    continue
+                matched.add(p)
+
         return matched
 
     def _copy_expected_file(self, path: Path) -> None:
