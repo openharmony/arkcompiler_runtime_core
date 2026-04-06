@@ -1,3 +1,6 @@
+#34083
+ets_func_tests/std/containers/async_array_concurrent_queue/ArrayConcurrentQueue_PopTest.ets
+
 #34009
 ets_func_tests/std/containers/async_array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 
