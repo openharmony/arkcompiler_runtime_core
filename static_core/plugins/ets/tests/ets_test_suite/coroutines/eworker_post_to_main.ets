@@ -42,10 +42,10 @@ function testEworkerPost2Main() {
     arktest.assertNE(runId1, runId3);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_post_to_main');
     testSuite.addTest('testEworkerPost2Main', testEworkerPost2Main);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }
 

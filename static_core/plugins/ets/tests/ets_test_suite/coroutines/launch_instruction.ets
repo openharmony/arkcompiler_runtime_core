@@ -94,7 +94,7 @@ function testLaunchFiveArgs(): void {
     Coroutine.Schedule();
 }
 
-function main(): int {
+async function main(): Promise<int> {
     // These tests must be run with exactly one coroutine worker thread due to it's design.
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_instruction');
     testSuite.addTest('testLaunchNoArgs', testLaunchNoArgs);
@@ -103,6 +103,6 @@ function main(): int {
     testSuite.addTest('testLaunchThreeArgs', testLaunchThreeArgs);
     testSuite.addTest('testLaunchFourArgs', testLaunchFourArgs);
     testSuite.addTest('testLaunchFiveArgs', testLaunchFiveArgs);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

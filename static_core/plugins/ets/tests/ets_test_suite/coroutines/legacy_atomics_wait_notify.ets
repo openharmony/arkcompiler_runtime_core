@@ -168,13 +168,13 @@ function testWithGC(index: int) {
     arktest.assertTrue(count <= NUM, count.toString());
 }
 
-function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.await_migrate');
+async function main(): Promise<int> {
+    let testSuite = new arktest.ArkTestsuite('coroutines.legacy_atomics_wait_notify');
     testSuite.addTest('testOSMutex', testOSMutex);
     testSuite.addTest('testWithGC', () => { return testWithGC(3) });
     testSuite.addTest('testMainDoesntBlock', () => { return testMainDoesntBlock(2) });
     testSuite.addAsyncTest('testSyncTimedWaitNotifyRace', () => { return testSyncTimedWaitNotifyRace(1) });
     testSuite.addAsyncTest('testAsyncTimedWaitNotifyRace', () => { return testAsyncTimedWaitNotifyRace(0) });
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

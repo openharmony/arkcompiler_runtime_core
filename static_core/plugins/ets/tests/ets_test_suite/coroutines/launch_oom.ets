@@ -39,9 +39,9 @@ function testLaunchOOM(): void {
     arktest.assertTrue(false, 'No error thrown but should be!');
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_oom');
     testSuite.addTest('testLaunchOOM', testLaunchOOM);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

@@ -97,11 +97,11 @@ function testAllUnhandledJobRejection(): void {
     }
 }
 
-function main(): int {
+async function main(): Promise<int> {
     StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_event');
     testSuite.addTest('testUnhandledRejectionObserverRegistration', testUnhandledRejectionObserverRegistration);
     testSuite.addTest('testAllUnhandledJobRejection', testAllUnhandledJobRejection);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ function undefinedTest() {
 
 let eaw:EAWorker = new EAWorker();
 
-function main(): int {
+async function main(): Promise<int> {
     eaw.start();
     const testSuite = new arktest.ArkTestsuite('EAWorkerParameterTest');
     testSuite.addTest('singleObject', singleObject);
@@ -101,7 +101,7 @@ function main(): int {
     testSuite.addTest('arrayParameter', arrayParameter);
     testSuite.addTest('primitiveParameter', primitiveParameter);
     testSuite.addTest("undefinedTest", undefinedTest);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     eaw.join();
     return res;
 }

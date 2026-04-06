@@ -131,11 +131,11 @@ function testLaunchStatic(): void {
 }
 
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch');
     testSuite.addTest('testLaunchLambdas', testLaunchLambdas);
     testSuite.addTest('testLaunchFunctions', testLaunchFunctions);
     testSuite.addTest('testLaunchStatic', testLaunchStatic);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

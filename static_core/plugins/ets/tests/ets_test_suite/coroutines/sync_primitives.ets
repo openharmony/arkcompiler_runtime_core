@@ -174,7 +174,7 @@ function exclusiveRWLockTest() {
     exclusiveLockTest(new RWLock().writeLock());
 }
 
-function main() {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.sync_primitives');
     testSuite.addTest('exclusiveMutexLockTest', exclusiveMutexLockTest);
     testSuite.addTest('exclusiveRWLockTest', exclusiveRWLockTest);
@@ -182,5 +182,6 @@ function main() {
     testSuite.addTest('illegalLockStateTest', illegalLockStateTest);
     testSuite.addTest('readWriteMutualExclusionTest', readWriteMutualExclusionTest);
 
-    return testSuite.run();
+    let res = await testSuite.runAsync();
+    return res;
 }

@@ -112,12 +112,12 @@ function testExclusiveLaunchFlag(): void {
 }
 
 
-function main(): int {
+async function main(): Promise<int> {
     // Call L's enableLogging method to enable logs.
     let testSuite = new arktest.ArkTestsuite('coroutines.affinity');
     testSuite.addTest('testAsyncDefaultPolicy', testAsyncDefaultPolicy);
     testSuite.addTest('testAsyncNonMainPolicy', testAsyncNonMainPolicy);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }
 

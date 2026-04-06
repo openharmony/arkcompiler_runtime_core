@@ -149,13 +149,13 @@ function testRunBatchAwait(): void {
     }
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
     testSuite.addTest('testCompareWorkerIdsAsync', testCompareWorkerIdsAsync);
     testSuite.addTest('testCompareWorkerIds', testCompareWorkerIds);
     testSuite.addTest('testRunBatchLaunch', testRunBatchLaunch);
     testSuite.addTest('testRunAwaitChain', testRunAwaitChain);
     testSuite.addTest('testRunBatchAwait', testRunBatchAwait);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

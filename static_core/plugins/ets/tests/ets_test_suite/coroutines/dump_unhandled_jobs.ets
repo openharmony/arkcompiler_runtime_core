@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,10 +25,10 @@ function testDumpUnhandledJobs(): void {
     event.Await();
 }
 
-function main(): int {
+async function main(): Promise<int> {
     StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
     testSuite.addTest('testDumpUnhandledJobs', testDumpUnhandledJobs);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

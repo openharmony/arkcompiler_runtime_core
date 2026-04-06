@@ -103,9 +103,9 @@ function testMultipleLaunch(): void {
     }
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.multiple_launch');
     testSuite.addTest('testMultipleLaunch', testMultipleLaunch);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

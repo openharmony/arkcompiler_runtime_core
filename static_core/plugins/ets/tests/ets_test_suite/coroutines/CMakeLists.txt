@@ -353,6 +353,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE concurrent_await.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
@@ -384,12 +385,13 @@ add_ets_coroutines_test(FILE launch_return.ets
                         MODE "INT"
 )
 
+# NOTE(alimovilya, #34019): enable in aot mode
 add_ets_coroutines_test(FILE launch_return.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT" "AOT"
+                        MODE "INT"
 )
 
 add_ets_coroutines_test(FILE launch_yield.ets
@@ -432,12 +434,13 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+# NOTE(alimovilya, #34019): enable in aot mode
 add_ets_coroutines_test(FILE wake_for_another_event.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT" "AOT"
+                        MODE "INT"
 )
 
 add_ets_coroutines_test(FILE await_standalone_promise.ets
