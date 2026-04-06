@@ -45,10 +45,10 @@
 //!              options: "--compiler-regex='.*__noinline__typedNullCheckWithFieldAccess.*'",
 //!              entry: "checkcast_nonnull_nullcheck_types.ETSGLOBAL::main"
 //! EVENT_NOT    /ImplicitNullcheck,.*/
-//! EVENT        /Exception,checkcast_nonnull_nullcheck_types\.ETSGLOBAL::__noinline__typedNullCheckWithFieldAccess,.*,CAST_CHECK/
+//! EVENT        /Exception,.*::__noinline__typedNullCheckWithFieldAccess,.*,CAST_CHECK/
 
 class TestBox {
-    value: int
+    public value: int
 
     constructor(value: int) {
         this.value = value
@@ -56,7 +56,7 @@ class TestBox {
 }
 
 class Holder {
-    box!: TestBox
+    public box!: TestBox
 }
 
 function __noinline__consumeBox(_: TestBox): int {

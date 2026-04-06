@@ -18,7 +18,7 @@
 ---*/
 
 export class TestBox {
-    value: int
+    public value: int
 
     constructor(value: int) {
         this.value = value
