@@ -22,10 +22,9 @@ set -e
 
 TEST_ID_PATH="$1"
 
-copied=0
 for new_lib in "${TEST_ID_PATH}".libr*.new.ets; do
     [ -f "$new_lib" ] || continue
     old_lib="${new_lib%.new.ets}.ets"
+    cp "$old_lib" "${old_lib}.orig"
     cp "$new_lib" "$old_lib"
-    copied=$((copied + 1))
 done

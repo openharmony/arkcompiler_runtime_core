@@ -36,7 +36,6 @@ OPT_LEVEL="$4"
 GEN_PREFIX="$5"
 INTERMEDIATE_PREFIX="$6"
 
-compiled=0
 for new_lib in "${GEN_PREFIX}".libr*.new.ets; do
     [ -f "$new_lib" ] || continue
 
@@ -54,6 +53,12 @@ for new_lib in "${GEN_PREFIX}".libr*.new.ets; do
         "--opt-level=${OPT_LEVEL}" \
         "--output=${output_abc}" \
         "$lib_file"
+done
 
-    compiled=$((compiled + 1))
+# Restore original library files from .orig backup
+for orig_lib in "${GEN_PREFIX}".libr*.ets.orig; do
+    [ -f "$orig_lib" ] || continue
+    lib_file="${orig_lib%.orig}"
+    cp "$orig_lib" "$lib_file"
+    rm "$orig_lib"
 done
