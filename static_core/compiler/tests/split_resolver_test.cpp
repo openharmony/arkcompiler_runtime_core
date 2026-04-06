@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,8 +35,9 @@ class SplitResolverTest : public GraphTest {
 public:
     LivenessAnalyzer *RunLivenessAnalysis(Graph *graph)
     {
-        graph->RunPass<LivenessAnalyzer>();
-        return &graph->GetAnalysis<LivenessAnalyzer>();
+        auto *la = RunFullLivenessAnalysis(graph);
+        EXPECT_NE(la, nullptr);
+        return la;
     }
 
     LifeIntervals *SplitAssignReg(LifeIntervals *source, LifeNumber position, Register reg)

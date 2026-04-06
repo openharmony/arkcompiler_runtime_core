@@ -151,8 +151,6 @@ void Pipeline::RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> taskRun
     }
     graph->template RunPass<Cleanup>();
 
-    graph->template RunPass<FillSaveStateSuspendInputs>();
-
     taskRunner.SetTaskOnSuccess([fatalOnErr](CompilerTaskRunner<RUNNER_MODE> nextRunner) {
         nextRunner.AddCallbackOnFail([fatalOnErr]([[maybe_unused]] CompilerContext<RUNNER_MODE> &compilerCtx) {
             if (fatalOnErr) {

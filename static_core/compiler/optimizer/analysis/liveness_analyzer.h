@@ -24,7 +24,6 @@
 #include "optimizer/ir/marker.h"
 #include "optimizer/pass.h"
 #include "optimizer/ir/locations.h"
-#include "compiler_logger.h"
 
 namespace ark::compiler {
 class BasicBlock;
@@ -506,10 +505,12 @@ public:
     ~LivenessAnalyzer() override = default;
 
     bool RunImpl() override;
-    void Cleanup();
-    void Finalize();
     const char *GetPassName() const override;
 
+    /*
+     * Target-independent liveness analysis API
+     */
+    size_t GetBlocksCount() const;
     const ArenaVector<BasicBlock *> &GetLinearizedBlocks() const;
     const ArenaVector<LifeIntervals *> &GetLifeIntervals() const;
 
@@ -518,9 +519,13 @@ public:
     BasicBlock *GetBlockCoversPoint(LifeNumber ln) const;
     LiveRange GetBlockLiveRange(const BasicBlock *block) const;
 
+    bool IsLiveAtPoint(const Inst *valueInst, const Inst *atInst) const;
+    void GetLiveValuesAtPoint(Inst *inst, ArenaVector<Inst *> &result) const;
+
     template <typename Func>
     void EnumerateLiveIntervalsForInst(Inst *inst, Func func)
     {
+        ASSERT(IsTargetIndependentComputed());
         auto instNumber = GetInstLifeNumber(inst);
         for (auto &li : GetLifeIntervals()) {
             if (!li->HasInst()) {
@@ -543,6 +548,13 @@ public:
     }
 
     /*
+     * Target-specific liveness API
+     */
+
+    [[nodiscard]] bool IsTargetSpecificComputed() const;
+    bool ComputeTargetSpecific();
+
+    /*
      * 'interval_for_temp' - is additional life interval for an instruction required temp;
      * - Find instruction for which was created 'interval_for_temp'
      * - Enumerate instruction's inputs with fixed locations
@@ -550,6 +562,7 @@ public:
     template <typename Func>
     void EnumerateFixedLocationsOverlappingTemp(const LifeIntervals *intervalForTemp, Func func) const
     {
+        ASSERT(IsTargetSpecificComputed());
         ASSERT(!intervalForTemp->HasInst());
         ASSERT(intervalForTemp->GetBegin() + 1 == intervalForTemp->GetEnd());
 
@@ -566,15 +579,13 @@ public:
     }
 
     const UseTable &GetUseTable() const;
-    size_t GetBlocksCount() const;
     LifeIntervals *GetTmpRegInterval(const Inst *inst);
-    bool IsCallBlockingRegisters(Inst *inst) const;
 
+    /*
+     * Dump methods
+     */
     void DumpLifeIntervals(std::ostream &out = std::cout) const;
     void DumpLocationsUsage(std::ostream &out = std::cout) const;
-
-    bool IsLiveAtPoint(const Inst *valueInst, const Inst *atInst) const;
-    void GetLiveValuesAtPoint(Inst *inst, ArenaVector<Inst *> &result) const;
 
 private:
     ArenaAllocator *GetAllocator();
@@ -582,6 +593,11 @@ private:
 
     bool IsLiveAtLifeNumber(const Inst *valueInst, LifeNumber ln) const;
     void GetLiveValuesAtLifeNumber(LifeNumber ln, ArenaVector<Inst *> &result) const;
+
+    [[nodiscard]] bool IsTargetIndependentComputed() const;
+
+    static bool IsCallBlockingRegisters(Inst *inst);
+    static bool IsNativeApiRuntimeCall(Inst *inst);
 
     /*
      * Blocks linearization methods
@@ -600,10 +616,10 @@ private:
     void BuildInstLifeNumbers();
     void BuildInstLifeIntervals();
     void ProcessBlockLiveInstructions(BasicBlock *block, InstLiveSet *liveSet);
+    void ProcessOpcodeLiveOut(BasicBlock *block, LifeIntervals *interval, LifeNumber instLifeNumber);
     void AdjustInputsLifetime(Inst *inst, LiveRange liveRange, InstLiveSet *liveSet);
     void SetInputRange(const Inst *inst, const Inst *input, LiveRange liveRange) const;
     void CreateLifeIntervals(Inst *inst);
-    void CreateIntervalForTemp(LifeNumber ln);
     InstLiveSet *GetInitInstLiveSet(BasicBlock *block);
     LifeNumber GetInstLifeNumber(const Inst *inst) const;
     void SetInstLifeNumber(const Inst *inst, LifeNumber number);
@@ -613,19 +629,27 @@ private:
     LifeNumber GetLoopEnd(Loop *loop);
     LiveRange GetPropagatedLiveRange(Inst *inst, LiveRange liveRange);
     void AdjustCatchPhiInputsLifetime(Inst *inst);
-    void SetUsePositions(Inst *userInst, LifeNumber lifeNumber);
 
+    /*
+     * Target-dependent analysis methods
+     */
+    void SetUsePositions(Inst *userInst, LifeNumber lifeNumber);
+    void CreateIntervalForTemp(LifeNumber ln);
     void BlockFixedRegisters(Inst *inst);
+    void BuildUsePositions();
+    void BuildTargetSpecificIntervals();
+    void FinalizeTargetSpecific();
+
     template <bool IS_FP>
     void BlockReg(Register reg, LifeNumber blockFrom, LifeNumber blockTo, bool isUse);
     template <bool IS_FP>
     void BlockPhysicalRegisters(Inst *inst, LifeNumber blockFrom);
     void BlockFixedLocationRegister(Location location, LifeNumber ln);
     void BlockFixedLocationRegister(Location location, LifeNumber blockFrom, LifeNumber blockTo, bool isUse);
-    void ProcessOpcodeLiveOut(BasicBlock *block, LifeIntervals *interval, LifeNumber instLifeNumber);
-    static bool IsNativeApiRuntimeCall(Inst *inst);
 
 private:
+    enum class LivenessState { NONE = 0, TARGET_INDEPENDENT_COMPUTED = 1, TARGET_SPECIFIC_COMPUTED = 2 };
+
     ArenaAllocator *allocator_;
     ArenaVector<BasicBlock *> linearBlocks_;
     ArenaVector<LifeNumber> instLifeNumbers_;
@@ -641,12 +665,12 @@ private:
     bool hasSafepointDuringCall_;
 
     Marker marker_ {UNDEF_MARKER};
-#ifndef NDEBUG
-    bool finalized_ {};
-#endif
+    LivenessState state_ {LivenessState::NONE};
 };
 
 float CalcSpillWeight(const LivenessAnalyzer &la, LifeIntervals *interval);
+
+LivenessAnalyzer *RunFullLivenessAnalysis(Graph *graph);
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H

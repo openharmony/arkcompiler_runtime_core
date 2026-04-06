@@ -477,10 +477,6 @@ bool RegAccAlloc::RunImpl()
     MarkPhiInstructions();
     MarkInstructions();
 
-#ifdef COMPILER_DEBUG_CHECKS
-    GetGraph()->SetRegAccAllocApplied();
-#endif  // COMPILER_DEBUG_CHECKS
-
     return true;
 }
 

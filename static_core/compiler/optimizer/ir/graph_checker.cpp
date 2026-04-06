@@ -336,8 +336,7 @@ void GraphChecker::CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block
                                      GetGraph()->Dump(&std::cerr)));
         if (!userInst->IsPhi() && !userInst->IsCatchPhi()) {
             CHECKER_DO_IF_NOT_AND_PRINT(
-                inst->IsDominate(userInst) || ((GetGraph()->IsRegAllocApplied() || GetGraph()->IsThrowApplied()) &&
-                                               IsTryCatchDomination(inst->GetBasicBlock(), userInst->GetBasicBlock())),
+                inst->IsDominate(userInst) || IsTryCatchDomination(inst->GetBasicBlock(), userInst->GetBasicBlock()),
                 (std::cerr << "Instruction doesn't dominate its user\n"
                            << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
                            << "user: bb " << userInst->GetBasicBlock()->GetId() << *userInst << std::endl,
@@ -577,8 +576,7 @@ void GraphChecker::CheckPhiInputs(Inst *phiInst)
         [[maybe_unused]] auto pred = phiInst->CastToPhi()->GetPhiInputBb(index);
         [[maybe_unused]] auto inputBb = phiInst->CastToPhi()->GetPhiInput(pred)->GetBasicBlock();
         CHECKER_DO_IF_NOT_AND_PRINT(
-            inputBb->IsDominate(pred) || ((GetGraph()->IsRegAccAllocApplied() || GetGraph()->IsThrowApplied()) &&
-                                          IsTryCatchDomination(inputBb, pred)),
+            inputBb->IsDominate(pred) || IsTryCatchDomination(inputBb, pred),
             (std::cerr
                  << "Block where phi-input is located should dominate predecessor block corresponding to this input\n"
                  << "Block inputBb " << inputBb->GetId() << " should dominate pred " << pred->GetId() << std::endl
@@ -906,10 +904,12 @@ void GraphChecker::CheckJump(const BasicBlock &block)
  *                [catch-begin]
  *                      |
  *                [user_block]
+ *
+ * Adding throw arcs in bytecode optimizer (ThrowApplied flag) also breaks domination, see try_catch_blocks_ir.md.
  */
 bool GraphChecker::IsTryCatchDomination(const BasicBlock *inputBlock, const BasicBlock *userBlock) const
 {
-    if (!GetGraph()->IsRegAllocApplied() && !GetGraph()->IsThrowApplied()) {
+    if (!(GetGraph()->IsCatchPhiResolved() || GetGraph()->IsThrowApplied())) {
         return false;
     }
     if (inputBlock->IsTry()) {

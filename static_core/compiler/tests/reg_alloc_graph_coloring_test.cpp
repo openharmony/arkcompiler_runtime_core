@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "optimizer/ir/constants.h"
+#include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "unit_test.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/live_registers.h"

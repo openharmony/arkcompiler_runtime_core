@@ -27,6 +27,12 @@ using LiveRanges = ArenaVector<LiveRange>;
 
 class LivenessAnalyzerTest : public GraphTest {
 public:
+    LivenessAnalyzer &RunLivenessAnalysis()
+    {
+        EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
+        return GetGraph()->GetAnalysis<LivenessAnalyzer>();
+    }
+
     void CheckSubsequence(const ArenaVector<BasicBlock *> &blocks, const ArenaVector<BasicBlock *> &&subsequence)
     {
         auto subseqIter = subsequence.begin();
@@ -106,9 +112,9 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraph)
         BASIC_BLOCK(14U, 15U) {}
         BASIC_BLOCK(15U, 3U) {}
     }
-    EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
+    auto &la = RunLivenessAnalysis();
 
-    const auto &blocks = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks();
+    const auto &blocks = la.GetLinearizedBlocks();
     CheckSubsequence(blocks,
                      GetBlocksById(GetGraph(), {0U, 2U, 4U, 5U, 11U, 12U, 13U, 1U, 3U, 6U, 7U, 8U, 9U, 10U, 14U, 15U}));
 }
@@ -154,9 +160,9 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraph2)
             INST(16U, Opcode::ReturnVoid);
         }
     }
-    EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
+    auto &la = RunLivenessAnalysis();
 
-    const auto &blocks = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks();
+    const auto &blocks = la.GetLinearizedBlocks();
     CheckSubsequence(blocks,
                      GetBlocksById(GetGraph(), {0, 100, 6, 2, 5, 4, 21, 17, 18, 24, 19, 36, 20, 14, 3, 43, 31, 7, 1}));
 }
@@ -192,14 +198,16 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraphWithoutLoops)
         }
     }
 
-    EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
-    CheckSubsequence(GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks(),
-                     GetBlocksById(GetGraph(), {0, 2, 4, 3, 1}));
+    {
+        auto &la = RunLivenessAnalysis();
+        CheckSubsequence(la.GetLinearizedBlocks(), GetBlocksById(GetGraph(), {0, 2, 4, 3, 1}));
+    }
 
     BB(2U).SwapTrueFalseSuccessors();
-    EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
-    CheckSubsequence(GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks(),
-                     GetBlocksById(GetGraph(), {0, 2, 4, 3, 1}));
+    {
+        auto &la = RunLivenessAnalysis();
+        CheckSubsequence(la.GetLinearizedBlocks(), GetBlocksById(GetGraph(), {0, 2, 4, 3, 1}));
+    }
 }
 
 /*
@@ -321,22 +329,22 @@ TEST_F(LivenessAnalyzerTest, InstructionsLifetime)
             INST(10U, Opcode::ReturnVoid);
         }
     }
-    auto livenessAnalyzer = &GetGraph()->GetValidAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
 
-    auto const0 = livenessAnalyzer->GetInstLifeIntervals(&INS(0U));
-    auto const1 = livenessAnalyzer->GetInstLifeIntervals(&INS(1U));
-    auto const2 = livenessAnalyzer->GetInstLifeIntervals(&INS(2U));
-    auto phi0 = livenessAnalyzer->GetInstLifeIntervals(&INS(3U));
-    auto phi1 = livenessAnalyzer->GetInstLifeIntervals(&INS(4U));
-    auto cmp = livenessAnalyzer->GetInstLifeIntervals(&INS(5U));
-    auto mul = livenessAnalyzer->GetInstLifeIntervals(&INS(7U));
-    auto sub = livenessAnalyzer->GetInstLifeIntervals(&INS(8U));
-    auto add = livenessAnalyzer->GetInstLifeIntervals(&INS(9U));
+    auto const0 = la.GetInstLifeIntervals(&INS(0U));
+    auto const1 = la.GetInstLifeIntervals(&INS(1U));
+    auto const2 = la.GetInstLifeIntervals(&INS(2U));
+    auto phi0 = la.GetInstLifeIntervals(&INS(3U));
+    auto phi1 = la.GetInstLifeIntervals(&INS(4U));
+    auto cmp = la.GetInstLifeIntervals(&INS(5U));
+    auto mul = la.GetInstLifeIntervals(&INS(7U));
+    auto sub = la.GetInstLifeIntervals(&INS(8U));
+    auto add = la.GetInstLifeIntervals(&INS(9U));
 
-    auto b0Lifetime = livenessAnalyzer->GetBlockLiveRange(&BB(0U));
-    auto b2Lifetime = livenessAnalyzer->GetBlockLiveRange(&BB(2U));
-    auto b3Lifetime = livenessAnalyzer->GetBlockLiveRange(&BB(3U));
-    auto b4Lifetime = livenessAnalyzer->GetBlockLiveRange(&BB(4U));
+    auto b0Lifetime = la.GetBlockLiveRange(&BB(0U));
+    auto b2Lifetime = la.GetBlockLiveRange(&BB(2U));
+    auto b3Lifetime = la.GetBlockLiveRange(&BB(3U));
+    auto b4Lifetime = la.GetBlockLiveRange(&BB(4U));
 
     EXPECT_EQ(const0->GetRanges()[0U], LiveRange(b0Lifetime.GetBegin() + 2U, b3Lifetime.GetEnd()));
     EXPECT_EQ(const1->GetRanges()[0U], LiveRange(b0Lifetime.GetBegin() + 4U, phi0->GetRanges()[1U].GetBegin()));
@@ -372,17 +380,16 @@ TEST_F(LivenessAnalyzerTest, LoadStoreArrayDataFlow)
         }
     }
 
-    auto livenessAnalyzer = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    livenessAnalyzer->Run();
+    auto &la = RunLivenessAnalysis();
 
-    auto array = livenessAnalyzer->GetInstLifeIntervals(&INS(0U));
-    auto index = livenessAnalyzer->GetInstLifeIntervals(&INS(1U));
-    auto nullCheck = livenessAnalyzer->GetInstLifeIntervals(&INS(3U));
-    auto lenArray = livenessAnalyzer->GetInstLifeIntervals(&INS(4U));
-    auto boundsCheck = livenessAnalyzer->GetInstLifeIntervals(&INS(5U));
-    auto stArray = livenessAnalyzer->GetInstLifeIntervals(&INS(8U));
+    auto array = la.GetInstLifeIntervals(&INS(0U));
+    auto index = la.GetInstLifeIntervals(&INS(1U));
+    auto nullCheck = la.GetInstLifeIntervals(&INS(3U));
+    auto lenArray = la.GetInstLifeIntervals(&INS(4U));
+    auto boundsCheck = la.GetInstLifeIntervals(&INS(5U));
+    auto stArray = la.GetInstLifeIntervals(&INS(8U));
 
-    auto b0Lifetime = livenessAnalyzer->GetBlockLiveRange(&BB(0U));
+    auto b0Lifetime = la.GetBlockLiveRange(&BB(0U));
 
     EXPECT_EQ(array->GetRanges()[0U], LiveRange(b0Lifetime.GetBegin() + 2U, stArray->GetRanges()[0U].GetBegin()));
     EXPECT_EQ(index->GetRanges()[0U], LiveRange(b0Lifetime.GetBegin() + 4U, stArray->GetRanges()[0U].GetBegin()));
@@ -408,13 +415,12 @@ TEST_F(LivenessAnalyzerTest, SaveStateInputs)
             INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
-    auto livenessAnalyzer = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    livenessAnalyzer->Run();
+    auto &la = RunLivenessAnalysis();
 
-    auto par0Lifetime = livenessAnalyzer->GetInstLifeIntervals(&INS(0U));
-    auto par1Lifetime = livenessAnalyzer->GetInstLifeIntervals(&INS(1U));
-    auto par2Lifetime = livenessAnalyzer->GetInstLifeIntervals(&INS(2U));
-    auto nullCheckLifetime = livenessAnalyzer->GetInstLifeIntervals(&INS(4U));
+    auto par0Lifetime = la.GetInstLifeIntervals(&INS(0U));
+    auto par1Lifetime = la.GetInstLifeIntervals(&INS(1U));
+    auto par2Lifetime = la.GetInstLifeIntervals(&INS(2U));
+    auto nullCheckLifetime = la.GetInstLifeIntervals(&INS(4U));
     EXPECT_TRUE(par0Lifetime->GetEnd() == nullCheckLifetime->GetEnd());
     EXPECT_TRUE(par1Lifetime->GetEnd() == nullCheckLifetime->GetEnd());
     EXPECT_TRUE(par2Lifetime->GetEnd() == nullCheckLifetime->GetBegin());
@@ -472,11 +478,10 @@ TEST_F(LivenessAnalyzerTest, InnerLoops)
         }
     }
 
-    auto livenessAnalyzer = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    livenessAnalyzer->Run();
-    auto mul = livenessAnalyzer->GetInstLifeIntervals(&INS(5U));
-    auto add = livenessAnalyzer->GetInstLifeIntervals(&INS(6U));
-    auto innerLoopBack = livenessAnalyzer->GetBlockLiveRange(&BB(6U));
+    auto &la = RunLivenessAnalysis();
+    auto mul = la.GetInstLifeIntervals(&INS(5U));
+    auto add = la.GetInstLifeIntervals(&INS(6U));
+    auto innerLoopBack = la.GetBlockLiveRange(&BB(6U));
     EXPECT_EQ(mul->GetEnd(), innerLoopBack.GetEnd());
     EXPECT_EQ(add->GetEnd(), innerLoopBack.GetEnd());
 }
@@ -507,20 +512,20 @@ TEST_F(LivenessAnalyzerTest, UpdateExistingRanges)
         }
     }
 
-    auto la = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    la->Run();
+    auto &la = RunLivenessAnalysis();
+    la.Run();
 
-    auto cmp = la->GetInstLifeIntervals(&INS(3U));
+    auto cmp = la.GetInstLifeIntervals(&INS(3U));
     EXPECT_EQ(cmp->GetRanges().size(), 2U);
 
     auto firstInterval = cmp->GetRanges().back();
-    auto add = la->GetInstLifeIntervals(&INS(2U));
+    auto add = la.GetInstLifeIntervals(&INS(2U));
     EXPECT_EQ(firstInterval.GetBegin(), add->GetEnd());
-    EXPECT_EQ(firstInterval.GetEnd(), la->GetBlockLiveRange(&BB(2U)).GetEnd());
+    EXPECT_EQ(firstInterval.GetEnd(), la.GetBlockLiveRange(&BB(2U)).GetEnd());
 
     auto secondInterval = cmp->GetRanges().front();
-    auto cast = la->GetInstLifeIntervals(&INS(5U));
-    EXPECT_EQ(secondInterval.GetBegin(), la->GetBlockLiveRange(&BB(3U)).GetBegin());
+    auto cast = la.GetInstLifeIntervals(&INS(5U));
+    EXPECT_EQ(secondInterval.GetBegin(), la.GetBlockLiveRange(&BB(3U)).GetBegin());
     EXPECT_EQ(secondInterval.GetEnd(), cast->GetBegin());
 }
 
@@ -551,12 +556,12 @@ TEST_F(LivenessAnalyzerTest, ReturnInlinedLiveness)
     }
     INS(10U).CastToReturnInlined()->SetExtendedLiveness();
 
-    auto la = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    la->Run();
-    auto par0Lifetime = la->GetInstLifeIntervals(&INS(0U));
-    auto par1Lifetime = la->GetInstLifeIntervals(&INS(1U));
-    auto par2Lifetime = la->GetInstLifeIntervals(&INS(20U));
-    auto deoptLifetime = la->GetInstLifeIntervals(&INS(11U));
+    auto &la = RunLivenessAnalysis();
+    la.Run();
+    auto par0Lifetime = la.GetInstLifeIntervals(&INS(0U));
+    auto par1Lifetime = la.GetInstLifeIntervals(&INS(1U));
+    auto par2Lifetime = la.GetInstLifeIntervals(&INS(20U));
+    auto deoptLifetime = la.GetInstLifeIntervals(&INS(11U));
     // 5.SaveState's inputs' liveness should be propagated up to 11.Deoptimize
     EXPECT_GE(par0Lifetime->GetEnd(), deoptLifetime->GetBegin());
     EXPECT_GE(par1Lifetime->GetEnd(), deoptLifetime->GetBegin());
@@ -594,8 +599,7 @@ TEST_F(LivenessAnalyzerTest, LookupInstByLifeNumber)
         }
     }
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    la.Run();
+    auto &la = RunLivenessAnalysis();
 
     EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(4U))->GetBegin()), &INS(4U));
     EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(4U))->GetBegin() + 1U), &INS(4U));
@@ -625,8 +629,7 @@ TEST_F(LivenessAnalyzerTest, PhiDataFlowInput)
         }
     }
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    la.Run();
+    auto &la = RunLivenessAnalysis();
     auto par0Lifetime = la.GetInstLifeIntervals(&INS(1U));
     auto phiLifetime = la.GetInstLifeIntervals(&INS(9U));
     EXPECT_EQ(par0Lifetime->GetEnd(), phiLifetime->GetBegin());
@@ -668,8 +671,7 @@ TEST_F(LivenessAnalyzerTest, CatchProcessing)
     GetGraph()->AppendThrowableInst(&INS(3U), &BB(5U));
     INS(1U).CastToTry()->SetTryEndBlock(&BB(5U));
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    la.Run();
+    auto &la = RunLivenessAnalysis();
 
     EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(2U))->GetBegin()), &INS(2U));
     EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(3U))->GetBegin()), &INS(3U));
@@ -879,8 +881,7 @@ TEST_F(LivenessAnalyzerTest, PropagateLivenessForImplicitNullCheckSaveStateInput
     }
     INS(3U).CastToNullCheck()->SetImplicit(true);
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    ASSERT_TRUE(la.Run());
+    auto &la = RunLivenessAnalysis();
 
     auto param = la.GetInstLifeIntervals(&INS(1U));
     auto len = la.GetInstLifeIntervals(&INS(5U));
@@ -906,8 +907,7 @@ TEST_F(LivenessAnalyzerTest, PropagateLivenessForExplicitNullCheckSaveStateInput
     }
     INS(3U).CastToNullCheck()->SetImplicit(false);
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    ASSERT_TRUE(la.Run());
+    auto &la = RunLivenessAnalysis();
 
     auto param = la.GetInstLifeIntervals(&INS(1U));
     auto addi = la.GetInstLifeIntervals(&INS(4U));
@@ -933,8 +933,7 @@ TEST_F(LivenessAnalyzerTest, NullCheckWithoutUsers)
     BB(2U).SetTry(true);
     INS(4U).CastToNullCheck()->SetImplicit(true);
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    ASSERT_TRUE(la.Run());
+    auto &la = RunLivenessAnalysis();
 
     auto call = la.GetInstLifeIntervals(&INS(2U));
     auto nullCheck = la.GetInstLifeIntervals(&INS(4U));
@@ -962,8 +961,9 @@ TEST_F(LivenessAnalyzerTest, UseHints)
         }
     }
 
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    ASSERT_TRUE(la.Run());
+    auto *maybeLa = RunFullLivenessAnalysis(GetGraph());
+    ASSERT_NE(maybeLa, nullptr);
+    auto &la = *maybeLa;
 
     auto call0 = la.GetInstLifeIntervals(&INS(2U));
     auto add0 = la.GetInstLifeIntervals(&INS(3U));

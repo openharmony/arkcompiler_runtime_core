@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "optimizer/ir/analysis.h"
-#include "optimizer/ir/inst.h"
-#include "optimizer/ir/basicblock.h"
-#include "optimizer/ir/graph.h"
 #include "liveness_analyzer.h"
+#include "compiler_logger.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
+#include "optimizer/ir/analysis.h"
+#include "optimizer/ir/basicblock.h"
+#include "optimizer/ir/graph.h"
+#include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/locations_builder.h"
 #include "optimizer/optimizations/regalloc/reg_type.h"
 
@@ -32,7 +33,7 @@ LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
       instLifeIntervals_(graph->GetAllocator()->Adapter()),
       instsByLifeNumber_(graph->GetAllocator()->Adapter()),
       blockLiveRanges_(graph->GetAllocator()->Adapter()),
-      blockLiveSets_(graph->GetLocalAllocator()->Adapter()),
+      blockLiveSets_(graph->GetAllocator()->Adapter()),
       pendingCatchPhiInputs_(graph->GetAllocator()->Adapter()),
       physicalGeneralIntervals_(graph->GetAllocator()->Adapter()),
       physicalVectorIntervals_(graph->GetAllocator()->Adapter()),
@@ -42,30 +43,104 @@ LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
 {
 }
 
+bool LivenessAnalyzer::IsTargetIndependentComputed() const
+{
+    return state_ >= LivenessState::TARGET_INDEPENDENT_COMPUTED;
+}
+
+bool LivenessAnalyzer::IsTargetSpecificComputed() const
+{
+    return state_ == LivenessState::TARGET_SPECIFIC_COMPUTED;
+}
+
 bool LivenessAnalyzer::RunImpl()
 {
-    if (!RunLocationsBuilder(GetGraph())) {
-        return false;
-    }
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
     ResetLiveness();
     BuildBlocksLinearOrder();
     BuildInstLifeNumbers();
     BuildInstLifeIntervals();
-    Finalize();
     if (!pendingCatchPhiInputs_.empty()) {
         COMPILER_LOG(ERROR, LIVENESS_ANALYZER)
             << "Graph contains CatchPhi instructions whose inputs were not processed";
         return false;
     }
+    state_ = LivenessState::TARGET_INDEPENDENT_COMPUTED;
+    COMPILER_LOG(DEBUG, LIVENESS_ANALYZER) << "Target-independent liveness analysis is constructed";
+    return true;
+}
+
+bool LivenessAnalyzer::ComputeTargetSpecific()
+{
+    ASSERT(IsTargetIndependentComputed());
+    if (IsTargetSpecificComputed()) {
+        return true;
+    }
+    if (!GetGraph()->IsLocationsBuilt()) {
+        return false;
+    }
+    BuildTargetSpecificIntervals();
+    BuildUsePositions();
+    FinalizeTargetSpecific();
+    state_ = LivenessState::TARGET_SPECIFIC_COMPUTED;
+    COMPILER_LOG(DEBUG, LIVENESS_ANALYZER) << "Target-specific liveness analysis is constructed";
+    return true;
+}
+
+void LivenessAnalyzer::BuildUsePositions()
+{
+    const auto &blocks = GetLinearizedBlocks();
+    for (auto *block : blocks) {
+        for (auto *inst : block->Insts()) {
+            auto lifeNumber = GetInstLifeNumber(inst);
+            if (IsPseudoUserOfMultiOutput(inst)) {
+                GetInstLifeIntervals(inst)->AddUsePosition(lifeNumber);
+            } else {
+                SetUsePositions(inst, lifeNumber);
+            }
+        }
+    }
+}
+
+void LivenessAnalyzer::BuildTargetSpecificIntervals()
+{
+    if (GetGraph()->GetArch() != Arch::NONE) {
+        physicalGeneralIntervals_.resize(REGISTERS_NUM);
+        physicalVectorIntervals_.resize(VREGISTERS_NUM);
+    }
+
+    const auto &blocks = GetLinearizedBlocks();
+    for (auto blockIt = blocks.rbegin(); blockIt != blocks.rend(); ++blockIt) {
+        auto *block = *blockIt;
+        for (auto inst : block->InstsSafeReverse()) {
+            auto lifeNumber = GetInstLifeNumber(inst);
+            BlockFixedRegisters(inst);
+            if (inst->RequireTmpReg()) {
+                CreateIntervalForTemp(lifeNumber);
+            }
+        }
+    }
+}
+
+void LivenessAnalyzer::FinalizeTargetSpecific()
+{
+    // Finalize intervals with computed use positions
+    for (auto *interv : instLifeIntervals_) {
+        interv->Finalize();
+    }
+
+    // Finalize intervals for temps
+    for (auto *interv : intervalsForTemps_) {
+        interv->Finalize();
+    }
+
+    // Merge physical regs & temp intervals into main intervals list
     std::copy_if(physicalGeneralIntervals_.begin(), physicalGeneralIntervals_.end(),
                  std::back_inserter(instLifeIntervals_), [](auto li) { return li != nullptr; });
     std::copy_if(physicalVectorIntervals_.begin(), physicalVectorIntervals_.end(),
                  std::back_inserter(instLifeIntervals_), [](auto li) { return li != nullptr; });
     std::copy(intervalsForTemps_.begin(), intervalsForTemps_.end(), std::back_inserter(instLifeIntervals_));
-    COMPILER_LOG(DEBUG, LIVENESS_ANALYZER) << "Liveness analysis is constructed";
-    return true;
 }
 
 void LivenessAnalyzer::ResetLiveness()
@@ -77,13 +152,8 @@ void LivenessAnalyzer::ResetLiveness()
     physicalGeneralIntervals_.clear();
     physicalVectorIntervals_.clear();
     intervalsForTemps_.clear();
-    if (GetGraph()->GetArch() != Arch::NONE) {
-        physicalGeneralIntervals_.resize(REGISTERS_NUM);
-        physicalVectorIntervals_.resize(VREGISTERS_NUM);
-    }
-#ifndef NDEBUG
-    finalized_ = false;
-#endif
+    useTable_.Clear();
+    state_ = LivenessState::NONE;
 }
 
 /*
@@ -241,17 +311,11 @@ void LivenessAnalyzer::BuildInstLifeNumbers()
             if (IsPseudoUserOfMultiOutput(inst)) {
                 // Should be the same life number as pseudo-user, since actually they have the same definition
                 SetInstLifeNumber(inst, lifeNumber);
-                GetInstLifeIntervals(inst)->AddUsePosition(lifeNumber);
                 continue;
             }
             lifeNumber += LIFE_NUMBER_GAP;
             SetInstLifeNumber(inst, lifeNumber);
-            SetUsePositions(inst, lifeNumber);
             instsByLifeNumber_.push_back(inst);
-
-            if (inst->RequireTmpReg()) {
-                CreateIntervalForTemp(lifeNumber);
-            }
         }
         lifeNumber += LIFE_NUMBER_GAP;
         SetBlockLiveRange(block, {blockBegin, lifeNumber});
@@ -387,8 +451,6 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
             auto currentLiveRange = LiveRange {GetBlockLiveRange(block).GetBegin(), instLifeNumber};
             AdjustInputsLifetime(inst, currentLiveRange, liveSet);
         }
-
-        BlockFixedRegisters(inst);
     }
 
     // The lifetime interval of phis instructions starts at the beginning of the block
@@ -555,7 +617,7 @@ LifeNumber LivenessAnalyzer::GetInstLifeNumber(const Inst *inst) const
  */
 void LivenessAnalyzer::CreateLifeIntervals(Inst *inst)
 {
-    ASSERT(!finalized_);
+    ASSERT(!IsTargetIndependentComputed());
     ASSERT(inst->GetLinearNumber() == instLifeIntervals_.size());
     auto interval = GetAllocator()->New<LifeIntervals>(GetAllocator(), inst);
     instLifeIntervals_.push_back(interval);
@@ -563,7 +625,8 @@ void LivenessAnalyzer::CreateLifeIntervals(Inst *inst)
 
 void LivenessAnalyzer::CreateIntervalForTemp(LifeNumber ln)
 {
-    ASSERT(!finalized_);
+    ASSERT(IsTargetIndependentComputed());
+    ASSERT(!IsTargetSpecificComputed());
     auto interval = GetAllocator()->New<LifeIntervals>(GetAllocator());
     ASSERT(interval != nullptr);
     interval->AppendRange({ln - 1, ln});
@@ -604,33 +667,9 @@ BasicBlock *LivenessAnalyzer::GetBlockCoversPoint(LifeNumber ln) const
     return nullptr;
 }
 
-void LivenessAnalyzer::Cleanup()
-{
-    for (auto *interv : instLifeIntervals_) {
-        if (!interv->IsPhysical() && !interv->IsPreassigned()) {
-            interv->ClearLocation();
-        }
-        if (interv->GetSibling() != nullptr) {
-            interv->MergeSibling();
-        }
-    }
-}
-
-void LivenessAnalyzer::Finalize()
-{
-    for (auto *interv : instLifeIntervals_) {
-        interv->Finalize();
-    }
-    for (auto *interv : intervalsForTemps_) {
-        interv->Finalize();
-    }
-#ifndef NDEBUG
-    finalized_ = true;
-#endif
-}
-
 const ArenaVector<LifeIntervals *> &LivenessAnalyzer::GetLifeIntervals() const
 {
+    ASSERT(IsTargetIndependentComputed());
     return instLifeIntervals_;
 }
 
@@ -651,11 +690,13 @@ InstLiveSet *LivenessAnalyzer::GetBlockLiveSet(BasicBlock *block) const
 
 const UseTable &LivenessAnalyzer::GetUseTable() const
 {
+    ASSERT(IsTargetSpecificComputed());
     return useTable_;
 }
 
 LifeIntervals *LivenessAnalyzer::GetTmpRegInterval(const Inst *inst)
 {
+    ASSERT(IsTargetSpecificComputed());
     auto instLn = GetInstLifeNumber(inst);
     auto it = std::find_if(intervalsForTemps_.begin(), intervalsForTemps_.end(),
                            [instLn](auto li) { return li->GetBegin() == instLn - 1; });
@@ -679,6 +720,7 @@ ArenaAllocator *LivenessAnalyzer::GetAllocator()
 
 void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
 {
+    ASSERT(IsTargetIndependentComputed());
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         if (bb->GetId() >= GetBlocksCount()) {
             continue;
@@ -701,16 +743,23 @@ void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
         }
     }
 
-    out << "Temps:" << std::endl;
-    for (auto interval : intervalsForTemps_) {
-        out << interval->ToString<false>() << "@ " << interval->GetLocation().ToString(GetGraph()->GetArch())
-            << std::endl;
+    if (IsTargetSpecificComputed()) {
+        out << "Temps:" << std::endl;
+        for (auto interval : intervalsForTemps_) {
+            out << interval->ToString<false>() << "@ " << interval->GetLocation().ToString(GetGraph()->GetArch())
+                << std::endl;
+        }
     }
+
     DumpLocationsUsage(out);
 }
 
 void LivenessAnalyzer::DumpLocationsUsage(std::ostream &out) const
 {
+    if (!IsTargetSpecificComputed()) {
+        return;
+    }
+
     std::map<Register, std::vector<LifeIntervals *>> regsIntervals;
     std::map<Register, std::vector<LifeIntervals *>> vregsIntervals;
     std::map<Register, std::vector<LifeIntervals *>> slotsIntervals;
@@ -850,7 +899,8 @@ void LivenessAnalyzer::BlockFixedLocationRegister(Location location, LifeNumber 
 template <bool IS_FP>
 void LivenessAnalyzer::BlockReg(Register reg, LifeNumber blockFrom, LifeNumber blockTo, bool isUse)
 {
-    ASSERT(!finalized_);
+    ASSERT(IsTargetIndependentComputed());
+    ASSERT(!IsTargetSpecificComputed());
     auto &intervals = IS_FP ? physicalVectorIntervals_ : physicalGeneralIntervals_;
     auto interval = intervals.at(reg);
     if (interval == nullptr) {
@@ -865,7 +915,7 @@ void LivenessAnalyzer::BlockReg(Register reg, LifeNumber blockFrom, LifeNumber b
     }
 }
 
-bool LivenessAnalyzer::IsCallBlockingRegisters(Inst *inst) const
+bool LivenessAnalyzer::IsCallBlockingRegisters(Inst *inst)
 {
     if (inst->IsCall() && !static_cast<CallInst *>(inst)->IsInlined()) {
         return true;
@@ -1118,6 +1168,7 @@ template bool LifeIntervals::IntersectsWith<true>(const LifeIntervals *) const;
  */
 void LivenessAnalyzer::GetLiveValuesAtPoint(Inst *inst, ArenaVector<Inst *> &result) const
 {
+    ASSERT(IsTargetIndependentComputed());
     ASSERT(inst != nullptr);
     auto ln = GetInstLifeNumber(inst);
     GetLiveValuesAtLifeNumber(ln, result);
@@ -1125,6 +1176,7 @@ void LivenessAnalyzer::GetLiveValuesAtPoint(Inst *inst, ArenaVector<Inst *> &res
 
 void LivenessAnalyzer::GetLiveValuesAtLifeNumber(LifeNumber ln, ArenaVector<Inst *> &result) const
 {
+    ASSERT(IsTargetIndependentComputed());
     result.clear();
 
     for (const auto &interval : instLifeIntervals_) {
@@ -1140,6 +1192,7 @@ void LivenessAnalyzer::GetLiveValuesAtLifeNumber(LifeNumber ln, ArenaVector<Inst
 
 bool LivenessAnalyzer::IsLiveAtPoint(const Inst *valueInst, const Inst *atInst) const
 {
+    ASSERT(IsTargetIndependentComputed());
     ASSERT(valueInst != nullptr);
     ASSERT(atInst != nullptr);
 
@@ -1149,6 +1202,7 @@ bool LivenessAnalyzer::IsLiveAtPoint(const Inst *valueInst, const Inst *atInst) 
 
 bool LivenessAnalyzer::IsLiveAtLifeNumber(const Inst *valueInst, LifeNumber ln) const
 {
+    ASSERT(IsTargetIndependentComputed());
     ASSERT(valueInst != nullptr);
 
     if (valueInst->GetLinearNumber() == INVALID_LINEAR_NUM) {
@@ -1161,6 +1215,18 @@ bool LivenessAnalyzer::IsLiveAtLifeNumber(const Inst *valueInst, LifeNumber ln) 
     }
 
     return interval->SplitCover(ln);
+}
+
+LivenessAnalyzer *RunFullLivenessAnalysis(Graph *graph)
+{
+    if (!graph->RunPass<LivenessAnalyzer>() || !RunLocationsBuilder(graph)) {
+        return nullptr;
+    }
+    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    if (!la.ComputeTargetSpecific()) {
+        return nullptr;
+    }
+    return &la;
 }
 
 }  // namespace ark::compiler

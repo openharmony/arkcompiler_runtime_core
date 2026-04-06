@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "optimizer/analysis/liveness_analyzer.h"
 #include "unit_test.h"
 #include "libarkbase/utils/utils.h"
 #include "optimizer/analysis/dominators_tree.h"
@@ -34,6 +35,19 @@ static bool operator==(const SpillFillData &lhs, const SpillFillData &rhs)
 
 class RegAllocLinearScanTest : public GraphTest {
 public:
+    LivenessAnalyzer &RunLivenessAnalysis()
+    {
+        auto *la = RunFullLivenessAnalysis(GetGraph());
+        EXPECT_NE(la, nullptr);
+        return *la;
+    }
+
+    void SetGraph(Graph *graph)
+    {
+        graph_ = graph;
+        graph_->SetRuntime(&runtime_);
+    }
+
     void CheckInstRegNotEqualOthersInstRegs(int checkId, std::vector<int> &&instIds)
     {
         for (auto id : instIds) {
@@ -694,8 +708,8 @@ TEST_F(RegAllocLinearScanTest, BrokenTriangleWithEmptyBlock)
     ASSERT_TRUE(result);
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    ResetGraph();
+    GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -714,13 +728,12 @@ TEST_F(RegAllocLinearScanTest, BrokenTriangleWithEmptyBlock)
             INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), GetGraph()));
 }
 
 TEST_F(RegAllocLinearScanTest, LoadArrayPair)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -739,8 +752,8 @@ TEST_F(RegAllocLinearScanTest, LoadArrayPair)
             INST(12U, Opcode::Return).s64().Inputs(11U);
         }
     }
-    auto result = graph->RunPass<RegAllocLinearScan>();
-    if (graph->GetCallingConvention() == nullptr) {
+    auto result = GetGraph()->RunPass<RegAllocLinearScan>();
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -759,11 +772,10 @@ TEST_F(RegAllocLinearScanTest, LoadArrayPair)
 
 TEST_F(RegAllocLinearScanTest, CheckInputTypeInStore)
 {
-    auto graph = CreateEmptyGraph();
-    if (graph->GetArch() != Arch::AARCH64) {
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
         return;
     }
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         CONSTANT(0U, nullptr).ref();
         CONSTANT(1U, 0x2aU).s64();
@@ -776,8 +788,8 @@ TEST_F(RegAllocLinearScanTest, CheckInputTypeInStore)
             INST(6U, Opcode::Return).s64().Inputs(1U);
         }
     }
-    auto result = graph->RunPass<RegAllocLinearScan>();
-    if (graph->GetCallingConvention() == nullptr) {
+    auto result = GetGraph()->RunPass<RegAllocLinearScan>();
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -790,8 +802,7 @@ TEST_F(RegAllocLinearScanTest, CheckInputTypeInStore)
 
 TEST_F(RegAllocLinearScanTest, NullCheckAsPhiInput)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -814,7 +825,7 @@ TEST_F(RegAllocLinearScanTest, NullCheckAsPhiInput)
         }
     }
 
-    EXPECT_TRUE(graph->RunPass<RegAllocLinearScan>());
+    EXPECT_TRUE(GetGraph()->RunPass<RegAllocLinearScan>());
     auto phiLocation = Location::MakeRegister(INS(11U).GetDstReg());
     auto paramLocation = INS(0U).CastToParameter()->GetLocationData().GetDst();
     if (phiLocation != paramLocation) {
@@ -828,8 +839,7 @@ TEST_F(RegAllocLinearScanTest, NullCheckAsPhiInput)
 
 TEST_F(RegAllocLinearScanTest, MultiDestInstruction)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         CONSTANT(0U, 1000U);
         CONSTANT(1U, 1U);
@@ -846,8 +856,8 @@ TEST_F(RegAllocLinearScanTest, MultiDestInstruction)
         }
     }
     // Run regalloc without free regs to push all dst on the stack
-    auto regalloc = RegAllocLinearScan(graph);
-    RegAllocResolver(graph).ResolveCatchPhis();
+    auto regalloc = RegAllocLinearScan(GetGraph());
+    RegAllocResolver(GetGraph()).ResolveCatchPhis();
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0x000FFFFFU : 0xAAAAAAFFU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
@@ -862,33 +872,32 @@ TEST_F(RegAllocLinearScanTest, MultiDestInstruction)
 /// Create COUNT constants and assign COUNT registers for them
 TEST_F(RegAllocLinearScanTest, DynamicRegsMask)
 {
-    auto graph = CreateEmptyBytecodeGraph();
-    graph->CreateStartBlock();
-    graph->CreateEndBlock();
+    SetGraph(CreateEmptyBytecodeGraph());
+    GetGraph()->CreateStartBlock();
+    GetGraph()->CreateEndBlock();
 
     const size_t count = 100;
-    auto savePoint = graph->CreateInstSafePoint();
-    auto block = CreateEmptyBlock(graph);
+    auto savePoint = GetGraph()->CreateInstSafePoint();
+    auto block = CreateEmptyBlock(GetGraph());
     block->AppendInst(savePoint);
-    block->AppendInst(graph->CreateInstReturnVoid());
-    graph->GetStartBlock()->AddSucc(block);
-    block->AddSucc(graph->GetEndBlock());
+    block->AppendInst(GetGraph()->CreateInstReturnVoid());
+    GetGraph()->GetStartBlock()->AddSucc(block);
+    block->AddSucc(GetGraph()->GetEndBlock());
 
     for (size_t i = 0; i < count; i++) {
-        savePoint->AppendInput(graph->FindOrCreateConstant(i));
+        savePoint->AppendInput(GetGraph()->FindOrCreateConstant(i));
         savePoint->SetVirtualRegister(i, VirtualRegister(i, VRegInfo::VRegType::VREG));
     }
-    auto result = graph->RunPass<RegAllocLinearScan>(EmptyRegMask());
+    auto result = GetGraph()->RunPass<RegAllocLinearScan>(EmptyRegMask());
     ASSERT_TRUE(result);
     for (size_t i = 1; i < count; i++) {
-        ASSERT_EQ(graph->FindOrCreateConstant(i)->GetDstReg(), i);
+        ASSERT_EQ(GetGraph()->FindOrCreateConstant(i)->GetDstReg(), i);
     }
 }
 
 TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         CONSTANT(0U, 1000U);
         CONSTANT(1U, 1U);
@@ -906,12 +915,12 @@ TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
             INST(10U, Opcode::Return).s32().Inputs(9U);
         }
     }
-    auto regalloc = RegAllocLinearScan(graph);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0x000FFFFFU : 0xAAAAAAAFU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -940,8 +949,7 @@ TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
 
 TEST_F(RegAllocLinearScanTest, MultiDestInLoop)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -974,7 +982,7 @@ TEST_F(RegAllocLinearScanTest, MultiDestInLoop)
             INST(20U, Opcode::Return).s32().Inputs(9U);
         }
     }
-    auto regalloc = RegAllocLinearScan(graph);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     regalloc.SetRegMask(RegMask {0xFFFFAAAAU});
     ASSERT_TRUE(regalloc.Run());
 
@@ -1011,11 +1019,9 @@ SRC_GRAPH(ResolveSegmentedCallInputs, Graph *graph)
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
 {
-    auto graph = CreateEmptyGraph();
-    src_graph::ResolveSegmentedCallInputs::CREATE(graph);
+    src_graph::ResolveSegmentedCallInputs::CREATE(GetGraph());
 
-    graph->RunPass<LivenessAnalyzer>();
-    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto call0 = (&INS(3U))->CastToCallStatic();
     auto call1 = (&INS(5U))->CastToCallStatic();
@@ -1028,12 +1034,12 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
     paramSplit1->SetReg(6U);
     paramSplit1->SetType(DataType::UINT64);
 
-    graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
-    auto regalloc = RegAllocLinearScan(graph);
+    GetGraph()->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     regalloc.SetRegMask(RegMask {0x000FFFFFU});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -1050,8 +1056,7 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).ref();
@@ -1066,8 +1071,7 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
         }
     }
 
-    graph->RunPass<LivenessAnalyzer>();
-    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto call = &INS(4U);
     auto paramSplit = param0->SplitAt(la.GetInstLifeIntervals(call)->GetBegin() - 1U, GetAllocator());
@@ -1075,13 +1079,13 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
     paramSplit->SetReg(REG_FOR_SPLIT);
     paramSplit->SetType(DataType::UINT64);
 
-    auto regalloc = RegAllocLinearScan(graph);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     // on AARCH32 use only caller-saved register pairs
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFFAU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -1096,8 +1100,7 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).u64();
 
@@ -1109,20 +1112,19 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
         }
     }
 
-    graph->RunPass<LivenessAnalyzer>();
-    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto paramSplit0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
     static constexpr auto REG_FOR_SPLIT = Register(20U);
     paramSplit0->SetReg(REG_FOR_SPLIT);
     paramSplit0->SetType(DataType::UINT64);
 
-    auto regalloc = RegAllocLinearScan(graph);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -1138,8 +1140,7 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
 {
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).u64();
 
@@ -1150,8 +1151,7 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
         }
     }
 
-    graph->RunPass<LivenessAnalyzer>();
-    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto sp = &INS(2U);
     auto paramSplit = param0->SplitAt(la.GetInstLifeIntervals(sp)->GetBegin() - 1U, GetAllocator());
@@ -1162,14 +1162,14 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
     retSplit->SetReg(0U);
     retSplit->SetType(DataType::UINT64);
 
-    graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
-    auto regalloc = RegAllocLinearScan(graph);
+    GetGraph()->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     regalloc.SetSlotsCount(MAX_NUM_STACK_SLOTS);
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -1211,23 +1211,21 @@ SRC_GRAPH(ResolveSegmentedPhiInput, Graph *graph)
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
 {
-    auto graph = CreateEmptyGraph();
-    src_graph::ResolveSegmentedPhiInput::CREATE(graph);
+    src_graph::ResolveSegmentedPhiInput::CREATE(GetGraph());
 
-    graph->RunPass<LivenessAnalyzer>();
-    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto paramSplit0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(4U))->GetBegin() - 1U, GetAllocator());
     static constexpr auto REG_FOR_SPLIT = Register(20U);
     paramSplit0->SetReg(REG_FOR_SPLIT);
     paramSplit0->SetType(DataType::UINT64);
 
-    auto regalloc = RegAllocLinearScan(graph);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -1288,8 +1286,8 @@ SRC_GRAPH(DISABLED_ResolveSegmentedCatchPhiInputs, Graph *graph)
  */
 TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
 {
-    auto graph = CreateEmptyBytecodeGraph();
-    src_graph::DISABLED_ResolveSegmentedCatchPhiInputs::CREATE(graph);
+    SetGraph(CreateEmptyBytecodeGraph());
+    src_graph::DISABLED_ResolveSegmentedCatchPhiInputs::CREATE(GetGraph());
 
     BB(2U).SetTryId(0U);
     BB(3U).SetTryId(0U);
@@ -1299,12 +1297,11 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
     catchPhi->AppendThrowableInst(&INS(4U));
     catchPhi->AppendThrowableInst(&INS(9U));
 
-    graph->AppendThrowableInst(&INS(4U), &BB(5U));
-    graph->AppendThrowableInst(&INS(9U), &BB(5U));
+    GetGraph()->AppendThrowableInst(&INS(4U), &BB(5U));
+    GetGraph()->AppendThrowableInst(&INS(9U), &BB(5U));
     INS(3U).CastToTry()->SetTryEndBlock(&BB(4U));
 
-    graph->RunPass<LivenessAnalyzer>();
-    auto &la = graph->GetAnalysis<LivenessAnalyzer>();
+    auto &la = RunLivenessAnalysis();
 
     auto con = la.GetInstLifeIntervals(&INS(2U));
     auto streq = &INS(4U);
@@ -1314,7 +1311,7 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
     conSplit->SetReg(SPLIT_REG);
     conSplit->SetType(DataType::UINT32);
 
-    auto regalloc = RegAllocLinearScan(graph, EmptyRegMask());
+    auto regalloc = RegAllocLinearScan(GetGraph(), EmptyRegMask());
     auto result = regalloc.Run();
     ASSERT_TRUE(result);
 
@@ -1365,15 +1362,14 @@ SRC_GRAPH(RematConstants, Graph *graph)
 
 TEST_F(RegAllocLinearScanTest, RematConstants)
 {
-    auto graph = CreateEmptyGraph();
-    src_graph::RematConstants::CREATE(graph);
+    src_graph::RematConstants::CREATE(GetGraph());
 
-    auto regalloc = RegAllocLinearScan(graph);
+    auto regalloc = RegAllocLinearScan(GetGraph());
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFE1U : 0xFABFFFFFU;
     regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {regMask});
     auto result = regalloc.Run();
-    if (graph->GetCallingConvention() == nullptr) {
+    if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
@@ -1389,7 +1385,7 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
     auto spillFill = callInst->GetPrev()->CastToSpillFill();
     for (auto sf : spillFill->GetSpillFills()) {
         if (sf.SrcType() == LocationType::IMMEDIATE) {
-            auto inputConst = graph->GetSpilledConstant(sf.SrcValue());
+            auto inputConst = GetGraph()->GetSpilledConstant(sf.SrcValue());
             auto it = std::find_if(callInst->GetInputs().begin(), callInst->GetInputs().end(),
                                    [inputConst](Input input) { return input.GetInst() == inputConst; });
             EXPECT_NE(it, callInst->GetInputs().end());
@@ -1546,8 +1542,8 @@ TEST_F(RegAllocLinearScanTest, PreassignedRegisters)
     RegMask shortMaskInvert {0x55U};  // {R0, R2, R4, R6} are NOT available for RA
 
     for (auto &mask : {fullMask, shortMask, shortMaskInvert}) {
-        auto graph = CreateEmptyGraph();
-        GRAPH(graph)
+        ResetGraph();
+        GRAPH(GetGraph())
         {
             BASIC_BLOCK(2U, -1L)
             {
@@ -1564,7 +1560,7 @@ TEST_F(RegAllocLinearScanTest, PreassignedRegisters)
                 INST(9U, Opcode::Return).Inputs(8U).u32();
             }
         }
-        auto regalloc = RegAllocLinearScan(graph);
+        auto regalloc = RegAllocLinearScan(GetGraph());
         regalloc.SetRegMask(mask);
         ASSERT_TRUE(regalloc.Run());
         ASSERT_TRUE(CheckInstsDstRegs(&INS(0U), &INS(3U), Register(0U)));

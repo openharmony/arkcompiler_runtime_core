@@ -396,6 +396,14 @@ public:
     {
         FlagUnrollComplete::Set(true, &bitFields_);
     }
+    bool IsLocationsBuilt() const
+    {
+        return FlagLocationsBuilt::Get(bitFields_);
+    }
+    void SetLocationsBuilt()
+    {
+        FlagLocationsBuilt::Set(true, &bitFields_);
+    }
     bool IsInliningComplete() const
     {
         return FlagInliningComplete::Get(bitFields_) || IsOsrMode();
@@ -413,6 +421,14 @@ public:
     {
         FlagSaveStateSuspendInputsAllocated::Set(true, &bitFields_);
     }
+    bool IsCatchPhiResolved() const
+    {
+        return FlagCatchPhiResolved::Get(bitFields_);
+    }
+    void SetCatchPhiResolved()
+    {
+        FlagCatchPhiResolved::Set(true, &bitFields_);
+    }
     bool IsRegAllocApplied() const
     {
         return FlagRegallocApplied::Get(bitFields_);
@@ -420,14 +436,6 @@ public:
     void SetRegAllocApplied()
     {
         FlagRegallocApplied::Set(true, &bitFields_);
-    }
-    bool IsRegAccAllocApplied() const
-    {
-        return FlagRegaccallocApplied::Get(bitFields_);
-    }
-    void SetRegAccAllocApplied()
-    {
-        FlagRegaccallocApplied::Set(true, &bitFields_);
     }
     bool IsLowLevelInstructionsEnabled() const
     {
@@ -451,6 +459,10 @@ public:
         return method_ == nullptr || ToUintPtr(runtime_->GetBinaryFileForMethod(method_)) == FAKE_FILE;
     }
 #else
+    bool IsCatchPhiResolved() const
+    {
+        return false;
+    }
     bool IsRegAllocApplied() const
     {
         return false;
@@ -1424,21 +1436,16 @@ private:
     using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
     using FlagCanOptimizeNativeMethods = FlagThrowApplied::NextFlag;
     using FlagUnrollComplete = FlagCanOptimizeNativeMethods::NextFlag;
-    using FlagRegallocApplied = FlagUnrollComplete::NextFlag;
-    using FlagRegaccallocApplied = FlagRegallocApplied::NextFlag;
-    using FlagInliningComplete = FlagRegaccallocApplied::NextFlag;
-
-#ifdef COMPILER_DEBUG_CHECKS
+    using FlagLocationsBuilt = FlagUnrollComplete::NextFlag;
+    using FlagCatchPhiResolved = FlagLocationsBuilt::NextFlag;
+    using FlagRegallocApplied = FlagCatchPhiResolved::NextFlag;
+    using FlagInliningComplete = FlagRegallocApplied::NextFlag;
     using FlagSaveStateSuspendInputsAllocated = FlagInliningComplete::NextFlag;
-    using BeforeRegallocFlags = FlagSaveStateSuspendInputsAllocated;
-#else
-    using BeforeRegallocFlags = FlagInliningComplete;
-#endif  // COMPILER_DEBUG_CHECKS
 
 #if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
-    using LastField = FlagUnrollComplete;
+    using LastField = FlagLocationsBuilt;
 #else
-    using FlagLowLevelInstnsEnabled = FlagInliningComplete::NextFlag;
+    using FlagLowLevelInstnsEnabled = FlagSaveStateSuspendInputsAllocated::NextFlag;
     using FlagDynUnitTest = FlagLowLevelInstnsEnabled::NextFlag;
     using LastField = FlagDynUnitTest;
 #endif  // NDEBUG && !ENABLE_LIBABCKIT
