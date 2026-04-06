@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "runtime/mem/gc/g1/g1-helpers.h"
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
@@ -48,10 +47,9 @@ void EpsilonG1GC<LanguageConfig>::InitializeImpl()
     this->CreateCardTable(allocator, PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
                           PoolManager::GetMmapMemPool()->GetTotalObjectSize());
 
-    auto barrierSet =
-        allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
-                                       ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
-                                       this->GetCardTable(), this->updatedRefsQueue_, &this->queueLock_);
+    auto barrierSet = allocator->New<GCG1BarrierSet>(
+        allocator, ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()), this->GetCardTable(),
+        this->updatedRefsQueue_, &this->queueLock_);
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
 

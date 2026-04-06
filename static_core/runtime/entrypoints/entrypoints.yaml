@@ -457,8 +457,8 @@ entrypoints:
   properties: []
   signature:
   - void
-  - const void*
-  - const void*
+  - ark::ObjectPointerType
+  - ark::ObjectPointerType
 
 - name: ResolveClass
   entrypoint: ResolveClassEntrypoint
