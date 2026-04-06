@@ -16,6 +16,7 @@
 /*---
 desc: Check type inference from the initialization expression
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0138: Invalid Type."
 ---*/
 
 function main(): void {
