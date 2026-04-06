@@ -89,7 +89,7 @@ TEST_F(CallFunctionalObjectTest, functional_object_call_invalid_args_1)
     ASSERT_EQ(env_->GetUnhandledError(&currentError), ANI_OK);
     ani_class expectedErrorClass {};
     ASSERT_EQ(env_->ResetError(), ANI_OK);
-    ASSERT_EQ(env_->FindClass("std:core.ArgumentsUnderapplicationError", &expectedErrorClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.ArgumentsUnderapplicationError", &expectedErrorClass), ANI_OK);
     ani_boolean isExpectedClass = ANI_FALSE;
     ASSERT_EQ(env_->Object_InstanceOf(currentError, expectedErrorClass, &isExpectedClass), ANI_OK);
     ASSERT_EQ(isExpectedClass, ANI_TRUE);

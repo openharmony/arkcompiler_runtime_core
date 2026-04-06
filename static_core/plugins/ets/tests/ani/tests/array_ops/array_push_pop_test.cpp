@@ -34,7 +34,7 @@ public:
         ASSERT_EQ(env_->Reference_IsNullishValue(throwingArray, &result), ANI_OK);
         ASSERT_EQ(result, ANI_FALSE);
         ani_class escompatArray {};
-        ASSERT_EQ(env_->FindClass("std:core.Array", &escompatArray), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.Array", &escompatArray), ANI_OK);
         ASSERT_EQ(env_->Object_InstanceOf(throwingArray, escompatArray, &result), ANI_OK);
         ASSERT_EQ(result, ANI_TRUE);
         *resultArray = static_cast<ani_array>(throwingArray);
@@ -102,7 +102,7 @@ static void CheckUnhandledError(ani_env *env, std::string_view expectedMessage)
     ASSERT_EQ(env->GetUnhandledError(&pendingError), ANI_OK);
     ASSERT_EQ(env->ResetError(), ANI_OK);
     ani_ref message {};
-    ASSERT_EQ(env->Object_CallMethodByName_Ref(pendingError, "%%get-message", ":C{std:core.String}", &message), ANI_OK);
+    ASSERT_EQ(env->Object_CallMethodByName_Ref(pendingError, "%%get-message", ":C{std.core.String}", &message), ANI_OK);
     std::string messageStr;
     AniTest::GetStdString(env, static_cast<ani_string>(message), messageStr);
     ASSERT_STREQ(messageStr.c_str(), expectedMessage.data());

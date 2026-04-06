@@ -86,8 +86,8 @@ static ani_object CreateAbcRuntimeLinker(ani_env *env, ani_class abcRuntimeLinke
     }
 
     ani_class stringClass = nullptr;
-    ani_status status = env->FindClass("std:core.String", &stringClass);
-    if (CheckAniError(status, "Cannot find String class std:core.String", env)) {
+    ani_status status = env->FindClass("std.core.String", &stringClass);
+    if (CheckAniError(status, "Cannot find String class std.core.String", env)) {
         return nullptr;
     }
 
@@ -106,7 +106,7 @@ static ani_object CreateAbcRuntimeLinker(ani_env *env, ani_class abcRuntimeLinke
 
     ani_method abcRuntimeLinkerCtor;
     status = env->Class_FindMethod(abcRuntimeLinkerClass, "<ctor>",
-                                   "C{std:core.RuntimeLinker}C{std:core.Array}:", &abcRuntimeLinkerCtor);
+                                   "C{std.core.RuntimeLinker}C{std.core.Array}:", &abcRuntimeLinkerCtor);
     if (CheckAniStatus(status, "Cannot find abcRuntimeLinker constructor")) {
         return nullptr;
     }
@@ -123,8 +123,8 @@ static ani_object CreateAbcRuntimeLinker(ani_env *env, ani_class abcRuntimeLinke
 static ani_object CreateBooleanObject(ani_env *env)
 {
     ani_class booleanClass = nullptr;
-    ani_status status = env->FindClass("std:core.Boolean", &booleanClass);
-    if (CheckAniError(status, "Cannot find std:core.Boolean class", env)) {
+    ani_status status = env->FindClass("std.core.Boolean", &booleanClass);
+    if (CheckAniError(status, "Cannot find std.core.Boolean class", env)) {
         return nullptr;
     }
 
@@ -148,7 +148,7 @@ static ani_object LoadMainAppClassInstance(ani_env *env, ani_class abcRuntimeLin
     ani_method loadClassMethod = nullptr;
     ani_status status =
         env->Class_FindMethod(abcRuntimeLinkerClass, "loadClass",
-                              "C{std:core.String}C{std:core.Boolean}:C{std:core.Class}", &loadClassMethod);
+                              "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}", &loadClassMethod);
     if (CheckAniStatus(status, "Cannot find loadClass method")) {
         return nullptr;
     }
@@ -171,15 +171,15 @@ static ani_object LoadMainAppClassInstance(ani_env *env, ani_class abcRuntimeLin
         return nullptr;
     }
 
-    const std::string stdClass = "std:core.Class";
+    const std::string stdClass = "std.core.Class";
     ani_class stdClassClass = nullptr;
     status = env->FindClass(stdClass.c_str(), &stdClassClass);
-    if (CheckAniError(status, "Cannot find std:core.Class class", env)) {
+    if (CheckAniError(status, "Cannot find std.core.Class class", env)) {
         return nullptr;
     }
 
     ani_method createInstanceMethod;
-    status = env->Class_FindMethod(stdClassClass, "createInstance", ":C{std:core.Object}", &createInstanceMethod);
+    status = env->Class_FindMethod(stdClassClass, "createInstance", ":C{std.core.Object}", &createInstanceMethod);
     if (CheckAniStatus(status, "Cannot find createInstance method")) {
         return nullptr;
     }
@@ -209,8 +209,8 @@ int RunApp(ani_vm *vm)
     }
 
     ani_class abcRuntimeLinkerClass = nullptr;
-    status = env->FindClass("std:core.AbcRuntimeLinker", &abcRuntimeLinkerClass);
-    if (CheckAniError(status, "Cannot find class std:core.AbcRuntimeLinker", env)) {
+    status = env->FindClass("std.core.AbcRuntimeLinker", &abcRuntimeLinkerClass);
+    if (CheckAniError(status, "Cannot find class std.core.AbcRuntimeLinker", env)) {
         return 1;
     }
 

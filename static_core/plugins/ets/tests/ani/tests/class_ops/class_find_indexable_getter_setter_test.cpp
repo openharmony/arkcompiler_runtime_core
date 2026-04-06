@@ -42,7 +42,7 @@ TEST_F(FindIndexableSetterTest, set_method)
     ASSERT_NE(cls, nullptr);
 
     ani_method stringSetter;
-    ASSERT_EQ(env_->Class_FindIndexableSetter(cls, "dC{std:core.String}:", &stringSetter), ANI_OK);
+    ASSERT_EQ(env_->Class_FindIndexableSetter(cls, "dC{std.core.String}:", &stringSetter), ANI_OK);
     ASSERT_NE(stringSetter, nullptr);
 
     ani_method booleanSetter;

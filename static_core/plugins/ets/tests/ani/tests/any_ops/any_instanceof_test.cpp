@@ -31,8 +31,8 @@ TEST_F(AnyInstanceOfTest, AnyInstanceof_InValid)
     ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
     ani_class strType {};
     ani_class stdCoreObj {};
-    ASSERT_EQ(env_->FindClass("std:core.String", &strType), ANI_OK);
-    ASSERT_EQ(env_->FindClass("std:core.Object", &stdCoreObj), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &strType), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Object", &stdCoreObj), ANI_OK);
     ani_boolean instanceof = ANI_FALSE;
     ASSERT_EQ(env_->Any_InstanceOf(strRef, stdCoreObj, & instanceof), ANI_OK);
     // NOTE: Test for Any_InstanceOf will be added after resolve #27087
@@ -44,7 +44,7 @@ TEST_F(AnyInstanceOfTest, AnyInstanceOf_InvalidArgs)
     ani_boolean result = ANI_FALSE;
 
     ani_class strType {};
-    ASSERT_EQ(env_->FindClass("std:core.String", &strType), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &strType), ANI_OK);
     ASSERT_EQ(env_->Any_InstanceOf(nullptr, strType, &result), ANI_INVALID_ARGS);
 
     ani_string strRef {};

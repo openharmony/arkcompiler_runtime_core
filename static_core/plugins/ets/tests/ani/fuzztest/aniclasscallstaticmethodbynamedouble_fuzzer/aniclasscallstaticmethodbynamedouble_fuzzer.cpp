@@ -35,7 +35,7 @@ void AniClassCallStaticMethodByNameDoubleFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class intCls {};
-    env->FindClass("std:core.Int", &intCls);
+    env->FindClass("std.core.Int", &intCls);
 
     ani_double res {};
     std::string input(data, size);

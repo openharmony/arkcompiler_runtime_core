@@ -35,7 +35,7 @@ void AniModuleFindFunctionFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_module md {};
-    env->FindModule("std:core", &md);
+    env->FindModule("std.core", &md);
     ani_function fn {};
     std::string funcName(data, size);
     env->Module_FindFunction(md, funcName.c_str(), nullptr, &fn);

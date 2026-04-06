@@ -23,5 +23,5 @@ ani_verify_add_generated_tests(ani_verify_test_function_call
            "long: Type=Long,type=long,ret_type=long,ret=l,wrong_ret=int,wrong_ret_short=i,value=1"
            "float: Type=Float,type=float,ret=f,ret_type=float,wrong_ret=int,wrong_ret_short=i,value=1"
            "double: Type=Double,type=double,ret=d,ret_type=double,wrong_ret=int,wrong_ret_short=i,value=1"
-           "ref: Type=Ref,type=ref,ret=C{std:core.Object},ret_type=Object,wrong_ret=int,wrong_ret_short=i,value=new Object()"
+           "ref: Type=Ref,type=ref,ret=C{std.core.Object},ret_type=Object,wrong_ret=int,wrong_ret_short=i,value=new Object()"
 )

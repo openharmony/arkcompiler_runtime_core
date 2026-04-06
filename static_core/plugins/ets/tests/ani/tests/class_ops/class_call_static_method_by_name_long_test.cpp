@@ -45,7 +45,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_V(cls, "method", "C{std:core.String}:l", value, args),
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_V(cls, "method", "C{std.core.String}:l", value, args),
                   ANI_OK);
         va_end(args);
     }
@@ -406,7 +406,7 @@ TEST_F(ClassCallStaticMethodByNameLongTest, check_wrong_signature)
     ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
 
     ani_long value {};
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Long(env_, cls, "method", "C{std:core.String}:l", &value, str),
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Long(env_, cls, "method", "C{std.core.String}:l", &value, str),
               ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Long(env_, cls, "method", "C{std/core/String}:l", &value, str),
@@ -414,7 +414,7 @@ TEST_F(ClassCallStaticMethodByNameLongTest, check_wrong_signature)
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_A(cls, "method", "C{std:core.String}:l", &value, &arg), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_A(cls, "method", "C{std.core.String}:l", &value, &arg), ANI_OK);
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_A(cls, "method", "C{std/core/String}:l", &value, &arg),
               ANI_INVALID_DESCRIPTOR);

@@ -47,8 +47,8 @@ TEST_F(IsAssignableFromTest, is_assignable)
 {
     CheckIsAssignableFrom<true>("is_assignable_from_test.A", "is_assignable_from_test.A");
     CheckIsAssignableFrom<true>("is_assignable_from_test.B", "is_assignable_from_test.A");
-    CheckIsAssignableFrom<true>("is_assignable_from_test.A", "std:core.Object");
-    CheckIsAssignableFrom<true>("is_assignable_from_test.B", "std:core.Object");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.A", "std.core.Object");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.B", "std.core.Object");
     CheckIsAssignableFrom<true>("is_assignable_from_test.A", "is_assignable_from_test.I");
     CheckIsAssignableFrom<true>("is_assignable_from_test.B", "is_assignable_from_test.I");
 }
@@ -56,8 +56,8 @@ TEST_F(IsAssignableFromTest, is_assignable)
 TEST_F(IsAssignableFromTest, not_assignable)
 {
     CheckIsAssignableFrom<false>("is_assignable_from_test.A", "is_assignable_from_test.B");
-    CheckIsAssignableFrom<false>("std:core.Object", "is_assignable_from_test.A");
-    CheckIsAssignableFrom<false>("std:core.Object", "is_assignable_from_test.B");
+    CheckIsAssignableFrom<false>("std.core.Object", "is_assignable_from_test.A");
+    CheckIsAssignableFrom<false>("std.core.Object", "is_assignable_from_test.B");
     CheckIsAssignableFrom<false>("is_assignable_from_test.I", "is_assignable_from_test.B");
     CheckIsAssignableFrom<false>("is_assignable_from_test.I", "is_assignable_from_test.A");
 }

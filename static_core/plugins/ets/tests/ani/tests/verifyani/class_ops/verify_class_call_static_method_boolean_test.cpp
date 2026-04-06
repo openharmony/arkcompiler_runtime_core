@@ -123,7 +123,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_env)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -156,7 +156,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_0)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -189,7 +189,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cls_1)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&cls)), ANI_OK);
@@ -224,7 +224,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_2)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Animal", &cls), ANI_OK);
 
@@ -258,7 +258,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_method_0)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "booleanMethod", "zcbsilfdC{std:core.String}:z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean(env_, cls, reinterpret_cast<ani_static_method>(method),
@@ -335,7 +335,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_result)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ASSERT_EQ(
@@ -367,7 +367,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_boolean_arg)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -400,7 +400,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_char_arg)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -433,7 +433,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_byte_arg)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -466,7 +466,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_short_arg)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -499,7 +499,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_ref_arg)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -547,7 +547,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_return_type)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticIntMethod", "zcbsilfdC{std:core.String}:i", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticIntMethod", "zcbsilfdC{std.core.String}:i", &method), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(
@@ -583,7 +583,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, class_from_local_scope)
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
     ani_boolean result;
     ASSERT_EQ(
@@ -654,7 +654,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, class_from_escape_local_scope)
     ASSERT_EQ(env_->DestroyEscapeLocalScope(lcls, reinterpret_cast<ani_ref *>(&cls)), ANI_OK);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -668,7 +668,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, call_method_on_global_ref)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_class gcls {};
@@ -690,7 +690,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cross_thread_method_call)
 
         ani_class cls {};
         ASSERT_EQ(env->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
-        ASSERT_EQ(env->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+        ASSERT_EQ(env->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
                   ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
@@ -712,7 +712,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, DISABLED_method_call_from_native_method
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
 
     std::array methods = {ani_native_function {
-        "bar", "C{std:core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ClassCallStaticMethodBooleanTest>)}};
+        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ClassCallStaticMethodBooleanTest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 
     ani_static_method method;
@@ -724,7 +724,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, DISABLED_method_call_from_native_method
     ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
 
     // In the native "bar" method, the "staticVoidParamMethod" method is called
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object, "bar", "C{std:core.Object}l:", cls, method),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object, "bar", "C{std.core.Object}l:", cls, method),
               ANI_OK);
 }
 
@@ -751,7 +751,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, method_call_in_local_scope)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     const int nr3 = 3;
@@ -768,7 +768,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, call_parent_method)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Child", &cls), ANI_OK);
@@ -784,7 +784,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, success)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -798,7 +798,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_env)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -829,7 +829,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_0)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -860,7 +860,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, cls_1)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&cls)), ANI_OK);
@@ -893,7 +893,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_2)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Animal", &cls), ANI_OK);
 
@@ -925,7 +925,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_method_0)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "booleanMethod", "zcbsilfdC{std:core.String}:z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, reinterpret_cast<ani_static_method>(method),
@@ -997,7 +997,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_result)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, nullptr, args_.data()), ANI_ERROR);
@@ -1027,7 +1027,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_args)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -1064,7 +1064,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_boolean_arg)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     const int fakeBoolean = 0xb1ba;
@@ -1097,7 +1097,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_return_type)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticIntMethod", "zcbsilfdC{std:core.String}:i", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticIntMethod", "zcbsilfdC{std.core.String}:i", &method), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, args_.data()), ANI_ERROR);
@@ -1131,7 +1131,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, class_from_local_scope)
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -1201,7 +1201,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, class_from_escape_local_scope)
     ASSERT_EQ(env_->DestroyEscapeLocalScope(lcls, reinterpret_cast<ani_ref *>(&cls)), ANI_OK);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;
@@ -1213,7 +1213,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, call_method_on_global_ref)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_class gcls {};
@@ -1233,7 +1233,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, cross_thread_method_call)
 
         ani_class cls {};
         ASSERT_EQ(env->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
-        ASSERT_EQ(env->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+        ASSERT_EQ(env->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
                   ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
@@ -1253,7 +1253,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, DISABLED_method_call_from_native_metho
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
 
     std::array methods = {ani_native_function {
-        "bar", "C{std:core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ClassCallStaticMethodBooleanATest>)}};
+        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ClassCallStaticMethodBooleanATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 
     ani_static_method method;
@@ -1264,7 +1264,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, DISABLED_method_call_from_native_metho
     ani_object object {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
     // In the native "bar" method, the "staticVoidParamMethod" method is called
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object, "bar", "C{std:core.Object}l:", cls, method),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object, "bar", "C{std.core.Object}l:", cls, method),
               ANI_OK);
 }
 
@@ -1294,7 +1294,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, method_call_in_local_scope)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
     const int nr3 = 3;
 
@@ -1309,7 +1309,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, call_parent_method)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Child", &cls), ANI_OK);
 
@@ -1322,7 +1322,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, success)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std:core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
     ani_boolean result;

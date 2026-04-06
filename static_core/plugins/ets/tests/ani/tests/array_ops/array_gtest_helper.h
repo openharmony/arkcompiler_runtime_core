@@ -24,8 +24,8 @@ class ArrayHelperTest : public AniTest {
 public:
     void InitTest()
     {
-        env_->FindClass("std:core.Boolean", &booleanClass);
-        env_->FindClass("std:core.Int", &intClass);
+        env_->FindClass("std.core.Boolean", &booleanClass);
+        env_->FindClass("std.core.Int", &intClass);
         ASSERT(booleanClass != nullptr);
         ASSERT(intClass != nullptr);
         env_->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanCtor);

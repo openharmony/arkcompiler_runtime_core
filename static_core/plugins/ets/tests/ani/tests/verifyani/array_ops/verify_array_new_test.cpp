@@ -130,7 +130,7 @@ TEST_F(ArrayNewTest, string_initial_element)
 TEST_F(ArrayNewTest, object_initial_element)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("std:core.Object", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
     ani_object obj {};

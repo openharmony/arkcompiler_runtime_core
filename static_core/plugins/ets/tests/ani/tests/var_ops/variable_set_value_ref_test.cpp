@@ -108,7 +108,7 @@ TEST_F(VariableSetValueRefTest, composite_case_1)
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":C{std:core.String}", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":C{std.core.String}", &method), ANI_OK);
 
     ani_ref sum = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &sum), ANI_OK);

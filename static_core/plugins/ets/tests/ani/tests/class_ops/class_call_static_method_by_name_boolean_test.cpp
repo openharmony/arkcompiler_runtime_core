@@ -41,7 +41,7 @@ public:
     {
         va_list args {};
         va_start(args, value);
-        ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_V(cls, "method", "C{std:core.String}:z", value, args),
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_V(cls, "method", "C{std.core.String}:z", value, args),
                   ANI_OK);
         va_end(args);
     }
@@ -465,7 +465,7 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, check_wrong_signature)
 
     ani_boolean value {};
     ASSERT_EQ(
-        env_->c_api->Class_CallStaticMethodByName_Boolean(env_, cls, "method", "C{std:core.String}:z", &value, str),
+        env_->c_api->Class_CallStaticMethodByName_Boolean(env_, cls, "method", "C{std.core.String}:z", &value, str),
         ANI_OK);
 
     ASSERT_EQ(
@@ -474,7 +474,7 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, check_wrong_signature)
 
     ani_value arg;
     arg.r = str;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "method", "C{std:core.String}:z", &value, &arg),
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "method", "C{std.core.String}:z", &value, &arg),
               ANI_OK);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "method", "C{std/core/String}:z", &value, &arg),
               ANI_INVALID_DESCRIPTOR);

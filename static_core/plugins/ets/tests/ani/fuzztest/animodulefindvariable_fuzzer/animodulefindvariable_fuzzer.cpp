@@ -35,7 +35,7 @@ void AniModuleFindVariableFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_module md {};
-    env->FindModule("std:core", &md);
+    env->FindModule("std.core", &md);
     ani_variable var {};
     std::string input(data, size);
     env->Module_FindVariable(md, input.c_str(), &var);

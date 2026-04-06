@@ -24,7 +24,6 @@
 #include "libarkfile/file_items.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/panda_string.h"
-#include "runtime/include/signature_utils.h"
 #include "runtime/object_header_config.h"
 
 namespace ark {
