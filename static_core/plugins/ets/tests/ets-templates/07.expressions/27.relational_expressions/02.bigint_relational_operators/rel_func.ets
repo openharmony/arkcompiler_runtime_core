@@ -13,21 +13,25 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
 /*---
-desc: {{ c.desc }}
-tags: []
+desc: >-
+    BigInt relational operations with function arguments.
 ---*/
 
-let b: bigint = {{c.b}};
+function get_bigint(p: bigint): bigint { return p }
+function get_operand(p: byte): byte { return p }
+function get_operand(p: short): short { return p }
+function get_operand(p: int): int { return p }
+function get_operand(p: long): long { return p }
+function get_operand(p: float): float { return p }
+function get_operand(p: double): double { return p }
 
-function getOperand(): number {
-    return {{c.operand_val}};
+function main(): int {
+    let tests = new arktest.ArkTestsuite('BigInt relational operations with function arguments')
+{%- for c in cases %}
+    tests.addTest(' {{c.desc}}. {{loop.index}}', () => {
+        arktest.assertEQ(get_bigint({{c.b}}) {{c.op}} get_operand({{c.operand_val}}), {{c.expected_bool}})
+    })
+{% endfor %}
+    return tests.run()
 }
-
-function main() {
-    let actual_outcome: boolean = (b {{c.op}} getOperand())
-    arktest.assertEQ(actual_outcome, {{c.expected_bool}}) // Test PASSES if actual outcome matches expected
-}
-{%- endfor %} 

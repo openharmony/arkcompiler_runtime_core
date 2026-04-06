@@ -1,0 +1,114 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+    - bigint: 0n
+      values:
+          - 0n
+          - -0n
+          - '0 as byte'
+          - '0 as short'
+          - '0'
+          - '0 as long'
+          - '0.0f'
+          - '0.0'
+    - bigint: 1n
+      values:
+          - +1n
+          - '1 as byte'
+          - '1 as short'
+          - '1'
+          - '1 as long'
+          - '1f'
+          - '1.00000000000000000001'
+    - bigint: -1n
+      values:
+          - -1n
+          - '-1 as byte'
+          - '-1 as short'
+          - '-1'
+          - '-1 as long'
+          - '-1.00000000000001f'
+          - '-1.0'
+
+    # from int
+    - bigint: 2147483647n # Int.MAX_VALUE
+      values:
+          - '2147483647n'
+          - '2147483647'
+          - '2147483647 as long'
+          - '2.147483647e9'
+    - bigint: 2147483646n # Int.MAX_VALUE - 1
+      values:
+          - new BigInt(2147483646)
+          - '2147483646'
+          - '2147483646 as long'
+          - '2147483646.0'
+    - bigint: -2147483648n # Int.MIN_VALUE
+      values:
+          - -2147483648n
+          - '-2147483648'
+          - '-2147483648 as long'
+          - '-2147483648.0'
+    - bigint: -2147483647n # Int.MIN_VALUE + 1
+      values:
+          - new BigInt(-2147483647)
+          - '-2147483647'
+          - '-2147483647 as long'
+          - '-2147483647.0'
+
+    # from long
+    - bigint: 9223372036854775807n
+      diff: 10000n
+      values:
+          - 9223372036854775807n
+          - '9223372036854775807'
+          - '9223372036854775807.0'
+
+    # from float
+    - bigint: 16777215n # max safe integer in float
+      values:
+          - 16777215n
+          - '16777215'
+          - '16777215f'
+          - '16777215.0'
+    - bigint: -16777215n # min safe integer in float
+      values:
+          - -16777215n
+          - '-16777215'
+          - '-16777215f'
+          - '-16777215.0'
+
+    # from double
+    - bigint: 9007199254740991n # max safe integer in double
+      values:
+          - 9007199254740991n
+          - '9007199254740991'
+          - '9007199254740991.0'
+    - bigint: -9007199254740991n # min safe integer in double
+      values:
+          - -9007199254740991n
+          - '-9007199254740991'
+          - '-900719.9254740991e10'
+
+    # from bigint
+    - bigint: 94876543875610289630186594876592837465n
+      values:
+          - 94876543875610289630186594876592837465n
+          - new BigInt(94876543875610289630186594876592837465n)
+          - new BigInt(new BigInt(94876543875610289630186594876592837465n))
+    - bigint: -10101010101010101010101n
+      values:
+          - -10101010101010101010101n
+          - new BigInt(-10101010101010101010101n)
+          - new BigInt(-(new BigInt(10101010101010101010101n)))
