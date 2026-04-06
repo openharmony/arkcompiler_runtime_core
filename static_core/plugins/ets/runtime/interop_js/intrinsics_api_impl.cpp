@@ -690,50 +690,6 @@ void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value)
     }
 }
 
-void SetIndexedPropertyWithObject(JSValue *object, uint32_t index, EtsObject *value)
-{
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    auto ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
-    auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
-
-    napi_status jsStatus {};
-    {
-        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        jsStatus = napi_set_element(env, jsThis, index, jsValue);
-    }
-    if (jsStatus != napi_ok) {
-        ctx->ForwardJSException(executionCtx);
-        return;
-    }
-}
-
-void SetNamedPropertyWithObject(JSValue *object, const char *key, EtsObject *value)
-{
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    auto ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
-    auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
-
-    napi_status jsStatus {};
-    {
-        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        jsStatus = napi_set_named_property(env, jsThis, key, jsValue);
-    }
-    if (jsStatus != napi_ok) {
-        ctx->ForwardJSException(executionCtx);
-        return;
-    }
-}
-
 EtsObject *GetPropertyObject(JSValue *object, JSValue *property)
 {
     auto executionCtx = EtsExecutionContext::GetCurrent();
@@ -744,38 +700,6 @@ EtsObject *GetPropertyObject(JSValue *object, JSValue *property)
 
     auto result = JSRuntimeGetPropertyImpl(executionCtx, env, object, property);
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, result).value();
-}
-
-EtsObject *GetNamedPropertyObject(JSValue *object, const char *property)
-{
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    auto ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    return JSValueGetByName<JSConvertEtsObject>(ctx, object, property).value();
-}
-
-JSValue *GetNamedPropertyJSValue(JSValue *object, const char *property)
-{
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    auto ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    return JSValueGetByName<JSConvertJSValue>(ctx, object, property).value();
-}
-
-EtsObject *GetPropertyObjectByString(JSValue *object, const char *property)
-{
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    auto ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-    return JSValueGetByName<JSConvertEtsObject>(ctx, object, property).value();
 }
 
 EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHandle<ObjectHeader>> args)
