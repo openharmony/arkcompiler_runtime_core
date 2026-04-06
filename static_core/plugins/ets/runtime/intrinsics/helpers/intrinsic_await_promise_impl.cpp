@@ -37,7 +37,7 @@ static void LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job,
     [[maybe_unused]] auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId, dependency});
     ASSERT(launchResult == LaunchResult::OK);
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    promise->GetEvent(etsCtx)->AddDependency(dependency);
+    promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
 }
 
 static PandaVector<Value> FillEntrypointArgs(Method *method)
@@ -70,7 +70,7 @@ static EtsObject *HandleAwaitStackful(EtsPromise *promise)
 
     /* CASE 2. This is a native ETS promise */
     LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
-    promiseHandle->GetEvent(etsCtx)->Wait();
+    promiseHandle->GetEvent<CoroutineMode::STACKFUL>(etsCtx)->Wait();
     ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
 
@@ -122,7 +122,7 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
         auto *stacklessJobMan = static_cast<StacklessJobManager *>(executionCtx->GetManager());
         auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
         stacklessJobMan->AwaitAsynchronous(dependency);
-        promise->GetEvent(etsCtx)->AddDependency(dependency);
+        promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return asyncCtx;
     }
@@ -144,6 +144,53 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
     LaunchJobWithDependency(executionCtx, job, asyncCtxHandle.GetPtr(), promiseHandle.GetPtr());
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return asyncCtxHandle.GetPtr();
+}
+
+static EtsObject *HandleSettledPromise(EtsExecutionContext *etsCtx, EtsHandle<EtsPromise> &promiseHandle)
+{
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
+    if (promiseHandle->IsResolved()) {
+        LOG(DEBUG, COROUTINES) << "Promise::awaitSync: promise is resolved!";
+        return promiseHandle->GetValue(etsCtx);
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
+    }
+    LOG(DEBUG, COROUTINES) << "Promise::awaitSync: promise is rejected!";
+    auto *exc = promiseHandle->GetValue(etsCtx);
+    etsCtx->GetMT()->SetException(exc->GetCoreType());
+    return nullptr;
+}
+
+EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise)
+{
+    JobExecutionContext *executionCtx = JobExecutionContext::GetCurrent();
+    EtsExecutionContext *etsCtx = EtsExecutionContext::FromMT(executionCtx);
+    if (promise == nullptr) {
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, executionCtx);
+        return nullptr;
+    }
+    if (executionCtx->GetManager()->IsJobSwitchDisabled()) {
+        ThrowEtsException(etsCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
+                          "Cannot await in the current context!");
+        return nullptr;
+    }
+
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
+        return HandleAwaitStackful(promise);
+    }
+
+    [[maybe_unused]] EtsHandleScope scope(etsCtx);
+    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
+
+    LOG(DEBUG, COROUTINES) << "Promise::awaitSync: starting blocking await for a promise...";
+
+    promiseHandle->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->WaitBlocking();
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
+    LOG(DEBUG, COROUTINES) << "Promise::awaitSync: blocking await finished.";
+
+    return HandleSettledPromise(etsCtx, promiseHandle);
 }
 
 }  // namespace ark::ets::intrinsics::helpers

@@ -28,6 +28,8 @@
 
 namespace ark::ets {
 
+enum class CoroutineMode { STACKFUL, STACKLESS };
+
 namespace test {
 class EtsPromiseTest;
 }  // namespace test
@@ -175,10 +177,15 @@ public:
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
     }
 
-    EtsEventWithDependencies *GetEvent(EtsExecutionContext *executionCtx) const
+    template <CoroutineMode MODE>
+    auto *GetEvent(EtsExecutionContext *executionCtx) const
     {
         auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, event_));
-        return EtsEventWithDependencies::FromCoreType(obj);
+        if constexpr (MODE == CoroutineMode::STACKFUL) {
+            return EtsEvent::FromCoreType(obj);
+        } else {
+            return EtsEventWithDependencies::FromCoreType(obj);
+        }
     }
 
     void SetEvent(EtsExecutionContext *executionCtx, EtsEventWithDependencies *event)

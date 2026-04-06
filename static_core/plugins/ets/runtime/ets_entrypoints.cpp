@@ -118,7 +118,7 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     EtsHandle<EtsPromise> promiseHandle(executionCtx, promise);
     // NOTE(panferovi): should be fixed in #19443
     ASSERT(promiseHandle->GetMutex(executionCtx) == nullptr);
-    ASSERT(promiseHandle->GetEvent(executionCtx) == nullptr);
+    ASSERT(promiseHandle->GetEvent<CoroutineMode::STACKLESS>(executionCtx) == nullptr);
     // NOTE(panferovi): issue with raw args and thisObj??
     auto *mutex = EtsMutex::Create(executionCtx);
     promiseHandle->SetMutex(executionCtx, mutex);

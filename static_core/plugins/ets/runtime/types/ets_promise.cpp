@@ -56,9 +56,9 @@ void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx)
 
     // Unblock awaitee jobs
     if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
-        GetEvent(executionCtx)->Fire();
+        GetEvent<CoroutineMode::STACKFUL>(executionCtx)->Fire();
     } else {
-        GetEvent(executionCtx)->ResolveDependencies();
+        GetEvent<CoroutineMode::STACKLESS>(executionCtx)->ResolveDependencies();
     }
 
     for (int idx = 0; idx < queueSize; ++idx) {
