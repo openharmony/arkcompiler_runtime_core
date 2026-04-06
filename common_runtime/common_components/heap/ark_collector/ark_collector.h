@@ -272,6 +272,8 @@ private:
     template<typename Stack>
     void MarkRef(RefField<> &ref, Stack &stack);
 
+    void ProcessReferencesAfterCopy();
+
     CopyTable fwdTable_;
 
     GCMode gcMode_ = GCMode::CMC;
