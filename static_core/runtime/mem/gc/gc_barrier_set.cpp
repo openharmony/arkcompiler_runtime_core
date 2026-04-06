@@ -228,7 +228,7 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     auto *begin = reinterpret_cast<ObjectPointerType *>(ToUintPtr(objAddr) + offset);
-    auto *end = begin + count;
+    auto *end = reinterpret_cast<ObjectPointerType *>(ToUintPtr(begin) + count);
     while (begin < end) {
         auto value = *begin;
         if (value != 0) {
