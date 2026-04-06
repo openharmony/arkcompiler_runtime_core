@@ -39,7 +39,7 @@ class F {
     foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     foo1<T>(u: T) {}
     foo1<T>(): T { return 'Hello' as T}
-    foo1<T>(u: T): never {
+    foo1<T>(u: T, v: T): never {
         throw new Error()
     }
     fooFixedArray<T>(u: FixedArray<T>) {}
@@ -89,7 +89,7 @@ class G {
     static foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     static foo1<T>(u: T) {}
     static foo1<T>(): T { return 'Hello' as T }
-    static foo1<T>(u: T): never {
+    static foo1<T>(u: T, v: T): never {
         throw new Error()
     }
     static fooFixedArray<T>(u: FixedArray<T>) {}
@@ -121,7 +121,7 @@ function foo(u: number | string | ValueArray<char>): (E | B) | Partial<A> { retu
 function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
 function foo1<T>(u: T) {}
 function foo1<T>(): T { return 'Hello' as T }
-function foo1<T>(u: T): never {
+function foo1<T>(u: T, v: T): never {
     throw new Error()
 }
 function fooFixedArray<T>(u: FixedArray<T>) {}
@@ -158,7 +158,7 @@ namespace rls {
     function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     function foo1<T>(u: T) {}
     function foo1<T>(): T { return 'Hello' as T }
-    function foo1<T>(u: T): never {
+    function foo1<T>(u: T, v: T): never {
         throw new Error()
     }
     function fooFixedArray<T>(u: FixedArray<T>) {}

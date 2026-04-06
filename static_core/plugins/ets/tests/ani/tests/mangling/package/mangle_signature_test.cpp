@@ -512,7 +512,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
     // Check generics
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "Y:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", ":Y", &fn), ANI_OK);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "Y:N", &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "YY:N", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "fooFixedArray", "A{Y}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "fooFixedArray", ":A{Y}", &fn), ANI_OK);
 
@@ -593,7 +593,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     // Check generics
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", "Y:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", ":Y", &fn), ANI_OK);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", "Y:N", &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", "YY:N", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooFixedArray", "A{Y}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooFixedArray", ":A{Y}", &fn), ANI_OK);
 
@@ -676,7 +676,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
     // Check generics
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", "Y:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", ":Y", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", "Y:N", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", "YY:N", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooFixedArray", "A{Y}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooFixedArray", ":A{Y}", &method), ANI_OK);
 
@@ -757,7 +757,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
     // Check generics
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", "Y:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", ":Y", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", "Y:N", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", "YY:N", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooFixedArray", "A{Y}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooFixedArray", ":A{Y}", &method), ANI_OK);
 

@@ -1518,12 +1518,13 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_034, TestSize.Level1)
     AddModuleElement("array_object_demo", "array_object_demo");
     AddElement<abckit_wrapper::Field>("array_object_demo.myArr", "myArr");
     AddElement<abckit_wrapper::Field>("array_object_demo.pickedCard1", "pickedCard1");
-    AddElement<abckit_wrapper::Field>("array_object_demo.arr2", "arr2");
+    AddElement<abckit_wrapper::Field>("array_object_demo.obj2", "obj2");
     AddElement<abckit_wrapper::Field>("array_object_demo.myDeck", "myDeck");
     AddElement<abckit_wrapper::Field>("array_object_demo.suits", "suits");
     AddElement<abckit_wrapper::Field>("array_object_demo.pickedCard2", "pickedCard2");
     AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:f64;array_object_demo.Obj1;", "pickCard");
-    AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:std.core.Array;std.core.String;", "pickCard");
+    AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:array_object_demo.Obj2;std.core.String;",
+                                       "pickCard");
     AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:std.core.Array;f64;", "pickCard");
     AddElement<abckit_wrapper::Class>("array_object_demo.Obj2", "Obj2");
     AddElement<abckit_wrapper::Field>("array_object_demo.Obj2.%%property-suit", "suit");
