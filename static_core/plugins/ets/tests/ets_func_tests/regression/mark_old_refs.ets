@@ -20,8 +20,8 @@ tags: []
 
 function main(): void {
   let size = 100000
-  let arr = new Object[size](new Object())
+  let arr = new Object[size]({})
   for (let i = 0; i < size; i++) {
-    arr[i] = new Object[100](new Object());
+    arr[i] = new Object[100]({});
   }
 }

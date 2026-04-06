@@ -44,7 +44,9 @@
 
 //! CHECKER       AOT. Check that SimplifyStringBuilder doesn't inline methods if methods in blacklist
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>,std.core.StringBuilder::%%get-stringLength' --compiler-regex=.*main.*"
+//! RUN_PAOC      options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>," +
+//!                        "std.core.StringBuilder::%%get-stringLength'" +
+//!                        " --compiler-regex=.*main.*"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
 //! PASS_AFTER    "BranchElimination"
@@ -102,7 +104,8 @@
 //! CHECKER       JIT. Check that SimplifyStringBuilder doesn't inline methods if methods in blacklist
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
-//!               options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>,std.core.StringBuilder::%%get-stringLength' --compiler-regex=.*main.*",
+//!               options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>," +
+//!                        "std.core.StringBuilder::%%get-stringLength'",
 //!               entry: "ets_string_builder_inline.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
@@ -129,6 +132,6 @@
 
 function main(){
     let sb = new StringBuilder();
-    let sb_len = sb.stringLength;
-    return sb_len;
+    let sbLen = sb.stringLength;
+    return sbLen;
 }
