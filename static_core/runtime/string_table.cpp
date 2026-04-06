@@ -155,7 +155,7 @@ void StringTable::Table::PreBarrierOnGet(coretypes::String *str)
     ASSERT_MANAGED_CODE();
     auto *preWrb = ManagedThread::GetCurrent()->GetPreWrbEntrypoint();
     if (preWrb != nullptr) {
-        reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(str);
+        reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(ToObjPtrType(str));
     }
 }
 

@@ -36,7 +36,7 @@ def llvm_type_getter(type, gc_space)
     return 'llvm::Type::get' + @llvm_type_map[type] + 'Ty(ctx)'
   elsif type.include?('ObjectHeader**')
     return 'llvm::PointerType::get(ctx, 0)'
-  elsif type.include?('*') && type.include?('coretypes') || type.include?('ObjectHeader*')
+  elsif type.include?('*') && type.include?('coretypes') || type.include?('ObjectHeader*') || type.include?('ObjectPointerType')
     return 'llvm::PointerType::get(ctx, ' + gc_space + ')'
   elsif type.include? '*'
     return 'llvm::PointerType::get(ctx, 0)'
