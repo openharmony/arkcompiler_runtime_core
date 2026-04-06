@@ -34,21 +34,21 @@ mem::GCBarrierSet *ObjectAccessor::GetBarrierSet()
 }
 
 /* static */
-mem::GCBarrierSet *ObjectAccessor::GetBarrierSet(const ManagedThread *thread)
+mem::GCBarrierSet *ObjectAccessor::GetBarrierSet(const Mutator *mutator)
 {
-    return thread->GetBarrierSet();
+    return mutator->GetBarrierSet();
 }
 
 /* static */
-mem::BarrierType ObjectAccessor::GetPreBarrierType(const ManagedThread *thread)
+mem::BarrierType ObjectAccessor::GetPreBarrierType(const Mutator *mutator)
 {
-    return thread->GetPreBarrierType();
+    return mutator->GetPreBarrierType();
 }
 
 /* static */
-mem::BarrierType ObjectAccessor::GetPostBarrierType(const ManagedThread *thread)
+mem::BarrierType ObjectAccessor::GetPostBarrierType(const Mutator *mutator)
 {
-    return thread->GetPostBarrierType();
+    return mutator->GetPostBarrierType();
 }
 
 }  // namespace ark

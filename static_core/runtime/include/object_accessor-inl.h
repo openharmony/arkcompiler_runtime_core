@@ -76,12 +76,12 @@ inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *va
 
 /* static */
 template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThread *thread, const void *obj,
-                                               size_t offset)
+inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const Mutator *mutator, const void *obj, size_t offset)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
-        auto *barrierSet = GetBarrierSet();
+        ASSERT(mutator != nullptr);
+        auto *barrierSet = GetBarrierSet(mutator);
         void **field = reinterpret_cast<void **>(ToUintPtr(obj) + offset);
         return reinterpret_cast<ObjectHeader *>(barrierSet->ReadBarrier(field));
     }
@@ -144,10 +144,10 @@ inline void ObjectAccessor::FillObjsNoBarrier(void *objArr, size_t dataOffset, s
 /* static */
 template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
+inline void ObjectAccessor::SetObject(const Mutator *mutator, void *obj, size_t offset, ObjectHeader *value)
 {
     if constexpr (NEED_WRITE_BARRIER) {
-        auto *barrierSet = GetBarrierSet(thread);
+        auto *barrierSet = GetBarrierSet(mutator);
         if (barrierSet->IsPreBarrierEnabled()) {
             ObjectHeader *preVal = GetObject<IS_VOLATILE, IS_DYN>(obj, offset);
             barrierSet->PreBarrier(preVal);
@@ -218,24 +218,23 @@ inline void ObjectAccessor::SetFieldObject(void *obj, const Field &field, Object
 /* static */
 // NEED_READ_BARRIER = true , IS_DYN = false
 template <bool NEED_READ_BARRIER, bool IS_DYN>
-inline ObjectHeader *ObjectAccessor::GetFieldObject(const ManagedThread *thread, const void *obj, const Field &field)
+inline ObjectHeader *ObjectAccessor::GetFieldObject(const Mutator *mutator, const void *obj, const Field &field)
 {
     if (UNLIKELY(field.IsVolatile())) {
-        return GetObject<true, NEED_READ_BARRIER, IS_DYN>(thread, obj, field.GetOffset());
+        return GetObject<true, NEED_READ_BARRIER, IS_DYN>(mutator, obj, field.GetOffset());
     }
-    return GetObject<false, NEED_READ_BARRIER, IS_DYN>(thread, obj, field.GetOffset());
+    return GetObject<false, NEED_READ_BARRIER, IS_DYN>(mutator, obj, field.GetOffset());
 }
 
 /* static */
 // NEED_READ_BARRIER = true , IS_DYN = false
 template <bool NEED_WRITE_BARRIER, bool IS_DYN>
-inline void ObjectAccessor::SetFieldObject(const ManagedThread *thread, void *obj, const Field &field,
-                                           ObjectHeader *value)
+inline void ObjectAccessor::SetFieldObject(const Mutator *mutator, void *obj, const Field &field, ObjectHeader *value)
 {
     if (UNLIKELY(field.IsVolatile())) {
-        SetObject<true, NEED_WRITE_BARRIER, IS_DYN>(thread, obj, field.GetOffset(), value);
+        SetObject<true, NEED_WRITE_BARRIER, IS_DYN>(mutator, obj, field.GetOffset(), value);
     } else {
-        SetObject<false, NEED_WRITE_BARRIER, IS_DYN>(thread, obj, field.GetOffset(), value);
+        SetObject<false, NEED_WRITE_BARRIER, IS_DYN>(mutator, obj, field.GetOffset(), value);
     }
 }
 
@@ -552,34 +551,33 @@ inline void ObjectAccessor::SetDynValueWithoutBarrier(void *obj, size_t offset, 
 
 /* static */
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void ObjectAccessor::SetDynValue(const ManagedThread *thread, void *obj, size_t offset,
-                                        coretypes::TaggedType value)
+inline void ObjectAccessor::SetDynValue(const Mutator *mutator, void *obj, size_t offset, coretypes::TaggedType value)
 {
-    if (UNLIKELY(GetBarrierSet(thread)->IsPreBarrierEnabled())) {
+    if (UNLIKELY(GetBarrierSet(mutator)->IsPreBarrierEnabled())) {
         coretypes::TaggedValue preVal(GetDynValue<coretypes::TaggedType>(obj, offset));
         if (preVal.IsHeapObject()) {
-            GetBarrierSet(thread)->PreBarrier(preVal.GetRawHeapObject());
+            GetBarrierSet(mutator)->PreBarrier(preVal.GetRawHeapObject());
         }
     }
     SetDynValueWithoutBarrier(obj, offset, value);
     coretypes::TaggedValue tv(value);
     if (tv.IsHeapObject() && tv.GetRawHeapObject() != nullptr) {
-        auto gcPostBarrierType = GetPostBarrierType(thread);
+        auto gcPostBarrierType = GetPostBarrierType(mutator);
         if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
-            GetBarrierSet(thread)->PostBarrier(obj, offset, tv.GetRawHeapObject());
+            GetBarrierSet(mutator)->PostBarrier(obj, offset, tv.GetRawHeapObject());
         }
     }
 }
 
 /* static */
 template <typename T>
-inline void ObjectAccessor::SetDynPrimitive(const ManagedThread *thread, void *obj, size_t offset, T value)
+inline void ObjectAccessor::SetDynPrimitive(const Mutator *mutator, void *obj, size_t offset, T value)
 {
     // Need pre-barrier becuase the previous value may be a reference.
-    if (UNLIKELY(GetBarrierSet(thread)->IsPreBarrierEnabled())) {
+    if (UNLIKELY(GetBarrierSet(mutator)->IsPreBarrierEnabled())) {
         coretypes::TaggedValue preVal(GetDynValue<coretypes::TaggedType>(obj, offset));
         if (preVal.IsHeapObject()) {
-            GetBarrierSet(thread)->PreBarrier(preVal.GetRawHeapObject());
+            GetBarrierSet(mutator)->PreBarrier(preVal.GetRawHeapObject());
         }
     }
     SetDynValueWithoutBarrier(obj, offset, value);

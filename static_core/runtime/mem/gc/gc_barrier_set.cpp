@@ -234,14 +234,14 @@ void GCG1BarrierSet::Invalidate(CardTable::CardPtr begin, CardTable::CardPtr las
 
 void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
 {
-    auto *thread = ManagedThread::GetCurrent();
-    if (thread == nullptr) {  // slow path via shared-queue for VM threads: gc/compiler/etc
+    auto *mutator = Mutator::GetCurrent();
+    if (mutator == nullptr) {  // slow path via shared-queue for VM threads: gc/compiler/etc
         os::memory::LockHolder lock(*queueLock_);
         updatedRefsQueue_->push_back(card);
     } else {
         // general fast-path for mutators
-        ASSERT(thread->GetPreBuff() != nullptr);  // write barrier cant be called after Terminate
-        auto *buffer = thread->GetG1PostBarrierBuffer();
+        ASSERT(mutator->GetPreBuff() != nullptr);  // write barrier cant be called after Terminate
+        auto *buffer = mutator->GetG1PostBarrierBuffer();
         ASSERT(buffer != nullptr);
         // try to push it twice
         for (size_t i = 0; i < 2U; i++) {
@@ -351,7 +351,7 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
 
 bool GCCMCBarrierSet::IsReadBarrierEnabled()
 {
-    return ManagedThread::GetCurrent()->GetReadBarrierEntrypoint() != nullptr;
+    return Mutator::GetCurrent()->GetReadBarrierEntrypoint() != nullptr;
 }
 
 void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
@@ -365,7 +365,7 @@ void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe
 void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
 {
     if constexpr (USE_READ_BARRIERS) {
-        auto *readBarrier = ManagedThread::GetCurrent()->GetReadBarrierEntrypoint();
+        auto *readBarrier = Mutator::GetCurrent()->GetReadBarrierEntrypoint();
         if (readBarrier != nullptr) {
             reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(refAddr));
             auto field = reinterpret_cast<common_vm::RefField<false> &>(*refAddr);

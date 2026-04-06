@@ -99,7 +99,7 @@ static PandaString GetFieldInfoForObject([[maybe_unused]] const ObjectHeader *ob
             if (localI % ClassHelper::OBJECT_POINTER_SIZE != 0) {
                 break;
             }
-            auto fields = cls->GetFields();
+            auto fields = cls->GetInstanceFields();
             return "field " + NameFromField(&fields[localI / ClassHelper::OBJECT_POINTER_SIZE]);
         }
         cls = cls->GetBase();

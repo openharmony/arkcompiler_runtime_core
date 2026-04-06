@@ -268,7 +268,7 @@ public:
             CopyData(srcSpan, dstSpan);
             // Call barriers.
             // PreBarrier isn't needed as links inside the source object arn't changed.
-            auto *barrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+            auto *barrierSet = Mutator::GetCurrent()->GetBarrierSet();
             if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
                 barrierSet->PostBarrier(dst, GetDataOffset(), count);
             }

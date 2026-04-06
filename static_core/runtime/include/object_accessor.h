@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ namespace ark {
 
 class ObjectHeader;
 class Field;
-class ManagedThread;
+class Mutator;
 
 class ObjectAccessor {
 public:
@@ -61,16 +61,16 @@ public:
 
     // Pass thread parameter to speed up interpreter
     template <bool IS_VOLATILE = false, bool NEED_READ_BARRIER = true, bool IS_DYN = false>
-    static ObjectHeader *GetObject(const ManagedThread *thread, const void *obj, size_t offset);
+    static ObjectHeader *GetObject(const Mutator *mutator, const void *obj, size_t offset);
 
     template <bool IS_VOLATILE = false, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    static void SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value);
+    static void SetObject(const Mutator *mutator, void *obj, size_t offset, ObjectHeader *value);
 
     template <bool NEED_READ_BARRIER = true, bool IS_DYN = false>
-    static ObjectHeader *GetFieldObject(const ManagedThread *thread, const void *obj, const Field &field);
+    static ObjectHeader *GetFieldObject(const Mutator *mutator, const void *obj, const Field &field);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    static void SetFieldObject(const ManagedThread *thread, void *obj, const Field &field, ObjectHeader *value);
+    static void SetFieldObject(const Mutator *mutator, void *obj, const Field &field, ObjectHeader *value);
 
     template <class T>
     static T GetFieldPrimitive(const void *obj, size_t offset, std::memory_order memoryOrder);
@@ -118,10 +118,10 @@ public:
 
     static inline void SetDynValueWithoutBarrier(void *obj, size_t offset, coretypes::TaggedType value);
 
-    static inline void SetDynValue(const ManagedThread *thread, void *obj, size_t offset, coretypes::TaggedType value);
+    static inline void SetDynValue(const Mutator *mutator, void *obj, size_t offset, coretypes::TaggedType value);
 
     template <typename T>
-    static inline void SetDynPrimitive(const ManagedThread *thread, void *obj, size_t offset, T value);
+    static inline void SetDynPrimitive(const Mutator *mutator, void *obj, size_t offset, T value);
 
     template <bool IS_VOLATILE = false, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
     static void FillObjects(void *objArr, size_t dataOffset, size_t count, size_t elemSize, ObjectHeader *value);
@@ -252,11 +252,11 @@ private:
 
     PANDA_PUBLIC_API static mem::GCBarrierSet *GetBarrierSet();
 
-    PANDA_PUBLIC_API static mem::GCBarrierSet *GetBarrierSet(const ManagedThread *thread);
+    PANDA_PUBLIC_API static mem::GCBarrierSet *GetBarrierSet(const Mutator *mutator);
 
-    static mem::BarrierType GetPreBarrierType(const ManagedThread *thread);
+    static mem::BarrierType GetPreBarrierType(const Mutator *mutator);
 
-    PANDA_PUBLIC_API static mem::BarrierType GetPostBarrierType(const ManagedThread *thread);
+    PANDA_PUBLIC_API static mem::BarrierType GetPostBarrierType(const Mutator *mutator);
 };
 
 }  // namespace ark

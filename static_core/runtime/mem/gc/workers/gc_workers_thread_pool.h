@@ -98,12 +98,9 @@ private:
 
 class GCWorkersCreationInterface : public WorkerCreationInterface {
 public:
-    explicit GCWorkersCreationInterface(PandaVM *vm) : gcThread_(vm, Mutator::MutatorType::GC)
-    {
-        ASSERT(vm != nullptr);
-    }
+    explicit GCWorkersCreationInterface(PandaVM *vm);
+    ~GCWorkersCreationInterface() override;
 
-    ~GCWorkersCreationInterface() override = default;
     NO_COPY_SEMANTIC(GCWorkersCreationInterface);
     NO_MOVE_SEMANTIC(GCWorkersCreationInterface);
 

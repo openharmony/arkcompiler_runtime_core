@@ -1386,9 +1386,9 @@ public:
         // Check GC haven't calculated live bytes for the region
         EXPECT_EQ(0, region->GetLiveBytes());
         // Check GC has cleared SATB buffer
-        MTManagedThread *thread = MTManagedThread::GetCurrent();
-        EXPECT_NE(nullptr, thread->GetPreBuff());
-        EXPECT_EQ(0, thread->GetPreBuff()->size());
+        Mutator *mutator = Mutator::GetCurrent();
+        EXPECT_NE(nullptr, mutator->GetPreBuff());
+        EXPECT_EQ(0, mutator->GetPreBuff()->size());
     }
 
 private:

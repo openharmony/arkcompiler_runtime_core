@@ -152,33 +152,6 @@ MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, ark::pan
     return thread;
 }
 
-void ManagedThread::InitCardTableData(mem::GCBarrierSet *barrier)
-{
-    auto postBarrierType = barrier->GetPostType();
-    switch (postBarrierType) {
-        case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
-            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
-            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
-            postWrbOneObject_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
-            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
-            break;
-        case ark::mem::BarrierType::POST_WRB_NONE:
-            postWrbOneObject_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
-            postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
-            break;
-        case mem::POST_RB_NONE:
-        case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
-            break;
-        case mem::PRE_WRB_NONE:
-        case mem::PRE_RB_NONE:
-        case mem::PRE_SATB_BARRIER:
-        case ark::mem::BarrierType::CMC_READ_BARRIER:
-        case ark::mem::BarrierType::PRE_CMC_WRITE_BARRIER:
-            LOG(FATAL, RUNTIME) << "Post barrier expected";
-            break;
-    }
-}
-
 ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
                              ManagedThread::ThreadType threadType, ark::panda_file::SourceLang threadLang)
     : Mutator(pandaVm, MutatorType::MANAGED),
@@ -192,21 +165,6 @@ ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, P
     ASSERT(zeroTlab_ != nullptr);
     tlab_ = zeroTlab_;
     entrypointsTable_ = Runtime::GetCurrent()->GetEntrypointsTable();
-    // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
-    mem::GC *gc = pandaVm->GetGC();
-    if (gc != nullptr) {
-        auto *barrierSet = gc->GetBarrierSet();
-        InitCardTableData(barrierSet);
-        preBarrierType_ = barrierSet->GetPreType();
-        postBarrierType_ = barrierSet->GetPostType();
-        if (barrierSet->GetPreType() == ark::mem::BarrierType::PRE_SATB_BARRIER) {
-            preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
-            // need to initialize in constructor because we have barriers between constructor and InitBuffers in
-            // InitializedClasses
-            g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
-        }
-    }
-
     stackFrameAllocator_ =
         allocator->New<mem::StackFrameAllocator>(Runtime::GetOptions().UseMallocForInternalAllocations());
     internalLocalAllocator_ =
@@ -252,36 +210,10 @@ ManagedThread::~ManagedThread()
     internalLocalAllocator_ = nullptr;
     allocator->Delete(stackFrameAllocator_);
     allocator->Delete(ptThreadInfo_.release());
-    FreePreBuffer();
 
 #if defined(VERBOSE_THREAD_STATE_LOG)
     ASSERT(threadFrameStates_.empty() && "stack should be empty");
 #endif
-}
-
-void ManagedThread::InitBuffers()
-{
-    auto allocator = GetInternalAllocator(this);
-    mem::GC *gc = GetVM()->GetGC();
-    auto barrier = gc->GetBarrierSet();
-    if (barrier->GetPreType() == ark::mem::BarrierType::PRE_SATB_BARRIER) {
-        // we need to recreate buffers if it was detach (we removed all structures) and attach again
-        // skip initializing in first attach after constructor
-        if (preBuff_ == nullptr) {
-            ASSERT(preBuff_ == nullptr);
-            preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
-            ASSERT(g1PostBarrierRingBuffer_ == nullptr);
-            g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
-        }
-    }
-}
-
-void ManagedThread::FreePreBuffer()
-{
-    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    ASSERT(allocator != nullptr);
-    allocator->Delete(preBuff_);
-    preBuff_ = nullptr;
 }
 
 NO_INLINE static uintptr_t GetStackTop()
@@ -844,9 +776,11 @@ void ManagedThread::CollectTLABMetrics()
 
 void ManagedThread::DestroyInternalResources(mem::MutatorUnregistrationMode mode)
 {
-    GetVM()->GetGC()->OnMutatorTerminate(this, mode, mem::BuffersKeepingFlag::DELETE);
-    ASSERT(preBuff_ == nullptr);
-    ASSERT(g1PostBarrierRingBuffer_ == nullptr);
+    if (mode == mem::MutatorUnregistrationMode::UNREGISTER) {
+        GetVM()->GetGC()->OnMutatorTerminate(this, mode, mem::BuffersKeepingFlag::DELETE);
+        ASSERT(GetPreBuff() == nullptr);
+        ASSERT(GetG1PostBarrierBuffer() == nullptr);
+    }
     ptThreadInfo_->Destroy();
 }
 
@@ -882,8 +816,6 @@ void ManagedThread::FreeInternalMemory()
 
     allocator->Delete(objectHeaderHandleStorage_);
     objectHeaderHandleScopes_.~PandaVector<HandleScope<ObjectHeader *> *>();
-
-    FreePreBuffer();
 }
 
 void ManagedThread::PrintSuspensionStackIfNeeded()

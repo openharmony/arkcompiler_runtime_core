@@ -111,7 +111,6 @@ public:
         thread_ = MTManagedThread::GetCurrent();
         if (thread_ == nullptr) {
             thread_ = MTManagedThread::Create(Runtime::GetCurrent(), Runtime::GetCurrent()->GetPandaVM());
-            thread_->InitBuffers();
         } else {
             thread_->InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
                                                ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);

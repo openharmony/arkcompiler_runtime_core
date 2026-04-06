@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "libarkbase/os/cpu_affinity.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
+#include "runtime/include/panda_vm.h"
 
 namespace ark::mem {
 
@@ -36,6 +37,18 @@ bool GCWorkersProcessor::Process(GCWorkersTask &&task)
 {
     gcThreadsPools_->RunGCWorkersTask(&task, workerData_);
     return true;
+}
+
+GCWorkersCreationInterface::GCWorkersCreationInterface(PandaVM *vm) : gcThread_(vm, Mutator::MutatorType::GC)
+{
+    ASSERT(vm != nullptr);
+    vm->GetGC()->OnMutatorCreate(&gcThread_);
+}
+
+GCWorkersCreationInterface::~GCWorkersCreationInterface()
+{
+    gcThread_.GetVM()->GetGC()->OnMutatorTerminate(&gcThread_, MutatorUnregistrationMode::UNREGISTER,
+                                                   BuffersKeepingFlag::DELETE);
 }
 
 GCWorkersThreadPool::GCWorkersThreadPool(GC *gc, size_t threadsCount)

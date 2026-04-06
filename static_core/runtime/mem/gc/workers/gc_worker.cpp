@@ -59,6 +59,7 @@ void GCWorker::GCThreadLoop(GCWorker *gcWorker)
 
 void GCWorker::CreateAndStartWorker()
 {
+    gc_->OnMutatorCreate(gcMutator_);
     // If GC runs in place or Task manager is used for GC, so no need create separate internal GC worker
     if (gc_->GetSettings()->RunGCInPlace()) {
         return;
@@ -83,16 +84,16 @@ void GCWorker::FinalizeAndDestroyWorker()
     if (gc_->GetSettings()->UseTaskManagerForGC()) {
         needToFinish_ = true;
         gc_->GetWorkersTaskQueue()->WaitBackgroundTasks();
+        gc_->OnMutatorTerminate(gcMutator_, MutatorUnregistrationMode::UNREGISTER, BuffersKeepingFlag::DELETE);
         return;
     }
     ASSERT(gc_->GetSettings()->UseThreadPoolForGC());
-    // Internal GC thread was not created, so just return
-    if (gcInternalThread_ == nullptr) {
-        return;
+    if (gcInternalThread_ != nullptr) {
+        gcInternalThread_->join();
+        gc_->GetInternalAllocator()->Delete(gcInternalThread_);
+        gcInternalThread_ = nullptr;
     }
-    gcInternalThread_->join();
-    gc_->GetInternalAllocator()->Delete(gcInternalThread_);
-    gcInternalThread_ = nullptr;
+    gc_->OnMutatorTerminate(gcMutator_, MutatorUnregistrationMode::UNREGISTER, BuffersKeepingFlag::DELETE);
 }
 
 void GCWorker::CreateAndAddTaskToTaskManager()
