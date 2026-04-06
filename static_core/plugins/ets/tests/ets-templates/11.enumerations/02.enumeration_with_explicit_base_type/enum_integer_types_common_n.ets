@@ -15,18 +15,40 @@
 
 {% for c in cases %}
 
-{% for decl in c.decl_variants %}
+{% for cv in c.check_variants %}
 
-{% for scl in c.sub_cases_logic %}
+{% for decl in c.decl_variants %}
+{% set decl_id = loop.index0 %}
+
+{% set logic_data -%}
+{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
+{% endset -%}
+
+{% set ns = namespace() %}
+
+{% set ns.logic_data = logic_data %}
+{% for k, v in cv.items() %}
+  {% set ns.logic_data = ns.logic_data|replace("[" ~ k ~ "]", v) %}
+{% endfor %}
+{% set logic_data=ns.logic_data %}
+
+{% set ns.decl = decl %}
+{% for k, v in cv.items() %}
+  {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
+{% endfor %}
+{% set decl=ns.decl %}
 
 /*---
 desc: {{c.desc}}
+tags: [compile-only, negative]
+expected_out: {{c.stdout[decl_id]}}
+test_suffix: "{{c.test_suffix}}_{{cv.check_type}}_{{decl_id}}"
 ---*/
 
 {{decl}}
 
 function main(): void {
-  {{scl|indent(width=2)}}
+{{logic_data}}
 }
 
 {% endfor %}

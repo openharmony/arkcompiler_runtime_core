@@ -17,8 +17,6 @@ cases:
     decl_variants:
       - |-
         enum Enum: long { first, second = -2147483648, third = second - 1}
-      - |-
-        const enum Enum: long { first, second = -2147483648, third = second - 1}
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -30,14 +28,13 @@ cases:
         arktest.assertEQ(Enum.first.valueOf(), 0)
         arktest.assertEQ(Enum.second.valueOf(), -2147483648)
         arktest.assertEQ(Enum.third.valueOf(), -2147483649)
+    test_suffix: "cioomin1"
 
   - desc: |-
       Checking int overflow on Int.MIN_VALUE in enum
     decl_variants:
       - |-
         enum Enum: long { first, second = -2147483649, third}
-      - |-
-        const enum Enum: long { first, second = -2147483649, third}
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -49,14 +46,13 @@ cases:
         arktest.assertEQ(Enum.first.valueOf(), 0)
         arktest.assertEQ(Enum.second.valueOf(), -2147483649)
         arktest.assertEQ(Enum.third.valueOf(), -2147483648)
+    test_suffix: "cioomin2"
 
   - desc: |-
       Checking int overflow on Int.MAX_VALUE in enum
     decl_variants:
       - |-
         enum Enum: long { first = 0x7fffffff - 1, second, third }
-      - |-
-        const enum Enum: long { first = 0x7fffffff - 1, second, third }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -68,6 +64,7 @@ cases:
         arktest.assertEQ(Enum.first.valueOf(), 0x7ffffffe)
         arktest.assertEQ(Enum.second.valueOf(), 0x7fffffff)
         arktest.assertEQ(Enum.third.valueOf(), 2147483648)
+    test_suffix: "cioomax1"
 
   - desc: |-
       Checking int overflow on Int.MAX_VALUE in enum
@@ -77,11 +74,6 @@ cases:
         const b: long = 1010
         const v: long = a + b
         enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = first + second }
-      - |-
-        const a: long = 0x7fffffff - 10
-        const b: long = 1010
-        const v: long = a + b
-        const enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = first + second }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -93,6 +85,7 @@ cases:
         arktest.assertEQ(Enum.first.valueOf(), a)
         arktest.assertEQ(Enum.second.valueOf(), b)
         arktest.assertEQ(Enum.third.valueOf(), v)
+    test_suffix: "cioomax2"
 
   - desc: |-
       Checking int overflow on Int.MAX_VALUE in enum
@@ -100,13 +93,13 @@ cases:
       - |-
         const a: long = 0x7fffffff - 10
         const b: long = 1010
-        const v: long = a + b
+        const v: long = 0x7fffffff - 10 + 1010
         enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = 0x7fffffff - 10 + 1010 }
       - |-
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        const enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = 0x7fffffff - 10 + 1010 }
+        enum Enum: long { first = 0x7fffffff - 10, second = 1010, third = (0x7fffffff as long) - 10 + 1010 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -118,16 +111,20 @@ cases:
         arktest.assertEQ(Enum.first.valueOf(), a)
         arktest.assertEQ(Enum.second.valueOf(), b)
         arktest.assertEQ(Enum.third.valueOf(), v)
+    test_suffix: "cioomax3"
 
   - desc: |-
       Checking int overflow on Int.MAX_VALUE in enum
     decl_variants:
       - |-
+        const v: long = 5 << 32
         enum Enum: long { A = 5 << 32 }
       - |-
-        const enum Enum: long { A = 5 << 32 }
+        const v: long = 0x5_0000_0000
+        enum Enum: long { A = (5 as long) << 32 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.A instanceof Enum)
         arktest.assertTrue(Enum.A.valueOf() instanceof long)
-        arktest.assertEQ(Enum.A, 0x5_0000_0000)
+        arktest.assertEQ(Enum.A, v)
+    test_suffix: "cioomax4"

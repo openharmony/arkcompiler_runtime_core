@@ -1,0 +1,209 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        An enumeration member value can be set explicitly by initializer
+        expression. An initializer can be omitted if an enumeration base type
+        is an integer type. Otherwise, a compile-time error occurs.
+    params: |-
+      using string literals in initializer expressions
+    decl_variants:
+      - |-
+        enum Enum: string { first = "Line 1", second = "Line 2", third = "Line 1" + "\nLine 2" }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum.second.valueOf() instanceof string)
+        arktest.assertTrue(Enum.third.valueOf() instanceof string)
+        arktest.assertEQ(Enum.first.valueOf(), "Line 1")
+        arktest.assertEQ(Enum.second.valueOf(), "Line 2")
+        arktest.assertEQ(Enum.third.valueOf(), "Line 1\nLine 2")
+        arktest.assertEQ(Enum.first.toString(), "Line 1")
+        arktest.assertEQ(Enum.second.toString(), "Line 2")
+        arktest.assertEQ(Enum.third.toString(), "Line 1\nLine 2")
+    test_suffix: "usliie"
+
+  - desc: |-
+      >-
+        An enumeration member value can be set explicitly by initializer
+        expression. An initializer can be omitted if an enumeration base type
+        is an integer type. Otherwise, a compile-time error occurs.
+    params: |-
+      using enum members values in initializers expressions
+    decl_variants:
+      - |-
+        enum Enum: string { first = "Line 1", second = "Line 2", third = first + "\n" + second }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.third instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum.second.valueOf() instanceof string)
+        arktest.assertTrue(Enum.third.valueOf() instanceof string)
+        arktest.assertEQ(Enum.first.valueOf(), "Line 1")
+        arktest.assertEQ(Enum.second.valueOf(), "Line 2")
+        arktest.assertEQ(Enum.third.valueOf(), "Line 1\nLine 2")
+        arktest.assertEQ(Enum.first.toString(), "Line 1")
+        arktest.assertEQ(Enum.second.toString(), "Line 2")
+        arktest.assertEQ(Enum.third.toString(), "Line 1\nLine 2")
+    test_suffix: "uemviie"
+
+  - desc: |-
+      >-
+        An enumeration member value can be set explicitly by initializer
+        expression. An initializer can be omitted if an enumeration base type
+        is an integer type. Otherwise, a compile-time error occurs.
+    params: |-
+      using other enum members values as enum members initializers
+    decl_variants:
+      - |-
+        enum Enum1: string { first = "Line 1", second = "Line 2", third = "Line 1\nLine 2" }
+        enum Enum2: string { first = Enum1.second, second = Enum1.third, third = Enum1.first }
+      - |-
+        enum Enum1: string { first = "Line 1", second = "Line 2", third = "Line 1\nLine 2" }
+        enum Enum2: string { first = Enum1.second.valueOf(), second = Enum1.third.toString(), third = Enum1.first }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum1.first instanceof Enum1)
+        arktest.assertTrue(Enum1.second instanceof Enum1)
+        arktest.assertTrue(Enum1.third instanceof Enum1)
+        arktest.assertFalse(Enum1.first instanceof Enum2)
+        arktest.assertFalse(Enum1.second instanceof Enum2)
+        arktest.assertFalse(Enum1.third instanceof Enum2)
+        arktest.assertTrue(Enum1.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum1.second.valueOf() instanceof string)
+        arktest.assertTrue(Enum1.third.valueOf() instanceof string)
+        arktest.assertEQ(Enum1.first.valueOf(), "Line 1")
+        arktest.assertEQ(Enum1.second.valueOf(), "Line 2")
+        arktest.assertEQ(Enum1.third.valueOf(), "Line 1\nLine 2")
+        arktest.assertTrue(Enum2.first instanceof Enum2)
+        arktest.assertTrue(Enum2.second instanceof Enum2)
+        arktest.assertTrue(Enum2.third instanceof Enum2)
+        arktest.assertFalse(Enum2.first instanceof Enum1)
+        arktest.assertFalse(Enum2.second instanceof Enum1)
+        arktest.assertFalse(Enum2.third instanceof Enum1)
+        arktest.assertTrue(Enum2.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum2.second.valueOf() instanceof string)
+        arktest.assertTrue(Enum2.third.valueOf() instanceof string)
+        arktest.assertEQ(Enum2.first.valueOf(), "Line 2")
+        arktest.assertEQ(Enum2.second.valueOf(), "Line 1\nLine 2")
+        arktest.assertEQ(Enum2.third.valueOf(), "Line 1")
+    test_suffix: "uoemvaemi"
+
+  - desc: |-
+      >-
+        An enumeration member value can be set explicitly by initializer
+        expression. An initializer can be omitted if an enumeration base type
+        is an integer type. Otherwise, a compile-time error occurs.
+    params: |-
+      using const variables in initializer expressions
+    decl_variants:
+      - |-
+        const a: string = "ABC"
+        const b: string = "EFG"
+        enum Enum: string { first = a, second = b }
+      - |-
+        const a: "ABC" = "ABC"
+        const b: "EFG" = "EFG"
+        enum Enum: string { first = a, second = b }
+      - |-
+        const a = "A"
+        const b = "G"
+        enum Enum: string { first = a + "BC", second = "EF" + b }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum.second.valueOf() instanceof string)
+        arktest.assertEQ(Enum.first.valueOf(), "ABC")
+        arktest.assertEQ(Enum.second.valueOf(), "EFG")
+    test_suffix: "ucviie"
+
+  - desc: |-
+      >-
+        An enumeration member value can be set explicitly by initializer
+        expression. An initializer can be omitted if an enumeration base type
+        is an integer type. Otherwise, a compile-time error occurs.
+    params: |-
+      using variables in initializer expressions
+    decl_variants:
+      - |-
+        let a: string = "ABC"
+        let b: string = "EFG"
+        enum Enum: string { first = a, second = b }
+      - |-
+        let a: "ABC" = "ABC"
+        let b: "EFG" = "EFG"
+        enum Enum: string { first = a, second = b }
+      - |-
+        let a = "A"
+        let b = "G"
+        enum Enum: string { first = a + "BC", second = "EF" + b }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum.second.valueOf() instanceof string)
+        arktest.assertEQ(Enum.first.valueOf(), "ABC")
+        arktest.assertEQ(Enum.second.valueOf(), "EFG")
+    test_suffix: "uviie"
+
+  - desc: |-
+      >-
+        An enumeration member value can be set explicitly by initializer
+        expression. An initializer can be omitted if an enumeration base type
+        is an integer type. Otherwise, a compile-time error occurs.
+    params: |-
+      using functions in initializer expressions
+    decl_variants:
+      - |-
+        function fa(): string {
+          return "ABC"
+        }
+        function fb(): string {
+          return "EFG"
+        }
+        enum Enum: string { first = fa(), second = fb() }
+      - |-
+        function fa(): "ABC" {
+          return "ABC"
+        }
+        function fb(): "EFG" {
+          return "EFG"
+        }
+        enum Enum: string { first = fa(), second = fb() }
+      - |-
+        function fa() {
+          return "ABC"
+        }
+        function fb() {
+          return "EFG"
+        }
+        enum Enum: string { first = fa() + "BC", second = "EF" + fb() }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum.first instanceof Enum)
+        arktest.assertTrue(Enum.second instanceof Enum)
+        arktest.assertTrue(Enum.first.valueOf() instanceof string)
+        arktest.assertTrue(Enum.second.valueOf() instanceof string)
+        arktest.assertEQ(Enum.first.valueOf(), "ABC")
+        arktest.assertEQ(Enum.second.valueOf(), "EFG")
+    test_suffix: "ufiie"
