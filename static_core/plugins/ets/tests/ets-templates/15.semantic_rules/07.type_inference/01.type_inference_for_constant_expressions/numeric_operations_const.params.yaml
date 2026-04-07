@@ -15,6 +15,7 @@ cases:
   # add
   - { use: "1.0f + 1.0f", use_type: ": float", expected_type: float }
   - { use: "1.0 + 1.0", use_type: ": double", expected_type: double }
+  - { use: "63 + 64", use_type: ": byte", expected_type: byte }
   - { use: "126 + 1", use_type: ": int", expected_type: int }
   - { use: "127 + 1", use_type: ": int", expected_type: int }
   - { use: "32766 + 1", use_type: ": int", expected_type: int }
