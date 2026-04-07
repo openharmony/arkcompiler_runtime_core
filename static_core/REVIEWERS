@@ -221,6 +221,7 @@ static_core/plugins/ets/tests/stdlib-templates/                               ^a
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
 static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg ^luobohua @luchenxu ^Wangyuzhong11
 static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya @nazarovkonstantin ^luobohua ^luchenxu @Wangyuzhong11
+static_core/plugins/ets/tools/migration_visualizer/                           @oatuwwutao @fouckttt @cy917474985 @Nojpg
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/hybrid/mem/                                   ^dmitriitr @artemu ^gitee-dakeQI ^ipetrov
