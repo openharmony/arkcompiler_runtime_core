@@ -749,8 +749,14 @@ function testNamespaceVariablesInvailidParam(): void {
     ASSERT_THROWS(Error, () => ns.namespaceSetVariable('magic_float_n', STValue.wrapNumber(3.141593), SType.FLOAT));
     ASSERT_THROWS(Error, () => ns.namespaceSetVariable('magic_double_n', STValue.wrapInt(44), SType.DOUBLE));
 
+    // invalid value type
+    ASSERT_THROWS(Error, () => ns.namespaceSetVariable('magic_int_n', {fake: true}, SType.INT));
+    ASSERT_THROWS(Error, () => ns.namespaceSetVariable('magic_int_n', null, SType.INT));
+
     // invalid call
     ASSERT_THROWS(Error, () => STValue.wrapInt(44).namespaceGetVariable('magic_int', SType.INT));
+    ASSERT_THROWS(Error, () => STValue.getNull().namespaceSetVariable('magic_int_n', STValue.wrapInt(1), SType.INT));
+    ASSERT_THROWS(Error, () => STValue.getUndefined().namespaceSetVariable('magic_int_n', STValue.wrapInt(1), SType.INT));
 }
 
 // objectGetType(): STValue

@@ -207,7 +207,9 @@ bool STValueData::IsAniNullOrUndefined(napi_env env) const
 {
     auto *aniEnv = GetAniEnv();
     ani_boolean isNullOrUndefined = ANI_FALSE;
-    AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsNullishValue(this->GetAniRef(), &isNullOrUndefined));
+    if (!AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsNullishValue(this->GetAniRef(), &isNullOrUndefined))) {
+        return true;
+    }
     return isNullOrUndefined == ANI_TRUE;
 }
 
@@ -521,6 +523,9 @@ void ThrowUnsupportedSTypeError(napi_env env, SType stype)
 
 void ThrowTypeCheckError(napi_env env, const std::string &name, const std::string &type)
 {
+    if (NapiIsExceptionPending(env)) {
+        return;
+    }
     STValueThrowJSError(env, name + " STValue instance does not wrap a value of type " + type);
 }
 
