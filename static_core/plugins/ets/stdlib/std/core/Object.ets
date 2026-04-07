@@ -49,7 +49,6 @@ export class Object {
      * @throws { TypeError } The object is an unexpected fixedarray.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(): String {
         const thisObj = this

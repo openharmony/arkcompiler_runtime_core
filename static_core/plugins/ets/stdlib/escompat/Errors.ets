@@ -26,7 +26,6 @@ package escompat;
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class EvalError extends Error {
     /**
@@ -36,7 +35,6 @@ export class EvalError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("EvalError", message, options)
@@ -51,7 +49,6 @@ export class EvalError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): EvalError {
         return new EvalError(message, options)
@@ -65,7 +62,6 @@ export class EvalError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class NonIntegralIndexError extends Error {
     /**
@@ -75,7 +71,6 @@ export class NonIntegralIndexError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("NonIntegralIndexError", message, options)
@@ -90,7 +85,6 @@ export class NonIntegralIndexError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): NonIntegralIndexError {
         return new NonIntegralIndexError(message, options)
@@ -104,7 +98,6 @@ export class NonIntegralIndexError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class TypeError extends Error {
     /**
@@ -114,7 +107,6 @@ export class TypeError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("TypeError", message, options)
@@ -129,7 +121,6 @@ export class TypeError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): TypeError {
         return new TypeError(message, options)
@@ -143,7 +134,6 @@ export class TypeError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class ReferenceError extends Error {
     /**
@@ -153,7 +143,6 @@ export class ReferenceError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ReferenceError", message, options)
@@ -168,7 +157,6 @@ export class ReferenceError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): ReferenceError {
         return new ReferenceError(message, options)
@@ -181,7 +169,6 @@ export class ReferenceError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class URIError extends Error {
     /**
@@ -191,7 +178,6 @@ export class URIError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("URIError", message, options)
@@ -206,7 +192,6 @@ export class URIError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): URIError {
         return new URIError(message, options)
@@ -220,7 +205,6 @@ export class URIError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class AggregateError extends Error {
     /**
@@ -229,7 +213,6 @@ export class AggregateError extends Error {
      * @type { Array<Error> }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24 static
      */
     errors: Array<Error>
 
@@ -241,7 +224,6 @@ export class AggregateError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(errors: Iterable<Error>, message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options)
@@ -256,7 +238,6 @@ export class AggregateError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(errors: Error[], message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options)
@@ -273,7 +254,6 @@ export class AggregateError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
@@ -289,7 +269,6 @@ export class AggregateError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
@@ -303,7 +282,6 @@ export class AggregateError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class FormatError extends Error {
     /**
@@ -313,7 +291,6 @@ export class FormatError extends Error {
      * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("FormatError", message, options)
@@ -328,7 +305,6 @@ export class FormatError extends Error {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): FormatError {
         return new FormatError(message, options)

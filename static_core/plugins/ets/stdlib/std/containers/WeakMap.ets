@@ -27,7 +27,6 @@ package std.containers;
  * Once an object used as a key has been collected,
  * its corresponding values in any WeakMap become candidates for garbage collection as well
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export final class WeakMap<K extends Object, V> {
     private readonly keyRefToEntry = new Map<WeakRef<K>, WeakMapEntry<V>>
@@ -47,7 +46,6 @@ export final class WeakMap<K extends Object, V> {
      *
      * @param { ([K, V])[] | null } [entries] - Optional array of key-value pairs to initialize the WeakMap
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     constructor(entries?: ([K, V])[] | null) {
         this.registry = new FinalizationRegistry<WeakRef<K>>((keyRef: WeakRef<K>) => {
@@ -76,7 +74,6 @@ export final class WeakMap<K extends Object, V> {
      *
      * @param { Iterable<[K, V]> } entries - Iterable of key-value pairs to initialize the WeakMap
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     constructor(entries: Iterable<[K, V]>) {
         this(null)
@@ -94,7 +91,6 @@ export final class WeakMap<K extends Object, V> {
      * @returns { WeakMap<K, V> } Returns the WeakMap instance itself, supporting chaining
      * @throws { TypeError } When the key is not a garbage-collectable object
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     set(key: K, val: V): WeakMap<K, V> {
         if (!WeakMap.validateKey(key)) {
@@ -128,7 +124,6 @@ export final class WeakMap<K extends Object, V> {
      * @param { K } key - The key to check
      * @returns { boolean } Returns true if the key exists in the WeakMap, otherwise returns false
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     has(key: K): boolean {
         const keyHash = Runtime.getHashCode(key)
@@ -152,7 +147,6 @@ export final class WeakMap<K extends Object, V> {
      * @param { K } key - The key to get the value for
      * @returns { V | undefined } Returns the value associated with the key, or undefined if the key does not exist
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     get(key: K): V | undefined {
         const keyHash = Runtime.getHashCode(key)
@@ -182,7 +176,6 @@ export final class WeakMap<K extends Object, V> {
      * @returns { boolean } Returns true if the element was successfully removed,
      *     returns false if the key does not exist
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     delete(key: K): boolean {
         const keyHash = Runtime.getHashCode(key)
@@ -251,7 +244,6 @@ export final class WeakMap<K extends Object, V> {
 /**
  * WeakMap entry type
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 class WeakMapEntry<V> {
     private readonly _keyHash: int
@@ -263,7 +255,6 @@ class WeakMapEntry<V> {
      * @param { int } keyHash - Hash of the key
      * @param { V } value - The value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     constructor(keyHash: int, value: V) {
         this._keyHash = keyHash
@@ -274,7 +265,6 @@ class WeakMapEntry<V> {
      * Hash of the key
      * @type { int }
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     get keyHash(): int {
         return this._keyHash
@@ -284,7 +274,6 @@ class WeakMapEntry<V> {
      * The value
      * @type { V }
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     get value(): V {
         return this._value

@@ -25,7 +25,6 @@ package std.annotations;
  * Support import from .abc file.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 @Retention({policy: "BYTECODE"})
 export @interface ModuleDeclaration {
@@ -34,7 +33,6 @@ export @interface ModuleDeclaration {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     declaration: string;
 }

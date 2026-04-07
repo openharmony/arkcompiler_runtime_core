@@ -1388,7 +1388,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: long): BigInt {
         return new BigInt(value)

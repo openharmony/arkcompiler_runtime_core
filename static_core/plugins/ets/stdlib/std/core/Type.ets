@@ -280,7 +280,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(): Type {
         //should never be executed since FE lowering this
@@ -2191,7 +2190,6 @@ export final class ArrayType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
         elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)

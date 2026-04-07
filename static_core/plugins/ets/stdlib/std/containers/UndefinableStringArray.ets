@@ -139,7 +139,6 @@ export namespace containers {
          * @returns { UndefinableString } Popped value
          * @throws { RangeError } When the array is empty
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public popBack(): UndefinableString {
             if (this.curSize === 0) {

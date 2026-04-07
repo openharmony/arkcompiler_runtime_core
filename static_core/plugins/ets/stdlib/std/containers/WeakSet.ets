@@ -25,7 +25,6 @@ package std.containers;
  * in the WeakSet may only occur once. It is unique in the WeakSet's
  * collection
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export final class WeakSet<K extends Object> {
     // NOTE(cheezzario) move creation to constructor
@@ -40,7 +39,6 @@ export final class WeakSet<K extends Object> {
      *
      * @param { K[] | null } [elements] - Optional initial object array to initialize the WeakSet
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     constructor(elements?: K[] | null) {
         if (elements != null) {
@@ -55,7 +53,6 @@ export final class WeakSet<K extends Object> {
      *
      * @param { Iterable<K> } elements - An iterable object whose elements will be added to the new WeakSet
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     constructor(elements: Iterable<K>) {
         iteratorForEach<K>(elements.$_iterator(), (elem: K) => {
@@ -69,7 +66,6 @@ export final class WeakSet<K extends Object> {
      * @param { K } v - The object to add
      * @returns { WeakSet<K> } Returns the WeakSet instance itself, supporting chaining
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     add(v: K): WeakSet<K>{
         this.elements.set(v, null)
@@ -82,7 +78,6 @@ export final class WeakSet<K extends Object> {
      * @param { K } v - The object to check
      * @returns { boolean } Returns true if the object exists, otherwise returns false
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     has(v: K): boolean {
         return this.elements.has(v)
@@ -95,7 +90,6 @@ export final class WeakSet<K extends Object> {
      * @returns { boolean } Returns true if the object was successfully removed,
      *     returns false if the object does not exist or removal failed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     delete(v: K): boolean {
         return this.elements.delete(v)
