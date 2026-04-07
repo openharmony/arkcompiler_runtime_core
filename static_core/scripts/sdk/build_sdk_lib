@@ -171,6 +171,40 @@ function windows_tools() {
     copy_into_sdk "$windows_build_dir" "$PANDA_SDK_PATH/windows_host_tools" "$SCRIPT_DIR"/windows_host_tools.txt
 }
 
+function android_arm64() {
+    echo "> Building runtime for ANDROID ARM64..."
+    local android_build_dir="$SDK_BUILD_ROOT/android_arm64"
+    local target_sdk_dir="$PANDA_SDK_PATH/android_arm64"
+
+    # https://developer.android.com/ndk/guides/cpp-support#shared_runtimes
+    local target_cmake_args=" \
+        -DCMAKE_CXX_FLAGS=\"-Wno-error\"
+        -DPANDA_LLVM_BACKEND=OFF \
+        -DPANDA_ETS_INTEROP_JS=OFF \
+        -DANDROID_STL=c++_shared \
+        -DANDROID_PLATFORM=android-30 \
+        -DANDROID_ABI=arm64-v8a \
+        -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
+        -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
+        -DPANDA_WITH_SAFEPOINT_CHECKER=${PANDA_WITH_SAFEPOINT_CHECKER} \
+        -DPANDA_USE_64_BIT_POINTER=${PANDA_USE_64_BIT_POINTER} \
+        -DPANDA_TRACK_INTERNAL_ALLOCATIONS=${PANDA_TRACK_INTERNAL_ALLOCATIONS} \
+        -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
+        -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
+    local android_build_targets="ark ark_aot arkruntime arkassembler e2p_test_plugin ani_helpers aspt_converter dependency_analyzer"
+    build_panda "$android_build_dir" "$target_cmake_args" "$android_build_targets"
+    # Keep libets_interop_js_napi.so in this list but not in test* list
+    copy_into_sdk "$android_build_dir" "$target_sdk_dir" "$SCRIPT_DIR"/android_arm64.txt
+
+    echo "> Copying headers into SDK..."
+    local headers_dst="$target_sdk_dir"/include
+    # Source headers
+    copy_into_sdk "$ARK_ROOT" "$headers_dst" "$SCRIPT_DIR"/headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
+    # Generated headers
+    copy_into_sdk "$android_build_dir" "$headers_dst" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\|\.idl$\)'
+    copy_abc_files "$android_build_dir"
+}
+
 function ohos_arm64() {
     echo "> Building runtime for OHOS ARM64..."
     local ohos_build_dir="$SDK_BUILD_ROOT/ohos_arm64"
@@ -303,6 +337,8 @@ function print_help() {
 
     --ohos_arm64            Run building for OHOS ARM64
 
+    --android_arm64            Run building for ANDROID ARM64 (Requires ANDROID_NDK env)
+
     --linux_arm64_tools     Run building linux arm64 tools
 
     --linux_tools           Run building linux tools
@@ -390,6 +426,7 @@ function set_default() {
     echo "No arguments provided. Set default-configuration."
     OHOS_ARM32="true"
     OHOS_ARM64="true"
+    ANDROID_ARM64="true"
     LINUX_ARM64_TOOLS="true"
     LINUX_TOOLS="true"
     WINDOWS_TOOLS="true"
@@ -429,6 +466,11 @@ function parse_options() {
             ;;
         --ohos_arm64)
             OHOS_ARM64="true"
+            has_args="true"
+            shift
+            ;;
+        --android_arm64)
+            ANDROID_ARM64="true"
             has_args="true"
             shift
             ;;
@@ -533,12 +575,16 @@ function parse_options() {
 }
 
 function build_sdk_targets() {
-    if [ "$OHOS_ARM32" = "true" ]; then 
+    if [ "$OHOS_ARM32" = "true" ]; then
         ohos_arm32
     fi
 
-    if [ "$OHOS_ARM64" = "true" ]; then 
+    if [ "$OHOS_ARM64" = "true" ]; then
         ohos_arm64
+    fi
+
+    if [ "$ANDROID_ARM64" = "true" ]; then
+        android_arm64
     fi
 
     if [ "$LINUX_ARM64_TOOLS" = "true" ]; then

@@ -18,6 +18,7 @@ set -x
 export PANDA_SDK_BUILD_TYPE="Release"
 export OHOS_ARM32="false"
 export OHOS_ARM64="false"
+export ANDROID_ARM64="false"
 export LINUX_ARM64_TOOLS="false"
 export LINUX_TOOLS="false"
 export WINDOWS_TOOLS="false"
@@ -80,6 +81,11 @@ fi
 if [ -z "$SDK_BUILD_ROOT" ]; then
     echo "Error: path to panda sdk destination is not provided"
     usage
+fi
+
+if [[ "${ANDROID_ARM64}" == "true" && -z "${ANDROID_NDK}" ]]; then
+    echo "Warning: Set ANDROID_NDK environment variable"
+    ANDROID_ARM64="false"
 fi
 
 export PANDA_SDK_PATH="$SDK_BUILD_ROOT/sdk"
