@@ -47,6 +47,8 @@ function main(): int {
 
   {% for case2 in cases %}
     testSuite.addTest("extended_conditional_type_{{case1.type}}_{{case2.type}}", () => {
+      // Note in this template, double loop by cases makes case1.type and case2.type occur at both first
+      //   and second place which ensures that order of operands does not influence the type of result.
       let runtime_cond: boolean = Math.random() > 0.5
 
       let operand1true: {{case1.type}} = {{case1.init_t}}
@@ -122,7 +124,7 @@ function main(): int {
     });
   {% endfor %}
 
-    return testSuite.run()
+  return testSuite.run()
 }
 
 {% endfor %}
