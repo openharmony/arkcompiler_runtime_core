@@ -143,3 +143,4 @@ std/core/ParseIntTests.ets
 std/containers/async_linked_concurrent_queue/AsyncLinkedConcurrentQueue_PopTest.ets
 std/containers/async_linked_concurrent_queue/AsyncLinkedConcurrentQueue_PushTest_Stress.ets
 std/containers/async_linked_concurrent_queue/AsyncLinkedConcurrentQueue_PopTest_Stress.ets
+std/core/sparsearray/SparseArrayTest.ets
