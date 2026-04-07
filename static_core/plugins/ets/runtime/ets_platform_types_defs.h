@@ -53,9 +53,10 @@
     AN("Larkruntime/annotation/FunctionReference;", arkruntimeAnnotationFunctionReference)                            \
     AN("Larkruntime/annotation/Async;", arkruntimeAnnotationAsync)                                                    \
     AN("Lstd/annotations/InterfaceObjectLiteral;", annotationsInterfaceObjectLiteral)                                 \
-    AN("Lstd/annotations/functions/OptionalParametersAnnotation;", annotationsFunctionsOptionalParametersAnnotation)  \
-    AN("Lstd/core/NamedFunctionObject;", coreNamedFunctionObject)                                                     \
-    AN("Lstd/core/AsyncFunctionObject;", coreAsyncFunctionObject)                                                     \
+    AN("Larkruntime/annotation/OptionalParametersAnnotation;",                                                        \
+       arkruntimeAnnotationFunctionsOptionalParametersAnnotation)                                                     \
+    AN("Larkruntime/annotation/NamedFunctionObject;", arkruntimeAnnotationNamedFunctionObject)                        \
+    AN("Larkruntime/annotation/AsyncFunctionObject;", arkruntimeAnnotationAsyncFunctionObject)                        \
     /* ANI */                                                                                                         \
     AN("Lstd/annotations/ani/unsafe/Quick;", annotationsAniUnsafeQuick)                                               \
     AN("Lstd/annotations/ani/unsafe/Direct;", annotationsAniUnsafeDirect)                                             \

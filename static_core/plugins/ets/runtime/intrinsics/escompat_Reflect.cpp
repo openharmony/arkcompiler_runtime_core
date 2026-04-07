@@ -24,7 +24,7 @@ extern "C" EtsBoolean IsLiteralInitializedInterfaceImpl(EtsObject *target)
 
 extern "C" EtsBoolean IsFuncObjAsyncImpl(EtsObject *target)
 {
-    static constexpr std::string_view ANNO_NAME = "Lstd/core/AsyncFunctionObject;";
+    static constexpr std::string_view ANNO_NAME = EtsPlatformTypes::DESCRIPTOR_arkruntimeAnnotationAsyncFunctionObject;
 
     if (target == nullptr) {
         ThrowNullPointerException();
