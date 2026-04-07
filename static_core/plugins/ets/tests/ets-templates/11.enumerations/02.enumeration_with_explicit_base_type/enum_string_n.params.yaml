@@ -107,20 +107,6 @@ cases:
     test_suffix: "wt"
 
   - desc: |-
-      Not allowed conversion
-    decl_variants:
-      - |-
-        enum Enum1: string { e1 = "a", e2 = "b", e3 = "c" }
-        enum Enum2: string { e1 = "a", e2 = "b", e3 = "c" }
-    logic: |-
-      let v: Enum1 = Enum1.e1
-      let q: Enum2 = v as Enum2
-    stdout:
-      - |-
-        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
-    test_suffix: "nac"
-
-  - desc: |-
       Modifying const variable of enum type
     decl_variants:
       - |-

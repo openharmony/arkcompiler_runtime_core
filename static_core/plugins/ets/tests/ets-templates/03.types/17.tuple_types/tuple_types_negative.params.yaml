@@ -82,11 +82,6 @@ cases:
           let t: [number, number, number] = v  // wrong type
 
     - use: |-
-          let v: [number, number] = [1.0, 2.0]
-          let t: Object = v
-          let p: [boolean] = t as [boolean]  // wrong cast
-
-    - use: |-
           // when no target type is given, array expression is always inferred as an array
           let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }();
 

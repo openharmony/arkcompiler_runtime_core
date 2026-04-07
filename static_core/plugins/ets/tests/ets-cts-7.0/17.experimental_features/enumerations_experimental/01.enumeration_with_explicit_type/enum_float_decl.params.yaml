@@ -153,3 +153,17 @@ cases:
         arktest.assertEQ(v1, -1.1f)
         arktest.assertEQ(v2, -1.2f)
         arktest.assertEQ(v3, -42.43f)
+
+  - desc: |-
+      Not allowed conversion (Warning + RTE)
+    decl_variants:
+      - |-
+        enum Enum1: float { first = -1.4f, second = -42.32f }
+        enum Enum2: float { first = -1.4f, second = -42.32f }
+      - |-
+        const enum Enum1: float { first = -1.4f, second = -42.32f }
+        const enum Enum2: float { first = -1.4f, second = -42.32f }
+    sub_cases_logic:
+      - |-
+        let v: Enum1 = Enum1.first
+        arktest.expectThrow(() => { let q: Enum2 = v as Enum2; }, (e) => e instanceof ClassCastError);

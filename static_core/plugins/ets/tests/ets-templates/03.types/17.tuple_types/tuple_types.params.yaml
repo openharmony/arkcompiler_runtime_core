@@ -214,3 +214,8 @@ cases:
           let res = a.getFld()
           arktest.assertEQ( res[0], 1 )
           arktest.assertEQ( res[1], "0X" )
+
+    - use: |-
+          let v: [number, number] = [1.0, 2.0]
+          let t: Object = v
+          let p: [boolean] = t as [boolean]  // only warning here at compile-time

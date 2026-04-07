@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Basic standalone expressions 
+--- # Basic standalone expressions
 cases:
     - {expr: -1,           expr_type: "int",  name: "Type of integer literals is int or long"}
     - {expr: 2147_483_648, expr_type: "long", name: "Type of integer literals is int or long"}
@@ -22,5 +22,5 @@ cases:
     - {expr: (1.3f - 10),      expr_type: "float",   name: "Type of expressions is inferred from operand types and operations"}
     - {expr: (-18.5 == -18.5), expr_type: "boolean", name: "Type of expressions is inferred from operand types and operations"}
 
-    - {expr: ["a", "b", "c"], expr_type: "Array<string>",    name: "Type of array literal is inferred from the elements"}
-    - {expr: [1, 9, 0.17f],   expr_type: "Array<int|float>", name: "Type of array literal is inferred from the elements"}
+    - {expr: ["a", "b", "c"], expr_type: "Array", name: "Type of array literal is erased at runtime"}
+    - {expr: [1, 9, 0.17f],   expr_type: "Array", name: "Type of array literal is erased at runtime"}

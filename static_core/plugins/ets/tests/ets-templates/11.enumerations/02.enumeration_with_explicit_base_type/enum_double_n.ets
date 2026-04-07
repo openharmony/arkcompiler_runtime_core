@@ -24,7 +24,7 @@
 
 /*---
 desc: {{c.desc}}
-tags: [compile-only, negative]
+tags: [compile-only{% if 'positive' not in c %}, negative{% endif %}]
 expected_out: {{c.stdout[decl_id]}}
 test_suffix: "{{c.test_suffix}}_{{decl_id}}"
 ---*/
