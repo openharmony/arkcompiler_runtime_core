@@ -162,27 +162,25 @@ function __noinline__getLength(flag: boolean): int {
 //! METHOD        "ETSGLOBAL::testTempArrays"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 6
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
-//! INST_NOT      /i32.*Phi/
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 6
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
-//! INST_NOT      /i32.*Phi/
 //!
 //! METHOD        "ETSGLOBAL::testTempArraysDiffLength1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 14
-//! INST_COUNT    /LoadArray/, 11
+//! INST_COUNT    /StoreArray/, 7
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 14
-//! INST_COUNT    /LoadArray/, 11
+//! INST_COUNT    /StoreArray/, 7
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::testTempArraysDiffLength2"
@@ -200,25 +198,25 @@ function __noinline__getLength(flag: boolean): int {
 //! METHOD        "ETSGLOBAL::testArraysMaterialize"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 6
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 6
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::testArraysMaterializeInSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 12
+//! INST_COUNT    /StoreArray/, 6
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 12
+//! INST_COUNT    /StoreArray/, 6
+//! INST_COUNT    /LoadArray/, 2
 //! INST_COUNT    /ref.*Phi/, 1
 
 //! CHECKER       JIT Escape eliminate phi with objects
@@ -336,27 +334,27 @@ function __noinline__getLength(flag: boolean): int {
 //! METHOD        "ETSGLOBAL::testTempArrays"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 10
+//! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 10
+//! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_COUNT    /i32.*Phi/, 0
 //!
 //! METHOD        "ETSGLOBAL::testTempArraysDiffLength1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 14
-//! INST_COUNT    /LoadArray/, 11
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 5
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 14
-//! INST_COUNT    /LoadArray/, 11
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 5
 //! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::testTempArraysDiffLength2"
@@ -374,25 +372,25 @@ function __noinline__getLength(flag: boolean): int {
 //! METHOD        "ETSGLOBAL::testArraysMaterialize"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 10
+//! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 9
+//! INST_COUNT    /StoreArray/, 10
+//! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::testArraysMaterializeInSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 12
+//! INST_COUNT    /StoreArray/, 10
+//! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    /NewArray/, 4
-//! INST_COUNT    /StoreArray/, 12
-//! INST_COUNT    /LoadArray/, 12
+//! INST_COUNT    /StoreArray/, 10
+//! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 1
 
 
