@@ -129,6 +129,25 @@ cases:
           arktest.assertEQ(original[1], 2.0)
           arktest.assertEQ(copy[1], 999.0)
 
+# Spread mixed with FixedArray
+    - decl: |-
+          function foo(k:int, ...p: FixedArray<int>) {
+              for (let i = 0; i < p.length; i++) {
+                  p[i] = p[i] + k
+              }
+              k = k + 1
+          }
+      use: |-
+          // FixedArray spread creates copy
+          let a: FixedArray<int> = [1, 2, 3]
+          let k: int = 10
+          foo(k, ...a)
+          foo(k, ...[...a])
+          arktest.assertEQ(a[0], 1)
+          arktest.assertEQ(a[1], 2)
+          arktest.assertEQ(a[2], 3)
+          arktest.assertEQ(k, 10)
+
 # Spread with tuples
     - decl: |-
           function foo(...p: [int, int][]) {
