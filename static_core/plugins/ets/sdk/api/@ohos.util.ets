@@ -494,6 +494,17 @@ export namespace util {
         return s
     }
 
+    /**
+     * Get stack trace of main thread.
+     *
+     * @returns { string } Return a stack trace of main thread.
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
+    export function getMainThreadStackTrace(): string {
+        return StackTraceHelper.getMainThreadStackTrace()
+    }
+
     export interface ScopeComparable<T> {
 
         /**

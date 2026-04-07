@@ -93,6 +93,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
     ${ETS_EXT_SOURCES}/intrinsics/arkruntime_StackTrace.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_dfx_StackTrace.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
     ${ETS_EXT_SOURCES}/intrinsics/reflect_Proxy.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp

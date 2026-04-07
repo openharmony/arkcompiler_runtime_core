@@ -22,6 +22,7 @@
 #include <type_traits>
 
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/stack_walker.h"
 #include "libarkbase/utils/bit_helpers.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -433,6 +434,16 @@ EtsString *FpToString(FpType number, int radix)
 }
 
 bool SameValueZero(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b);
+
+struct StackTraceElementInfo {
+    EtsMethod *method = nullptr;
+    int32_t lineNumber = 0;
+    const char *sourceFile = nullptr;
+    PandaString className;
+    PandaString methodName;
+};
+
+bool GetStackTraceElementBasicInfo(StackWalker *stack, StackTraceElementInfo *info);
 
 }  // namespace ark::ets::intrinsics::helpers
 
