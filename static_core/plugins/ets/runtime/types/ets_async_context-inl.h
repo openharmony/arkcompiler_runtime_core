@@ -126,6 +126,11 @@ void EtsAsyncContext::SetPc(EtsInt pc)
     ObjectAccessor::SetPrimitive<EtsInt>(this, MEMBER_OFFSET(EtsAsyncContext, pc_), pc);
 }
 
+EtsInt EtsAsyncContext::GetPc() const
+{
+    return ObjectAccessor::GetPrimitive<EtsInt>(this, MEMBER_OFFSET(EtsAsyncContext, pc_));
+}
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ASYNC_CONTEXT_INL_H

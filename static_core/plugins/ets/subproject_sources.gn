@@ -363,6 +363,7 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
   srcs_runtime += [
     "runtime/ani/arch/arm64/ets_ani_entry_point_aarch64.S",
     "runtime/ani/arch/arm64/ets_async_entry_point_aarch64.S",
+    "runtime/entrypoints/arch/arm64/ets_async_stubs_aarch64.S",
     "runtime/entrypoints/arch/arm64/ets_proxy_entry_point_aarch64.S",
   ]
 } else if (current_cpu == "arm") {

@@ -206,8 +206,8 @@ void Codegen::EtsWrapObjectNative(WrapObjectNativeInst *wrapObject)
 
 void Codegen::EtsAsyncSuspend(Inst *inst)
 {
-    if (GetArch() != Arch::X86_64) {
-        LOG(WARNING, COMPILER) << "Compiled ETS async suspend stub is implemented only for x86_64";
+    if (GetArch() != Arch::X86_64 && GetArch() != Arch::AARCH64) {
+        LOG(WARNING, COMPILER) << "Compiled ETS async suspend stub is implemented only for x86_64 and AArch64";
         GetEncoder()->SetFalseResult();
         return;
     }
@@ -236,8 +236,8 @@ void Codegen::EtsAsyncSuspend(Inst *inst)
 
 void Codegen::EtsAsyncDispatch(Inst *inst)
 {
-    if (GetArch() != Arch::X86_64) {
-        LOG(WARNING, COMPILER) << "Compiled ETS async dispatch stub is implemented only for x86_64";
+    if (GetArch() != Arch::X86_64 && GetArch() != Arch::AARCH64) {
+        LOG(WARNING, COMPILER) << "Compiled ETS async dispatch stub is implemented only for x86_64 and AArch64";
         GetEncoder()->SetFalseResult();
         return;
     }

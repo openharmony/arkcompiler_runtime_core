@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,8 +69,10 @@ MethodProperties::MethodProperties(const Graph *graph)
      *    Thus there is no sense in supporting compact prologue for these targets.
      *
      * 2. We don't support compact prologue/epilogue for OSR to simplify OSR entry bridge.
+     * 3. We don't support compact prologue/epilogue for async methods, because assembly EtsAsyncSuspendStub must be
+     * able to perform epilogue without the knowledge about used registers.
      */
-    SetCompactPrologueAllowed(graph->GetArch() == Arch::AARCH64 && !graph->IsOsrMode() &&
+    SetCompactPrologueAllowed(graph->GetArch() == Arch::AARCH64 && !graph->IsOsrMode() && !graph->IsAsync() &&
                               g_options.IsCompilerCompactPrologue());
 
     SetRequireFrameSetup(!IsLeaf() || graph->IsOsrMode());

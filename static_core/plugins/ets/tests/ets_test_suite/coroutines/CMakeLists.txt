@@ -184,7 +184,7 @@ add_ets_coroutines_test(FILE launch_instruction.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE launch_launch.ets
@@ -240,7 +240,7 @@ if (NOT PANDA_TARGET_ARM32)
                             IMPL "STACKLESS"
                             OPTION_SETS_STACKLESS "DEFAULT"
                             WORKERS "AUTO"
-                            MODE "INT"
+                            MODE "INT" "AOT"
     )
 
     add_ets_coroutines_test(FILE class_load_race.ets
@@ -381,7 +381,7 @@ add_ets_coroutines_test(FILE launch_return.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE launch_yield.ets
@@ -405,7 +405,7 @@ add_ets_coroutines_test(FILE launch_yield.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE affinity.ets
@@ -429,7 +429,7 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE await_standalone_promise.ets
@@ -453,7 +453,7 @@ add_ets_coroutines_test(FILE await_sync.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE stats.ets
@@ -592,68 +592,6 @@ add_ets_coroutines_test(FILE legacy_atomics_wait_notify.ets
                         WORKERS "THREE"
                         MODE "INT" "JIT" "AOT"
 )
-
-# Stackless async coroutine tests (.pa files)
-# NOTE: skip arm32 because of launch instruction support
-if (NOT PANDA_TARGET_ARM32)
-    set(STACKLESS_ASYNC_TESTS
-        stackless_async
-        # stackless_async_params
-    )
-
-    set(COMMON_RUNTIME_OPTIONS "--coroutine-impl=stackless" "--coroutine-workers-count=0" "--verification-mode=disabled")
-    set(COMMONT_COMPILER_OPTIONS "--compiler-inlining=false")
-
-    foreach(test_name ${STACKLESS_ASYNC_TESTS})
-        # llvm currently is not supported
-        foreach(interpreter_type "cpp" "irtoc")
-            panda_add_asm_file(
-                FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/ets_test_suite/coroutines/${test_name}.pa
-                TARGET ets_coroutines_${test_name}_${interpreter_type}
-                DEPENDS etsstdlib
-                LANGUAGE_CONTEXT ets
-                ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-                RUNTIME_OPTIONS ${COMMON_RUNTIME_OPTIONS} "--interpreter-type=${interpreter_type}"
-            )
-            add_dependencies(ets_test_suite_coroutines ets_coroutines_${test_name}_${interpreter_type})
-            add_dependencies(ets_run_int_ets_code_tests ets_coroutines_${test_name}_${interpreter_type})
-
-        endforeach()
-
-        # AOT mode
-        # no PANDA_TARGET_ARM64 currently
-        if(PANDA_COMPILER_ENABLE AND PANDA_TARGET_AMD64)
-            panda_add_asm_file(
-                FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/ets_test_suite/coroutines/${test_name}.pa
-                TARGET ets_coroutines_${test_name}_aot
-                DEPENDS etsstdlib
-                LANGUAGE_CONTEXT ets
-                AOT_MODE TRUE
-                ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-                RUNTIME_OPTIONS ${COMMON_RUNTIME_OPTIONS} "--compiler-enable-jit=false"
-                COMPILER_OPTIONS ${COMMONT_COMPILER_OPTIONS}
-            )
-            add_dependencies(ets_test_suite_coroutines ets_coroutines_${test_name}_aot)
-            add_dependencies(ets_run_aot_ets_code_tests ets_coroutines_${test_name}_aot)
-
-            if (OFF) # PANDA_LLVM_AOT is not supported for stackless
-                panda_add_asm_file(
-                    FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/ets_test_suite/coroutines/${test_name}.pa
-                    TARGET ets_coroutines_${test_name}_llvmaot
-                    DEPENDS etsstdlib
-                    LANGUAGE_CONTEXT ets
-                    AOT_MODE TRUE
-                    AOT_COMPILER llvm
-                    ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-                    RUNTIME_OPTIONS ${COMMON_RUNTIME_OPTIONS} "--compiler-enable-jit=false"
-                    COMPILER_OPTIONS ${COMMONT_COMPILER_OPTIONS}
-                )
-                add_dependencies(ets_test_suite_coroutines ets_coroutines_${test_name}_llvmaot)
-                add_dependencies(ets_run_aot_ets_code_tests ets_coroutines_${test_name}_llvmaot)
-            endif()
-        endif()
-    endforeach()
-endif()
 
 add_subdirectory(dfx)
 add_subdirectory(no_suitable_worker)
