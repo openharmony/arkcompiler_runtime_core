@@ -103,7 +103,6 @@ export final class Runtime {
  * @implements { ErrorOptions }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 class ErrorOptionsImpl implements ErrorOptions {
     /**
@@ -113,7 +112,6 @@ class ErrorOptionsImpl implements ErrorOptions {
      * @default undefined
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private cause_?: Object
 
@@ -123,7 +121,6 @@ class ErrorOptionsImpl implements ErrorOptions {
      * @returns { Object | undefined } - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override get cause(): Object | undefined {
         return this.cause_
@@ -135,7 +132,6 @@ class ErrorOptionsImpl implements ErrorOptions {
      * @param { Object | undefined } cause - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     set cause(cause: Object | undefined) {
         this.cause_ = cause
@@ -147,7 +143,6 @@ class ErrorOptionsImpl implements ErrorOptions {
      * @param { Object } [cause] - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(cause?: Object) {
         this.cause_ = cause

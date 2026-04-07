@@ -277,7 +277,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { RangeError } if begin > end
      * @returns { int } the amount of completed codepoints
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public codePointCount(begin: int, end: int): int {
         if (begin > end) {
@@ -307,7 +306,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { number } the amount of completed codepoints
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public codePointCount(begin: number, end: number): number {
         return this.codePointCount(begin.toInt(), end.toInt())
@@ -364,7 +362,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { byte[] } byte[] array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getBytes(begin: int, end: int): byte[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -1388,7 +1385,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): String {
         begin = normalizeIndex(begin ?? 0, this.getLength())
@@ -1412,7 +1408,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String) {
         let matchLength = matched.getLength()

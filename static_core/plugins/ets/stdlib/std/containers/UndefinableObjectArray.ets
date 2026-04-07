@@ -120,7 +120,6 @@ export namespace containers {
          * @returns { UndefinableObject } Popped value
          * @throws { RangeError } When the array is empty, attempting to pop an element will throw this exception
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public popBack(): UndefinableObject {
             if (this.curSize === 0) {
