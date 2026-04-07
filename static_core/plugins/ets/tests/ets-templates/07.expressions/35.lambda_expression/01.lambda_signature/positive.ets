@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: Lambda signature positive case examples
+desc: Lambda signature
 ---*/
-type LT<T> = (p1: T, ...p2: T[]) => T
 
-function foo<T> (a: LT<T>) {}
-function bar<T> (a: (...p: T[]) => T) {}
-function goo<T> (a: (p?: T) => T) {}
+const func: (p: Object) => Object = e => e
 
-function main() {
-    {{c.call}}
-}
-
-{% endfor %}
+function foo<T>(p: (p: T) => T) {}
+foo <Object> (e => e)

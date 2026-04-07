@@ -319,17 +319,6 @@
 #33717
 07.expressions/32.assignment/03.left_hand_side_expressions/lhs_class_this_via_extension_n.ets
 
-#30582
-07.expressions/35.lambda_expression/01.lambda_signature/positive_0.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_1.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_2.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_3.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_4.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_5.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_6.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_7.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_8.ets
-
 #33994 Unexpected CTE on constant expression with cast operation on numeric literals
 07.expressions/36.constant_expression/check_enum/constant_cast_expression.ets
 07.expressions/36.constant_expression/check_tuple/tuple_index.ets

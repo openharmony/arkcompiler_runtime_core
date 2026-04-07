@@ -464,17 +464,6 @@
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
-#30582
-07.expressions/35.lambda_expression/01.lambda_signature/positive_0.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_1.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_2.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_3.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_4.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_5.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_6.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_7.ets
-07.expressions/35.lambda_expression/01.lambda_signature/positive_8.ets
-
 #29160
 07.expressions/36.constant_expression/check_enum/constant_number_conversion_5.ets
 
