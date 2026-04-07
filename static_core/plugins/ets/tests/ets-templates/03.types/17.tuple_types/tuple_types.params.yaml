@@ -192,6 +192,9 @@ cases:
     - use: |-
           let e: [] = []  // empty tuple
           arktest.assertTrue( e instanceof Object )
+          arktest.assertTrue( e instanceof Tuple )
+          let t: Tuple = e  // empty tuple is identical to Tuple
+          arktest.assertTrue( t instanceof Tuple )
 
     - decl: |-
           type TT = [int, string]
