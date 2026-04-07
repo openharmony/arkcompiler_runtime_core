@@ -444,7 +444,8 @@ JSCONVERT_WRAP(Promise)
         // connect->Invoke calls EtsPromiseSubmitCallback that acquires the mutex and checks the state again
         hpromise->Unlock();
         ASSERT_MANAGED_CODE();
-        std::array<Value, 2U> args = {Value(hpromise.GetPtr()), Value(reinterpret_cast<int64_t>(deferred))};
+        std::array<Value, 2U> args = {Value(hpromise.GetPtr()->GetCoreType()),
+                                      Value(reinterpret_cast<int64_t>(deferred))};
         PlatformTypes(executionCtx)
             ->interopPromiseInteropConnectPromise->GetPandaMethod()
             ->Invoke(executionCtx->GetMT(), args.data());

@@ -181,7 +181,8 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
         InteropCtx::Fatal("Cannot call then() from a JS promise");
     }
 
-    mem::Reference *promiseRef = vm->GetGlobalObjectStorage()->Add(etsPromise, mem::Reference::ObjectType::GLOBAL);
+    mem::Reference *promiseRef =
+        vm->GetGlobalObjectStorage()->Add(etsPromise->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
     std::array<napi_value, 2U> thenCallback {};
 
