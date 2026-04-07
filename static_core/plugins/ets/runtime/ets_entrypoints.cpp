@@ -77,7 +77,8 @@ static inline bool Launch(EtsExecutionContext *executionCtx, Method *method, con
     ASSERT(executionCtx != nullptr);
     PandaEtsVM *etsVm = executionCtx->GetPandaVM();
     auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
-    auto *promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
+    auto *promiseRef =
+        etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, jobMan);
     // create the job and put it to the ready queue
     auto epInfo = Job::ManagedEntrypointInfo {evt, method, std::move(args)};
@@ -165,8 +166,8 @@ ObjectHeader *LaunchFromInterpreterImpl(Method *method, Frame *frame, const uint
     if (UNLIKELY(!successfulLaunch)) {
         return nullptr;
     }
-    frame->GetAccAsVReg().SetReference(promiseHandle.GetPtr());
-    return promiseHandle.GetPtr();
+    frame->GetAccAsVReg().SetReference(promiseHandle.GetPtr()->GetCoreType());
+    return promiseHandle.GetPtr()->GetCoreType();
 }
 
 extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v)

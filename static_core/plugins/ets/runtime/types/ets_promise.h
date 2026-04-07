@@ -32,7 +32,7 @@ namespace test {
 class EtsPromiseTest;
 }  // namespace test
 
-class EtsPromise : public ObjectHeader {
+class EtsPromise : public EtsObject {
 public:
     // temp
     static constexpr EtsInt STATE_PENDING = 0;
@@ -53,24 +53,19 @@ public:
         return reinterpret_cast<EtsPromise *>(promise);
     }
 
-    ObjectHeader *GetCoreType() const
-    {
-        return static_cast<ObjectHeader *>(const_cast<EtsPromise *>(this));
-    }
-
     EtsObject *AsObject()
     {
-        return EtsObject::FromCoreType(this);
+        return this;
     }
 
     const EtsObject *AsObject() const
     {
-        return EtsObject::FromCoreType(this);
+        return this;
     }
 
     static EtsPromise *FromEtsObject(EtsObject *promise)
     {
-        return reinterpret_cast<EtsPromise *>(promise);
+        return static_cast<EtsPromise *>(promise);
     }
 
     EtsObjectArray *GetCallbackQueue(EtsExecutionContext *executionCtx) const

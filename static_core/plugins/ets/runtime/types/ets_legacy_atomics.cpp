@@ -191,7 +191,7 @@ static EtsPromise *ResolvePromiseWithString(EtsPromise *promise, EtsExecutionCon
     ASSERT(ctx != nullptr);
     ASSERT_MANAGED_CODE();
     ASSERT(promise != nullptr);
-    ASSERT(!promise->IsForwarded());
+    ASSERT(!promise->GetCoreType()->IsForwarded());
 
     EtsHandleScope hsc(ctx);
     EtsHandle<EtsPromise> hPromise(ctx, promise);

@@ -121,6 +121,7 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
     if (asyncCtx != nullptr) {
         auto *stacklessJobMan = static_cast<StacklessJobManager *>(executionCtx->GetManager());
         auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
+        asyncCtx->SetAwaitee(etsCtx, promise);
         stacklessJobMan->AwaitAsynchronous(dependency);
         promise->GetEvent(etsCtx)->AddDependency(dependency);
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
