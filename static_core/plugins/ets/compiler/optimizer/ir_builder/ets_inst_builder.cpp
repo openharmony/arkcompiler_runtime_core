@@ -207,6 +207,8 @@ void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
 
     // Create dispatch instruction in separate block.
     auto dispatchBlock = currentBlock->GetSuccessor(0U);
+    dispatchBlock->SetTry(currentBlock->IsTry());
+    dispatchBlock->SetTryId(currentBlock->GetTryId());
     auto dispatchInst = graph->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext);
     dispatchBlock->AppendInst(dispatchInst);
 }

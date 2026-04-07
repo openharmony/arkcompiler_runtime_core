@@ -203,6 +203,7 @@ elseif(PANDA_TARGET_ARM64)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_ani_entry_point_aarch64.S
         ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_async_entry_point_aarch64.S
+        ${ETS_EXT_SOURCES}/entrypoints/arch/arm64/ets_async_stubs_aarch64.S
         ${ETS_EXT_SOURCES}/entrypoints/arch/arm64/ets_proxy_entry_point_aarch64.S
     )
 elseif (PANDA_TARGET_AMD64)

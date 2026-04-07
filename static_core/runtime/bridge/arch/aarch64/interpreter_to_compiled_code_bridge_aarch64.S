@@ -346,10 +346,23 @@ MAKE_ASM_NAME(InterpreterToCompiledCodeBridge):
     ret
     CFI_ENDPROC
 
-// int64_t InvokeCompiledCodeWithArguments(const int64_t* args, const Frame *iframe, const Method *method, ManagedThread* thread)
+.equ USUAL_INVOKE_MODE, 0
+.equ RESUME_INVOKE_MODE, 1
+
+.macro InvokeCompiledCode mode
+.if \mode == USUAL_INVOKE_MODE
 .global MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray)
 TYPE_FUNCTION(InvokeCompiledCodeWithArgArray)
+// int64_t InvokeCompiledCodeWithArgArray(const int64_t* args, const Frame *iframe, const Method *method, ManagedThread* thread)
 MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
+.elseif \mode == RESUME_INVOKE_MODE
+.global MAKE_ASM_NAME(ResumeAsyncCompiledCode)
+TYPE_FUNCTION(ResumeAsyncCompiledCode)
+// uint64_t ResumeAsyncCompiledCode(const int64_t* args, const Frame *iframe, const Method *method, ManagedThread* thread)
+MAKE_ASM_NAME(ResumeAsyncCompiledCode):
+.else
+.error "Wrong calling mode for InvokeCompiledCode: \mode!"
+.endif
     CFI_STARTPROC
 
     stp fp, lr, [sp, #-16]!
@@ -387,7 +400,7 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     cbnz x0, 1f
     mov lr, x2
     mov x0, x2
-    b .Linvoke_with_args
+    b .Linvoke_with_args_\@
 
 1:  // setup regs as follow
     // x0 - SHORTY_PTR_REG, w1 - SHORTY_REG, w2 - shorty value, x6 - arg_ptr
@@ -426,17 +439,17 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     // store method (the last arg)
     str lr, [x10], #8
 
-.Lloop_args_push:
+.Lloop_args_push_\@:
     NEXT_SHORTY w2
-    cbz w2, .Lloopend_args_push
+    cbz w2, .Lloopend_args_push_\@
 
     ldr x11, [x6], #8
     cmp w2, #SHORTY_TAGGED
     bne 1f
     ldr x12, [x6], #8
-1:  PUSH_ARG x11, x12, x10, x4, x3, x13, .Lloop_args_push
-    b .Lloop_args_push
-.Lloopend_args_push:
+1:  PUSH_ARG x11, x12, x10, x4, x3, x13, .Lloop_args_push_\@
+    b .Lloop_args_push_\@
+.Lloopend_args_push_\@:
     // load arguments into d0-d7 while x12 != x6
     mov x11, x9
     LOAD_FPR_ARGS x11
@@ -444,8 +457,13 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     // restore sp to stack args
     mov sp, x9
 
-.Linvoke_with_args:
+.Linvoke_with_args_\@:
     // invoke the method
+.if \mode == RESUME_INVOKE_MODE
+    // Add IS_RESUMED tag to thread *
+    // NOTE: tagging approach will be removed!
+    orr THREAD_REG, THREAD_REG, #1
+.endif
     ldr lr, [lr, #METHOD_COMPILED_ENTRY_POINT_OFFSET]
     blr lr
 
@@ -458,34 +476,34 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
 
     sub w3, w2, #SHORTY_FIRST_FLOAT
     cmp w3, #(SHORTY_NUM_FLOAT_TYPES - 1)
-    bls .LFLOAT_
+    bls .LFLOAT_\@
     sub w3, w2, #SHORTY_FIRST_32
     cmp w3, #(SHORTY_NUM_MIN32_TYPES - 1)
-    bls .Lreturn_
+    bls .Lreturn_\@
     cmp w2, #SHORTY_I16
-    beq .LI16_
-    bpl .LU16_
+    beq .LI16_\@
+    bpl .LU16_\@
     cmp w2, #SHORTY_I8
-    beq .LI8_
+    beq .LI8_\@
     cmp w2, #SHORTY_U1
-    beq .LU1_
+    beq .LU1_\@
     uxtb x0, w0
-    b .Lreturn_
-.LU1_:
+    b .Lreturn_\@
+.LU1_\@:
     and w0, w0 , #0x1
-    b .Lreturn_
-.LI8_:
+    b .Lreturn_\@
+.LI8_\@:
     sxtb x0, w0
-    b .Lreturn_
-.LI16_:
+    b .Lreturn_\@
+.LI16_\@:
     sxth x0, w0
-    b .Lreturn_
-.LU16_:
+    b .Lreturn_\@
+.LU16_\@:
     uxth x0, w0
-    b .Lreturn_
-.LFLOAT_:
+    b .Lreturn_\@
+.LFLOAT_\@:
     fmov x0, d0
-.Lreturn_:
+.Lreturn_\@:
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
     ldp x19, THREAD_REG, [fp, #-32]
@@ -499,8 +517,7 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     CFI_DEF_CFA(sp, 0)
     ret
     CFI_ENDPROC
+.endm
 
-.global MAKE_ASM_NAME(ResumeAsyncCompiledCode)
-TYPE_FUNCTION(ResumeAsyncCompiledCode)
-MAKE_ASM_NAME(ResumeAsyncCompiledCode):
-    ret
+InvokeCompiledCode USUAL_INVOKE_MODE
+InvokeCompiledCode RESUME_INVOKE_MODE

@@ -81,6 +81,7 @@ private:
     ArenaVector<Inst *> liveValues_;
     uint32_t maxRefCount_ {0};
     uint32_t maxPrimCount_ {0};
+    uint32_t maxSuspendBridges_ {0};
 };
 
 }  // namespace ark::compiler

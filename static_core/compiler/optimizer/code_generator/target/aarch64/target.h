@@ -525,7 +525,7 @@ public:
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;
 
-    Reg InitFlagsReg(bool hasFloatRegs);
+    Reg InitFlagsReg(bool hasFloatRegs, bool flagsInThreadReg);
     size_t SaveFpLr(const FrameInfo &frameInfo, [[maybe_unused]] Encoder *encoder, [[maybe_unused]] Reg fp,
                     [[maybe_unused]] Reg lr);
     void EncodeDynCallMode([[maybe_unused]] const FrameInfo &frameInfo, Encoder *encoder);

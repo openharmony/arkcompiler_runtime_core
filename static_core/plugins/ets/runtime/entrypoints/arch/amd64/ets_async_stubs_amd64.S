@@ -77,23 +77,17 @@ EtsAsyncSuspendStub:
     CFI_ADJUST_CFA_OFFSET(-8)
 
     // Rewind to the first saved callee register slot in the current compiled CFrame.
-    leaq -104(%rbp), %rsp
+    leaq -(CFRAME_CALLEE_VREGS_END_SLOT * SLOT_SIZE)(%rbp), %rsp
 
     // Restore callee-saved registers in the same order as the compiled epilogue.
     popq %rbx
-    CFI_RESTORE(rbx)
     popq %r12
-    CFI_RESTORE(r12)
     popq %r13
-    CFI_RESTORE(r13)
     popq %r14
-    CFI_RESTORE(r14)
     popq %THREAD_REG
-    CFI_RESTORE(THREAD_REG)
 
     movq %rbp, %rsp
     popq %rbp
-    CFI_RESTORE(rbp)
     CFI_DEF_CFA(rsp, 8)
     retq
     CFI_ENDPROC

@@ -189,7 +189,7 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
     // Set HasFloatRegsFlag
     // No need to reset OSR flag because x86_64 doesn't support OSR mode
     auto flags {static_cast<uint64_t>(frameInfo.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
-    if (IsPandaMode()) {
+    if (frameInfo.GetFlagsInThreadReg()) {
         ScopedTmpReg flagsReg(encoder);
         auto threadReg = Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType());
         constexpr uint64_t TAG = 0x1;
