@@ -26,7 +26,6 @@ package std.core;
  * @typedef { string } PropertyKey
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type PropertyKey = string
 
@@ -43,7 +42,6 @@ type NullishEntryType = EntryType | null | undefined
  * @typedef { Object } object
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type object = Object;
 
@@ -52,7 +50,6 @@ export type object = Object;
  *
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Object {
     /**
@@ -60,7 +57,6 @@ export class Object {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor () {};
 
@@ -71,7 +67,6 @@ export class Object {
      * @throws { TypeError } The object is an unexpected fixedarray.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(): String {
         const thisObj = this
@@ -128,7 +123,6 @@ export class Object {
      * @returns { string } A locale-specific string representing the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         return this.toString()
@@ -140,7 +134,6 @@ export class Object {
     * @returns { int } The hash code value of this instance.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     public final $_hashCode(): int {
         return Runtime.getHashCode(this);
@@ -569,7 +562,6 @@ export class Object {
      * @returns { Record<PropertyKey, T> }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static fromEntries<T = Any>(entries: Iterable<[PropertyKey, T]>): Record<PropertyKey, T> {
         const result = new Record<PropertyKey, T>()

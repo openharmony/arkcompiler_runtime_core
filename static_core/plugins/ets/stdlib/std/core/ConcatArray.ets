@@ -27,7 +27,6 @@ package std.core;
  * @interface ConcatArray
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface ConcatArray<out T> extends ArrayLike<T> {
 
@@ -38,7 +37,6 @@ export interface ConcatArray<out T> extends ArrayLike<T> {
      * @returns { T | undefined } The element at the specified index, or undefined if the index is out of bounds.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     at(index: int): T | undefined;
 
@@ -50,7 +48,6 @@ export interface ConcatArray<out T> extends ArrayLike<T> {
      * @returns { string } A string containing all the elements of the array joined.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     join(separator?: String): string;
 
@@ -62,7 +59,6 @@ export interface ConcatArray<out T> extends ArrayLike<T> {
      * @returns { Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T> } A new array containing the extracted elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     slice(start?: int, end?: int): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
 }

@@ -20,7 +20,6 @@ package std.concurrency;
 *
 * @namespace concurrency.stackless
 * @syscap SystemCapability.Utils.Lang
-* @since 24
 */
 export namespace concurrency.stackless {
 
@@ -30,7 +29,6 @@ export namespace concurrency.stackless {
  *
  * @class AsyncCondVar
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export class AsyncCondVar {
     constructor() {
@@ -48,7 +46,6 @@ export class AsyncCondVar {
      * it will be unlocked before waiting and re-locked after wakeup
      * @returns { Promise<void> } A promise that resolves after wakeup and re-acquisition of the mutex
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      *
      * pre-condition: mutex is locked.
      * post-condition: mutex is locked.
@@ -67,7 +64,6 @@ export class AsyncCondVar {
      * @param { AsyncMutex } mutex - The mutex associated with the condition,
      * must be locked when calling to ensure correct synchronization
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      *
      * pre-condition: mutex is locked.
      * post-condition: mutex is locked.
@@ -86,7 +82,6 @@ export class AsyncCondVar {
      * @param { AsyncMutex } mutex - The mutex associated with the condition,
      * must be locked when calling to ensure correct synchronization
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      *
      * pre-condition: mutex is locked.
      * post-condition: mutex is locked.

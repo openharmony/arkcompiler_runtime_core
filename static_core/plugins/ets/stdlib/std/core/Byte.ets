@@ -26,7 +26,6 @@ package std.core;
  * @implements Comparable<Byte>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Byte extends Integral implements Comparable<Byte> {
     private value: byte;
@@ -36,7 +35,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this.value = 0;
@@ -48,7 +46,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @param { byte } value the initial value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: byte) {
         this.value = value;
@@ -62,7 +59,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static valueOf(value: byte): Byte {
         // TODO(ivan-tyulyandin): caching is possible
@@ -76,7 +72,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static MIN_VALUE: byte = -128;
 
@@ -87,7 +82,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static MAX_VALUE: byte = 127;
 
@@ -98,7 +92,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static BIT_SIZE: byte = 8;
 
@@ -109,7 +102,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static BYTE_SIZE: byte = 1;
 
@@ -119,7 +111,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { byte }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toByte(): byte {
         return this.value;
@@ -131,7 +122,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { short }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toShort(): short {
         return this.value.toShort();
@@ -143,7 +133,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toInt(): int {
         return this.value.toInt();
@@ -155,7 +144,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLong(): long {
         return this.value.toLong();
@@ -167,7 +155,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { float }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toFloat(): float {
         return this.value.toFloat();
@@ -179,7 +166,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { double }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toDouble(): double {
         return this.value.toDouble();
@@ -191,7 +177,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { char }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toChar(): char {
         return this.value.toChar();
@@ -205,7 +190,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toShort(value: byte): short;
 
@@ -217,7 +201,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toInt(value: byte): int;
 
@@ -229,7 +212,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toLong(value: byte): long;
 
@@ -241,7 +223,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toFloat(value: byte): float;
 
@@ -253,7 +234,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toDouble(value: byte): double;
 
@@ -265,7 +245,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toChar(value: byte): char;
 
@@ -277,7 +256,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toByte(value: byte): byte {
         return value;
@@ -291,7 +269,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override compareTo(other: Byte): int {
         if (this.value < other) {
@@ -309,7 +286,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return StringBuilder.toString(this.value);
@@ -323,7 +299,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(v: byte): string {
         return StringBuilder.toString(v);
@@ -336,7 +311,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(radix: int): string {
         return (new Long(this.value)).toString(radix);
@@ -350,7 +324,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
 
     public equals(other: Any): boolean {
@@ -375,7 +348,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
         const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
@@ -392,7 +364,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         if (options instanceof Intl.NumberFormatOptions) {
@@ -408,7 +379,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { Byte }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public add(other: Byte): Byte {
         return (this.value + other.toByte()).toByte()
@@ -421,7 +391,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { Byte }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sub(other: Byte): Byte {
         return (this.value - other.toByte()).toByte()
@@ -434,7 +403,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { Byte }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public mul(other: Byte): Byte {
         return (this.value * other.toByte()).toByte()
@@ -447,7 +415,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { Byte }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public div(other: Byte): Byte {
         return (this.value / other.toByte()).toByte()
@@ -460,7 +427,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLessThan(other: Byte): boolean {
         return this.value < other.toByte();
@@ -473,7 +439,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLessEqualThan(other: Byte): boolean {
         return this.value <= other.toByte();
@@ -486,7 +451,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGreaterThan(other: Byte): boolean {
         return this.value > other.toByte();
@@ -499,7 +463,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGreaterEqualThan(other: Byte): boolean {
         return this.value >= other.toByte();
@@ -514,7 +477,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native parseInt(s: String, r: int): byte;
 }

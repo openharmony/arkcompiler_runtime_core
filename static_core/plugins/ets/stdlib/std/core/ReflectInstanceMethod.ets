@@ -27,7 +27,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -37,7 +36,6 @@ export namespace reflect {
  * @extends Method
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class InstanceMethod extends Method {
     /**
@@ -52,7 +50,6 @@ export final class InstanceMethod extends Method {
      * @returns { boolean } Returns true if the method is final, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isFinal(): boolean {
         return (this.attributes & Attributes.FINAL) != 0
@@ -64,7 +61,6 @@ export final class InstanceMethod extends Method {
      * @returns { boolean } Returns true if the method is async, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isAsync(): boolean {
         return (this.attributes & Attributes.ASYNC) != 0
@@ -76,7 +72,6 @@ export final class InstanceMethod extends Method {
      * @returns { boolean } Returns true if the method is abstract, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isAbstract(): boolean {
         return (this.attributes & Attributes.ABSTRACT) != 0
@@ -88,7 +83,6 @@ export final class InstanceMethod extends Method {
      * @returns { boolean } Returns true if the method is a getter, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGetter(): boolean {
         return (this.attributes & Attributes.GETTER) != 0
@@ -100,7 +94,6 @@ export final class InstanceMethod extends Method {
      * @returns { boolean } Returns true if the method is a setter, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isSetter(): boolean {
         return (this.attributes & Attributes.SETTER) != 0
@@ -113,7 +106,6 @@ export final class InstanceMethod extends Method {
      * @returns { boolean } Returns true if the two methods are equal, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: InstanceMethod): boolean {
         return this.methodPtr == other.methodPtr
@@ -131,7 +123,6 @@ export final class InstanceMethod extends Method {
      * @throws { TypeError } Throws when The number or type of `args` does not match the method signature.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public invoke(thisObj: Object, args?: FixedArray<Any>): Any {
         return super.invoke(thisObj, args)

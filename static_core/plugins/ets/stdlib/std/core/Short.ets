@@ -24,7 +24,6 @@ package std.core;
  * @implements Comparable<Short>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Short extends Integral implements Comparable<Short> {
     private value: short;
@@ -33,7 +32,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * Constructs a new Short instance with initial value zero
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this.value = 0;
@@ -44,7 +42,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @param { short } value the initial value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: short) {
         this.value = value;
@@ -57,7 +54,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static valueOf(value: short): Short {
         // TODO(ivan-tyulyandin): caching is possible
@@ -70,7 +66,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static MIN_VALUE: short = -32768;
 
@@ -80,7 +75,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static MAX_VALUE: short = 32767;
 
@@ -90,7 +84,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static BIT_SIZE: byte = 16;
 
@@ -100,7 +93,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static BYTE_SIZE: byte = 2;
 
@@ -110,7 +102,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { byte } value as short
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toByte(): byte {
         return (this.value).toByte();
@@ -122,7 +113,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { short } value as short
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toShort(): short {
         return this.value;
@@ -134,7 +124,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { int } value as int
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toInt(): int {
         return Short.toInt(this.value);
@@ -146,7 +135,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { long } value as long
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLong(): long {
         return this.value.toLong();
@@ -158,7 +146,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { float } value as float
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toFloat(): float {
         return this.value.toFloat();
@@ -170,7 +157,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { double } value as double
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toDouble(): double {
         return Short.toDouble(this.value);
@@ -182,7 +168,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { char } value as char
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toChar(): char {
         return this.value.toChar();
@@ -196,7 +181,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toByte(value: short): byte;
 
@@ -208,7 +192,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toInt(value: short): int;
 
@@ -220,7 +203,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toLong(value: short): long;
 
@@ -232,7 +214,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toFloat(value: short): float;
 
@@ -244,7 +225,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toDouble(value: short): double;
 
@@ -256,7 +236,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toChar(value: short): char;
 
@@ -268,7 +247,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toShort(value: short): short {
         return value;
@@ -284,7 +262,6 @@ export final class Short extends Integral implements Comparable<Short> {
      *     0 if equal, 1 if greater
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override compareTo(other: Short): int {
         if (this.value < other) {
@@ -304,7 +281,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(v: short): string {
         return StringBuilder.toString(v);
@@ -315,7 +291,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { String } result of the conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return StringBuilder.toString(this.value);
@@ -328,7 +303,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { string } result of the conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(radix: int): string {
         return (new Long(this.value)).toString(radix);
@@ -342,7 +316,6 @@ export final class Short extends Integral implements Comparable<Short> {
     *     Returns false if type of provided object is not the same as this type
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     public equals(other: Any): boolean {
         if (this === other) {
@@ -366,7 +339,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
         const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
@@ -383,7 +355,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         if (options instanceof Intl.NumberFormatOptions) {
@@ -399,7 +370,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { Short } Result of the addition
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public add(other: Short): Short {
         return Short.valueOf((this.value + other.toShort()).toShort())
@@ -412,7 +382,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { Short } Result of the subtraction
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sub(other: Short): Short {
         return Short.valueOf((this.value - other.toShort()).toShort())
@@ -425,7 +394,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { Short } Result of the multiplication
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public mul(other: Short): Short {
         return Short.valueOf((this.value * other.toShort()).toShort())
@@ -438,7 +406,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { Short } Result of the division
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public div(other: Short): Short {
         return Short.valueOf((this.value / other.toShort()).toShort())
@@ -451,7 +418,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { boolean } true if this value is less than provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLessThan(other: Short): boolean {
         return this.value < other.toShort();
@@ -464,7 +430,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { boolean } true if this value is less than or equal to provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLessEqualThan(other: Short): boolean {
         return this.value <= other.toShort();
@@ -477,7 +442,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { boolean } true if this value is greater than provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGreaterThan(other: Short): boolean {
         return this.value > other.toShort();
@@ -490,7 +454,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @returns { boolean } true if this value is greater than or equal to provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGreaterEqualThan(other: Short): boolean {
         return this.value >= other.toShort();
@@ -505,7 +468,6 @@ export final class Short extends Integral implements Comparable<Short> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
     */
     public static native parseInt(s: String, r: int): short;
 }

@@ -25,7 +25,6 @@ package std.core;
  * @interface Comparable
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface Comparable<in T> {
 
@@ -39,7 +38,6 @@ export interface Comparable<in T> {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     compareTo(to: T): int;
 }

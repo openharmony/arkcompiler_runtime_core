@@ -90,7 +90,6 @@ function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<boolean>, index: int): Boolean {
     let len = self.length;
@@ -117,7 +116,6 @@ export function at(self: FixedArray<boolean>, index: int): Boolean {
  * @returns { FixedArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<boolean>, target: int): FixedArray<boolean> {
     copyWithin(self, target, 0, self.length);
@@ -134,7 +132,6 @@ export function copyWithin(self: FixedArray<boolean>, target: int): FixedArray<b
  * @returns { FixedArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<boolean>, target: int, start: int): FixedArray<boolean> {
     copyWithin(self, target, start, self.length);
@@ -152,7 +149,6 @@ export function copyWithin(self: FixedArray<boolean>, target: int, start: int): 
  * @returns { FixedArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<boolean>, target: int, start: int, end?: int): FixedArray<boolean> {
     target = normalizeIndex(target, self.length)
@@ -192,7 +188,6 @@ export function copyWithin(self: FixedArray<boolean>, target: int, start: int, e
  * @returns { FixedArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end?: int): FixedArray<boolean> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -213,7 +208,6 @@ export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
@@ -231,7 +225,6 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -251,7 +244,6 @@ export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean,
  * @returns { Boolean | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, index: int, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -273,7 +265,6 @@ export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, i
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -294,7 +285,6 @@ export function every(self: FixedArray<boolean>, predicate: (value: boolean, ind
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -314,7 +304,6 @@ export function some(self: FixedArray<boolean>, predicate: (value: boolean, inde
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -336,7 +325,6 @@ export function findLastIndex(self: FixedArray<boolean>, predicate: (element: bo
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
@@ -360,7 +348,6 @@ export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: bo
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
@@ -381,7 +368,6 @@ export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (prev
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
@@ -399,7 +385,6 @@ export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousV
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => void): void {
     const len0 = self.length;
@@ -419,7 +404,6 @@ export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, 
  * @returns { FixedArray<boolean> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<boolean>, start: int): FixedArray<boolean> {
     return slice(self, start, Int.MAX_VALUE);
@@ -435,7 +419,6 @@ export function slice(self: FixedArray<boolean>, start: int): FixedArray<boolean
  * @returns { FixedArray<boolean> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedArray<boolean> {
     const len: int = self.length;
@@ -460,7 +443,6 @@ export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedA
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromIndex?: int): int {
     if (self.length == 0) {
@@ -493,7 +475,6 @@ export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromInd
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<boolean>, sep?: String): string {
     if (self.length == 0) {
@@ -517,7 +498,6 @@ export function join(self: FixedArray<boolean>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<boolean>): string {
     return join(self, ",");
@@ -534,7 +514,6 @@ export function toString(self: FixedArray<boolean>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<boolean>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -549,7 +528,6 @@ export function toLocaleString(self: FixedArray<boolean>, locales: Object, optio
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<boolean>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -563,7 +541,6 @@ export function toLocaleString(self: FixedArray<boolean>, locales: Object): stri
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<boolean>): string {
     const sb = new StringBuilder()
@@ -588,7 +565,6 @@ export function toLocaleString(self: FixedArray<boolean>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<boolean>, start: int): FixedArray<boolean> {
     return toSpliced(self, start, self.length)
@@ -604,7 +580,6 @@ export function toSpliced(self: FixedArray<boolean>, start: int): FixedArray<boo
  * @returns { FixedArray<boolean> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<boolean>, start: int, delete: int, ...items: FixedArray<boolean>): FixedArray<boolean> {
     const len = self.length;
@@ -639,7 +614,6 @@ export function toSpliced(self: FixedArray<boolean>, start: int, delete: int, ..
  * @returns { FixedArray<boolean> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<boolean>, start?: int, delete?: int): FixedArray<boolean> {
     const len = self.length;
@@ -655,7 +629,6 @@ export function toSpliced(self: FixedArray<boolean>, start?: int, delete?: int):
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: int): boolean {
     const len = self.length;
@@ -676,7 +649,6 @@ export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: in
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -695,7 +667,6 @@ export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: int
  * @returns { FixedArray<boolean> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<boolean>): FixedArray<boolean> {
     let arr = cloneArray(self);
@@ -711,7 +682,6 @@ export function toSorted(self: FixedArray<boolean>): FixedArray<boolean> {
  * @returns { FixedArray<boolean> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => int): FixedArray<boolean> {
     let arr = cloneArray(self);
@@ -727,7 +697,6 @@ export function toSorted(self: FixedArray<boolean>, comparator: (a: boolean, b: 
  * @returns { FixedArray<boolean> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<boolean>): FixedArray<boolean> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -747,7 +716,6 @@ export function reverse(self: FixedArray<boolean>): FixedArray<boolean> {
  * @returns { FixedArray<boolean> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
     let arr : FixedArray<boolean> = new FixedArray<boolean>(self.length)
@@ -767,7 +735,6 @@ export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<boolean>, index: int, value: boolean): FixedArray<boolean> {
     if (index < 0) {
@@ -788,7 +755,6 @@ export function with(self: FixedArray<boolean>, index: int, value: boolean): Fix
  * @returns { IterableIterator<boolean> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
     return new ArrayValuesIterator_boolean_FixedArray(self);
@@ -801,7 +767,6 @@ export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<boolean>): IterableIterator<[int, boolean]> {
     return new ArrayEntriesIterator_boolean_FixedArray(self);
@@ -815,7 +780,6 @@ export function entries(self: FixedArray<boolean>): IterableIterator<[int, boole
  * function one time for each element in the array.
  * @returns { FixedArray<boolean> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
     const len = self.length;
@@ -837,7 +801,6 @@ export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, inde
  * @returns { boolean } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
@@ -1034,7 +997,6 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<byte>, index: int): Byte {
     let len = self.length;
@@ -1061,7 +1023,6 @@ export function at(self: FixedArray<byte>, index: int): Byte {
  * @returns { FixedArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<byte>, target: int): FixedArray<byte> {
     copyWithin(self, target, 0, self.length);
@@ -1078,7 +1039,6 @@ export function copyWithin(self: FixedArray<byte>, target: int): FixedArray<byte
  * @returns { FixedArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<byte>, target: int, start: int): FixedArray<byte> {
     copyWithin(self, target, start, self.length);
@@ -1096,7 +1056,6 @@ export function copyWithin(self: FixedArray<byte>, target: int, start: int): Fix
  * @returns { FixedArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<byte>, target: int, start: int, end?: int): FixedArray<byte> {
     target = normalizeIndex(target, self.length)
@@ -1136,7 +1095,6 @@ export function copyWithin(self: FixedArray<byte>, target: int, start: int, end?
  * @returns { FixedArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int): FixedArray<byte> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -1157,7 +1115,6 @@ export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
@@ -1175,7 +1132,6 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -1195,7 +1151,6 @@ export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index
  * @returns { Byte | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: int, array: FixedArray<byte>) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1217,7 +1172,6 @@ export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: 
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -1238,7 +1192,6 @@ export function every(self: FixedArray<byte>, predicate: (value: byte, index: in
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -1258,7 +1211,6 @@ export function some(self: FixedArray<byte>, predicate: (value: byte, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1280,7 +1232,6 @@ export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte,
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: FixedArray<byte>) => byte): byte {
     if (self.length == 0) {
@@ -1304,7 +1255,6 @@ export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte,
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
@@ -1325,7 +1275,6 @@ export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousVa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
@@ -1343,7 +1292,6 @@ export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValu
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => void): void {
     const len0 = self.length;
@@ -1363,7 +1311,6 @@ export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index:
  * @returns { FixedArray<byte> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<byte>, start: int): FixedArray<byte> {
     return slice(self, start, Int.MAX_VALUE);
@@ -1379,7 +1326,6 @@ export function slice(self: FixedArray<byte>, start: int): FixedArray<byte> {
  * @returns { FixedArray<byte> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArray<byte> {
     const len: int = self.length;
@@ -1404,7 +1350,6 @@ export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArra
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: int): int {
     if (self.length == 0) {
@@ -1437,7 +1382,6 @@ export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: i
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<byte>, sep?: String): string {
     if (self.length == 0) {
@@ -1461,7 +1405,6 @@ export function join(self: FixedArray<byte>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<byte>): string {
     return join(self, ",");
@@ -1478,7 +1421,6 @@ export function toString(self: FixedArray<byte>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<byte>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -1493,7 +1435,6 @@ export function toLocaleString(self: FixedArray<byte>, locales: Object, options:
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<byte>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -1507,7 +1448,6 @@ export function toLocaleString(self: FixedArray<byte>, locales: Object): string 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<byte>): string {
     const sb = new StringBuilder()
@@ -1532,7 +1472,6 @@ export function toLocaleString(self: FixedArray<byte>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<byte>, start: int): FixedArray<byte> {
     return toSpliced(self, start, self.length)
@@ -1548,7 +1487,6 @@ export function toSpliced(self: FixedArray<byte>, start: int): FixedArray<byte> 
  * @returns { FixedArray<byte> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<byte>, start: int, delete: int, ...items: FixedArray<byte>): FixedArray<byte> {
     const len = self.length;
@@ -1583,7 +1521,6 @@ export function toSpliced(self: FixedArray<byte>, start: int, delete: int, ...it
  * @returns { FixedArray<byte> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<byte>, start?: int, delete?: int): FixedArray<byte> {
     const len = self.length;
@@ -1599,7 +1536,6 @@ export function toSpliced(self: FixedArray<byte>, start?: int, delete?: int): Fi
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<byte>, val: byte, fromIndex?: int): boolean {
     const len = self.length;
@@ -1620,7 +1556,6 @@ export function includes(self: FixedArray<byte>, val: byte, fromIndex?: int): bo
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -1639,7 +1574,6 @@ export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: int): int
  * @returns { FixedArray<byte> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<byte>): FixedArray<byte> {
     let arr = cloneArray(self);
@@ -1655,7 +1589,6 @@ export function toSorted(self: FixedArray<byte>): FixedArray<byte> {
  * @returns { FixedArray<byte> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<byte>, comparator: (a: byte, b: byte) => int): FixedArray<byte> {
     let arr = cloneArray(self);
@@ -1671,7 +1604,6 @@ export function toSorted(self: FixedArray<byte>, comparator: (a: byte, b: byte) 
  * @returns { FixedArray<byte> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<byte>): FixedArray<byte> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -1691,7 +1623,6 @@ export function reverse(self: FixedArray<byte>): FixedArray<byte> {
  * @returns { FixedArray<byte> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
     let arr : FixedArray<byte> = new FixedArray<byte>(self.length)
@@ -1711,7 +1642,6 @@ export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<byte>, index: int, value: byte): FixedArray<byte> {
     if (index < 0) {
@@ -1732,7 +1662,6 @@ export function with(self: FixedArray<byte>, index: int, value: byte): FixedArra
  * @returns { IterableIterator<byte> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<byte>): IterableIterator<byte> {
     return new ArrayValuesIterator_byte_FixedArray(self);
@@ -1745,7 +1674,6 @@ export function values(self: FixedArray<byte>): IterableIterator<byte> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<byte>): IterableIterator<[int, byte]> {
     return new ArrayEntriesIterator_byte_FixedArray(self);
@@ -1759,7 +1687,6 @@ export function entries(self: FixedArray<byte>): IterableIterator<[int, byte]> {
  * function one time for each element in the array.
  * @returns { FixedArray<byte> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => byte): FixedArray<byte> {
     const len = self.length;
@@ -1781,7 +1708,6 @@ export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: int
  * @returns { byte } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: FixedArray<byte>) => byte): byte {
     if (self.length == 0) {
@@ -1978,7 +1904,6 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<short>, index: int): Short {
     let len = self.length;
@@ -2005,7 +1930,6 @@ export function at(self: FixedArray<short>, index: int): Short {
  * @returns { FixedArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<short>, target: int): FixedArray<short> {
     copyWithin(self, target, 0, self.length);
@@ -2022,7 +1946,6 @@ export function copyWithin(self: FixedArray<short>, target: int): FixedArray<sho
  * @returns { FixedArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<short>, target: int, start: int): FixedArray<short> {
     copyWithin(self, target, start, self.length);
@@ -2040,7 +1963,6 @@ export function copyWithin(self: FixedArray<short>, target: int, start: int): Fi
  * @returns { FixedArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<short>, target: int, start: int, end?: int): FixedArray<short> {
     target = normalizeIndex(target, self.length)
@@ -2080,7 +2002,6 @@ export function copyWithin(self: FixedArray<short>, target: int, start: int, end
  * @returns { FixedArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<short>, value: short, start?: int, end?: int): FixedArray<short> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -2101,7 +2022,6 @@ export function fill(self: FixedArray<short>, value: short, start?: int, end?: i
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
@@ -2119,7 +2039,6 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -2139,7 +2058,6 @@ export function findIndex(self: FixedArray<short>, predicate: (value: short, ind
  * @returns { Short | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<short>, predicate: (elem: short, index: int, array: FixedArray<short>) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -2161,7 +2079,6 @@ export function findLast(self: FixedArray<short>, predicate: (elem: short, index
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -2182,7 +2099,6 @@ export function every(self: FixedArray<short>, predicate: (value: short, index: 
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -2202,7 +2118,6 @@ export function some(self: FixedArray<short>, predicate: (value: short, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -2224,7 +2139,6 @@ export function findLastIndex(self: FixedArray<short>, predicate: (element: shor
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: FixedArray<short>) => short): short {
     if (self.length == 0) {
@@ -2248,7 +2162,6 @@ export function reduce(self: FixedArray<short>, callbackfn: (previousValue: shor
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
@@ -2269,7 +2182,6 @@ export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previous
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
@@ -2287,7 +2199,6 @@ export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousVal
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => void): void {
     const len0 = self.length;
@@ -2307,7 +2218,6 @@ export function forEach(self: FixedArray<short>, callbackfn: (value: short, inde
  * @returns { FixedArray<short> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<short>, start: int): FixedArray<short> {
     return slice(self, start, Int.MAX_VALUE);
@@ -2323,7 +2233,6 @@ export function slice(self: FixedArray<short>, start: int): FixedArray<short> {
  * @returns { FixedArray<short> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArray<short> {
     const len: int = self.length;
@@ -2348,7 +2257,6 @@ export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArr
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?: int): int {
     if (self.length == 0) {
@@ -2381,7 +2289,6 @@ export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?:
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<short>, sep?: String): string {
     if (self.length == 0) {
@@ -2405,7 +2312,6 @@ export function join(self: FixedArray<short>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<short>): string {
     return join(self, ",");
@@ -2422,7 +2328,6 @@ export function toString(self: FixedArray<short>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<short>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -2437,7 +2342,6 @@ export function toLocaleString(self: FixedArray<short>, locales: Object, options
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<short>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -2451,7 +2355,6 @@ export function toLocaleString(self: FixedArray<short>, locales: Object): string
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<short>): string {
     const sb = new StringBuilder()
@@ -2476,7 +2379,6 @@ export function toLocaleString(self: FixedArray<short>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<short>, start: int): FixedArray<short> {
     return toSpliced(self, start, self.length)
@@ -2492,7 +2394,6 @@ export function toSpliced(self: FixedArray<short>, start: int): FixedArray<short
  * @returns { FixedArray<short> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<short>, start: int, delete: int, ...items: FixedArray<short>): FixedArray<short> {
     const len = self.length;
@@ -2527,7 +2428,6 @@ export function toSpliced(self: FixedArray<short>, start: int, delete: int, ...i
  * @returns { FixedArray<short> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<short>, start?: int, delete?: int): FixedArray<short> {
     const len = self.length;
@@ -2543,7 +2443,6 @@ export function toSpliced(self: FixedArray<short>, start?: int, delete?: int): F
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<short>, val: short, fromIndex?: int): boolean {
     const len = self.length;
@@ -2564,7 +2463,6 @@ export function includes(self: FixedArray<short>, val: short, fromIndex?: int): 
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<short>, val: short, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -2583,7 +2481,6 @@ export function indexOf(self: FixedArray<short>, val: short, fromIndex?: int): i
  * @returns { FixedArray<short> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<short>): FixedArray<short> {
     let arr = cloneArray(self);
@@ -2599,7 +2496,6 @@ export function toSorted(self: FixedArray<short>): FixedArray<short> {
  * @returns { FixedArray<short> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<short>, comparator: (a: short, b: short) => int): FixedArray<short> {
     let arr = cloneArray(self);
@@ -2615,7 +2511,6 @@ export function toSorted(self: FixedArray<short>, comparator: (a: short, b: shor
  * @returns { FixedArray<short> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<short>): FixedArray<short> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -2635,7 +2530,6 @@ export function reverse(self: FixedArray<short>): FixedArray<short> {
  * @returns { FixedArray<short> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<short>): FixedArray<short> {
     let arr : FixedArray<short> = new FixedArray<short>(self.length)
@@ -2655,7 +2549,6 @@ export function toReversed(self: FixedArray<short>): FixedArray<short> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<short>, index: int, value: short): FixedArray<short> {
     if (index < 0) {
@@ -2676,7 +2569,6 @@ export function with(self: FixedArray<short>, index: int, value: short): FixedAr
  * @returns { IterableIterator<short> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<short>): IterableIterator<short> {
     return new ArrayValuesIterator_short_FixedArray(self);
@@ -2689,7 +2581,6 @@ export function values(self: FixedArray<short>): IterableIterator<short> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<short>): IterableIterator<[int, short]> {
     return new ArrayEntriesIterator_short_FixedArray(self);
@@ -2703,7 +2594,6 @@ export function entries(self: FixedArray<short>): IterableIterator<[int, short]>
  * function one time for each element in the array.
  * @returns { FixedArray<short> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => short): FixedArray<short> {
     const len = self.length;
@@ -2725,7 +2615,6 @@ export function map(self: FixedArray<short>, callbackfn: (value: short, index: i
  * @returns { short } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: FixedArray<short>) => short): short {
     if (self.length == 0) {
@@ -2922,7 +2811,6 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<int>, index: int): Int {
     let len = self.length;
@@ -2949,7 +2837,6 @@ export function at(self: FixedArray<int>, index: int): Int {
  * @returns { FixedArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<int>, target: int): FixedArray<int> {
     copyWithin(self, target, 0, self.length);
@@ -2966,7 +2853,6 @@ export function copyWithin(self: FixedArray<int>, target: int): FixedArray<int> 
  * @returns { FixedArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<int>, target: int, start: int): FixedArray<int> {
     copyWithin(self, target, start, self.length);
@@ -2984,7 +2870,6 @@ export function copyWithin(self: FixedArray<int>, target: int, start: int): Fixe
  * @returns { FixedArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<int>, target: int, start: int, end?: int): FixedArray<int> {
     target = normalizeIndex(target, self.length)
@@ -3024,7 +2909,6 @@ export function copyWithin(self: FixedArray<int>, target: int, start: int, end?:
  * @returns { FixedArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<int>, value: int, start?: int, end?: int): FixedArray<int> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -3045,7 +2929,6 @@ export function fill(self: FixedArray<int>, value: int, start?: int, end?: int):
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
@@ -3063,7 +2946,6 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: int, 
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -3083,7 +2965,6 @@ export function findIndex(self: FixedArray<int>, predicate: (value: int, index: 
  * @returns { Int | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<int>, predicate: (elem: int, index: int, array: FixedArray<int>) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3105,7 +2986,6 @@ export function findLast(self: FixedArray<int>, predicate: (elem: int, index: in
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -3126,7 +3006,6 @@ export function every(self: FixedArray<int>, predicate: (value: int, index: int,
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -3146,7 +3025,6 @@ export function some(self: FixedArray<int>, predicate: (value: int, index: int, 
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3168,7 +3046,6 @@ export function findLastIndex(self: FixedArray<int>, predicate: (element: int, i
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: FixedArray<int>) => int): int {
     if (self.length == 0) {
@@ -3192,7 +3069,6 @@ export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, c
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
@@ -3213,7 +3089,6 @@ export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValu
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
@@ -3231,7 +3106,6 @@ export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => void): void {
     const len0 = self.length;
@@ -3251,7 +3125,6 @@ export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: i
  * @returns { FixedArray<int> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<int>, start: int): FixedArray<int> {
     return slice(self, start, Int.MAX_VALUE);
@@ -3267,7 +3140,6 @@ export function slice(self: FixedArray<int>, start: int): FixedArray<int> {
  * @returns { FixedArray<int> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray<int> {
     const len: int = self.length;
@@ -3292,7 +3164,6 @@ export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: int): int {
     if (self.length == 0) {
@@ -3325,7 +3196,6 @@ export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: int
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<int>, sep?: String): string {
     if (self.length == 0) {
@@ -3349,7 +3219,6 @@ export function join(self: FixedArray<int>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<int>): string {
     return join(self, ",");
@@ -3366,7 +3235,6 @@ export function toString(self: FixedArray<int>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<int>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -3381,7 +3249,6 @@ export function toLocaleString(self: FixedArray<int>, locales: Object, options: 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<int>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -3395,7 +3262,6 @@ export function toLocaleString(self: FixedArray<int>, locales: Object): string {
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<int>): string {
     const sb = new StringBuilder()
@@ -3420,7 +3286,6 @@ export function toLocaleString(self: FixedArray<int>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<int>, start: int): FixedArray<int> {
     return toSpliced(self, start, self.length)
@@ -3436,7 +3301,6 @@ export function toSpliced(self: FixedArray<int>, start: int): FixedArray<int> {
  * @returns { FixedArray<int> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<int>, start: int, delete: int, ...items: FixedArray<int>): FixedArray<int> {
     const len = self.length;
@@ -3471,7 +3335,6 @@ export function toSpliced(self: FixedArray<int>, start: int, delete: int, ...ite
  * @returns { FixedArray<int> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<int>, start?: int, delete?: int): FixedArray<int> {
     const len = self.length;
@@ -3487,7 +3350,6 @@ export function toSpliced(self: FixedArray<int>, start?: int, delete?: int): Fix
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<int>, val: int, fromIndex?: int): boolean {
     const len = self.length;
@@ -3508,7 +3370,6 @@ export function includes(self: FixedArray<int>, val: int, fromIndex?: int): bool
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<int>, val: int, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -3527,7 +3388,6 @@ export function indexOf(self: FixedArray<int>, val: int, fromIndex?: int): int {
  * @returns { FixedArray<int> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<int>): FixedArray<int> {
     let arr = cloneArray(self);
@@ -3543,7 +3403,6 @@ export function toSorted(self: FixedArray<int>): FixedArray<int> {
  * @returns { FixedArray<int> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<int>, comparator: (a: int, b: int) => int): FixedArray<int> {
     let arr = cloneArray(self);
@@ -3559,7 +3418,6 @@ export function toSorted(self: FixedArray<int>, comparator: (a: int, b: int) => 
  * @returns { FixedArray<int> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<int>): FixedArray<int> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -3579,7 +3437,6 @@ export function reverse(self: FixedArray<int>): FixedArray<int> {
  * @returns { FixedArray<int> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<int>): FixedArray<int> {
     let arr : FixedArray<int> = new FixedArray<int>(self.length)
@@ -3599,7 +3456,6 @@ export function toReversed(self: FixedArray<int>): FixedArray<int> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<int>, index: int, value: int): FixedArray<int> {
     if (index < 0) {
@@ -3620,7 +3476,6 @@ export function with(self: FixedArray<int>, index: int, value: int): FixedArray<
  * @returns { IterableIterator<int> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<int>): IterableIterator<int> {
     return new ArrayValuesIterator_int_FixedArray(self);
@@ -3633,7 +3488,6 @@ export function values(self: FixedArray<int>): IterableIterator<int> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<int>): IterableIterator<[int, int]> {
     return new ArrayEntriesIterator_int_FixedArray(self);
@@ -3647,7 +3501,6 @@ export function entries(self: FixedArray<int>): IterableIterator<[int, int]> {
  * function one time for each element in the array.
  * @returns { FixedArray<int> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => int): FixedArray<int> {
     const len = self.length;
@@ -3669,7 +3522,6 @@ export function map(self: FixedArray<int>, callbackfn: (value: int, index: int, 
  * @returns { int } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: FixedArray<int>) => int): int {
     if (self.length == 0) {
@@ -3866,7 +3718,6 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<long>, index: int): Long {
     let len = self.length;
@@ -3893,7 +3744,6 @@ export function at(self: FixedArray<long>, index: int): Long {
  * @returns { FixedArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<long>, target: int): FixedArray<long> {
     copyWithin(self, target, 0, self.length);
@@ -3910,7 +3760,6 @@ export function copyWithin(self: FixedArray<long>, target: int): FixedArray<long
  * @returns { FixedArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<long>, target: int, start: int): FixedArray<long> {
     copyWithin(self, target, start, self.length);
@@ -3928,7 +3777,6 @@ export function copyWithin(self: FixedArray<long>, target: int, start: int): Fix
  * @returns { FixedArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<long>, target: int, start: int, end?: int): FixedArray<long> {
     target = normalizeIndex(target, self.length)
@@ -3968,7 +3816,6 @@ export function copyWithin(self: FixedArray<long>, target: int, start: int, end?
  * @returns { FixedArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<long>, value: long, start?: int, end?: int): FixedArray<long> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -3989,7 +3836,6 @@ export function fill(self: FixedArray<long>, value: long, start?: int, end?: int
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
@@ -4007,7 +3853,6 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -4027,7 +3872,6 @@ export function findIndex(self: FixedArray<long>, predicate: (value: long, index
  * @returns { Long | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<long>, predicate: (elem: long, index: int, array: FixedArray<long>) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4049,7 +3893,6 @@ export function findLast(self: FixedArray<long>, predicate: (elem: long, index: 
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -4070,7 +3913,6 @@ export function every(self: FixedArray<long>, predicate: (value: long, index: in
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -4090,7 +3932,6 @@ export function some(self: FixedArray<long>, predicate: (value: long, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4112,7 +3953,6 @@ export function findLastIndex(self: FixedArray<long>, predicate: (element: long,
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: FixedArray<long>) => long): long {
     if (self.length == 0) {
@@ -4136,7 +3976,6 @@ export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long,
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
@@ -4157,7 +3996,6 @@ export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousVa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
@@ -4175,7 +4013,6 @@ export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValu
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => void): void {
     const len0 = self.length;
@@ -4195,7 +4032,6 @@ export function forEach(self: FixedArray<long>, callbackfn: (value: long, index:
  * @returns { FixedArray<long> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<long>, start: int): FixedArray<long> {
     return slice(self, start, Int.MAX_VALUE);
@@ -4211,7 +4047,6 @@ export function slice(self: FixedArray<long>, start: int): FixedArray<long> {
  * @returns { FixedArray<long> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArray<long> {
     const len: int = self.length;
@@ -4236,7 +4071,6 @@ export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArra
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: int): int {
     if (self.length == 0) {
@@ -4269,7 +4103,6 @@ export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: i
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<long>, sep?: String): string {
     if (self.length == 0) {
@@ -4293,7 +4126,6 @@ export function join(self: FixedArray<long>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<long>): string {
     return join(self, ",");
@@ -4310,7 +4142,6 @@ export function toString(self: FixedArray<long>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<long>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -4325,7 +4156,6 @@ export function toLocaleString(self: FixedArray<long>, locales: Object, options:
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<long>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -4339,7 +4169,6 @@ export function toLocaleString(self: FixedArray<long>, locales: Object): string 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<long>): string {
     const sb = new StringBuilder()
@@ -4364,7 +4193,6 @@ export function toLocaleString(self: FixedArray<long>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<long>, start: int): FixedArray<long> {
     return toSpliced(self, start, self.length)
@@ -4380,7 +4208,6 @@ export function toSpliced(self: FixedArray<long>, start: int): FixedArray<long> 
  * @returns { FixedArray<long> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<long>, start: int, delete: int, ...items: FixedArray<long>): FixedArray<long> {
     const len = self.length;
@@ -4415,7 +4242,6 @@ export function toSpliced(self: FixedArray<long>, start: int, delete: int, ...it
  * @returns { FixedArray<long> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<long>, start?: int, delete?: int): FixedArray<long> {
     const len = self.length;
@@ -4431,7 +4257,6 @@ export function toSpliced(self: FixedArray<long>, start?: int, delete?: int): Fi
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<long>, val: long, fromIndex?: int): boolean {
     const len = self.length;
@@ -4452,7 +4277,6 @@ export function includes(self: FixedArray<long>, val: long, fromIndex?: int): bo
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<long>, val: long, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -4471,7 +4295,6 @@ export function indexOf(self: FixedArray<long>, val: long, fromIndex?: int): int
  * @returns { FixedArray<long> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<long>): FixedArray<long> {
     let arr = cloneArray(self);
@@ -4487,7 +4310,6 @@ export function toSorted(self: FixedArray<long>): FixedArray<long> {
  * @returns { FixedArray<long> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<long>, comparator: (a: long, b: long) => int): FixedArray<long> {
     let arr = cloneArray(self);
@@ -4503,7 +4325,6 @@ export function toSorted(self: FixedArray<long>, comparator: (a: long, b: long) 
  * @returns { FixedArray<long> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<long>): FixedArray<long> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -4523,7 +4344,6 @@ export function reverse(self: FixedArray<long>): FixedArray<long> {
  * @returns { FixedArray<long> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<long>): FixedArray<long> {
     let arr : FixedArray<long> = new FixedArray<long>(self.length)
@@ -4543,7 +4363,6 @@ export function toReversed(self: FixedArray<long>): FixedArray<long> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<long>, index: int, value: long): FixedArray<long> {
     if (index < 0) {
@@ -4564,7 +4383,6 @@ export function with(self: FixedArray<long>, index: int, value: long): FixedArra
  * @returns { IterableIterator<long> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<long>): IterableIterator<long> {
     return new ArrayValuesIterator_long_FixedArray(self);
@@ -4577,7 +4395,6 @@ export function values(self: FixedArray<long>): IterableIterator<long> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<long>): IterableIterator<[int, long]> {
     return new ArrayEntriesIterator_long_FixedArray(self);
@@ -4591,7 +4408,6 @@ export function entries(self: FixedArray<long>): IterableIterator<[int, long]> {
  * function one time for each element in the array.
  * @returns { FixedArray<long> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => long): FixedArray<long> {
     const len = self.length;
@@ -4613,7 +4429,6 @@ export function map(self: FixedArray<long>, callbackfn: (value: long, index: int
  * @returns { long } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: FixedArray<long>) => long): long {
     if (self.length == 0) {
@@ -4810,7 +4625,6 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<float>, index: int): Float {
     let len = self.length;
@@ -4837,7 +4651,6 @@ export function at(self: FixedArray<float>, index: int): Float {
  * @returns { FixedArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<float>, target: int): FixedArray<float> {
     copyWithin(self, target, 0, self.length);
@@ -4854,7 +4667,6 @@ export function copyWithin(self: FixedArray<float>, target: int): FixedArray<flo
  * @returns { FixedArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<float>, target: int, start: int): FixedArray<float> {
     copyWithin(self, target, start, self.length);
@@ -4872,7 +4684,6 @@ export function copyWithin(self: FixedArray<float>, target: int, start: int): Fi
  * @returns { FixedArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<float>, target: int, start: int, end?: int): FixedArray<float> {
     target = normalizeIndex(target, self.length)
@@ -4912,7 +4723,6 @@ export function copyWithin(self: FixedArray<float>, target: int, start: int, end
  * @returns { FixedArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<float>, value: float, start?: int, end?: int): FixedArray<float> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -4933,7 +4743,6 @@ export function fill(self: FixedArray<float>, value: float, start?: int, end?: i
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
@@ -4951,7 +4760,6 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -4971,7 +4779,6 @@ export function findIndex(self: FixedArray<float>, predicate: (value: float, ind
  * @returns { Float | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<float>, predicate: (elem: float, index: int, array: FixedArray<float>) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4993,7 +4800,6 @@ export function findLast(self: FixedArray<float>, predicate: (elem: float, index
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -5014,7 +4820,6 @@ export function every(self: FixedArray<float>, predicate: (value: float, index: 
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -5034,7 +4839,6 @@ export function some(self: FixedArray<float>, predicate: (value: float, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -5056,7 +4860,6 @@ export function findLastIndex(self: FixedArray<float>, predicate: (element: floa
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: FixedArray<float>) => float): float {
     if (self.length == 0) {
@@ -5080,7 +4883,6 @@ export function reduce(self: FixedArray<float>, callbackfn: (previousValue: floa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
@@ -5101,7 +4903,6 @@ export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previous
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
@@ -5119,7 +4920,6 @@ export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousVal
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => void): void {
     const len0 = self.length;
@@ -5139,7 +4939,6 @@ export function forEach(self: FixedArray<float>, callbackfn: (value: float, inde
  * @returns { FixedArray<float> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<float>, start: int): FixedArray<float> {
     return slice(self, start, Int.MAX_VALUE);
@@ -5155,7 +4954,6 @@ export function slice(self: FixedArray<float>, start: int): FixedArray<float> {
  * @returns { FixedArray<float> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArray<float> {
     const len: int = self.length;
@@ -5180,7 +4978,6 @@ export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArr
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?: int): int {
     if (self.length == 0) {
@@ -5213,7 +5010,6 @@ export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?:
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<float>, sep?: String): string {
     if (self.length == 0) {
@@ -5237,7 +5033,6 @@ export function join(self: FixedArray<float>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<float>): string {
     return join(self, ",");
@@ -5254,7 +5049,6 @@ export function toString(self: FixedArray<float>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<float>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -5269,7 +5063,6 @@ export function toLocaleString(self: FixedArray<float>, locales: Object, options
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<float>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -5283,7 +5076,6 @@ export function toLocaleString(self: FixedArray<float>, locales: Object): string
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<float>): string {
     const sb = new StringBuilder()
@@ -5308,7 +5100,6 @@ export function toLocaleString(self: FixedArray<float>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<float>, start: int): FixedArray<float> {
     return toSpliced(self, start, self.length)
@@ -5324,7 +5115,6 @@ export function toSpliced(self: FixedArray<float>, start: int): FixedArray<float
  * @returns { FixedArray<float> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<float>, start: int, delete: int, ...items: FixedArray<float>): FixedArray<float> {
     const len = self.length;
@@ -5359,7 +5149,6 @@ export function toSpliced(self: FixedArray<float>, start: int, delete: int, ...i
  * @returns { FixedArray<float> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<float>, start?: int, delete?: int): FixedArray<float> {
     const len = self.length;
@@ -5375,7 +5164,6 @@ export function toSpliced(self: FixedArray<float>, start?: int, delete?: int): F
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<float>, val: float, fromIndex?: int): boolean {
     const len = self.length;
@@ -5404,7 +5192,6 @@ export function includes(self: FixedArray<float>, val: float, fromIndex?: int): 
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<float>, val: float, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -5423,7 +5210,6 @@ export function indexOf(self: FixedArray<float>, val: float, fromIndex?: int): i
  * @returns { FixedArray<float> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<float>): FixedArray<float> {
     let arr = cloneArray(self);
@@ -5439,7 +5225,6 @@ export function toSorted(self: FixedArray<float>): FixedArray<float> {
  * @returns { FixedArray<float> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<float>, comparator: (a: float, b: float) => int): FixedArray<float> {
     let arr = cloneArray(self);
@@ -5455,7 +5240,6 @@ export function toSorted(self: FixedArray<float>, comparator: (a: float, b: floa
  * @returns { FixedArray<float> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<float>): FixedArray<float> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -5475,7 +5259,6 @@ export function reverse(self: FixedArray<float>): FixedArray<float> {
  * @returns { FixedArray<float> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<float>): FixedArray<float> {
     let arr : FixedArray<float> = new FixedArray<float>(self.length)
@@ -5495,7 +5278,6 @@ export function toReversed(self: FixedArray<float>): FixedArray<float> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<float>, index: int, value: float): FixedArray<float> {
     if (index < 0) {
@@ -5516,7 +5298,6 @@ export function with(self: FixedArray<float>, index: int, value: float): FixedAr
  * @returns { IterableIterator<float> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<float>): IterableIterator<float> {
     return new ArrayValuesIterator_float_FixedArray(self);
@@ -5529,7 +5310,6 @@ export function values(self: FixedArray<float>): IterableIterator<float> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<float>): IterableIterator<[int, float]> {
     return new ArrayEntriesIterator_float_FixedArray(self);
@@ -5543,7 +5323,6 @@ export function entries(self: FixedArray<float>): IterableIterator<[int, float]>
  * function one time for each element in the array.
  * @returns { FixedArray<float> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => float): FixedArray<float> {
     const len = self.length;
@@ -5565,7 +5344,6 @@ export function map(self: FixedArray<float>, callbackfn: (value: float, index: i
  * @returns { float } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: FixedArray<float>) => float): float {
     if (self.length == 0) {
@@ -5762,7 +5540,6 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<double>, index: int): Double {
     let len = self.length;
@@ -5789,7 +5566,6 @@ export function at(self: FixedArray<double>, index: int): Double {
  * @returns { FixedArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<double>, target: int): FixedArray<double> {
     copyWithin(self, target, 0, self.length);
@@ -5806,7 +5582,6 @@ export function copyWithin(self: FixedArray<double>, target: int): FixedArray<do
  * @returns { FixedArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<double>, target: int, start: int): FixedArray<double> {
     copyWithin(self, target, start, self.length);
@@ -5824,7 +5599,6 @@ export function copyWithin(self: FixedArray<double>, target: int, start: int): F
  * @returns { FixedArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<double>, target: int, start: int, end?: int): FixedArray<double> {
     target = normalizeIndex(target, self.length)
@@ -5864,7 +5638,6 @@ export function copyWithin(self: FixedArray<double>, target: int, start: int, en
  * @returns { FixedArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<double>, value: double, start?: int, end?: int): FixedArray<double> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -5885,7 +5658,6 @@ export function fill(self: FixedArray<double>, value: double, start?: int, end?:
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
@@ -5903,7 +5675,6 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -5923,7 +5694,6 @@ export function findIndex(self: FixedArray<double>, predicate: (value: double, i
  * @returns { Double | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<double>, predicate: (elem: double, index: int, array: FixedArray<double>) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -5945,7 +5715,6 @@ export function findLast(self: FixedArray<double>, predicate: (elem: double, ind
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -5966,7 +5735,6 @@ export function every(self: FixedArray<double>, predicate: (value: double, index
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -5986,7 +5754,6 @@ export function some(self: FixedArray<double>, predicate: (value: double, index:
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6008,7 +5775,6 @@ export function findLastIndex(self: FixedArray<double>, predicate: (element: dou
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: FixedArray<double>) => double): double {
     if (self.length == 0) {
@@ -6032,7 +5798,6 @@ export function reduce(self: FixedArray<double>, callbackfn: (previousValue: dou
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
@@ -6053,7 +5818,6 @@ export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previo
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
@@ -6071,7 +5835,6 @@ export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousVa
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => void): void {
     const len0 = self.length;
@@ -6091,7 +5854,6 @@ export function forEach(self: FixedArray<double>, callbackfn: (value: double, in
  * @returns { FixedArray<double> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<double>, start: int): FixedArray<double> {
     return slice(self, start, Int.MAX_VALUE);
@@ -6107,7 +5869,6 @@ export function slice(self: FixedArray<double>, start: int): FixedArray<double> 
  * @returns { FixedArray<double> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<double>, start?: int, end?: int): FixedArray<double> {
     const len: int = self.length;
@@ -6132,7 +5893,6 @@ export function slice(self: FixedArray<double>, start?: int, end?: int): FixedAr
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex?: int): int {
     if (self.length == 0) {
@@ -6165,7 +5925,6 @@ export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<double>, sep?: String): string {
     if (self.length == 0) {
@@ -6189,7 +5948,6 @@ export function join(self: FixedArray<double>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<double>): string {
     return join(self, ",");
@@ -6206,7 +5964,6 @@ export function toString(self: FixedArray<double>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<double>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -6221,7 +5978,6 @@ export function toLocaleString(self: FixedArray<double>, locales: Object, option
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<double>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -6235,7 +5991,6 @@ export function toLocaleString(self: FixedArray<double>, locales: Object): strin
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<double>): string {
     const sb = new StringBuilder()
@@ -6260,7 +6015,6 @@ export function toLocaleString(self: FixedArray<double>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<double>, start: int): FixedArray<double> {
     return toSpliced(self, start, self.length)
@@ -6276,7 +6030,6 @@ export function toSpliced(self: FixedArray<double>, start: int): FixedArray<doub
  * @returns { FixedArray<double> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<double>, start: int, delete: int, ...items: FixedArray<double>): FixedArray<double> {
     const len = self.length;
@@ -6311,7 +6064,6 @@ export function toSpliced(self: FixedArray<double>, start: int, delete: int, ...
  * @returns { FixedArray<double> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<double>, start?: int, delete?: int): FixedArray<double> {
     const len = self.length;
@@ -6327,7 +6079,6 @@ export function toSpliced(self: FixedArray<double>, start?: int, delete?: int): 
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<double>, val: double, fromIndex?: int): boolean {
     const len = self.length;
@@ -6356,7 +6107,6 @@ export function includes(self: FixedArray<double>, val: double, fromIndex?: int)
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<double>, val: double, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -6375,7 +6125,6 @@ export function indexOf(self: FixedArray<double>, val: double, fromIndex?: int):
  * @returns { FixedArray<double> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<double>): FixedArray<double> {
     let arr = cloneArray(self);
@@ -6391,7 +6140,6 @@ export function toSorted(self: FixedArray<double>): FixedArray<double> {
  * @returns { FixedArray<double> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<double>, comparator: (a: double, b: double) => int): FixedArray<double> {
     let arr = cloneArray(self);
@@ -6407,7 +6155,6 @@ export function toSorted(self: FixedArray<double>, comparator: (a: double, b: do
  * @returns { FixedArray<double> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<double>): FixedArray<double> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -6427,7 +6174,6 @@ export function reverse(self: FixedArray<double>): FixedArray<double> {
  * @returns { FixedArray<double> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<double>): FixedArray<double> {
     let arr : FixedArray<double> = new FixedArray<double>(self.length)
@@ -6447,7 +6193,6 @@ export function toReversed(self: FixedArray<double>): FixedArray<double> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<double>, index: int, value: double): FixedArray<double> {
     if (index < 0) {
@@ -6468,7 +6213,6 @@ export function with(self: FixedArray<double>, index: int, value: double): Fixed
  * @returns { IterableIterator<double> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<double>): IterableIterator<double> {
     return new ArrayValuesIterator_double_FixedArray(self);
@@ -6481,7 +6225,6 @@ export function values(self: FixedArray<double>): IterableIterator<double> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<double>): IterableIterator<[int, double]> {
     return new ArrayEntriesIterator_double_FixedArray(self);
@@ -6495,7 +6238,6 @@ export function entries(self: FixedArray<double>): IterableIterator<[int, double
  * function one time for each element in the array.
  * @returns { FixedArray<double> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => double): FixedArray<double> {
     const len = self.length;
@@ -6517,7 +6259,6 @@ export function map(self: FixedArray<double>, callbackfn: (value: double, index:
  * @returns { double } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: FixedArray<double>) => double): double {
     if (self.length == 0) {
@@ -6714,7 +6455,6 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: FixedArray<char>, index: int): Char {
     let len = self.length;
@@ -6741,7 +6481,6 @@ export function at(self: FixedArray<char>, index: int): Char {
  * @returns { FixedArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<char>, target: int): FixedArray<char> {
     copyWithin(self, target, 0, self.length);
@@ -6758,7 +6497,6 @@ export function copyWithin(self: FixedArray<char>, target: int): FixedArray<char
  * @returns { FixedArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<char>, target: int, start: int): FixedArray<char> {
     copyWithin(self, target, start, self.length);
@@ -6776,7 +6514,6 @@ export function copyWithin(self: FixedArray<char>, target: int, start: int): Fix
  * @returns { FixedArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: FixedArray<char>, target: int, start: int, end?: int): FixedArray<char> {
     target = normalizeIndex(target, self.length)
@@ -6816,7 +6553,6 @@ export function copyWithin(self: FixedArray<char>, target: int, start: int, end?
  * @returns { FixedArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: FixedArray<char>, value: char, start?: int, end?: int): FixedArray<char> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -6837,7 +6573,6 @@ export function fill(self: FixedArray<char>, value: char, start?: int, end?: int
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
@@ -6855,7 +6590,6 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -6875,7 +6609,6 @@ export function findIndex(self: FixedArray<char>, predicate: (value: char, index
  * @returns { Char | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: FixedArray<char>, predicate: (elem: char, index: int, array: FixedArray<char>) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6897,7 +6630,6 @@ export function findLast(self: FixedArray<char>, predicate: (elem: char, index: 
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -6918,7 +6650,6 @@ export function every(self: FixedArray<char>, predicate: (value: char, index: in
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -6938,7 +6669,6 @@ export function some(self: FixedArray<char>, predicate: (value: char, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6960,7 +6690,6 @@ export function findLastIndex(self: FixedArray<char>, predicate: (element: char,
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: FixedArray<char>) => char): char {
     if (self.length == 0) {
@@ -6984,7 +6713,6 @@ export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char,
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
@@ -7005,7 +6733,6 @@ export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousVa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
@@ -7023,7 +6750,6 @@ export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValu
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => void): void {
     const len0 = self.length;
@@ -7043,7 +6769,6 @@ export function forEach(self: FixedArray<char>, callbackfn: (value: char, index:
  * @returns { FixedArray<char> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<char>, start: int): FixedArray<char> {
     return slice(self, start, Int.MAX_VALUE);
@@ -7059,7 +6784,6 @@ export function slice(self: FixedArray<char>, start: int): FixedArray<char> {
  * @returns { FixedArray<char> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArray<char> {
     const len: int = self.length;
@@ -7084,7 +6808,6 @@ export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArra
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: int): int {
     if (self.length == 0) {
@@ -7117,7 +6840,6 @@ export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: i
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: FixedArray<char>, sep?: String): string {
     if (self.length == 0) {
@@ -7141,7 +6863,6 @@ export function join(self: FixedArray<char>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: FixedArray<char>): string {
     return join(self, ",");
@@ -7158,7 +6879,6 @@ export function toString(self: FixedArray<char>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<char>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -7173,7 +6893,6 @@ export function toLocaleString(self: FixedArray<char>, locales: Object, options:
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<char>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -7187,7 +6906,6 @@ export function toLocaleString(self: FixedArray<char>, locales: Object): string 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: FixedArray<char>): string {
     const sb = new StringBuilder()
@@ -7212,7 +6930,6 @@ export function toLocaleString(self: FixedArray<char>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<char>, start: int): FixedArray<char> {
     return toSpliced(self, start, self.length)
@@ -7228,7 +6945,6 @@ export function toSpliced(self: FixedArray<char>, start: int): FixedArray<char> 
  * @returns { FixedArray<char> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<char>, start: int, delete: int, ...items: FixedArray<char>): FixedArray<char> {
     const len = self.length;
@@ -7263,7 +6979,6 @@ export function toSpliced(self: FixedArray<char>, start: int, delete: int, ...it
  * @returns { FixedArray<char> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: FixedArray<char>, start?: int, delete?: int): FixedArray<char> {
     const len = self.length;
@@ -7279,7 +6994,6 @@ export function toSpliced(self: FixedArray<char>, start?: int, delete?: int): Fi
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: FixedArray<char>, val: char, fromIndex?: int): boolean {
     const len = self.length;
@@ -7300,7 +7014,6 @@ export function includes(self: FixedArray<char>, val: char, fromIndex?: int): bo
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: FixedArray<char>, val: char, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -7319,7 +7032,6 @@ export function indexOf(self: FixedArray<char>, val: char, fromIndex?: int): int
  * @returns { FixedArray<char> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<char>): FixedArray<char> {
     let arr = cloneArray(self);
@@ -7335,7 +7047,6 @@ export function toSorted(self: FixedArray<char>): FixedArray<char> {
  * @returns { FixedArray<char> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: FixedArray<char>, comparator: (a: char, b: char) => int): FixedArray<char> {
     let arr = cloneArray(self);
@@ -7351,7 +7062,6 @@ export function toSorted(self: FixedArray<char>, comparator: (a: char, b: char) 
  * @returns { FixedArray<char> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: FixedArray<char>): FixedArray<char> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -7371,7 +7081,6 @@ export function reverse(self: FixedArray<char>): FixedArray<char> {
  * @returns { FixedArray<char> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: FixedArray<char>): FixedArray<char> {
     let arr : FixedArray<char> = new FixedArray<char>(self.length)
@@ -7391,7 +7100,6 @@ export function toReversed(self: FixedArray<char>): FixedArray<char> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: FixedArray<char>, index: int, value: char): FixedArray<char> {
     if (index < 0) {
@@ -7412,7 +7120,6 @@ export function with(self: FixedArray<char>, index: int, value: char): FixedArra
  * @returns { IterableIterator<char> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: FixedArray<char>): IterableIterator<char> {
     return new ArrayValuesIterator_char_FixedArray(self);
@@ -7425,7 +7132,6 @@ export function values(self: FixedArray<char>): IterableIterator<char> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: FixedArray<char>): IterableIterator<[int, char]> {
     return new ArrayEntriesIterator_char_FixedArray(self);
@@ -7439,7 +7145,6 @@ export function entries(self: FixedArray<char>): IterableIterator<[int, char]> {
  * function one time for each element in the array.
  * @returns { FixedArray<char> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => char): FixedArray<char> {
     const len = self.length;
@@ -7461,7 +7166,6 @@ export function map(self: FixedArray<char>, callbackfn: (value: char, index: int
  * @returns { char } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: FixedArray<char>) => char): char {
     if (self.length == 0) {
@@ -7658,7 +7362,6 @@ function cloneArray(self: ValueArray<boolean>): ValueArray<boolean> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<boolean>, index: int): Boolean {
     let len = self.length;
@@ -7685,7 +7388,6 @@ export function at(self: ValueArray<boolean>, index: int): Boolean {
  * @returns { ValueArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<boolean>, target: int): ValueArray<boolean> {
     copyWithin(self, target, 0, self.length);
@@ -7702,7 +7404,6 @@ export function copyWithin(self: ValueArray<boolean>, target: int): ValueArray<b
  * @returns { ValueArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<boolean>, target: int, start: int): ValueArray<boolean> {
     copyWithin(self, target, start, self.length);
@@ -7720,7 +7421,6 @@ export function copyWithin(self: ValueArray<boolean>, target: int, start: int): 
  * @returns { ValueArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<boolean>, target: int, start: int, end?: int): ValueArray<boolean> {
     target = normalizeIndex(target, self.length)
@@ -7760,7 +7460,6 @@ export function copyWithin(self: ValueArray<boolean>, target: int, start: int, e
  * @returns { ValueArray<boolean> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<boolean>, value: boolean, start?: int, end?: int): ValueArray<boolean> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -7781,7 +7480,6 @@ export function fill(self: ValueArray<boolean>, value: boolean, start?: int, end
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
@@ -7799,7 +7497,6 @@ export function find(self: ValueArray<boolean>, predicate: (value: boolean, inde
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -7819,7 +7516,6 @@ export function findIndex(self: ValueArray<boolean>, predicate: (value: boolean,
  * @returns { Boolean | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<boolean>, predicate: (elem: boolean, index: int, array: ValueArray<boolean>) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -7841,7 +7537,6 @@ export function findLast(self: ValueArray<boolean>, predicate: (elem: boolean, i
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -7862,7 +7557,6 @@ export function every(self: ValueArray<boolean>, predicate: (value: boolean, ind
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<boolean>, predicate: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -7882,7 +7576,6 @@ export function some(self: ValueArray<boolean>, predicate: (value: boolean, inde
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<boolean>, predicate: (element: boolean, index: int, array: ValueArray<boolean>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -7904,7 +7597,6 @@ export function findLastIndex(self: ValueArray<boolean>, predicate: (element: bo
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
@@ -7928,7 +7620,6 @@ export function reduce(self: ValueArray<boolean>, callbackfn: (previousValue: bo
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = boolean>(self: ValueArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: ValueArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
@@ -7949,7 +7640,6 @@ export function reduce<U = boolean>(self: ValueArray<boolean>, callbackfn: (prev
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: ValueArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
@@ -7967,7 +7657,6 @@ export function reduceRight<U>(self: ValueArray<boolean>, callbackfn: (previousV
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<boolean>, callbackfn: (value: boolean, index: int, array: ValueArray<boolean>) => void): void {
     const len0 = self.length;
@@ -7987,7 +7676,6 @@ export function forEach(self: ValueArray<boolean>, callbackfn: (value: boolean, 
  * @returns { ValueArray<boolean> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<boolean>, start: int): ValueArray<boolean> {
     return slice(self, start, Int.MAX_VALUE);
@@ -8003,7 +7691,6 @@ export function slice(self: ValueArray<boolean>, start: int): ValueArray<boolean
  * @returns { ValueArray<boolean> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<boolean>, start?: int, end?: int): ValueArray<boolean> {
     const len: int = self.length;
@@ -8028,7 +7715,6 @@ export function slice(self: ValueArray<boolean>, start?: int, end?: int): ValueA
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<boolean>, element: boolean, fromIndex?: int): int {
     if (self.length == 0) {
@@ -8061,7 +7747,6 @@ export function lastIndexOf(self: ValueArray<boolean>, element: boolean, fromInd
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<boolean>, sep?: String): string {
     if (self.length == 0) {
@@ -8085,7 +7770,6 @@ export function join(self: ValueArray<boolean>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<boolean>): string {
     return join(self, ",");
@@ -8102,7 +7786,6 @@ export function toString(self: ValueArray<boolean>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<boolean>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -8117,7 +7800,6 @@ export function toLocaleString(self: ValueArray<boolean>, locales: Object, optio
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<boolean>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -8131,7 +7813,6 @@ export function toLocaleString(self: ValueArray<boolean>, locales: Object): stri
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<boolean>): string {
     const sb = new StringBuilder()
@@ -8156,7 +7837,6 @@ export function toLocaleString(self: ValueArray<boolean>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<boolean>, start: int): ValueArray<boolean> {
     return toSpliced(self, start, self.length)
@@ -8172,7 +7852,6 @@ export function toSpliced(self: ValueArray<boolean>, start: int): ValueArray<boo
  * @returns { ValueArray<boolean> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<boolean>, start: int, delete: int, ...items: FixedArray<boolean>): ValueArray<boolean> {
     const len = self.length;
@@ -8207,7 +7886,6 @@ export function toSpliced(self: ValueArray<boolean>, start: int, delete: int, ..
  * @returns { ValueArray<boolean> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<boolean>, start?: int, delete?: int): ValueArray<boolean> {
     const len = self.length;
@@ -8223,7 +7901,6 @@ export function toSpliced(self: ValueArray<boolean>, start?: int, delete?: int):
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<boolean>, val: boolean, fromIndex?: int): boolean {
     const len = self.length;
@@ -8244,7 +7921,6 @@ export function includes(self: ValueArray<boolean>, val: boolean, fromIndex?: in
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<boolean>, val: boolean, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -8263,7 +7939,6 @@ export function indexOf(self: ValueArray<boolean>, val: boolean, fromIndex?: int
  * @returns { ValueArray<boolean> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<boolean>): ValueArray<boolean> {
     let arr = cloneArray(self);
@@ -8279,7 +7954,6 @@ export function toSorted(self: ValueArray<boolean>): ValueArray<boolean> {
  * @returns { ValueArray<boolean> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<boolean>, comparator: (a: boolean, b: boolean) => int): ValueArray<boolean> {
     let arr = cloneArray(self);
@@ -8295,7 +7969,6 @@ export function toSorted(self: ValueArray<boolean>, comparator: (a: boolean, b: 
  * @returns { ValueArray<boolean> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<boolean>): ValueArray<boolean> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -8315,7 +7988,6 @@ export function reverse(self: ValueArray<boolean>): ValueArray<boolean> {
  * @returns { ValueArray<boolean> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<boolean>): ValueArray<boolean> {
     let arr : ValueArray<boolean> = new ValueArray<boolean>(self.length)
@@ -8335,7 +8007,6 @@ export function toReversed(self: ValueArray<boolean>): ValueArray<boolean> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<boolean>, index: int, value: boolean): ValueArray<boolean> {
     if (index < 0) {
@@ -8356,7 +8027,6 @@ export function with(self: ValueArray<boolean>, index: int, value: boolean): Val
  * @returns { IterableIterator<boolean> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<boolean>): IterableIterator<boolean> {
     return new ArrayValuesIterator_boolean_ValueArray(self);
@@ -8369,7 +8039,6 @@ export function values(self: ValueArray<boolean>): IterableIterator<boolean> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<boolean>): IterableIterator<[int, boolean]> {
     return new ArrayEntriesIterator_boolean_ValueArray(self);
@@ -8383,7 +8052,6 @@ export function entries(self: ValueArray<boolean>): IterableIterator<[int, boole
  * function one time for each element in the array.
  * @returns { ValueArray<boolean> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<boolean>, callbackfn: (value: boolean, index: int, array: ValueArray<boolean>) => boolean): ValueArray<boolean> {
     const len = self.length;
@@ -8405,7 +8073,6 @@ export function map(self: ValueArray<boolean>, callbackfn: (value: boolean, inde
  * @returns { boolean } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: ValueArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
@@ -8602,7 +8269,6 @@ function cloneArray(self: ValueArray<byte>): ValueArray<byte> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<byte>, index: int): Byte {
     let len = self.length;
@@ -8629,7 +8295,6 @@ export function at(self: ValueArray<byte>, index: int): Byte {
  * @returns { ValueArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<byte>, target: int): ValueArray<byte> {
     copyWithin(self, target, 0, self.length);
@@ -8646,7 +8311,6 @@ export function copyWithin(self: ValueArray<byte>, target: int): ValueArray<byte
  * @returns { ValueArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<byte>, target: int, start: int): ValueArray<byte> {
     copyWithin(self, target, start, self.length);
@@ -8664,7 +8328,6 @@ export function copyWithin(self: ValueArray<byte>, target: int, start: int): Val
  * @returns { ValueArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<byte>, target: int, start: int, end?: int): ValueArray<byte> {
     target = normalizeIndex(target, self.length)
@@ -8704,7 +8367,6 @@ export function copyWithin(self: ValueArray<byte>, target: int, start: int, end?
  * @returns { ValueArray<byte> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<byte>, value: byte, start?: int, end?: int): ValueArray<byte> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -8725,7 +8387,6 @@ export function fill(self: ValueArray<byte>, value: byte, start?: int, end?: int
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
@@ -8743,7 +8404,6 @@ export function find(self: ValueArray<byte>, predicate: (value: byte, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -8763,7 +8423,6 @@ export function findIndex(self: ValueArray<byte>, predicate: (value: byte, index
  * @returns { Byte | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<byte>, predicate: (elem: byte, index: int, array: ValueArray<byte>) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -8785,7 +8444,6 @@ export function findLast(self: ValueArray<byte>, predicate: (elem: byte, index: 
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -8806,7 +8464,6 @@ export function every(self: ValueArray<byte>, predicate: (value: byte, index: in
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<byte>, predicate: (value: byte, index: int, array: ValueArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -8826,7 +8483,6 @@ export function some(self: ValueArray<byte>, predicate: (value: byte, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<byte>, predicate: (element: byte, index: int, array: ValueArray<byte>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -8848,7 +8504,6 @@ export function findLastIndex(self: ValueArray<byte>, predicate: (element: byte,
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: ValueArray<byte>) => byte): byte {
     if (self.length == 0) {
@@ -8872,7 +8527,6 @@ export function reduce(self: ValueArray<byte>, callbackfn: (previousValue: byte,
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = byte>(self: ValueArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: ValueArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
@@ -8893,7 +8547,6 @@ export function reduce<U = byte>(self: ValueArray<byte>, callbackfn: (previousVa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: ValueArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
@@ -8911,7 +8564,6 @@ export function reduceRight<U>(self: ValueArray<byte>, callbackfn: (previousValu
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<byte>, callbackfn: (value: byte, index: int, array: ValueArray<byte>) => void): void {
     const len0 = self.length;
@@ -8931,7 +8583,6 @@ export function forEach(self: ValueArray<byte>, callbackfn: (value: byte, index:
  * @returns { ValueArray<byte> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<byte>, start: int): ValueArray<byte> {
     return slice(self, start, Int.MAX_VALUE);
@@ -8947,7 +8598,6 @@ export function slice(self: ValueArray<byte>, start: int): ValueArray<byte> {
  * @returns { ValueArray<byte> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<byte>, start?: int, end?: int): ValueArray<byte> {
     const len: int = self.length;
@@ -8972,7 +8622,6 @@ export function slice(self: ValueArray<byte>, start?: int, end?: int): ValueArra
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<byte>, element: byte, fromIndex?: int): int {
     if (self.length == 0) {
@@ -9005,7 +8654,6 @@ export function lastIndexOf(self: ValueArray<byte>, element: byte, fromIndex?: i
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<byte>, sep?: String): string {
     if (self.length == 0) {
@@ -9029,7 +8677,6 @@ export function join(self: ValueArray<byte>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<byte>): string {
     return join(self, ",");
@@ -9046,7 +8693,6 @@ export function toString(self: ValueArray<byte>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<byte>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -9061,7 +8707,6 @@ export function toLocaleString(self: ValueArray<byte>, locales: Object, options:
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<byte>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -9075,7 +8720,6 @@ export function toLocaleString(self: ValueArray<byte>, locales: Object): string 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<byte>): string {
     const sb = new StringBuilder()
@@ -9100,7 +8744,6 @@ export function toLocaleString(self: ValueArray<byte>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<byte>, start: int): ValueArray<byte> {
     return toSpliced(self, start, self.length)
@@ -9116,7 +8759,6 @@ export function toSpliced(self: ValueArray<byte>, start: int): ValueArray<byte> 
  * @returns { ValueArray<byte> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<byte>, start: int, delete: int, ...items: FixedArray<byte>): ValueArray<byte> {
     const len = self.length;
@@ -9151,7 +8793,6 @@ export function toSpliced(self: ValueArray<byte>, start: int, delete: int, ...it
  * @returns { ValueArray<byte> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<byte>, start?: int, delete?: int): ValueArray<byte> {
     const len = self.length;
@@ -9167,7 +8808,6 @@ export function toSpliced(self: ValueArray<byte>, start?: int, delete?: int): Va
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<byte>, val: byte, fromIndex?: int): boolean {
     const len = self.length;
@@ -9188,7 +8828,6 @@ export function includes(self: ValueArray<byte>, val: byte, fromIndex?: int): bo
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<byte>, val: byte, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -9207,7 +8846,6 @@ export function indexOf(self: ValueArray<byte>, val: byte, fromIndex?: int): int
  * @returns { ValueArray<byte> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<byte>): ValueArray<byte> {
     let arr = cloneArray(self);
@@ -9223,7 +8861,6 @@ export function toSorted(self: ValueArray<byte>): ValueArray<byte> {
  * @returns { ValueArray<byte> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<byte>, comparator: (a: byte, b: byte) => int): ValueArray<byte> {
     let arr = cloneArray(self);
@@ -9239,7 +8876,6 @@ export function toSorted(self: ValueArray<byte>, comparator: (a: byte, b: byte) 
  * @returns { ValueArray<byte> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<byte>): ValueArray<byte> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -9259,7 +8895,6 @@ export function reverse(self: ValueArray<byte>): ValueArray<byte> {
  * @returns { ValueArray<byte> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<byte>): ValueArray<byte> {
     let arr : ValueArray<byte> = new ValueArray<byte>(self.length)
@@ -9279,7 +8914,6 @@ export function toReversed(self: ValueArray<byte>): ValueArray<byte> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<byte>, index: int, value: byte): ValueArray<byte> {
     if (index < 0) {
@@ -9300,7 +8934,6 @@ export function with(self: ValueArray<byte>, index: int, value: byte): ValueArra
  * @returns { IterableIterator<byte> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<byte>): IterableIterator<byte> {
     return new ArrayValuesIterator_byte_ValueArray(self);
@@ -9313,7 +8946,6 @@ export function values(self: ValueArray<byte>): IterableIterator<byte> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<byte>): IterableIterator<[int, byte]> {
     return new ArrayEntriesIterator_byte_ValueArray(self);
@@ -9327,7 +8959,6 @@ export function entries(self: ValueArray<byte>): IterableIterator<[int, byte]> {
  * function one time for each element in the array.
  * @returns { ValueArray<byte> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<byte>, callbackfn: (value: byte, index: int, array: ValueArray<byte>) => byte): ValueArray<byte> {
     const len = self.length;
@@ -9349,7 +8980,6 @@ export function map(self: ValueArray<byte>, callbackfn: (value: byte, index: int
  * @returns { byte } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: ValueArray<byte>) => byte): byte {
     if (self.length == 0) {
@@ -9546,7 +9176,6 @@ function cloneArray(self: ValueArray<short>): ValueArray<short> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<short>, index: int): Short {
     let len = self.length;
@@ -9573,7 +9202,6 @@ export function at(self: ValueArray<short>, index: int): Short {
  * @returns { ValueArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<short>, target: int): ValueArray<short> {
     copyWithin(self, target, 0, self.length);
@@ -9590,7 +9218,6 @@ export function copyWithin(self: ValueArray<short>, target: int): ValueArray<sho
  * @returns { ValueArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<short>, target: int, start: int): ValueArray<short> {
     copyWithin(self, target, start, self.length);
@@ -9608,7 +9235,6 @@ export function copyWithin(self: ValueArray<short>, target: int, start: int): Va
  * @returns { ValueArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<short>, target: int, start: int, end?: int): ValueArray<short> {
     target = normalizeIndex(target, self.length)
@@ -9648,7 +9274,6 @@ export function copyWithin(self: ValueArray<short>, target: int, start: int, end
  * @returns { ValueArray<short> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<short>, value: short, start?: int, end?: int): ValueArray<short> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -9669,7 +9294,6 @@ export function fill(self: ValueArray<short>, value: short, start?: int, end?: i
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
@@ -9687,7 +9311,6 @@ export function find(self: ValueArray<short>, predicate: (value: short, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -9707,7 +9330,6 @@ export function findIndex(self: ValueArray<short>, predicate: (value: short, ind
  * @returns { Short | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<short>, predicate: (elem: short, index: int, array: ValueArray<short>) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -9729,7 +9351,6 @@ export function findLast(self: ValueArray<short>, predicate: (elem: short, index
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -9750,7 +9371,6 @@ export function every(self: ValueArray<short>, predicate: (value: short, index: 
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<short>, predicate: (value: short, index: int, array: ValueArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -9770,7 +9390,6 @@ export function some(self: ValueArray<short>, predicate: (value: short, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<short>, predicate: (element: short, index: int, array: ValueArray<short>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -9792,7 +9411,6 @@ export function findLastIndex(self: ValueArray<short>, predicate: (element: shor
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: ValueArray<short>) => short): short {
     if (self.length == 0) {
@@ -9816,7 +9434,6 @@ export function reduce(self: ValueArray<short>, callbackfn: (previousValue: shor
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = short>(self: ValueArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: ValueArray<short>) => U, initialValue: U): U {
     let acc = initialValue
@@ -9837,7 +9454,6 @@ export function reduce<U = short>(self: ValueArray<short>, callbackfn: (previous
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: ValueArray<short>) => U, initialValue: U): U {
     let acc = initialValue
@@ -9855,7 +9471,6 @@ export function reduceRight<U>(self: ValueArray<short>, callbackfn: (previousVal
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<short>, callbackfn: (value: short, index: int, array: ValueArray<short>) => void): void {
     const len0 = self.length;
@@ -9875,7 +9490,6 @@ export function forEach(self: ValueArray<short>, callbackfn: (value: short, inde
  * @returns { ValueArray<short> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<short>, start: int): ValueArray<short> {
     return slice(self, start, Int.MAX_VALUE);
@@ -9891,7 +9505,6 @@ export function slice(self: ValueArray<short>, start: int): ValueArray<short> {
  * @returns { ValueArray<short> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<short>, start?: int, end?: int): ValueArray<short> {
     const len: int = self.length;
@@ -9916,7 +9529,6 @@ export function slice(self: ValueArray<short>, start?: int, end?: int): ValueArr
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<short>, element: short, fromIndex?: int): int {
     if (self.length == 0) {
@@ -9949,7 +9561,6 @@ export function lastIndexOf(self: ValueArray<short>, element: short, fromIndex?:
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<short>, sep?: String): string {
     if (self.length == 0) {
@@ -9973,7 +9584,6 @@ export function join(self: ValueArray<short>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<short>): string {
     return join(self, ",");
@@ -9990,7 +9600,6 @@ export function toString(self: ValueArray<short>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<short>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -10005,7 +9614,6 @@ export function toLocaleString(self: ValueArray<short>, locales: Object, options
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<short>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -10019,7 +9627,6 @@ export function toLocaleString(self: ValueArray<short>, locales: Object): string
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<short>): string {
     const sb = new StringBuilder()
@@ -10044,7 +9651,6 @@ export function toLocaleString(self: ValueArray<short>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<short>, start: int): ValueArray<short> {
     return toSpliced(self, start, self.length)
@@ -10060,7 +9666,6 @@ export function toSpliced(self: ValueArray<short>, start: int): ValueArray<short
  * @returns { ValueArray<short> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<short>, start: int, delete: int, ...items: FixedArray<short>): ValueArray<short> {
     const len = self.length;
@@ -10095,7 +9700,6 @@ export function toSpliced(self: ValueArray<short>, start: int, delete: int, ...i
  * @returns { ValueArray<short> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<short>, start?: int, delete?: int): ValueArray<short> {
     const len = self.length;
@@ -10111,7 +9715,6 @@ export function toSpliced(self: ValueArray<short>, start?: int, delete?: int): V
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<short>, val: short, fromIndex?: int): boolean {
     const len = self.length;
@@ -10132,7 +9735,6 @@ export function includes(self: ValueArray<short>, val: short, fromIndex?: int): 
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<short>, val: short, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -10151,7 +9753,6 @@ export function indexOf(self: ValueArray<short>, val: short, fromIndex?: int): i
  * @returns { ValueArray<short> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<short>): ValueArray<short> {
     let arr = cloneArray(self);
@@ -10167,7 +9768,6 @@ export function toSorted(self: ValueArray<short>): ValueArray<short> {
  * @returns { ValueArray<short> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<short>, comparator: (a: short, b: short) => int): ValueArray<short> {
     let arr = cloneArray(self);
@@ -10183,7 +9783,6 @@ export function toSorted(self: ValueArray<short>, comparator: (a: short, b: shor
  * @returns { ValueArray<short> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<short>): ValueArray<short> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -10203,7 +9802,6 @@ export function reverse(self: ValueArray<short>): ValueArray<short> {
  * @returns { ValueArray<short> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<short>): ValueArray<short> {
     let arr : ValueArray<short> = new ValueArray<short>(self.length)
@@ -10223,7 +9821,6 @@ export function toReversed(self: ValueArray<short>): ValueArray<short> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<short>, index: int, value: short): ValueArray<short> {
     if (index < 0) {
@@ -10244,7 +9841,6 @@ export function with(self: ValueArray<short>, index: int, value: short): ValueAr
  * @returns { IterableIterator<short> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<short>): IterableIterator<short> {
     return new ArrayValuesIterator_short_ValueArray(self);
@@ -10257,7 +9853,6 @@ export function values(self: ValueArray<short>): IterableIterator<short> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<short>): IterableIterator<[int, short]> {
     return new ArrayEntriesIterator_short_ValueArray(self);
@@ -10271,7 +9866,6 @@ export function entries(self: ValueArray<short>): IterableIterator<[int, short]>
  * function one time for each element in the array.
  * @returns { ValueArray<short> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<short>, callbackfn: (value: short, index: int, array: ValueArray<short>) => short): ValueArray<short> {
     const len = self.length;
@@ -10293,7 +9887,6 @@ export function map(self: ValueArray<short>, callbackfn: (value: short, index: i
  * @returns { short } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: ValueArray<short>) => short): short {
     if (self.length == 0) {
@@ -10490,7 +10083,6 @@ function cloneArray(self: ValueArray<int>): ValueArray<int> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<int>, index: int): Int {
     let len = self.length;
@@ -10517,7 +10109,6 @@ export function at(self: ValueArray<int>, index: int): Int {
  * @returns { ValueArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<int>, target: int): ValueArray<int> {
     copyWithin(self, target, 0, self.length);
@@ -10534,7 +10125,6 @@ export function copyWithin(self: ValueArray<int>, target: int): ValueArray<int> 
  * @returns { ValueArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<int>, target: int, start: int): ValueArray<int> {
     copyWithin(self, target, start, self.length);
@@ -10552,7 +10142,6 @@ export function copyWithin(self: ValueArray<int>, target: int, start: int): Valu
  * @returns { ValueArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<int>, target: int, start: int, end?: int): ValueArray<int> {
     target = normalizeIndex(target, self.length)
@@ -10592,7 +10181,6 @@ export function copyWithin(self: ValueArray<int>, target: int, start: int, end?:
  * @returns { ValueArray<int> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<int>, value: int, start?: int, end?: int): ValueArray<int> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -10613,7 +10201,6 @@ export function fill(self: ValueArray<int>, value: int, start?: int, end?: int):
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
@@ -10631,7 +10218,6 @@ export function find(self: ValueArray<int>, predicate: (value: int, index: int, 
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -10651,7 +10237,6 @@ export function findIndex(self: ValueArray<int>, predicate: (value: int, index: 
  * @returns { Int | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<int>, predicate: (elem: int, index: int, array: ValueArray<int>) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -10673,7 +10258,6 @@ export function findLast(self: ValueArray<int>, predicate: (elem: int, index: in
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -10694,7 +10278,6 @@ export function every(self: ValueArray<int>, predicate: (value: int, index: int,
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<int>, predicate: (value: int, index: int, array: ValueArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -10714,7 +10297,6 @@ export function some(self: ValueArray<int>, predicate: (value: int, index: int, 
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<int>, predicate: (element: int, index: int, array: ValueArray<int>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -10736,7 +10318,6 @@ export function findLastIndex(self: ValueArray<int>, predicate: (element: int, i
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: ValueArray<int>) => int): int {
     if (self.length == 0) {
@@ -10760,7 +10341,6 @@ export function reduce(self: ValueArray<int>, callbackfn: (previousValue: int, c
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = int>(self: ValueArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: ValueArray<int>) => U, initialValue: U): U {
     let acc = initialValue
@@ -10781,7 +10361,6 @@ export function reduce<U = int>(self: ValueArray<int>, callbackfn: (previousValu
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: ValueArray<int>) => U, initialValue: U): U {
     let acc = initialValue
@@ -10799,7 +10378,6 @@ export function reduceRight<U>(self: ValueArray<int>, callbackfn: (previousValue
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<int>, callbackfn: (value: int, index: int, array: ValueArray<int>) => void): void {
     const len0 = self.length;
@@ -10819,7 +10397,6 @@ export function forEach(self: ValueArray<int>, callbackfn: (value: int, index: i
  * @returns { ValueArray<int> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<int>, start: int): ValueArray<int> {
     return slice(self, start, Int.MAX_VALUE);
@@ -10835,7 +10412,6 @@ export function slice(self: ValueArray<int>, start: int): ValueArray<int> {
  * @returns { ValueArray<int> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<int>, start?: int, end?: int): ValueArray<int> {
     const len: int = self.length;
@@ -10860,7 +10436,6 @@ export function slice(self: ValueArray<int>, start?: int, end?: int): ValueArray
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<int>, element: int, fromIndex?: int): int {
     if (self.length == 0) {
@@ -10893,7 +10468,6 @@ export function lastIndexOf(self: ValueArray<int>, element: int, fromIndex?: int
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<int>, sep?: String): string {
     if (self.length == 0) {
@@ -10917,7 +10491,6 @@ export function join(self: ValueArray<int>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<int>): string {
     return join(self, ",");
@@ -10934,7 +10507,6 @@ export function toString(self: ValueArray<int>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<int>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -10949,7 +10521,6 @@ export function toLocaleString(self: ValueArray<int>, locales: Object, options: 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<int>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -10963,7 +10534,6 @@ export function toLocaleString(self: ValueArray<int>, locales: Object): string {
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<int>): string {
     const sb = new StringBuilder()
@@ -10988,7 +10558,6 @@ export function toLocaleString(self: ValueArray<int>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<int>, start: int): ValueArray<int> {
     return toSpliced(self, start, self.length)
@@ -11004,7 +10573,6 @@ export function toSpliced(self: ValueArray<int>, start: int): ValueArray<int> {
  * @returns { ValueArray<int> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<int>, start: int, delete: int, ...items: FixedArray<int>): ValueArray<int> {
     const len = self.length;
@@ -11039,7 +10607,6 @@ export function toSpliced(self: ValueArray<int>, start: int, delete: int, ...ite
  * @returns { ValueArray<int> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<int>, start?: int, delete?: int): ValueArray<int> {
     const len = self.length;
@@ -11055,7 +10622,6 @@ export function toSpliced(self: ValueArray<int>, start?: int, delete?: int): Val
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<int>, val: int, fromIndex?: int): boolean {
     const len = self.length;
@@ -11076,7 +10642,6 @@ export function includes(self: ValueArray<int>, val: int, fromIndex?: int): bool
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<int>, val: int, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -11095,7 +10660,6 @@ export function indexOf(self: ValueArray<int>, val: int, fromIndex?: int): int {
  * @returns { ValueArray<int> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<int>): ValueArray<int> {
     let arr = cloneArray(self);
@@ -11111,7 +10675,6 @@ export function toSorted(self: ValueArray<int>): ValueArray<int> {
  * @returns { ValueArray<int> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<int>, comparator: (a: int, b: int) => int): ValueArray<int> {
     let arr = cloneArray(self);
@@ -11127,7 +10690,6 @@ export function toSorted(self: ValueArray<int>, comparator: (a: int, b: int) => 
  * @returns { ValueArray<int> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<int>): ValueArray<int> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -11147,7 +10709,6 @@ export function reverse(self: ValueArray<int>): ValueArray<int> {
  * @returns { ValueArray<int> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<int>): ValueArray<int> {
     let arr : ValueArray<int> = new ValueArray<int>(self.length)
@@ -11167,7 +10728,6 @@ export function toReversed(self: ValueArray<int>): ValueArray<int> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<int>, index: int, value: int): ValueArray<int> {
     if (index < 0) {
@@ -11188,7 +10748,6 @@ export function with(self: ValueArray<int>, index: int, value: int): ValueArray<
  * @returns { IterableIterator<int> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<int>): IterableIterator<int> {
     return new ArrayValuesIterator_int_ValueArray(self);
@@ -11201,7 +10760,6 @@ export function values(self: ValueArray<int>): IterableIterator<int> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<int>): IterableIterator<[int, int]> {
     return new ArrayEntriesIterator_int_ValueArray(self);
@@ -11215,7 +10773,6 @@ export function entries(self: ValueArray<int>): IterableIterator<[int, int]> {
  * function one time for each element in the array.
  * @returns { ValueArray<int> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<int>, callbackfn: (value: int, index: int, array: ValueArray<int>) => int): ValueArray<int> {
     const len = self.length;
@@ -11237,7 +10794,6 @@ export function map(self: ValueArray<int>, callbackfn: (value: int, index: int, 
  * @returns { int } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: ValueArray<int>) => int): int {
     if (self.length == 0) {
@@ -11434,7 +10990,6 @@ function cloneArray(self: ValueArray<long>): ValueArray<long> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<long>, index: int): Long {
     let len = self.length;
@@ -11461,7 +11016,6 @@ export function at(self: ValueArray<long>, index: int): Long {
  * @returns { ValueArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<long>, target: int): ValueArray<long> {
     copyWithin(self, target, 0, self.length);
@@ -11478,7 +11032,6 @@ export function copyWithin(self: ValueArray<long>, target: int): ValueArray<long
  * @returns { ValueArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<long>, target: int, start: int): ValueArray<long> {
     copyWithin(self, target, start, self.length);
@@ -11496,7 +11049,6 @@ export function copyWithin(self: ValueArray<long>, target: int, start: int): Val
  * @returns { ValueArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<long>, target: int, start: int, end?: int): ValueArray<long> {
     target = normalizeIndex(target, self.length)
@@ -11536,7 +11088,6 @@ export function copyWithin(self: ValueArray<long>, target: int, start: int, end?
  * @returns { ValueArray<long> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<long>, value: long, start?: int, end?: int): ValueArray<long> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -11557,7 +11108,6 @@ export function fill(self: ValueArray<long>, value: long, start?: int, end?: int
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
@@ -11575,7 +11125,6 @@ export function find(self: ValueArray<long>, predicate: (value: long, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -11595,7 +11144,6 @@ export function findIndex(self: ValueArray<long>, predicate: (value: long, index
  * @returns { Long | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<long>, predicate: (elem: long, index: int, array: ValueArray<long>) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -11617,7 +11165,6 @@ export function findLast(self: ValueArray<long>, predicate: (elem: long, index: 
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -11638,7 +11185,6 @@ export function every(self: ValueArray<long>, predicate: (value: long, index: in
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<long>, predicate: (value: long, index: int, array: ValueArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -11658,7 +11204,6 @@ export function some(self: ValueArray<long>, predicate: (value: long, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<long>, predicate: (element: long, index: int, array: ValueArray<long>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -11680,7 +11225,6 @@ export function findLastIndex(self: ValueArray<long>, predicate: (element: long,
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: ValueArray<long>) => long): long {
     if (self.length == 0) {
@@ -11704,7 +11248,6 @@ export function reduce(self: ValueArray<long>, callbackfn: (previousValue: long,
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = long>(self: ValueArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: ValueArray<long>) => U, initialValue: U): U {
     let acc = initialValue
@@ -11725,7 +11268,6 @@ export function reduce<U = long>(self: ValueArray<long>, callbackfn: (previousVa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: ValueArray<long>) => U, initialValue: U): U {
     let acc = initialValue
@@ -11743,7 +11285,6 @@ export function reduceRight<U>(self: ValueArray<long>, callbackfn: (previousValu
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<long>, callbackfn: (value: long, index: int, array: ValueArray<long>) => void): void {
     const len0 = self.length;
@@ -11763,7 +11304,6 @@ export function forEach(self: ValueArray<long>, callbackfn: (value: long, index:
  * @returns { ValueArray<long> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<long>, start: int): ValueArray<long> {
     return slice(self, start, Int.MAX_VALUE);
@@ -11779,7 +11319,6 @@ export function slice(self: ValueArray<long>, start: int): ValueArray<long> {
  * @returns { ValueArray<long> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<long>, start?: int, end?: int): ValueArray<long> {
     const len: int = self.length;
@@ -11804,7 +11343,6 @@ export function slice(self: ValueArray<long>, start?: int, end?: int): ValueArra
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<long>, element: long, fromIndex?: int): int {
     if (self.length == 0) {
@@ -11837,7 +11375,6 @@ export function lastIndexOf(self: ValueArray<long>, element: long, fromIndex?: i
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<long>, sep?: String): string {
     if (self.length == 0) {
@@ -11861,7 +11398,6 @@ export function join(self: ValueArray<long>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<long>): string {
     return join(self, ",");
@@ -11878,7 +11414,6 @@ export function toString(self: ValueArray<long>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<long>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -11893,7 +11428,6 @@ export function toLocaleString(self: ValueArray<long>, locales: Object, options:
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<long>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -11907,7 +11441,6 @@ export function toLocaleString(self: ValueArray<long>, locales: Object): string 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<long>): string {
     const sb = new StringBuilder()
@@ -11932,7 +11465,6 @@ export function toLocaleString(self: ValueArray<long>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<long>, start: int): ValueArray<long> {
     return toSpliced(self, start, self.length)
@@ -11948,7 +11480,6 @@ export function toSpliced(self: ValueArray<long>, start: int): ValueArray<long> 
  * @returns { ValueArray<long> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<long>, start: int, delete: int, ...items: FixedArray<long>): ValueArray<long> {
     const len = self.length;
@@ -11983,7 +11514,6 @@ export function toSpliced(self: ValueArray<long>, start: int, delete: int, ...it
  * @returns { ValueArray<long> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<long>, start?: int, delete?: int): ValueArray<long> {
     const len = self.length;
@@ -11999,7 +11529,6 @@ export function toSpliced(self: ValueArray<long>, start?: int, delete?: int): Va
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<long>, val: long, fromIndex?: int): boolean {
     const len = self.length;
@@ -12020,7 +11549,6 @@ export function includes(self: ValueArray<long>, val: long, fromIndex?: int): bo
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<long>, val: long, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -12039,7 +11567,6 @@ export function indexOf(self: ValueArray<long>, val: long, fromIndex?: int): int
  * @returns { ValueArray<long> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<long>): ValueArray<long> {
     let arr = cloneArray(self);
@@ -12055,7 +11582,6 @@ export function toSorted(self: ValueArray<long>): ValueArray<long> {
  * @returns { ValueArray<long> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<long>, comparator: (a: long, b: long) => int): ValueArray<long> {
     let arr = cloneArray(self);
@@ -12071,7 +11597,6 @@ export function toSorted(self: ValueArray<long>, comparator: (a: long, b: long) 
  * @returns { ValueArray<long> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<long>): ValueArray<long> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -12091,7 +11616,6 @@ export function reverse(self: ValueArray<long>): ValueArray<long> {
  * @returns { ValueArray<long> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<long>): ValueArray<long> {
     let arr : ValueArray<long> = new ValueArray<long>(self.length)
@@ -12111,7 +11635,6 @@ export function toReversed(self: ValueArray<long>): ValueArray<long> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<long>, index: int, value: long): ValueArray<long> {
     if (index < 0) {
@@ -12132,7 +11655,6 @@ export function with(self: ValueArray<long>, index: int, value: long): ValueArra
  * @returns { IterableIterator<long> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<long>): IterableIterator<long> {
     return new ArrayValuesIterator_long_ValueArray(self);
@@ -12145,7 +11667,6 @@ export function values(self: ValueArray<long>): IterableIterator<long> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<long>): IterableIterator<[int, long]> {
     return new ArrayEntriesIterator_long_ValueArray(self);
@@ -12159,7 +11680,6 @@ export function entries(self: ValueArray<long>): IterableIterator<[int, long]> {
  * function one time for each element in the array.
  * @returns { ValueArray<long> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<long>, callbackfn: (value: long, index: int, array: ValueArray<long>) => long): ValueArray<long> {
     const len = self.length;
@@ -12181,7 +11701,6 @@ export function map(self: ValueArray<long>, callbackfn: (value: long, index: int
  * @returns { long } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: ValueArray<long>) => long): long {
     if (self.length == 0) {
@@ -12378,7 +11897,6 @@ function cloneArray(self: ValueArray<float>): ValueArray<float> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<float>, index: int): Float {
     let len = self.length;
@@ -12405,7 +11923,6 @@ export function at(self: ValueArray<float>, index: int): Float {
  * @returns { ValueArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<float>, target: int): ValueArray<float> {
     copyWithin(self, target, 0, self.length);
@@ -12422,7 +11939,6 @@ export function copyWithin(self: ValueArray<float>, target: int): ValueArray<flo
  * @returns { ValueArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<float>, target: int, start: int): ValueArray<float> {
     copyWithin(self, target, start, self.length);
@@ -12440,7 +11956,6 @@ export function copyWithin(self: ValueArray<float>, target: int, start: int): Va
  * @returns { ValueArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<float>, target: int, start: int, end?: int): ValueArray<float> {
     target = normalizeIndex(target, self.length)
@@ -12480,7 +11995,6 @@ export function copyWithin(self: ValueArray<float>, target: int, start: int, end
  * @returns { ValueArray<float> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<float>, value: float, start?: int, end?: int): ValueArray<float> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -12501,7 +12015,6 @@ export function fill(self: ValueArray<float>, value: float, start?: int, end?: i
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
@@ -12519,7 +12032,6 @@ export function find(self: ValueArray<float>, predicate: (value: float, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -12539,7 +12051,6 @@ export function findIndex(self: ValueArray<float>, predicate: (value: float, ind
  * @returns { Float | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<float>, predicate: (elem: float, index: int, array: ValueArray<float>) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -12561,7 +12072,6 @@ export function findLast(self: ValueArray<float>, predicate: (elem: float, index
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -12582,7 +12092,6 @@ export function every(self: ValueArray<float>, predicate: (value: float, index: 
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<float>, predicate: (value: float, index: int, array: ValueArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -12602,7 +12111,6 @@ export function some(self: ValueArray<float>, predicate: (value: float, index: i
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<float>, predicate: (element: float, index: int, array: ValueArray<float>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -12624,7 +12132,6 @@ export function findLastIndex(self: ValueArray<float>, predicate: (element: floa
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: ValueArray<float>) => float): float {
     if (self.length == 0) {
@@ -12648,7 +12155,6 @@ export function reduce(self: ValueArray<float>, callbackfn: (previousValue: floa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = float>(self: ValueArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: ValueArray<float>) => U, initialValue: U): U {
     let acc = initialValue
@@ -12669,7 +12175,6 @@ export function reduce<U = float>(self: ValueArray<float>, callbackfn: (previous
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: ValueArray<float>) => U, initialValue: U): U {
     let acc = initialValue
@@ -12687,7 +12192,6 @@ export function reduceRight<U>(self: ValueArray<float>, callbackfn: (previousVal
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<float>, callbackfn: (value: float, index: int, array: ValueArray<float>) => void): void {
     const len0 = self.length;
@@ -12707,7 +12211,6 @@ export function forEach(self: ValueArray<float>, callbackfn: (value: float, inde
  * @returns { ValueArray<float> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<float>, start: int): ValueArray<float> {
     return slice(self, start, Int.MAX_VALUE);
@@ -12723,7 +12226,6 @@ export function slice(self: ValueArray<float>, start: int): ValueArray<float> {
  * @returns { ValueArray<float> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<float>, start?: int, end?: int): ValueArray<float> {
     const len: int = self.length;
@@ -12748,7 +12250,6 @@ export function slice(self: ValueArray<float>, start?: int, end?: int): ValueArr
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<float>, element: float, fromIndex?: int): int {
     if (self.length == 0) {
@@ -12781,7 +12282,6 @@ export function lastIndexOf(self: ValueArray<float>, element: float, fromIndex?:
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<float>, sep?: String): string {
     if (self.length == 0) {
@@ -12805,7 +12305,6 @@ export function join(self: ValueArray<float>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<float>): string {
     return join(self, ",");
@@ -12822,7 +12321,6 @@ export function toString(self: ValueArray<float>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<float>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -12837,7 +12335,6 @@ export function toLocaleString(self: ValueArray<float>, locales: Object, options
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<float>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -12851,7 +12348,6 @@ export function toLocaleString(self: ValueArray<float>, locales: Object): string
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<float>): string {
     const sb = new StringBuilder()
@@ -12876,7 +12372,6 @@ export function toLocaleString(self: ValueArray<float>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<float>, start: int): ValueArray<float> {
     return toSpliced(self, start, self.length)
@@ -12892,7 +12387,6 @@ export function toSpliced(self: ValueArray<float>, start: int): ValueArray<float
  * @returns { ValueArray<float> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<float>, start: int, delete: int, ...items: FixedArray<float>): ValueArray<float> {
     const len = self.length;
@@ -12927,7 +12421,6 @@ export function toSpliced(self: ValueArray<float>, start: int, delete: int, ...i
  * @returns { ValueArray<float> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<float>, start?: int, delete?: int): ValueArray<float> {
     const len = self.length;
@@ -12943,7 +12436,6 @@ export function toSpliced(self: ValueArray<float>, start?: int, delete?: int): V
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<float>, val: float, fromIndex?: int): boolean {
     const len = self.length;
@@ -12972,7 +12464,6 @@ export function includes(self: ValueArray<float>, val: float, fromIndex?: int): 
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<float>, val: float, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -12991,7 +12482,6 @@ export function indexOf(self: ValueArray<float>, val: float, fromIndex?: int): i
  * @returns { ValueArray<float> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<float>): ValueArray<float> {
     let arr = cloneArray(self);
@@ -13007,7 +12497,6 @@ export function toSorted(self: ValueArray<float>): ValueArray<float> {
  * @returns { ValueArray<float> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<float>, comparator: (a: float, b: float) => int): ValueArray<float> {
     let arr = cloneArray(self);
@@ -13023,7 +12512,6 @@ export function toSorted(self: ValueArray<float>, comparator: (a: float, b: floa
  * @returns { ValueArray<float> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<float>): ValueArray<float> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -13043,7 +12531,6 @@ export function reverse(self: ValueArray<float>): ValueArray<float> {
  * @returns { ValueArray<float> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<float>): ValueArray<float> {
     let arr : ValueArray<float> = new ValueArray<float>(self.length)
@@ -13063,7 +12550,6 @@ export function toReversed(self: ValueArray<float>): ValueArray<float> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<float>, index: int, value: float): ValueArray<float> {
     if (index < 0) {
@@ -13084,7 +12570,6 @@ export function with(self: ValueArray<float>, index: int, value: float): ValueAr
  * @returns { IterableIterator<float> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<float>): IterableIterator<float> {
     return new ArrayValuesIterator_float_ValueArray(self);
@@ -13097,7 +12582,6 @@ export function values(self: ValueArray<float>): IterableIterator<float> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<float>): IterableIterator<[int, float]> {
     return new ArrayEntriesIterator_float_ValueArray(self);
@@ -13111,7 +12595,6 @@ export function entries(self: ValueArray<float>): IterableIterator<[int, float]>
  * function one time for each element in the array.
  * @returns { ValueArray<float> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<float>, callbackfn: (value: float, index: int, array: ValueArray<float>) => float): ValueArray<float> {
     const len = self.length;
@@ -13133,7 +12616,6 @@ export function map(self: ValueArray<float>, callbackfn: (value: float, index: i
  * @returns { float } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: ValueArray<float>) => float): float {
     if (self.length == 0) {
@@ -13330,7 +12812,6 @@ function cloneArray(self: ValueArray<double>): ValueArray<double> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<double>, index: int): Double {
     let len = self.length;
@@ -13357,7 +12838,6 @@ export function at(self: ValueArray<double>, index: int): Double {
  * @returns { ValueArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<double>, target: int): ValueArray<double> {
     copyWithin(self, target, 0, self.length);
@@ -13374,7 +12854,6 @@ export function copyWithin(self: ValueArray<double>, target: int): ValueArray<do
  * @returns { ValueArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<double>, target: int, start: int): ValueArray<double> {
     copyWithin(self, target, start, self.length);
@@ -13392,7 +12871,6 @@ export function copyWithin(self: ValueArray<double>, target: int, start: int): V
  * @returns { ValueArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<double>, target: int, start: int, end?: int): ValueArray<double> {
     target = normalizeIndex(target, self.length)
@@ -13432,7 +12910,6 @@ export function copyWithin(self: ValueArray<double>, target: int, start: int, en
  * @returns { ValueArray<double> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<double>, value: double, start?: int, end?: int): ValueArray<double> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -13453,7 +12930,6 @@ export function fill(self: ValueArray<double>, value: double, start?: int, end?:
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
@@ -13471,7 +12947,6 @@ export function find(self: ValueArray<double>, predicate: (value: double, index:
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -13491,7 +12966,6 @@ export function findIndex(self: ValueArray<double>, predicate: (value: double, i
  * @returns { Double | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<double>, predicate: (elem: double, index: int, array: ValueArray<double>) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -13513,7 +12987,6 @@ export function findLast(self: ValueArray<double>, predicate: (elem: double, ind
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -13534,7 +13007,6 @@ export function every(self: ValueArray<double>, predicate: (value: double, index
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<double>, predicate: (value: double, index: int, array: ValueArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -13554,7 +13026,6 @@ export function some(self: ValueArray<double>, predicate: (value: double, index:
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<double>, predicate: (element: double, index: int, array: ValueArray<double>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -13576,7 +13047,6 @@ export function findLastIndex(self: ValueArray<double>, predicate: (element: dou
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: ValueArray<double>) => double): double {
     if (self.length == 0) {
@@ -13600,7 +13070,6 @@ export function reduce(self: ValueArray<double>, callbackfn: (previousValue: dou
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = double>(self: ValueArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: ValueArray<double>) => U, initialValue: U): U {
     let acc = initialValue
@@ -13621,7 +13090,6 @@ export function reduce<U = double>(self: ValueArray<double>, callbackfn: (previo
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: ValueArray<double>) => U, initialValue: U): U {
     let acc = initialValue
@@ -13639,7 +13107,6 @@ export function reduceRight<U>(self: ValueArray<double>, callbackfn: (previousVa
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<double>, callbackfn: (value: double, index: int, array: ValueArray<double>) => void): void {
     const len0 = self.length;
@@ -13659,7 +13126,6 @@ export function forEach(self: ValueArray<double>, callbackfn: (value: double, in
  * @returns { ValueArray<double> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<double>, start: int): ValueArray<double> {
     return slice(self, start, Int.MAX_VALUE);
@@ -13675,7 +13141,6 @@ export function slice(self: ValueArray<double>, start: int): ValueArray<double> 
  * @returns { ValueArray<double> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<double>, start?: int, end?: int): ValueArray<double> {
     const len: int = self.length;
@@ -13700,7 +13165,6 @@ export function slice(self: ValueArray<double>, start?: int, end?: int): ValueAr
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<double>, element: double, fromIndex?: int): int {
     if (self.length == 0) {
@@ -13733,7 +13197,6 @@ export function lastIndexOf(self: ValueArray<double>, element: double, fromIndex
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<double>, sep?: String): string {
     if (self.length == 0) {
@@ -13757,7 +13220,6 @@ export function join(self: ValueArray<double>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<double>): string {
     return join(self, ",");
@@ -13774,7 +13236,6 @@ export function toString(self: ValueArray<double>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<double>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -13789,7 +13250,6 @@ export function toLocaleString(self: ValueArray<double>, locales: Object, option
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<double>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -13803,7 +13263,6 @@ export function toLocaleString(self: ValueArray<double>, locales: Object): strin
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<double>): string {
     const sb = new StringBuilder()
@@ -13828,7 +13287,6 @@ export function toLocaleString(self: ValueArray<double>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<double>, start: int): ValueArray<double> {
     return toSpliced(self, start, self.length)
@@ -13844,7 +13302,6 @@ export function toSpliced(self: ValueArray<double>, start: int): ValueArray<doub
  * @returns { ValueArray<double> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<double>, start: int, delete: int, ...items: FixedArray<double>): ValueArray<double> {
     const len = self.length;
@@ -13879,7 +13336,6 @@ export function toSpliced(self: ValueArray<double>, start: int, delete: int, ...
  * @returns { ValueArray<double> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<double>, start?: int, delete?: int): ValueArray<double> {
     const len = self.length;
@@ -13895,7 +13351,6 @@ export function toSpliced(self: ValueArray<double>, start?: int, delete?: int): 
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<double>, val: double, fromIndex?: int): boolean {
     const len = self.length;
@@ -13924,7 +13379,6 @@ export function includes(self: ValueArray<double>, val: double, fromIndex?: int)
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<double>, val: double, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -13943,7 +13397,6 @@ export function indexOf(self: ValueArray<double>, val: double, fromIndex?: int):
  * @returns { ValueArray<double> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<double>): ValueArray<double> {
     let arr = cloneArray(self);
@@ -13959,7 +13412,6 @@ export function toSorted(self: ValueArray<double>): ValueArray<double> {
  * @returns { ValueArray<double> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<double>, comparator: (a: double, b: double) => int): ValueArray<double> {
     let arr = cloneArray(self);
@@ -13975,7 +13427,6 @@ export function toSorted(self: ValueArray<double>, comparator: (a: double, b: do
  * @returns { ValueArray<double> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<double>): ValueArray<double> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -13995,7 +13446,6 @@ export function reverse(self: ValueArray<double>): ValueArray<double> {
  * @returns { ValueArray<double> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<double>): ValueArray<double> {
     let arr : ValueArray<double> = new ValueArray<double>(self.length)
@@ -14015,7 +13465,6 @@ export function toReversed(self: ValueArray<double>): ValueArray<double> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<double>, index: int, value: double): ValueArray<double> {
     if (index < 0) {
@@ -14036,7 +13485,6 @@ export function with(self: ValueArray<double>, index: int, value: double): Value
  * @returns { IterableIterator<double> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<double>): IterableIterator<double> {
     return new ArrayValuesIterator_double_ValueArray(self);
@@ -14049,7 +13497,6 @@ export function values(self: ValueArray<double>): IterableIterator<double> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<double>): IterableIterator<[int, double]> {
     return new ArrayEntriesIterator_double_ValueArray(self);
@@ -14063,7 +13510,6 @@ export function entries(self: ValueArray<double>): IterableIterator<[int, double
  * function one time for each element in the array.
  * @returns { ValueArray<double> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<double>, callbackfn: (value: double, index: int, array: ValueArray<double>) => double): ValueArray<double> {
     const len = self.length;
@@ -14085,7 +13531,6 @@ export function map(self: ValueArray<double>, callbackfn: (value: double, index:
  * @returns { double } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: ValueArray<double>) => double): double {
     if (self.length == 0) {
@@ -14282,7 +13727,6 @@ function cloneArray(self: ValueArray<char>): ValueArray<char> {
  * @throws { RangeError } Throws a RangeError if the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function at(self: ValueArray<char>, index: int): Char {
     let len = self.length;
@@ -14309,7 +13753,6 @@ export function at(self: ValueArray<char>, index: int): Char {
  * @returns { ValueArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<char>, target: int): ValueArray<char> {
     copyWithin(self, target, 0, self.length);
@@ -14326,7 +13769,6 @@ export function copyWithin(self: ValueArray<char>, target: int): ValueArray<char
  * @returns { ValueArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<char>, target: int, start: int): ValueArray<char> {
     copyWithin(self, target, start, self.length);
@@ -14344,7 +13786,6 @@ export function copyWithin(self: ValueArray<char>, target: int, start: int): Val
  * @returns { ValueArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyWithin(self: ValueArray<char>, target: int, start: int, end?: int): ValueArray<char> {
     target = normalizeIndex(target, self.length)
@@ -14384,7 +13825,6 @@ export function copyWithin(self: ValueArray<char>, target: int, start: int, end?
  * @returns { ValueArray<char> } The modified array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function fill(self: ValueArray<char>, value: char, start?: int, end?: int): ValueArray<char> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -14405,7 +13845,6 @@ export function fill(self: ValueArray<char>, value: char, start?: int, end?: int
  *     otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function find(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
@@ -14423,7 +13862,6 @@ export function find(self: ValueArray<char>, predicate: (value: char, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findIndex(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -14443,7 +13881,6 @@ export function findIndex(self: ValueArray<char>, predicate: (value: char, index
  * @returns { Char | undefined } The value of the element if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLast(self: ValueArray<char>, predicate: (elem: char, index: int, array: ValueArray<char>) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -14465,7 +13902,6 @@ export function findLast(self: ValueArray<char>, predicate: (elem: char, index: 
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function every(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -14486,7 +13922,6 @@ export function every(self: ValueArray<char>, predicate: (value: char, index: in
  * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function some(self: ValueArray<char>, predicate: (value: char, index: int, array: ValueArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -14506,7 +13941,6 @@ export function some(self: ValueArray<char>, predicate: (value: char, index: int
  * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function findLastIndex(self: ValueArray<char>, predicate: (element: char, index: int, array: ValueArray<char>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -14528,7 +13962,6 @@ export function findLastIndex(self: ValueArray<char>, predicate: (element: char,
  * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce(self: ValueArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: ValueArray<char>) => char): char {
     if (self.length == 0) {
@@ -14552,7 +13985,6 @@ export function reduce(self: ValueArray<char>, callbackfn: (previousValue: char,
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduce<U = char>(self: ValueArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: ValueArray<char>) => U, initialValue: U): U {
     let acc = initialValue
@@ -14573,7 +14005,6 @@ export function reduce<U = char>(self: ValueArray<char>, callbackfn: (previousVa
  * @returns { U } The accumulated result.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reduceRight<U>(self: ValueArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: ValueArray<char>) => U, initialValue: U): U {
     let acc = initialValue
@@ -14591,7 +14022,6 @@ export function reduceRight<U>(self: ValueArray<char>, callbackfn: (previousValu
  *     function one time for each element in the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function forEach(self: ValueArray<char>, callbackfn: (value: char, index: int, array: ValueArray<char>) => void): void {
     const len0 = self.length;
@@ -14611,7 +14041,6 @@ export function forEach(self: ValueArray<char>, callbackfn: (value: char, index:
  * @returns { ValueArray<char> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<char>, start: int): ValueArray<char> {
     return slice(self, start, Int.MAX_VALUE);
@@ -14627,7 +14056,6 @@ export function slice(self: ValueArray<char>, start: int): ValueArray<char> {
  * @returns { ValueArray<char> } A new Array object containing the extracted elements.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function slice(self: ValueArray<char>, start?: int, end?: int): ValueArray<char> {
     const len: int = self.length;
@@ -14652,7 +14080,6 @@ export function slice(self: ValueArray<char>, start?: int, end?: int): ValueArra
  * @returns { int } The last index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lastIndexOf(self: ValueArray<char>, element: char, fromIndex?: int): int {
     if (self.length == 0) {
@@ -14685,7 +14112,6 @@ export function lastIndexOf(self: ValueArray<char>, element: char, fromIndex?: i
  * @returns { string } A string with all array elements joined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function join(self: ValueArray<char>, sep?: String): string {
     if (self.length == 0) {
@@ -14709,7 +14135,6 @@ export function join(self: ValueArray<char>, sep?: String): string {
  * @returns { string } A string representing the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toString(self: ValueArray<char>): string {
     return join(self, ",");
@@ -14726,7 +14151,6 @@ export function toString(self: ValueArray<char>): string {
  * @throws { Error } Throws an Error if the method is not implemented.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<char>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
@@ -14741,7 +14165,6 @@ export function toLocaleString(self: ValueArray<char>, locales: Object, options:
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<char>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
@@ -14755,7 +14178,6 @@ export function toLocaleString(self: ValueArray<char>, locales: Object): string 
  * @returns { string } A string representing the elements of the array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toLocaleString(self: ValueArray<char>): string {
     const sb = new StringBuilder()
@@ -14780,7 +14202,6 @@ export function toLocaleString(self: ValueArray<char>): string {
  * @returns { Array<T> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<char>, start: int): ValueArray<char> {
     return toSpliced(self, start, self.length)
@@ -14796,7 +14217,6 @@ export function toSpliced(self: ValueArray<char>, start: int): ValueArray<char> 
  * @returns { ValueArray<char> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<char>, start: int, delete: int, ...items: FixedArray<char>): ValueArray<char> {
     const len = self.length;
@@ -14831,7 +14251,6 @@ export function toSpliced(self: ValueArray<char>, start: int, delete: int, ...it
  * @returns { ValueArray<char> } A new array with the changes applied.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSpliced(self: ValueArray<char>, start?: int, delete?: int): ValueArray<char> {
     const len = self.length;
@@ -14847,7 +14266,6 @@ export function toSpliced(self: ValueArray<char>, start?: int, delete?: int): Va
  * @returns { boolean } True if the value is found, false otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function includes(self: ValueArray<char>, val: char, fromIndex?: int): boolean {
     const len = self.length;
@@ -14868,7 +14286,6 @@ export function includes(self: ValueArray<char>, val: char, fromIndex?: int): bo
  * @returns { int } The first index of the element in the array; -1 if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function indexOf(self: ValueArray<char>, val: char, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -14887,7 +14304,6 @@ export function indexOf(self: ValueArray<char>, val: char, fromIndex?: int): int
  * @returns { ValueArray<char> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<char>): ValueArray<char> {
     let arr = cloneArray(self);
@@ -14903,7 +14319,6 @@ export function toSorted(self: ValueArray<char>): ValueArray<char> {
  * @returns { ValueArray<char> } A new sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toSorted(self: ValueArray<char>, comparator: (a: char, b: char) => int): ValueArray<char> {
     let arr = cloneArray(self);
@@ -14919,7 +14334,6 @@ export function toSorted(self: ValueArray<char>, comparator: (a: char, b: char) 
  * @returns { ValueArray<char> } The reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function reverse(self: ValueArray<char>): ValueArray<char> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -14939,7 +14353,6 @@ export function reverse(self: ValueArray<char>): ValueArray<char> {
  * @returns { ValueArray<char> } A new reversed array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function toReversed(self: ValueArray<char>): ValueArray<char> {
     let arr : ValueArray<char> = new ValueArray<char>(self.length)
@@ -14959,7 +14372,6 @@ export function toReversed(self: ValueArray<char>): ValueArray<char> {
  * @throws { RangeError } If the index is out of bounds.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function with(self: ValueArray<char>, index: int, value: char): ValueArray<char> {
     if (index < 0) {
@@ -14980,7 +14392,6 @@ export function with(self: ValueArray<char>, index: int, value: char): ValueArra
  * @returns { IterableIterator<char> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function values(self: ValueArray<char>): IterableIterator<char> {
     return new ArrayValuesIterator_char_ValueArray(self);
@@ -14993,7 +14404,6 @@ export function values(self: ValueArray<char>): IterableIterator<char> {
  * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function entries(self: ValueArray<char>): IterableIterator<[int, char]> {
     return new ArrayEntriesIterator_char_ValueArray(self);
@@ -15007,7 +14417,6 @@ export function entries(self: ValueArray<char>): IterableIterator<[int, char]> {
  * function one time for each element in the array.
  * @returns { ValueArray<char> } An array instance, constructed from `this` and given function.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function map(self: ValueArray<char>, callbackfn: (value: char, index: int, array: ValueArray<char>) => char): ValueArray<char> {
     const len = self.length;
@@ -15029,7 +14438,6 @@ export function map(self: ValueArray<char>, callbackfn: (value: char, index: int
  * @returns { char } A result after applying callbackfn over all elements of the Array.
  * @throws { TypeError } Throws if the array is empty and no initial value is provided.
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export function reduceRight(self: ValueArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: ValueArray<char>) => char): char {
     if (self.length == 0) {

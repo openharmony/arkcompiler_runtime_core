@@ -27,7 +27,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -37,7 +36,6 @@ export namespace reflect {
  * @extends Field
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class InstanceField extends Field {
     /**
@@ -53,7 +51,6 @@ export final class InstanceField extends Field {
      * @returns { boolean } Returns true if the two instance fields are equal, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: InstanceField): boolean {
         return this.fieldPtr == other.fieldPtr
@@ -67,7 +64,6 @@ export final class InstanceField extends Field {
      * @throws { TypeError } Throws when `thisObj` is incompatible with the field.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getValue(thisObj: Object): Any {
         return super.getValueInternal(thisObj)
@@ -82,7 +78,6 @@ export final class InstanceField extends Field {
      * @throws { TypeError } Throws when the field is readonly.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setValue(thisObj: Object, value: Any): void {
         if (this.isReadonly()) {

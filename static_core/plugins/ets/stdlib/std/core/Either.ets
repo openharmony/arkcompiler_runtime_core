@@ -25,7 +25,6 @@ package std.core;
  *
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export abstract class Either<L, R> {
     protected Ldata: L
@@ -39,7 +38,6 @@ export abstract class Either<L, R> {
      * @syscap SystemCapability.Utils.Lang
      * @final
      * @FaAndStageModel
-     * @since 24
      */
     public final isLeft(): boolean {
         return this.isLeft_
@@ -52,7 +50,6 @@ export abstract class Either<L, R> {
      * @syscap SystemCapability.Utils.Lang
      * @final
      * @FaAndStageModel
-     * @since 24
      */
     public final isRight(): boolean {
         return !this.isLeft()
@@ -66,7 +63,6 @@ export abstract class Either<L, R> {
      * @syscap SystemCapability.Utils.Lang
      * @final
      * @FaAndStageModel
-     * @since 24
      */
     public final get left(): L {
         if (this.isLeft()) {
@@ -83,7 +79,6 @@ export abstract class Either<L, R> {
      * @syscap SystemCapability.Utils.Lang
      * @final
      * @FaAndStageModel
-     * @since 24
      */
     public final get right(): R {
         if (this.isRight()) {
@@ -100,7 +95,6 @@ export abstract class Either<L, R> {
  * @syscap SystemCapability.Utils.Lang
  * @final
  * @FaAndStageModel
- * @since 24
  */
 export final class Left<L, R> extends Either<L, R> {
     private constructor(data: L) {
@@ -116,7 +110,6 @@ export final class Left<L, R> extends Either<L, R> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static $_invoke<L, R>(data: L): Left<L, R> {
         return new Left<L,R>(data)
@@ -130,7 +123,6 @@ export final class Left<L, R> extends Either<L, R> {
  * @syscap SystemCapability.Utils.Lang
  * @final
  * @FaAndStageModel
- * @since 24
  */
 export final class Right<L, R> extends Either<L, R> {
     private constructor(data: R) {
@@ -146,7 +138,6 @@ export final class Right<L, R> extends Either<L, R> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static $_invoke<L, R>(data: R): Right<L, R> {
         return new Right<L,R>(data)

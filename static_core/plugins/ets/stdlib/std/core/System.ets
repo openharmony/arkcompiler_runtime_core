@@ -25,7 +25,6 @@ package std.core;
  *     non-zero values indicate abnormal exit.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function exit(code: int): void
 
@@ -33,7 +32,6 @@ export native function exit(code: int): void
  * Prints current call stack information to standard error output.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function printStackTrace(): void
 
@@ -43,7 +41,6 @@ export native function printStackTrace(): void
  *     where each string represents one line of the call stack.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function stackTraceLines(): FixedArray<String> {
     return new FixedArray<String>(0);

@@ -26,7 +26,6 @@ import {PI, E, LN10, LN2, LOG2E, SQRT1_2, SQRT2} from "std/math/consts";
  * @returns { byte } Absolute value of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function abs(v: byte): byte {
     return abs(v.toInt()).toByte()
@@ -38,7 +37,6 @@ export function abs(v: byte): byte {
  * @returns { short } Absolute value of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function abs(v: short): short {
     return abs(v.toInt()).toShort()
@@ -50,7 +48,6 @@ export function abs(v: short): short {
  * @returns { int } Absolute value of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function abs(v: int): int;
 
@@ -60,7 +57,6 @@ export native function abs(v: int): int;
  * @returns { long } Absolute value of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function abs(v: long): long;
 
@@ -70,7 +66,6 @@ export native function abs(v: long): long;
  * @returns { float } Absolute value of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function abs(v: float): float;
 
@@ -81,7 +76,6 @@ export native function abs(v: float): float;
  * @returns { double } Absolute value of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * abs(doubleNaN) = nan
@@ -96,7 +90,6 @@ export native function abs(v: double): double;
  * @returns { float } Hyperbolic arccosine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function acosh(v: float): float;
 
@@ -106,7 +99,6 @@ export native function acosh(v: float): float;
  * @returns { double } Hyperbolic arccosine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * acosh(doubleNaN) = -nan
@@ -121,7 +113,6 @@ export native function acosh(v: double): double;
  * @returns { float } Arccosine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * acos(floatNaN) = -nan
@@ -136,7 +127,6 @@ export native function acos(v: float): float;
  * @returns { double } Arccosine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * acos(doubleNaN) = -nan
@@ -151,7 +141,6 @@ export native function acos(v: double): double;
  * @returns { float } Hyperbolic arcsine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function asinh(v: float): float;
 
@@ -161,7 +150,6 @@ export native function asinh(v: float): float;
  * @returns { double } Hyperbolic arcsine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * asinh(doubleNaN) = -nan
@@ -176,7 +164,6 @@ export native function asinh(v: double): double;
  * @returns { float } Arcsine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function asin(v: float): float;
 
@@ -186,7 +173,6 @@ export native function asin(v: float): float;
  * @returns { double } Arcsine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * asin(doubleInf) = nan
@@ -204,7 +190,6 @@ export native function asin(v: double): double;
  *     and the ray from (0, 0) to the point (x, y).
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function atan2(y: float, x: float): float;
 
@@ -217,7 +202,6 @@ export native function atan2(y: float, x: float): float;
  *     and the ray from (0, 0) to the point (x, y).
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * atan2(doubleInf, doubleInf)= 0.7853981633974483
@@ -232,7 +216,6 @@ export native function atan2(y: double, x: double): double;
  * @returns { float } Hyperbolic arctangent of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function atanh(v: float): float;
 
@@ -242,7 +225,6 @@ export native function atanh(v: float): float;
  * @returns { double } Hyperbolic arctangent of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * atanh(doubleNaN) = -nan
@@ -257,7 +239,6 @@ export native function atanh(v: double): double;
  * @returns { float } Arctangent of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function atan(v: float): float;
 
@@ -267,7 +248,6 @@ export native function atan(v: float): float;
  * @returns { double } Arctangent of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * atan(doubleNaN) = -nan
@@ -282,7 +262,6 @@ export native function atan(v: double): double;
  * @returns { float } Returns the cube root of number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function cbrt(v: float): float;
 
@@ -292,7 +271,6 @@ export native function cbrt(v: float): float;
  * @returns { double } Returns the cube root of number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * cbrt(doubleNaN) = nan
@@ -308,7 +286,6 @@ export native function cbrt(v: double): double;
  * @returns { double } Smallest integer greater or equal to v
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * ceil(doubleNaN) = -nan
@@ -323,7 +300,6 @@ export native function ceil(v: double): double;
  * @returns { int } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * clz64(0xFFFFFFFFFFFFFFFF) == 0
@@ -338,7 +314,6 @@ export native function clz64(v: long): int;
  * @returns { int } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function clz64(v: int): int {
     let extendedNum: long = v.toLong();
@@ -352,7 +327,6 @@ export function clz64(v: int): int {
  * @returns { int } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function clz64(v: short): int {
     let extendedNum: long = v.toLong();
@@ -366,7 +340,6 @@ export function clz64(v: short): int {
  * @returns { int } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function clz64(v: byte): int {
     let extendedNum: long = v.toLong();
@@ -380,7 +353,6 @@ export function clz64(v: byte): int {
  * @returns { int } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function clz64(v: char): int {
     let extendedNum: long = v.toLong();
@@ -394,7 +366,6 @@ export function clz64(v: char): int {
  * @returns { int } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * clz32(0xFFFFFFFF) == 0
@@ -409,7 +380,6 @@ export native function clz32(v: int): int;
  * @returns { double } Number of leading zero bits count in bit representation of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function clz32Double(v: double): double;
 
@@ -419,7 +389,6 @@ export native function clz32Double(v: double): double;
  * @returns { float } Hyperbolic cosine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function cosh(v: float): float;
 
@@ -429,7 +398,6 @@ export native function cosh(v: float): float;
  * @returns { double } Hyperbolic cosine of angle `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * cosh(doubleNaN) = -nan
@@ -444,7 +412,6 @@ export native function cosh(v: double): double;
  * @returns { double } Cosine of angle in radians
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * cos(doubleNaN) = -nan
@@ -459,7 +426,6 @@ export native function cos(v: double): double;
  * @returns { double } the value of a 2 raised to a power of `v`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * power2(doubleInf) = inf
@@ -476,7 +442,6 @@ export function power2(v: double): double {
  * @returns {float} raised to the power of a number v, subtracted by 1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function expm1(v: float): float;
 
@@ -486,7 +451,6 @@ export native function expm1(v: float): float;
  * @returns {double} raised to the power of a number v, subtracted by 1.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * expm1(doubleNaN) = -nan
@@ -501,7 +465,6 @@ export native function expm1(v: double): double;
  * @returns {float} raised to the power of a number `v`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function exp(v: float): float;
 
@@ -511,7 +474,6 @@ export native function exp(v: float): float;
  * @returns {double} raised to the power of a number `v`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * exp(doubleNaN) = -nan
@@ -526,7 +488,6 @@ export native function exp(v: double): double;
  * @returns { double } Largest integer less or equal to `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * floor(doubleNaN) = -nan
@@ -542,7 +503,6 @@ export native function floor(v: double): double;
  * @returns { float } The square root of the sum of squares of its arguments
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function hypot(u: float, v: float): float;
 
@@ -553,7 +513,6 @@ export native function hypot(u: float, v: float): float;
  * @returns { double } The square root of the sum of squares of its arguments
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * hypot(doubleInf) = inf
  * hypot(doubleNegInf) = inf
@@ -567,7 +526,6 @@ export native function hypot(u: double, v: double): double;
  * @returns { float } Returns base 10 logarithm of 'v'
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function log10(v: float): float;
 
@@ -577,7 +535,6 @@ export native function log10(v: float): float;
  * @returns { double } Returns base 10 logarithm of 'v'
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * log10(doubleNaN) = -nan
@@ -592,7 +549,6 @@ export native function log10(v: double): double;
  * @returns { float } Returns the natural logarithm of '1 + v'.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function log1p(v: float): float {
     return log(1.0f + v);
@@ -604,7 +560,6 @@ export function log1p(v: float): float {
  * @returns { double } Returns the natural logarithm of '1 + v'.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * log1p(doubleNaN) = nan
@@ -621,7 +576,6 @@ export function log1p(v: double): double {
  * @returns { float } Returns base 2 logarithm of 'v'
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function log2(v: float): float {
     return log(v) / log(2.0f);
@@ -633,7 +587,6 @@ export function log2(v: float): float {
  * @returns { double } Returns base 2 logarithm of 'v'
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * log2(doubleNaN) = -nan
@@ -650,7 +603,6 @@ export function log2(v: double): double {
  * @returns { float } Returns the natural logarithm of 'v'
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function log(v: float): float;
 
@@ -660,7 +612,6 @@ export native function log(v: float): float;
  * @returns { double } Returns the natural logarithm of 'v'
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * log(doubleNaN) = -nan
@@ -676,7 +627,6 @@ export native function log(v: double): double;
  * @returns { byte } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: byte, u: byte): byte {
     if (v > u) {
@@ -693,7 +643,6 @@ export function max(v: byte, u: byte): byte {
  * @returns { char } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: char, u: char): char {
     if (v.compareTo(u) > 0) {
@@ -710,7 +659,6 @@ export function max(v: char, u: char): char {
  * @returns { short } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: short, u: short): short {
     if (v > u) {
@@ -727,7 +675,6 @@ export function max(v: short, u: short): short {
  * @returns { int } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: int, u: int): int {
     if (v > u) {
@@ -744,7 +691,6 @@ export function max(v: int, u: int): int {
  * @returns { long } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: long, u: long): long {
     if (v > u) {
@@ -761,7 +707,6 @@ export function max(v: long, u: long): long {
  * @returns { float } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: float, u: float): float {
     if (v > u) {
@@ -778,7 +723,6 @@ export function max(v: float, u: float): float {
  * @returns { double } Largest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function max(v: double, u: double): double {
     if (v > u) {
@@ -795,7 +739,6 @@ export function max(v: double, u: double): double {
  * @returns { byte } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: byte, u: byte): byte {
     if (v < u) {
@@ -812,7 +755,6 @@ export function min(v: byte, u: byte): byte {
  * @returns { char } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: char, u: char): char {
     if (v.compareTo(u) < 0) {
@@ -829,7 +771,6 @@ export function min(v: char, u: char): char {
  * @returns { short } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: short, u: short): short {
     if (v < u) {
@@ -846,7 +787,6 @@ export function min(v: short, u: short): short {
  * @returns { int } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: int, u: int): int {
     if (v < u) {
@@ -863,7 +803,6 @@ export function min(v: int, u: int): int {
  * @returns { long } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: long, u: long): long {
     if (v < u) {
@@ -880,7 +819,6 @@ export function min(v: long, u: long): long {
  * @returns { float } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: float, u: float): float {
     if (v < u) {
@@ -897,7 +835,6 @@ export function min(v: float, u: float): float {
  * @returns { double } Smallest value of `u` and `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function min(v: double, u: double): double {
     if (v < u) {
@@ -914,7 +851,6 @@ export function min(v: double, u: double): double {
  * @returns { double } The remainder of the division of `v` by `u`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * mod(doubleInf, doubleInf) = nan
@@ -930,7 +866,6 @@ export native function mod(u: double, v: double): double;
  * @returns { double } The value of a base `u` raised to a power `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * power(doubleNaN, doubleInf) = -nan
@@ -947,7 +882,6 @@ export native function power(v: double, u: double): double;
  * @returns { double } The remainder of `v / u`, reunded to nearest
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function rem(v: double, u: double): double;
 
@@ -957,7 +891,6 @@ export native function rem(v: double, u: double): double;
  * @returns { double } rounded to nearest integer
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * round(doubleNaN) = -nan
@@ -973,7 +906,6 @@ export native function round(v: double): double;
  * @returns { double } The result of `v * 2 ** n`, computed as a floating-point number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * scalbn(doubleNaN, 5) = nan
@@ -990,7 +922,6 @@ export function scalbn(v: double, n: int): double {
  * @returns { boolean } true if arg is negative, false otherwise
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * signbit(doubleNaN) = true
@@ -1005,7 +936,6 @@ export native function signbit(v: double): boolean;
  * @returns { int } sign of `v`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * sign(0) = 0
  * sign(doubleInf) = 1
@@ -1031,7 +961,6 @@ export function sign(v: double): int {
  * @returns { float } Returns the hyperbolic sine of a number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function sinh(v: float): float;
 
@@ -1041,7 +970,6 @@ export native function sinh(v: float): float;
  * @returns { double } Returns the hyperbolic sine of a number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * sinh(doubleInf) = inf
@@ -1056,7 +984,6 @@ export native function sinh(v: double): double;
  * @returns { double } Sine of angle in radians
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * sin(doubleNaN) = -nan
@@ -1072,7 +999,6 @@ export native function sin(v: double): double;
  *     If x is less than zero, returns NaN.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * sqrt(doubleNaN) = nan
@@ -1088,7 +1014,6 @@ export native function sqrt(v: double): double;
  * @returns { float } Returns the hyperbolic tangent of a number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function tanh(v: float): float;
 
@@ -1098,7 +1023,6 @@ export native function tanh(v: float): float;
  * @returns { double } Returns the hyperbolic tangent of a number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * tanh(doubleInf) = 1.0
@@ -1113,7 +1037,6 @@ export native function tanh(v: double): double;
  * @returns { float } Returns the tangent of a number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function tan(v: float): float;
 
@@ -1123,7 +1046,6 @@ export native function tan(v: float): float;
  * @returns { double } Returns the tangent of a number.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * tan(doubleInf) = nan
@@ -1138,7 +1060,6 @@ export native function tan(v: double): double;
  * @returns { double } The integer part of a number by removing any fractional digits.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function trunc(v: double): double;
 
@@ -1147,7 +1068,6 @@ export native function trunc(v: double): double;
  * @param { long } value - The seed value for the random number generator
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function seedRandom(value: long): void {}
 
@@ -1158,7 +1078,6 @@ export function seedRandom(value: long): void {}
  *     Initial seed to the random number generator algorithm can be given using {@link seedRandom()} function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function random(): double;
 
@@ -1172,7 +1091,6 @@ export native function random(): double;
  * @returns { int } Returns the result of 32-bit multiplication of two numbers.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  * imul(doubleInf, 1) = 0
@@ -1190,7 +1108,6 @@ export native function imul(a: double, b: double): int;
  * @returns { double } The nearest 32-bit single precision float representation
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```
  *  Math.fround(1.337) == 1.337 // false, result would be 1.3370000123977661

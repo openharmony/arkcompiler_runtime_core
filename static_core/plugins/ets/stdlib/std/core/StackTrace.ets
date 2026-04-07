@@ -24,7 +24,6 @@ package std.core;
  * synchronize with mirror class in runtime
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class StackTraceElement {
     private static readonly NATIVE_METHOD_LINE_NUMBER: int = -2;
@@ -43,7 +42,6 @@ export class StackTraceElement {
      * @returns { String } data in formatted string.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return "\tat " + this.className + "." + this.methodName +
@@ -57,7 +55,6 @@ export class StackTraceElement {
  * Provides functionality to obtain the current call stack trace.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class StackTrace {
     /**
@@ -67,7 +64,6 @@ export class StackTrace {
     * @static
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     static native provisionStackTrace(): FixedArray<StackTraceElement>
 }

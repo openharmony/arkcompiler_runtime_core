@@ -25,7 +25,6 @@ package std.annotations;
  * @enum { int } AnnotationTargets
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export enum AnnotationTargets {
     // Top-Level Declarations
@@ -61,7 +60,6 @@ export enum AnnotationTargets {
  * Defines Target annotation
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export @interface Target {
     /**
@@ -69,7 +67,6 @@ export @interface Target {
      * @type { AnnotationTargets[] }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     targets: AnnotationTargets[]
 };

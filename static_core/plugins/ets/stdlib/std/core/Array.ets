@@ -53,7 +53,6 @@ const FROM_BUFFER: FromBuffer;
  * @typedef { String | undefined } arrType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 type arrType = String | undefined;
 
@@ -64,7 +63,6 @@ type arrType = String | undefined;
  * @implements ReadonlyArray<T>, Iterable<T>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<Any>
@@ -77,7 +75,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The length of the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override get length(): int {
         return this.actualLength
@@ -90,7 +87,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { void }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     set length(newLen: int) {
         const len = newLen
@@ -113,7 +109,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { T } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override native $_get(idx: int): T;
 
@@ -126,7 +121,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param { T } val The value to set at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(idx: int, val: T): void;
 
@@ -138,7 +132,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param { int } arrayLen The initial length of the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(arrayLen: int) {
         this.buffer = new FixedArray<Any>(arrayLen)
@@ -155,7 +148,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this.buffer = new FixedArray<Any>(Array.INIT_CAPACITY)
@@ -169,7 +161,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param { function } initializer A function that generates an element for a given index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(arrayLen: int, initializer: (index: int) => T) {
         this.buffer = new FixedArray<Any>(arrayLen)
@@ -186,7 +177,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param { T[] } d The rest of the elements to initialize the array with.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(first: T, ...d: T[]) {
         this.buffer = new FixedArray<Any>(d.length + 1)
@@ -207,7 +197,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static create<T>(arrayLength: int, initialValue: T): Array<T> {
         let other = new Array<T>(arrayLength)
@@ -223,7 +212,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @throws { RangeError } Throws a RangeError if the array length is negative.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public extendTo(arrayLength: int, initialValue: T): void {
         if(arrayLength < 0){
@@ -247,7 +235,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @throws { RangeError } Throws a RangeError if the array length is negative.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public shrinkTo(arrayLength: int): void {
         if(arrayLength < 0){
@@ -274,7 +261,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      * @example
      * ```arkts
      * // Constructor form
@@ -299,7 +285,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arr: FixedArray<T>): Array<T> {
         const len: int = arr.length
@@ -318,7 +303,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arr: ArrayLike<T>): Array<T> {
         const ret: Array<T> = new Array<T>(arr.length)
@@ -338,7 +322,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
         const ret = new Array<T>()
@@ -357,7 +340,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T, U>(values: FixedArray<T>, mapfn: (v: T, k: int) => U): Array<U> {
         const length: int = values.length
@@ -379,7 +361,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: int) => U): Array<U> {
         const ret: Array<U> = new Array<U>()
@@ -641,7 +622,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { this } The sorted array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(comparator?: (a: T, b: T) => int): this {
         if (this.actualLength <= 1)
@@ -666,7 +646,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { T | undefined } The removed element from the array; undefined if the array is empty.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public shift(): T | undefined {
         const len: int = this.actualLength
@@ -685,7 +664,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { T | undefined } The removed element from the array; undefined if the array is empty.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public pop(): T | undefined {
         const len: int = this.actualLength
@@ -710,7 +688,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The new length of the array upon which the method was called.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public pushArray(...val: T[]): int {
         const length: int = val.length
@@ -729,7 +706,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The new length of the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public pushOne(val: T): int {
         this.ensureUnusedCapacity(1)
@@ -760,7 +736,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } An array containing the deleted elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public splice(start: int, delete: int | undefined, ...items: T[]): Array<T> {
         if (delete === undefined) {
@@ -822,7 +797,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } An array containing the deleted elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public splice(start: int): Array<T> {
         return this.splice(start, this.actualLength)
@@ -836,7 +810,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isArray(o: Any): boolean {
         return o instanceof Array
@@ -850,7 +823,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of<T>(...values: T[]): Array<T> {
         const ret = new Array<T>()
@@ -869,7 +841,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The new length of the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public unshift(...values: T[]): int {
         const length: int = this.buffer.length
@@ -893,7 +864,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { IterableIterator<number> } A new Array Iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override keys(): IterableIterator<int> {
         return new ArrayKeysIterator<T>(this)
@@ -905,7 +875,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { IterableIterator<T> } An iterator over all values.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<T> {
         return this.values()
@@ -920,7 +889,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new array with the elements that pass the test.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         const res = new Array<T>()
@@ -941,7 +909,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<U> } A new array with the sub-array elements concatenated into it.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public flat<U = T>(depth: int): Array<U> {
         let ret = new Array<U>()
@@ -960,7 +927,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new Array instance.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
         let totalAdd = this.actualLength;
@@ -1008,7 +974,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<U> } A new array with the sub-array elements concatenated into it.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public flat<U = T>(): Array<U> {
         return this.flat<U>(1)
@@ -1022,7 +987,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<U> } A new array with each element being the result of the callback function and flattened.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public flatMap<U = T>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
         const result = new Array<U>();
@@ -1053,7 +1017,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @throws { RangeError } Throws a RangeError if the index is out of bounds.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override at(index: int): T {
         let len = this.actualLength;
@@ -1080,7 +1043,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { this } The modified array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): this {
         this.copyWithin(target, 0, this.actualLength);
@@ -1097,7 +1059,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { this } The modified array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int): this {
         this.copyWithin(target, start, this.actualLength);
@@ -1115,7 +1076,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { this } The modified array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): this {
         target = normalizeIndex(target, this.actualLength)
@@ -1155,7 +1115,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { this } The modified array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: T, start?: int, end?: int): this {
         Array.fillImpl(this.buffer, this.actualLength, value, start ?? 0, end ?? this.actualLength)
@@ -1173,7 +1132,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *     otherwise, undefined.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
         const len = this.actualLength
@@ -1194,7 +1152,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         const len = this.actualLength
@@ -1215,7 +1172,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { T | undefined } The value of the element if found; otherwise, undefined.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0 && i < this.actualLength; i--) {
@@ -1237,7 +1193,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override every(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         let curArrLength = this.actualLength
@@ -1259,7 +1214,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         const len = this.actualLength
@@ -1280,7 +1234,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         for (let i = this.actualLength - 1; i >= 0 && i < this.actualLength; i--) {
@@ -1302,7 +1255,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override reduce(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         if (this.actualLength == 0) {
@@ -1327,7 +1279,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { U } The accumulated result.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
@@ -1349,7 +1300,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { U } The accumulated result.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
@@ -1369,7 +1319,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *     function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         const len0 = this.actualLength;
@@ -1389,7 +1338,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new Array object containing the extracted elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(start: int): Array<T> {
         return this.slice(start, Int.MAX_VALUE);
@@ -1405,7 +1353,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new Array object containing the extracted elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(start?: int, end?: int): Array<T> {
         const len: int = this.actualLength;
@@ -1451,7 +1398,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The last index of the element in the array; -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: T): int {
         return Array.lastIndexOfImpl(this.buffer, this.actualLength, searchElement, this.actualLength - 1)
@@ -1467,7 +1413,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The last index of the element in the array; -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: T, fromIndex?: int): int {
         return Array.lastIndexOfImpl(this.buffer, this.actualLength, searchElement, fromIndex ?? 0)
@@ -1527,7 +1472,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { string } A string with all array elements joined.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override join(sep?: String): string {
         if (this.actualLength == 0) {
@@ -1560,7 +1504,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { string } A string representing the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",");
@@ -1576,7 +1519,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { string } A string representing the elements of the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         const len = this.actualLength;
@@ -1606,7 +1548,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new array with the changes applied.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSpliced(start: int): Array<T> {
         return this.toSpliced(start, this.actualLength)
@@ -1622,7 +1563,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new array with the changes applied.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSpliced(start: int, delete: int, ...items: FixedArray<T>): Array<T> {
         const len = this.actualLength;
@@ -1657,7 +1597,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new array with the changes applied.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSpliced(start?: int, delete?: int): Array<T> {
         const len = this.actualLength;
@@ -1673,7 +1612,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { boolean } True if the value is found, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override includes(val: T, fromIndex?: int): boolean {
         const len = this.actualLength;
@@ -1705,7 +1643,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The first index of the element in the array; -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private static native indexOfImpl<T>(buffer: FixedArray<Any>, actualLength: int, val: T, fromIndex: int): int;
 
@@ -1722,7 +1659,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { int } The first index of the element in the array; -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override indexOf(val: T, fromIndex?: int): int {
         return Array.indexOfImpl(this.buffer, this.actualLength, val, asIntOrDefault(fromIndex, 0))
@@ -1735,7 +1671,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new sorted array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): Array<T> {
         let arr = new Array<T>(FROM_BUFFER, this.copyArray());
@@ -1751,7 +1686,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new sorted array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(comparator: (a: T, b: T) => int): Array<T> {
         let arr = new Array<T>(FROM_BUFFER, this.copyArray());
@@ -1767,7 +1701,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { this } The reversed array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reverse(): this {
     /* otherwise the result will be exactly the same as it is */
@@ -1787,7 +1720,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<T> } A new reversed array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): Array<T> {
         let arr : FixedArray<Any> = new FixedArray<Any>(this.actualLength)
@@ -1807,7 +1739,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @throws { RangeError } If the index is out of bounds.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: T): Array<T> {
         if (index < 0) {
@@ -1828,7 +1759,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { IterableIterator<T> } A new Array Iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override values(): IterableIterator<T> {
         return new ArrayValuesIterator_T<T>(this);
@@ -1841,7 +1771,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override entries(): IterableIterator<[int, T]> {
         return new ArrayEntriesIterator_T<T>(this);
@@ -1856,7 +1785,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns { Array<U> } A new array with each element being the result of the callback function.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
@@ -1878,7 +1806,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         if (this.actualLength == 0) {
@@ -1906,7 +1833,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
  * @param { int } srcEnd Last index of src to copy, exclusive (src[srcEnd] is not copied).
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```arkts
  * copyToFast(src, dst, 0, 0, src.length)
@@ -1925,7 +1851,6 @@ native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart:
  * @param { int } srcEnd Last index of src to copy, exclusive (src[srcEnd] is not copied).
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @example
  * ```arkts
  * copyToFastWithBarriers(src, dst, 0, 1, src.length)
@@ -1940,7 +1865,6 @@ native function copyToFastWithBarriers(src: FixedArray<Any>, dst: FixedArray<Any
  * @returns { int | undefined } The length of the iterator if found; otherwise, undefined.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function tryGetIteratorLength(obj: Object): int | undefined {
     const objCls = Class.of(obj)

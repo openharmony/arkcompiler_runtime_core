@@ -24,7 +24,6 @@ package std.core;
  * Class used to describe runtime types
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Class {
     private name: string | undefined
@@ -41,7 +40,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_BOOLEAN: Class = Class.of(null)
 
@@ -52,7 +50,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_BYTE: Class = Class.of(null)
 
@@ -63,7 +60,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_CHAR: Class = Class.of(null)
 
@@ -74,7 +70,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_SHORT: Class = Class.of(null)
 
@@ -85,7 +80,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_INT: Class = Class.of(null)
 
@@ -96,7 +90,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_LONG: Class = Class.of(null)
 
@@ -107,7 +100,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_FLOAT: Class = Class.of(null)
 
@@ -118,7 +110,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_DOUBLE: Class = Class.of(null)
 
@@ -129,7 +120,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_NUMBER: Class = Class.of(null)
 
@@ -140,7 +130,6 @@ export final class Class {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRIMITIVE_VOID: Class = Class.of(null)
 
@@ -158,7 +147,6 @@ export final class Class {
      * @returns { string } return class name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getName(): string {
         if (this.name === undefined) {
@@ -173,7 +161,6 @@ export final class Class {
      * @returns { Class | undefined } return the super class
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getSuper(): Class | undefined {
         return this.superClass
@@ -186,7 +173,6 @@ export final class Class {
      * @returns { boolean } Returns true if this class is a subtype of the other class, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native final isSubtypeOf(other: Class): boolean
 
@@ -196,7 +182,6 @@ export final class Class {
      * @returns { RuntimeLinker } the runtime linker for this class
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getLinker(): RuntimeLinker {
         if (this.linker == undefined) {
@@ -211,7 +196,6 @@ export final class Class {
      * 
      * @returns { boolean } true if this class is a namespace, false otherwise.
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public native isNamespace(): boolean;
 
@@ -223,7 +207,6 @@ export final class Class {
      * 
      * @returns { Class | undefined } the component type of the fixed array, or undefined if this class is not a fixed array.
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */ 
     public native getFixedArrayComponentType(): Class | undefined
 
@@ -232,7 +215,6 @@ export final class Class {
      * 
      * @returns { FixedArray<Class> } a fixed array of interfaces implemented by the class.
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */ 
     public native getInterfaces(): FixedArray<Class>
 
@@ -240,7 +222,6 @@ export final class Class {
      * Invoke class initializer once if class is not initialized.
      * 
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public native initialize(): void
 
@@ -253,7 +234,6 @@ export final class Class {
      * @returns { Class | undefined } the class of the object, or undefined if the object is not a class instance.
      * @static 
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */ 
     public static ofAny(obj: Any): Class | undefined {
         if (obj instanceof Object) {
@@ -272,7 +252,6 @@ export final class Class {
      * @returns { Class } the class of the object.
      * @static 
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */ 
     public static of(obj: Object | null): Class {
         if (obj instanceof Object) {
@@ -291,7 +270,6 @@ export final class Class {
      * @returns { Class } the current class.
      * @static 
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */ 
     public static native current(): Class
 
@@ -301,7 +279,6 @@ export final class Class {
      * @returns { Class | undefined } the class of the caller, or undefined if there is no caller managed frame.
      * @static 
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public static native ofCaller(): Class | undefined
     /**
@@ -314,7 +291,6 @@ export final class Class {
      * @throws { OutOfMemoryError } if there is not enough memory to allocate the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native createInstance(): Object
 
@@ -325,7 +301,6 @@ export final class Class {
      * @returns { boolean } true if this class is an enum, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isEnum(): boolean
     /**
@@ -334,7 +309,6 @@ export final class Class {
      * @returns { boolean } true if this class is an interface, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isInterface(): boolean
     /**
@@ -343,7 +317,6 @@ export final class Class {
      * @returns { boolean } true if this class is a fixed array, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isFixedArray(): boolean
 
@@ -353,7 +326,6 @@ export final class Class {
      * @returns { boolean } true if this class is a union type, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isUnion(): boolean
 
@@ -362,7 +334,6 @@ export final class Class {
      * 
      * @returns { FixedArray<reflect.InstanceMethod> } a fixed array of instance methods.
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public getInstanceMethods(): FixedArray<reflect.InstanceMethod> {
         return this.getInstanceMethodsInternal(true)
@@ -377,7 +348,6 @@ export final class Class {
      * @returns { reflect.InstanceMethod | undefined } the found instance method, or undefined if not found.
      * @throws { Error } When signature is omitted and multiple overloads exist
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public getInstanceMethod(name: string, signature?: FixedArray<Class>): reflect.InstanceMethod | undefined {
         return this.getInstanceMethodInternal(name, signature, true)
@@ -388,7 +358,6 @@ export final class Class {
      * 
      * @returns { FixedArray<reflect.StaticMethod> } a fixed array of static methods.
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public getStaticMethods(): FixedArray<reflect.StaticMethod> {
         if (this.isInterface()) {
@@ -405,7 +374,6 @@ export final class Class {
      * @returns { reflect.StaticMethod | undefined } the found static method, or undefined if not found.
      * @throws {Error} When signature is omitted and multiple overloads exist
      * @syscap SystemCapability.Utils.Lang 
-     * @since 24 
      */
     public getStaticMethod(name: string, signature?: FixedArray<Class>): reflect.StaticMethod | undefined {
         let methods = this.getStaticMethods()
@@ -424,7 +392,6 @@ export final class Class {
      * @returns { FixedArray<reflect.InstanceField> } a fixed array of instance fields.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getInstanceFields(): FixedArray<reflect.InstanceField> {
         if (this.isInterface()) {
@@ -440,7 +407,6 @@ export final class Class {
      * @returns { reflect.InstanceField | undefined } the found instance field, or undefined if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getInstanceField(name: string): reflect.InstanceField | undefined {
         return this.getInstanceFieldByNameInternal(name, true)
@@ -452,7 +418,6 @@ export final class Class {
      * @returns { FixedArray<reflect.StaticField> } a fixed array of static fields.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getStaticFields(): FixedArray<reflect.StaticField> {
         if (this.isInterface()) {
@@ -468,7 +433,6 @@ export final class Class {
      * @returns { reflect.StaticField | undefined } the found static field, or undefined if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getStaticField(name: string): reflect.StaticField | undefined {
         return this.getStaticFieldByNameInternal(name, true)
@@ -480,7 +444,6 @@ export final class Class {
      * @returns { FixedArray<reflect.Constructor> } a fixed array of constructors.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getConstructors(): FixedArray<reflect.Constructor> {
         return this.getConstructorsInternal(true)
@@ -493,7 +456,6 @@ export final class Class {
      * or undefined if this is not a union class.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUnionConstituentTypes(): FixedArray<Class> | undefined {
         if (!this.isUnion()) {
@@ -508,7 +470,6 @@ export final class Class {
      * @returns { boolean } true if the class is fianl
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isFinal(): boolean
 
@@ -518,7 +479,6 @@ export final class Class {
      * @returns { boolean } true if the class is abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isAbstract(): boolean
 
@@ -528,7 +488,6 @@ export final class Class {
      * @returns { boolean } true if the class corresponds to a primitive type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isPrimitive(): boolean
 

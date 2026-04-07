@@ -23,7 +23,6 @@ package std.time;
  * Utility class for time measurement and clock access.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Chrono {
     /**
@@ -33,7 +32,6 @@ export final class Chrono {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly NS_PER_MS: long = 1000000;
 
@@ -43,7 +41,6 @@ export final class Chrono {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native nanoNow(): long;
 
@@ -53,7 +50,6 @@ export final class Chrono {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static milliNow(): number {
         return Chrono.nanoNow() / 1000000;
@@ -65,7 +61,6 @@ export final class Chrono {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native getCpuTime(): long;
 }

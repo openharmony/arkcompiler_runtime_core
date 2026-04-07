@@ -22,7 +22,6 @@ package std.core;
  * @template V - value type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 final class ConcurrentLRUCache<K, V> {
     private readonly capacity: int;
@@ -37,7 +36,6 @@ final class ConcurrentLRUCache<K, V> {
      * @param { int } - maximum number of entries to cache (must be positive)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(capacity: int) {
         if (capacity <= 0) {
@@ -57,7 +55,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { V | undefined } the cached value or undefined
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get(key: K): V | undefined {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -80,7 +77,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { true } if the key exists in the cache
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public has(key: K): boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -99,7 +95,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { void }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public put(key: K, value: V): void {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -131,7 +126,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { true } if an entry was removed, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public remove(key: K): boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -154,7 +148,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { void }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public clear(): void {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -173,7 +166,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { int } The current number of entries in the cache.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getSize(): int {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -189,7 +181,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { int } The capacity of the cache.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getCapacity(): int {
         return this.capacity;
@@ -203,7 +194,6 @@ final class ConcurrentLRUCache<K, V> {
      * @returns { V } - the existing or newly computed value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public computeIfAbsent(key: K, producer: (key: K) => V): V {
         ConcurrencyHelpers.mutexLock(this.mutex);

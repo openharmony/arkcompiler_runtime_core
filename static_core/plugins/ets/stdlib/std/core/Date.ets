@@ -428,7 +428,6 @@ function ecmaInLeapYear(year: int): byte {
  *
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Date {
     private static readonly DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -539,7 +538,6 @@ export class Date {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor() {
         this.ms = Date.now();
@@ -552,7 +550,6 @@ export class Date {
      * @param { long | string | Date } value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(value: long | string | Date) {
         if (value instanceof Date) {
@@ -577,7 +574,6 @@ export class Date {
      * @param { int } [ ms ]
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(year: int, monthIndex: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int) {
         this.ms = ecmaMakeDate(
@@ -594,7 +590,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(): string {
         return new Date().toString();
@@ -620,7 +615,6 @@ export class Date {
      * @returns { boolean } return current date is valid date
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isDateValid(): boolean {
         return this.isDateValid(this.ms);
@@ -632,7 +626,6 @@ export class Date {
      * @returns { long } return the primitive value of a `Date` object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): long {
         return this.ms;
@@ -647,7 +640,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native now(): long;
 
@@ -659,7 +651,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native getLocalTimezoneOffset(ms: long): long;
 
@@ -671,7 +662,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native getTimezoneName(ms: long): String;
 
@@ -681,7 +671,6 @@ export class Date {
      * @returns { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleTimeString(): string {
         return this.toLocaleTimeString(undefined)
@@ -739,7 +728,6 @@ export class Date {
      * @throws { TypeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleTimeString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         if (options && options.dateStyle) {
@@ -761,7 +749,6 @@ export class Date {
     //  * @returns { string } Gets a string with a language-sensitive representation of this date
     //  * @syscap SystemCapability.Utils.Lang
     //  * @FaAndStageModel
-    //  * @since 24
     //  */
     // public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
     //     const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
@@ -798,7 +785,6 @@ export class Date {
      * @returns { string } Gets a string with a language-sensitive representation of this date
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         let options_: Intl.DateTimeFormatOptions | undefined = undefined
@@ -821,7 +807,6 @@ export class Date {
      * @throws { TypeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleDateString(): string {
         return this.toLocaleDateString(undefined)
@@ -855,7 +840,6 @@ export class Date {
      * @throws { TypeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleDateString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         if (options && options.timeStyle) {
@@ -873,7 +857,6 @@ export class Date {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getDate(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -890,7 +873,6 @@ export class Date {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setDate(value: int): long {
         let day = this.getDate();
@@ -905,7 +887,6 @@ export class Date {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCDate(): int {
         let localTime = this.ms;
@@ -922,7 +903,6 @@ export class Date {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCDate(value: int): long {
         let day = this.getUTCDate();
@@ -938,7 +918,6 @@ export class Date {
      * @returns { long } set UTCDay
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCDay(value: int): long {
         this.setUTCDate(value);
@@ -952,7 +931,6 @@ export class Date {
      * @returns { int } get day
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getDay(): int {
         return ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -964,7 +942,6 @@ export class Date {
      * @returns { int } get UTCday
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCDay(): int {
         return ecmaWeekDay(this.ms);
@@ -976,7 +953,6 @@ export class Date {
      * @returns { int } get year
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getYear(): int {
         return this.getFullYear();
@@ -989,7 +965,6 @@ export class Date {
      * @returns { int } get the UTCYear
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCFullYear(): int {
         return ecmaYearFromTime(this.ms);
@@ -1004,7 +979,6 @@ export class Date {
      * @returns { int } get fullyear
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getFullYear(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1018,7 +992,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCFullYear(value: int): long {
         let currentYear = ecmaYearFromTime(this.ms);
@@ -1036,7 +1009,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCFullYear(value: int, month: int): long {
         this.setUTCFullYear(value);
@@ -1053,7 +1025,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCFullYear(value: int, month: int, date: int): long {
         this.setUTCFullYear(value);
@@ -1068,7 +1039,6 @@ export class Date {
      * @param { int } value new year
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setYear(value: int): void {
         this.setFullYear(value);
@@ -1081,7 +1051,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setFullYear(value: int): long {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond
@@ -1100,7 +1069,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setFullYear(value: int, month: int): long {
         this.setFullYear(value);
@@ -1117,7 +1085,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setFullYear(value: int, month: int, date: int): long {
         this.setFullYear(value);
@@ -1132,7 +1099,6 @@ export class Date {
      * @returns { int } get new date hour value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getHours(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1145,7 +1111,6 @@ export class Date {
      * @returns { int } get new date hour value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCHours(): int {
         return ecmaHourFromTime(this.ms);
@@ -1158,7 +1123,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setHours(value: int): long {
         let hours = ecmaHourFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1175,7 +1139,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setHours(value: int, min: int): long {
         this.setHours(value);
@@ -1192,7 +1155,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setHours(value: int, min: int, sec: int): long {
         this.setHours(value);
@@ -1211,7 +1173,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setHours(value: int, min: int, sec: int, ms: int): long {
         this.setHours(value);
@@ -1228,7 +1189,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCHours(value: int): long {
         let hours = ecmaHourFromTime(this.ms);
@@ -1245,7 +1205,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCHours(value: int, min: int): long {
         this.setUTCHours(value);
@@ -1262,7 +1221,6 @@ export class Date {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCHours(value: int, min: int, sec: int): long {
         this.setUTCHours(value);
@@ -1281,7 +1239,6 @@ export class Date {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCHours(value: int, min: int, sec: int, ms: int): long {
         this.setUTCHours(value);
@@ -1297,7 +1254,6 @@ export class Date {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMilliseconds(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1313,7 +1269,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static UTC(d: Date): long {
         return d.ms;
@@ -1328,7 +1283,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static UTC(year: int): long {
         return ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0));
@@ -1349,7 +1303,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static UTC(year: int, month: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int): long {
         return ecmaMakeDate(
@@ -1373,7 +1326,6 @@ export class Date {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCMilliseconds(): int {
         let localTime = this.ms;
@@ -1387,7 +1339,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setMilliseconds(value: int): long {
         let ms = ecmaMsFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1403,7 +1354,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCMilliseconds(value: int): long {
         let ms = ecmaMsFromTime(this.ms);
@@ -1419,7 +1369,6 @@ export class Date {
      *     representing the seconds in the given date according to local time.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getSeconds(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1432,7 +1381,6 @@ export class Date {
      * @returns { int } the seconds in the specified date according to universal time.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCSeconds(): int {
         return ecmaSecFromTime(this.ms);
@@ -1445,7 +1393,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setSeconds(value: int): long {
         let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1462,7 +1409,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setSeconds(value: int, ms: int): long {
         this.setSeconds(value);
@@ -1477,7 +1423,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCSeconds(value: int): long {
         let sec = ecmaSecFromTime(this.ms);
@@ -1494,7 +1439,6 @@ export class Date {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCSeconds(value: int, ms: int): long {
         this.setUTCSeconds(value);
@@ -1509,7 +1453,6 @@ export class Date {
      *     representing the minutes in the given date according to local time.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMinutes(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1523,7 +1466,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCMinutes(value: int): long {
         let min = ecmaMinFromTime(this.ms);
@@ -1540,7 +1482,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCMinutes(value: int, sec: int): long {
         this.setUTCMinutes(value);
@@ -1557,7 +1498,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCMinutes(value: int, sec: int, ms: int): long {
         this.setUTCMinutes(value);
@@ -1572,7 +1512,6 @@ export class Date {
      * @returns { int } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCMinutes(): int {
         return ecmaMinFromTime(this.ms);
@@ -1585,7 +1524,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setMinutes(value: int): long {
         let min = ecmaMinFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1602,7 +1540,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setMinutes(value: int, sec: int): long {
         this.setMinutes(value);
@@ -1619,7 +1556,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setMinutes(value: int, sec: int, ms: int): long {
         this.setMinutes(value);
@@ -1635,7 +1571,6 @@ export class Date {
      * @returns { int } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMonth(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1649,7 +1584,6 @@ export class Date {
      * @returns { int } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getUTCMonth(): int {
         return ecmaMonthFromTime(this.ms);
@@ -1662,7 +1596,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setMonth(month: int): long {
         let yearsNow: int = this.getFullYear();
@@ -1689,7 +1622,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setMonth(month: int, date: int): long {
         this.setMonth(month);
@@ -1704,7 +1636,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCMonth(month: int): long {
         let yearsNow: int = this.getUTCFullYear();
@@ -1732,7 +1663,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setUTCMonth(month: int, date: int): long {
         this.setUTCMonth(month);
@@ -1747,7 +1677,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getTime(): long {
         return this.ms;
@@ -1761,7 +1690,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setTime(value: long): long {
         this.ms = value;
@@ -1785,7 +1713,6 @@ export class Date {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static parse(dateStr: string): long {
         return Date.parseDateFromString(dateStr);
@@ -1798,7 +1725,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getTimezoneOffset(): long {
         return this.TZOffset;
@@ -1812,7 +1738,6 @@ export class Date {
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setTimezoneOffset(value: int): long {
         const diff = value - this.getTimezoneOffset();
@@ -1829,7 +1754,6 @@ export class Date {
      * @returns { string } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toISOString(): string {
         let sb = new StringBuilder();
@@ -1905,7 +1829,6 @@ export class Date {
      * @returns { string | null } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toJSON(): string | null {
         if (!this.isDateValid()) {
@@ -1920,7 +1843,6 @@ export class Date {
      * @returns { string } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toTimeString(): string {
         return this.timeString() + " " + this.timeZoneString();
@@ -1962,7 +1884,6 @@ export class Date {
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toDateString(): string {
         return this.dateString();
@@ -2036,7 +1957,6 @@ export class Date {
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         let res: String = "Invalid Date";
@@ -2057,7 +1977,6 @@ export class Date {
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toUTCString(): string {
         if (!this.isDateValid()) {

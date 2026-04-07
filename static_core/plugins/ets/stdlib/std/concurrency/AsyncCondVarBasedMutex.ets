@@ -21,7 +21,6 @@ package std.concurrency;
  * @namespace concurrency.stackless
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24 static
  */
 export namespace concurrency.stackless {
 
@@ -31,7 +30,6 @@ export namespace concurrency.stackless {
  * @class AsyncCondVarBasedMutex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24 static
  */
 export final class AsyncCondVarBasedMutex {
     constructor() {
@@ -48,7 +46,6 @@ export final class AsyncCondVarBasedMutex {
      *     and after the mutex is re-acquired.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24 static
      *
      * pre-condition: mutex is locked.
      * post-condition: mutex is locked.
@@ -66,7 +63,6 @@ export final class AsyncCondVarBasedMutex {
      * @returns { void } No return value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24 static
      *
      * pre-condition: mutex is locked.
      * post-condition: mutex is locked.
@@ -84,7 +80,6 @@ export final class AsyncCondVarBasedMutex {
      * @returns { void } No return value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24 static
      *
      * pre-condition: mutex is locked.
      * post-condition: mutex is locked.

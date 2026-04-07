@@ -29,7 +29,6 @@ export final class AtomicReference<T> {
      *
      * @returns { T } The current value stored in the atomic reference
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): T;
 
@@ -38,7 +37,6 @@ export final class AtomicReference<T> {
      *
      * @param { T } - The new value to store in the atomic reference
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(ref: T): void;
 
@@ -49,7 +47,6 @@ export final class AtomicReference<T> {
      * @param { T } - The new value to store in the atomic reference
      * @returns { T } The previous value that was stored in the atomic reference before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(ref: T): T;
 
@@ -63,7 +60,6 @@ export final class AtomicReference<T> {
      * @returns { T } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: T, ref: T): T;
     
@@ -74,7 +70,6 @@ export final class AtomicReference<T> {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -95,7 +90,6 @@ export final class AtomicInt {
      *
      * @returns { int } The current value stored in the atomic integer
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): int;
 
@@ -104,7 +98,6 @@ export final class AtomicInt {
      *
      * @param { int } val - The new value to store in the atomic integer
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: int): void;
 
@@ -115,7 +108,6 @@ export final class AtomicInt {
      * @param { int } val - The new value to store in the atomic integer
      * @returns { int } The previous value that was stored in the atomic integer before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: int): int;
 
@@ -129,7 +121,6 @@ export final class AtomicInt {
      * @returns { int } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: int, val: int): int;
 
@@ -140,7 +131,6 @@ export final class AtomicInt {
      * @param { int } val - The value to add to the current atomic integer value
      * @returns { int } The previous value before the addition was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAdd(val: int): int;
     
@@ -151,7 +141,6 @@ export final class AtomicInt {
      * @param { int } val - The value to subtract from the current atomic integer value
      * @returns { int } The previous value before the subtraction was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchSub(val: int): int;
 
@@ -162,7 +151,6 @@ export final class AtomicInt {
      * @param { int } val - The value to AND with the current atomic integer value
      * @returns { int } The previous value before the bitwise AND operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAnd(val: int): int;
 
@@ -173,7 +161,6 @@ export final class AtomicInt {
      * @param { int } val - The value to OR with the current atomic integer value
      * @returns { int } The previous value before the bitwise OR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchOr(val: int): int;
 
@@ -184,7 +171,6 @@ export final class AtomicInt {
      * @param { int } val - The value to XOR with the current atomic integer value
      * @returns { int } The previous value before the bitwise XOR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchXor(val: int): int;
     
@@ -195,7 +181,6 @@ export final class AtomicInt {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -216,7 +201,6 @@ export final class AtomicLong {
      *
      * @returns { long } The current value stored in the atomic long
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): long;
 
@@ -225,7 +209,6 @@ export final class AtomicLong {
      *
      * @param { long } val - The new value to store in the atomic long
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: long): void;
 
@@ -236,7 +219,6 @@ export final class AtomicLong {
      * @param { long } val - The new value to store in the atomic long
      * @returns { long } The previous value that was stored in the atomic long before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: long): long;
     
@@ -250,7 +232,6 @@ export final class AtomicLong {
      * @returns { long } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: long, val: long): long;
 
@@ -261,7 +242,6 @@ export final class AtomicLong {
      * @param { long } val - The value to add to the current atomic long value
      * @returns { long } The previous value before the addition was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAdd(val: long): long;
     
@@ -272,7 +252,6 @@ export final class AtomicLong {
      * @param { long } val - The value to subtract from the current atomic long value
      * @returns { long } The previous value before the subtraction was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchSub(val: long): long;
     
@@ -283,7 +262,6 @@ export final class AtomicLong {
      * @param { long } val - The value to AND with the current atomic long value
      * @returns { long } The previous value before the bitwise AND operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAnd(val: long): long;
 
@@ -294,7 +272,6 @@ export final class AtomicLong {
      * @param { long } val - The value to OR with the current atomic long value
      * @returns { long } The previous value before the bitwise OR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchOr(val: long): long;
 
@@ -305,7 +282,6 @@ export final class AtomicLong {
      * @param { long } val - The value to XOR with the current atomic long value
      * @returns { long } The previous value before the bitwise XOR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchXor(val: long): long;
     
@@ -316,7 +292,6 @@ export final class AtomicLong {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -337,7 +312,6 @@ export final class AtomicShort {
      *
      * @returns { short } The current value stored in the atomic short
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): short;
 
@@ -346,7 +320,6 @@ export final class AtomicShort {
      *
      * @param { short } val - The new value to store in the atomic short
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: short): void;
 
@@ -357,7 +330,6 @@ export final class AtomicShort {
      * @param { short } val - The new value to store in the atomic short
      * @returns { short } The previous value that was stored in the atomic short before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: short): short;
     
@@ -371,7 +343,6 @@ export final class AtomicShort {
      * @returns { short } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: short, val: short): short;
 
@@ -382,7 +353,6 @@ export final class AtomicShort {
      * @param { short } val - The value to add to the current atomic short value
      * @returns { short } The previous value before the addition was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAdd(val: short): short;
     
@@ -393,7 +363,6 @@ export final class AtomicShort {
      * @param { short } val - The value to subtract from the current atomic short value
      * @returns { short } The previous value before the subtraction was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchSub(val: short): short;
     
@@ -404,7 +373,6 @@ export final class AtomicShort {
      * @param { short } val - The value to AND with the current atomic short value
      * @returns { short } The previous value before the bitwise AND operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAnd(val: short): short;
 
@@ -415,7 +383,6 @@ export final class AtomicShort {
      * @param { short } val - The value to OR with the current atomic short value
      * @returns { short } The previous value before the bitwise OR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchOr(val: short): short;
 
@@ -426,7 +393,6 @@ export final class AtomicShort {
      * @param { short } val - The value to XOR with the current atomic short value
      * @returns { short } The previous value before the bitwise XOR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchXor(val: short): short;
     
@@ -437,7 +403,6 @@ export final class AtomicShort {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -458,7 +423,6 @@ export final class AtomicByte {
      *
      * @returns { byte } The current value stored in the atomic byte
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): byte;
 
@@ -467,7 +431,6 @@ export final class AtomicByte {
      *
      * @param { byte } val - The new value to store in the atomic byte
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: byte): void;
 
@@ -478,7 +441,6 @@ export final class AtomicByte {
      * @param { byte } val - The new value to store in the atomic byte
      * @returns { byte } The previous value that was stored in the atomic byte before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: byte): byte;
     
@@ -492,7 +454,6 @@ export final class AtomicByte {
      * @returns { byte } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: byte, val: byte): byte;
 
@@ -503,7 +464,6 @@ export final class AtomicByte {
      * @param { byte } val - The value to add to the current atomic byte value
      * @returns { byte } The previous value before the addition was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAdd(val: byte): byte;
     
@@ -514,7 +474,6 @@ export final class AtomicByte {
      * @param { byte } val - The value to subtract from the current atomic byte value
      * @returns { byte } The previous value before the subtraction was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchSub(val: byte): byte;
     
@@ -525,7 +484,6 @@ export final class AtomicByte {
      * @param { byte } val - The value to AND with the current atomic byte value
      * @returns { byte } The previous value before the bitwise AND operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchAnd(val: byte): byte;
 
@@ -536,7 +494,6 @@ export final class AtomicByte {
      * @param { byte } val - The value to OR with the current atomic byte value
      * @returns { byte } The previous value before the bitwise OR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchOr(val: byte): byte;
 
@@ -547,7 +504,6 @@ export final class AtomicByte {
      * @param { byte } val - The value to XOR with the current atomic byte value
      * @returns { byte } The previous value before the bitwise XOR operation was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native fetchXor(val: byte): byte;
     
@@ -558,7 +514,6 @@ export final class AtomicByte {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -579,7 +534,6 @@ export final class AtomicFloat {
      *
      * @returns { float } The current value stored in the atomic float
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): float;
 
@@ -588,7 +542,6 @@ export final class AtomicFloat {
      *
      * @param { float } val - The new value to store in the atomic float
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: float): void;
 
@@ -599,7 +552,6 @@ export final class AtomicFloat {
      * @param { float } val - The new value to store in the atomic float
      * @returns { float } The previous value that was stored in the atomic float before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: float): float;
     
@@ -613,7 +565,6 @@ export final class AtomicFloat {
      * @returns { float } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: float, val: float): float;
 
@@ -624,7 +575,6 @@ export final class AtomicFloat {
      * @param { float } val - The value to add to the current atomic float value
      * @returns { float } The previous value before the addition was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public fetchAdd(val: float): float {
         let current: float = this.load();
@@ -643,7 +593,6 @@ export final class AtomicFloat {
      * @param { float } val - The value to subtract from the current atomic float value
      * @returns { float } The previous value before the subtraction was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public fetchSub(val: float): float {
         let current: float = this.load();
@@ -662,7 +611,6 @@ export final class AtomicFloat {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -683,7 +631,6 @@ export final class AtomicDouble {
      *
      * @returns { double } The current value stored in the atomic double
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): double;
 
@@ -692,7 +639,6 @@ export final class AtomicDouble {
      *
      * @param { double } val - The new value to store in the atomic double
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: double): void;
 
@@ -703,7 +649,6 @@ export final class AtomicDouble {
      * @param { double } val - The new value to store in the atomic double
      * @returns { double } The previous value that was stored in the atomic double before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: double): double;
     
@@ -717,7 +662,6 @@ export final class AtomicDouble {
      * @returns { double } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: double, val: double): double;
 
@@ -728,7 +672,6 @@ export final class AtomicDouble {
      * @param { double } val - The value to add to the current atomic double value
      * @returns { double } The previous value before the addition was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public fetchAdd(val: double): double {
         let current: double = this.load();
@@ -747,7 +690,6 @@ export final class AtomicDouble {
      * @param { double } val - The value to subtract from the current atomic double value
      * @returns { double } The previous value before the subtraction was performed
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public fetchSub(val: double): double {
         let current: double = this.load();
@@ -766,7 +708,6 @@ export final class AtomicDouble {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -787,7 +728,6 @@ export final class AtomicChar {
      *
      * @returns { char } The current value stored in the atomic char
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): char;
 
@@ -796,7 +736,6 @@ export final class AtomicChar {
      *
      * @param { char } val - The new value to store in the atomic char
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: char): void;
 
@@ -807,7 +746,6 @@ export final class AtomicChar {
      * @param { char } val - The new value to store in the atomic char
      * @returns { char } The previous value that was stored in the atomic char before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: char): char;
     
@@ -821,7 +759,6 @@ export final class AtomicChar {
      * @returns { char } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: char, val: char): char;
     
@@ -832,7 +769,6 @@ export final class AtomicChar {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 
@@ -853,7 +789,6 @@ export final class AtomicBoolean {
      *
      * @returns { boolean } The current value stored in the atomic boolean
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native load(): boolean;
 
@@ -862,7 +797,6 @@ export final class AtomicBoolean {
      *
      * @param { boolean } val - The new value to store in the atomic boolean
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native store(val: boolean): void;
 
@@ -873,7 +807,6 @@ export final class AtomicBoolean {
      * @param { boolean } val - The new value to store in the atomic boolean
      * @returns { boolean } The previous value that was stored in the atomic boolean before the update
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native exchange(val: boolean): boolean;
     
@@ -887,7 +820,6 @@ export final class AtomicBoolean {
      * @returns { boolean } the same value as expected if operation was successful (the value was changed),
      *                    correct old value if the current value did not match the expected value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public native compareAndSwap(expected: boolean, val: boolean): boolean;
     
@@ -898,7 +830,6 @@ export final class AtomicBoolean {
      * @return { boolean } True if the implementation is non-blocking
      *                    false if the implementation uses blocking sync primitives
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static native isLockFree(): boolean; 
 

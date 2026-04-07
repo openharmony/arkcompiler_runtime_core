@@ -25,7 +25,6 @@ package std.core;
  * @interface ReadonlySet<T>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface ReadonlySet<T> extends Iterable<T> {
     /**
@@ -35,7 +34,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
      * @returns { boolean } - Return true if the value exists, otherwise return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     has(value: T): boolean;
 
@@ -45,7 +43,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
      * @returns { int } - The number of unique elements in the Set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get size(): int;
 
@@ -55,7 +52,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
      * @param { function } callbackfn - The callback function to execute for each element.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     forEach(callbackfn: (value: T, value2: T, set: ReadonlySet<T>) => void): void;
 
@@ -65,7 +61,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
      * @returns { IterableIterator<T> } - an iterable of the values in the set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     keys(): IterableIterator<T>;
 
@@ -75,7 +70,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
      * @returns {IterableIterator<T> } - an iterable of the values in the set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     values(): IterableIterator<T>;
 
@@ -85,7 +79,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
      * @returns {IterableIterator<[T, T]> } - an iterable of [v,v] pairs for every value `v` in the set..
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     entries(): IterableIterator<[T, T]>;
 }
@@ -96,7 +89,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
  * @interface SetIterator<T>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface SetIterator<T> extends IterableIterator<T> {}
 
@@ -105,7 +97,6 @@ export interface SetIterator<T> extends IterableIterator<T> {}
  * @implements SetIterator<T>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 final class SetIteratorImpl<T> implements SetIterator<T> {
     /**
@@ -113,7 +104,6 @@ final class SetIteratorImpl<T> implements SetIterator<T> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private it: IterableIterator<T>
     /**
@@ -122,7 +112,6 @@ final class SetIteratorImpl<T> implements SetIterator<T> {
      * @param { IterableIterator<T> } it - The underlying iterator to wrap.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(it: IterableIterator<T>) {
         super()
@@ -135,7 +124,6 @@ final class SetIteratorImpl<T> implements SetIterator<T> {
      * @returns { IteratorResult<T> } - The next element in the iteration.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override next(): IteratorResult<T> {
         return this.it.next()
@@ -147,7 +135,6 @@ final class SetIteratorImpl<T> implements SetIterator<T> {
      * @returns { IterableIterator<T> } - The iterator itself.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override $_iterator(): IterableIterator<T> {
         return this.it
@@ -159,7 +146,6 @@ final class SetIteratorImpl<T> implements SetIterator<T> {
  * @extends Map<K, V>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 final class FinalMap<K, V> extends Map<K, V> {
     /**
@@ -168,7 +154,6 @@ final class FinalMap<K, V> extends Map<K, V> {
      * @param { int } initialCapacity - The initial capacity of the map.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(initialCapacity: int) {
         super(initialCapacity)
@@ -180,7 +165,6 @@ final class FinalMap<K, V> extends Map<K, V> {
      * @param { FinalMap<K, V> } map - Another FinalMap instance used for initialization.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(map: FinalMap<K, V>) {
         super(map)
@@ -193,7 +177,6 @@ final class FinalMap<K, V> extends Map<K, V> {
      *    The iterable or array of entries used for initialization.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(entries?: Iterable<[K, V]> | readonly ((readonly [K, V]) | null | undefined)[] | null) {
         super(entries)
@@ -205,7 +188,6 @@ final class FinalMap<K, V> extends Map<K, V> {
  * @implements ReadonlySet<K>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Set<K> implements ReadonlySet<K> {
     /**
@@ -213,7 +195,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private readonly elements: FinalMap<K, K>
 
@@ -224,7 +205,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @param { int } bucketsCount - The number of buckets for the internal map.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(bucketsCount: int) {
         this.elements = new FinalMap<K, K>(bucketsCount);
@@ -236,7 +216,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @param { Set<K> } set - Another Set instance used for initialization.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(set: Set<K>) {
         this.elements = new FinalMap<K, K>(set.elements)
@@ -251,7 +230,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @param { K[] } values - The array used for initialization.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(values: K[]) {
         this.elements = new FinalMap<K, K>()
@@ -267,7 +245,6 @@ export class Set<K> implements ReadonlySet<K> {
      *     or null used for initialization.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(elements?: Iterable<K> | FixedArray<K> | null) {
         if (elements == null) {
@@ -308,7 +285,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns { String } - A string representation of the Set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override toString(): String {
         if(this.elements.size == 0) {
@@ -324,7 +300,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns { this } - Returns the Set instance itself.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     add(val: K): this {
         this.elements.set(val, val)
@@ -338,7 +313,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns { boolean } - Return true if the value exists, otherwise return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override has(val: K): boolean {
         return this.elements.has(val)
@@ -350,7 +324,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns { int } - The number of unique elements in the Set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override get size(): int {
         return this.elements.size;
@@ -363,7 +336,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns { boolean } - Return true if the element exists and was successfully removed, otherwise return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     delete(val: K): boolean {
         return this.elements.delete(val)
@@ -374,7 +346,6 @@ export class Set<K> implements ReadonlySet<K> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     clear(): void {
         this.elements.clear()
@@ -386,7 +357,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns {IterableIterator<K> } - an iterable of the values in the set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override keys(): IterableIterator<K> {
         return new SetIteratorImpl<K>(this.elements.keys())
@@ -398,7 +368,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns {IterableIterator<K> } - an iterable of the values in the set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override values(): IterableIterator<K> {
         return new SetIteratorImpl<K>(this.elements.values())
@@ -410,7 +379,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns {IterableIterator<K> } - The default iterator of the Set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override $_iterator(): IterableIterator<K> {
         return new SetIteratorImpl<K>(this.values())
@@ -422,7 +390,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns {IterableIterator<[K, K]> } - an iterable of [v,v] pairs for every value `v` in the set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override entries(): IterableIterator<[K, K]> {
         return new SetIteratorImpl<[K, K]>(this.elements.entries())
@@ -434,7 +401,6 @@ export class Set<K> implements ReadonlySet<K> {
      * @param { function } callbackfn - The callback function to execute for each element.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override forEach(callbackfn: (k: K, v: K, set: Set<K>) => void): void {
         let it = this.keys();
@@ -453,7 +419,6 @@ export class Set<K> implements ReadonlySet<K> {
  * @implements IterableIterator<O>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 class MappingIterator<I, O> implements IterableIterator<O> {
     /**
@@ -461,7 +426,6 @@ class MappingIterator<I, O> implements IterableIterator<O> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private readonly inputIter: Iterator<I>
     /**
@@ -469,7 +433,6 @@ class MappingIterator<I, O> implements IterableIterator<O> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private readonly mappingFn: (input: I) => O
 
@@ -480,7 +443,6 @@ class MappingIterator<I, O> implements IterableIterator<O> {
      * @param { function } mappingFn - The mapping function to transform input elements to output elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(inputIter: Iterator<I>, mappingFn: (input: I) => O) {
         this.inputIter = inputIter
@@ -493,7 +455,6 @@ class MappingIterator<I, O> implements IterableIterator<O> {
      * @returns { IteratorResult<O> } - The next mapped element in the iteration.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     override next(): IteratorResult<O> {
         const inputIterRes = this.inputIter.next()

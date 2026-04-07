@@ -25,7 +25,6 @@ import * as arkruntime from "arkruntime"
  * Provides core functionality of ArkTS runtime.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Runtime {
 
@@ -37,7 +36,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native getHashCode(o: Object): int;
 
@@ -52,7 +50,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native getHashCodeByValue(o: Any): long;
 
@@ -63,7 +60,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native static isLittleEndianPlatform(): boolean;
 
@@ -76,7 +72,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     native static __getTypeInfo(o: Any): Class|undefined;
 
@@ -93,7 +88,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static addFrontElementsStub(original: FixedArray<Any>, front: FixedArray<Any>): FixedArray<Any> {
         let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length + front.length)
@@ -117,7 +111,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static removeFrontElementsStub(original: FixedArray<Any>, count: int): FixedArray<Any> {
         let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length - count)
@@ -137,7 +130,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static restArgumentsUnderapplicationStub(rest: FixedArray<Any>, required: int): FixedArray<Any> {
         if (rest.length >= required) {
@@ -163,7 +155,6 @@ export final class Runtime {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
         return __lambdaUnsafeCallStub(fn, r)
@@ -219,7 +210,6 @@ class ErrorOptionsImpl implements ErrorOptions {
  * @returns { T } The value with type T
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function __narrowAny<T = (object | null | undefined)>(v: Any): T {
     return v as T

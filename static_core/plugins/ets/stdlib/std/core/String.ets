@@ -39,7 +39,6 @@ const SURROGATE_BASE = 0x10000;      // Base value for supplementary Unicode pla
  * @typedef { String | RegExp } StringOrRegExp
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 type StringOrRegExp = String | RegExp
 
@@ -49,7 +48,6 @@ type StringOrRegExp = String | RegExp
  * @implements Comparable<String>, Iterable<String>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class String extends Object implements Comparable<String>, Iterable<String> {
 
@@ -58,7 +56,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * Constructs an empty String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native constructor()
 
@@ -69,7 +66,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { FixedArray<char> } data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native constructor(data: FixedArray<char>)
 
@@ -79,7 +75,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { ValueArray<char> } data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native constructor(data: ValueArray<char>)
 
@@ -91,7 +86,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { String } otherStr initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native constructor(otherStr: String)
 
@@ -101,7 +95,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { Any } object initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native constructor(object: Any)
 
@@ -112,7 +105,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(): string {
         return new String();
@@ -126,7 +118,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: boolean): string {
         return new String(value);
@@ -140,7 +131,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: byte): string {
         return new String(value);
@@ -154,7 +144,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: char): string {
         return new String(value);
@@ -168,7 +157,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: short): string {
         return new String(value);
@@ -182,7 +170,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: int): string {
         return new String(value);
@@ -196,7 +183,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: long): string {
         return new String(value);
@@ -210,7 +196,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: float): string {
         return new String(value);
@@ -224,7 +209,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: double): string {
         return new String(value);
@@ -239,7 +223,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: Any): string {
         return new String(value);
@@ -253,7 +236,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } StringIndexOutOfBoundsError if index is negative or >= length
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_get(index: int): String;
 
@@ -264,7 +246,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if strings are equal and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native equals(to: Any): boolean;
 
@@ -274,7 +255,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } length of this string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native getLength(): int;
 
@@ -284,7 +264,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } length of this string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.getLength()
@@ -299,7 +278,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { StringIndexOutOfBoundsError } if index is negative or >= length
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native charAt(index: int): char;
 
@@ -309,7 +287,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if empty and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isEmpty(): boolean;
 
@@ -324,7 +301,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int | undefined } the codepoint at the specified index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public codePointAt(index: int): int | undefined {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
@@ -352,7 +328,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { RangeError } if begin > end
      * @returns { int } the amount of completed codepoints
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public codePointCount(begin: int, end: int): int {
         if (begin > end) {
@@ -382,7 +357,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { number } the amount of completed codepoints
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public codePointCount(begin: number, end: number): number {
         return this.codePointCount(begin.toInt(), end.toInt())
@@ -394,7 +368,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { char[] } char[] array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getChars(): char[] {
         return this.getChars(0, this.getLength());
@@ -412,7 +385,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { char[] } char[] array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getChars(begin: int, end: int): char[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -438,7 +410,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { byte[] } byte[] array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getBytes(begin: int, end: int): byte[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -462,7 +433,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if StringBuilder has the same String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public contentEquals(sb: StringBuilder): boolean {
         return this.equals(sb.toString());
@@ -478,7 +448,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } the comparison result
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native override compareTo(other: String): int;
 
@@ -495,7 +464,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } the comparison result
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): int {
         return new Intl.Collator(locale, options).compare(this, that)
@@ -512,7 +480,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if the substring begins with prefix
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private native startsWithImpl(prefix: String, fromIndex: int): boolean;
 
@@ -527,7 +494,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if the substring begins with prefix
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public startsWith(prefix: String, fromIndex?: int): boolean {
         if (fromIndex == undefined) {
@@ -556,7 +522,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public endsWith(suffix: String, endPosition?: int): boolean {
         return this.endsWithImpl(suffix, endPosition ?? this.getLength());
@@ -569,7 +534,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the character from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native indexOf(ch: char): int;
 
@@ -582,7 +546,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the character from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native indexOf(ch: char, fromIndex: int): int;
 
@@ -594,7 +557,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the str from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(str: String, fromIndex?: int): int {
         return this.indexOfImpl(str, fromIndex ?? 0)
@@ -609,7 +571,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the str from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native indexOfImpl(str: String, fromIndex: int): int;
 
@@ -622,7 +583,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the character from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native lastIndexOf(ch: char, fromIndex: int): int;
 
@@ -633,7 +593,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the character from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(ch: char): int {
         return this.lastIndexOf(ch, this.getLength());
@@ -648,7 +607,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { int } index of the str from the beginning of this string, or -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined) {
@@ -677,7 +635,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new String which is a substring of this String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public substring(begin: int): String {
         return this.substring(begin, this.getLength());
@@ -697,7 +654,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new String which is a substring of this String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public native substring(begin: int, end: int): String;
@@ -709,7 +665,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public concat(s: String): String {
         return String.concat2(this, s);
@@ -722,7 +677,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public concat(s1: String, s2: String): String {
         return String.concat3(this, s1, s2);
@@ -736,7 +690,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public concat(s1: String, s2: String, s3: String): String {
         return String.concat4(this, s1, s2, s3);
@@ -748,7 +701,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public concat(...strings: String[]): String {
         let length = strings.length
@@ -789,7 +741,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new String with replaced characters
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceChar(oldCh: char, newCh: char): String {
         let newChars: ValueArray<char> = this.getCharsImpl(0, this.getLength());
@@ -812,7 +763,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if this String contains str and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public contains(str: String, fromIndex: int): boolean {
         return this.indexOf(str, fromIndex) != -1;
@@ -829,7 +779,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true if this String contains str and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public contains(str: String, fromIndex: number): boolean {
         return this.contains(str, fromIndex.toInt());
@@ -847,7 +796,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns string array contains substrings from this String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private split(separator: Char, limit: Int): String[] {
         if (limit == 0) {
@@ -930,7 +878,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { RegExp } string array contains substrings from this String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public split(separator: String, limit?: int): String[] {
         let maxSize = limit == undefined ? Int.MAX_VALUE : limit.toInt();
@@ -948,7 +895,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String[] } string array contains substrings from this String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public split(separator: RegExp, limit?: int): String[] {
         return separator.split(this, limit);
@@ -962,7 +908,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String[] } string array contains substrings from this String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public split(separator: StringOrRegExp, limit?: int): String[] {
         if (separator instanceof RegExp) {
@@ -982,7 +927,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static join(strings: String[], delim: String): String {
         return String.join(strings, delim, '', '');
@@ -1004,7 +948,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static join(strings: String[], delim: String, prefix: String, suffix: String): String {
         let resStr: String = '';
@@ -1024,7 +967,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new string with all characters in lower case
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native toLowerCase(): String;
 
@@ -1035,7 +977,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new string with all characters in upper case
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native toUpperCase(): String;
 
@@ -1045,7 +986,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new trimmed string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native trim(): String;
 
@@ -1055,7 +995,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new left trimmed string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native trimLeft(): String;
 
@@ -1065,7 +1004,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new right trimmed string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native trimRight(): String;
 
@@ -1078,7 +1016,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns true if ch is in the data and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private static isCharOneOf(ch: char, data: char[]): boolean {
         for (let i: int = 0; i < data.length; i++) {
@@ -1097,7 +1034,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new trimmed string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public trim(remove: char[]): String {
         if (this.isEmpty()) {
@@ -1137,7 +1073,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new left trimmed string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public trimLeft(remove: char[]): String {
         if (this.isEmpty() || !String.isCharOneOf(this.charAt(0), remove)) {
@@ -1161,7 +1096,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new right trimmed string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public trimRight(remove: char[]): String {
         let last: int = this.getLength() - 1;
@@ -1189,7 +1123,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new string with padding at the beginning
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padLeft(pad: char, count: int): String {
         return this.padStart(count, pad)
@@ -1206,7 +1139,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new string with padding at the end
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padRight(pad: char, count: int): String {
         return this.padEnd(count, pad)
@@ -1222,7 +1154,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     * @returns { String } this string that is repeated count times
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     public native repeat(count: int): String;
 
@@ -1233,7 +1164,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a copy of the original String
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return this;
@@ -1249,7 +1179,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     at the specified position. Returns undefined if the given index can not be found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): string | undefined {
         const n = this.getLength();
@@ -1274,7 +1203,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     replaced with &quot;), then the text str, and then an </a> end tag.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public anchor(name: String): String {
         return this.CreateHTMLString('a', ' name=\"' + name + '\"')
@@ -1286,7 +1214,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public big(): String{
         return this.CreateHTMLString('big', '')
@@ -1299,7 +1226,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public small(): String{
         return this.CreateHTMLString('small', '')
@@ -1311,7 +1237,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public blink(): String{
         return this.CreateHTMLString('blink', '')
@@ -1323,7 +1248,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public bold(): String{
         return this.CreateHTMLString('b', '')
@@ -1335,7 +1259,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public italics(): String{
         return this.CreateHTMLString('i', '')
@@ -1347,7 +1270,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public strike(): String{
         return this.CreateHTMLString('strike', '')
@@ -1359,7 +1281,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sub(): String{
         return this.CreateHTMLString('sub', '')
@@ -1371,7 +1292,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sup(): String{
         return this.CreateHTMLString('sup', '')
@@ -1383,7 +1303,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fixed(): String{
         return this.CreateHTMLString('tt', '')
@@ -1396,7 +1315,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fontcolor(color: String): String{
         return this.CreateHTMLString('font', ' color=\"' + color + '\"')
@@ -1409,7 +1327,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fontsize(size: int): String{
         return this.CreateHTMLString('font', ' size=\"' + size + '\"')
@@ -1422,7 +1339,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fontsize(size: String): String {
         return this.CreateHTMLString('font', ' size=\"' + size.replaceAll('\"', '&quot;') + '\"')
@@ -1435,7 +1351,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public link(link: String): String{
         return this.CreateHTMLString('a', ' href=\"' + link + '\"')
@@ -1449,7 +1364,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public charCodeAt(index: int): int {
         if (index < 0 || index >= this.getLength()) {
@@ -1467,7 +1381,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private static native fromCharCodeImpl(codes: Array<int>): String;
     /**
@@ -1478,7 +1391,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native fromCharCode(code: int): String;
 
@@ -1491,7 +1403,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static fromCharCode(...codes: int[]): String {
         if (codes.length < 0) {
@@ -1505,7 +1416,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): String {
         return this;
@@ -1521,7 +1431,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     including when searchString is an empty string; otherwise, false
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchString: String, position?: int): boolean {
         return this.indexOf(searchString, position) != -1
@@ -1536,7 +1445,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } string with the padString applied at the end of the current str
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padEnd(end: int): String {
         return this.padEnd(end, ' ')
@@ -1551,7 +1459,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } string with the padString applied at the end of the current str
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padEnd(end: int, ch: char): String {
         if (this.getLength() >= end) {
@@ -1577,7 +1484,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } string with the padString applied at the end of the current str
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padEnd(end: int, fillString?: String): String {
         const str = fillString ?? '\u0020'
@@ -1608,7 +1514,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padStart(end: int, ch: char): String {
         let padLen = end - this.getLength();
@@ -1632,7 +1537,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public padStart(end: int, fillString?: String): String {
         const str = (fillString == undefined) ? '\u0020' : fillString
@@ -1663,7 +1567,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } new string containing the specified part of the given string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public substr(begin: int, length?: int): String {
         begin = normalizeIndex(begin, this.getLength());
@@ -1685,7 +1588,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public trimEnd(): String {
         return this.trimRight()
@@ -1697,7 +1599,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public trimStart(): String {
         return this.trimLeft()
@@ -1711,7 +1612,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): String {
         begin = normalizeIndex(begin ?? 0, this.getLength())
@@ -1735,7 +1635,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String): string {
         let matchLength = matched.getLength()
@@ -1838,7 +1737,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(searchValue: RegExp, replaceValue: String) : String {
         return searchValue.replace(this, replaceValue)
@@ -1852,7 +1750,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(searchValue: String, replaceValue: String) : String {
         let searchLength = searchValue.getLength()
@@ -1874,7 +1771,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(searchValue: StringOrRegExp, replaceValue: String) : String {
         if (searchValue instanceof RegExp) {
@@ -1891,7 +1787,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
         return searchValue.replace(this, replacer)
@@ -1905,7 +1800,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
         let searchLength = searchValue.getLength()
@@ -1927,7 +1821,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (searchValue instanceof RegExp) {
@@ -1944,7 +1837,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceAll(searchValue: RegExp, replaceValue: String): String {
         if (!searchValue.global) {
@@ -1961,7 +1853,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceAll(searchValue: String, replaceValue: String): String {
         let searchLength = searchValue.getLength()
@@ -2000,7 +1891,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } Global flag expected for regexp
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceAll(searchValue: StringOrRegExp, replaceValue: String): String {
         if (searchValue instanceof RegExp) {
@@ -2022,7 +1912,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } Global flag expected for regexp
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceAll(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (!searchValue.global) {
@@ -2039,7 +1928,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } a new replaced string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceAll(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
         let searchLength = searchValue.getLength()
@@ -2078,7 +1966,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } Global flag expected for regexp
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replaceAll(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (searchValue instanceof RegExp) {
@@ -2099,7 +1986,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     or -1 if no match was found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public search(implicitRegExp: String): int {
         return new RegExp(implicitRegExp).search(this)
@@ -2113,7 +1999,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     or -1 if no match was found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public search(regexp: RegExp): int {
         return regexp.search(this)
@@ -2127,7 +2012,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     or -1 if no match was found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public search(regexp: StringOrRegExp): int {
         if (regexp instanceof String) {
@@ -2143,7 +2027,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native toLocaleLowerCase(locale: String): String;
 
@@ -2154,7 +2037,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleLowerCase(locale: String[]): String {
         if (locale.length != 0) {
@@ -2169,7 +2051,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleLowerCase(): String {
         return this.toLocaleLowerCase('');
@@ -2182,7 +2063,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native toLocaleUpperCase(locale: String): String;
 
@@ -2193,7 +2073,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleUpperCase(locale: String[]): String {
         if (locale.length != 0) {
@@ -2208,7 +2087,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleUpperCase(): String {
         return this.toLocaleUpperCase('');
@@ -2224,7 +2102,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public match(implicitRegExp: String): RegExpMatchArray | null {
         return new RegExp(implicitRegExp).match(this)
@@ -2238,7 +2115,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public match(regexp: RegExp): RegExpMatchArray | null {
         return regexp.match(this)
@@ -2252,7 +2128,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public match(regexp: StringOrRegExp): RegExpMatchArray | null {
         if (regexp instanceof String) {
@@ -2271,7 +2146,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public matchAll(reg: RegExp): IterableIterator<RegExpMatchArray> {
         let flags = reg.flags;
@@ -2297,7 +2171,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { String } the Unicode Normalization Form of the string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public normalize(form?: String): String {
         const f = (form == undefined) ? 'NFC' : form
@@ -2347,7 +2220,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toWellFormed(): string {
         let res = new StringBuilder();
@@ -2387,7 +2259,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { string } string created by using the specified sequence of code points
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static fromCodePoint(...codePoints: int[]): String {
         let res = new StringBuilder();
@@ -2412,7 +2283,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws { RangeError } RangeError if codePoints[i] is less than 0, or is greater than 0x10FFFF
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isWellFormed(): boolean;
 
@@ -2422,7 +2292,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns { boolean } true - if s is compressed, false - otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native isCompressed(): boolean;
 
@@ -2432,7 +2301,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     * @returns {IterableIterator<String>} Iterator for String elements.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     public override $_iterator(): IterableIterator<String> {
         return new StringIterator(this)
@@ -2444,7 +2312,6 @@ export final class String extends Object implements Comparable<String>, Iterable
  * @implements IterableIterator<String>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 class StringIterator implements IterableIterator<String> {
     private s: String
@@ -2460,7 +2327,6 @@ class StringIterator implements IterableIterator<String> {
      * @returns { IteratorResult<String> }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override next(): IteratorResult<String> {
         if (this.idx == this.s.getLength()) {
@@ -2485,6 +2351,5 @@ class StringIterator implements IterableIterator<String> {
  * @typedef String string
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type string = String;

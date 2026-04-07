@@ -26,7 +26,6 @@ package std.core;
  * @extends Object
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class TypeAPIParameter extends Object {
     private paramType: Type | undefined // not undefined if already created
@@ -41,7 +40,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { Type } The type object of the parameter.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getType(): Type {
         return this.paramType!
@@ -53,7 +51,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { string } The name string of the parameter.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getName(): string {
         return this.name
@@ -65,7 +62,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { int } The attribute value of the parameter, which is a bit mask.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getAttributes(): int {
         return this.attributes
@@ -77,7 +73,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { boolean } Returns true if it is a rest parameter, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isRest(): boolean {
         return (this.attributes & Attributes.REST) != 0
@@ -89,7 +84,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { boolean } Returns true if it is an optional parameter, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isOptional(): boolean {
         return (this.attributes & Attributes.OPTIONAL) != 0
@@ -101,7 +95,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { string } The string representation of the parameter.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.getName() + ": " + this.getType().toString()
@@ -114,7 +107,6 @@ export final class TypeAPIParameter extends Object {
      * @returns { boolean } Returns true if the objects are equal, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(oth: Any): boolean {
         return oth instanceof TypeAPIParameter &&

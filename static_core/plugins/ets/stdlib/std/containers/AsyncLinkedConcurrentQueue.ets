@@ -21,7 +21,6 @@ package std.containers;
  * @namespace containers.stackless
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24 static
  */
 export namespace containers.stackless {
 
@@ -33,7 +32,6 @@ export namespace containers.stackless {
         * Constructs an empty list node.
         *
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public constructor() { }
 
@@ -42,7 +40,6 @@ export namespace containers.stackless {
         *
         * @param { T } element the element stored in the node
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public constructor(element: T) {
             this.element = element;
@@ -56,7 +53,6 @@ export namespace containers.stackless {
     * @class LinkedConcurrentQueue
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24 static
      */
     export final class LinkedConcurrentQueue<T extends Object> implements ConcurrentQueue<T> {
 
@@ -66,7 +62,6 @@ export namespace containers.stackless {
          *
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public constructor() {
             this.actualCapacity = Int.MAX_VALUE;
@@ -80,7 +75,6 @@ export namespace containers.stackless {
          * @param { int } capacity The maximum number of elements accepted by the queue.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public constructor(capacity: int) {
             if (capacity <= 0) {
@@ -98,7 +92,6 @@ export namespace containers.stackless {
          * @param { Iterable<T> } iterable The iterable source used to initialize the queue.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public constructor(iterable: Iterable<T>) {
             this.actualCapacity = Int.MAX_VALUE;
@@ -114,7 +107,6 @@ export namespace containers.stackless {
          * @param { Iterable<T> } iterable The iterable source used to initialize the queue.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public constructor(capacity: int, iterable: Iterable<T>) {
             this(capacity);
@@ -130,7 +122,6 @@ export namespace containers.stackless {
          *     and after capacity becomes available when the queue is full.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public async push(element: T): Promise<void> {
             const newNode = new ListNode<T>(element);
@@ -153,7 +144,6 @@ export namespace containers.stackless {
          *     and after an element becomes available when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public async pop(): Promise<T> {
             let previousSize: int = -1;
@@ -179,7 +169,6 @@ export namespace containers.stackless {
          *     else false when no space is currently available.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public add(element: T): boolean {
             if (this.atomicsGetSize() == this.actualCapacity) {
@@ -209,7 +198,6 @@ export namespace containers.stackless {
          *     else undefined when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public poll(): T | undefined {
             if (this.atomicsGetSize() == 0) {
@@ -239,7 +227,6 @@ export namespace containers.stackless {
          *     else undefined when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public getFirst(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.pushMutex);
@@ -261,7 +248,6 @@ export namespace containers.stackless {
          *     else undefined when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public getEnd(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.pushMutex);
@@ -283,7 +269,6 @@ export namespace containers.stackless {
          *     else false when at least one element is present.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public isEmpty(): boolean {
             return this.atomicsGetSize() == 0;
@@ -297,7 +282,6 @@ export namespace containers.stackless {
          *     else returns 0 when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public get size(): int {
             return this.atomicsGetSize();
@@ -311,7 +295,6 @@ export namespace containers.stackless {
          *     else returns the implementation maximum when the queue is unbounded.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public get capacity(): int {
             return this.actualCapacity;
@@ -325,7 +308,6 @@ export namespace containers.stackless {
          *     else returns 0 when the queue is already full.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         public remainingCapacity(): int {
             return this.actualCapacity - this.atomicsGetSize();
@@ -339,7 +321,6 @@ export namespace containers.stackless {
          *     and after the waiting coroutine is resumed.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private async waitFullQueue(): Promise<void> {
             while (this.atomicsGetSize() == this.actualCapacity) {
@@ -355,7 +336,6 @@ export namespace containers.stackless {
          *     and after the waiting coroutine is resumed.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private async waitEmptyQueue(): Promise<void> {
             while (this.atomicsGetSize() == 0) {
@@ -370,7 +350,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private resumePopQueue(): void {
             ConcurrencyHelpers.mutexLock(this.popMutex);
@@ -385,7 +364,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private resumePushQueue(): void {
             ConcurrencyHelpers.mutexLock(this.pushMutex);
@@ -401,7 +379,6 @@ export namespace containers.stackless {
          *     and before the new element count becomes visible.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private fetchAndAddSize(): int {
             return this.actualSize.fetchAdd(1);
@@ -415,7 +392,6 @@ export namespace containers.stackless {
          *     and before the new element count becomes visible.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private fetchAndSubSize(): int {
             return this.actualSize.fetchSub(1);
@@ -429,7 +405,6 @@ export namespace containers.stackless {
          *     else returns 0 when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private atomicsGetSize(): int {
             return this.actualSize.load();
@@ -441,7 +416,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private initializeQueueState(): void {
             const sentinel = new ListNode<T>();
@@ -457,7 +431,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private appendIterable(iterable: Iterable<T>): void {
             const entriesIter = iterable.$_iterator();
@@ -480,7 +453,6 @@ export namespace containers.stackless {
          * @returns { int } The queue size observed before the node was appended.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private completeEnqueueLocked(newNode: ListNode<T>): int {
             this.pushListNode(newNode);
@@ -496,7 +468,6 @@ export namespace containers.stackless {
          * @returns { T } The removed head element.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private dequeueElementLocked(): T {
             const firstNode = this.requireFirstNodeLocked();
@@ -512,7 +483,6 @@ export namespace containers.stackless {
          * @returns { int } The queue size observed before the dequeue completed.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private completeDequeueLocked(): int {
             const previousSize = this.fetchAndSubSize();
@@ -527,7 +497,6 @@ export namespace containers.stackless {
          * @returns { ListNode<T> } The first linked node after the sentinel head.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private requireFirstNodeLocked(): ListNode<T> {
             const firstNode = this.head.next;
@@ -545,7 +514,6 @@ export namespace containers.stackless {
          * @returns { T } The element stored in the node.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private requireNodeElement(node: ListNode<T>): T {
             const element = node.element;
@@ -563,7 +531,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private notifyPendingProducersLocked(previousSize: int): void {
             if (previousSize + 1 < this.actualCapacity) {
@@ -579,7 +546,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private notifyPendingConsumersLocked(previousSize: int): void {
             if (previousSize - 1 > 0) {
@@ -595,7 +561,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private resumeConsumersIfQueueWasEmpty(previousSize: int): void {
             if (previousSize == 0) {
@@ -611,7 +576,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private resumeProducersIfQueueWasFull(previousSize: int): void {
             if (previousSize == this.actualCapacity) {
@@ -627,7 +591,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private pushListNode(newNode: ListNode<T>): void {
             this.tail.next = newNode;
@@ -642,7 +605,6 @@ export namespace containers.stackless {
          * @returns { void } No return value.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         private popListNode(firstNode: ListNode<T>): void {
             let h = this.head;

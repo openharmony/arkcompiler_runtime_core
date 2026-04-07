@@ -27,7 +27,6 @@ package std.core;
  * @implements Comparable<Double>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Double extends Floating implements Comparable<Double> {
     private value: double;
@@ -37,7 +36,6 @@ export final class Double extends Floating implements Comparable<Double> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this.value = 0.0;
@@ -49,7 +47,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @param { double } value the initial value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: double) {
         this.value = value;
@@ -61,7 +58,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @param { BigInt } value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: BigInt) {
         this.value = value.doubleValue()
@@ -73,7 +69,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @param { String } value string that may contain a number
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: String) {
         this.value = Double.numberFromString(value);
@@ -86,7 +81,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(): Number {
         return new Double();
@@ -101,7 +95,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: String | Number | BigInt | undefined | null): Number {
         if (value instanceof String) {
@@ -125,7 +118,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static valueOf(value: double): Double {
         // TODO(ivan-tyulyandin): caching is possible
@@ -138,7 +130,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { number } boxed value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): number {
         return this.value as number;
@@ -153,7 +144,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MIN_VALUE: double = 4.9e-300 / 1.e+24;
 
@@ -165,7 +155,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MAX_VALUE: double = 1.7976931348623157e+308;
 
@@ -177,7 +166,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MAX_SAFE_INTEGER: double = 9007199254740991;
 
@@ -189,7 +177,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MIN_SAFE_INTEGER: double = -9007199254740991;
 
@@ -201,7 +188,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BIT_SIZE: byte = 64;
 
@@ -213,7 +199,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTE_SIZE: byte = 8;
 
@@ -225,7 +210,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly NaN: double = 0.0 / 0.0;
 
@@ -237,7 +221,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly POSITIVE_INFINITY: double = 1.0 / 0.0;
 
@@ -249,7 +232,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly NEGATIVE_INFINITY: double = -1.0 / 0.0;
 
@@ -261,7 +243,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly PRECISION: byte = 53;
 
@@ -274,7 +255,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly DELTA: double = Double.bitCastFromLong(0x3cb0000000000000);
 
@@ -286,7 +266,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly EPSILON: double = Double.DELTA;
 
@@ -297,7 +276,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { byte } return the current value convert byte value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toByte(): byte {
         return this.value.toByte();
@@ -309,7 +287,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { short } return the current value convert short value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toShort(): short {
         return this.value.toShort();
@@ -321,7 +298,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { int } return the current value convert int value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toInt(): int {
         return this.value.toInt();
@@ -333,7 +309,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { long } return the current value convert long value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLong(): long {
         return this.value.toLong();
@@ -345,7 +320,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { float } return the current value convert float value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toFloat(): float {
         return this.value.toFloat();
@@ -357,7 +331,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { double } return the current value convert double value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toDouble(): double {
         return this.value;
@@ -371,7 +344,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toDouble(value: double): double {
         return value;
@@ -385,7 +357,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toByte(value: double): byte;
 
@@ -397,7 +368,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toShort(value: double): short;
 
@@ -409,7 +379,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toInt(value: double): int;
 
@@ -421,7 +390,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toLong(value: double): long;
 
@@ -433,7 +401,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toFloat(value: double): float;
 
@@ -447,7 +414,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { int } if the cur value > the other reutrn 0,otherwise return -1
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override compareTo(other: Double): int {
         if ((this.isNaN() && other.isNaN()) || (Math.abs(this.value - other) < Double.EPSILON)) {
@@ -468,7 +434,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(d: double, r: int): String;
 
@@ -480,7 +445,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(d: double): String {
         return Double.toString(d, 10);
@@ -494,7 +458,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(r: int): String {
         return Double.toString(this.value, r);
@@ -507,7 +470,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } return the string value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(d: Number): String {
         return Double.toString(this.value, d.toInt());
@@ -519,7 +481,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } return the string value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return Double.toString(this.value, 10);
@@ -535,7 +496,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
         const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
@@ -552,7 +512,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         if (options instanceof Intl.NumberFormatOptions) {
@@ -570,7 +529,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static compare(lhs: double, rhs: double): boolean {
         return (abs(lhs - rhs) <= Double.DELTA)
@@ -585,7 +543,6 @@ export final class Double extends Floating implements Comparable<Double> {
      *     Returns false if type of provided object is not the same as this type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: Any): boolean {
         if (this === other) {
@@ -607,7 +564,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isNaN(v: double): boolean {
         // IEEE-754 feature
@@ -620,7 +576,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if the underlying double is NaN
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isNaN(): boolean {
         return Double.isNaN(this.value);
@@ -634,7 +589,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isFinite(v: double): boolean {
         return !(Double.isNaN(v) || (v == Double.POSITIVE_INFINITY) || (v == Double.NEGATIVE_INFINITY));
@@ -646,7 +600,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if the underlying double is a floating point value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isFinite(): boolean {
         return Double.isFinite(this.value);
@@ -660,7 +613,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isInteger(v: double): boolean {
         // In the language % works as C fmod that differs with IEEE-754 % definition
@@ -673,7 +625,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if the underlying double is similar to an integer value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isInteger(): boolean {
         return Double.isInteger(this.value);
@@ -687,7 +638,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isSafeInteger(v: double): boolean {
         return Double.isInteger(v) && (abs(v) <= Double.MAX_SAFE_INTEGER);
@@ -699,7 +649,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if the underlying double is a safe integer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isSafeInteger(): boolean {
         return Double.isSafeInteger(this.value);
@@ -713,7 +662,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { Double } Result of the addition
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public add(other: Double): Double {
         return Double.valueOf((this.value + other.toDouble()) as double)
@@ -726,7 +674,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { Double } Result of the subtraction
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sub(other: Double): Double {
         return Double.valueOf((this.value - other.toDouble()) as double)
@@ -739,7 +686,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { Double } Result of the multiplication
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public mul(other: Double): Double {
         return Double.valueOf((this.value * other.toDouble()) as double)
@@ -752,7 +698,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { Double } Result of the division
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public div(other: Double): Double {
         return Double.valueOf((this.value / other.toDouble()) as double)
@@ -765,7 +710,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if this value is less than provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLessThan(other: Double): boolean {
         return this.value < other.toDouble();
@@ -778,7 +722,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if this value is less than or equal to provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLessEqualThan(other: Double): boolean {
         return this.value <= other.toDouble();
@@ -791,7 +734,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if this value is greater than provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGreaterThan(other: Double): boolean {
         return this.value > other.toDouble();
@@ -804,7 +746,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { boolean } true if this value is greater than or equal to provided, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGreaterEqualThan(other: Double): boolean {
         return this.value >= other.toDouble();
@@ -824,7 +765,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native parseFloat(s: String): double;
 
@@ -842,7 +782,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native parseIntCore(s: String, r: int): double;
 
@@ -855,7 +794,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static parseInt(s: String): double {
         return Double.parseIntCore(s, 0);
@@ -875,7 +813,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static parseInt(s: String, r: int): double {
         if ((r < 2 || r > 36) && r != 0.0) {
@@ -899,7 +836,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static parseInt(s: String, r: double): double {
         if (!Double.isFinite(r)) {
@@ -924,7 +860,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private native toExponentialImpl(d: double): String;
     public native toExponentialWithNoDigit(): String;
@@ -935,7 +870,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toExponential(): String {
         return this.toExponentialWithNoDigit();
@@ -948,7 +882,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toExponential(d?: double): String {
         if (d == undefined) {
@@ -968,7 +901,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native toPrecision(d: double): String;
 
@@ -979,7 +911,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toPrecision(): String {
         return this.toString();
@@ -999,7 +930,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native toFixedImpl(d: double): String;
 
@@ -1009,7 +939,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toFixed(): String {
         return this.toFixed(0);
@@ -1022,7 +951,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toFixed(d?: double): String {
         if (d == undefined) {
@@ -1039,7 +967,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native bitCastFromLong(bits: long): double
 
@@ -1051,7 +978,6 @@ export final class Double extends Floating implements Comparable<Double> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native bitCastToLong(val: double): long
 
@@ -1082,7 +1008,6 @@ export final class Double extends Floating implements Comparable<Double> {
  * @typedef { Double } Number
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type Number = Double;
 
@@ -1092,6 +1017,5 @@ export type Number = Double;
  * @typedef { double } number
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type number = double;

@@ -25,7 +25,6 @@ package std.core;
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class NoDataError extends Error {
     // NOTE(kparshukov): #28318 move to std/core/Errors.ets
@@ -41,7 +40,6 @@ export final class NoDataError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class ArgumentOutOfRangeError extends Error {
     /**
@@ -50,7 +48,6 @@ export final class ArgumentOutOfRangeError extends Error {
      * @param { ErrorOptions } [ options ] Error options, usually containing the error stack information.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ArgumentOutOfRangeError", message, options)
@@ -63,7 +60,6 @@ export final class ArgumentOutOfRangeError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class IllegalStateError extends Error {
     /**
@@ -73,7 +69,6 @@ export class IllegalStateError extends Error {
      * usually containing the error stack information.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("IllegalStateError", message, options)
@@ -86,7 +81,6 @@ export class IllegalStateError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class UnsupportedOperationError extends Error {
     /**
@@ -96,7 +90,6 @@ export final class UnsupportedOperationError extends Error {
      * usually containing the error stack information.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("UnsupportedOperationError", message, options)
@@ -109,7 +102,6 @@ export final class UnsupportedOperationError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class IllegalArgumentError extends Error {
     /**
@@ -119,7 +111,6 @@ export final class IllegalArgumentError extends Error {
      * usually containing the error stack information.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("IllegalArgumentError", message, options)
@@ -132,7 +123,6 @@ export final class IllegalArgumentError extends Error {
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class RuntimeError extends Error {
     /**
@@ -142,7 +132,6 @@ export final class RuntimeError extends Error {
      * usually containing the error stack information.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("RuntimeError", message, options)

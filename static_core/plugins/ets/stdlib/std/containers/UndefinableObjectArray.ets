@@ -24,7 +24,6 @@ package std.containers
  * Container namespace providing implementations of various container classes
  * @namespace containers
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export namespace containers {
     
@@ -32,14 +31,12 @@ export namespace containers {
      * Represents a type that can be either Object or undefined
      * @typedef { Object | undefined } UndefinableObject
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     type UndefinableObject = Object | undefined
 
     /**
      * A dynamic array class that can contain Object or undefined values
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     export class UndefinableObjectArray {
         /**
@@ -47,7 +44,6 @@ export namespace containers {
          * @type { int }
          * @static
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         /* const */ static ArrayInitSize : int = 16
 
@@ -65,7 +61,6 @@ export namespace containers {
          * @param { int } capacity - The initial capacity of the array
          * @param { UndefinableObject } val - The value used to initialize all array elements
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         constructor(capacity: int, val: UndefinableObject) {
             this.init(capacity, val)
@@ -76,7 +71,6 @@ export namespace containers {
          *
          * @param { int } capacity - The initial capacity of the array
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         constructor(capacity: int) {
             this.data = new FixedArray<UndefinableObject>(capacity)
@@ -87,7 +81,6 @@ export namespace containers {
          * Constructs new empty UndefinableObjectArray
          *
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         constructor() {
             this(UndefinableObjectArray.ArrayInitSize)
@@ -98,7 +91,6 @@ export namespace containers {
          *
          * @param { int } capacity - The new capacity
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
@@ -115,7 +107,6 @@ export namespace containers {
          *
          * @returns { Object[] } The underlying array containing all non-undefined elements
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public toArray(): Object[] {
             let newData = new (Object)[this.curSize](new Object())
@@ -141,7 +132,6 @@ export namespace containers {
          *
          * @param { UndefinableObject } e - Value to push
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public pushBack(e: UndefinableObject): void {
             if (this.curSize == this.data.length) {
@@ -161,7 +151,6 @@ export namespace containers {
          * @returns { UndefinableObject } Popped value
          * @throws { RangeError } When the array is empty, attempting to pop an element will throw this exception
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public popBack(): UndefinableObject {
             if (this.curSize === 0) {
@@ -176,7 +165,6 @@ export namespace containers {
          *
          * @returns { int } The number of elements in the array
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public size(): int {
             return this.curSize
@@ -188,7 +176,6 @@ export namespace containers {
          * @param { int } index - Element position
          * @returns { UndefinableObject } An element at the specified index
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public at(index: int): UndefinableObject {
             return this.data[index]
@@ -200,7 +187,6 @@ export namespace containers {
          * @param { int } index - Element position
          * @param { UndefinableObject } e - New value
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public set(index: int, e: UndefinableObject): void {
             this.data[index] = e

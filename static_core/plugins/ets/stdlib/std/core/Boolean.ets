@@ -26,7 +26,6 @@ package std.core;
  * @implements Comparable<Boolean>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Boolean extends Object implements Comparable<Boolean> {
     private value: boolean;
@@ -36,7 +35,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this.value = false
@@ -48,7 +46,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { boolean } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: boolean) {
         this.value = value
@@ -60,7 +57,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { byte } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: byte) {
         this.value = value != 0;
@@ -72,7 +68,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { char } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: char) {
         this.value = value != c'\u0000';
@@ -84,7 +79,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { short } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: short) {
         this.value = value != 0;
@@ -96,7 +90,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { int } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: int) {
         this.value = value != 0;
@@ -108,7 +101,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { long } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: long) {
         this.value = value != 0;
@@ -120,7 +112,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { bigint } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: bigint) {
         this.value = value != new BigInt(0);
@@ -132,7 +123,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { float } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: float) {
         this.value = (value != 0.0 && !isNaN(value));
@@ -144,7 +134,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { number } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: number) {
         this.value = (value != 0 && !isNaN(value));
@@ -156,7 +145,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { string } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: string) {
         this.value = value != '';
@@ -168,7 +156,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param { Any } value value to construct class instance with
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: Any = undefined) {
         if (value == null || value == undefined) {
@@ -205,7 +192,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(): boolean {
         return Boolean.FALSE;
@@ -219,7 +205,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke<T>(value: T): boolean {
         return new Boolean(value).valueOf();
@@ -233,7 +218,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly TRUE = new Boolean(true);
 
@@ -245,7 +229,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly FALSE = new Boolean(false);
 
@@ -257,7 +240,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toBoolean(value: boolean): boolean {
         return value;
@@ -269,7 +251,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { boolean } The instance value converted to boolean.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toBoolean(): boolean {
         return this.value;
@@ -283,7 +264,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static valueOf(b: boolean): Boolean {
         if (b) {
@@ -298,7 +278,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { boolean } The primitive boolean value of this instance
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): boolean {
         return this.value
@@ -312,7 +291,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { boolean } True if the objects are equal, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: Any): boolean {
         if (this === other) {
@@ -334,7 +312,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(v: boolean): string {
         if (v) {
@@ -349,7 +326,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { String } The string representation of this Boolean object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         if (this.value) {
@@ -366,7 +342,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { int } Negative if this < other,0 if equal, positive if this > other
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override compareTo(other: Boolean): int {
         let thisInt = this.value ? 1 : 0
@@ -380,7 +355,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { boolean } True if the instance value is true, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isTrue(): boolean {
         return this.value == true;
@@ -392,7 +366,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { boolean } True if the instance value is false, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isFalse(): boolean {
         return this.value == false;
@@ -404,7 +377,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { Boolean } The logical negation of this Boolean instance
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public negate(): Boolean {
         return Boolean.valueOf(!this.value)
@@ -417,7 +389,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { Boolean } The logical AND result of both Boolean instances
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public and(other: Boolean): Boolean {
         return Boolean.valueOf(this.value && other)
@@ -430,7 +401,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { Boolean } The logical OR result of both Boolean instances
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public or(other: Boolean): Boolean {
         return Boolean.valueOf(this.value || other)
@@ -443,7 +413,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns { Boolean } The logical XOR result of both Boolean instances
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public xor(other: Boolean): Boolean {
         return Boolean.valueOf(this.value ^ other)

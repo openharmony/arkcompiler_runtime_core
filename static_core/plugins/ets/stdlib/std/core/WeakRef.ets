@@ -29,7 +29,6 @@ class BaseWeakRef<T> {
      * @param { T } target - The target object for the weak reference.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(target: T) {
         this.referent = target;
@@ -41,7 +40,6 @@ class BaseWeakRef<T> {
      * @returns { T | undefined } Returns the target object, or undefined if the object has been garbage collected.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public final deref(): T | undefined {
         return this.referent;
@@ -54,7 +52,6 @@ class BaseWeakRef<T> {
  * @extends BaseWeakRef<T>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class WeakRef<T extends Object> extends BaseWeakRef<T> {
     /**
@@ -62,7 +59,6 @@ export final class WeakRef<T extends Object> extends BaseWeakRef<T> {
      * @param { T } target - The target object for the weak reference.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(target: T) {
         super(target);

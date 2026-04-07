@@ -93,7 +93,6 @@ class Int8ArrayIteratorEntries implements IterableIterator<[int, Number]> {
  * @implements { Iterable<Number>, ArrayLike<Number> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
@@ -104,7 +103,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = 1
     /**
@@ -114,7 +112,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = Int8Array.BYTES_PER_ELEMENT
     protected readonly lengthInt: int
@@ -124,7 +121,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -137,7 +133,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -150,7 +145,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Int8Array.BYTES_PER_ELEMENT).toInt()) {
@@ -168,7 +162,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Int8Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: Int8Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -183,7 +176,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -198,7 +190,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -213,7 +204,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Array<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: Array<int>) {
         this(numbers.length)
@@ -228,7 +218,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Iterable<Number> } elements - an iterable object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
@@ -259,7 +248,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -273,7 +261,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -288,7 +275,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -303,7 +289,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -346,7 +331,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -381,7 +365,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: byte): void
 
@@ -393,7 +376,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: int): void
 
@@ -405,7 +387,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: number): void {
         this.$_set(index, Int8Array.doubleToInt(val))
@@ -417,7 +398,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the number of elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -430,7 +410,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_get(index: int): number
 
@@ -441,7 +420,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Number | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): Number | undefined {
         let k: int
@@ -467,7 +445,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): Int8Array {
         let arrayLength: int = this.lengthInt;
@@ -497,7 +474,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): Int8Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -510,7 +486,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<[int, Number]> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<[int, Number]> {
         return new Int8ArrayIteratorEntries(this)
@@ -525,7 +500,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Int8Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: byte, start?: int, end?: int): this {
         const k = normalizeIndex(start ?? 0, this.lengthInt)
@@ -543,7 +517,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Int8Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: number, start?: int, end?: int): this {
         this.fill(Int8Array.doubleToInt(value), start, end)
@@ -560,7 +533,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: byte): void {
         this.$_set(insertPos, val)
@@ -574,7 +546,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: number): void {
         this.$_set(insertPos, val)
@@ -587,7 +558,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<byte>): void {
         this.set(arr, 0)
@@ -602,7 +572,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<byte>, insertPos: int): void {
         const offset = insertPos
@@ -621,7 +590,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>): void {
         this.set(arr, 0)
@@ -636,7 +604,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>, insertPos: int): void {
         const offset = insertPos
@@ -657,7 +624,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Int8Array): void
     private native final set(array: Uint8Array): void
@@ -670,7 +636,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Int8Array, offset: int): void
 
@@ -683,7 +648,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<number>, offset: int = 0): void {
         const insertPos = offset
@@ -703,7 +667,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<byte>): Int8Array {
         let res = new Int8Array(items.length.toInt())
@@ -719,7 +682,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<int>): Int8Array {
         let res = new Int8Array(items.length.toInt())
@@ -735,7 +697,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<number>): Int8Array {
         let res = new Int8Array(items.length.toInt())
@@ -754,7 +715,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): Int8Array {
         return new Int8Array(0)
@@ -768,7 +728,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<int>): Int8Array {
         let result = new Int8Array(arr.length)
@@ -785,7 +744,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<int>): Int8Array {
         const length = set.size;
@@ -809,7 +767,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Int8Array): Int8Array {
         let result = new Int8Array(arr.length)
@@ -824,7 +781,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Uint8Array): Int8Array {
         let result = new Int8Array(arr.length)
@@ -840,7 +796,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<int>): Int8Array {
         let result = new Int8Array(arr.length)
@@ -856,7 +811,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: ArrayLike<number>): Int8Array {
         return Int8Array.from<number>(arrayLike, (x: number, k: number): number => x)
@@ -871,7 +825,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
         let res = new Int8Array(arrayLike.length)
@@ -895,7 +848,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int8Array {
         if (mapfn == undefined) {
@@ -951,7 +903,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int8Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: byte, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
@@ -964,7 +915,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int8Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: byte): boolean {
         return this.includes(searchElement, 0)
@@ -979,7 +929,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int8Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: number, fromIndex?: int): boolean {
         if (isNaN(searchElement)) {
@@ -995,7 +944,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -1009,7 +957,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -1024,7 +971,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: number, fromIndex?: int): int {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
@@ -1044,7 +990,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -1059,7 +1004,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new Int8ArrayIteratorKeys(this)
@@ -1072,7 +1016,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -1085,7 +1028,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -1099,7 +1041,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -1114,7 +1055,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
@@ -1130,7 +1070,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
@@ -1142,7 +1081,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(data: FixedArray<Object>): Int8Array {
         throw new Error("Int8Array.of: not implemented")
@@ -1154,7 +1092,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a new Int8Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): Int8Array
 
@@ -1165,7 +1102,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a new Int8Array with elements of current Int8Array[begin, this.length)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): Int8Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -1181,7 +1117,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): Int8Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -1203,7 +1138,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a new Int8Array with the same underlying ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): Int8Array {
         const len: int = this.lengthInt
@@ -1225,7 +1159,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -1246,7 +1179,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): Int8Array {
         let newArray = new Int8Array(this.lengthInt);
@@ -1262,7 +1194,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): Int8Array {
         return new Int8Array(this).sort()
@@ -1274,7 +1205,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - a string representation of the Int8Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -1286,7 +1216,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<Number> {
         return new Int8ArrayIterator(this)
@@ -1298,7 +1227,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Number> {
         return this.values()
@@ -1313,7 +1241,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: byte): Int8Array {
         let res = new Int8Array(this)
@@ -1330,7 +1257,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: number): Int8Array {
         let res = new Int8Array(this)
@@ -1347,7 +1273,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - the last element that satisfies fn
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: int, array: Int8Array) => boolean =
@@ -1361,7 +1286,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Int8Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -1374,7 +1298,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Int8Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
@@ -1426,7 +1349,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: number, index: int, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -1449,7 +1371,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int8Array) => U,
@@ -1473,7 +1394,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Int8Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int8Array) => number): number {
         if (this.lengthInt == 0) {
@@ -1498,7 +1418,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int8Array) => U,
@@ -1523,7 +1442,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Int8Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int8Array) => number): number {
         if (this.lengthInt == 0) {
@@ -1544,7 +1462,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a new Int8Array where for each element from current Int8Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: number, index: int, array: Int8Array) => number): Int8Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int8Array.BYTES_PER_ELEMENT)
@@ -1565,7 +1482,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: number, index: int, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -1583,7 +1499,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array } - a new Int8Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: number, index: int, array: Int8Array) => boolean): Int8Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -1614,7 +1529,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: number, index: int, obj: Int8Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -1635,7 +1549,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: number, index: int, obj: Int8Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -1654,7 +1567,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number, index: int, array: Int8Array) => boolean): byte {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -1673,7 +1585,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: number, index: int, array: Int8Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -1692,7 +1603,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: number, index: int, array: Int8Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -1706,7 +1616,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int8Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): Int8Array {
         return this
@@ -1730,7 +1639,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -1741,7 +1649,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteOffset: int
 
@@ -1752,7 +1659,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteLength: int
 
@@ -1763,7 +1669,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "Int8Array"
 }
@@ -1837,7 +1742,6 @@ class Int16ArrayIteratorEntries implements IterableIterator<[int, Number]> {
  * @implements { Iterable<Number>, ArrayLike<Number> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
@@ -1848,7 +1752,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = 2
     /**
@@ -1858,7 +1761,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = Int16Array.BYTES_PER_ELEMENT
     protected readonly lengthInt: int
@@ -1868,7 +1770,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -1881,7 +1782,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -1894,7 +1794,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Int16Array.BYTES_PER_ELEMENT).toInt()) {
@@ -1912,7 +1811,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Int16Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: Int16Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -1927,7 +1825,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -1942,7 +1839,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -1957,7 +1853,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Array<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: Array<int>) {
         this(numbers.length)
@@ -1972,7 +1867,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Iterable<Number> } elements - an iterable object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
@@ -2003,7 +1897,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -2017,7 +1910,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -2032,7 +1924,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -2047,7 +1938,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -2094,7 +1984,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -2129,7 +2018,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: short): void
 
@@ -2141,7 +2029,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: int): void
 
@@ -2153,7 +2040,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: number): void {
         this.$_set(index, Int16Array.doubleToInt(val))
@@ -2165,7 +2051,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the number of elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -2178,7 +2063,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_get(index: int): number
 
@@ -2189,7 +2073,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Number | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): Number | undefined {
         let k: int
@@ -2215,7 +2098,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): Int16Array {
         let arrayLength: int = this.lengthInt;
@@ -2245,7 +2127,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): Int16Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -2258,7 +2139,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<[int, Number]> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<[int, Number]> {
         return new Int16ArrayIteratorEntries(this)
@@ -2273,7 +2153,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Int16Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: short, start?: int, end?: int): this {
         const k = normalizeIndex(start ?? 0, this.lengthInt)
@@ -2291,7 +2170,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Int16Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: number, start?: int, end?: int): this {
         this.fill(Int16Array.doubleToInt(value), start, end)
@@ -2308,7 +2186,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: short): void {
         this.$_set(insertPos, val)
@@ -2322,7 +2199,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: number): void {
         this.$_set(insertPos, val)
@@ -2335,7 +2211,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<short>): void {
         this.set(arr, 0)
@@ -2350,7 +2225,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<short>, insertPos: int): void {
         const offset = insertPos
@@ -2369,7 +2243,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>): void {
         this.set(arr, 0)
@@ -2384,7 +2257,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>, insertPos: int): void {
         const offset = insertPos
@@ -2405,7 +2277,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Int16Array): void
     private native final set(array: Uint16Array): void
@@ -2418,7 +2289,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Int16Array, offset: int): void
 
@@ -2431,7 +2301,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<number>, offset: int = 0): void {
         const insertPos = offset
@@ -2451,7 +2320,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<short>): Int16Array {
         let res = new Int16Array(items.length.toInt())
@@ -2467,7 +2335,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<int>): Int16Array {
         let res = new Int16Array(items.length.toInt())
@@ -2483,7 +2350,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<number>): Int16Array {
         let res = new Int16Array(items.length.toInt())
@@ -2502,7 +2368,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): Int16Array {
         return new Int16Array(0)
@@ -2516,7 +2381,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<int>): Int16Array {
         let result = new Int16Array(arr.length)
@@ -2533,7 +2397,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<int>): Int16Array {
         const length = set.size;
@@ -2557,7 +2420,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Int16Array): Int16Array {
         let result = new Int16Array(arr.length)
@@ -2572,7 +2434,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Uint16Array): Int16Array {
         let result = new Int16Array(arr.length)
@@ -2588,7 +2449,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<int>): Int16Array {
         let result = new Int16Array(arr.length)
@@ -2604,7 +2464,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: ArrayLike<number>): Int16Array {
         return Int16Array.from<number>(arrayLike, (x: number, k: number): number => x)
@@ -2619,7 +2478,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
         let res = new Int16Array(arrayLike.length)
@@ -2643,7 +2501,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int16Array {
         if (mapfn == undefined) {
@@ -2699,7 +2556,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int16Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: short, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
@@ -2712,7 +2568,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int16Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: short): boolean {
         return this.includes(searchElement, 0)
@@ -2727,7 +2582,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int16Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: number, fromIndex?: int): boolean {
         if (isNaN(searchElement)) {
@@ -2743,7 +2597,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -2757,7 +2610,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -2772,7 +2624,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: number, fromIndex?: int): int {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
@@ -2792,7 +2643,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -2807,7 +2657,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new Int16ArrayIteratorKeys(this)
@@ -2820,7 +2669,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -2833,7 +2681,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -2847,7 +2694,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -2862,7 +2708,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
@@ -2878,7 +2723,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
@@ -2890,7 +2734,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(data: FixedArray<Object>): Int16Array {
         throw new Error("Int16Array.of: not implemented")
@@ -2902,7 +2745,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a new Int16Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): Int16Array
 
@@ -2913,7 +2755,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a new Int16Array with elements of current Int16Array[begin, this.length)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): Int16Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -2929,7 +2770,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): Int16Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -2951,7 +2791,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a new Int16Array with the same underlying ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): Int16Array {
         const len: int = this.lengthInt
@@ -2973,7 +2812,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -2994,7 +2832,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): Int16Array {
         let newArray = new Int16Array(this.lengthInt);
@@ -3010,7 +2847,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): Int16Array {
         return new Int16Array(this).sort()
@@ -3022,7 +2858,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - a string representation of the Int16Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -3034,7 +2869,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<Number> {
         return new Int16ArrayIterator(this)
@@ -3046,7 +2880,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Number> {
         return this.values()
@@ -3061,7 +2894,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: short): Int16Array {
         let res = new Int16Array(this)
@@ -3078,7 +2910,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: number): Int16Array {
         let res = new Int16Array(this)
@@ -3095,7 +2926,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - the last element that satisfies fn
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: int, array: Int16Array) => boolean =
@@ -3109,7 +2939,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Int16Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -3122,7 +2951,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Int16Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
@@ -3174,7 +3002,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: number, index: int, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -3197,7 +3024,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int16Array) => U,
@@ -3221,7 +3047,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Int16Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int16Array) => number): number {
         if (this.lengthInt == 0) {
@@ -3246,7 +3071,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int16Array) => U,
@@ -3271,7 +3095,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Int16Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int16Array) => number): number {
         if (this.lengthInt == 0) {
@@ -3292,7 +3115,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a new Int16Array where for each element from current Int16Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: number, index: int, array: Int16Array) => number): Int16Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int16Array.BYTES_PER_ELEMENT)
@@ -3313,7 +3135,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: number, index: int, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -3331,7 +3152,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array } - a new Int16Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: number, index: int, array: Int16Array) => boolean): Int16Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -3362,7 +3182,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: number, index: int, obj: Int16Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -3383,7 +3202,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: number, index: int, obj: Int16Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -3402,7 +3220,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number, index: int, array: Int16Array) => boolean): short {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -3421,7 +3238,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: number, index: int, array: Int16Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -3440,7 +3256,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: number, index: int, array: Int16Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -3454,7 +3269,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int16Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): Int16Array {
         return this
@@ -3491,7 +3305,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -3502,7 +3315,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteOffset: int
 
@@ -3513,7 +3325,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteLength: int
 
@@ -3524,7 +3335,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "Int16Array"
 }
@@ -3598,7 +3408,6 @@ class Int32ArrayIteratorEntries implements IterableIterator<[int, Number]> {
  * @implements { Iterable<Number>, ArrayLike<Number> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
@@ -3609,7 +3418,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = 4
     /**
@@ -3619,7 +3427,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = Int32Array.BYTES_PER_ELEMENT
     protected readonly lengthInt: int
@@ -3629,7 +3436,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -3642,7 +3448,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -3655,7 +3460,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Int32Array.BYTES_PER_ELEMENT).toInt()) {
@@ -3673,7 +3477,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Int32Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: Int32Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -3688,7 +3491,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -3703,7 +3505,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -3718,7 +3519,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Array<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: Array<int>) {
         this(numbers.length)
@@ -3733,7 +3533,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Iterable<Number> } elements - an iterable object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
@@ -3764,7 +3563,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -3778,7 +3576,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -3793,7 +3590,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -3808,7 +3604,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -3855,7 +3650,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -3890,7 +3684,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: int): void
 
@@ -3902,7 +3695,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: number): void {
         this.$_set(index, Int32Array.doubleToInt(val))
@@ -3914,7 +3706,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the number of elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -3927,7 +3718,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_get(index: int): number
 
@@ -3938,7 +3728,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Number | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): Number | undefined {
         let k: int
@@ -3964,7 +3753,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): Int32Array {
         let arrayLength: int = this.lengthInt;
@@ -3994,7 +3782,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): Int32Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -4007,7 +3794,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<[int, Number]> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<[int, Number]> {
         return new Int32ArrayIteratorEntries(this)
@@ -4022,7 +3808,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Int32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: int, start?: int, end?: int): this {
         const k = normalizeIndex(start ?? 0, this.lengthInt)
@@ -4040,7 +3825,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Int32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: number, start?: int, end?: int): this {
         this.fill(Int32Array.doubleToInt(value), start, end)
@@ -4057,7 +3841,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: int): void {
         this.$_set(insertPos, val)
@@ -4071,7 +3854,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: number): void {
         this.$_set(insertPos, val)
@@ -4084,7 +3866,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<int>): void {
         this.set(arr, 0)
@@ -4099,7 +3880,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<int>, insertPos: int): void {
         const offset = insertPos
@@ -4118,7 +3898,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>): void {
         this.set(arr, 0)
@@ -4133,7 +3912,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>, insertPos: int): void {
         const offset = insertPos
@@ -4154,7 +3932,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Int32Array): void
 
@@ -4166,7 +3943,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Int32Array, offset: int): void
 
@@ -4179,7 +3955,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<number>, offset: int = 0): void {
         const insertPos = offset
@@ -4199,7 +3974,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<int>): Int32Array {
         let res = new Int32Array(items.length.toInt())
@@ -4215,7 +3989,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<number>): Int32Array {
         let res = new Int32Array(items.length.toInt())
@@ -4233,7 +4006,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): Int32Array {
         return new Int32Array(0)
@@ -4247,7 +4019,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<int>): Int32Array {
         let result = new Int32Array(arr.length)
@@ -4264,7 +4035,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<int>): Int32Array {
         const length = set.size;
@@ -4288,7 +4058,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Int32Array): Int32Array {
         let result = new Int32Array(arr.length)
@@ -4304,7 +4073,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<int>): Int32Array {
         let result = new Int32Array(arr.length)
@@ -4320,7 +4088,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: ArrayLike<number>): Int32Array {
         return Int32Array.from<number>(arrayLike, (x: number, k: number): number => x)
@@ -4335,7 +4102,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
         let res = new Int32Array(arrayLike.length)
@@ -4359,7 +4125,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int32Array {
         if (mapfn == undefined) {
@@ -4415,7 +4180,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int32Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: int, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
@@ -4428,7 +4192,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int32Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: int): boolean {
         return this.includes(searchElement, 0)
@@ -4443,7 +4206,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Int32Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: number, fromIndex?: int): boolean {
         if (isNaN(searchElement)) {
@@ -4459,7 +4221,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -4473,7 +4234,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -4488,7 +4248,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: number, fromIndex?: int): int {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
@@ -4508,7 +4267,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -4523,7 +4281,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new Int32ArrayIteratorKeys(this)
@@ -4536,7 +4293,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -4549,7 +4305,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -4563,7 +4318,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -4578,7 +4332,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
@@ -4594,7 +4347,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
@@ -4606,7 +4358,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(data: FixedArray<Object>): Int32Array {
         throw new Error("Int32Array.of: not implemented")
@@ -4618,7 +4369,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a new Int32Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): Int32Array
 
@@ -4629,7 +4379,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a new Int32Array with elements of current Int32Array[begin, this.length)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): Int32Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -4645,7 +4394,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): Int32Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -4667,7 +4415,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a new Int32Array with the same underlying ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): Int32Array {
         const len: int = this.lengthInt
@@ -4689,7 +4436,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -4710,7 +4456,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): Int32Array {
         let newArray = new Int32Array(this.lengthInt);
@@ -4726,7 +4471,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): Int32Array {
         return new Int32Array(this).sort()
@@ -4738,7 +4482,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - a string representation of the Int32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -4750,7 +4493,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<Number> {
         return new Int32ArrayIterator(this)
@@ -4762,7 +4504,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Number> {
         return this.values()
@@ -4777,7 +4518,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: int): Int32Array {
         let res = new Int32Array(this)
@@ -4794,7 +4534,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: number): Int32Array {
         let res = new Int32Array(this)
@@ -4811,7 +4550,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - the last element that satisfies fn
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: int, array: Int32Array) => boolean =
@@ -4825,7 +4563,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Int32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -4838,7 +4575,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Int32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
@@ -4890,7 +4626,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: number, index: int, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -4913,7 +4648,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int32Array) => U,
@@ -4937,7 +4671,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Int32Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int32Array) => number): number {
         if (this.lengthInt == 0) {
@@ -4962,7 +4695,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int32Array) => U,
@@ -4987,7 +4719,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Int32Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int32Array) => number): number {
         if (this.lengthInt == 0) {
@@ -5008,7 +4739,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a new Int32Array where for each element from current Int32Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: number, index: int, array: Int32Array) => number): Int32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int32Array.BYTES_PER_ELEMENT)
@@ -5029,7 +4759,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: number, index: int, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -5047,7 +4776,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array } - a new Int32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: number, index: int, array: Int32Array) => boolean): Int32Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -5078,7 +4806,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: number, index: int, obj: Int32Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -5099,7 +4826,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: number, index: int, obj: Int32Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -5118,7 +4844,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number, index: int, array: Int32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -5137,7 +4862,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: number, index: int, array: Int32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -5156,7 +4880,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: number, index: int, array: Int32Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -5170,7 +4893,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Int32Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): Int32Array {
         return this
@@ -5207,7 +4929,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -5218,7 +4939,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteOffset: int
 
@@ -5229,7 +4949,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteLength: int
 
@@ -5240,7 +4959,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "Int32Array"
 }
@@ -5314,7 +5032,6 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[int, BigInt]> {
  * @implements { Iterable<BigInt>, ArrayLike<BigInt> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     /**
@@ -5325,7 +5042,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = 8
     /**
@@ -5335,7 +5051,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = BigInt64Array.BYTES_PER_ELEMENT
     protected readonly lengthInt: int
@@ -5345,7 +5060,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -5358,7 +5072,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -5371,7 +5084,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / BigInt64Array.BYTES_PER_ELEMENT).toInt()) {
@@ -5389,7 +5101,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param { BigInt64Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: BigInt64Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -5404,7 +5115,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -5419,7 +5129,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -5434,7 +5143,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param { FixedArray<bigint> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<bigint>) {
         this(numbers.length)
@@ -5449,7 +5157,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param { Iterable<BigInt> } elements - an iterable object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<BigInt>) {
         const items: Object = elements as Object
@@ -5479,7 +5186,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -5493,7 +5199,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -5508,7 +5213,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -5523,7 +5227,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -5570,7 +5273,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -5605,7 +5307,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: long): void
 
@@ -5617,7 +5318,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: BigInt): void {
         this.$_set(index, val.getLong())
@@ -5629,7 +5329,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - the number of elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -5642,7 +5341,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_get(index: int): BigInt {
         return new BigInt(this.getLong(index))
@@ -5657,7 +5355,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): BigInt | undefined {
         let k: int
@@ -5683,7 +5380,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): BigInt64Array {
         let arrayLength: int = this.lengthInt;
@@ -5713,7 +5409,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): BigInt64Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -5726,7 +5421,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { IterableIterator<[int, BigInt]> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<[int, BigInt]> {
         return new BigInt64ArrayIteratorEntries(this)
@@ -5741,7 +5435,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { this } - modified BigInt64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: long, start?: int, end?: int): this {
         const k = normalizeIndex(start ?? 0, this.lengthInt)
@@ -5759,7 +5452,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { this } - modified BigInt64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: BigInt, start?: int, end?: int): this {
         this.fill(value.getLong(), start, end)
@@ -5776,7 +5468,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: long): void {
         this.$_set(insertPos, val)
@@ -5790,7 +5481,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: BigInt): void {
         this.$_set(insertPos, val)
@@ -5803,7 +5493,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<long>): void {
         this.set(arr, 0)
@@ -5818,7 +5507,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<long>, insertPos: int): void {
         const offset = insertPos
@@ -5837,7 +5525,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<BigInt>): void {
         this.set(arr, 0)
@@ -5852,7 +5539,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<BigInt>, insertPos: int): void {
         const offset = insertPos
@@ -5873,7 +5559,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: BigInt64Array): void
 
@@ -5885,7 +5570,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: BigInt64Array, offset: int): void
 
@@ -5898,7 +5582,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<BigInt>, offset: int = 0): void {
         const insertPos = offset
@@ -5918,7 +5601,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<int>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
@@ -5934,7 +5616,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<long>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
@@ -5950,7 +5631,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<bigint>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
@@ -5966,7 +5646,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<number>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
@@ -5986,7 +5665,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): BigInt64Array {
         return new BigInt64Array(0)
@@ -6000,7 +5678,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<BigInt>): BigInt64Array {
         let result = new BigInt64Array(arr.length)
@@ -6017,7 +5694,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<BigInt>): BigInt64Array {
         const length = set.size;
@@ -6041,7 +5717,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: BigInt64Array): BigInt64Array {
         let result = new BigInt64Array(arr.length)
@@ -6057,7 +5732,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<BigInt>): BigInt64Array {
         let result = new BigInt64Array(arr.length)
@@ -6073,7 +5747,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: ArrayLike<number>): BigInt64Array {
         throw new Error("BigInt64Array.from: not implemented")
@@ -6088,7 +5761,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
         let res = new BigInt64Array(arrayLike.length)
@@ -6112,7 +5784,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigInt64Array {
         if (mapfn == undefined) {
@@ -6168,7 +5839,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { boolean } - true if searchElement is in BigInt64Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: long, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
@@ -6181,7 +5851,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { boolean } - true if searchElement is in BigInt64Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: long): boolean {
         return this.includes(searchElement, 0)
@@ -6196,7 +5865,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { boolean } - true if searchElement is in BigInt64Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: BigInt, fromIndex?: int): boolean {
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
@@ -6209,7 +5877,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -6223,7 +5890,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -6238,7 +5904,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: BigInt, fromIndex?: int): int {
             return this.indexOfImpl(searchElement.getLong(), fromIndex ?? 0)
@@ -6258,7 +5923,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -6273,7 +5937,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new BigInt64ArrayIteratorKeys(this)
@@ -6286,7 +5949,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -6299,7 +5961,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: BigInt): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -6313,7 +5974,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -6328,7 +5988,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: BigInt, fromIndex: int | undefined): int {
             return this.lastIndexOfImpl(searchElement.getLong(), fromIndex ?? 0)
@@ -6344,7 +6003,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
@@ -6356,7 +6014,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(data: FixedArray<Object>): BigInt64Array {
         throw new Error("BigInt64Array.of: not implemented")
@@ -6368,7 +6025,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a new BigInt64Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): BigInt64Array
 
@@ -6379,7 +6035,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a new BigInt64Array with elements of current BigInt64Array[begin, this.length)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): BigInt64Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -6395,7 +6050,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): BigInt64Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -6417,7 +6071,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a new BigInt64Array with the same underlying ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): BigInt64Array {
         const len: int = this.lengthInt
@@ -6439,7 +6092,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -6460,7 +6112,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): BigInt64Array {
         let newArray = new BigInt64Array(this.lengthInt);
@@ -6476,7 +6127,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): BigInt64Array {
         return new BigInt64Array(this).sort()
@@ -6488,7 +6138,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { string } - a string representation of the BigInt64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -6500,7 +6149,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { IterableIterator<BigInt> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<BigInt> {
         return new BigInt64ArrayIterator(this)
@@ -6512,7 +6160,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { IterableIterator<BigInt> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<BigInt> {
         return this.values()
@@ -6527,7 +6174,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: long): BigInt64Array {
         let res = new BigInt64Array(this)
@@ -6544,7 +6190,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: BigInt): BigInt64Array {
         let res = new BigInt64Array(this)
@@ -6561,7 +6206,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt } - the last element that satisfies fn
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: BigInt) => boolean): BigInt {
         let newF: (val: BigInt, index: int, array: BigInt64Array) => boolean =
@@ -6575,7 +6219,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { this } - sorted BigInt64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -6588,7 +6231,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { this } - sorted BigInt64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(compareFn?: (a: BigInt, b: BigInt) => int | BigInt): this {
         if (compareFn == undefined) {
@@ -6644,7 +6286,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: BigInt, index: int, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -6667,7 +6308,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = BigInt>(
                 callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => U,
@@ -6691,7 +6331,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { TypeError } - If the BigInt64Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => BigInt): BigInt {
         if (this.lengthInt == 0) {
@@ -6716,7 +6355,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = BigInt>(
                 callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => U,
@@ -6741,7 +6379,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { TypeError } - If the BigInt64Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => BigInt): BigInt {
         if (this.lengthInt == 0) {
@@ -6762,7 +6399,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a new BigInt64Array where for each element from current BigInt64Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: BigInt, index: int, array: BigInt64Array) => BigInt): BigInt64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT)
@@ -6783,7 +6419,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: BigInt, index: int, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -6801,7 +6436,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array } - a new BigInt64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): BigInt64Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -6832,7 +6466,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: BigInt, index: int, obj: BigInt64Array) => boolean): BigInt | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -6853,7 +6486,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: BigInt, index: int, obj: BigInt64Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -6872,7 +6504,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): long {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -6891,7 +6522,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { int } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -6910,7 +6540,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: BigInt, index: int, array: BigInt64Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -6924,7 +6553,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns { BigInt64Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): BigInt64Array {
         return this
@@ -6961,7 +6589,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -6972,7 +6599,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteOffset: int
 
@@ -6983,7 +6609,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteLength: int
 
@@ -6994,7 +6619,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "BigInt64Array"
 }
@@ -7068,7 +6692,6 @@ class Float32ArrayIteratorEntries implements IterableIterator<[int, Number]> {
  * @implements { Iterable<Number>, ArrayLike<Number> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
@@ -7079,7 +6702,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = 4
     /**
@@ -7089,7 +6711,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = Float32Array.BYTES_PER_ELEMENT
     protected readonly lengthInt: int
@@ -7099,7 +6720,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -7112,7 +6732,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -7125,7 +6744,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Float32Array.BYTES_PER_ELEMENT).toInt()) {
@@ -7143,7 +6761,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Float32Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: Float32Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -7158,7 +6775,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -7173,7 +6789,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -7188,7 +6803,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Iterable<Number> } elements - an iterable object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
@@ -7218,7 +6832,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -7232,7 +6845,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -7247,7 +6859,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -7262,7 +6873,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -7309,7 +6919,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -7344,7 +6953,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: float): void
 
@@ -7356,7 +6964,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: number): void {
         this.$_set(index, val.toFloat())
@@ -7368,7 +6975,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the number of elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -7381,7 +6987,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_get(index: int): number
 
@@ -7392,7 +6997,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Number | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): Number | undefined {
         let k: int
@@ -7418,7 +7022,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): Float32Array {
         let arrayLength: int = this.lengthInt;
@@ -7448,7 +7051,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): Float32Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -7461,7 +7063,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<[int, Number]> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<[int, Number]> {
         return new Float32ArrayIteratorEntries(this)
@@ -7476,7 +7077,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Float32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: float, start?: int, end?: int): this {
         const k = normalizeIndex(start ?? 0, this.lengthInt)
@@ -7494,7 +7094,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Float32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: number, start?: int, end?: int): this {
         this.fill(value.toFloat(), start, end)
@@ -7511,7 +7110,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: float): void {
         this.$_set(insertPos, val)
@@ -7525,7 +7123,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: number): void {
         this.$_set(insertPos, val)
@@ -7538,7 +7135,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<float>): void {
         this.set(arr, 0)
@@ -7553,7 +7149,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<float>, insertPos: int): void {
         const offset = insertPos
@@ -7572,7 +7167,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>): void {
         this.set(arr, 0)
@@ -7587,7 +7181,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>, insertPos: int): void {
         const offset = insertPos
@@ -7608,7 +7201,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Float32Array): void
 
@@ -7620,7 +7212,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Float32Array, offset: int): void
 
@@ -7633,7 +7224,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<number>, offset: int = 0): void {
         const insertPos = offset
@@ -7653,7 +7243,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<int>): Float32Array {
         let res = new Float32Array(items.length.toInt())
@@ -7669,7 +7258,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<float>): Float32Array {
         let res = new Float32Array(items.length.toInt())
@@ -7685,7 +7273,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<number>): Float32Array {
         let res = new Float32Array(items.length.toInt())
@@ -7704,7 +7291,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): Float32Array {
         return new Float32Array(0)
@@ -7718,7 +7304,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<number>): Float32Array {
         let result = new Float32Array(arr.length)
@@ -7735,7 +7320,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<number>): Float32Array {
         const length = set.size;
@@ -7759,7 +7343,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Float32Array): Float32Array {
         let result = new Float32Array(arr.length)
@@ -7775,7 +7358,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<number>): Float32Array {
         let result = new Float32Array(arr.length)
@@ -7791,7 +7373,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: ArrayLike<number>): Float32Array {
         return Float32Array.from<number>(arrayLike, (x: number, k: number): number => x)
@@ -7806,7 +7387,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
         let res = new Float32Array(arrayLike.length)
@@ -7830,7 +7410,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float32Array {
         if (mapfn == undefined) {
@@ -7887,7 +7466,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Float32Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: float, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
@@ -7900,7 +7478,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Float32Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: float): boolean {
         return this.includes(searchElement, 0)
@@ -7915,7 +7492,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Float32Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: number, fromIndex?: int): boolean {
         if (isNaN(searchElement)) {
@@ -7931,7 +7507,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -7945,7 +7520,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -7960,7 +7534,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: number, fromIndex?: int): int {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
@@ -7980,7 +7553,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -7995,7 +7567,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new Float32ArrayIteratorKeys(this)
@@ -8008,7 +7579,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -8021,7 +7591,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -8035,7 +7604,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -8050,7 +7618,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
@@ -8066,7 +7633,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
@@ -8078,7 +7644,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(data: FixedArray<Object>): Float32Array {
         throw new Error("Float32Array.of: not implemented")
@@ -8090,7 +7655,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a new Float32Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): Float32Array
 
@@ -8101,7 +7665,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a new Float32Array with elements of current Float32Array[begin, this.length)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): Float32Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -8117,7 +7680,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): Float32Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -8139,7 +7701,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a new Float32Array with the same underlying ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): Float32Array {
         const len: int = this.lengthInt
@@ -8161,7 +7722,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -8182,7 +7742,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): Float32Array {
         let newArray = new Float32Array(this.lengthInt);
@@ -8198,7 +7757,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): Float32Array {
         return new Float32Array(this).sort()
@@ -8210,7 +7768,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - a string representation of the Float32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -8222,7 +7779,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<Number> {
         return new Float32ArrayIterator(this)
@@ -8234,7 +7790,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Number> {
         return this.values()
@@ -8249,7 +7804,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: float): Float32Array {
         let res = new Float32Array(this)
@@ -8266,7 +7820,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: number): Float32Array {
         let res = new Float32Array(this)
@@ -8283,7 +7836,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - the last element that satisfies fn
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: int, array: Float32Array) => boolean =
@@ -8297,7 +7849,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Float32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -8310,7 +7861,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Float32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
@@ -8379,7 +7929,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: number, index: int, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -8402,7 +7951,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float32Array) => U,
@@ -8426,7 +7974,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Float32Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float32Array) => number): number {
         if (this.lengthInt == 0) {
@@ -8451,7 +7998,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float32Array) => U,
@@ -8476,7 +8022,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Float32Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float32Array) => number): number {
         if (this.lengthInt == 0) {
@@ -8497,7 +8042,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a new Float32Array where for each element from current Float32Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: number, index: int, array: Float32Array) => number): Float32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Float32Array.BYTES_PER_ELEMENT)
@@ -8518,7 +8062,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: number, index: int, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -8536,7 +8079,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array } - a new Float32Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: number, index: int, array: Float32Array) => boolean): Float32Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -8567,7 +8109,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: number, index: int, obj: Float32Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -8588,7 +8129,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: number, index: int, obj: Float32Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -8607,7 +8147,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number, index: int, array: Float32Array) => boolean): float {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -8626,7 +8165,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: number, index: int, array: Float32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -8645,7 +8183,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: number, index: int, array: Float32Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -8659,7 +8196,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float32Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): Float32Array {
         return this
@@ -8696,7 +8232,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -8707,7 +8242,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteOffset: int
 
@@ -8718,7 +8252,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteLength: int
 
@@ -8729,7 +8262,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "Float32Array"
 }
@@ -8803,7 +8335,6 @@ class Float64ArrayIteratorEntries implements IterableIterator<[int, Number]> {
  * @implements { Iterable<Number>, ArrayLike<Number> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     /**
@@ -8814,7 +8345,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = 8
     /**
@@ -8824,7 +8354,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = Float64Array.BYTES_PER_ELEMENT
     protected readonly lengthInt: int
@@ -8834,7 +8363,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -8847,7 +8375,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -8860,7 +8387,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Float64Array.BYTES_PER_ELEMENT).toInt()) {
@@ -8878,7 +8404,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Float64Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: Float64Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -8893,7 +8418,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -8908,7 +8432,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -8923,7 +8446,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param { Iterable<Number> } elements - an iterable object
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
@@ -8953,7 +8475,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -8967,7 +8488,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -8982,7 +8502,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -8997,7 +8516,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -9044,7 +8562,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -9079,7 +8596,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: double): void
 
@@ -9089,7 +8605,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the number of elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -9102,7 +8617,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_get(index: int): number
 
@@ -9113,7 +8627,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Number | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): Number | undefined {
         let k: int
@@ -9139,7 +8652,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): Float64Array {
         let arrayLength: int = this.lengthInt;
@@ -9169,7 +8681,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): Float64Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -9182,7 +8693,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<[int, Number]> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<[int, Number]> {
         return new Float64ArrayIteratorEntries(this)
@@ -9197,7 +8707,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - modified Float64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: number, start?: int, end?: int): this {
         const k = normalizeIndex(start ?? 0, this.lengthInt)
@@ -9216,7 +8725,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: number): void {
         this.$_set(insertPos, val)
@@ -9229,7 +8737,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<double>): void {
         this.set(arr, 0)
@@ -9244,7 +8751,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<number>, insertPos: int): void {
         const offset = insertPos
@@ -9265,7 +8771,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Float64Array): void
 
@@ -9277,7 +8782,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: Float64Array, offset: int): void
 
@@ -9290,7 +8794,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<number>, offset: int = 0): void {
         const insertPos = offset
@@ -9310,7 +8813,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<int>): Float64Array {
         let res = new Float64Array(items.length.toInt())
@@ -9326,7 +8828,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<number>): Float64Array {
         let res = new Float64Array(items.length.toInt())
@@ -9344,7 +8845,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): Float64Array {
         return new Float64Array(0)
@@ -9358,7 +8858,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<number>): Float64Array {
         let result = new Float64Array(arr.length)
@@ -9375,7 +8874,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<number>): Float64Array {
         const length = set.size;
@@ -9399,7 +8897,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Float64Array): Float64Array {
         let result = new Float64Array(arr.length)
@@ -9415,7 +8912,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<number>): Float64Array {
         let result = new Float64Array(arr.length)
@@ -9431,7 +8927,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: ArrayLike<number>): Float64Array {
         return Float64Array.from<number>(arrayLike, (x: number, k: number): number => x)
@@ -9446,7 +8941,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
         let res = new Float64Array(arrayLike.length)
@@ -9470,7 +8964,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float64Array {
         if (mapfn == undefined) {
@@ -9528,7 +9021,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { boolean } - true if searchElement is in Float64Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: number, fromIndex?: int): boolean {
         if (isNaN(searchElement)) {
@@ -9544,7 +9036,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -9558,7 +9049,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -9573,7 +9063,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: number, fromIndex?: int): int {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
@@ -9593,7 +9082,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -9608,7 +9096,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new Float64ArrayIteratorKeys(this)
@@ -9621,7 +9108,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -9634,7 +9120,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -9648,7 +9133,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -9663,7 +9147,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
@@ -9679,7 +9162,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
@@ -9691,7 +9173,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(data: FixedArray<Object>): Float64Array {
         throw new Error("Float64Array.of: not implemented")
@@ -9703,7 +9184,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a new Float64Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): Float64Array
 
@@ -9714,7 +9194,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a new Float64Array with elements of current Float64Array[begin, this.length)
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): Float64Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -9730,7 +9209,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): Float64Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -9752,7 +9230,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a new Float64Array with the same underlying ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): Float64Array {
         const len: int = this.lengthInt
@@ -9774,7 +9251,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -9795,7 +9271,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): Float64Array {
         let newArray = new Float64Array(this.lengthInt);
@@ -9811,7 +9286,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): Float64Array {
         return new Float64Array(this).sort()
@@ -9823,7 +9297,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { string } - a string representation of the Float64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -9835,7 +9308,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<Number> {
         return new Float64ArrayIterator(this)
@@ -9847,7 +9319,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { IterableIterator<Number> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Number> {
         return this.values()
@@ -9862,7 +9333,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: number): Float64Array {
         let res = new Float64Array(this)
@@ -9879,7 +9349,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number } - the last element that satisfies fn
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: int, array: Float64Array) => boolean =
@@ -9893,7 +9362,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Float64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -9906,7 +9374,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { this } - sorted Float64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
@@ -9975,7 +9442,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: number, index: int, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -9998,7 +9464,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float64Array) => U,
@@ -10022,7 +9487,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Float64Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float64Array) => number): number {
         if (this.lengthInt == 0) {
@@ -10047,7 +9511,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = number>(
                 callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float64Array) => U,
@@ -10072,7 +9535,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { TypeError } - If the Float64Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float64Array) => number): number {
         if (this.lengthInt == 0) {
@@ -10093,7 +9555,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a new Float64Array where for each element from current Float64Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: number, index: int, array: Float64Array) => number): Float64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Float64Array.BYTES_PER_ELEMENT)
@@ -10114,7 +9575,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: number, index: int, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -10132,7 +9592,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array } - a new Float64Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: number, index: int, array: Float64Array) => boolean): Float64Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -10163,7 +9622,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { number | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: number, index: int, obj: Float64Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -10184,7 +9642,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: number, index: int, obj: Float64Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -10203,7 +9660,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: number, index: int, array: Float64Array) => boolean): double {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -10222,7 +9678,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { int } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: number, index: int, array: Float64Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
@@ -10241,7 +9696,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: number, index: int, array: Float64Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -10255,7 +9709,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns { Float64Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): Float64Array {
         return this
@@ -10292,7 +9745,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -10303,7 +9755,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteOffset: int
 
@@ -10314,7 +9765,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly byteLength: int
 
@@ -10325,7 +9775,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "Float64Array"
 }

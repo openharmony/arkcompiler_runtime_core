@@ -27,7 +27,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -37,7 +36,6 @@ export namespace reflect {
  * @extends Method
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Constructor extends Method {
     /**
@@ -53,7 +51,6 @@ export final class Constructor extends Method {
      * @returns { boolean } Returns true if the two constructor objects are equal, otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: Constructor): boolean {
         return this.methodPtr == other.methodPtr
@@ -71,7 +68,6 @@ export final class Constructor extends Method {
      * @throws { TypeError } Throws when The number or type of `args` does not match the method signature.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public createInstance(args?: FixedArray<Any>): Object {
         return this.createInstanceInternal(args);

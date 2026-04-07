@@ -24,7 +24,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -34,7 +33,6 @@ export namespace reflect {
  * @typedef { InvocationHandler }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface InvocationHandler {
     /**
@@ -45,7 +43,6 @@ export interface InvocationHandler {
      * @returns { Any } The value of the attribute.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get(proxy: Proxy, method: InstanceMethod): Any
 
@@ -57,7 +54,6 @@ export interface InvocationHandler {
      * @param { Any } value - The value that has been passed to assign through the setter.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     set(proxy: Proxy, method: InstanceMethod, value: Any): void
 
@@ -70,7 +66,6 @@ export interface InvocationHandler {
      * @returns { Any } The result of the method call.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     invoke(proxy: Proxy, method: InstanceMethod, args: FixedArray<Any>): Any
 }
@@ -81,7 +76,6 @@ export interface InvocationHandler {
  *     instantiating proxy objects dynamically at runtime.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Proxy {
     /**
@@ -124,7 +118,6 @@ export class Proxy {
      * @returns { InvocationHandler } The `InvocationHandler` used by this proxy.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getHandler(): InvocationHandler {
         return this.handler
@@ -141,7 +134,6 @@ export class Proxy {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static create(linker: RuntimeLinker, interfaces: FixedArray<Class>, handler: InvocationHandler): Proxy {
         let proxyClass = Proxy.createClass(linker, interfaces)
@@ -161,7 +153,6 @@ export class Proxy {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isProxyClass(klass: Class): boolean {
         return klass.isSubtypeOf(Class.from<Proxy>()) && Proxy.hasProxyFlag(klass)
@@ -175,7 +166,6 @@ export class Proxy {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private static native hasProxyFlag(klass: Class): boolean
 

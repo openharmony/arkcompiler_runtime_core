@@ -39,7 +39,6 @@ export @interface JSONParseIgnore {
  * 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export @interface JSONStringifyGetter {
 }
@@ -704,7 +703,6 @@ export class JSON {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static stringifyWithGetters(obj: Any): String {
         if (obj === undefined) {
@@ -730,7 +728,6 @@ export class JSON {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static stringifyWithGetters(
                 obj: Any,
@@ -768,7 +765,6 @@ export class JSON {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static stringifyWithGetters(
                 obj: Any,
@@ -1017,7 +1013,6 @@ export class JSON {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static parseUpdate<T>(json: string, instance: T): T {
         return JSON.parseUpdate<T>(json, undefined, instance)
@@ -1038,7 +1033,6 @@ export class JSON {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static parseUpdate<T>(
         json: string,
@@ -1065,7 +1059,6 @@ export class JSON {
       * @static
       * @syscap SystemCapability.Utils.Lang
       * @FaAndStageModel
-      * @since 24
       */
     public static parseJsonElement(text: string, options?: jsonx.ParseOptions): jsonx.JsonElement {
         return new UnifiedJsonParser(text, options).parse()
@@ -1081,7 +1074,6 @@ export class JSON {
       * @static
       * @syscap SystemCapability.Utils.Lang
       * @FaAndStageModel
-      * @since 24
       */
     public static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement,
         options?: jsonx.ParseOptions): jsonx.JsonElement {
@@ -1098,7 +1090,6 @@ export class JSON {
       * @static
       * @syscap SystemCapability.Utils.Lang
       * @FaAndStageModel
-      * @since 24
       */
     public static parseJsonRecord(text: string, options?: jsonx.ParseOptions): Record<string, JsonRecordType> {
         return new UnifiedJsonParser(text, options).parseRecord()
