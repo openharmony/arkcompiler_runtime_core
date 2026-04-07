@@ -619,16 +619,12 @@ void EncodeVisitor::VisitSaveStateOsr(GraphVisitor *visitor, Inst *inst)
 
 void EncodeVisitor::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
 {
-    // NOTE(compiler): Implement encoding for SaveStateSuspend
-    auto enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetEncoder()->SetFalseResult();
+    static_cast<EncodeVisitor *>(visitor)->GetCodegen()->AsyncSuspend(inst);
 }
 
 void EncodeVisitor::VisitDispatch([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
 {
-    // NOTE(compiler): Implement encoding for Dispatch
-    auto enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetEncoder()->SetFalseResult();
+    static_cast<EncodeVisitor *>(visitor)->GetCodegen()->AsyncDispatch(inst);
 }
 
 void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)

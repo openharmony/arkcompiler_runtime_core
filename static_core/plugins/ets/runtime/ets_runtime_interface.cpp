@@ -105,6 +105,11 @@ uint64_t EtsRuntimeInterface::GetFuncPropNameOffset(MethodPtr methodPtr, uint32_
     return reinterpret_cast<uint64_t>(str) - reinterpret_cast<uint64_t>(pf->GetBase());
 }
 
+bool EtsRuntimeInterface::HasAsyncAnnotation(MethodPtr methodPtr) const
+{
+    return MethodCast(methodPtr)->HasAsyncAnnotation();
+}
+
 bool EtsRuntimeInterface::IsMethodStringConcat(MethodPtr method) const
 {
     return method == PlatformTypes()->coreStringConcat;

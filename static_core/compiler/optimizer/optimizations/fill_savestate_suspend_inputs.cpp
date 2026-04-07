@@ -16,10 +16,12 @@
 #include "fill_savestate_suspend_inputs.h"
 #include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/ir/basicblock.h"
+#include "optimizer/ir/datatype.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/analysis.h"
 #include "compiler_logger.h"
 #include <algorithm>
+#include <cstdint>
 
 namespace ark::compiler {
 
@@ -56,9 +58,27 @@ bool FillSaveStateSuspendInputs::RunImpl()
     graph->SetSaveStateSuspendInputsAllocated();
 #endif  // COMPILER_DEBUG_CHECKS
 
+    graph->SetMaxPrimCountAtSuspend(maxPrimCount_);
+    graph->SetMaxRefCountAtSuspend(maxRefCount_);
+
     COMPILER_LOG(DEBUG, FILL_SS_SUSPEND) << "FillSaveStateSuspendInputs pass completed, modified=" << modified;
 
     return modified;
+}
+
+void FillSaveStateSuspendInputs::UpdateCounters(SaveStateInst *saveStateSuspend)
+{
+    uint32_t refCount = 0;
+    uint32_t primCount = 0;
+    for (auto input : saveStateSuspend->GetInputs()) {
+        if (IsReference(input.GetInst()->GetType())) {
+            refCount++;
+        } else {
+            primCount++;
+        }
+    }
+    maxPrimCount_ = std::max(maxPrimCount_, primCount + static_cast<uint32_t>(saveStateSuspend->GetImmediatesCount()));
+    maxRefCount_ = std::max(maxRefCount_, refCount);
 }
 
 bool FillSaveStateSuspendInputs::ProcessSaveStateSuspend(SaveStateInst *saveStateSuspend)
@@ -95,6 +115,7 @@ bool FillSaveStateSuspendInputs::ProcessSaveStateSuspend(SaveStateInst *saveStat
     }
 
     OptimizeSaveStateConstantInputs(saveStateSuspend);
+    UpdateCounters(saveStateSuspend);
 
     COMPILER_LOG(DEBUG, FILL_SS_SUSPEND) << "SaveStateSuspend v" << saveStateSuspend->GetId() << ": added "
                                          << addedCount

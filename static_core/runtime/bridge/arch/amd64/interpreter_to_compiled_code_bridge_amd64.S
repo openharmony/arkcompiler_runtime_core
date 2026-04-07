@@ -409,10 +409,22 @@ InterpreterToCompiledCodeBridge:
     retq
     CFI_ENDPROC
 
-// uint64_t InvokeCompiledCodeWithArguments(const int64_t* args, const Frame *iframe, const Method *method, ManagedThread* thread)
+.equ USUAL_INVOKE_MODE, 0
+.equ RESUME_INVOKE_MODE, 1
+
+.macro InvokeCompiledCode mode
+.if \mode == USUAL_INVOKE_MODE
 .global InvokeCompiledCodeWithArgArray
 TYPE_FUNCTION(InvokeCompiledCodeWithArgArray)
+// uint64_t InvokeCompiledCodeWithArguments(const int64_t* args, const Frame *iframe, const Method *method, ManagedThread* thread)
 InvokeCompiledCodeWithArgArray:
+.elseif \mode == RESUME_INVOKE_MODE
+.global ResumeAsyncCompiledCode
+TYPE_FUNCTION(ResumeAsyncCompiledCode)
+ResumeAsyncCompiledCode:
+.else
+.error "Wrong calling mode for InvokeCompiledCode: \mode!"
+.endif
     CFI_STARTPROC
 
     pushq %rbp
@@ -458,7 +470,7 @@ InvokeCompiledCodeWithArgArray:
     jne 1f
 
     movq %r13, %rdi
-    jmp .Linvoke_with_args
+    jmp .Linvoke_with_args_\@
 
 1:
     // setup regs as follow
@@ -500,10 +512,10 @@ InvokeCompiledCodeWithArgArray:
     movq %r13, (%rdx)
     addq $8, %rdx
 
-.Lloop_args_push:
+.Lloop_args_push_\@:
     NEXT_SHORTY %r11d
     cmpl $0, %r11d
-    je .Lloopend_args_push
+    je .Lloopend_args_push_\@
 
     movq (%rbx), %rcx
     addq $8, %rbx
@@ -513,19 +525,24 @@ InvokeCompiledCodeWithArgArray:
     movq (%rbx), %r13
     addq $8, %rbx
 
-1:  PUSH_ARG %rcx, %r13, %rdx, %rdi, %rsi, %r9, .Lloop_args_push
-    jmp .Lloop_args_push
-.Lloopend_args_push:
+1:  PUSH_ARG %rcx, %r13, %rdx, %rdi, %rsi, %r9, .Lloop_args_push_\@
+    jmp .Lloop_args_push_\@
+.Lloopend_args_push_\@:
     // load arguments into regs
     movq %r8, %rax
     LOAD_FPR_ARGS %rax
     LOAD_GPR_ARGS %rax
 
-.Linvoke_with_args:
+.Linvoke_with_args_\@:
     // invoke the method
     // since the first argument is Method* it must be in %rdi
     movq METHOD_COMPILED_ENTRY_POINT_OFFSET(%rdi), %rax
     movq -64(%rbp), %THREAD_REG
+.if \mode == RESUME_INVOKE_MODE
+    // Add IS_RESUMED tag to thread *
+    // NOTE: tagging approach will be removed!
+    orq $1, %THREAD_REG
+.endif
     callq *%rax
 
     // handle the result
@@ -536,7 +553,7 @@ InvokeCompiledCodeWithArgArray:
     andl $0xF, %r14d
 
     cmpl $SHORTY_VOID, %r14d
-    je .Lreturn_
+    je .Lreturn_\@
 
     movl %r14d, %esi
     movl %r14d, %edi
@@ -547,33 +564,33 @@ InvokeCompiledCodeWithArgArray:
 
     subl $(SHORTY_FIRST_32), %esi
     cmpl $(SHORTY_NUM_MIN32_TYPES - 1), %esi
-    jbe .Lreturn_ // 64-bit int / ref or 32-bit int
+    jbe .Lreturn_\@ // 64-bit int / ref or 32-bit int
 
     // less than 32-bit
     cmpl $SHORTY_I16, %edi
-    je .LI16_
-    ja .LU16_
+    je .LI16_\@
+    ja .LU16_\@
 
     cmpl $SHORTY_I8, %edi
-    je .LI8_
-    jne .LU1_U8_
+    je .LI8_\@
+    jne .LU1_U8_\@
 
 1:
     movq %xmm0, %rax
-    jmp .Lreturn_
-.LU1_U8_:
+    jmp .Lreturn_\@
+.LU1_U8_\@:
     movzbl %al, %eax
-    jmp .Lreturn_
-.LI8_:
+    jmp .Lreturn_\@
+.LI8_\@:
     movsbl %al, %eax
-    jmp .Lreturn_
-.LI16_:
+    jmp .Lreturn_\@
+.LI16_\@:
     movswl %ax, %eax
-    jmp .Lreturn_
-.LU16_:
+    jmp .Lreturn_\@
+.LU16_\@:
     movzwl %ax, %eax
 
-.Lreturn_:
+.Lreturn_\@:
     leaq -56(%rbp), %rsp
     popq %rbx
     CFI_RESTORE(rbx)
@@ -593,3 +610,7 @@ InvokeCompiledCodeWithArgArray:
     CFI_RESTORE(rbp)
     retq
     CFI_ENDPROC
+.endm
+
+InvokeCompiledCode USUAL_INVOKE_MODE
+InvokeCompiledCode RESUME_INVOKE_MODE

@@ -411,3 +411,8 @@ InvokeCompiledCodeWithArgArray:
     CFI_DEF_CFA(sp, 0)
     bx lr
     CFI_ENDPROC
+
+.global ResumeAsyncCompiledCode
+.type ResumeAsyncCompiledCode, %function
+ResumeAsyncCompiledCode:
+    bx lr

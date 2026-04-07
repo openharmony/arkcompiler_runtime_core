@@ -209,6 +209,8 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::CallResolvedVirtual:
             case Opcode::CallDynamic:
             case Opcode::Call:
+            case Opcode::Dispatch:
+            case Opcode::SaveStateSuspend:
             case Opcode::Bitcast:
             case Opcode::Cast:
                 return true;
