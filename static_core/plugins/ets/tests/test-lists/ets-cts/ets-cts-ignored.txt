@@ -80,9 +80,6 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_8.ets
 
 #26666 (cts #47 - bad array element type)
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined1.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined1u.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined2.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined4.ets
@@ -939,12 +936,6 @@
 
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
-
-#25111
-15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/positive_0.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/positive_1.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/negative_type_safety_0.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/negative_type_safety_1.ets
 
 #33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
