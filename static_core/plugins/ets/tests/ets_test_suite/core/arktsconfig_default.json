@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "package": "@entry",
+        "baseUrl": "."
+    },
+    "include": [
+        "./**/*.ets"
+    ]
+}

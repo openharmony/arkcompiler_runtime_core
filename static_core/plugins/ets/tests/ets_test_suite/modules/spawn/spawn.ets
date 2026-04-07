@@ -48,6 +48,15 @@ function main() {
     return 0;
 }
 
+function abilityExpectSuccess() {
+    loadLibrary(getNativeLibName())
+    try {
+        loadAndInvokeAbility(getAppMainAbilityClassName())
+    } catch (e) {
+        throw new Error("Success expected, but got error: " + e.message)
+    }
+}
+
 function abilityExpectFailure(cb: (e: Error) => void) {
     loadLibrary(getNativeLibName())
     try {
@@ -75,7 +84,7 @@ function mainCatchLinkerUnresolvedClassError() {
 
 function mainCatchLinkerBadSupertypeError() {
     abilityExpectFailure((e: Error) => {
-        arktest.assertTrue(e instanceof LinkerBadSupertypeError)
+        arktest.assertTrue(e instanceof LinkerMethodConflictError)
         console.log(e.message);
     })
 }
@@ -93,11 +102,11 @@ function mainCircularityExtends() {
 }
 
 function mainMultipleOverrideBase() {
-    abilityExpectVerificationError("L@app/module/MainAbility;");
+    abilityExpectSuccess()
 }
 
 function mainMultipleOverrideBase1() {
-    abilityExpectVerificationError("L@app/module1/MainAbility;");
+    abilityExpectSuccess()
 }
 
 // NOTE(dslynko, #33090): re-enable or remove
@@ -110,13 +119,13 @@ function mainVerificationModeAheadOfTime() {
 }
 
 function mainMultipleImplement() {
-    abilityExpectVerificationError("L@app/module/MainAbility;");
+    abilityExpectSuccess()
 }
 
 function mainMultipleImplement1() {
-    abilityExpectVerificationError("L@app/module1/MainAbility;");
+    abilityExpectSuccess()
 }
 
 function mainMultipleImplement2() {
-    abilityExpectVerificationError("L@app/module2/MainAbility;");
+    abilityExpectSuccess()
 }

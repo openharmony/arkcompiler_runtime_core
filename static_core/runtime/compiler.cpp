@@ -20,6 +20,7 @@
 #include "libarkfile/type_helper.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"
+#include "runtime/bridge/bridge.h"
 #include "runtime/cha.h"
 #include "runtime/jit/profiling_data.h"
 #include "runtime/include/class_linker-inl.h"
@@ -136,7 +137,13 @@ compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::ResolveInterfaceMet
                                                                                     MethodPtr method) const
 {
     ASSERT(method != nullptr);
-    return ClassCast(cls)->ResolveVirtualMethod(MethodCast(method));
+    // prevent inlining conflict copied body, must hit the stub
+    auto *resolved = ClassCast(cls)->ResolveVirtualMethod(MethodCast(method));
+    if (resolved != nullptr && resolved->IsDefaultInterfaceMethod() &&
+        resolved->GetCompiledEntryPoint() == GetDefaultConflictMethodStub()) {
+        return nullptr;
+    }
+    return resolved;
 }
 
 compiler::RuntimeInterface::IdType PandaRuntimeInterface::GetMethodReturnTypeId(MethodPtr method) const

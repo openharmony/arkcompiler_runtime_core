@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if(PANDA_COMPILER_ENABLE AND NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64)
+if(PANDA_COMPILER_ENABLE AND NOT PANDA_MINIMAL_VIXL AND USE_VIXL_ARM64)
     panda_ets_add_gtest(
         CONTAINS_MAIN
         NAME ets_tests_compiler_codegen

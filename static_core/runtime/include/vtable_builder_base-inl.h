@@ -186,7 +186,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable ita
         auto methods = iface->GetVirtualMethods();
         for (auto &method : methods) {
             if (method.IsAbstract()) {
-                continue;
+                continue;  // abstracts never become CopiedMethods
             }
             MethodInfo *info = &defaultMethods->emplace_front(&method);
             if (!ProcessDefaultMethod(itable, i, info)) {
@@ -194,8 +194,14 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable ita
             }
         }
     }
+    return true;
+}
 
-    ASSERT(orderedCopiedMethods_.empty());
+// must run after hook, step 3 creates CONFLICT copied methods
+template <bool VISIT_SUPERITABLE>
+void VTableBuilderBase<VISIT_SUPERITABLE>::BuildOrderedCopiedMethods()
+{
+    orderedCopiedMethods_.clear();
     orderedCopiedMethods_.resize(vtable_.CopiedMethods().size());
 
     for (auto const &[info, entry] : vtable_.CopiedMethods()) {
@@ -203,7 +209,6 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable ita
         copied.SetStatus(entry.GetStatus());
         orderedCopiedMethods_[entry.GetIndex()] = copied;
     }
-    return true;
 }
 
 template <bool VISIT_SUPERITABLE>
@@ -222,6 +227,8 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::Build(panda_file::ClassDataAccessor *
     if (!AddDefaultInterfaceMethods(itable, baseClass != nullptr ? baseClass->GetITable().Size() : 0)) {
         return false;
     }
+    ResolveInterfaceMethodsHook(itable, baseClass != nullptr ? baseClass->GetITable().Size() : 0);
+    BuildOrderedCopiedMethods();
     return true;
 }
 
@@ -241,6 +248,8 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::Build(Span<Method> methods, Class *ba
     if (!AddDefaultInterfaceMethods(itable, baseClass != nullptr ? baseClass->GetITable().Size() : 0)) {
         return false;
     }
+    ResolveInterfaceMethodsHook(itable, baseClass != nullptr ? baseClass->GetITable().Size() : 0);
+    BuildOrderedCopiedMethods();
     return true;
 }
 

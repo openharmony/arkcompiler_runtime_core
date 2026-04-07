@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "package": "@entry",
+        "baseUrl": ".",
+        "paths": {
+            "@dep/x": ["../old/x"]
+        }
+    },
+    "include": [
+        "./**/*.ets"
+    ],
+    "references": [
+        { "path": "../old" }
+    ]
+}

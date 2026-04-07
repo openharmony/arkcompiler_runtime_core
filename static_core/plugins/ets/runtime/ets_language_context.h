@@ -261,7 +261,7 @@ public:
 
     const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/LinkerBadSupertypeError;");
+        return utf::CStringAsMutf8("Lstd/core/LinkerMethodConflictError;");
     }
 
     coretypes::TaggedValue GetInitialTaggedValue() const override

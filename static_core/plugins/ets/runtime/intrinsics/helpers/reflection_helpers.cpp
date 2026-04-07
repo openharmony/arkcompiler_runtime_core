@@ -145,11 +145,8 @@ EtsMethod *ValidateAndResolveInstanceMethod(EtsExecutionContext *executionCtx, E
     }
 
     // Resolve virtual method - this is instance-method specific
-    EtsMethod *resolved = thisObj->GetClass()->ResolveVirtualMethod(method);
-    if (resolved == nullptr) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "Virtual method resolution failed");
-        return nullptr;
-    }
+    auto *resolved = thisObj->GetClass()->ResolveVirtualMethod(method);
+    ASSERT(resolved != nullptr);
     return resolved;
 }
 

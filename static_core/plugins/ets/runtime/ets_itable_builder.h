@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/itable.h"
+#include "runtime/include/vtable_builder_interface.h"
 
 namespace ark {
 
@@ -37,6 +38,11 @@ public:
 
     bool Resolve(Class *klass) override;
 
+    void SetDispatches(Span<const IfaceMethodDispatch> dispatches) override
+    {
+        dispatches_ = dispatches;
+    }
+
     void UpdateClass(Class *klass) override;
 
     void DumpITable([[maybe_unused]] Class *klass) override;
@@ -47,8 +53,13 @@ public:
     };
 
 private:
+    static Method *ResolveMethod(Span<Method *> vtable, ClassLinkerContext *ctx, Class *klass,
+                                 const IfaceMethodDispatch &disp);
+
     ITable itable_;
-    ClassLinkerErrorHandler *errorHandler_;
+    Span<const IfaceMethodDispatch> dispatches_;
+    // base-class ctor expects this field
+    ClassLinkerErrorHandler *errorHandler_ __attribute__((unused));
 };
 
 }  // namespace ark::ets

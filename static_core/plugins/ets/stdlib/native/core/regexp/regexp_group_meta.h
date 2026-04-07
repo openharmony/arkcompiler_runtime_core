@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+// CC-OFFNXT(NPC_RULE_ID_HEADER_FILE_PROTECT) buggy code checker
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_GROUP_META_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_GROUP_META_H
 
@@ -60,6 +61,7 @@ struct CompiledPattern {
     PatternGroupMeta groupMeta;
 };
 
+// CC-OFFNXT(NPC_RULE_ID_BLANK_SPACE_INDENT) buggy code checker
 using Pcre2Obj = CompiledPattern *;
 
 template <typename CharT>

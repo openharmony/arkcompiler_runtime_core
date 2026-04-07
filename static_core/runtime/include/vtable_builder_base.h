@@ -344,6 +344,11 @@ public:
         return {orderedCopiedMethods_.data(), orderedCopiedMethods_.size()};
     }
 
+    Span<const IfaceMethodDispatch> GetIfaceMethodDispatches() const override
+    {
+        return {dispatches_.data(), dispatches_.size()};
+    }
+
 protected:
     explicit VTableBuilderBase(ClassLinkerErrorHandler *errHandler) : errorHandler_(errHandler) {}
 
@@ -355,12 +360,17 @@ protected:
         UNREACHABLE();
     }
 
+    virtual void ResolveInterfaceMethodsHook([[maybe_unused]] ITable itable, [[maybe_unused]] size_t superItableSize) {}
+
+    void BuildOrderedCopiedMethods();
+
     [[nodiscard]] bool CollectProxyMethods(PandaVector<Method *> *output);
 
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_INTERNAL};
     VTableInfo vtable_ {&allocator_};
     size_t numVmethods_ {0};
     ArenaVector<CopiedMethod> orderedCopiedMethods_ {allocator_.Adapter()};
+    ArenaVector<IfaceMethodDispatch> dispatches_ {allocator_.Adapter()};
     ClassLinkerErrorHandler *errorHandler_;
 
 private:

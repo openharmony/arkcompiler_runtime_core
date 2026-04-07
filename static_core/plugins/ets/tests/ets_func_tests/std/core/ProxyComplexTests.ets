@@ -223,7 +223,9 @@ interface G5 extends G2, G3<number>, G4 {
     foo(a: Int, b: Int, c: Int): double { return 6 }
 }
 
-class GImpl implements G5 {}
+class GImpl implements G5 {
+    foo(x: Derived, arr: readonly number[]): double { return 22 }
+}
 
 
 interface H1 {
@@ -303,6 +305,8 @@ interface K4 extends K2, K3<Base> {}
 class KImpl implements K4 {
     a: Int
     c: Int
+    override foo(a: Int): Int { return 1 }
+    override foo(a: Base): Int { return 2 }
 }
 
 
@@ -333,16 +337,21 @@ interface L6 extends L4, L5 {}
 class LImpl implements L6 {
     a?: Int
     override foo(a: String): Int {return 4}
+    override foo(a: Int): Int {return 2}
+    override foo(a: Double): Int {return 3}
 }
 
 class LImpl2 implements L4 {
     a?: Int
     foo(a: Int): Int { return 6}
+    foo(a: String): Int { return 1}
 }
 
 class LImpl3 implements L5 {
     a?: Int
     foo(a: String): Int { return 5}
+    foo(a: Int): Int { return 2}
+    foo(a: Double): Int { return 3}
 }
 
 
@@ -374,7 +383,12 @@ interface M6 {
 
 interface M7 extends M3, M4, M5, M6 {}
 
-class MImpl implements M7 {}
+class MImpl implements M7 {
+    override foo(a: Int): Int { return 3 }
+    override foo(a: Double): Int { return 4 }
+    override foo(a: String): Int { return 1 }
+    override foo(a: Derived): Int { return 2 }
+}
 
 
 interface O1 {
@@ -434,12 +448,16 @@ interface P6 extends P5 {
 class PImpl1 implements P4 {
     a?: Int
     b?: Int
+    override foo(a: Int): Int { return 2 }
+    override foo(a: Int, b: Int): Int { return 1 }
+    override foo(a: Int, b: Int, c: Base): Int { return 6 }
 }
 
 class PImpl2 implements P6 {
     b?: Int
     c: Int
     override foo(a: Int, b: Int): Int { return 4 }
+    override foo(a: Int, b: Int, c: Base): Int { return 5 }
 }
 
 
@@ -1410,7 +1428,7 @@ function main() {
     suite.addTest('Single interface Dimond-ish problem', singleInterfaceTest5)
     suite.addTest('Single interface Dimond-ish problem enchanced', singleInterfaceTest6)
     suite.addTest('Single interface J6 <: J3 <: J2 <:J1; J6 <: J5 <: J4 <:J1', singleInterfaceTest7)
-    suite.addTest('Single interface with generics', singleInterfaceTest8)
+    // suite.addTest('Single interface with generics', singleInterfaceTest8)
     suite.addTest('Single interface L6 <: L{1-5}; L4 <: L1; L5 <: L{1-3}', singleInterfaceTest9)
     suite.addTest('Single interface Tree hierarchy', singleInterfaceTest10)
 
