@@ -1,0 +1,59 @@
+{
+  "harGraph": {
+    "nodes": [
+      { "id": "H_APP",  "name": "app_main",  "timing_cycles": 180 },
+      { "id": "H_DATA", "name": "data_io",   "timing_cycles": 260 },
+      { "id": "H_UI",   "name": "ui_kit",    "timing_cycles": 40  }
+    ],
+    "edges": [
+      { "source": "H_APP",  "target": "H_DATA" },
+      { "source": "H_APP",  "target": "H_UI"   },
+      { "source": "H_DATA", "target": "H_UI"   }
+    ]
+  },
+
+  "fileGraphs": {
+    "app_main": {
+      "nodes": [
+        { "id": "F_APP_ROUTER",  "name": "src/app/router/app_router.ts",  "timing_cycles": 120 },
+        { "id": "F_APP_SERVICE", "name": "src/app/service/core_service.ts","timing_cycles": 60  },
+        { "id": "F_APP_UTILS",   "name": "src/app/utils/helpers.ts",      "timing_cycles": 0   }
+      ],
+      "edges": [
+        { "source": "F_APP_ROUTER",  "target": "F_APP_SERVICE" },
+        { "source": "F_APP_SERVICE", "target": "F_APP_UTILS"   }
+      ]
+    },
+
+    "data_io": {
+      "nodes": [
+        { "id": "F_D_LOADER",     "name": "src/data/loader.ts",               "timing_cycles": 200 },
+        { "id": "F_D_SERIALIZER", "name": "src/data/serializer.ts",           "timing_cycles": 150 },
+        { "id": "F_D_CACHE",      "name": "src/data/cache/simple_cache.ts",   "timing_cycles": 0   }
+      ],
+      "edges": [
+        { "source": "F_D_LOADER",     "target": "F_D_SERIALIZER" },
+        { "source": "F_D_SERIALIZER", "target": "F_D_CACHE"      }
+      ]
+    },
+
+    "ui_kit": {
+      "nodes": [
+        { "id": "F_UI_BUTTON", "name": "src/ui/button/Button.ts",   "timing_cycles": 30 },
+        { "id": "F_UI_MODAL",  "name": "src/ui/modal/Modal.ts",     "timing_cycles": 0  },
+        { "id": "F_UI_THEME",  "name": "src/ui/theme/theme.ts",     "timing_cycles": 10 }
+      ],
+      "edges": [
+        { "source": "F_UI_MODAL",  "target": "F_UI_BUTTON" },
+        { "source": "F_UI_BUTTON", "target": "F_UI_THEME"  }
+      ]
+    }
+  },
+
+  "crossHarDependencies": [
+    { "sourceId": "F_D_SERIALIZER", "targetHarId": "app_main", "count": 4 },
+    { "sourceId": "F_APP_SERVICE",  "targetHarId": "data_io",  "count": 2 },
+    { "sourceId": "F_UI_MODAL",     "targetHarId": "app_main", "count": 1 },
+    { "sourceId": "F_APP_ROUTER",   "targetHarId": "ui_kit",   "count": 3 }
+  ]
+}
