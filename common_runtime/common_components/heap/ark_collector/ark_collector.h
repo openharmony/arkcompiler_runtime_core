@@ -162,6 +162,13 @@ public:
         }
     }
 
+    void ProcessEvacuationStack(GlobalEvacuationStack &globalStack);
+    void ProcessEvacuationStack(ParallelLocalEvacuationStack &markStack);
+
+    void RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack);
+    void MarkEvacuationStack(GlobalEvacuationStack &globalStack);
+    void MarkEvacuationStack(ParallelLocalEvacuationStack &markStack);
+
 protected:
     void CollectLargeGarbage()
     {
@@ -236,6 +243,34 @@ private:
     void PreforwardFlip();
 
     void CollectGarbageWithXRef();
+
+    template <EnumRootsPolicy policy>
+    void PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack);
+    template <void (&rootsVisitFunc)(const common_vm::RefFieldVisitor &)>
+    void PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots);
+    void PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots);
+    void PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots);
+    void RemarkNonHeapRoots(GlobalEvacuationStack &globalStack);
+    void EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack);
+    void MarkSatbBuffer(GlobalEvacuationStack &globalStack);
+    template <typename Stack>
+    void EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &stack);
+    template <typename Stack>
+    size_t EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj, Stack &stack);
+    bool InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region) const;
+    bool InYoungCollectionSpace(const RegionDesc *region) const;
+    bool InYoungCollectionSpace(const BaseObject *obj) const;
+    bool InYoungCollectionSpace(RegionDesc::RegionType type) const;
+    void DoGarbageCollectionWithoutConcurrentMarking();
+
+    template<typename Stack>
+    void RemarkNonHeapRoot(RefField<> &ref, Stack &stack);
+
+    template<typename Stack>
+    void ProcessRef(RefField<> &ref, Stack &stack);
+
+    template<typename Stack>
+    void MarkRef(RefField<> &ref, Stack &stack);
 
     CopyTable fwdTable_;
 

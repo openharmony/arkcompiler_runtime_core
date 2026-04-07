@@ -51,7 +51,7 @@ public:
           collectorProxy_(*theSpace_, collectorResources_), stwBarrier_(collectorProxy_),
         idleBarrier_(collectorProxy_), enumBarrier_(collectorProxy_), markingBarrier_(collectorProxy_),
         remarkBarrier_(collectorProxy_), postMarkingBarrier_(collectorProxy_), preforwardBarrier_(collectorProxy_),
-        copyBarrier_(collectorProxy_)
+        copyBarrier_(collectorProxy_), youngCopyBarrier_(collectorProxy_)
     {
         currentBarrier_.store(&stwBarrier_, std::memory_order_relaxed);
         stwBarrierPtr_ = &stwBarrier_;
@@ -153,6 +153,7 @@ private:
     PostMarkingBarrier postMarkingBarrier_;
     PreforwardBarrier preforwardBarrier_;
     CopyBarrier copyBarrier_;
+    YoungCopyBarrier youngCopyBarrier_;
     std::atomic<Barrier*> currentBarrier_ = nullptr;
     HeuristicGCPolicy heuristicGCPolicy_;
     // manage gc roots entry
@@ -320,6 +321,8 @@ void HeapImpl::InstallBarrier(const GCPhase phase)
         currentBarrier_.store(&preforwardBarrier_, std::memory_order_relaxed);
     } else if (phase == GCPhase::GC_PHASE_COPY || phase == GCPhase::GC_PHASE_FIX) {
         currentBarrier_.store(&copyBarrier_, std::memory_order_relaxed);
+    } else if (phase == GCPhase::GC_PHASE_YOUNG_COPY) {
+        currentBarrier_.store(&youngCopyBarrier_, std::memory_order_relaxed);
     } else if (phase == GCPhase::GC_PHASE_IDLE) {
         currentBarrier_.store(&idleBarrier_, std::memory_order_relaxed);
     } else if (phase == GCPhase::GC_PHASE_POST_MARK) {

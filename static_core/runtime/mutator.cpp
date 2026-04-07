@@ -389,7 +389,7 @@ void Mutator::UpdateReadBarrierEntrypoint(common_vm::GCPhase phase)
            phase == common_vm::GCPhase::GC_PHASE_PRECOPY || phase == common_vm::GCPhase::GC_PHASE_COPY ||
            phase == common_vm::GCPhase::GC_PHASE_FIX || phase == common_vm::GCPhase::GC_PHASE_IDLE ||
            phase == common_vm::GCPhase::GC_PHASE_POST_MARK || phase == common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
-           phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB);
+           phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB || phase == common_vm::GCPhase::GC_PHASE_YOUNG_COPY);
 }
 #endif
 

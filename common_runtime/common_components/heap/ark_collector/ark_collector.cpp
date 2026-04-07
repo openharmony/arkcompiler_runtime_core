@@ -886,10 +886,76 @@ private:
     GCType gcType_;
 };
 
+class ConcurrentEvacuationTask : public common_vm::Task {
+public:
+    ConcurrentEvacuationTask(uint32_t id, ArkCollector &tc, ParallelMarkingMonitor &monitor,
+                             GlobalEvacuationStack &globalStack)
+        : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
+    {
+    }
+
+    ~ConcurrentEvacuationTask() override = default;
+
+    // run concurrent marking task.
+    bool Run(uint32_t threadIndex) override
+    {
+        ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
+        ParallelLocalEvacuationStack stack(&globalStack_, &monitor_);
+        do {
+            if (!monitor_.TryStartStep()) {
+                break;
+            }
+            collector_.ProcessEvacuationStack(stack);
+            monitor_.FinishStep();
+        } while (monitor_.WaitNextStepOrFinished());
+        monitor_.NotifyFinishOne();
+        ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
+        return true;
+    }
+
+private:
+    ArkCollector &collector_;
+    ParallelMarkingMonitor &monitor_;
+    GlobalEvacuationStack &globalStack_;
+};
+
+class RemarkTask : public common_vm::Task {
+public:
+    RemarkTask(uint32_t id, ArkCollector &tc, ParallelMarkingMonitor &monitor,
+                             GlobalEvacuationStack &globalStack)
+        : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
+    {
+    }
+
+    ~RemarkTask() override = default;
+
+    // run concurrent marking task.
+    bool Run(uint32_t threadIndex) override
+    {
+        ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
+        ParallelLocalEvacuationStack stack(&globalStack_, &monitor_);
+        do {
+            if (!monitor_.TryStartStep()) {
+                break;
+            }
+            collector_.MarkEvacuationStack(stack);
+            monitor_.FinishStep();
+        } while (monitor_.WaitNextStepOrFinished());
+        monitor_.NotifyFinishOne();
+        ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
+        return true;
+    }
+
+private:
+    ArkCollector &collector_;
+    ParallelMarkingMonitor &monitor_;
+    GlobalEvacuationStack &globalStack_;
+};
+
 void ArkCollector::DoGarbageCollection()
 {
     GCTracer gcTracer(gcReason_, gcType_);
-    const bool isNotYoungGC = gcReason_ != GCReason::GC_REASON_YOUNG;
+    const bool isYoungGC = gcReason_ == GCReason::GC_REASON_YOUNG;
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::DoGarbageCollection", "");
     if (gcReason_ == GCReason::GC_REASON_XREF) {
         CollectGarbageWithXRef();
@@ -912,7 +978,7 @@ void ArkCollector::DoGarbageCollection()
         ConcurrentPreforward();
         // reclaim large objects should after preforward(may process weak ref) and
         // before fix heap(may clear live bit)
-        if (isNotYoungGC) {
+        if (!isYoungGC) {
             CollectLargeGarbage();
         }
         SweepThreadLocalJitFort();
@@ -922,7 +988,7 @@ void ArkCollector::DoGarbageCollection()
 
         PrepareFix();
         FixHeap();
-        if (isNotYoungGC) {
+        if (!isYoungGC) {
             CollectNonMovableGarbage();
         }
 
@@ -952,7 +1018,7 @@ void ArkCollector::DoGarbageCollection()
         ConcurrentPreforward();
         // reclaim large objects should after preforward(may process weak ref) and
         // before fix heap(may clear live bit)
-        if (isNotYoungGC) {
+        if (!isYoungGC) {
             CollectLargeGarbage();
         }
         SweepThreadLocalJitFort();
@@ -962,7 +1028,7 @@ void ArkCollector::DoGarbageCollection()
 
         PrepareFix();
         FixHeap();
-        if (isNotYoungGC) {
+        if (!isYoungGC) {
             CollectNonMovableGarbage();
         }
 
@@ -972,24 +1038,32 @@ void ArkCollector::DoGarbageCollection()
         return;
     }
 
-    auto collectedRoots = EnumRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>();
-    MarkingHeap(collectedRoots);
-    PreforwardFlip();
-    ConcurrentPreforward();
-    // reclaim large objects should after preforward(may process weak ref)
-    // and before fix heap(may clear live bit)
-    if (isNotYoungGC) {
-        CollectLargeGarbage();
-    }
-    SweepThreadLocalJitFort();
+    const auto avoidConcurrentMarking =
+        BaseRuntime::GetInstance()->GetGCParam().singlePassCompactionEnabled && isYoungGC;
+    if (!avoidConcurrentMarking) {
+        auto collectedRoots = EnumRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>();
+        MarkingHeap(collectedRoots);
+        PreforwardFlip();
+        ConcurrentPreforward();
+        // reclaim large objects should after preforward(may process weak ref)
+        // and before fix heap(may clear live bit)
+        if (!isYoungGC) {
+            CollectLargeGarbage();
+        }
+        SweepThreadLocalJitFort();
 
-    CopyFromSpace();
-    WVerify::VerifyAfterForward(*this);
+        CopyFromSpace();
 
-    PrepareFix();
-    FixHeap();
-    if (isNotYoungGC) {
-        CollectNonMovableGarbage();
+        WVerify::VerifyAfterForward(*this);
+
+        PrepareFix();
+        FixHeap();
+
+        if (!isYoungGC) {
+            CollectNonMovableGarbage();
+        }
+    } else {
+        DoGarbageCollectionWithoutConcurrentMarking();
     }
 
     TransitionToGCPhase(GCPhase::GC_PHASE_IDLE, true);
@@ -998,6 +1072,413 @@ void ArkCollector::DoGarbageCollection()
     space.DumpAllRegionSummary("Peak GC log");
     space.DumpAllRegionStats("region statistics when gc ends");
     CollectSmallSpace();
+}
+
+void ArkCollector::DoGarbageCollectionWithoutConcurrentMarking()
+{
+    CHECK_CC(Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+    GlobalEvacuationStack globalEvacuationStack;
+    PreforwardNonHeapRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>(globalEvacuationStack);
+    EnqueueRememberedSetRefs(globalEvacuationStack);
+    ProcessEvacuationStack(globalEvacuationStack);
+    RemarkYoungCollectionSpace(globalEvacuationStack);
+
+    // We do not evacuate objects on remark pause to avoid too long STW
+    CopyFromSpace();
+
+    WVerify::VerifyAfterForward(*this);
+
+    PrepareFix();
+    FixHeap();
+}
+
+template <ArkCollector::EnumRootsPolicy policy>
+void ArkCollector::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
+{
+    CArrayList<common_vm::BaseObject *> roots;
+
+    if constexpr (policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR) {
+        STWParam param {"preforward-nonheap-roots"};
+        ScopedStopTheWorld stw(param);
+
+        PreforwardNonHeapRootsImpl<VisitRoots>(roots);
+        GetGCStats().recordSTWTime(param.GetElapsedNs());
+    } else if constexpr (policy == EnumRootsPolicy::STW_AND_FLIP_MUTATOR) {
+        PreforwardNonHeapRootsFlip(roots);
+    } else {
+        static_assert(policy == EnumRootsPolicy::STW_AND_FLIP_MUTATOR ||
+                          policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR,
+                      "not implemented");
+    }
+    LocalEvacuationStack stack(&globalStack);
+    for (auto *obj : roots) {
+        if (!MarkObject(obj)) {
+            EnqueueRefsToYoungCollectionSpace(obj, stack);
+        }
+    }
+    stack.Publish();
+}
+
+template <void (&rootsVisitFunc)(const common_vm::RefFieldVisitor &)>
+void ArkCollector::PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots)
+{
+    auto &heap = static_cast<RegionalHeap &>(theAllocator_);
+    heap.AssembleGarbageCandidates();
+    heap.PrepareMarking();
+    heap.PrepareForward();
+
+    TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
+    rootsVisitFunc([this, &forwardedRoots](RefField<> &root) { PreforwardNonHeapRoot(root, forwardedRoots); });
+
+    TransitionToGCPhase(GCPhase::GC_PHASE_YOUNG_COPY, true);
+}
+
+void ArkCollector::PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots)
+{
+    auto *obj = root.GetTargetObject();
+    auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
+
+    if (!InYoungCollectionSpace(region)) {
+        // we do not trace from such root
+        return;
+    }
+
+    if (region->IsFromRegion()) {
+        obj = ForwardObject(obj);
+        root.SetTargetObject(obj);
+    }
+
+    forwardedRoots.push_back(obj);
+}
+
+void ArkCollector::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots)
+{
+    const auto enumGlobalRoots = [this, &forwardedRoots]() {
+        SetGCThreadQosPriority(common_vm::PriorityMode::STW);
+        PreforwardNonHeapRootsImpl<VisitGlobalRoots>(forwardedRoots);
+        SetGCThreadQosPriority(common_vm::PriorityMode::FOREGROUND);
+    };
+
+    std::mutex stackMutex;
+    CArrayList<CArrayList<BaseObject *>> rootSet;  // allocate for each mutator
+    FlipFunction enumMutatorRoot = [this, &rootSet, &stackMutex](Mutator &mutator) {
+        CArrayList<BaseObject *> roots;
+        mutator.VisitMutatorRoots([this, &roots](RefField<> &root) { PreforwardNonHeapRoot(root, roots); });
+        std::lock_guard<std::mutex> lockGuard(stackMutex);
+        rootSet.emplace_back(std::move(roots));
+    };
+
+    STWParam param {"preforward-non-heap-roots"};
+    MutatorManager::Instance().FlipMutators(param, enumGlobalRoots, &enumMutatorRoot);
+    GetGCStats().recordSTWTime(param.GetElapsedNs());
+
+    for (const auto &roots : rootSet) {
+        std::copy(roots.begin(), roots.end(), std::back_inserter(forwardedRoots));
+    }
+
+    VisitConcurrentRoots([this, &forwardedRoots](RefField<> &root) {
+        auto *obj = root.GetTargetObject();
+        auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
+        if (InYoungCollectionSpace(region)) {
+            CHECK_CC(!region->IsFromRegion());
+            forwardedRoots.push_back(obj);
+        }
+    });
+}
+
+void ArkCollector::RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack)
+{
+    STWParam param {"remark-young-collection-space"};
+    ScopedStopTheWorld stw(param);
+
+    TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
+
+    RemarkNonHeapRoots(globalStack);
+    MarkSatbBuffer(globalStack);
+    MarkEvacuationStack(globalStack);
+
+    SatbBuffer::Instance().ClearBuffer();
+    GetGCStats().recordSTWTime(param.GetElapsedNs());
+}
+
+void ArkCollector::RemarkNonHeapRoots(GlobalEvacuationStack &globalStack)
+{
+    LocalEvacuationStack stack(&globalStack);
+    VisitRoots([this, &stack](RefField<> &root) { RemarkNonHeapRoot(root, stack); });
+    stack.Publish();
+}
+
+void ArkCollector::EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack)
+{
+    LocalEvacuationStack stack(&globalStack);
+    auto &space = static_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    space.MarkRememberSet([this, &stack](BaseObject *object) { EnqueueRefsToYoungCollectionSpace(object, stack); });
+    stack.Publish();
+}
+
+void ArkCollector::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
+{
+    std::vector<BaseObject *> remarkStack;
+    MutatorManager::Instance().VisitAllMutators([&remarkStack](Mutator &mutator) {
+        const SatbBuffer::TreapNode* node = static_cast<const SatbBuffer::TreapNode*>(mutator.GetSatbBufferNode());
+        if (node != nullptr) {
+            const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
+        }
+    });
+    SatbBuffer::Instance().GetRetiredObjects(remarkStack);
+
+    LocalEvacuationStack localStack(&globalStack);
+    while (!remarkStack.empty()) {
+        BaseObject *obj = remarkStack.back();
+        remarkStack.pop_back();
+        CHECK_CC(Heap::IsHeapAddress(obj));
+        auto *region = RegionDesc::GetAliveRegionDescAt(obj);
+        CHECK_CC(!region->IsFromRegion());
+        if (!MarkObject(obj)) {
+            auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, localStack);
+            region->AddLiveByteCount(size);
+        }
+    }
+    localStack.Publish();
+}
+
+void ArkCollector::ProcessEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
+{
+    const auto maxWorkers = GetGCThreadCount(true) - 1;
+    if (maxWorkers > 0) {
+        auto parallelCount = maxWorkers;
+        ParallelMarkingMonitor monitor(parallelCount, parallelCount);
+
+        auto *threadPool = GetThreadPool();
+        for (uint32_t i = 0; i < parallelCount; ++i) {
+            threadPool->PostTask(std::make_unique<ConcurrentEvacuationTask>(0, *this, monitor, globalEvacuationStack));
+        }
+        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
+        do {
+            if (!monitor.TryStartStep()) {
+                break;
+            }
+            ProcessEvacuationStack(stack);
+            monitor.FinishStep();
+        } while (monitor.WaitNextStepOrFinished());
+        monitor.WaitAllFinished();
+    } else {
+        // serial marking with a single mark task.
+        // Fixme: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
+        // use monitor, but this need to add template param to `ProcessMarkStack`.
+        // So for convenience just use a fake dummy parallel one.
+        ParallelMarkingMonitor dummyMonitor(0, 0);
+        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &dummyMonitor);
+        ProcessEvacuationStack(stack);
+    }
+}
+
+void ArkCollector::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
+{
+    // NOTE: it is performed concurrently with other GC threads and mutators
+    std::vector<BaseObject *> remarkStack;
+    auto fetchFromSatbBuffer = [this, &stack, &remarkStack]() {
+        SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
+        bool needProcess = false;
+        while (!remarkStack.empty()) {
+            BaseObject *obj = remarkStack.back();
+            remarkStack.pop_back();
+            CHECK_CC(Heap::IsHeapAddress(obj));
+            if (!MarkObject(obj)) {
+                EnqueueRefsToYoungCollectionSpace(obj, stack);
+                needProcess = true;
+            }
+        }
+        return needProcess;
+    };
+    size_t iterationCount = 0;
+    const size_t maxIterationCount = 1000;
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        RefField<> *ref;
+        while (stack.Pop(&ref)) {
+            ProcessRef(*ref, stack);
+        }
+
+        if (++iterationCount >= maxIterationCount) {
+            break;
+        }
+
+        if (!fetchFromSatbBuffer()) {
+            break;
+        }
+    }
+}
+
+void ArkCollector::MarkEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
+{
+    const auto maxWorkers = GetGCThreadCount(true) - 1;
+    if (maxWorkers > 0) {
+        auto parallelCount = maxWorkers;
+        ParallelMarkingMonitor monitor(parallelCount, parallelCount);
+
+        auto *threadPool = GetThreadPool();
+        for (uint32_t i = 0; i < parallelCount; ++i) {
+            threadPool->PostTask(std::make_unique<RemarkTask>(0, *this, monitor, globalEvacuationStack));
+        }
+        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
+        do {
+            if (!monitor.TryStartStep()) {
+                break;
+            }
+            MarkEvacuationStack(stack);
+            monitor.FinishStep();
+        } while (monitor.WaitNextStepOrFinished());
+        monitor.WaitAllFinished();
+    } else {
+        // serial marking with a single mark task.
+        // Fixme: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
+        // use monitor, but this need to add template param to `ProcessMarkStack`.
+        // So for convenience just use a fake dummy parallel one.
+        ParallelMarkingMonitor dummyMonitor(0, 0);
+        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &dummyMonitor);
+        MarkEvacuationStack(stack);
+    }
+}
+
+void ArkCollector::MarkEvacuationStack(ParallelLocalEvacuationStack &stack)
+{
+    RefField<> *ref;
+    while (stack.Pop(&ref)) {
+        MarkRef(*ref, stack);
+    }
+}
+
+template <typename Stack>
+void ArkCollector::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
+{
+    auto *obj = ref.GetTargetObject();
+    auto *region = RegionDesc::GetAliveRegionDescAt(obj);
+
+    CHECK_CC(Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+    // Root was updated while concurrent copying phase so it cannot be in FromRegion
+    CHECK_CC(!region->IsFromRegion());
+
+    if (!InYoungCollectionSpace(region)) {
+        return;
+    }
+
+    if (region->IsNewObjectSinceMarking(obj)) {
+        return;
+    }
+
+    if (!MarkObject(obj)) {
+        EnqueueRefsToYoungCollectionSpace(obj, stack);
+    }
+}
+
+template <typename Stack>
+void ArkCollector::ProcessRef(RefField<> &ref, Stack &stack)
+{
+    RefField<> oldRef(ref);
+    auto *obj = oldRef.GetTargetObject();
+    if (!Heap::IsHeapAddress(obj)) {
+        return;
+    }
+
+    auto *region = RegionDesc::GetAliveRegionDescAt(obj);
+
+    if (region->IsFromRegion()) {
+        auto *fwd = ForwardObject(obj);
+
+        // Object can be evacuated by mutator so mark it
+        if (!MarkObject(fwd)) {
+            EnqueueRefsToYoungCollectionSpace(fwd, stack);
+        }
+        RefField<> newRef(fwd, oldRef.IsWeak());
+        ref.CompareExchange(oldRef.GetFieldValue(), newRef.GetFieldValue());
+        return;
+    }
+
+    if (!InYoungCollectionSpace(region)) {
+        return;
+    }
+
+    if (region->IsNewObjectSinceMarking(obj)) {
+        return;
+    }
+
+    if (!MarkObject(obj)) {
+        EnqueueRefsToYoungCollectionSpace(obj, stack);
+    }
+}
+
+template <typename Stack>
+void ArkCollector::MarkRef(RefField<> &ref, Stack &stack)
+{
+    auto *obj = ref.GetTargetObject();
+    auto *region = RegionDesc::GetAliveRegionDescAt(obj);
+
+    CHECK_CC(Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+
+    if (!InYoungCollectionSpace(obj)) {
+        return;
+    }
+
+    if (region->IsNewObjectSinceMarking(obj)) {
+        return;
+    }
+
+    if (region->IsFromRegion() && obj->IsForwarded()) {
+        obj = GetForwardingPointer(obj);
+    }
+
+    if (!MarkObject(obj)) {
+        auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, stack);
+        region->AddLiveByteCount(size);
+    }
+}
+
+template <typename Stack>
+void ArkCollector::EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &stack)
+{
+    auto fieldHandler = [this, &stack](RefField<> &field) {
+        if (InYoungCollectionSpace(field.GetTargetObject())) {
+            stack.Push(&field);
+        }
+    };
+
+    obj->ForEachRefField(fieldHandler, fieldHandler);
+}
+
+template <typename Stack>
+size_t ArkCollector::EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj, Stack &stack)
+{
+    auto fieldHandler = [this, &stack](RefField<> &field) {
+        if (InYoungCollectionSpace(field.GetTargetObject())) {
+            stack.Push(&field);
+        }
+    };
+
+    return obj->ForEachRefFieldAndGetSize(fieldHandler, fieldHandler);
+}
+
+bool ArkCollector::InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region) const
+{
+    return InYoungCollectionSpace(region->GetRegionType());
+}
+
+bool ArkCollector::InYoungCollectionSpace(const RegionDesc *region) const
+{
+    return InYoungCollectionSpace(region->GetRegionType());
+}
+
+bool ArkCollector::InYoungCollectionSpace(const BaseObject *obj) const
+{
+    return Heap::IsHeapAddress(obj) &&
+           InYoungCollectionSpace(RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj));
+}
+
+bool ArkCollector::InYoungCollectionSpace(RegionDesc::RegionType type) const
+{
+    // During single pass evacuation in young GC objects might be concurrently evacuated by mutator. So we should
+    // inspect references which point to them too.
+    return RegionDesc::IsInYoungSpace(type) || RegionDesc::IsInToSpace(type);
 }
 
 CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam& param,
@@ -1095,7 +1576,7 @@ BaseObject* ArkCollector::ForwardObject(BaseObject* obj)
     return (to != nullptr) ? to : obj;
 }
 
-BaseObject* ArkCollector::TryForwardObject(BaseObject* obj)
+BaseObject *ArkCollector::TryForwardObject(BaseObject *obj)
 {
     return CopyObjectImpl(obj);
 }
@@ -1106,11 +1587,12 @@ BaseObject* ArkCollector::CopyObjectImpl(BaseObject* obj)
     // reconsider phase difference between mutator and GC thread during transition.
     if (IsGcThread()) {
         CHECK_CC(GetGCPhase() == GCPhase::GC_PHASE_PRECOPY || GetGCPhase() == GCPhase::GC_PHASE_COPY ||
-                 GetGCPhase() == GCPhase::GC_PHASE_FIX || GetGCPhase() == GCPhase::GC_PHASE_FINAL_MARK);
+                 GetGCPhase() == GCPhase::GC_PHASE_YOUNG_COPY || GetGCPhase() == GCPhase::GC_PHASE_FIX ||
+                 GetGCPhase() == GCPhase::GC_PHASE_FINAL_MARK);
     } else {
         auto phase = Mutator::GetMutator()->GetMutatorPhase();
         CHECK_CC(phase == GCPhase::GC_PHASE_PRECOPY || phase == GCPhase::GC_PHASE_COPY ||
-                 phase == GCPhase::GC_PHASE_FIX);
+                 phase == GCPhase::GC_PHASE_YOUNG_COPY || phase == GCPhase::GC_PHASE_FIX);
     }
 
     do {

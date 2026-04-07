@@ -127,6 +127,11 @@ using WorkStackBuf = MarkStackBuffer<BaseObject*>;
 
 using WeakStack = CArrayList<std::pair<RefField<>*, size_t>>;
 
+constexpr size_t LOCAL_EVACUATION_STACK_CAPACITY = 128;
+using GlobalEvacuationStack = StackList<RefField<>, LOCAL_EVACUATION_STACK_CAPACITY>;
+using LocalEvacuationStack = LocalStack<RefField<>, LOCAL_EVACUATION_STACK_CAPACITY>;
+using ParallelLocalEvacuationStack = LocalStack<RefField<>, LOCAL_MARK_STACK_CAPACITY, ParallelMarkingMonitor>;
+
 class MarkingCollector : public Collector {
     friend MarkingWork;
     template <bool ProcessXRef>

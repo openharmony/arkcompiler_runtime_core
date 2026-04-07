@@ -140,4 +140,20 @@ void CopyBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MInd
         LOG_COMMON(FATAL) << "Unresolved fatal";
         UNREACHABLE_CC();
 }
-} // namespace common_vm
+
+void YoungCopyBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
+{
+    if (!Heap::IsTaggedObject(reinterpret_cast<HeapAddress>(ref))) {
+        return;
+    }
+    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+        UpdateRememberSet(obj, ref);
+    }
+    ref = (BaseObject*)((uintptr_t)ref & ~(TAG_WEAK));
+    if (UNLIKELY_CC(mutator == nullptr)) {
+        mutator = Mutator::GetMutator();
+    }
+    mutator->RememberObjectInSatbBuffer(ref);
+    DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
+}
+}  // namespace common_vm

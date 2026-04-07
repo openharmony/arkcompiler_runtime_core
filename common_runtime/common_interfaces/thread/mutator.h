@@ -61,6 +61,7 @@ enum GCPhase : uint8_t {
     GC_PHASE_PRECOPY = 14,
     GC_PHASE_COPY = 15,
     GC_PHASE_FIX = 16,
+    GC_PHASE_YOUNG_COPY = 17,
 };
 
 class Mutator;
