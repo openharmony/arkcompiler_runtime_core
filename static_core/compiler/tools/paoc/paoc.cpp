@@ -320,8 +320,7 @@ private:
 
         paoc_->aotBuilder_->SetGcType(static_cast<uint32_t>(gcType));
 
-        // NOTE(Zhu Heng): Issue 33553, temporary solution, need to remove hardcore in the gn file nextly
-#if !defined(NDEBUG) || defined(PANDA_TARGET_HOST_AOT_TOOLS)
+#ifndef NDEBUG
         paoc_->aotBuilder_->SetGenerateSymbols(true);
 #else
         paoc_->aotBuilder_->SetGenerateSymbols(paoc_->paocOptions_->IsPaocGenerateSymbols());
