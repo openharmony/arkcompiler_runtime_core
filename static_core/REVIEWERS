@@ -20,12 +20,12 @@ CODEOWNERS           @dmitriitr @Prof @igelhaus
 bundle.json          @dmitriitr @Prof @igelhaus @ipetrov @jokerxd-liu @huyunhui1
 static_vm_config.gni @dmitriitr @Prof @igelhaus @ipetrov
 
-arkplatform/ @dmitriitr @udav @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+arkplatform/ @dmitriitr @artemu @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 
-common_runtime/ @ipetrov @xucheng46 @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yingguofeng
+common_runtime/ @ipetrov @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yingguofeng
 
 static_core/ @dmitriitr @Prof @igelhaus @Nojpg
-static_core/*.gn{i,}                  @sukhikhalexander
+static_core/*.gn{i,}                  @sukhikhalexander @ipetrov
 static_core/abc2program/              @nazarovkonstantin @oatuwwutao ^igelhaus ^seeuiceland
 static_core/assembler/                @nazarovkonstantin ^igelhaus @tension16
 static_core/bytecode_optimizer/       @mbolshov @chernykhsergey ^igelhaus  @oatuwwutao ^seeuiceland
@@ -40,30 +40,33 @@ static_core/docs/task_manager.md      @dmitriitr
 static_core/dprof/                    @slynkodenis @v-cherkashin
 static_core/extras/                   @igelhaus
 static_core/gn/                       @igelhaus
-static_core/irtoc/                    @Prof @mbolshov @asidorov @xucheng46 ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang @sukhikhalexander
-static_core/isa/                      @mbolshov ^igelhaus @oatuwwutao ^seeuiceland @xucheng46 ^gitee-dakeQI
+static_core/irtoc/                    @Prof @mbolshov @asidorov ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang @sukhikhalexander
+static_core/isa/                      @mbolshov ^igelhaus @oatuwwutao ^seeuiceland ^gitee-dakeQI
 static_core/isa/BUILD.gn              @sukhikhalexander
-static_core/libarkbase/               @dmitriitr @nazarovkonstantin ^igelhaus @xucheng46 ^gitee-dakeQI
-static_core/libarkbase/BUILD.gn       @sukhikhalexander
-static_core/libarkfile/               @igelhaus @xucheng46 ^gitee-dakeQI
+static_core/libarkbase/               @dmitriitr @nazarovkonstantin ^igelhaus ^gitee-dakeQI
+static_core/libarkbase/BUILD.gn       @sukhikhalexander @ipetrov
+static_core/libarkfile/               @igelhaus ^gitee-dakeQI
 static_core/libarkfile/BUILD.gn       @sukhikhalexander
-static_core/libllvmbackend/           ^Prof @urandon ^asidorov @xucheng46 ^gitee-dakeQI @sukhikhalexander
+static_core/libllvmbackend/           ^Prof @urandon ^asidorov ^gitee-dakeQI @sukhikhalexander
 static_core/libziparchive/            @nazarovkonstantin ^igelhaus
-static_core/panda/                    @nazarovkonstantin ^igelhaus @xucheng46 ^gitee-dakeQI
+static_core/panda/                    @nazarovkonstantin ^igelhaus ^gitee-dakeQI
 static_core/panda/BUILD.gn            @sukhikhalexander
 static_core/pandastdlib/              @igelhaus
 static_core/patches/                  @asidorov @Prof
-static_core/platforms/                @dmitriitr @igelhaus @xucheng46 ^gitee-dakeQI
-static_core/plugins/plugins.gni       @sukhikhalexander
+static_core/platforms/                @dmitriitr @igelhaus ^gitee-dakeQI
+static_core/plugins/plugins.gni       @sukhikhalexander @ipetrov
 static_core/quickener/                @nsizov ^igelhaus
 static_core/runtime/                  @igelhaus @vpukhov
 static_core/runtime/*cframe*          @Prof ^wanzixuan330 ^LeechyLiang
 static_core/runtime/*compiler*        @Prof @wanzixuan330 ^LeechyLiang
 static_core/runtime/*deoptimization*  @Prof ^wanzixuan330 ^LeechyLiang
+static_core/runtime/*handle*          @artemu @ipetrov ^dmitriitr
 static_core/runtime/*method*          @igelhaus @vpukhov @Prof
+static_core/runtime/*mutator*         @artemu @ipetrov ^dmitriitr
 static_core/runtime/*osr*             @Prof ^wanzixuan330 ^LeechyLiang
 static_core/runtime/*signal*          @igelhaus @vpukhov @Prof
 static_core/runtime/*stack_walker*    @Prof ^wanzixuan330 ^LeechyLiang
+static_core/runtime/BUILD.gn          @ipetrov
 static_core/scripts/                  @igelhaus
 static_core/static_linker/            @nazarovkonstantin ^igelhaus @oatuwwutao	^seeuiceland
 static_core/tests/                    @Prof
@@ -79,24 +82,30 @@ static_core/compiler/optimizer/       ^asidorov @Prof @chernykhsergey @wanzixuan
 static_core/docs/coroutines/                             @dmitriitr
 static_core/docs/diagrams/                               @dmitriitr
 static_core/gn/**/*.gn{i,}                               @sukhikhalexander
-static_core/libarkbase/mem/                              ^dmitriitr @udav ^ipetrov
-static_core/libarkbase/os/*mem*                          ^dmitriitr @udav ^ipetrov
-static_core/libarkbase/tests/*mem*                       @udav ^ipetrov
+static_core/irtoc/scripts/allocation.irt                 @Prof @mbolshov @asidorov ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang @sukhikhalexander ^artemu ^ipetrov
+static_core/irtoc/scripts/gc.irt                         @Prof @mbolshov @asidorov ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang @sukhikhalexander ^artemu ^ipetrov
+static_core/libarkbase/mem/                              ^dmitriitr @artemu ^ipetrov
+static_core/libarkbase/os/*mem*                          ^dmitriitr @artemu ^ipetrov
+static_core/libarkbase/tests/*mem*                       @artemu ^ipetrov
 static_core/platforms/**/*.gn{i,}                        @sukhikhalexander
-static_core/platforms/**/*mem*                           ^dmitriitr @udav ^ipetrov
+static_core/platforms/**/*mem*                           ^dmitriitr @artemu ^ipetrov
 static_core/plugins/ets/abc2program	                     @nazarovkonstantin @oatuwwutao	^seeuiceland
 static_core/plugins/ets/disassembler                     @nazarovkonstantin @oatuwwutao ^seeuiceland
 static_core/plugins/ets/playground                       @anton-sysoev @Nojpg ^cy917474985 ^ivan-tyulyandin ^magikarp777 ^templinkonstantin
-static_core/runtime/arch/                                @Prof @xucheng46 ^gitee-dakeQI @asidorov ^chernykhsergey
+static_core/plugins/ets/subproject_sources.gn            @sukhikhalexander @ipetrov
+static_core/runtime/arch/                                @Prof ^gitee-dakeQI @asidorov ^chernykhsergey
 static_core/runtime/asm_defines/BUILD.gn                 @sukhikhalexander
-static_core/runtime/bridge/                              @Prof @wanzixuan330 @asidorov @xucheng46 ^gitee-dakeQI ^chernykhsergey ^LeechyLiang
+static_core/runtime/bridge/                              @Prof @wanzixuan330 @asidorov ^gitee-dakeQI ^chernykhsergey ^LeechyLiang
 static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/runtime/entrypoints/                         @Prof @xucheng46 ^gitee-dakeQI @chernykhsergey
+static_core/runtime/entrypoints/                         @Prof ^gitee-dakeQI @chernykhsergey
 static_core/runtime/entrypoints/entrypoints.*            @mbolshov @chernykhsergey ^asidorov
 static_core/runtime/fibers/                              @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/runtime/include/*mutator*                    ^dmitriitr @artemu @ipetrov
+static_core/runtime/include/*object*                     ^dmitriitr @artemu @ipetrov
+static_core/runtime/include/*thread*                     ^dmitriitr @artemu @konstanting ^molotkovmikhail ^ipetrov
 static_core/runtime/interpreter/                         @igelhaus @chernykhsergey
 static_core/runtime/jit/                                 @Prof @zijiancogito @K0u1hw ^wanzixuan330 ^chernykhsergey @zhuheng27 @zhangrunze13 ^LeechyLiang
-static_core/runtime/mem/                                 ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
+static_core/runtime/mem/                                 ^dmitriitr @artemu ^ipetrov ^gitee-dakeQI
 static_core/runtime/profilesaver/                        @chernykhsergey @zhuheng27 @zhangrunze13 ^wanzixuan330 ^LeechyLiang
 static_core/runtime/profiling/                           @chernykhsergey
 static_core/runtime/tooling/                             @slynkodenis ^kurnevichstanislav
@@ -113,16 +122,16 @@ static_core/tests/tests-u-runner/                        ^amate ^sergeyandreev @
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/tools/ark_js_napi_cli/                       ^nazarovkonstantin @ipetrov ^rokashevichsvetlana ^kurnevichstanislav
 static_core/compiler/tools/paoc/                         @asidorov @Prof ^chernykhsergey @wanzixuan330 @sukhikhalexander ^LeechyLiang
-static_core/libarkbase/tests/genmc/                      @udav
-static_core/libarkbase/tests/ringbuf/                    @udav
-static_core/libarkbase/tests/taskmanager/                @udav @molotkovmikhail
+static_core/libarkbase/tests/genmc/                      @artemu
+static_core/libarkbase/tests/ringbuf/                    @artemu
+static_core/libarkbase/tests/taskmanager/                @artemu @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov @oatuwwutao	^seeuiceland @chernykhsergey
 static_core/plugins/ets/compiler/                        @Prof @wanzixuan330 @chernykhsergey ^asidorov ^LeechyLiang
 static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr @fanglou @dumbledore
-static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^wanzixuan330 @xucheng46 ^gitee-dakeQI ^chernykhsergey ^LeechyLiang
-static_core/plugins/ets/isa/                             @mbolshov @xucheng46 @gitee-dakeQI
-static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon ^asidorov @xucheng46 ^gitee-dakeQI
+static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^wanzixuan330 ^gitee-dakeQI ^chernykhsergey ^LeechyLiang
+static_core/plugins/ets/isa/                             @mbolshov @gitee-dakeQI
+static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon ^asidorov ^gitee-dakeQI
 static_core/plugins/ets/runtime/                         @vpukhov @slynkodenis
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis @liyiming13
@@ -131,9 +140,9 @@ static_core/plugins/ets/runtime/ets_class_linker_context.h                    @v
 static_core/plugins/ets/runtime/ets_class_linker_extension.cpp                @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_class_linker_extension.h                  @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_coroutine.h          ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting ^dingding5
-static_core/plugins/ets/runtime/ets_entrypoints*         @Prof @mbolshov @vpukhov ^asidorov @xucheng46 ^gitee-dakeQI
-static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
-static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof @xucheng46 ^gitee-dakeQI
+static_core/plugins/ets/runtime/ets_entrypoints*         @Prof @mbolshov @vpukhov ^asidorov ^gitee-dakeQI
+static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @artemu
+static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof ^gitee-dakeQI
 static_core/plugins/ets/runtime/ets_namespace_manager.cpp                     @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_namespace_manager.h                       @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_namespace_manager_impl.cpp                @vpukhov @slynkodenis @shilei123
@@ -142,20 +151,20 @@ static_core/plugins/ets/runtime/ets_native_library.cpp                        @v
 static_core/plugins/ets/runtime/ets_native_library.h                          @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_native_library_provider.cpp               @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_native_library_provider.h                 @vpukhov @slynkodenis @shilei123
-static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof @xucheng46 ^gitee-dakeQI
+static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof ^gitee-dakeQI
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 ^templinkonstantin
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^templinkonstantin ^chernykhsergey
 static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis @liyiming13
 static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao @slynkodenis @groshevmaksim ^seeuiceland
-static_core/runtime/include/mem/                         ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
+static_core/runtime/include/mem/                         ^dmitriitr @artemu ^gitee-dakeQI
 static_core/runtime/include/tooling/                     @slynkodenis ^kurnevichstanislav
 static_core/runtime/tests/tooling/                       @slynkodenis ^kurnevichstanislav
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^asidorov
-static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @udav @ipetrov ^shemetovphilip
+static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @artemu @ipetrov ^shemetovphilip
 static_core/plugins/ets/runtime/interop_js/                                   @igelhaus ^nazarovkonstantin @vpukhov @slynkodenis @benzunfu
 static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
+static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @artemu ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof @schernykh
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @schernykh ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @schernykh ^slynkodenis ^vpukhov
@@ -163,12 +172,12 @@ static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^d
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcFile.cpp               @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_Timers.cpp                ^anton-sysoev @magikarp777 @molotkovmikhail ^ivan-tyulyandin @Nojpg @schernykh ^slynkodenis ^vpukhov
-static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @udav
-static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @udav
+static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @artemu
+static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @artemu
 static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/runtime/libani_helpers/concurrency_*                  @molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/libani_helpers/interop_js                     @igelhaus @wanzixuan330 @v-cherkashin @slynkodenis @benzunfu
-static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
+static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @artemu ^gitee-dakeQI ^ipetrov
 static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/types/                                        ^nazarovkonstantin @slynkodenis @vpukhov
 static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
@@ -177,9 +186,11 @@ static_core/plugins/ets/runtime/types/*reflect*                               @m
 static_core/plugins/ets/runtime/types/*typeapi*                               @magikarp777 ^anton-sysoev @Nojpg ^ivan-tyulyandin @slynkodenis
 static_core/plugins/ets/runtime/types/ets_abc_runtime_linker.h                @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/types/ets_class*                              @vpukhov @slynkodenis ^igelhaus
+static_core/plugins/ets/runtime/types/ets_fin*                                @artemu @ipetrov ^shemetovphilip
 static_core/plugins/ets/runtime/types/ets_method*                             @vpukhov ^igelhaus ^Prof
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting ^dingding5
 static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    ^nazarovkonstantin @slynkodenis @shilei123 @vpukhov
+static_core/plugins/ets/runtime/types/ets_weak_reference.h                    @artemu @ipetrov ^shemetovphilip
 static_core/plugins/ets/stdlib/arkruntime/                                    @vpukhov @igelhaus @Prof @schernykh ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 @slynkodenis
 static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
 static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan
@@ -202,9 +213,10 @@ static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^a
 static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya @nazarovkonstantin ^luobohua ^luchenxu @Wangyuzhong11
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
-static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
-static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
-static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/hybrid/mem/                                   ^dmitriitr @artemu ^gitee-dakeQI ^ipetrov
+static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @artemu ^ipetrov
+static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @artemu ^ipetrov
+static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^artemu ^wang_zhaoyong ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   ^ipetrov ^dmitriitr ^konstanting @molotkovmikhail @kastenalexey ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
@@ -212,11 +224,12 @@ static_core/plugins/ets/stdlib/std/core/AbcRuntimeLinker.ets                  @v
 static_core/plugins/ets/stdlib/std/core/BootRuntimeLinker.ets                 @vpukhov @slynkodenis @shilei123 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/stdlib/std/core/EAWorker.ets                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.ets              ^dmitriitr @udav ^shemetovphilip @liyiming13 ^lijin1039
-static_core/plugins/ets/stdlib/std/core/GC.ets                                ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr @udav ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.ets              ^dmitriitr @artemu ^shemetovphilip @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/GC.ets                                ^dmitriitr @artemu
+static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/stdlib/std/core/Runtime.ets                           @vpukhov @igelhaus @Prof @schernykh ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039
 static_core/plugins/ets/stdlib/std/core/RuntimeLinker.ets                     @vpukhov @slynkodenis @shilei123 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/WeakRef.ets                           ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^templinkonstantin ^chernykhsergey @artemu ^ipetrov
 static_core/plugins/ets/tests/ets-templates/03.types/                         ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @tengtengh
 static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/ ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xuxjeeee
 static_core/plugins/ets/tests/ets-templates/06.contexts_and_conversions/      ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @tengtengh
@@ -236,23 +249,23 @@ static_core/plugins/ets/tests/ets_func_tests/std/                             ^a
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.ets    @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
-static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @udav ^shemetovphilip
-static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
+static_core/plugins/ets/tests/ets_test_suite/gc/                              @artemu
+static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @artemu ^shemetovphilip
+static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @artemu ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus ^nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav @slynkodenis @benzunfu
-static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^udav
+static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^artemu
 static_core/plugins/ets/tests/native/promise/                                 @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis ^kurnevichstanislav
-static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus ^nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav @wanzixuan330
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus ^nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof @wanzixuan330
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                ^Nojpg ^igelhaus @shimenkovmikhail ^v-cherkashin @trubachevilya ^Prof ^luobohua @luchenxu @Wangyuzhong11
-static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
+static_core/plugins/ets/tests/interop_js/tests/promise/                       @konstanting
 static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 
 /AUTHORS @jokerxd-liu @dmitriitr @Prof @igelhaus
@@ -292,6 +305,6 @@ static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/g
 /tests/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /verifier/	@oatuwwutao	^seeuiceland
 
-/common_interfaces/heap/    @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng
-/common_interfaces/objects/ @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng
+/common_interfaces/heap/    @wuzhefengh @weng-changcheng @dmitriitr @artemu @ipetrov ^yingguofeng
+/common_interfaces/objects/ @wuzhefengh @weng-changcheng @dmitriitr @artemu @ipetrov ^yingguofeng
 /common_interfaces/thread/  @wuzhefengh @weng-changcheng @dmitriitr @konstanting
