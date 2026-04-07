@@ -102,6 +102,7 @@ public:
     using ShouldDeoptimizeFlag = BitField<bool, 0, 1>;
     using HasFloatRegsFlag = ShouldDeoptimizeFlag::NextFlag;
     using FrameKindField = HasFloatRegsFlag::NextField<FrameKind, MinimumBitsToStore(FrameKind::LAST)>;
+    using IsResumedFlag = FrameKindField::NextFlag;
 
     // Current usage of the locals:
     //  [0..1] slots: internal spill slots for codegen

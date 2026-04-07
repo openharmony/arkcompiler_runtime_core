@@ -26,5 +26,7 @@ void EtsEndNativeMethodPrim(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsEndNativeMethodObj(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsCheckNativeException(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsWrapObjectNative(WrapObjectNativeInst *wrapObject);
+void EtsAsyncSuspend(Inst *inst);
+void EtsAsyncDispatch(Inst *inst);
 
 #endif  // PANDA_PLUGINS_ETS_COMPILER_ETS_CODEGEN_EXTENSIONS_H

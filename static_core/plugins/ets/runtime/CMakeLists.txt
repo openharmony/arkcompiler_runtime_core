@@ -111,6 +111,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/regexp_preparser.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/intrinsic_await_promise_impl.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
     ${ETS_EXT_SOURCES}/main_worker_external_scheduler.cpp
@@ -151,6 +152,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_object_state_table.cpp
     ${ETS_EXT_SOURCES}/static_object_accessor.cpp
     ${ETS_EXT_SOURCES}/static_type_converter.cpp
+    ${ETS_EXT_SOURCES}/entrypoints/ets_async_entrypoints.cpp
     ${ETS_EXT_SOURCES}/entrypoints/ets_proxy_entrypoints.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
@@ -206,6 +208,7 @@ elseif (PANDA_TARGET_AMD64)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_ani_entry_point_amd64.S
         ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_async_entry_point_amd64.S
+        ${ETS_EXT_SOURCES}/entrypoints/arch/amd64/ets_async_stubs_amd64.S
         ${ETS_EXT_SOURCES}/entrypoints/arch/amd64/ets_proxy_entry_point_amd64.S
     )
 endif()

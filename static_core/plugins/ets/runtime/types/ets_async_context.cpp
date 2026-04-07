@@ -25,55 +25,76 @@
 
 namespace ark::ets {
 
-EtsAsyncContext *EtsAsyncContext::Create(EtsExecutionContext *executionCtx)
+namespace {
+
+template <typename ObjType, auto SETTER, typename... ConstructorArgs>
+bool CreateAndSetCtxObject(EtsExecutionContext *const executionCtx, const EtsHandle<EtsAsyncContext> &asyncCtx,
+                           ConstructorArgs... constructorArgs)
+{
+    auto *obj = ObjType::Create(constructorArgs...);
+    if (UNLIKELY(obj == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return false;
+    }
+    (asyncCtx.GetPtr()->*SETTER)(executionCtx, obj);
+    return true;
+}
+
+}  // namespace
+
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
+EtsAsyncContext *EtsAsyncContext::Create(EtsExecutionContext *executionCtx, int32_t refSize, int32_t primSize,
+                                         int32_t pc)
 {
     EtsHandleScope scope(executionCtx);
     auto *klass = PlatformTypes(executionCtx)->arkruntimeAsyncContext;
     auto *ctx = EtsAsyncContext::FromEtsObject(EtsObject::Create(klass));
-    if (UNLIKELY(ctx == nullptr)) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
-        return nullptr;
-    }
-
-    auto *frame = executionCtx->GetMT()->GetCurrentFrame();
-    ASSERT(frame != nullptr);
-    auto *method = frame->GetMethod();
-    ASSERT(method != nullptr);
-    uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
-    ASSERT(frameSize <= frame->GetSize());
-    ASSERT(frameSize <= static_cast<uint32_t>(std::numeric_limits<EtsShort>::max()));
-
     EtsHandle<EtsAsyncContext> asyncCtx(executionCtx, ctx);
-    auto *returnValue = EtsPromise::Create(executionCtx);
-    if (UNLIKELY(returnValue == nullptr)) {
+    if (UNLIKELY(asyncCtx.GetPtr() == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    asyncCtx->SetReturnValue(executionCtx, returnValue);
 
-    auto *refValues = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, frameSize);
-    if (UNLIKELY(refValues == nullptr)) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
-        return nullptr;
+    auto *mt = executionCtx->GetMT();
+    Method *method = nullptr;
+    uint32_t frameSize = 0;
+    if (mt->IsCurrentFrameCompiled()) {
+        auto stackWalker = StackWalker::Create(mt);
+        method = stackWalker.GetMethod();
+        ASSERT(method != nullptr);
+    } else {
+        auto *frame = executionCtx->GetMT()->GetCurrentFrame();
+        ASSERT(frame != nullptr);
+        method = frame->GetMethod();
+        ASSERT(method != nullptr);
+        frameSize = method->GetNumVregs() + method->GetNumArgs();
+        ASSERT(frameSize <= frame->GetSize());
+        ASSERT(frameSize <= static_cast<uint32_t>(std::numeric_limits<EtsShort>::max()));
     }
-    asyncCtx->SetRefValues(executionCtx, refValues);
 
-    auto *primValues = EtsLongArray::Create(frameSize);
-    if (UNLIKELY(primValues == nullptr)) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
+    if (!CreateAndSetCtxObject<EtsPromise, &EtsAsyncContext::SetReturnValue>(executionCtx, asyncCtx, executionCtx) ||
+        !CreateAndSetCtxObject<EtsObjectArray, &EtsAsyncContext::SetRefValues>(
+            executionCtx, asyncCtx, PlatformTypes(executionCtx)->coreObject, refSize >= 0 ? refSize : frameSize) ||
+        !CreateAndSetCtxObject<EtsLongArray, &EtsAsyncContext::SetPrimValues>(executionCtx, asyncCtx,
+                                                                              primSize >= 0 ? primSize : frameSize)) {
         return nullptr;
     }
-    asyncCtx->SetPrimValues(executionCtx, primValues);
 
     asyncCtx->SetRefCount(0);
     asyncCtx->SetPrimCount(0);
+    // Default value is ok, since it is ignored by interpreter,
+    // and should be right value in compiler
+    asyncCtx->SetPc(pc);
+    if (pc >= 0) {
+        asyncCtx->SetCompiledCode(bit_cast<uintptr_t>(method->GetCompiledEntryPoint()));
+    } else {
+        asyncCtx->SetCompiledCode(0);
+    }
 
-    auto *frameOffsets = EtsShortArray::Create(frameSize);
-    if (UNLIKELY(frameOffsets == nullptr)) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
+    if (!CreateAndSetCtxObject<EtsShortArray, &EtsAsyncContext::SetFrameOffsets>(
+            executionCtx, asyncCtx, (primSize >= 0 || refSize >= 0) ? refSize + primSize : frameSize)) {
         return nullptr;
     }
-    asyncCtx->SetFrameOffsets(executionCtx, frameOffsets);
 
     return asyncCtx.GetPtr();
 }
@@ -81,7 +102,7 @@ EtsAsyncContext *EtsAsyncContext::Create(EtsExecutionContext *executionCtx)
 /* static */
 EtsAsyncContext *EtsAsyncContext::GetCurrent(EtsExecutionContext *executionCtx)
 {
-    if LIKELY (!executionCtx->GetMT()->GetCurrentFrame()->IsResumed()) {
+    if LIKELY (!StackWalker::Create(executionCtx->GetMT()).IsResumed()) {
         return nullptr;
     }
     auto *job = SuspendableJob::FromExecutionContext(JobExecutionContext::CastFromMutator(executionCtx->GetMT()));

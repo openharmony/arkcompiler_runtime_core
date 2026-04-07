@@ -1325,6 +1325,26 @@ public:
 
     int64_t GetThrowCounter(const BasicBlock *block);
 
+    uint32_t GetMaxPrimCountAtSuspend()
+    {
+        return maxPrimCountAtSuspend_;
+    }
+
+    void SetMaxPrimCountAtSuspend(uint32_t count)
+    {
+        maxPrimCountAtSuspend_ = count;
+    }
+
+    uint32_t GetMaxRefCountAtSuspend()
+    {
+        return maxRefCountAtSuspend_;
+    }
+
+    void SetMaxRefCountAtSuspend(uint32_t count)
+    {
+        maxRefCountAtSuspend_ = count;
+    }
+
     /// This class provides methods for ranged-based `for` loop over all parameters in the graph.
     class ParameterList {
     public:
@@ -1506,6 +1526,11 @@ private:
     uint32_t extStackSlot_ {0};
     // Number of the virtual registers used in the compiled method (inlined methods aren't included).
     uint32_t vregsCount_ {0};
+
+    // Maximum number of Primitives/References used in SaveStateSuspend instruction
+    uint32_t maxPrimCountAtSuspend_ {0};
+    uint32_t maxRefCountAtSuspend_ {0};
+
     // Source language of the method being compiled
     SourceLanguage lang_ {SourceLanguage::PANDA_ASSEMBLY};
     // true if tree strings are enabled but StringFlatCheck pass is disabled

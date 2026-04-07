@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ extern "C" void InterpreterToCompiledCodeBridgeDyn(const uint8_t *, const Frame 
 extern "C" uint64_t InvokeCompiledCodeWithArgArray(const int64_t *, const Frame *, const Method *, ManagedThread *);
 extern "C" uint64_t InvokeCompiledCodeWithArgArrayDyn(const uint64_t *, uint32_t, const Frame *, const Method *,
                                                       ManagedThread *);
+extern "C" uint64_t ResumeAsyncCompiledCode(const int64_t *, const Frame *, const Method *, ManagedThread *);
 
 extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, Frame *frame, Frame *lastFrame);
 
