@@ -13,13 +13,17 @@
 * limitations under the License.
 */
 
+function assertWithLog(condition: boolean, testName: string): void {
+    console.log(testName + (condition ? ' success!' : ' failed!'));
+    arktest.assertTrue(condition);
+}
+
 async function checkToPromise(): Promise<void> {
     let module = ESValue.load('esvalue_to_promise_test');
     let sleepRetNumber = module.getProperty('sleepRetNumber');
     let p = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.toNumber() === 0xcafe);
+    assertWithLog(res.toNumber() === 0xcafe, 'checkToPromise');
 }
 
 async function checkToNumber(): Promise<void> {
@@ -32,7 +36,7 @@ async function checkToNumber(): Promise<void> {
     }).catch((e: Error) => {
         res = false;
     });
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkToNumber');
 }
 
 async function checkToString(): Promise<void> {
@@ -45,7 +49,7 @@ async function checkToString(): Promise<void> {
     }).catch((e: Error) => {
         res = false;
     });
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkToString');
 }
 
 async function checkToBoolean(): Promise<void> {
@@ -58,7 +62,7 @@ async function checkToBoolean(): Promise<void> {
     }).catch((e: Error) => {
         res = false;
     });
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkToBoolean');
 }
 
 async function checkToBigInt(): Promise<void> {
@@ -71,7 +75,7 @@ async function checkToBigInt(): Promise<void> {
     }).catch((e: Error) => {
         res = false;
     });
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkToBigInt');
 }
 
 function testInteropRejectStringCatch(): int {
@@ -121,9 +125,9 @@ async function testInteropAll(): Promise<void> {
     let asyncArrayFunctionBoolean = module.getProperty('asyncArrayFunctionBoolean');
     let asyncArrayFunctionBoolean2 = module.getProperty('asyncArrayFunctionBoolean2');
     const results = await Promise.all([asyncArrayFunctionBoolean.invoke().toPromise(), asyncArrayFunctionBoolean2.invoke().toPromise()]);
+    assertWithLog(results[0].toBoolean() && !results[1].toBoolean(), 'testInteropAll');
     arktest.assertTrue(results[0].toBoolean());
     arktest.assertTrue(!results[1].toBoolean());
-    console.log('Promise.all ESValue success!');
 }
 
 async function checkNestedPromise(): Promise<void> {
@@ -131,7 +135,7 @@ async function checkNestedPromise(): Promise<void> {
     let nestedPromiseFunc = module.getProperty('nestedPromise');
     let p = nestedPromiseFunc.invoke().toPromise();
     let res = await p;
-    arktest.assertTrue(res.toNumber() === 42);
+    assertWithLog(res.toNumber() === 42, 'checkNestedPromise');
 }
 
 async function checkRaceTest(): Promise<void> {
@@ -139,7 +143,7 @@ async function checkRaceTest(): Promise<void> {
     let raceFunc = module.getProperty('raceTest');
     let p = raceFunc.invoke().toPromise();
     let res = await p;
-    arktest.assertTrue(res.toNumber() === 2);
+    assertWithLog(res.toNumber() === 2, 'checkRaceTest');
 }
 
 async function checkAllSettledTest(): Promise<void> {
@@ -147,14 +151,17 @@ async function checkAllSettledTest(): Promise<void> {
     let allSettledFunc = module.getProperty('allSettledTest');
     let p = allSettledFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.getProperty('length').toNumber() === 2);
-
+    let valid = res.getProperty('length').toNumber() === 2;
     let firstResult = res.getProperty('0');
+    valid = valid && firstResult.getProperty('status').toString() === 'fulfilled';
+    valid = valid && firstResult.getProperty('value').toNumber() === 1;
+    let secondResult = res.getProperty('1');
+    valid = valid && secondResult.getProperty('status').toString() === 'rejected';
+    valid = valid && secondResult.getProperty('reason').toString() === 'error';
+    assertWithLog(valid, 'checkAllSettledTest');
+    arktest.assertTrue(res.getProperty('length').toNumber() === 2);
     arktest.assertTrue(firstResult.getProperty('status').toString() === 'fulfilled');
     arktest.assertTrue(firstResult.getProperty('value').toNumber() === 1);
-
-    let secondResult = res.getProperty('1');
     arktest.assertTrue(secondResult.getProperty('status').toString() === 'rejected');
     arktest.assertTrue(secondResult.getProperty('reason').toString() === 'error');
 }
@@ -164,7 +171,7 @@ async function checkChainTest(): Promise<void> {
     let chainFunc = module.getProperty('chainTest');
     let p = chainFunc.invoke().toPromise();
     let res = await p;
-    arktest.assertTrue(res.toNumber() === 4);
+    assertWithLog(res.toNumber() === 4, 'checkChainTest');
 }
 
 async function checkObjectPromise(): Promise<void> {
@@ -172,10 +179,13 @@ async function checkObjectPromise(): Promise<void> {
     let objectPromiseFunc = module.getProperty('objectPromise');
     let p = objectPromiseFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.isObject());
+    let valid = res.isObject();
     let name = res.getProperty('name');
     let count = res.getProperty('count');
+    valid = valid && name.toString() === 'test';
+    valid = valid && count.toNumber() === 42;
+    assertWithLog(valid, 'checkObjectPromise');
+    arktest.assertTrue(res.isObject());
     arktest.assertTrue(name.toString() === 'test');
     arktest.assertTrue(count.toNumber() === 42);
 }
@@ -185,8 +195,7 @@ async function checkArrayPromise(): Promise<void> {
     let arrayPromiseFunc = module.getProperty('arrayPromise');
     let p = arrayPromiseFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.getProperty('length').toNumber() === 3);
+    assertWithLog(res.getProperty('length').toNumber() === 3, 'checkArrayPromise');
 }
 
 async function checkNanPromise(): Promise<void> {
@@ -194,7 +203,7 @@ async function checkNanPromise(): Promise<void> {
     let nanPromiseFunc = module.getProperty('nanPromise');
     let p = nanPromiseFunc.invoke().toPromise();
     let res = await p;
-
+    assertWithLog(res.isNumber() && isNaN(res.toNumber()), 'checkNanPromise');
     arktest.assertTrue(res.isNumber());
     arktest.assertTrue(isNaN(res.toNumber()));
 }
@@ -204,7 +213,7 @@ async function checkInfinityPromise(): Promise<void> {
     let infinityPromiseFunc = module.getProperty('infinityPromise');
     let p = infinityPromiseFunc.invoke().toPromise();
     let res = await p;
-
+    assertWithLog(res.isNumber() && res.toNumber() === Infinity, 'checkInfinityPromise');
     arktest.assertTrue(res.isNumber());
     arktest.assertTrue(res.toNumber() === Infinity);
 }
@@ -214,8 +223,7 @@ async function checkNullPromise(): Promise<void> {
     let nullPromiseFunc = module.getProperty('nullPromise');
     let p = nullPromiseFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.isNull());
+    assertWithLog(res.isNull(), 'checkNullPromise');
 }
 
 async function checkUndefinedPromise(): Promise<void> {
@@ -223,8 +231,7 @@ async function checkUndefinedPromise(): Promise<void> {
     let undefinedPromiseFunc = module.getProperty('undefinedPromise');
     let p = undefinedPromiseFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.isUndefined());
+    assertWithLog(res.isUndefined(), 'checkUndefinedPromise');
 }
 
 async function checkThrowTypeError(): Promise<void> {
@@ -232,12 +239,10 @@ async function checkThrowTypeError(): Promise<void> {
     let throwFunc = module.getProperty('throwError');
     let p = throwFunc.invoke().toPromise();
     let res = false;
-
     await p.catch((e: Error) => {
         res = e.message.includes('Test error');
     });
-
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkThrowTypeError');
 }
 
 async function checkThrowNullError(): Promise<void> {
@@ -245,13 +250,11 @@ async function checkThrowNullError(): Promise<void> {
     let throwFunc = module.getProperty('throwNullError');
     let p = throwFunc.invoke().toPromise();
     let res = false;
-
     await p.catch((e: Error) => {
         e = e as ESError;
         res = e.getValue().isNull();
     });
-
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkThrowNullError');
 }
 
 async function checkAwaitCatch(): Promise<void> {
@@ -259,8 +262,7 @@ async function checkAwaitCatch(): Promise<void> {
     let awaitCatchFunc = module.getProperty('awaitCatch');
     let p = awaitCatchFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.toNumber() === 1);
+    assertWithLog(res.toNumber() === 1, 'checkAwaitCatch');
 }
 
 async function checkTimeoutSuccess(): Promise<void> {
@@ -268,8 +270,7 @@ async function checkTimeoutSuccess(): Promise<void> {
     let timeoutFunc = module.getProperty('timeoutSuccessTest');
     let p = timeoutFunc.invoke().toPromise();
     let res = await p;
-
-    arktest.assertTrue(res.toNumber() === 42);
+    assertWithLog(res.toNumber() === 42, 'checkTimeoutSuccess');
 }
 
 async function checkTimeoutFail(): Promise<void> {
@@ -277,10 +278,9 @@ async function checkTimeoutFail(): Promise<void> {
     let timeoutFunc = module.getProperty('timeoutFailTest');
     let p = timeoutFunc.invoke().toPromise();
     let res = false;
-
     await p.catch((e: Error) => {
-        res = e.message.includes('timeout');
+        e = e as ESError;
+        res = e.getValue().toString() === 'timeout';
     });
-
-    arktest.assertTrue(res);
+    assertWithLog(res, 'checkTimeoutFail');
 }
