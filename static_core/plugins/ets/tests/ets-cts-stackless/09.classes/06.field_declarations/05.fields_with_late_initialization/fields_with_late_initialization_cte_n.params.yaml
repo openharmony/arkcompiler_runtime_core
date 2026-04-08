@@ -1,0 +1,517 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+      >-
+        Field with late initialization must be an instance field.
+        If it is defined as static, then a compile-time error occurs.
+    check_variants:
+      - {modifiers: "static", check_type: "int", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "double", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "bigint", check_value: "0n", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "string", check_value: "\"abc\"", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "char", check_value: "c'\\u0000'", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "boolean", check_value: "false", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "Object", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "static", check_type: "C", check_value: "new C()", cv_decl_data: "class C {}",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "private static", check_type: "int", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+      - {modifiers: "protected static", check_type: "int", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0303: Late-initialized field cannot be defined as static."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          [modifiers] field!: [check_type]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          [modifiers] field!: [check_type] = [check_value]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          [modifiers] field!: [check_type]
+          static {
+            A.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      Field with late initialization cannot be of a nullish type
+    check_variants:
+      - {check_type: "Any", check_value: "undefined", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "long | null", check_value: "null", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "long | undefined", check_value: "undefined", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "long | undefined | null", check_value: "0", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "int | null", check_value: "null", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "int | undefined", check_value: "undefined", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "int | undefined | null", check_value: "0", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "double | null", check_value: "null", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "double | undefined", check_value: "undefined", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "double | undefined | null", check_value: "0", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "string | null", check_value: "null", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "string | undefined", check_value: "undefined", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "string | undefined | null", check_value: "\"abc\"", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "Object | null", check_value: "null", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "Object | undefined", check_value: "undefined", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "Object | undefined | null", check_value: "0", cv_decl_data: "",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "C | null", check_value: "null", cv_decl_data: "class C {}",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "C | undefined", check_value: "undefined", cv_decl_data: "class C {}",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+      - {check_type: "C | undefined | null", check_value: "new C()", cv_decl_data: "class C {}",
+        expected_out: "Semantic error ESE0376: Late-initialized field cannot be nullish types or possibly nullish types."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type] = [check_value]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type]
+          constructor () {
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      Field with late initialization cannot have field initializers
+    check_variants:
+      - {check_type: "int", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "double", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "bigint", check_value: "0n", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "string", check_value: "\"abc\"", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "char", check_value: "c'\\u0000'", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "boolean", check_value: "false", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "Object", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+      - {check_type: "C", check_value: "new C()", cv_decl_data: "class C {}",
+        expected_out: "Syntax error ESY0304: Late-initialized field cannot have default value."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type] = [check_value]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          v: [check_type] = [check_value]
+          field!: [check_type] = this.v
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          private _v: [check_type] = [check_value]
+          public get v(): [check_type] {
+            return this._v
+          }
+        }
+        class B extends A {
+          field!: [check_type] = super.v
+        }
+      - |-
+        [cv_decl_data]
+        function foo(): [check_type] {
+          return [check_value]
+        }
+        class A {
+          field!: [check_type] = foo()
+        }
+
+  - desc: |-
+      >-
+        Checking for initialization from outside of constructor
+        with different not covariant subtype values usage
+    check_variants:
+      - {check_value_type: "Cat",
+        expected_out: "Semantic error ESE0318: Type 'Cat' cannot be assigned to type 'Dog'"}
+      - {check_value_type: "Animal",
+        expected_out: "Semantic error ESE0318: Type 'Animal' cannot be assigned to type 'Dog'"}
+    decl_variants:
+      - |-
+        class Animal {}
+        class Dog extends Animal {}
+        class Cat extends Animal {}
+        class C {
+          field!: Dog
+        }
+    logic: |-
+      let a: C = new C
+      a.field = new [check_value_type]
+
+  - desc: |-
+      >-
+        Checking for initialization from outside of constructor
+        with different not covariant function subtype values usage
+    check_variants:
+      - {check_value: "handlerCInt",
+        expected_out: "Semantic error ESE0318: Type '((p1: C, p2: Int) => B)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
+      - {check_value: "handlerBInt",
+        expected_out: "Semantic error ESE0318: Type '((p1: B, p2: Int) => A)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
+      - {check_value: "handlerB",
+        expected_out: "Semantic error ESE0318: Type '((p1: B) => A)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
+      - {check_value: "handlerBIntInt",
+        expected_out: "Semantic error ESE0318: Type '((p1: B, p2: Int, p3: Int) => B)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
+      - {check_value: "handlerNothing",
+        expected_out: "Semantic error ESE0318: Type '(() => C)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
+    decl_variants:
+      - |-
+        class A {}
+        class B extends A {}
+        class C extends A {}
+        type HandlerReq = (a: B, b: int) => B
+        const handlerReq: HandlerReq = (a: B, b: int): B => {
+          return new B
+        }
+        type HandlerCInt = (a: C, b: int) => B
+        const handlerCInt: HandlerCInt = (a: C, b: int): B => {
+          return new B
+        }
+        type HandlerBInt = (a: B, b: int) => A
+        const handlerBInt: HandlerBInt = (a: B, b: int): A => {
+          return new B
+        }
+        type HandlerB = (a: B) => A
+        const handlerB: HandlerB = (a: B): A => {
+          return new B
+        }
+        type HandlerBIntInt = (a: B, b: int, c: int) => B
+        const handlerBIntInt: HandlerBIntInt = (a: B, b: int, c: int): B => {
+          return new B
+        }
+        type HandlerNothing = () => C
+        const handlerNothing: HandlerNothing = (): C => {
+          return new C
+        }
+        class D {
+          field!: HandlerReq
+        }
+    logic: |-
+      let a: D = new D
+      a.field = [check_value]
+
+  - desc: |-
+      Field with late initialization cannot be used in interface
+    check_variants:
+      - {check_type: "int", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "double", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "bigint", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "string", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "char", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "boolean", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "Object", cv_decl_data: "",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+      - {check_type: "C", cv_decl_data: "class C {}",
+        expected_out: "Syntax error ESY162966: Definite assignment assertions '!' are not allowed in interface properties."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        interface I {
+          field!: [check_type]
+        }
+
+  - desc: |-
+      >-
+        The type of the overriding field is to be the same as that of the
+        overridden field. Otherwise, a compile-time error occurs
+    check_variants:
+      - {base_type: "Object", override_type: "number",
+        base_value: "0", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "number", override_type: "Object",
+        base_value: "0", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "number", override_type: "int",
+        base_value: "0", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "int", override_type: "number",
+        base_value: "0", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "float", override_type: "int",
+        base_value: "0", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "int", override_type: "float",
+        base_value: "0", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "number", override_type: "bigint",
+        base_value: "0", override_value: "0n",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "bigint", override_type: "number",
+        base_value: "0n", override_value: "0",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "string", override_type: "char",
+        base_value: "\"\"", override_value: "c'0'",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+      - {base_type: "char", override_type: "string",
+        base_value: "c'0'", override_value: "\"\"",
+        expected_out: "Semantic error ESE52491: field in A cannot override field in Base because overriding type is not compatible with the base type."}
+    decl_variants:
+      - |-
+        class Base {
+          field!: [base_type]
+        }
+        class A extends Base {
+          override field: [override_type] = [override_value]
+        }
+      - |-
+        class Base {
+          field: [base_type] = [base_value]
+        }
+        class A extends Base {
+          override field!: [override_type]
+        }
+
+  - desc: |-
+      >-
+        As all other fields, a field with late initialization
+        must be initialized before it is used for the first time.
+    check_variants:
+      - {check_type: "bigint", check_value: "0n", cv_decl_data: "",
+        expected_out: "Semantic error ESE0375: Property 'field' is used before being assigned."}
+      - {check_type: "string", check_value: "\"abc\"", cv_decl_data: "",
+        expected_out: "Semantic error ESE0375: Property 'field' is used before being assigned."}
+      - {check_type: "Object", check_value: "0", cv_decl_data: "",
+        expected_out: "Semantic error ESE0375: Property 'field' is used before being assigned."}
+      - {check_type: "C", check_value: "new C()", cv_decl_data: "class C {}",
+        expected_out: "Semantic error ESE0375: Property 'field' is used before being assigned."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type]
+          constructor () {
+            let v: [check_type] = this.field
+          }
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type]
+          constructor (arg: [check_type]) {
+            let v: [check_type] = this.field
+          }
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type]
+          constructor (arg: [check_type] = [check_value]) {
+            let v: [check_type] = this.field
+          }
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: [check_type]
+          constructor (...args: Any[]) {
+            let v: [check_type] = this.field
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for initialization from object literal.
+        Only class fields that have default values (see Default Values for Types)
+        or explicit initializers (see Variable and Constant Declarations)
+        can be skipped in an object literal. Otherwise, a compile-time error occurs.
+    check_variants:
+      - {check_type: "int", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "double", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "char", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "boolean", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "bigint", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "string", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "Object", cv_decl_data: "",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+      - {check_type: "C", cv_decl_data: "class C {}",
+        expected_out: "Semantic error ESE0400: Non-optional property 'f3' in type 'A' is missing in object literal."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          f1: number
+          f2: string
+          f3!: [check_type]
+        }
+    logic: |-
+      let a: A = {f2: "xyz"}
+
+  - desc: |-
+      >-
+        Field with late initialization cannot have field initializers,
+        and can be neither readonly (see Readonly (Constant) Fields)
+        nor optional (see Optional Fields). Otherwise, a compile-time error occurs.
+    check_variants:
+      - {check_type: "int", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "double", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "char", check_value: "c'\\u0000'", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "boolean", check_value: "false", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "bigint", check_value: "0n", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "string", check_value: "\"abc\"", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "Object", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+      - {check_type: "C", check_value: "new C()", cv_decl_data: "class C {}",
+        expected_out: "Syntax error ESY0127: Conflicting modifiers '!' and '?' on field."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          field!?: [check_type]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!?: [check_type] = [check_value]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field!?: [check_type]
+          constructor () {
+            this.field = [check_value]
+          }
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field?!: [check_type]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field?!: [check_type] = [check_value]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          field?!: [check_type]
+          constructor () {
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Field with late initialization cannot have field initializers,
+        and can be neither readonly (see Readonly (Constant) Fields)
+        nor optional (see Optional Fields). Otherwise, a compile-time error occurs.
+    check_variants:
+      - {check_type: "int", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "double", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "char", check_value: "c'\\u0000'", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "boolean", check_value: "false", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "bigint", check_value: "0n", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "string", check_value: "\"abc\"", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "Object", check_value: "0", cv_decl_data: "",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "C", check_value: "new C()", cv_decl_data: "class C {}",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          readonly field!: [check_type] = [check_value]
+        }
+      - |-
+        [cv_decl_data]
+        class A {
+          readonly field!: [check_type]
+          constructor () {
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Field with late initialization cannot have field initializers,
+        and can be neither readonly (see Readonly (Constant) Fields)
+        nor optional (see Optional Fields). Otherwise, a compile-time error occurs.
+    check_variants:
+      - {check_type: "int",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "double",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "char",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+      - {check_type: "boolean",
+        expected_out: "Syntax error ESY139768: Late-initialized field cannot be readonly."}
+    decl_variants:
+      - |-
+        class A {
+          readonly field!: [check_type]
+        }

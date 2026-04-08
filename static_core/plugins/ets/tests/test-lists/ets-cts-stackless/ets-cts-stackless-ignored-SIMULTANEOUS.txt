@@ -1,0 +1,8 @@
+#33893 es2panda aborts on overloading an imported function when '--simultaneous=true'
+04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_0.ets
+04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_1.ets
+
+#31588
+13.modules_and_namespaces/07.export_directives/04.re-export_directive/reexported_default.ets
+13.modules_and_namespaces/07.export_directives/04.re-export_directive/reexported_default_2.ets
+13.modules_and_namespaces/07.export_directives/04.re-export_directive/reexported_default_3.ets
