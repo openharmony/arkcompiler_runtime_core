@@ -339,9 +339,9 @@ function testFlat() {
 function testCopyWithIn() {
     let x = new SparseArray<string>('1', '2', 'b', 'c', 'd')
     x.copyWithin(1, 2)
-    checkExpected(x, ["1", "b", "c", "d", "d"])
+    checkExpected(x, ['1', 'b', 'c', 'd', 'd'])
     x.copyWithin(0, 2, 3)
-    checkExpected(x, ["c", "b", "c", "d", "d"])
+    checkExpected(x, ['c', 'b', 'c', 'd', 'd'])
 }
 
 function testSortUnion() {
