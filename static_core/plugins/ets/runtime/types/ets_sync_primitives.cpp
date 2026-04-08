@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "runtime/execution/job_events.h"
 #include "runtime/execution/job_execution_context.h"
-#include "include/managed_thread.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
@@ -26,69 +26,130 @@ namespace ark::ets {
 /*static*/
 EtsMutex *EtsMutex::Create(EtsExecutionContext *executionCtx)
 {
-    EtsHandleScope scope(executionCtx);
     auto *klass = PlatformTypes(executionCtx)->coreMutex;
-    auto hMutex = EtsHandle<EtsMutex>(executionCtx, EtsMutex::FromEtsObject(EtsObject::Create(executionCtx, klass)));
-    auto *waitersList = EtsWaitersList::Create(executionCtx);
-    ASSERT(hMutex.GetPtr() != nullptr);
-    hMutex->SetWaitersList(executionCtx, waitersList);
-    return hMutex.GetPtr();
+    return EtsMutex::FromEtsObject(EtsObject::Create(executionCtx, klass));
 }
 
-ALWAYS_INLINE inline static void BackOff(uint32_t i)
+ALWAYS_INLINE static void BackOff(uint32_t spinCount)
 {
-    volatile uint32_t x;  // Volatile to make sure loop is not optimized out.
-    const uint32_t spinCount = 10 * i;
+#if defined(PANDA_TARGET_AMD64)
     for (uint32_t spin = 0; spin < spinCount; spin++) {
+        __builtin_ia32_pause();
+    }
+#else
+    volatile int64_t x = 0;
+    static constexpr int64_t FACTOR = 10;
+    for (uint32_t spin = 0; spin < FACTOR * spinCount; spin++) {
         x = x + 1;
     }
+#endif
 }
 
-static bool TrySpinLockFor(std::atomic<uint32_t> &waiters, uint32_t expected, uint32_t desired)
+bool EtsMutex::TrySpinLockFor(std::atomic<uintptr_t> &state, uintptr_t &expected)
 {
-    static constexpr uint32_t maxBackOff = 3;  // NOLINT(readability-identifier-naming)
-    static constexpr uint32_t maxIter = 3;     // NOLINT(readability-identifier-naming)
-    uint32_t exp;
-    for (uint32_t i = 1; i <= maxIter; ++i) {
-        exp = expected;
-        if (waiters.compare_exchange_weak(exp, desired, std::memory_order_acq_rel, std::memory_order_relaxed)) {
-            return true;
+    constexpr uint32_t SHORT_REPEAT = 16;
+    constexpr uint32_t SHORT_DELAY = 2;
+
+    constexpr uint32_t MEDIUM_REPEAT = 12;
+    constexpr uint32_t MEDIUM_DELAY = 8;
+
+    constexpr uint32_t LONG_REPEAT = 6;
+    constexpr uint32_t LONG_DELAY = 24;
+
+    constexpr auto SPINLOCK_FUNC = [](std::atomic<uintptr_t> &state, uintptr_t &expected, uint32_t repeat,
+                                      uint32_t delay) {
+        for (uint32_t i = 0; i < repeat; ++i) {
+            if (!IsLocked(expected) &&
+                // Atomic with acquire order reason: to make the changes in the critical section visible
+                state.compare_exchange_weak(expected, expected | LOCKED_STATE, std::memory_order_acquire,
+                                            std::memory_order_relaxed)) {
+                return true;
+            }
+            BackOff(delay);
+            // Atomic with relaxed order reason: sync is not needed here because of CAS
+            expected = state.load(std::memory_order_relaxed);
         }
-        BackOff(std::min<uint32_t>(i, maxBackOff));
-    }
-    return false;
+        return false;
+    };
+
+    return SPINLOCK_FUNC(state, expected, SHORT_REPEAT, SHORT_DELAY) ||
+           SPINLOCK_FUNC(state, expected, MEDIUM_REPEAT, MEDIUM_DELAY) ||
+           SPINLOCK_FUNC(state, expected, LONG_REPEAT, LONG_DELAY);
 }
 
 void EtsMutex::Lock()
 {
-    if (TrySpinLockFor(waiters_, 0, 1)) {
+    uintptr_t head = UNLOCKED_STATE;
+    // Atomic with acquire order reason: to make the changes in the critical section visible
+    if LIKELY (state_.compare_exchange_strong(head, LOCKED_STATE, std::memory_order_acquire,
+                                              std::memory_order_relaxed)) {
         return;
     }
-    // Atomic with acq_rel order reason: sync Lock/Unlock in other threads
-    if (waiters_.fetch_add(1, std::memory_order_acq_rel) == 0) {
-        return;
+
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    auto handleScope = EtsHandleScope(executionCtx);
+    auto mutexH = EtsHandle<EtsMutex>(executionCtx, this);
+    auto *state = &mutexH.GetPtr()->state_;
+
+    while (!TrySpinLockFor(*state, head)) {
+        if (IsLocked(head)) {
+            auto awaitee = Node(jobMan);
+            awaitee.next = reinterpret_cast<Node *>(head & ~LOCKED_STATE);
+            auto newHead = reinterpret_cast<uintptr_t>(&awaitee) | LOCKED_STATE;
+            awaitee.GetEvent().Lock();
+            TSAN_ANNOTATE_HAPPENS_BEFORE(state);
+            // Atomic with release order reason: to make the store in the .next visible in unlock
+            if (state->compare_exchange_weak(head, newHead, std::memory_order_release, std::memory_order_relaxed)) {
+                awaitee.GetEvent().Wait();
+                state = &mutexH.GetPtr()->state_;
+                // Atomic with relaxed order reason: sync is not needed here because of CAS
+                head = state->load(std::memory_order_relaxed);
+                continue;
+            }
+            awaitee.GetEvent().Unlock();
+        }
     }
-    auto *executionCtx = JobExecutionContext::GetCurrent();
-    ASSERT(executionCtx != nullptr);
-    auto event = BlockingEvent {executionCtx->GetManager()};
-    auto awaitee = EtsWaitersList::Node(&event);
-    SuspendCoroutine(&awaitee);
 }
 
 void EtsMutex::Unlock()
 {
-    // Atomic with acq_rel order reason: sync Lock/Unlock in other threads
-    if (waiters_.fetch_sub(1, std::memory_order_acq_rel) == 1) {
+    uintptr_t head = LOCKED_STATE;
+    // Atomic with release order reason: to make the changes in the critical section visible in other threads
+    // Atomic with acquire order reason: to make the store in .next visible
+    if LIKELY (state_.compare_exchange_strong(head, UNLOCKED_STATE, std::memory_order_release,
+                                              std::memory_order_acquire)) {
         return;
     }
-    ResumeCoroutine();
+
+    constexpr uint32_t MAX_UNBLOCK_CNT = 8;
+
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        TSAN_ANNOTATE_HAPPENS_AFTER(&state_);
+        auto *node = reinterpret_cast<Node *>(head & ~LOCKED_STATE);
+        auto *unblockList = node;
+        uint32_t unblockCnt = 0;
+        for (; unblockCnt != MAX_UNBLOCK_CNT && node != nullptr; ++unblockCnt) {
+            node = node->next;
+        }
+        auto newHead = reinterpret_cast<uintptr_t>(node);
+        // Atomic with release order reason: to make the changes in the critical section visible in other threads
+        // Atomic with acquire order reason: to make the store in .next visible
+        if (state_.compare_exchange_weak(head, newHead, std::memory_order_release, std::memory_order_acquire)) {
+            for (; unblockCnt != 0; --unblockCnt) {
+                std::exchange(unblockList, unblockList->next)->GetEvent().Happen();
+            }
+            return;
+        }
+    }
 }
 
 bool EtsMutex::IsHeld()
 {
     // Atomic with relaxed order reason: sync is not needed here
     // because it is expected that method is not called concurrently with Lock/Unlock
-    return waiters_.load(std::memory_order_relaxed) != 0;
+    return IsLocked(state_.load(std::memory_order_relaxed));
 }
 
 /*static*/

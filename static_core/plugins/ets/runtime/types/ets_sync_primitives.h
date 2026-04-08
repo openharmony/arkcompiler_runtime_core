@@ -114,7 +114,7 @@ private:
 };
 
 /// @brief Coroutine mutex. This allows to get exclusive access to the critical section.
-class EtsMutex : public EtsSyncPrimitive<EtsMutex> {
+class EtsMutex final : public EtsObject {
 public:
     template <typename T>
     class LockHolder {
@@ -155,8 +155,53 @@ public:
 
     static EtsMutex *Create(EtsExecutionContext *executionCtx);
 
+    static EtsMutex *FromCoreType(ObjectHeader *mutex)
+    {
+        return reinterpret_cast<EtsMutex *>(mutex);
+    }
+
+    static EtsMutex *FromEtsObject(EtsObject *mutex)
+    {
+        return reinterpret_cast<EtsMutex *>(mutex);
+    }
+
+    EtsObject *AsObject()
+    {
+        return this;
+    }
+
+    const EtsObject *AsObject() const
+    {
+        return this;
+    }
+
 private:
-    std::atomic<uint32_t> waiters_;
+    class Node {
+    public:
+        explicit Node(JobManager *jobMan) : event_(jobMan) {}
+
+        BlockingEvent &GetEvent()
+        {
+            return event_;
+        }
+
+        Node *next = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    private:
+        BlockingEvent event_;
+    };
+
+    static constexpr uintptr_t UNLOCKED_STATE = 0;
+    static constexpr uintptr_t LOCKED_STATE = 1;
+
+    static bool IsLocked(uintptr_t state)
+    {
+        return (state & LOCKED_STATE) != 0;
+    }
+
+    static bool TrySpinLockFor(std::atomic<uintptr_t> &state, uintptr_t &expected);
+
+    std::atomic<uintptr_t> state_;
 
     friend class test::EtsSyncPrimitivesTest;
 };
