@@ -190,7 +190,7 @@ public:
     [[nodiscard]] void *AllocateLocal([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
                                       [[maybe_unused]] ark::ManagedThread *thread) final
     {
-        LOG(FATAL, ALLOC) << "ObjectAllocatorGen: AllocateLocal not supported";
+        LOG(FATAL, ALLOC) << "ObjectAllocatorG1: AllocateLocal not supported";
         return nullptr;
     }
 

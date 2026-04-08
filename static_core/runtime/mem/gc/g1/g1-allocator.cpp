@@ -159,7 +159,7 @@ void ObjectAllocatorG1<MT_MODE>::IterateOverObjectsInRange(MemRange memRange, co
     }
 }
 
-// maybe ObjectAllocatorGen and ObjectAllocatorNoGen should have inheritance relationship
+// maybe ObjectAllocatorG1 and ObjectAllocatorNoGen should have inheritance relationship
 template <MTModeT MT_MODE>
 bool ObjectAllocatorG1<MT_MODE>::ContainObject(const ObjectHeader *obj) const
 {
