@@ -14,8 +14,7 @@
  */
 {%- for c in cases %}
 /*---
-desc: A compile-time error occurs if type T is not preserved by Type Erasure
-tags: [compile-only, negative]
+desc: Test for instanceof without instantiated generic type
 ---*/
 {{c.decl}}
 

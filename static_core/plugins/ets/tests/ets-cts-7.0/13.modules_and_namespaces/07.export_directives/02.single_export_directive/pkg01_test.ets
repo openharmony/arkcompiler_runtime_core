@@ -18,7 +18,10 @@ desc: Single export directive allows specifying the declaration to be exported f
 files: ['./pkg01/a.ets', './pkg01/b.ets', './pkg01/c.ets', './pkg01/d.ets']
 ---*/
 
-import { ClassA, InterfaceA, foo, BAR } from './pkg01'
+import { ClassA } from './pkg01/a.ets'
+import { InterfaceA } from './pkg01/b.ets'
+import { foo } from './pkg01/c.ets'
+import { BAR } from './pkg01/d.ets'
 
 function main() {
     arktest.assertEQ(BAR, 146)

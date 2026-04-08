@@ -14,51 +14,50 @@
 ---
 cases:
 #0
-  - { stype: boolean, sval: 'true', dtype: as byte, expected: "Semantic error ESE0326: Cannot cast type 'Boolean' to 'Byte'" } 
+  - { tags: [compile-only], stype: boolean, sval: 'true', dtype: as byte, expected: "Warning W0326: Attempting to cast type 'Boolean' to 'Byte' can throw 'CastClassError' exception at runtime" }
 #1
-  - { stype: boolean, sval: 'false', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Boolean'"}
+  - { tags: [compile-only, negative], stype: boolean, sval: 'false', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Boolean'"}
 #2
-  - { stype: boolean, sval: 'true', dtype2: .toDouble(), expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'Boolean'"}
+  - { tags: [compile-only, negative], stype: boolean, sval: 'true', dtype2: .toDouble(), expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'Boolean'"}
 #3
-  - { stype: short, sval: (1).toShort(), dtype: as boolean, expected: "Semantic error ESE0326: Cannot cast type 'Short' to 'Boolean'" }
+  - { tags: [compile-only], stype: short, sval: (1).toShort(), dtype: as boolean, expected: "Warning W0326: Attempting to cast type 'Short' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #4
-  - { stype: long, sval: (1).toLong(), dtype: as boolean, expected: " Semantic error ESE0326: Cannot cast type 'Long' to 'Boolean'" }
+  - { tags: [compile-only], stype: long, sval: (1).toLong(), dtype: as boolean, expected: "Warning W0326: Attempting to cast type 'Long' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #5
-  - { stype: float, sval: 1.0f, dtype: as boolean, expected: "Semantic error ESE0326: Cannot cast type 'Float' to 'Boolean'" }
-
+  - { tags: [compile-only], stype: float, sval: 1.0f, dtype: as boolean, expected: "Warning W0326: Attempting to cast type 'Float' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #6
-  - { stype: Boolean, sval: new Boolean(), dtype2: .toShort(), expected: "Semantic error ESE0087: Property 'toShort' does not exist on type 'Boolean'" }
+  - { tags: [compile-only, negative], stype: Boolean, sval: new Boolean(), dtype2: .toShort(), expected: "Semantic error ESE0087: Property 'toShort' does not exist on type 'Boolean'" }
 #7
-  - { stype: Boolean, sval: new Boolean(), dtype2: .toLong(), expected: "Semantic error ESE0087: Property 'toLong' does not exist on type 'Boolean'" }
+  - { tags: [compile-only, negative], stype: Boolean, sval: new Boolean(), dtype2: .toLong(), expected: "Semantic error ESE0087: Property 'toLong' does not exist on type 'Boolean'" }
 #8
-  - { stype: Boolean, sval: new Boolean(), dtype2: f, expected: "Syntax error ESY0227: Unexpected token 'f'." }
+  - { tags: [compile-only, negative], stype: Boolean, sval: new Boolean(), dtype2: f, expected: "Syntax error ESY0227: Unexpected token 'f'." }
 #9
-  - { stype: byte, sval: 1 as byte, dtype: as Boolean, expected: "Semantic error ESE0326: Cannot cast type 'Byte' to 'Boolean'" }
+  - { tags: [compile-only], stype: byte, sval: 1 as byte, dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Byte' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #10
-  - { stype: int, sval: (1).toInt(), dtype: as Boolean, expected: "Semantic error ESE0326: Cannot cast type 'Int' to 'Boolean'" }
+  - { tags: [compile-only], stype: int, sval: (1).toInt(), dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Int' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #11
-  - { stype: double, sval: 1.0, dtype: as Boolean, expected: "Semantic error ESE0326: Cannot cast type 'Double' to 'Boolean'" }
-
+  - { tags: [compile-only], stype: double, sval: 1.0, dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Double' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #12
-  - { stype: int, sval: 1, dtype: as string, expected: "Semantic error ESE0326: Cannot cast type 'Int' to 'String'" }
+  - { tags: [compile-only], stype: int, sval: 1, dtype: as string, expected: "Warning W0326: Attempting to cast type 'Int' to 'String' can throw 'CastClassError' exception at runtime" }
 #13
-  - { stype: string, sval: '"1"', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'String'" }
+  - { tags: [compile-only, negative], stype: string, sval: '"1"', dtype2: .toInt(), expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'String'" }
 #14
-  - { stype: Boolean, sval: new Boolean(), dtype: as string, expected: "Semantic error ESE0326: Cannot cast type 'Boolean' to 'String'" }
+  - { tags: [compile-only], stype: Boolean, sval: new Boolean(), dtype: as string, expected: "Warning W0326: Attempting to cast type 'Boolean' to 'String' can throw 'CastClassError' exception at runtime" }
 #15
-  - { stype: string, sval: '"true"', dtype: as Boolean, expected: "Semantic error ESE0326: Cannot cast type '\\\"true\\\"' to 'Boolean'" }
+  - { tags: [compile-only], stype: string, sval: '"true"', dtype: as Boolean, expected: "Warning W0326: Attempting to cast type '\\\"true\\\"' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 #16
-  - { stype: Object, sval: new Int(), dtype: as Boolean, expected: "Semantic error ESE0326: Cannot cast type 'Int' to 'Boolean'" }
+  - { tags: [compile-only], stype: Object, sval: new Int(), dtype: as Boolean, expected: "Warning W0326: Attempting to cast type 'Int' to 'Boolean' can throw 'CastClassError' exception at runtime" }
 
 #17
   - defs: |-
       class A {}
       class B extends A {}
       class C extends A {}
+    tags: [compile-only]
     stype: B
     sval: new B()
     dtype: as C
-    expected: "Semantic error ESE0326: Cannot cast type 'B' to 'C'"
+    expected: "Warning W0326: Attempting to cast type 'B' to 'C' can throw 'CastClassError' exception at runtime"
 #18
   - defs: |-
       interface I {}
@@ -66,21 +65,24 @@ cases:
       interface K extends I {}
       class B implements J {}
       class C implements K {}
+    tags: [compile-only]
     stype: B
     sval: new B()
     dtype: as C
-    expected: "Semantic error ESE0326: Cannot cast type 'B' to 'C'"
+    expected: "Warning W0326: Attempting to cast type 'B' to 'C' can throw 'CastClassError' exception at runtime"
 #19
   - defs: |-
       class A {}
       class B {}
+    tags: [compile-only]
     stype: B[]
     sval: new B[1](new B())
     dtype: as A[]
-    expected: "Semantic error ESE0326: Cannot cast type 'Array<B>' to 'Array<A>'"
+    expected: "Warning W0326: Attempting to cast type 'Array<B>' to 'Array<A>' can throw 'CastClassError' exception at runtime"
 #20
   - defs: |-
       type func = (a: int, b: int) => int;
+    tags: [compile-only, negative]
     stype: func
     sval: '(a: int, b: int): int => { return a + b; }'
     dtype2: .toInt()
@@ -91,83 +93,53 @@ cases:
       function foo(a: int, b: int): Int {
         return new Int(a + b);
       }
+    tags: [compile-only]
     stype: Int
     sval: foo(1, 2)
     dtype: as func
-    expected: "Semantic error ESE0326: Cannot cast type 'Int' to '((p1: Int, p2: Int) => Int)'"
+    expected: "Warning W0326: Attempting to cast type 'Int' to '((p1: Int, p2: Int) => Int)' can throw 'CastClassError' exception at runtime"
 #22
   - defs: |-
       class A<T> {}
+    tags: [compile-only]
     stype: A<Int>
     sval: new A<Int>()
     dtype: as A<Long>
-    expected: "Semantic error ESE0326: Cannot cast type 'A<Int>' to 'A<Long>'"
+    expected: "Warning W0326: Attempting to cast type 'A<Int>' to 'A<Long>' can throw 'CastClassError' exception at runtime"
 #23
   - defs: |-
-      class X {}
-      class Y extends X {}
-      class BB<T> {}
-    stype: BB<Y>
-    sval: new BB<Y>()
-    dtype: as BB<X>
-    expected: "Semantic error ESE0326: Cannot cast type 'BB<Y>' to 'BB<X>'"
-#24
-  - defs: |-
-      class X {}
-      class Y extends X {}
-      class BB<T> {}
-    stype: BB<X>
-    sval: new BB<X>()
-    dtype: as BB<Y>
-    expected: "Semantic error ESE0326: Cannot cast type 'BB<X>' to 'BB<Y>'"
-
-#  Should be allowed as narrowing conversion.
-#  - defs: |-
-#      class X {}
-#      class Y extends X {}
-#      class BB<in T> {}
-#    stype: BB<Y>
-#    sval: new BB<Y>()
-#    dtype: BB<X>
-#
-#  - defs: |-
-#      class X {}
-#      class Y extends X {}
-#      class BB<out T> {}
-#    stype: BB<X>
-#    sval: new BB<X>()
-#    dtype: BB<Y>
-
-#25
-  - defs: |-
       class A {}
+    tags: [compile-only, negative]
     stype: Object
     sval: new A()
     dtype2: .toDouble()
     expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'A'"
-#26
+#24
   - defs: |-
       interface I {}
       class A implements I {}
       class B implements I {}
+    tags: [compile-only]
     stype: I
     sval: new A()
     dtype: as B
-    expected: "Semantic error ESE0326: Cannot cast type 'A' to 'B'"
-#27
+    expected: "Warning W0326: Attempting to cast type 'A' to 'B' can throw 'CastClassError' exception at runtime"
+#25
   - defs: |-
       class A {}
+    tags: [compile-only]
     stype: Object
     sval: new A[1](new A())
     dtype: as A[][]
-    expected: "Semantic error ESE0326: Cannot cast type 'Array<A>' to 'Array<Array<A>>'"
-#28
+    expected: "Warning W0326: Attempting to cast type 'Array<A>' to 'Array<Array<A>>' can throw 'CastClassError' exception at runtime"
+#26
   - defs: |-
       type func = (a: int, b: int) => Int;
       function foo(a: int, b: int): Int {
         return new Int(a + b);
       }
+    tags: [compile-only]
     stype: func
     sval: foo
     dtype: as Object[]
-    expected: "Semantic error ESE0326: Cannot cast type '((p1: Int, p2: Int) => Int)' to 'Array<Object>'"
+    expected: "Warning W0326: Attempting to cast type '((p1: Int, p2: Int) => Int)' to 'Array<Object>' can throw 'CastClassError' exception at runtime"

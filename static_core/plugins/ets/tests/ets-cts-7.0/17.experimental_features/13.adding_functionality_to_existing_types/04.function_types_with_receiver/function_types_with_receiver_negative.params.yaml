@@ -68,7 +68,7 @@ cases:
       x.foo(x.bar)
       x.foo(x.bar<int>)
       let z = x.bar
-      let y = x.bar<int> 
+      let y = x.bar<int>
     out: |
       Semantic error ESE0127: No matching call signature for foo(Int, x.bar)\n
       Semantic error ESE655063: Generic function bar requires explicit type arguments when used as a value.\n
@@ -83,8 +83,7 @@ cases:
       type Foo = (this: A) => number
     use: |
       let f1: Foo = (this: A): number => { return this.fld++ }
-    out: |
-      Semantic error ESE4002: Cannot assign to a readonly field fld
+    out: "Semantic error ESE4002: Cannot assign to a readonly field fld"
   - decl: |
       class A {
         readonly fld = 0
@@ -93,7 +92,7 @@ cases:
     use: |
       let f1 = bar
     out: |
-      Semantic error ESE4002: Cannot assign to a readonly field fld
+      Semantic error ESE4002: Cannot assign to a readonly field fld\n
   - decl: |
       class A { p: string = "abc" }
       class B extends A {

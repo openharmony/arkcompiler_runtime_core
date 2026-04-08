@@ -13,33 +13,30 @@
  * limitations under the License.
  */
 
-{% for type in types %}
-
 /*---
 desc: Type T1 is assignable to type T2 if T1 is type never;
 tags: [compile-only]
 ---*/
 
-const n: {{type}} = neverFunction(), m = neverFunction();
-let a: {{type}} = neverFunction();
+{%- for type in types %}
+const n{{loop.index}}: {{type}} = neverFunction(), m{{loop.index}} = neverFunction();
+let a{{loop.index}}: {{type}} = neverFunction();
 
-class MyClass {
-  i: {{type}} = neverFunction();
-  static j: {{type}} = neverFunction();
-  constructor() {
-    test(this.i);
-    test(MyClass.j);
-  }
+class MyClass{{loop.index}} {
+    i: {{type}} = neverFunction();
+    static j: {{type}} = neverFunction();
+    
+    constructor() {
+        test{{loop.index}}(this.i);
+        test{{loop.index}}(MyClass{{loop.index}}.j);
+    }
 }
+
+function test{{loop.index}}(param: {{type}}) {
+}
+
+{%- endfor %}
 
 function neverFunction(): never {
-  throw new Error("This function never returns");
+    throw new Error("This function never returns");
 }
-
-function test(param: {{type}}) {
-
-}
-
-
-
-{% endfor %}

@@ -1,0 +1,26 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - {type: "int", base_value: "1", check_value: "34"}
+  - {type: "double", base_value: "3", check_value: "3.14"}
+  - {type: "Object | undefined", base_value: "777", check_value: "5"}
+  - {type: "long", base_value: "23456789012555", check_value: "23456789010000"}
+  - {type: "float", base_value: "2.1101f", check_value: "28.2f"}
+  - {type: "short", base_value: "0x4", check_value: "512"}
+  - {type: "byte", base_value: "0b0001", check_value: "0o3"}
+  - {type: "Any", base_value: "0", check_value: "200"}
+  - {type: "bigint", base_value: "4230099887543857847358743598734957934875983475934785n", check_value: "5892122134324534534534543534543545345n"}
+  - {type: "string", base_value: "\"检查\"", check_value: "\"已经凌晨三点了，我真的很想睡觉。\""}
+  - {type: "Object", base_value: "50", check_value: "0"}
+

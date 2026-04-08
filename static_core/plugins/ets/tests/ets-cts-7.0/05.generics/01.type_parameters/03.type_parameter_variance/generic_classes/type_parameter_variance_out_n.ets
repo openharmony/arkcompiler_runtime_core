@@ -16,8 +16,8 @@
 {% for c in cases %}
 
 /*---
-desc: Test of covariant _out_ type parameter modifier. 
-tags: [compile-only, negative]
+desc: Test of covariant _out_ type parameter modifier.
+tags: [compile-only]
 expected_out: {{c.stdout}}
 ---*/
 

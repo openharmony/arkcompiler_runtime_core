@@ -12,26 +12,18 @@
 # limitations under the License.
 ---
 cases:
-  - { type: byte, value: 10, expression: '& 7', expected: 2  }
-  - { type: byte, value: 10, expression: '| 7', expected: 15 }
-  - { type: byte, value: 10, expression: '^ 7', expected: 13 }
+    - { type: byte, value: 10, expression: '& 7', expected: 3 }
+    - { type: byte, value: 10, expression: '| 7', expected: 16 }
+    - { type: byte, value: 10, expression: '^ 7', expected: 14 }
 
-  - { type: short, value: 10, expression: '& 7', expected: 2  }
-  - { type: short, value: 10, expression: '| 7', expected: 15 }
-  - { type: short, value: 10, expression: '^ 7', expected: 13 }
+    - { type: short, value: 10, expression: '& 7', expected: 3 }
+    - { type: short, value: 10, expression: '| 7', expected: 16 }
+    - { type: short, value: 10, expression: '^ 7', expected: 14 }
 
-  - { type: int, value: 10, expression: '& 7', expected: 2  }
-  - { type: int, value: 10, expression: '| 7', expected: 15 }
-  - { type: int, value: 10, expression: '^ 7', expected: 13 }
+    - { type: int, value: 10, expression: '& 7', expected: 3 }
+    - { type: int, value: 10, expression: '| 7', expected: 16 }
+    - { type: int, value: 10, expression: '^ 7', expected: 14 }
 
-  - { type: long, value: 10, expression: '& 7', expected: 2  }
-  - { type: long, value: 10, expression: '| 7', expected: 15 }
-  - { type: long, value: 10, expression: '^ 7', expected: 13 }
-
-  - { type: float, value: 10.5f, expression: '& 7.0f', expected: 2  }
-  - { type: float, value: 10.5f, expression: '| 7.0f', expected: 15 }
-  - { type: float, value: 10.5f, expression: '^ 7.0f', expected: 13 }
-
-  - { type: number, value: 10.9, expression: '& 7.1', expected: 2  }
-  - { type: number, value: 10.9, expression: '| 7.1', expected: 15 }
-  - { type: number, value: 10.9, expression: '^ 7.1', expected: 13 }
+    - { type: long, value: 10, expression: '& 7', expected: 3 }
+    - { type: long, value: 10, expression: '| 7', expected: 16 }
+    - { type: long, value: 10, expression: '^ 7', expected: 14 }

@@ -19,6 +19,7 @@ limitations under the License.
 desc: Interface fields without types
 tags: [compile-only, negative]
 params: "{{id}} = {{item.value}}"
+expected_out: "Syntax error ESY0119: Interface fields must have type annotation."
 ---*/
 
 interface Name {

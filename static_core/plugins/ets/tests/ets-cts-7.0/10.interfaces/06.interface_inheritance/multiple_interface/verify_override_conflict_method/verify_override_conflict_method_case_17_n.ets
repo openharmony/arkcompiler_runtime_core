@@ -18,6 +18,9 @@ desc: >-
     Test whether a child interface can change a method's parameters (overloading) and require
     the new signature in the implementation.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildImpl is not abstract and does not override abstract method
+    greet(): String in Parent
 ---*/
 
 interface Parent {

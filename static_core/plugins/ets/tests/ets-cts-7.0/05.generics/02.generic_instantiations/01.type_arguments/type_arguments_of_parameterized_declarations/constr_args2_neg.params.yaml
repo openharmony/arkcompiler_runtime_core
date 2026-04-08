@@ -13,104 +13,109 @@
 
 ---
 cases:
-  # classes
-  - use: |-
-      let v: A<X> = new A<X> (new Y())  // Y is not X
-    stdout: |-
-      "Semantic error ESE0046: Type 'Y' is not compatible with type 'X' at index 1"
+    # classes
+    #0
+    - use: |-
+          let v: A<X> = new A<X> (new Y())  // Y is not X
+      stdout: |-
+          "Semantic error ESE0046: Type 'Y' is not compatible with type 'X' at index 1"
+    #1
+    - use: |-
+          let v: A<null|J> = new A<null|X> (new X())  // syntax error
+      stdout: |-
+          "Semantic error ESE0318: Type 'A<null|X>' cannot be assigned to type 'A<null|J>'"
+    #2
+    - use: |-
+          let v: A<null> = new A<undefined> (null)  // syntax error
+      stdout: |-
+          "Semantic error ESE0046: Type 'null' is not compatible with type 'undefined' at index 1"
+    #3
+    - use: |-
+          let v: A<X> = new A<X> (new X())
+      bound: ' extends Y'
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'X' should be a subtype of 'Y' constraint"
+    #4
+    - use: |-
+          let v: A<X|null> = new A<X|null> (null)
+      bound: ' extends Object'
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'X|null' should be a subtype of 'Object' constraint"
 
-  - use: |-
-      let v: A<null|J> = new A<null|X> (new X())  // syntax error
-    stdout: |-
-      "Semantic error ESE0318: Type 'A<null|X>' cannot be assigned to type 'A<null|J>'"
+    # interfaces
+    #5
+    - use: |-
+          let v: A<I> = new A<I> (new Y())  // Y is not I
+      stdout: |-
+          "Semantic error ESE0046: Type 'Y' is not compatible with type 'I' at index 1"
+    #6
+    - use: |-
+          let v: A<J|null> = new A<J|null> (null)  // wrong bound
+      bound: ' extends I|null'
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'J|null' should be a subtype of 'I|null' constraint"
 
-  - use: |-
-      let v: A<null> = new A<undefined> (null)  // syntax error
-    stdout: |-
-      "Semantic error ESE0046: Type 'null' is not compatible with type 'undefined' at index 1"
+    # arrays
+    #7
+    - use: |-
+          let v: A<X[]> = new A<X[]> (new Object[0](new Object()))  // wrong array type
+      stdout: |-
+          "Semantic error ESE0046: Type 'Array<Object>' is not compatible with type 'Array<X>' at index 1"
+    #8
+    - use: |-
+          let v: A<X[]> = new A<X[]> (new X[0](new X()))  // wrong bound
+      bound: ' extends Y[]'
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
+    #9
+    - use: |-
+          let v: A<X[]|null> = new A<X[]|null> ([ [new X()],[new X()] ])  // X[][] is not X[]
+      bound: ' extends X[]|null'
+      stdout: |-
+          "Semantic error ESE0046: Type 'Array<Array<X>>' is not compatible with type 'Array<X>|null' at index 1"
+    #10
+    - use: |-
+          let v: A<X[]|null> = new A<X[]|null> (null)  // wrong bound
+      bound: ' extends Object[][]|null'
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'Array<X>|null' should be a subtype of 'Array<Array<Object>>|null' constraint"
 
-  - use: |-
-      let v: A<X> = new A<X> (new X())
-    bound: ' extends Y'
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'X' should be a subtype of 'Y' constraint"
+    # aliases
+    #11
+    - use: |-
+          let v: A<B> = new A<B> (new Color[0](Color.Red))  // X is not Color
+      decl: type B = X[]
+      stdout: |-
+          "Semantic error ESE0046: Type 'Array<Color>' is not compatible with type 'Array<X>' at index 1"
+    #12
+    - use: |-
+          let v: A<B> = new A<B> (new X[1](new X()))
+      decl: type B = null|X[][]
+      stdout: |-
+          "Semantic error ESE0046: Type 'Array<X>' is not compatible with type 'null|Array<Array<X>>' at index 1"
+    #13
+    - use: |-
+          let v: A<B> = new A<B> (new X[0](new X()))  // wrong bound
+      bound: ' extends Y[]'
+      decl: type B = X[]
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
+    #14
+    - use: |-
+          let v: A<B|null> = new A<B|null> (new X[0](new X()))  // out of bound
+      bound: ' extends X[]'
+      decl: type B = X[]
+      stdout: |-
+          "Semantic error ESE0228: Type argument 'Array<X>|null' should be a subtype of 'Array<X>' constraint"
 
-  - use: |-
-      let v: A<X|null> = new A<X|null> (null)
-    bound: ' extends Object'
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'X|null' should be a subtype of 'Object' constraint"
-
-  # interfaces
-  - use: |-
-      let v: A<I> = new A<I> (new Y())  // Y is not I
-    stdout: |-
-      "Semantic error ESE0046: Type 'Y' is not compatible with type 'I' at index 1"
-
-  - use: |-
-      let v: A<J|null> = new A<J|null> (null)  // wrong bound
-    bound: ' extends I|null'
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'J|null' should be a subtype of 'I|null' constraint"
-
-  # arrays
-  - use: |-
-      let v: A<X[]> = new A<X[]> (new Object[0](new Object()))  // wrong array type
-    stdout: |-
-      "Semantic error ESE0046: Type 'Array<Object>' is not compatible with type 'Array<X>' at index 1"
-
-  - use: |-
-      let v: A<X[]> = new A<X[]> (new X[0](new X()))  // wrong bound
-    bound: ' extends Y[]'
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
-
-  - use: |-
-      let v: A<X[]|null> = new A<X[]|null> (new X[1][0])  // X[][] is not X[]
-    bound: ' extends X[]|null'
-    stdout: |-
-      "Semantic error ESE0046: Type 'Array<Array<X>>' is not compatible with type 'Array<X>|null' at index 1"
-
-  - use: |-
-      let v: A<X[]|null> = new A<X[]|null> (null)  // wrong bound
-    bound: ' extends Object[][]|null'
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'Array<X>|null' should be a subtype of 'Array<Array<Object>>|null' constraint"
-
-  # aliases
-  - use: |-
-      let v: A<B> = new A<B> (new Color[0](new Color()))  // X is not Color
-    decl: type B = X[]
-    stdout: |-
-      "Semantic error ESE0046: Type 'Array<Color>' is not compatible with type 'Array<X>' at index 1"
-
-  - use: |-
-      let v: A<B> = new A<B> (new X[1](new X()))
-    decl: type B = null|X[][]
-    stdout: |-
-      "Semantic error ESE0046: Type 'Array<X>' is not compatible with type 'null|Array<Array<X>>' at index 1"
-
-  - use: |-
-      let v: A<B> = new A<B> (new X[0](new X()))  // wrong bound
-    bound: ' extends Y[]'
-    decl: type B = X[]
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'Array<X>' should be a subtype of 'Array<Y>' constraint"
-
-  - use: |-
-      let v: A<B|null> = new A<B|null> (new X[0](new X()))  // out of bound
-    bound: ' extends X[]'
-    decl: type B = X[]
-    stdout: |-
-      "Semantic error ESE0228: Type argument 'Array<X>|null' should be a subtype of 'Array<X>' constraint"
-
-  # not a reference type
-  - use: |-
-      let v: A<Color> = new A<Color> (Color)
-    stdout: |-
-      "Semantic error ESE0122: Class name can't be the argument of function or method."
-
-  - use: |-
-      let v: A<int> = new A<int> (1.0)
-    stdout: |-
-      "Semantic error ESE0046: Type 'Double' is not compatible with type 'Int' at index 1"
+    # not a reference type
+    #15
+    - use: |-
+          let v: A<Color> = new A<Color> (Color)
+      stdout: |-
+          "Semantic error ESE0122: Class name can't be the argument of function or method."
+    #16
+    - use: |-
+          let v: A<int> = new A<int> (1.0)
+      stdout: |-
+          "Semantic error ESE0046: Type 'Double' is not compatible with type 'Int' at index 1"

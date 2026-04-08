@@ -17,12 +17,12 @@
 desc: A default method can be explicitly declared private in an interface body.
 ---*/
 interface Vehicle {
-    private getHorsePower3(rpm: int, torq: int): int {
-        return (rpm * torq) / 5252;
+    private getHorsePower3(rpm: int, torque: int): int {
+        return (rpm * torque) / 5252;
     }
 
-    getPwrIndex(torq: int): int {
-        return this.getHorsePower3(5252, torq);
+    getPwrIndex(torque: int): int {
+        return this.getHorsePower3(5252, torque);
     }
 }
 

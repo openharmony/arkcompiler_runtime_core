@@ -16,7 +16,8 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A compile-time error occurs if arguments of an explicit constructor call refer to one of the following:
+    A compile-time error occurs if arguments of an explicit constructor call, or statements preceding it,
+    refer to one of the following:
     - Any non-static field or instance method; or
     - this or super.
 tags: [compile-only, negative]

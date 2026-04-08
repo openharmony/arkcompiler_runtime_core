@@ -16,6 +16,8 @@
 /*---
 desc: Method with the same name in multiple interfaces, subclass chooses not to implement.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: Robot is not abstract and does not override abstract method makeSound(): void in Animal
 ---*/
 
 interface Animal {

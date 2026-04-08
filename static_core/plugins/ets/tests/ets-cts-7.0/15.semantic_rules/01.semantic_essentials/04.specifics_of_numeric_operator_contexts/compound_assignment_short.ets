@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
 /*---
-desc: Compound assignment {{c.op}} for short with overflow - {{c.description}}
+desc: Compound assignment for short with overflow
 ---*/
 
-function main() {
-    let a: short = {{c.initial}};
-    a {{c.op}} {{c.operand}};
-    arktest.assertEQ(a, {{c.expected}});
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Compound_assignment_short");
+
+    {%- for c in cases %}
+        testSuite.addTest("assignment_{{c.description}}_{{loop.index}}", () => {
+            let a: short = {{c.initial}};
+            a {{c.op}} {{c.operand}};
+            arktest.assertEQ(a, {{c.expected}});
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-{%- endfor %}

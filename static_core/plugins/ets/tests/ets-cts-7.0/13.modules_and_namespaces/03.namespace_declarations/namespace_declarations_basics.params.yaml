@@ -207,6 +207,8 @@ cases:
     use: |-
         let NS2: string = "Test should pass"
         arktest.assertEQ(NS2, "Test should pass")
+    files:
+      - ./namespace_storage.ets
 
   # 15. Case sensitivity
   - decl: |-
@@ -280,7 +282,7 @@ cases:
   # 20. Impported Namespace vs local Nanmespace visibility
   - decl: |-
       import {Space1 as mySpace} from "./namespace_storage"
-  
+
         export namespace Space1 {
           export function foo(): string {
             return "Local Space1"
@@ -290,3 +292,28 @@ cases:
       }
     use: |-
       arktest.assertEQ(Space1.foo(), "Local Space1")
+    files:
+      - ./namespace_storage.ets
+
+  # 21. Inner namespace interface extending outer namespace interface via outer qualification
+  - decl: |-
+        namespace NSO {
+          export interface Base {
+            getValue(): int
+          }
+          export namespace NSI {
+            export interface Extended extends NSO.Base {
+              getExtra(): string
+            }
+            export class Impl implements Extended {
+              getValue(): int { return 99 }
+              getExtra(): string { return "extra" }
+            }
+          }
+        }
+    use: |-
+      let b: NSO.NSI.Extended = new NSO.NSI.Impl()
+      arktest.assertEQ(b.getValue(), 99)
+      arktest.assertEQ(b.getExtra(), "extra")
+      let base: NSO.Base = b
+      arktest.assertEQ(base.getValue(), 99)

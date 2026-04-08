@@ -1,0 +1,94 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - doc: Use supertype class of allowed one
+    error: |-
+      "Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A' constraint"
+    decl: |-
+      class A {
+        f: int = 9
+      }
+      class B extends A {
+        f: int = 10
+      }
+      interface I<T extends A> {
+        foo(i: T) { return i.f }
+      }
+      function main() {
+        let c: I<Object> = {}
+      }
+
+  - doc: Generic parameter restriction is applied to instance method call
+    error: |-
+      "Semantic error ESE0046: Type 'A' is not compatible with type 'B' at index 1"
+    decl: |-
+      class A {
+        f: int = 9
+      }
+      class B extends A {
+        f: int = 10
+      }
+      interface I<T extends A> {
+        foo(i: T) { return i.f }
+      }
+      function main() {
+        let c: I<B> = {}
+        c.foo(new A())
+      }
+
+  - doc: Incorrect number of generic parameters used (lower than expected)
+    error: |-
+      "Semantic error ESE0171: Type 'I<T,G>' has 2 number of type parameters, but 1 type arguments were provided."
+    decl: |-
+      interface I<T, G> {}
+      function main() {
+        let i: I<string>
+      }
+
+  - doc: Incorrect number of generic parameters used (none)
+    error: |-
+      "Semantic error ESE0170: Type 'I<T,G>' is generic but type argument were not provided."
+    decl: |-
+      interface I<T, G> {}
+      function main() {
+        let i: I
+      }
+
+  - doc: Incorrect number of generic parameters used (zero)
+    error: |-
+      "Semantic error ESE0171: Type 'I<T,G>' has 2 number of type parameters, but 0 type arguments were provided."
+    decl: |-
+      interface I<T, G> {}
+      function main() {
+        let i: I<>
+      }
+
+  - doc: Incorrect number of generic parameters used (more than expected)
+    error: |-
+      "Semantic error ESE0171: Type 'I<T>' has 1 number of type parameters, but 2 type arguments were provided."
+    decl: |-
+      interface I<T> {}
+      function main() {
+        let i: I<string, string>
+      }
+
+  - doc: No generic parameters used at interface definition
+    error: |-
+      "Semantic error ESE0169: Type 'I' is not generic."
+    decl: |-
+      interface I {}
+      function main() {
+        let i: I<Object>
+      }

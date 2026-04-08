@@ -71,7 +71,7 @@ cases:
     - 42 * (21 - 10 - 10)
 
     - 'new number[0](0)'
-    - 'new boolean[0][0]'
+    - '[ [new Boolean(false)],[new Boolean(false)] ]'
     - 'new Object()'
     - 'new Error()'
     - '{} as Object'

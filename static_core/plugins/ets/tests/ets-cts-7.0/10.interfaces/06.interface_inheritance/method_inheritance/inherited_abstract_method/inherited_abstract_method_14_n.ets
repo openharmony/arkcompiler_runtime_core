@@ -16,6 +16,9 @@
 /*---
 desc: Class does not implement the abstract method of the parent interface (error scenario).
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildClass is not abstract and does not override
+    abstract method parentMethod(): String in ParentInterface
 ---*/
 
 interface ParentInterface {

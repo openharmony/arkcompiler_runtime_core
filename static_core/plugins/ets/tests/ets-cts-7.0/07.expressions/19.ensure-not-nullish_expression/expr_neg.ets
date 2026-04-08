@@ -20,6 +20,8 @@ desc: >-
     result of e! is the outcome of the evaluation of e. If the result of the evaluation
     of e is equal to null or undefined, then NullPointerError is thrown.
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 {{c.decl}}
 

@@ -21,6 +21,7 @@ desc: >-
       may be provided in a form of field or accessors.
 assert: {{c.doc}}
 tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
 {{c.decl}}

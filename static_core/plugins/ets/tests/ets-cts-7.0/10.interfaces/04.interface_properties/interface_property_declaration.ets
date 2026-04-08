@@ -13,28 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
-desc: Declaring interface property
-tags: [compile-only]
+desc: >-
+    Interface property is an accessor which can be declared in the form of a field declaration,
+    or getter/setter declarations.
+    {{c.doc}}
 ---*/
 
-interface I1 {
-    text: string;
-}
+{{c.decl}}
 
-interface I2 {
-    get text(): string;
-    set text(s: string);
-}
-
-interface I3 {
-    get text(): string;
-}
-
-interface I4 {
-    readonly text: string;
-}
-
-interface I5 {
-    text?: string;
-}
+{% endfor %}

@@ -140,3 +140,40 @@ cases:
         arktest.assertEQ(foo(), 1.1)
         arktest.assertTrue(foo() instanceof number)
       }
+
+  - decl: |-
+      function foo(): float|double {
+        return 1.1
+      }
+
+  - decl: |-
+      class C {
+        foo(): double|float {
+          return 1.1
+        }
+      }
+
+  - decl: |-
+      class C {
+        static foo(): double|float {
+          return 1.1
+        }
+      }
+
+  - decl: |-
+      abstract class C {
+        foo(): double|float {
+          return 1.1
+        }
+      }
+
+  - decl: |-
+        interface I {
+          foo(): double|float {
+            return 1.1
+          }
+        }
+        class C implements I {}
+
+  - decl: |-
+      let foo = (): number|float => { return 1.1 }

@@ -1,0 +1,41 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- 
+# List of identifiers
+identifiers:
+  - id: interface
+    error: |-
+      Syntax error ESY0316: Hard keyword 'interface' cannot be used as identifier
+  - id: class
+    error: |-
+      Syntax error ESY0316: Hard keyword 'class' cannot be used as identifier
+  - id: abstract
+    error: |-
+      Syntax error ESY0316: Hard keyword 'abstract' cannot be used as identifier
+  - id: implements
+    error: |-
+      Syntax error ESY0316: Hard keyword 'implements' cannot be used as identifier
+  - id: "null"
+    error: |-
+      Syntax error ESY0224: Identifier expected, got 'null'.
+  - id: var
+    error: |-
+      Syntax error ESY0145: Cannot be used as user-defined type.
+  - id: yield
+    error: |-
+      Syntax error ESY0145: Cannot be used as user-defined type.
+  - id: return
+    error: |-
+      Syntax error ESY0316: Hard keyword 'return' cannot be used as identifier
+

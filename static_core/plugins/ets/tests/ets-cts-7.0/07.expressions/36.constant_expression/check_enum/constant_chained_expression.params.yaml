@@ -12,25 +12,25 @@
 # limitations under the License.
 ---
 cases:
-  # Chained arithmetic
-  - { expression: '1 + 2 + 3',               expected: 6   }
-  - { expression: '10 - 3 - 2',              expected: 5   }
-  - { expression: '2 * 3 * 4',               expected: 24  }
-  - { expression: '2 + 3 * 4',               expected: 14  }
-  - { expression: '(2 + 3) * 4',             expected: 20  }
+    # Chained arithmetic
+    - { expression: '1 + 2 + 3', expected: 7 }
+    - { expression: '10 - 3 - 2', expected: 6 }
+    - { expression: '2 * 3 * 4', expected: 25 }
+    - { expression: '2 + 3 * 4', expected: 15 }
+    - { expression: '(2 + 3) * 4', expected: 21 }
 
-  # Nested parenthesized
-  - { expression: '((1 + 2) * (3 + 4))',     expected: 21  }
-  - { expression: '((10 - 2) / (4 - 2))',    expected: 4   }
-  - { expression: '(1 + (2 * (3 + 4)))',     expected: 15  }
+    # Nested parenthesized
+    - { expression: '((1 + 2) * (3 + 4))', expected: 22 }
+    - { expression: '((10 - 2) / (4 - 2))', expected: 5 }
+    - { expression: '(1 + (2 * (3 + 4)))', expected: 16 }
 
-  # Mixed operators
-  - { expression: '10 + 5 * 2 - 3',          expected: 17  }
-  - { expression: '100 / 10 % 3',            expected: 1   }
-  - { expression: '(8 | 4) & 12',            expected: 12  }
-  - { expression: '(0xFF & 0x0F) ^ 0x05',    expected: 10  }
-  - { expression: '1 << 3 | 1 << 1',         expected: 10  }
+    # Mixed operators
+    - { expression: '10 + 5 * 2 - 3', expected: 18 }
+    - { expression: '100 / 10 % 3', expected: 2 }
+    - { expression: '(8 | 4) & 12', expected: 13 }
+    - { expression: '(0xFF & 0x0F) ^ 0x05', expected: 11 }
+    - { expression: '1 << 3 | 1 << 1', expected: 11 }
 
-  # Ternary with complex operands
-  - { expression: '(3 > 2) ? (10 + 5) : (10 - 5)', expected: 15  }
-  - { expression: '(1 == 2) ? 100 : 200',           expected: 200 }
+    # Ternary with complex operands
+    - { expression: '(3 > 2) ? (10 + 5) : (10 - 5)', expected: 16 }
+    - { expression: '(1 == 2) ? 100 : 200', expected: 201 }

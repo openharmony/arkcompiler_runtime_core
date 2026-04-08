@@ -28,6 +28,9 @@ interface ChildInterface extends ParentInterface {
     return "ChildInterface overridden method";
   }
   readonly property: string;
+  genericMethod<T>(value: T): T {
+    return value;
+  }
 }
 
 class ChildClass implements ChildInterface {
@@ -40,4 +43,6 @@ class ChildClass implements ChildInterface {
 function main(): void {
   let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.defaultMethod(), "Class overridden method");
+  let instance2: ParentInterface = new ChildClass();
+  arktest.assertEQ(instance2.defaultMethod(), "Class overridden method");
 }

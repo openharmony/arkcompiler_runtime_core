@@ -16,11 +16,9 @@
 /*---
 desc: The method with the same name has the same type and number of parameters, but a method has a this parameter.
 tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0240: Unexpected 'this' keyword in non-receiver context.
 ---*/
-
-interface Parent1 {
-  greet(message: string): void; 
-}
 
 interface Parent2 {
   greet(this: void, message: string): void;

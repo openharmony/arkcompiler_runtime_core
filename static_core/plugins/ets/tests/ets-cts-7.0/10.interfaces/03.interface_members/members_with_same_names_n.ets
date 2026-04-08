@@ -13,16 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 /*---
-desc: Declaring member with same names.
-assert: >-
-    Fields, methods, and member types of an interface type may not have the same name,
-    as a name must be unique in its declaration space.
+desc: >-
+    A name in a declaration scope must be unique, i.e., the names of properties and methods
+    of an interface type must not be the same (see Interface Declarations).
+    {{c.doc}}
 tags: [compile-only, negative]
+expected_out: {{c.error}}
 ---*/
 
-interface B {
-  bar(): int;
-  bar: int = 1;
-  bar(): void;
-}
+{{c.decl}}
+
+{% endfor %}

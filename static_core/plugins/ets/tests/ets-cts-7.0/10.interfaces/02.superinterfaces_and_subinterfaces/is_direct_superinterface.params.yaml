@@ -1,0 +1,73 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - doc: Variable of subinterface generic type could be assigned to variable of its superinterface type
+    decl: |-
+      interface A {}
+      interface B<T> extends A {}
+      function main() {
+        let i: B<string> = {}
+        let j: A = i
+      }
+  - doc: Variable of subinterface generic type could be assigned to variable of its generic superinterface type
+    decl: |-
+      interface A<T> {}
+      interface B<T> extends A<T> {}
+      function main() {
+        let i: B<string> = {}
+        let j: A<string> = i
+      }
+  - doc: Superinterface type is of generic class type
+    decl: |-
+      interface A<T> {}
+      interface B<T> extends A<Array<T>> {}
+      function main() {
+        let i: B<string> = {}
+        let j: A<Array<string>> = i
+      }
+  - doc: Superinterface has default value for generic type
+    decl: |-
+      interface A<T=string> {}
+      interface B<T> extends A {}
+      function main() {
+        let i: B<string> = {}
+        let j: A<string> = i
+      }
+  - doc: Reorder parameters
+    decl: |-
+      interface A<T,V> {
+        t: T
+        v: V
+      }
+      interface B<V,T> extends A<T,V> {}
+      function main() {
+        let i: B<string, int> = {t: 3, v: "str"}
+        let j: A<int, string> = i
+        arktest.assertEQ(j.t, 3)
+        arktest.assertEQ(j.v, "str")
+      }
+  - doc: Hardcoded parameter
+    decl: |-
+      interface A<T,V> {
+        t: T
+        v: V
+      }
+      interface B<T,V> extends A<V,int> {}
+      function main() {
+        let i: B<int, string> = {t: "str", v: 4}
+        let j: A<string, int> = i
+        arktest.assertEQ(j.t, "str")
+        arktest.assertEQ(j.v, 4)
+      }

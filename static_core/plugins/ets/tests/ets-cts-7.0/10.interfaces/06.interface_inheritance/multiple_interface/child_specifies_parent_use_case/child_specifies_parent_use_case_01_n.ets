@@ -16,6 +16,8 @@
 /*---
 desc: Verify that a child interface must provide implementation when both parents have default methods.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0187: Method 'greet' is declared in ParentWithDefault1 and ParentWithDefault2 interfaces.
 ---*/
 
 interface ParentWithDefault1 {

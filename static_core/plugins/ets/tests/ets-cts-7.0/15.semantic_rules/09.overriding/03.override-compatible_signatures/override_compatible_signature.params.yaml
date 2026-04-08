@@ -61,7 +61,7 @@ cases:
               res = 2;
           }
       call: |-
-          new Derived().foo(new Base(), new Derived())
+          new Derived().foo<Base, Base>(new Base(), new Derived())
           arktest.assertEQ(res, 2)
 
     # same type parameters number, same parameters in prototype 2
@@ -74,5 +74,5 @@ cases:
               res = 2;
           }
       call: |-
-          new Derived().foo(new Base(), new Derived())
+          new Derived().foo<Base, Base>(new Base(), new Derived())
           arktest.assertEQ(res, 2)

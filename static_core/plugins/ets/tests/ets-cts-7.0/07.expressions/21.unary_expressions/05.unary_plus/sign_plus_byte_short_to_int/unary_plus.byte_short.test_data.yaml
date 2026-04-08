@@ -1,0 +1,47 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+testData:
+  # byte (Byte)
+  - {type: "byte", value: "12", format: "+%s", result: "12", resultType: "int",  desc: "0. Decimal byte value with plus sign."}
+  - {type: "Byte", value: "0x1_A", format: "+%s", result: "0O32", resultType: "int",  desc: "1. Hex Byte (alias) value with plus sign."}
+  - {type: "Byte", value: "0o33", format: "+%s", result: "0B0001_1011", resultType: "int",  desc: "2. Octal Byte (alias) value with plus sign."}
+  - {type: "byte", value: "0b11011", format: "+%s", result: "0X1B", resultType: "int",  desc: "3. Binary byte value with plus sign."}
+
+  - {type: "Byte", value: "0", format: "+%s", result: "0x0", resultType: "int",  desc: "4. Decimal Byte (alias) value (zero) with plus sign."}
+  - {type: "byte", value: "0X0", format: "+%s", result: "0", resultType: "int",  desc: "5. Hex byte value (zero) with plus sign."}
+  - {type: "byte", value: "0O0", format: "+%s", result: "0b0", resultType: "int",  desc: "6. Octal byte value (zero) with plus sign."}
+  - {type: "Byte", value: "0B0", format: "+%s", result: "0o0", resultType: "int",  desc: "7. Binary Byte (alias) value (zero) with plus sign."}
+
+  # short (Short)
+  - {type: "Short", value: "1_201", format: "+%s", result: "1201", resultType: "int",  desc: "8. Decimal Short (alias) value with plus sign."}
+  - {type: "short", value: "0X01_Af", format: "+%s", result: "0o657", resultType: "int",  desc: "9. Hex short value with plus sign."}
+  - {type: "short", value: "0O03_37", format: "+%s", result: "0b11011111", resultType: "int",  desc: "10. Octal short value with plus sign."}
+  - {type: "Short", value: "0B0011_0011_0011", format: "+%s", result: "0x333", resultType: "int",  desc: "11. Binary Short (alias) value with plus sign."}
+
+  - {type: "short", value: "0", format: "+%s", result: "0B0", resultType: "int",  desc: "12. Decimal short value (zero) with plus sign."}
+  - {type: "Short", value: "0x000", format: "+%s", result: "0O0", resultType: "int",  desc: "13. Hex Short (alias) value (zero) with plus sign."}
+  - {type: "Short", value: "0o0_0", format: "+%s", result: "0X0", resultType: "int",  desc: "14. Octal Short (alias) value (zero) with plus sign."}
+  - {type: "short", value: "0b0_0_0_0", format: "+%s", result: "0", resultType: "int",  desc: "15. Binary short value (zero) with plus sign."}
+
+  # parentheses and negative value
+  - {type: "Byte", value: "-120", format: "+(%s)", result: "-1_20", resultType: "int",  desc: "16. Negative decimal Byte (alias) value with plus sign and parentheses."}
+  - {type: "byte", value: "0x1_B", format: "(+%s)", result: "0O33", resultType: "int",  desc: "17. Hex byte value with plus sign in parentheses."}
+  - {type: "Byte", value: "0o34", format: "+(%s)", result: "0B0001_1100", resultType: "int",  desc: "18. Octal Byte (alias) value with plus sign and parentheses."}
+  - {type: "Byte", value: "-0b0_0_0_11", format: "+%s", result: "-0B11", resultType: "int",  desc: "19. Negative binary Byte (alias) value with plus sign"}
+  
+  - {type: "short", value: "-0o0_1", format: "+(%s)", result: "-1", resultType: "int",  desc: "20. Negative octal short value with plus sign and parentheses."}
+  - {type: "Short", value: "0b0_0_0_10", format: "(+%s)", result: "2", resultType: "int",  desc: "21. Binary Short (alias) value with plus sign in parentheses."}
+  - {type: "short", value: "0O03_36", format: "+(%s)", result: "0b11011110", resultType: "int",  desc: "22. Octal short value with plus sign and parentheses."}
+  - {type: "short", value: "-0X01_Ad", format: "+%s", result: "-0o655", resultType: "int",  desc: "23. Negative hex short value with plus sign."}

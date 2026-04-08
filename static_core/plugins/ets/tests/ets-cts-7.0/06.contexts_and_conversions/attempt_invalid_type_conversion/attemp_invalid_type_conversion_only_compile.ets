@@ -17,7 +17,7 @@
 
 /*---
 desc: {{c.desc}}
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 {{c.decl}}

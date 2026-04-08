@@ -11,14 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # list of values
-values:
-- { value: '""', assert: "string" }
-- { value: '"what are you"', assert: "string" }
-- { value: '"@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\"', assert: "string" } # special chars
-- { value: '"\xff\xfe\xac 1\x003\x00,\x005\x006\x00"', assert: "string" } # unicode
-- { value: '"\u{A123}"', assert: "string" } # utf 16
-- { value: '"\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}"', assert: "string" } # utf32
-- { value: '"\u{D800}"', assert: "string" } # surrogate start
-- { value: '"\u{DC01}"', assert: "string" } # surrogate end
-- { value: '"\u{DBFF}\u{DFFF}"', assert: "string" } # surrogate full
+--- # list of literals
+literals:
+- literal: '""'
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"what are you"'
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"what are you\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\"' # special chars
+  exp_out: |
+    "Semantic error ESE38251: Type '\"@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"\xff\xfe\xac 1\x003\x00,\x005\x006\x00"' # unicode
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"ÿþ¬ 13,56\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"\u{A123}"' # utf 16
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"ꄣ\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}"' # utf32
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"hello\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"\u{D800}"' # surrogate start
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"\u{DC01}"' # surrogate end
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"\"' cannot be used on the right hand side of an 'instanceof' expression"
+- literal: '"\u{DBFF}\u{DFFF}"' # surrogate full
+  exp_out: |-
+    "Semantic error ESE38251: Type '\"\"' cannot be used on the right hand side of an 'instanceof' expression"

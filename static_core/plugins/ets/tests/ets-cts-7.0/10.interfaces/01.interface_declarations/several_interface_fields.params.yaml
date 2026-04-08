@@ -13,11 +13,11 @@
 
 --- # List of default values for primitive types
 default_value:
-  - {type: byte}
-  - {type: short}
-  - {type: int}
-  - {type: long}
-  - {type: float}
-  - {type: double}
-  - {type: char}
-  - {type: boolean}
+  - {type: byte, value: 1}
+  - {type: short, value: 2}
+  - {type: int, value: 3}
+  - {type: long, value: 4}
+  - {type: float, value: 5.1f}
+  - {type: number, value: 6.2}
+  - {type: char, value: c'A'}
+  - {type: boolean, value: "true"}

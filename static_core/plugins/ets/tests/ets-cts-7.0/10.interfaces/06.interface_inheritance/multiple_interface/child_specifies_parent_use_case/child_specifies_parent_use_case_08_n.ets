@@ -18,6 +18,9 @@ desc: >-
     Verify that a child interface without implementation causes an error when three parent interfaces have the same
     default method.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildImpl is not abstract and does not override abstract method
+    greet(): String in Parent1
 ---*/
 
 interface Parent1 {

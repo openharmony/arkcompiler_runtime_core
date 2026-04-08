@@ -24,7 +24,7 @@ export declare function fun2(x: string): string
 export declare overload fun {fun1, fun2}
 
 export declare namespace N {
-    function foo1(x: number, y: string, z: Object[]): double
+    function foo1(x: number, y: string, z: Any[]): double
     function foo2(x: number, y: string): double
     overload foo {foo1, foo2}
 }

@@ -134,15 +134,15 @@ cases:
       - |-
         "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
 
   - desc: |-
       >-
@@ -385,15 +385,15 @@ cases:
       - |-
         "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
 
   - desc: |-
       >-
@@ -449,7 +449,7 @@ cases:
       - |-
         "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
 
   - desc: |-
       >-
@@ -517,7 +517,7 @@ cases:
       - |-
         "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"
 
   - desc: |-
       >-
@@ -594,4 +594,4 @@ cases:
       - |-
         "Semantic error ESE0145: Property 'x' must be accessed through 'this'"
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0143: Unresolved reference x"

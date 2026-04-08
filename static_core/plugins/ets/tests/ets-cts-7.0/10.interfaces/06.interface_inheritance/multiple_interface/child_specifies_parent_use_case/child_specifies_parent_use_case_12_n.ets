@@ -16,6 +16,9 @@
 /*---
 desc: Verify that a child interface without implementation throws an error due to method conflict.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildWithoutImplClass is not abstract
+    and does not override abstract method greet(): String in Parent1
 ---*/
 
 interface Parent1 {

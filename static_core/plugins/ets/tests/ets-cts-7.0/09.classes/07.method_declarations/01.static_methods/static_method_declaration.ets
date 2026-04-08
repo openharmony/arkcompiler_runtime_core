@@ -14,11 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static method declaration.
-assert: A method that is declared static is called a class method. 
+desc: >-
+    Static method declaration.
+    A method that is declared static is called a class method. 
 tags: [compile-only]
 ---*/
 
 class A {
-  static run(): void {}
+    static run(): void {}
 }

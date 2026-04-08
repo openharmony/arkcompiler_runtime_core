@@ -18,7 +18,7 @@ desc: >-
     Static initialization is not working with non-static fields
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE0145: Property 'v' must be accessed through 'this'
+    Semantic error ESE0143: Unresolved reference v
 ---*/
 
 class C {

@@ -15,11 +15,18 @@ limitations under the License.
 
 /*---
 desc: Several interface fields at the same time
-tags: [compile-only]
 ---*/
 
 interface Name {
-  {% for item in default_value %}
-    {{item.type}}Field: {{item.type}};
+  {% for item in default_value %}{{item.type}}Field: {{item.type}}
+  {% endfor %}
+}
+
+function main() {
+  let i: Name = {
+    {% for item in default_value %}{% if default_value[0] != item %},{% endif %}
+    {{item.type}}Field: {{item.value}}{% endfor %}
+  }
+  {% for item in default_value %}arktest.assertEQ(i.{{item.type}}Field, {{item.value}})
   {% endfor %}
 }

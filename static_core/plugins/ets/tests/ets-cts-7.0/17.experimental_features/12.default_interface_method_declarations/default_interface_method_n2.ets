@@ -20,8 +20,8 @@ expected_out: "Semantic error ESE0208: 'getHorsePower' is an instance property o
 ---*/
 
 interface Vehicle {
-    getHorsePower(rpm: int, torq: int): int {
-        return (rpm * torq) / 5;
+    getHorsePower(rpm: int, torque: int): int {
+        return (rpm * torque) / 5;
     }
 }
 

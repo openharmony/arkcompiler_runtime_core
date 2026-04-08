@@ -13,51 +13,52 @@
 
 --- # List of valid class instance creation samples
 class_instance:
+#0
   - decl: ''
     init: 'new Testee'
-
+#1
   - decl: 'constructor () {}'
     init: 'new Testee'
-
+#2
   - decl: 'constructor () {}'
     init: 'new A'
-
+#3
   - decl: |-
       constructor () {}
       callme(): this { return this }
     init: 'new A().callme()'
-
+#4
   - decl: |-
       constructor () {}
       callme(): this { return this }
     init: '(new A).callme()'
-
+#5
   - decl: 'constructor () {}'
     init: '(() => { return new A })()'
-
+#6
   - decl: 'constructor () {}'
     init: '(() => { return [new A(), new Testee][0] })()'
-
+#7
   - decl: 'constructor (input?: String) {}'
     init: 'new Testee'
-
+#8
   - decl: "constructor (input: String = 'Hello World') {}"
     init: 'new Testee'
-
+#9
   - decl: 'constructor (...input: String[]) {}'
     init: 'new Testee'
-
+#10
   - decl: 'constructor (...input: String[]) {}'
     init: 'new A'
-
+#11
   - decl: 'constructor (...input: A[]) {}'
     init: 'new Testee(new A, new A, new A)'
-
+#12
   - decl: ''
     init: 'new String'
-
+#13
   - decl: ''
-    init: 'new number[2][2]'
-
+    init: '[ [new Double(0)],[new Double(0)] ]'
+#14
   - decl: ''
-    init: 'new A[2][2]'
+    init: '[ [[new A()],[new A()]], [[new A()],[new A()]] ]'

@@ -16,6 +16,9 @@
 /*---
 desc: Multiple inheritance conflict detection.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0141: draw(): void in E cannot override draw():
+    String in B because overriding return type is not compatible with the other return type.
 ---*/
 
 let a: number = 10;

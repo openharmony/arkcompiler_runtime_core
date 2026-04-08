@@ -16,6 +16,9 @@
 /*---
 desc: The method with the same name has the same parameter type but different return types.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildClass is not abstract
+    and does not override abstract method calculate(value: Double): Double in Parent1
 ---*/
 
 interface Parent1 {

@@ -18,6 +18,9 @@ desc: >-
     A compile-time error occurs if a field is not declared as readonly in a superclass/superinterface,
     while an overriding field is marked as readonly.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0337: Cannot implement interface InterfaceA:
+    property 'CONSTANT' must have a setter, but the implementation is readonly
 ---*/
 
 interface InterfaceA {

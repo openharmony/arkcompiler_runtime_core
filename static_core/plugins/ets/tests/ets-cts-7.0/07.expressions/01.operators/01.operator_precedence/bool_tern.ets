@@ -29,13 +29,16 @@ function ft(): boolean {
     return true;
 }
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Ternary operator on boolean values")
 
-    let v = false, vt = true, vf = false
-    res = "";
+    suite.addTest("nested ternary with boolean functions", () => {
+        let v = false, vt = true, vf = false
+        res = "";
 
-    v = ft() ? ff() ? vt: ft() ? ff() ? vt : ff() ? vt : vf : vf : vf;
-    arktest.assertFalse(v || res != "TFTFF");
+        v = ft() ? ff() ? vt: ft() ? ff() ? vt : ff() ? vt : vf : vf : vf;
+        arktest.assertFalse(v || res != "TFTFF");
+    })
 
-    
+    return suite.run()
 }

@@ -16,6 +16,7 @@
 /*---
 desc: Null interface inherits an interface containing an readonly type, modify a read-only array.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
 ---*/
 
 interface ParentInterface {

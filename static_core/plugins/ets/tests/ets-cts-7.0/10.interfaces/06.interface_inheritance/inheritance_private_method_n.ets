@@ -17,6 +17,8 @@ limitations under the License.
 desc: Inheritance private method from superinterface.
 assert: An interface does not inherit private or static methods from its superinterfaces.
 tags: [negative, compile-only]
+expected_out: >-
+    Semantic error ESE0139: Signature foo(): Int is not visible here.
 ---*/
 
 interface A {
@@ -32,6 +34,5 @@ class C implements B {
 
 function main(): void {
   let instance: C = new C();
-
-  arktest.assertEQ(instance.foo(), 5)
+  instance.foo()
 }

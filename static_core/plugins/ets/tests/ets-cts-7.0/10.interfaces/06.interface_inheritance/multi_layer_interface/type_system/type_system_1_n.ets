@@ -16,6 +16,8 @@
 /*---
 desc: The interface method has not been fully implemented.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: E is not abstract and does not override abstract method methodC(): String in C
 ---*/
 
 interface A {

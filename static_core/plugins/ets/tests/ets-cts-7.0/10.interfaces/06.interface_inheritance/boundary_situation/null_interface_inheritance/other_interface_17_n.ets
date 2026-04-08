@@ -16,6 +16,7 @@
 /*---
 desc: An empty interface inherits an interface that contains generic constraints.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0228: Type argument 'Boolean' should be a subtype of 'String|Double' constraint"
 ---*/
 
 interface ParentInterface<T extends string | number> {

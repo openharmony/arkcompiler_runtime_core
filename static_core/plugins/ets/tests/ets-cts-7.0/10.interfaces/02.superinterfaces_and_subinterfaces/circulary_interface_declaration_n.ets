@@ -14,8 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Circularly declared interfaces.
+desc: A compile-time error occurs if the extends graph has a cycle.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0310: Cyclic inheritance involving A."
 ---*/
 
 interface A extends D {}

@@ -14,31 +14,31 @@
  */
 
 /*---
-desc: Access to overridden method of superclass.
-assert: >-
+desc: >-
+    Access to overridden method of superclass.
     An overridden method can be accessed by using a method invocation expression (link to that exp)
     that contains the keyword super.
 ---*/
 
 class A {
-  public m(): int {
-    return 1;
-  }
+    public m(): int {
+        return 1;
+    }
 }
 
 final class C extends A {
-  override m(): int {
-    return 5;
-  }
+    override m(): int {
+        return 5;
+    }
 
-  superm(): int {
-    return super.m();
-  }
+    superm(): int {
+        return super.m();
+    }
 }
 
 function main(): void {
-  let instance: C = new C();
+    let instance: C = new C();
 
-  arktest.assertTrue( instance.m() == 5 );
-  arktest.assertTrue( instance.superm() == 1 );
+    arktest.assertEQ( instance.m(), 5 );
+    arktest.assertEQ( instance.superm(), 1 );
 }

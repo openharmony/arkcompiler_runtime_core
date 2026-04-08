@@ -1,0 +1,59 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - doc: method and variable with the same name
+    error: |-
+      "Semantic error ESE567795: Method 'bar' in I cannot overload property bar in I."
+    decl: |-
+      interface I {
+        bar(): int
+        bar: int
+      }
+  - doc: 2 methods with the same name
+    error: |-
+      "Semantic error ESE0130: Function bar is already declared."
+    decl: |-
+      interface I {
+        bar(): int
+        bar(): void
+      }
+  - doc: 2 variables with the same name
+    error: |-
+      "Semantic error ESE0130: Function bar is already declared."
+    decl: |-
+      interface I {
+        bar: int
+        bar: string
+      }
+  - doc: method and variable with the same name in super and sub interfaces
+    error: |-
+      "Semantic error ESE567795: Method 'bar' in I cannot overload property bar in II."
+    decl: |-
+      interface I {
+        bar(): int
+      }
+      interface II extends I {
+        bar: int
+      }
+  - doc: 2 variables with the same name of different types in super and sub interfaces
+    error: |-
+      "Semantic error ESE0136: Method bar(): String in II not overriding any method"
+    decl: |-
+      interface I {
+        bar: int
+      }
+      interface II extends I {
+        bar: string
+      }

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 cases:
+#0
     - decl: |-
           // protected invoke from another class invoke
           class B {
@@ -22,7 +23,9 @@ cases:
           }
       use: |-
           arktest.assertEQ(C(), 'abc')
-
+      expected: |-
+          Semantic error ESE0127: No matching call signature for $_invoke(\"abc\")
+#1
     - decl: |-
           // protected invoke from another class method
           class B {
@@ -35,7 +38,9 @@ cases:
           }
       use: |-
           arktest.assertEQ(new C().meth(), 'abcabc')
-
+      expected: |-
+          Semantic error ESE0127: No matching call signature for $_invoke(\"abc\")
+#2
     - decl: |-
           // private invoke from subclass invoke
           class B {
@@ -46,7 +51,9 @@ cases:
           }
       use: |-
           arktest.assertEQ(C(), 'abc')
-
+      expected: |-
+          Semantic error ESE0127: No matching call signature for $_invoke(\"abc\")
+#3
     - decl: |-
           // private invoke from subclass method
           class B {
@@ -59,3 +66,15 @@ cases:
           }
       use: |-
           arktest.assertEQ(new C().meth(), 'abcabc')
+      expected: |-
+          Semantic error ESE0127: No matching call signature for $_invoke(\"abc\")
+#4     
+    - decl: |-
+          class B<T> {
+              static $_invoke(p: T): int { return p; }
+              static $_invoke(): string { return "hello"; }
+          }
+      use: |-
+          B()
+      expected: |-
+          Semantic error ESE0371: Cannot find type 'T'.

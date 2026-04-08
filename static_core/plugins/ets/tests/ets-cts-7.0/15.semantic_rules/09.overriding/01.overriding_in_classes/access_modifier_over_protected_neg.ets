@@ -26,6 +26,7 @@ desc: |-
     Protected member can be overridden by the protected or public one.
 
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: protected_foo(i: Double): void in Derived cannot override protected_foo(i: Double): void in Base because overridden method has weaker access privilege."
 ---*/
 
 let res: number = 0;

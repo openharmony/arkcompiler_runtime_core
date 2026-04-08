@@ -225,6 +225,21 @@ cases:
         let u1: A|B = new A
         let u2: A|B = new B
       use: |-
+        //optional field effectively (T|undefined): Object|null|undefined
         arktest.assertTrue(u1.fld === undefined)
         arktest.assertTrue(u2.fld === null)
-    
+
+    - decl: |-
+        // fields of different types
+        interface A {
+            fld: string
+        }
+        interface B {
+            fld?: string 
+        }
+        type U = A|B
+      use: |-
+        const u: U = {}
+        let a = u.fld
+        arktest.assertTrue(u instanceof B)
+        arktest.assertEQ(undefined, a)

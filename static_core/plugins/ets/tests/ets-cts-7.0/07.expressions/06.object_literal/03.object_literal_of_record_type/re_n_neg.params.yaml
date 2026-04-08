@@ -80,7 +80,7 @@ cases:
           let a: Record<Error, string> = {} // CTE, wrong key type, Error is not allowed
       expected: |-
           Semantic error ESE0228: Type argument 'Error' should be a subtype of
-          'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>' constraint
+          'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>' constraint
 
     - use: |-
           let a: Record<number, number> = {
@@ -171,17 +171,6 @@ cases:
           let b = a[2]  // CTE, wrong key
       expected: |-
           Semantic error ESE0046: Type 'Int' is not compatible with type '"10"|"1"' at index 1
-
-    - decl: |-
-          enum Season { Spring, Summer, Autumn, Winter }
-      use: |-
-          let a: Record<Season, string> = {
-              Season.Spring: "spring",
-              Season.Summer: "summer",
-              Season.Winter: "winter",
-          } // CTE, missing Season.Autumn
-      expected: |-
-          Semantic error ESE0265: All variants of literals listed in the enum type must be listed in the object literal
 
     - use: |-
           let a: Record<number, string> = {

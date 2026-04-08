@@ -16,8 +16,10 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Inherite all non-private members.
-assert: An interface inherits from its direct superinterfaces all the non-private member types of the superinterfaces that are both accessible to code in the interface and not hidden by a declaration in the interface.
+desc: >-
+    Interface members include:
+    • Members declared explicitly in the interface declaration;
+    • Members inherited from a direct superinterface (see Superinterfaces and Subinterfaces).
 ---*/
 
 {{c.decl}}

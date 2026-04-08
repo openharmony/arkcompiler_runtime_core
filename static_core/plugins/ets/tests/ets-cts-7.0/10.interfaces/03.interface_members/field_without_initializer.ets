@@ -15,9 +15,15 @@ limitations under the License.
 
 /*---
 desc: Field declaration without initializer.
-tags: [compile-only]
 ---*/
 
 interface A {
   x: int;
+}
+
+function main() {
+  let i: A = { x: 9 }
+  arktest.assertEQ(i.x, 9)
+  i.x = 7
+  arktest.assertEQ(i.x, 7)
 }

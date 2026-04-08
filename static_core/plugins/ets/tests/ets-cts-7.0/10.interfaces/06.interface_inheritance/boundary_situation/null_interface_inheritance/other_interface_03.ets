@@ -15,7 +15,6 @@
 
 /*---
 desc: Nan empty interface inherits an empty interface.
-tags: [compile-only]
 ---*/
 
 interface ParentEmptyInterface {}
@@ -24,4 +23,5 @@ interface EmptyInterface extends ParentEmptyInterface {}
 
 function main(): void {
   const obj: EmptyInterface = {};
+  arktest.assertTrue(obj instanceof ParentEmptyInterface)
 }

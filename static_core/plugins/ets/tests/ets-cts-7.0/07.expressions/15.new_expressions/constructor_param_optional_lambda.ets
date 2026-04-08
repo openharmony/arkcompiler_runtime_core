@@ -37,9 +37,9 @@ class C {
 }
 
 function main(): void {
-  let arr = new Array<C>()
+  let arr: Array<C> = new C[5](new C())
   let t: foo = (i: undefined|Object) => { return i }
-  arr.push(new C(t))
-  arktest.assertEQ(arr.length, 1)
+  arr[0] = new C(t)
+  arktest.assertEQ(arr.length, 5)
   arktest.assertEQ(arr.at(0).i, undefined)
 }

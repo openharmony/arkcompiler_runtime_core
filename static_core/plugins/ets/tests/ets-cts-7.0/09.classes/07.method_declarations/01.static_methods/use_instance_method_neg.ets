@@ -19,16 +19,16 @@ desc: >-
     or derived one represented as parameters or local variables
     Access inherited private method
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0127: No matching call signature for count()"
 ---*/
 
 class B {
-  private count(): number {
-    return 1
-  }
+    private count(): number {
+        return 1
+    }
 }
 class C extends B {
-  static getCount(c: C): number {
-    return c.count()
-  }
+    static getCount(c: C): number {
+        return c.count()
+    }
 }
-

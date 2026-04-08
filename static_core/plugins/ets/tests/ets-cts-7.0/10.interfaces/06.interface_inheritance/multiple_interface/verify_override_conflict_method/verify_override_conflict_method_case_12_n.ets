@@ -18,6 +18,9 @@ desc: >-
     Verify that a class implementing an interface with a constant and having a static property
     with the same name but different types causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0188: TestClass is not abstract and does not implement getter for
+    CONSTANT property in InterfaceA
 ---*/
 
 interface InterfaceA {

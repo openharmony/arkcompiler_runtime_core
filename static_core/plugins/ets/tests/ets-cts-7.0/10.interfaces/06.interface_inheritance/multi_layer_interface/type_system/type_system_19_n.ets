@@ -16,6 +16,9 @@
 /*---
 desc: Modify the return value type of the interface.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0141: sayHello(): String in B cannot override sayHello(): void in A
+    because overriding return type is not compatible with the other return type.
 ---*/
 
 interface A {

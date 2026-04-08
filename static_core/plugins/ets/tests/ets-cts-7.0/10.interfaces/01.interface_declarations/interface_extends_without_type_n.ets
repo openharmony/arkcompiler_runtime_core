@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: interface extends must be followed by a type
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0122: Identifier expected."
 ---*/
 
 interface Name extends {

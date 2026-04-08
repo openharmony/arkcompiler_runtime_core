@@ -16,7 +16,7 @@
 {% for fd in function_decls %}
 /*---
 desc: >-
-  An omitted function or method return type can be inferred from the method body.
+    An omitted function or method return type can be inferred from the method body.
 ---*/
 
 {{fd.decl}}
@@ -24,4 +24,4 @@ desc: >-
 function main() {
     {{fd.call|indent}}
 }
-{% endfor %}
+{%- endfor %}

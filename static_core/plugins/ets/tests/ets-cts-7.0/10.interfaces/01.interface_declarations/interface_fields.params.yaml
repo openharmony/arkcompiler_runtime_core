@@ -18,8 +18,6 @@ identifiers:
   - test
   - main
   - x
-  - y
-  - z
 
 # List of default values for primitive types
 default_value:

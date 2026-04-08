@@ -16,6 +16,7 @@
 /*---
 desc: Null interfaces and conditional types.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0144: Interface name 'EmptyInterface' used in the wrong context"
 ---*/
 
 interface ParentInterface {

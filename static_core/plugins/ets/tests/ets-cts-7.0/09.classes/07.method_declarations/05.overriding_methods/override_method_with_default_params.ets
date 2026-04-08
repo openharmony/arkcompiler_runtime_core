@@ -16,8 +16,8 @@
 {% for c in cases %}
 
 /*---
-desc: Overriding methods with default parameters.
-assert: >-
+desc: >-
+    Overriding methods with default parameters.
     If the signature of an overridden method contains parameters with default values (see Optional Parameters),
     then the overriding method always uses the default parameter values of the overridden method.
     A compile-time error occurs if a parameter in the overriding method has a default value
@@ -25,20 +25,20 @@ tags: []
 ---*/
 
 class A {
-  /* @ label */foo({{c.base_params}}): {{c.return_type}} {
-    return a;
-  }
+    /* @ label */foo({{c.base_params}}): {{c.return_type}} {
+       return a;
+    }
 }
 
 final class B extends A {
-  override foo({{c.overridden_params}}): {{c.return_type}} {
-    return a;
-  }
+    override foo({{c.overridden_params}}): {{c.return_type}} {
+        return a;
+    }
 }
 
 function main() {
-  {{c.main|indent}}
+    {{c.main|indent}}
 }
 
 
-{% endfor %}
+{%- endfor %}

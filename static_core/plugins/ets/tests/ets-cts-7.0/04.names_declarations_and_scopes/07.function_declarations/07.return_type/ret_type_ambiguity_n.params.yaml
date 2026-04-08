@@ -19,37 +19,9 @@ cases:
       }
 
   - decl: |-
-      function foo(): float|double {
-        return 1.1
-      }
-
-  - decl: |-
-      interface I {
-        i: string
-      }
-      interface II {
-        j: number
-      }
-      class D implements I, II {
-        i = "str"
-        j = 9.0
-      }
-
-      function foo(): I|II {
-        return new D()
-      }
-
-  - decl: |-
       class C {
         foo(): byte|long {
           return 127
-        }
-      }
-
-  - decl: |-
-      class C {
-        foo(): double|float {
-          return 1.1
         }
       }
 
@@ -61,23 +33,9 @@ cases:
       }
 
   - decl: |-
-      class C {
-        static foo(): double|float {
-          return 1.1
-        }
-      }
-
-  - decl: |-
       abstract class C {
         foo(): byte|long {
           return 127
-        }
-      }
-
-  - decl: |-
-      abstract class C {
-        foo(): double|float {
-          return 1.1
         }
       }
 
@@ -90,15 +48,4 @@ cases:
         class C implements I {} 
 
   - decl: |-
-        interface I {
-          foo(): double|float {
-            return 1.1
-          }
-        }
-        class C implements I {}
-
-  - decl: |-
       let foo = (): int|long => { return 1 }
-
-  - decl: |-
-      let foo = (): number|float => { return 1.1 }

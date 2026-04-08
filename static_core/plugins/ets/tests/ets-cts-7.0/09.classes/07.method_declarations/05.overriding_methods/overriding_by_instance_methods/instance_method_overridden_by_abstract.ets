@@ -14,17 +14,28 @@
  */
 
 /*---
-desc: Overriding abstract method.
-assert: An abstract method can also override non-abstract methods inherited from base classes or base inferfaces
-tags: [compile-only]
+desc: >-
+    Overriding abstract method.
+    An abstract method can also override non-abstract methods inherited from base classes or base inferfaces
 ---*/
 
 class A {
-  run(): number {
-    return 1
-  }
+    run(): number {
+        return 1
+    }
 }
 
 abstract class B extends A {
-  abstract run(): number;
+    abstract run(): number;
+}
+
+class C extends B {
+}
+
+function main() {
+    arktest.expectThrow(() => {
+        new C().run() //method A.run() was overriden without new implementation
+    }, (e: Error) => {
+        return e instanceof LinkerAbstractMethodError;
+    }); 
 }

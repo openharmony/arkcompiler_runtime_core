@@ -40,4 +40,8 @@ class ChildClass extends ParentClass implements ParentInterface {
 function main(): void {
   let instance: ParentInterface = new ChildClass();
   arktest.assertEQ(instance.parentMethod(), "Parent class method implementation");
+  arktest.assertEQ(instance.interfaceMethod(), "Interface method implementation");
+  let instance2: ParentClass  = new ChildClass();
+  arktest.assertEQ(instance2.interfaceMethod(), "Interface method implementation");
+  arktest.assertEQ(instance2.parentMethod(), "Parent class method implementation");
 }

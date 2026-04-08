@@ -19,42 +19,25 @@ cases:
       class Derived extends Base {
         protected override public_foo/* @@ label */() { res = 11; }
       }
-    use: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: public_foo(): void in Derived cannot override public_foo(): void in Base 
-      because overridden method has weaker access privilege. */
-      /* @@@ label Error Method public_foo(): void in Derived not overriding any method */
-      
+    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Base because overridden method has weaker access privilege."
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived implements Interface {
         protected override public_foo/* @@ label */() { res = 11; }
       }
-    use: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: public_foo(): void in Derived cannot override public_foo(): void in Base 
-      because overridden method has weaker access privilege. */
-      /* @@@ label Error Method public_foo(): void in Derived not overriding any method */
+    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Interface because overridden method has weaker access privilege."
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived extends Base {
         private override public_foo/* @@ label */() { res = 11; }
       }
-    use: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: public_foo(): void in Derived cannot override public_foo(): void in Base 
-      because overridden method has weaker access privilege. */
-      /* @@@ label Error Method public_foo(): void in Derived not overriding any method */
+    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Base because overridden method has weaker access privilege."
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived implements Interface {
         private override public_foo/* @@ label */() { res = 11; }
       }
-    use: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: public_foo(): void in Derived cannot override public_foo(): void in Base 
-      because overridden method has weaker access privilege. */
-      /* @@@ label Error Method public_foo(): void in Derived not overriding any method */
+    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Interface because overridden method has weaker access privilege."

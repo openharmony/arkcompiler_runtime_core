@@ -16,6 +16,9 @@
 /*---
 desc: The method with the same name has the same type and number of parameters, but a method is asynchronous.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: ChildClass is not abstract
+    and does not override abstract method fetchData(): String in Parent1
 ---*/
 
 interface Parent1 {

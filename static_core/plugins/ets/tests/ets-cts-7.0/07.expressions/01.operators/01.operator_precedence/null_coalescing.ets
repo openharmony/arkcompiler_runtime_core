@@ -21,27 +21,44 @@ interface I {}
 class A implements I {}
 class B {}
 
-function main() {
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Null-coalescing operator precedence")
 
-   	let a: A = new A();
-	let b: B = new B();
-	let i: I = a;
-	let an: A|null = null;
-	let bn: B|null = null;
+    suite.addTest("ternary true condition", () => {
+        let a: A = new A();
+        let b: B = new B();
+        let an: A|null = null;
+        let bn: B|null = null;
 
-	// ternary
-	let res: boolean = ((an ?? a) instanceof I ? bn ?? b : an ?? a) === b
-	arktest.assertTrue(res)
+        let res: boolean = ((an ?? a) instanceof I ? bn ?? b : an ?? a) === b
+        arktest.assertTrue(res)
+    })
 
-	res = ((a ?? an) instanceof B ? an ?? a : bn ?? b) === b
-	arktest.assertTrue(res)
+    suite.addTest("ternary false condition", () => {
+        let a: A = new A();
+        let b: B = new B();
+        let an: A|null = null;
+        let bn: B|null = null;
 
-	// assignment
-	let x: Object = bn ?? a
-	arktest.assertEQ(x, a)
+        let res: boolean = ((a ?? an) instanceof B ? an ?? a : bn ?? b) === b
+        arktest.assertTrue(res)
+    })
 
-	let y: Object = an ?? b
-	arktest.assertEQ(y, b)
+    suite.addTest("assignment with null first", () => {
+        let a: A = new A();
+        let bn: B|null = null;
 
-    
+        let x: Object = bn ?? a
+        arktest.assertEQ(x, a)
+    })
+
+    suite.addTest("assignment with null second", () => {
+        let b: B = new B();
+        let an: A|null = null;
+
+        let y: Object = an ?? b
+        arktest.assertEQ(y, b)
+    })
+
+    return suite.run()
 }

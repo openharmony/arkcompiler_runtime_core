@@ -17,6 +17,10 @@
 desc: typeof operator with other operators
 ---*/
 
+function foo() {
+    return ['one', 'two']
+}
+
 function main() {
 
 	let t255: int = 255
@@ -185,4 +189,9 @@ function main() {
 	str = s += typeof typeof num + typeof num
 	arktest.assertEQ(str, "1stringnumber")
 	arktest.assertEQ(s, "1stringnumber")
+
+	let pt = foo()
+	arktest.assertTrue(typeof pt instanceof Object)
+	arktest.assertFalse(typeof pt instanceof Array)
+	arktest.assertTrue(pt instanceof Array)
 }

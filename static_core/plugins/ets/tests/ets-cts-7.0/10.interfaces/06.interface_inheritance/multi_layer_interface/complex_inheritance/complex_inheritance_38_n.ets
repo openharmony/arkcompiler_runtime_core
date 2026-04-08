@@ -17,6 +17,9 @@
 desc: Overriding getter.
 assertion:  A compile-time error occurs if a field overrides getter or setter in a superclass.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE129829: 'num' is defined as an accessor in class 'C',
+    but is overridden here in 'D' as an instance property.
 ---*/
 
 class C {

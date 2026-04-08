@@ -18,6 +18,8 @@ desc: >-
     Verify that a class implementing an interface with a constant and having an optional property with the same name
     causes a compile-time error.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0136: Method CONSTANT(): String|undefined in TestClass not overriding any method
 ---*/
 
 interface InterfaceA {

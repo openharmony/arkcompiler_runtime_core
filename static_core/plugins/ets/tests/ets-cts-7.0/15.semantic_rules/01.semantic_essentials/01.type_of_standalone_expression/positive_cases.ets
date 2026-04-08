@@ -17,27 +17,14 @@
 desc: Standalone expression (see Type of Expression) is an expression for which no target type is expected in its context.
 ---*/
 
-{% for c in cases %}
-let v{{loop.index}} = {{c}}
-const c{{loop.index}} = {{c}}
-{% endfor %}
+function main(): int {
+    let testsuite = new arktest.ArkTestsuite("Type of standalone expression");
+    
+    {% for c in cases %}
+    testsuite.addTest("{{ c.name }}", () => {
+        arktest.assertTrue({{c.expr}} instanceof {{c.expr_type}});
+    });
+    {% endfor %}
 
-let lorem = `lorem
-    ipsum dolor
-    sit amet
-    `
-const ipsum = lorem
-
-function main() {
-{% for c in cases %}
-    {{c}};
-{% endfor %}
-
-    42; "foo"
-    3.14;
-    null; undefined
-
-    `consectetur adipiscing elit,
-    sed do eiusmo`
-
+    return testsuite.run();
 }

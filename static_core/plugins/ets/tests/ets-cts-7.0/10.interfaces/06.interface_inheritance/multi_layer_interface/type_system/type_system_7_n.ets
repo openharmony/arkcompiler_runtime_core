@@ -18,6 +18,8 @@ desc: >-
     Using class inheritance and interface implementation to verify the correctness of the type system,
     but not all interface methods are implemented.
 tags: [compile-only, negative]
+expected_out: >-
+    Semantic error ESE0190: Fish is not abstract and does not override abstract method swim(): String in Swimmable
 ---*/
 
 class Animal {

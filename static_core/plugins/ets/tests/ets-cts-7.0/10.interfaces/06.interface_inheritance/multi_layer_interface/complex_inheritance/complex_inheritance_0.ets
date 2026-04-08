@@ -25,7 +25,7 @@ interface A {
 abstract class B implements A {
     a: number = 3;
     abstract getB(): number;
-    
+
     getA(): number {
         return this.a;
     }

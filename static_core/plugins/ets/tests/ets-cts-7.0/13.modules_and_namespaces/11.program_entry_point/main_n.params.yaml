@@ -185,7 +185,7 @@ cases:
     - tags: compile-only
       use: |-
           function main(): void
-          function main(p: string[]): void
+          function main(p: FixedArray<string>): void
           function main(...p: Any[]): Any { // CTE, overload signatures not permitted
               if (true) {
                   return
@@ -196,7 +196,7 @@ cases:
     - tags: compile-only
       use: |-
           function main(): int
-          function main(p: string[]): int
+          function main(p: FixedArray<string>): int
           function main(...p: Any[]): Any { // CTE, overload signatures not permitted
               if (true) {
                   return 0

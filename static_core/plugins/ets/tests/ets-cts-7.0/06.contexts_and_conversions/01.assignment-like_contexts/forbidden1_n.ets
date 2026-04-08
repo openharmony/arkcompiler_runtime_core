@@ -17,7 +17,7 @@
 /*---
 desc: >-
     Any conversion that is not explicitly allowed is forbidden.
-tags: [compile-only, negative]
+tags: {{c.tags}}
 expected_out: "{{c.expected}}"
 ---*/
 

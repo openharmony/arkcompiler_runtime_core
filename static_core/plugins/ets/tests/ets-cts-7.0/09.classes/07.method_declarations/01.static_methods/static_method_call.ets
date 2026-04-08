@@ -14,16 +14,17 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static method call.
-assert: A class method is always invoked without reference to a particular object.
+desc: >-
+    Static method call.
+    A class method is always invoked without reference to a particular object.
 ---*/
 
 class A {
-  public static run(): int {
-    return 5;
-  }
+    public static run(): int {
+        return 5;
+    }
 }
 
 function main(): void {
-  arktest.assertEQ( A.run(), 5 );
+    arktest.assertEQ( A.run(), 5 );
 }

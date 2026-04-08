@@ -93,7 +93,7 @@ cases:
   - use: |-
       let v: A<Color[]> = new A<Color[]>(new Size[0](new Size()))  // Size is not Color
     stdout: |-
-      "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
+      "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 3"
   #14
   - use: |-
       let v: A<A<Color[]>[]> = new A<A<Color[]>[]>(new A<Size[]>[0](new A<Size[]>()))  // Size[] is not Color[]

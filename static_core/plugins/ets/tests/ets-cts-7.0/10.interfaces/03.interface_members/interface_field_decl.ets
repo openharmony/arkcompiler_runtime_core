@@ -37,4 +37,15 @@ interface ExtendedColorsWithUndefined extends BaseColorsWithUndefined {
   YELLOW ?: int;
 }
 
-function main(): void {}
+function main() {
+  let i: ExtendedColors = { RED: 1, GREEN: 2, BLUE: 3, YELLOW: 4}
+  let j: ExtendedColorsWithUndefined = { RED: 1, BLUE: 3}
+  arktest.assertEQ(i.RED, 1)
+  arktest.assertEQ(i.GREEN, 2)
+  arktest.assertEQ(i.BLUE, 3)
+  arktest.assertEQ(i.YELLOW, 4)
+  arktest.assertEQ(j.RED, 1)
+  arktest.assertEQ(j.GREEN, undefined)
+  arktest.assertEQ(j.BLUE, 3)
+  arktest.assertEQ(j.YELLOW, undefined)
+}

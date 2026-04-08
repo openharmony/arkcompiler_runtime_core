@@ -21,7 +21,7 @@ desc: Array creation expression
 
 class A {}
 
-let x = new {{exp}};
+let x = {{exp}};
 function main(): void {}
 
 {% endfor %}

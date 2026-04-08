@@ -1,0 +1,76 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # List of invalid interface members
+cases:
+  - doc: String property of the interface
+    decl: |-
+      interface I {
+        text: string;
+      }
+      function main() {
+        let i: I = {text: "smth"}
+        arktest.assertEQ(i.text, "smth")
+      }
+  - doc: String interface property configured via getter and setter
+    decl: |-
+      interface I {
+        get text(): string;
+        set text(s: string);
+      }
+      function main() {
+        let i: I = {text: "smthng"}
+        arktest.assertEQ(i.text, "smthng")
+        i.text = "anthr"
+        arktest.assertEQ(i.text, "anthr")
+      }
+  - doc: Only getter is configured which makes property read-only
+    decl: |-
+      interface I {
+        get text(): string;
+      }
+      function main() {
+        let i: I = {text: "str"}
+        arktest.assertEQ(i.text, "str")
+      }
+  - doc: Only setter is configured
+    decl: |-
+      interface I {
+        set text(s: string)
+      }
+      function main() {
+        let i: I = {text: "smthng"}
+        i.text = "anthr"
+      }
+  - doc: Readonly property configured
+    decl: |-
+      interface I {
+        readonly text: string;
+      }
+      function main() {
+        let i: I = {text: "str"}
+        arktest.assertEQ(i.text, "str")
+      }
+  - doc: Optional property configured
+    decl: |-
+      interface I {
+        text?: string
+      }
+      function main() {
+        let i: I = {text: "smthng"}
+        let j: I = {}
+        arktest.assertEQ(i.text, "smthng")
+        arktest.assertEQ(j.text, undefined)
+        j.text = "anthr"
+        arktest.assertEQ(j.text, "anthr")
+      }

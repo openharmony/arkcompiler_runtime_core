@@ -52,9 +52,9 @@ cases:
       arktest.assertEQ(p[0], 1)
       arktest.assertEQ(p[1], "111")
 
-# NOTE #28484 (oignatenko) after this is fixed, extend below list with interface
 context:
   - function
   - lambda
   - constructor
   - method
+  - interface

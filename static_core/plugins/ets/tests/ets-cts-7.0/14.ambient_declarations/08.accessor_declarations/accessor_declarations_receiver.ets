@@ -31,7 +31,7 @@ function main() {
     let r1: ReceiverTest1 = new ReceiverTest1(5)
     arktest.assertEQ(r1.valuePlusOneGetter, 6, "expect 6")
 
-    let r2: ReceiverTest2 = new ReceiverTest1(7)
+    let r2: ReceiverTest2 = new ReceiverTest2(7)
     r2.valueNewSetter = 8
     arktest.assertEQ(r2.value, 8, "expect 8")
 }

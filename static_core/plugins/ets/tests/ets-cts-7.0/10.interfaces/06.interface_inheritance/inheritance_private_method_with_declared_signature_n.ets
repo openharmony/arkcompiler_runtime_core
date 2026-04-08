@@ -21,6 +21,9 @@ assert: >-
         Signature of m is compatible with the public instance method 𝑚′ in a superinterface of I, and
         𝑚′ is otherwise accessible to code in I.
 tags: [negative, compile-only]
+expected_out: >-
+    Semantic error ESE0141: foo(): Int in B cannot override foo(): Int in A
+    because overridden method has weaker access privilege.
 ---*/
 
 interface A {

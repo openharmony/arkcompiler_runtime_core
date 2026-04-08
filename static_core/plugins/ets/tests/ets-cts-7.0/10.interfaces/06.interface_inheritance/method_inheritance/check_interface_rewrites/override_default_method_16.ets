@@ -46,4 +46,8 @@ class ChildClass implements ChildInterface {
 function main(): void {
   let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.defaultMethod(), "Class overridden method");
+  arktest.assertEQ(instance.additionalMethod(), "Class additional method");
+  let instance2: ParentInterface = new ChildClass();
+  arktest.assertEQ(instance2.defaultMethod(), "Class overridden method");
+  arktest.assertEQ(instance2.additionalMethod(), "Class additional method");
 }

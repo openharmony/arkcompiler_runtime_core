@@ -70,8 +70,8 @@ cases:
           } catch (e) {
               if (e instanceof Error)
                   arktest.assertTrue((e as Error).message == 'XYZ')
-          } 
-          
+          }
+
     - decl: |-
           const initVal: number = 1.0
       use: |-
@@ -101,12 +101,12 @@ cases:
           ).catch<number>(
               (p: Error): number => {
                   if (p instanceof Error) throw new Error((p as Error).message + 'B')
-                  throw p;
+                  throw new Error();
               }
           ).catch<number>(
               (p: Error): number => {
                   if (p instanceof Error) throw new Error((p as Error).message + 'C')
-                  throw p;
+                  throw new Error();
               }
           )
 
@@ -116,7 +116,7 @@ cases:
           } catch (e) {
               if (e instanceof Error)
                   arktest.assertTrue((e as Error).message == 'ABC')
-          } 
+          }
 
     - decl: |-
       use: |-
@@ -164,7 +164,7 @@ cases:
           } catch (e) {
               if (e instanceof Error)
                   arktest.assertTrue((e as Error).message == 'AEFJ')
-          } 
+          }
 
     - decl: |-
       use: |-
@@ -186,7 +186,7 @@ cases:
               (data:string) => { return "test" }
           );
           await r2;
-          
+
           arktest.assertTrue(true);
 
     - decl: |-
