@@ -43,6 +43,12 @@ public:
     void CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MIndex dstSize, BaseObject* srcObj,
                          HeapAddress srcField, MIndex srcSize) const override;
 };
-} // namespace common_vm
+
+class YoungCopyBarrier : public CopyBarrier {
+public:
+    explicit YoungCopyBarrier(Collector &collector) : CopyBarrier(collector) {}
+    void WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const override;
+};
+}  // namespace common_vm
 
 #endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_COPY_BARRIER_H

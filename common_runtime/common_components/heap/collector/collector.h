@@ -72,7 +72,7 @@ public:
         UNREACHABLE_CC();
     }
 
-    virtual BaseObject* ForwardObject(BaseObject*) = 0;
+    virtual BaseObject *ForwardObject(BaseObject *) = 0;
 
     virtual bool ShouldIgnoreRequest(GCRequest& quest) = 0;
     virtual bool IsFromObject(BaseObject*) const = 0;

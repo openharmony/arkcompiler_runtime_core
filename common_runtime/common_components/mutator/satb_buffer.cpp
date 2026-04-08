@@ -23,13 +23,16 @@ static ImmortalWrapper<SatbBuffer> g_instance;
 
 SatbBuffer& SatbBuffer::Instance() noexcept { return *g_instance; }
 
-bool SatbBuffer::ShouldEnqueue(const BaseObject* obj)
+bool SatbBuffer::ShouldEnqueue(const BaseObject *obj)
 {
     if (UNLIKELY_CC(obj == nullptr)) {
         return false;
     }
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG && !RegionalHeap::IsYoungSpaceObject(obj)) {
-        return false;
+    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+        auto *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        if (!region->IsToRegion() && !region->IsInYoungSpace()) {
+            return false;
+        }
     }
     if (RegionalHeap::IsNewObjectSinceMarking(obj)) {
         return false;
@@ -39,4 +42,4 @@ bool SatbBuffer::ShouldEnqueue(const BaseObject* obj)
     }
     return !RegionalHeap::EnqueueObject(obj);
 }
-} // namespace common_vm
+}  // namespace common_vm

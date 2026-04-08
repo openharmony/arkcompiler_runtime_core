@@ -486,6 +486,11 @@ public:
         return reinterpret_cast<RegionDesc*>(unit);
     }
 
+    static RegionDesc *GetAliveRegionDescAt(const BaseObject *obj)
+    {
+        return GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+    }
+
     static void InitFreeRegion(size_t unitIdx, size_t nUnit)
     {
         RegionDesc* region = reinterpret_cast<RegionDesc*>(RegionDesc::UnitInfo::GetUnitInfo(unitIdx));
@@ -1250,6 +1255,11 @@ public:
         static InlinedRegionMetaData *GetInlinedRegionMetaData(uintptr_t allocAddr)
         {
             return reinterpret_cast<InlinedRegionMetaData *>(allocAddr & ~DEFAULT_REGION_UNIT_MASK);
+        }
+
+        static InlinedRegionMetaData *GetInlinedRegionMetaData(const BaseObject *obj)
+        {
+            return GetInlinedRegionMetaData(reinterpret_cast<HeapAddress>(obj));
         }
 
         explicit InlinedRegionMetaData(RegionDesc *regionDesc)

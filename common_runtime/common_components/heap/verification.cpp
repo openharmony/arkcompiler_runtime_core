@@ -90,7 +90,7 @@ std::string GetObjectInfo(const BaseObject* obj)
     constexpr size_t defaultInfoLength = 64;
 
     std::ostringstream s;
-    s << std::hex << std::endl << ">>> address: 0x" << obj << std::endl;
+    s << std::endl << ">>> address: " << obj << std::endl;
 
     s << "> Raw memory:" << std::endl;
     if (obj == nullptr) {

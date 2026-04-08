@@ -165,6 +165,11 @@ struct GCParam {
     * The maximum remaining bytes for next heuristic gc, the default value is 512KB.
     */
     size_t kMaxConcurrentRemainingBytes;
+
+    /*
+    * true if young compaction without premarking is enabled, otherwise false
+    */
+    bool singlePassCompactionEnabled;
 };
 
 /*

@@ -61,7 +61,8 @@ protected:
         if (phase == GC_PHASE_ENUM || phase == GC_PHASE_MARK || phase == GC_PHASE_REMARK_SATB ||
             phase == GC_PHASE_POST_MARK) {
             region->SetMarkingLine();
-        } else if (phase == GC_PHASE_PRECOPY || phase == GC_PHASE_COPY || phase == GC_PHASE_FIX) {
+        } else if (phase == GC_PHASE_PRECOPY || phase == GC_PHASE_COPY || phase == GC_PHASE_FIX ||
+                   phase == GC_PHASE_YOUNG_COPY) {
             region->SetMarkingLine();
             region->SetCopyLine();
         }
