@@ -129,6 +129,8 @@ declare_args() {
   }
 
   ark_static_use_64_bit_managed_pointer = false
+
+  is_ark_dfx_memory = false
 }
 
 declare_args() {

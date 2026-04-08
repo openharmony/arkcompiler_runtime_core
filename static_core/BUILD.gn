@@ -414,6 +414,9 @@ config("ark_common_config") {
     cflags_cc += ["-flto=thin"]
   }
 
+  if (is_ark_dfx_memory) {
+    defines += [ "PANDA_ENABLE_DFX_MEMORY_CHECK" ]
+  }
 }
 
 config("ark_config") {

@@ -221,6 +221,7 @@ option(PANDA_WITH_TESTS "Enable test targets" true)
 option(PANDA_WITH_BYTECODE_OPTIMIZER "Enable bytecode optimizer" true)
 option(PANDA_COMPILER_DEBUG_INFO "Support DWARF debug information in Compiler (JIT/AOT/IRtoC)" OFF)
 option(PANDA_ENABLE_CCACHE "Enable ccache" true)
+option(PANDA_ENABLE_DFX_MEMORY_CHECK "Enable DFX memory object validation checks" false)
 if (NOT DEFINED ES2PANDA_PATH)
     file(REAL_PATH ${PANDA_ROOT}/tools/es2panda ES2PANDA_PATH)
 endif()
@@ -317,6 +318,7 @@ panda_promote_to_definitions(
     PANDA_WITH_COMPILER
     PANDA_WITH_BYTECODE_OPTIMIZER
     PANDA_COMPILER_DEBUG_INFO
+    PANDA_ENABLE_DFX_MEMORY_CHECK
     PANDA_MINIMAL_VIXL
     INTRUSIVE_TESTING
 )
@@ -546,6 +548,7 @@ message(STATUS "PANDA_LLVM_INTERPRETER                 = ${PANDA_LLVM_INTERPRETE
 message(STATUS "PANDA_LLVM_FASTPATH                    = ${PANDA_LLVM_FASTPATH}")
 message(STATUS "PANDA_LLVM_AOT                         = ${PANDA_LLVM_AOT}")
 message(STATUS "PANDA_ENABLE_CCACHE                    = ${PANDA_ENABLE_CCACHE}")
+message(STATUS "PANDA_ENABLE_DFX_MEMORY_CHECK          = ${PANDA_ENABLE_DFX_MEMORY_CHECK}")
 message(STATUS "PANDA_USE_CUSTOM_SIGNAL_STACK          = ${PANDA_USE_CUSTOM_SIGNAL_STACK}")
 message(STATUS "PANDA_USE_PREBUILT_TARGETS             = ${PANDA_USE_PREBUILT_TARGETS}")
 message(STATUS "CMAKE_NO_SYSTEM_FROM_IMPORTED          = ${CMAKE_NO_SYSTEM_FROM_IMPORTED}")
