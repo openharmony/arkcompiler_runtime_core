@@ -16,10 +16,11 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    If an equality expression is known at compile time to always evaluate to false
-    or true at runtime, then a compile-time warning is issued.
+    Validate diagnostics for equality expressions expected to evaluate as false:
+    emit W65001 for comparable operands, or semantic errors for invalid type combinations.
 expected_out: |-
     {{c.warning|indent}}
+tags: [{{c.tags|join(', ')}}]
 ---*/
 {{c.decl}}
 
