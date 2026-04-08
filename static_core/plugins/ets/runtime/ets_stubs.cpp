@@ -803,6 +803,7 @@ EtsObject *EtsLdbyval(ManagedThread *mThread, EtsObject *thisObj, EtsObject *val
         }
         if (valObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
             PANDA_ETS_INTEROP_JS_GUARD({
+                INTEROP_TRACE();
                 auto ctx = interop::js::InteropCtx::Current(executionCtx);
                 auto env = ctx->GetJSEnv();
                 interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
@@ -862,7 +863,7 @@ bool EtsStbyval(ManagedThread *mThread, EtsObject *obj, EtsObject *key, EtsObjec
     if (unboxedValue.has_value()) {
         return EtsStbyidx(executionCtx->GetMT(), obj, unboxedValue.value(), value);
     }
-    if (value->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+    if (key->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
             INTEROP_TRACE();
             auto ctx = interop::js::InteropCtx::Current();
@@ -870,8 +871,9 @@ bool EtsStbyval(ManagedThread *mThread, EtsObject *obj, EtsObject *key, EtsObjec
             interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
             if (LIKELY(storage->HasReference(obj, env))) {
                 auto jsThis = storage->GetJsObject(obj, env);
-                return interop::js::GetPropertyObject(JSValue::Create(executionCtx, ctx, jsThis),
-                                                      JSValue::FromEtsObject(value));
+                interop::js::SetPropertyWithObject(JSValue::Create(executionCtx, ctx, jsThis),
+                                                   JSValue::FromEtsObject(key), value);
+                return true;
             }
         });
     }
