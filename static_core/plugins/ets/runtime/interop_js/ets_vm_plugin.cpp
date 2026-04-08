@@ -326,6 +326,7 @@ static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
 
 static napi_value Init(napi_env env, napi_value exports)
 {
+    NapiImpl::InitNapi();
     auto stValueCtor = GetSTValueClass(env);
     auto sTypeObj = CreateSTypeObject(env);
     const std::array desc = {
@@ -343,9 +344,6 @@ static napi_value Init(napi_env env, napi_value exports)
     };
 
     NAPI_CHECK_FATAL(napi_define_properties(env, exports, desc.size(), desc.data()));
-
-    NapiImpl::InitNapi();
-
     return exports;
 }
 
