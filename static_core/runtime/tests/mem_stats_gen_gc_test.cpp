@@ -222,9 +222,6 @@ private:
     template <MemStatsGenGCTest::TargetSpace SPACE>
     bool InitG1Gc(MemStatsGenGCTest::GcData &gcData);
 
-    template <MemStatsGenGCTest::TargetSpace SPACE>
-    bool InitGenGc(MemStatsGenGCTest::GcData &gcData);
-
     template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE, bool DO_SAVE>
     void MakeAllocationsWithSingleRepeat(MemStatsGenGCTest::GcData &gcData, MemStatsGenGCTest::MemOpReport &report,
                                          size_t &bytes, size_t &rawObjectsSize, [[maybe_unused]] F spaceCheck);
@@ -388,42 +385,6 @@ bool MemStatsGenGCTest::InitG1Gc(MemStatsGenGCTest::GcData &gcData)
         gcData.minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
         gcData.minSize = std::max(gcData.minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
         gcData.minSize = std::max(gcData.minSize, g1Alloc->GetLargeObjectMaxSize() + 1);
-        gcData.maxSize = gcData.minSize * 3U;
-        gcData.checkOom = true;
-    }
-    return true;
-}
-
-template <MemStatsGenGCTest::TargetSpace SPACE>
-bool MemStatsGenGCTest::InitGenGc(MemStatsGenGCTest::GcData &gcData)
-{
-    auto genAlloc = reinterpret_cast<ObjectAllocatorGen<MT_MODE_MULTI> *>(objectAllocator);
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    gcData.count = 15U;
-    if constexpr (SPACE == TargetSpace::YOUNG) {
-        gcData.minSize = 0;
-        gcData.maxSize = genAlloc->GetYoungAllocMaxSize();
-    } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
-        gcData.minSize = genAlloc->GetYoungAllocMaxSize() + 1;
-        gcData.maxSize = genAlloc->GetRegularObjectMaxSize();
-        if (gcData.minSize >= gcData.maxSize) {
-            // Allocator configuration disallows allocating directly in this space
-            return false;
-        }
-    } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
-        gcData.minSize = genAlloc->GetYoungAllocMaxSize() + 1;
-        gcData.minSize = std::max(gcData.minSize, genAlloc->GetRegularObjectMaxSize() + 1);
-        gcData.maxSize = genAlloc->GetLargeObjectMaxSize();
-        if (gcData.minSize >= gcData.maxSize) {
-            // Allocator configuration disallows allocating directly in this space
-            return false;
-        }
-    } else {
-        ASSERT(SPACE == TargetSpace::HUMONGOUS);
-        gcData.count = 3U;
-        gcData.minSize = genAlloc->GetYoungAllocMaxSize() + 1;
-        gcData.minSize = std::max(gcData.minSize, genAlloc->GetRegularObjectMaxSize() + 1);
-        gcData.minSize = std::max(gcData.minSize, genAlloc->GetLargeObjectMaxSize() + 1);
         gcData.maxSize = gcData.minSize * 3U;
         gcData.checkOom = true;
     }
