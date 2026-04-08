@@ -118,6 +118,9 @@
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_1.ets
 
+#34099
+06.contexts_and_conversions/03.numeric_operator_contexts/02.char_conversions_for_relational_and_equality_operands/conversions_char.ets
+
 #31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
 20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
 
