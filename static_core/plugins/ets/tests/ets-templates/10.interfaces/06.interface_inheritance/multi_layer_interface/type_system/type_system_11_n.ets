@@ -17,8 +17,8 @@
 desc: Use generic interfaces and class implementations to verify the correctness of the type system.
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE0141: value(): Int in MyStringBBox cannot override value():
-    String in BBox<T> because overriding return type is not compatible with the other return type.
+    Semantic error ESE985118: Class member value with type Int in MyStringBBox cannot implement value with type String property from interface BBox<T>
+    because the implementing return type is not compatible with the interface return type.
 ---*/
 
 interface BBox<T> {

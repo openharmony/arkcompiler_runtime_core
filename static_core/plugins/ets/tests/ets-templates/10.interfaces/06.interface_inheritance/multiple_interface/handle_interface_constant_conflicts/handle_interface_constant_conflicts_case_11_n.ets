@@ -17,8 +17,8 @@
 desc: Verify that a class implementing two interfaces with the same constant name and different values.
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE0141: CONSTANT(): String in TestClass cannot override CONSTANT():
-    Double in InterfaceB because overriding return type is not compatible with the other return type.
+    Semantic error ESE985118: Class member CONSTANT with type String in TestClass cannot implement CONSTANT with type Double property from interface InterfaceB
+    because the implementing return type is not compatible with the interface return type.
 ---*/
 
 interface InterfaceA {
