@@ -39,6 +39,13 @@ static std::optional<Method *> FindMethodInVTable(Class *klass, Method *imethod,
         if (LIKELY(kmethod->GetName() != imethodName)) {
             continue;
         }
+        /*
+         * NOTE(knazarov): Private methods should not even appear in vtable.
+         * Should be fixed in #31066. After original issue is fixed, this check should be removed.
+         */
+        if (kmethod->IsPrivate()) {
+            continue;
+        }
         if (!ETSProtoIsOverriddenBy(ctx, imethod->GetProtoId(), kmethod->GetProtoId())) {
             continue;
         }

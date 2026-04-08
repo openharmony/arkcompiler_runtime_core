@@ -2505,3 +2505,7 @@
 17.experimental_features/03.value_array_types/value_array_init.ets
 02.lexical_elements/07.keywords/soft.ets
 02.lexical_elements/07.keywords/soft_reserved_common.ets
+
+# This code is unsupported in TypeScript
+#TSC-PROJECT_FAIL
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets

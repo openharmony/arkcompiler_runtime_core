@@ -849,9 +849,6 @@
 15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_8.ets
 15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_0.ets
 
-#31017 override method in superinterface with the same private in superclass
-15.semantic_rules/08.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
-
 #33447 Verifier error on 2 methods in subclass override same method in superclass
 15.semantic_rules/08.overriding/01.overriding_in_classes/several_methods_override_negative.ets
 
