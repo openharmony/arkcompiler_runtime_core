@@ -49,6 +49,10 @@ napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
 // Convert JS string to C++ string, selecting std::string or std::u16string based on internal storage
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_get_value_string_utf8_hybrid(napi_env env, napi_value value, void *string_object);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_is_undefined(napi_env env, napi_value value, bool *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_is_null(napi_env env, napi_value value, bool *result);
 // NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 
@@ -263,23 +267,23 @@ inline napi_value GetBooleanValue(napi_env env, bool val)
     return jsValueBoolean;
 }
 
-template <bool IS_ADD_NATIVE_SCOPE = false>
 inline bool IsNull(napi_env env, napi_value val)
 {
-    return GetValueType<IS_ADD_NATIVE_SCOPE>(env, val) == napi_null;
+    bool isNull = true;
+    NAPI_CHECK_FATAL(napi_is_null(env, val, &isNull));
+    return isNull;
 }
 
-template <bool IS_ADD_NATIVE_SCOPE = false>
 inline bool IsUndefined(napi_env env, napi_value val)
 {
-    return GetValueType<IS_ADD_NATIVE_SCOPE>(env, val) == napi_undefined;
+    bool isUndefined = true;
+    NAPI_CHECK_FATAL(napi_is_undefined(env, val, &isUndefined));
+    return isUndefined;
 }
 
-template <bool IS_ADD_NATIVE_SCOPE = false>
 inline bool IsNullOrUndefined(napi_env env, napi_value val)
 {
-    napi_valuetype vtype = GetValueType<IS_ADD_NATIVE_SCOPE>(env, val);
-    return vtype == napi_undefined || vtype == napi_null;
+    return IsNull(env, val) || IsUndefined(env, val);
 }
 
 inline std::string GetString(napi_env env, napi_value jsVal)

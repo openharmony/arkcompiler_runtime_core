@@ -144,9 +144,9 @@ struct EtsFieldAccessorREFERENCE {
     {
         INTEROP_TRACE();
         EtsObject *etsValue;
-        if (IsUndefined<true>(env, jsValue)) {
+        if (IsUndefined(env, jsValue)) {
             etsValue = nullptr;
-        } else if (IsNull<true>(env, jsValue)) {
+        } else if (IsNull(env, jsValue)) {
             etsValue = ctx->GetNullValue();
         } else {
             JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);

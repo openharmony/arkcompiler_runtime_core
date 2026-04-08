@@ -124,7 +124,7 @@ JSCONVERT_WRAP(U1)
 }
 JSCONVERT_UNWRAP(U1)
 {
-    if (IsUndefined<true>(env, jsVal)) {
+    if (IsUndefined(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
@@ -148,7 +148,7 @@ JSCONVERT_WRAP(U16)
 }
 JSCONVERT_UNWRAP(U16)
 {
-    if (IsUndefined<true>(env, jsVal)) {
+    if (IsUndefined(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
@@ -498,7 +498,7 @@ JSCONVERT_WRAP(EtsNull)
 
 JSCONVERT_UNWRAP(EtsNull)
 {
-    if (UNLIKELY(!IsNull<true>(env, jsVal))) {
+    if (UNLIKELY(!IsNull(env, jsVal))) {
         TypeCheckFailed();
         return {};
     }

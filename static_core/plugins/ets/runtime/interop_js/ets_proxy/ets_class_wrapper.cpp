@@ -116,7 +116,7 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
     CheckClassInitialized(etsClass_->GetRuntimeClass());
 
     napi_env env = ctx->GetJSEnv();
-    if (IsUndefined<true>(env, jsValue)) {
+    if (IsUndefined(env, jsValue)) {
         InteropCtx::ThrowJSTypeError(env, "Value is undefined");
     }
 
@@ -166,7 +166,7 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
         }
         return etsObject;
     }
-    if (UNLIKELY(IsNullOrUndefined<true>(env, jsValue))) {
+    if (UNLIKELY(IsNullOrUndefined(env, jsValue))) {
         ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
     }
     return nullptr;

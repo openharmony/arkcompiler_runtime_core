@@ -87,7 +87,7 @@ using common_vm::TaggedType;
             return nullptr;
         }
     }
-    if (IsUndefined<true>(env, result) || result == nullptr) {
+    if (IsUndefined(env, result) || result == nullptr) {
         // NOLINTNEXTLINE(readability-redundant-string-cstr)
         PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to Undefined result";
         INTEROP_LOG(ERROR) << exp;
@@ -1455,7 +1455,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     if (UNLIKELY(IsNull(env, jsVal))) {
         return ctx->GetNullValue();
     }
-    if (UNLIKELY(IsUndefined<true>(env, jsVal))) {
+    if (UNLIKELY(IsUndefined(env, jsVal))) {
         return nullptr;
     }
 
@@ -1510,7 +1510,7 @@ EtsString *JSONStringify(JSValue *jsvalue)
         ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
-    if (IsUndefined<true>(env, result)) {
+    if (IsUndefined(env, result)) {
         return EtsString::CreateFromMUtf8("undefined");
     }
     auto res = JSConvertString::Unwrap(ctx, env, result);

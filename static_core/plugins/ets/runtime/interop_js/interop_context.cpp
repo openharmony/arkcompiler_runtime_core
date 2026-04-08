@@ -527,7 +527,7 @@ void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, napi_value val
     ASSERT(!executionCtx->GetMT()->HasPendingException());
 
     auto env = ctx->GetJSEnv();
-    if (IsUndefined<true>(env, val)) {
+    if (IsUndefined(env, val)) {
         auto etsObj = JSValue::CreateUndefined(executionCtx, ctx)->AsObject();
         EtsObject *esObj = ctx->CreateETSCoreESError(executionCtx, etsObj);
         executionCtx->GetMT()->SetException(esObj->GetCoreType());
