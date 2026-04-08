@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
+{% for lib in libs %}
 /*---
-desc: New lib version
-tags:
-- compile-only
-- not-a-test
+desc: |-
+    New library - {{lib.desc}}
+tags: [compile-only, not-a-test]
 ---*/
 
 export namespace N {
-    export function f(): string {
-        return 'f'
-    }
-    export function m(): string {
-        return 'm'
-    }
+    {{lib.body|indent}}
 }
+
+{% endfor %}
