@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,12 +13,21 @@
 
 --- # List of types and operators
 
+types:
+  - ["char", c'\u0001']
+  - ["byte", 1]
+  - ["short", 1]
+  - ["int", 1]
+  - ["long", 1]
+  - ["float", 1]
+  - ["double", 1]
+
 operators:
- - [">", "false"]
- - [">=", "true"]
- - ["<", "false"]
- - ["<=", "true"]
- - ["==", "true"]
- - ["===", "true"]
- - ["!=", "false"]
- - ["!==", "false"]
+  - [">", "false"]
+  - [">=", "true"]
+  - ["<", "false"]
+  - ["<=", "true"]
+  - ["==", "true"]
+  - ["===", "true"]
+  - ["!=", "false"]
+  - ["!==", "false"]
