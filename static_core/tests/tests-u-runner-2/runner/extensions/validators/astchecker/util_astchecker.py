@@ -32,6 +32,9 @@ _LOGGER = Log.get_logger(__file__)
 
 _error_msg_pattern = re.compile(r"[\w\s]*error:.*", re.IGNORECASE)
 
+_warning_msg_pattern = re.compile(
+    r"^\s*Warning\s+W\d+\s*:\s*.+$")
+
 
 class UtilASTChecker:
     def __init__(self) -> None:
@@ -342,7 +345,7 @@ class UtilASTChecker:
 
         for actual_error in actual_errors:
             message = actual_error[0]
-            if not self.check_skip_warning() and message.startswith("Warning:"):
+            if not self.check_skip_warning() and _warning_msg_pattern.match(message):
                 _LOGGER.all(f'Unexpected warning {actual_error}')
                 failed_tests += 1
             if not self.check_skip_error() and _error_msg_pattern.match(message):
