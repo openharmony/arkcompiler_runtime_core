@@ -22,16 +22,11 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/string_builder_utils.h"
-#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
-constexpr size_t ARG_IDX_0 = 0;
-constexpr size_t ARG_IDX_1 = 1;
-constexpr size_t ARG_IDX_2 = 2;
 constexpr uint64_t INVALID_COUNT = std::numeric_limits<uint64_t>::max();
 constexpr size_t TLAB_MAX_ALLOC_SIZE = 4_KB;
-constexpr uint64_t SB_INITIAL_BUFFER_SIZE = 16;
 
 ReserveStringBuilderBuffer::ReserveStringBuilderBuffer(Graph *graph)
     : Optimization(graph), blockWeightsMap_ {graph->GetLocalAllocator()->Adapter()}
@@ -173,231 +168,6 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantInlined(Inst *i
 
         isApplied_ = true;
     }
-}
-
-IntrinsicInst *CreateIntrinsicStringIsCompressed(Graph *graph, Inst *arg, SaveStateInst *saveState)
-{
-    auto intrinsic = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringIsCompressedIntrinsicId());
-    ASSERT(intrinsic->RequireState());
-
-    intrinsic->SetType(DataType::BOOL);
-    intrinsic->SetInputs(graph->GetAllocator(), {{arg, arg->GetType()}, {saveState, saveState->GetType()}});
-
-    return intrinsic;
-}
-
-using StringBuilderConstructorSignature = StringCtorType;
-StringBuilderConstructorSignature GetStringBuilderConstructorSignature(Inst *instance, Inst *&ctorCall, Inst *&ctorArg)
-{
-    ASSERT(IsStringBuilderInstance(instance));
-
-    for (auto &user : instance->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (IsMethodStringBuilderDefaultConstructor(userInst)) {
-            ctorCall = userInst;
-            ctorArg = nullptr;
-            return StringBuilderConstructorSignature::UNKNOWN;
-        }
-        if (IsMethodStringBuilderConstructorWithStringArg(userInst)) {
-            ctorCall = userInst;
-            ASSERT(userInst->GetInputsCount() > 1);
-            ctorArg = userInst->GetDataFlowInput(1);
-            return StringBuilderConstructorSignature::STRING;
-        }
-        if (IsMethodStringBuilderConstructorWithCharArrayArg(userInst)) {
-            ctorCall = userInst;
-            ASSERT(userInst->GetInputsCount() > 1);
-            ctorArg = userInst->GetDataFlowInput(1);
-            return StringBuilderConstructorSignature::CHAR_ARRAY;
-        }
-    }
-
-    UNREACHABLE();
-}
-
-Inst *CreateInstructionNewObjectsArray(Graph *graph, Inst *ctorCall, uint64_t size)
-{
-    auto runtime = graph->GetRuntime();
-    auto method = graph->GetMethod();
-
-    // Create LoadAndInitClass instruction for Object[] type
-    auto objectsArrayClassId = runtime->GetClassOffsetObjectsArray(method);
-    if (objectsArrayClassId == 0U) {
-        return nullptr;
-    }
-
-    auto ctorCallMethod = ctorCall->GetSaveState()->GetMethod();
-    auto objectsArrayClassIdForCall = runtime->GetClassOffsetObjectsArray(ctorCallMethod);
-    auto loadClassObjectsArray = graph->CreateInstLoadAndInitClass(
-        DataType::REFERENCE, ctorCall->GetPc(), CopySaveState(graph, ctorCall->GetSaveState()),
-        TypeIdMixin {objectsArrayClassIdForCall, ctorCallMethod},
-        runtime->ResolveType(ctorCallMethod, objectsArrayClassIdForCall));
-    InsertBeforeWithSaveState(loadClassObjectsArray, ctorCall->GetSaveState());
-
-    // Create Constant instruction for new Object[] array size
-    auto sizeConstant = graph->FindOrCreateConstant(size);
-
-    // Create NewArray instruction for Object[] type and new array size
-    auto newObjectsArray = graph->CreateInstNewArray(DataType::REFERENCE, ctorCall->GetPc(), loadClassObjectsArray,
-                                                     sizeConstant, CopySaveState(graph, ctorCall->GetSaveState()),
-                                                     TypeIdMixin {objectsArrayClassId, method});
-    InsertBeforeWithSaveState(newObjectsArray, ctorCall->GetSaveState());
-
-    return newObjectsArray;
-}
-
-void StoreStringBuilderConstructorArgument(Graph *graph, Inst *arg, Inst *newObjectsArray, Inst *ctorCall)
-{
-    auto storeArray = graph->CreateInstStoreArray(DataType::REFERENCE, ctorCall->GetPc());
-    storeArray->SetInput(ARG_IDX_0, newObjectsArray);
-    storeArray->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(0));
-    storeArray->SetInput(ARG_IDX_2, arg);
-    storeArray->SetNeedWriteBarrier(true);
-    InsertBeforeWithSaveState(storeArray, ctorCall->GetSaveState());
-}
-
-Inst *CreateStringBuilderConstructorArgumentLength(Graph *graph, Inst *arg, Inst *ctorCall)
-{
-    auto lenArray = graph->CreateInstLenArray(DataType::INT32, ctorCall->GetPc(), arg);
-    InsertBeforeWithSaveState(lenArray, ctorCall->GetSaveState());
-
-    auto argLength = graph->CreateInstShr(DataType::INT32, ctorCall->GetPc());
-    argLength->SetInput(ARG_IDX_0, lenArray);
-    argLength->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT));
-    InsertBeforeWithSaveState(argLength, ctorCall->GetSaveState());
-
-    return argLength;
-}
-
-Inst *CreateStringBuilderConstructorArgumentIsCompressed(Graph *graph, Inst *arg, Inst *ctorCall)
-{
-    auto argIsCompressed =
-        CreateIntrinsicStringIsCompressed(graph, arg, CopySaveState(graph, ctorCall->GetSaveState()));
-    InsertBeforeWithSaveState(argIsCompressed, ctorCall->GetSaveState());
-
-    return argIsCompressed;
-}
-
-Inst *StoreStringBuilderBufferField(Graph *graph, Inst *buffer, Inst *instance, RuntimeInterface::ClassPtr klass,
-                                    Inst *ctorCall)
-{
-    auto runtime = graph->GetRuntime();
-    auto field = runtime->GetFieldStringBuilderBuffer(klass);
-    auto storeObject = graph->CreateInstStoreObject(DataType::REFERENCE, ctorCall->GetPc(), instance, buffer,
-                                                    TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), true);
-    InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
-
-    return storeObject;
-}
-
-void StoreStringBuilderIndexField(Graph *graph, Inst *index, Inst *instance, RuntimeInterface::ClassPtr klass,
-                                  Inst *ctorCall)
-{
-    auto runtime = graph->GetRuntime();
-    auto field = runtime->GetFieldStringBuilderIndex(klass);
-    auto storeObject = graph->CreateInstStoreObject(DataType::INT32, ctorCall->GetPc(), instance, index,
-                                                    TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), false);
-    InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
-}
-
-void StoreStringBuilderLengthField(Graph *graph, Inst *length, Inst *instance, RuntimeInterface::ClassPtr klass,
-                                   Inst *ctorCall)
-{
-    auto runtime = graph->GetRuntime();
-    auto field = runtime->GetFieldStringBuilderLength(klass);
-    auto storeObject = graph->CreateInstStoreObject(DataType::INT32, ctorCall->GetPc(), instance, length,
-                                                    TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), false);
-    InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
-}
-
-void StoreStringBuilderIsCompressedField(Graph *graph, Inst *isCompressed, Inst *instance,
-                                         RuntimeInterface::ClassPtr klass, Inst *ctorCall)
-{
-    auto runtime = graph->GetRuntime();
-    auto field = runtime->GetFieldStringBuilderCompress(klass);
-    auto storeObject = graph->CreateInstStoreObject(DataType::BOOL, ctorCall->GetPc(), instance, isCompressed,
-                                                    TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), false);
-    InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
-}
-
-void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst *instance, uint64_t appendCallsCount)
-{
-    Inst *ctorCall = nullptr;
-    Inst *ctorArg = nullptr;
-    StringBuilderConstructorSignature ctorSignature = GetStringBuilderConstructorSignature(instance, ctorCall, ctorArg);
-
-    // Create NewArray instruction for Object[] type and new array size
-    auto newObjectsArray = CreateInstructionNewObjectsArray(GetGraph(), ctorCall, appendCallsCount);
-    if (newObjectsArray == nullptr) {
-        return;
-    }
-
-    // Create StoreArray instruction to store constructor argument
-    Inst *argLength = nullptr;
-    Inst *argIsCompressed = nullptr;
-    Inst *argString = ctorArg;
-
-    switch (ctorSignature) {
-        case StringBuilderConstructorSignature::UNKNOWN:
-            argLength = GetGraph()->FindOrCreateConstant(0);
-            argIsCompressed = GetGraph()->FindOrCreateConstant(1);
-            break;
-
-        case StringBuilderConstructorSignature::CHAR_ARRAY:
-            ASSERT(ctorArg != nullptr);
-            // Create string object out of char[] array
-            argString = GetGraph()->CreateInstInitString(DataType::REFERENCE, ctorCall->GetPc(), ctorArg,
-                                                         CopySaveState(GetGraph(), ctorCall->GetSaveState()),
-                                                         StringCtorType::CHAR_ARRAY);
-            InsertBeforeWithSaveState(argString, ctorCall->GetSaveState());
-
-            // Store string object in Objects[] array
-            StoreStringBuilderConstructorArgument(GetGraph(), argString, newObjectsArray, ctorCall);
-
-            argLength = CreateStringBuilderConstructorArgumentLength(GetGraph(), argString, ctorCall);
-            argIsCompressed = CreateStringBuilderConstructorArgumentIsCompressed(GetGraph(), argString, ctorCall);
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {argString, argIsCompressed});
-            break;
-
-        case StringBuilderConstructorSignature::STRING:
-            // Store constructor argument in Objects[] array
-            StoreStringBuilderConstructorArgument(GetGraph(), argString, newObjectsArray, ctorCall);
-
-            argLength = CreateStringBuilderConstructorArgumentLength(GetGraph(), argString, ctorCall);
-            argIsCompressed = CreateStringBuilderConstructorArgumentIsCompressed(GetGraph(), argString, ctorCall);
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {argString, argIsCompressed});
-            break;
-
-        default:
-            UNREACHABLE();
-    }
-
-    auto stringBuilderClass = GetObjectClass(instance);
-    ASSERT(stringBuilderClass != nullptr);
-
-    // Create StoreObject instruction to store Object[] array
-    auto storeObjectBuffer =
-        StoreStringBuilderBufferField(GetGraph(), newObjectsArray, instance, stringBuilderClass, ctorCall);
-    ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), ObjCtx {newObjectsArray, storeObjectBuffer});
-
-    // Create StoreObject instruction to store initial buffer index
-    StoreStringBuilderIndexField(
-        GetGraph(),
-        GetGraph()->FindOrCreateConstant(ctorSignature == StringBuilderConstructorSignature::UNKNOWN ? 0 : 1), instance,
-        stringBuilderClass, ctorCall);
-
-    // Create StoreObject instruction to store initial string length
-    StoreStringBuilderLengthField(GetGraph(), argLength, instance, stringBuilderClass, ctorCall);
-
-    // Create StoreObject instruction to store initial compression flag
-    StoreStringBuilderIsCompressedField(GetGraph(), argIsCompressed, instance, stringBuilderClass, ctorCall);
-
-    ctorCall->ClearFlag(inst_flags::NO_DCE);
-    isApplied_ = true;
 }
 
 uint64_t CountStringBuilderConstructorArgumentsInlined(Inst *instance)
@@ -666,7 +436,7 @@ bool ReserveStringBuilderBuffer::RunImpl()
                 ReplaceInitialBufferSizeConstantInlined(instance, appendCallsCount);
             } else {
                 // Inline constructor manually and patch
-                ReplaceInitialBufferSizeConstantNotInlined(instance, appendCallsCount);
+                isApplied_ |= ManuallyInlineStringBuilderConstructor(GetGraph(), &ssb_, instance, appendCallsCount);
             }
         }
     }

@@ -25,13 +25,15 @@
 //! IN_BLOCK    "prehead"
 //! INST        /Load.*std\.core\.StringBuilder/
 //! INST_NEXT   /NewObject/
-//! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.buf/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.index/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.length/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.compress/,1
 //! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting optimization for string concatenation in loop
-//! RUN         force_jit: true,
-//!             options: "--compiler-regex='.*willHoist[0-9]+'",
+//! RUN         force_jit: true, options: "--compiler-regex='.*willHoist[0-9]+'",
 //!             entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
@@ -39,7 +41,10 @@
 //! IN_BLOCK    "prehead"
 //! INST        /LoadImmediate/
 //! INST_NEXT   /NewObject/
-//! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.buf/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.index/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.length/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.compress/,1
 //! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 function willHoist1() {

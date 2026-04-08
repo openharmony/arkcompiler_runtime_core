@@ -298,6 +298,8 @@ private:
 
     // 6. Removes extra call for StringBuilder::%%get-stringLength if possible
     bool OptimizeStringBuilderStringLength(BasicBlock *block);
+    bool ManuallyInlineStringBuilderGetLength(Inst *instance, Inst *getLengthCall);
+    bool ManuallyInlineMethods();
 
 private:
     bool isApplied_ {false};
