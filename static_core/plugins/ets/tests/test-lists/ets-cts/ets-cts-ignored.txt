@@ -62,9 +62,6 @@
 #30760
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
 
-#33769 no CTE on interface method return type never with normal execution
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_16.ets
-
 #33488 CTE on plain form of return
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_3.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_never_n_8.ets
