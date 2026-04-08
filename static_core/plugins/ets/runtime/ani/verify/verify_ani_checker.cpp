@@ -928,6 +928,80 @@ public:
         return {};
     }
 
+    std::optional<PandaString> VerifyReadPropertyByName(const char *name, EtsType propertyType)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+        if (class_ == nullptr) {
+            return {};
+        }
+        EtsField *field = class_->GetFieldIDByName(name, nullptr);
+        if (field != nullptr) {
+            if (field->GetEtsType() != propertyType) {
+                PandaStringStream ss;
+                ss << "wrong property type: " << EtsTypeToString(field->GetEtsType())
+                   << ", expected: " << EtsTypeToString(propertyType);
+                return ss.str();
+            }
+            return {};
+        }
+
+        EtsMethod *method = class_->GetInstanceMethod((PandaString(GETTER_BEGIN) + name).c_str(), nullptr);
+        if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 1 ||
+            method->GetArgType(0) != EtsType::OBJECT) {
+            return "wrong property";
+        }
+        if (method->GetReturnValueType() != propertyType) {
+            PandaStringStream ss;
+            ss << "wrong property type: " << EtsTypeToString(method->GetReturnValueType())
+               << ", expected: " << EtsTypeToString(propertyType);
+            return ss.str();
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyWritePropertyByName(const char *name, EtsType propertyType)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+        if (class_ == nullptr) {
+            return {};
+        }
+        EtsField *field = class_->GetFieldIDByName(name, nullptr);
+        if (field != nullptr) {
+            if (field->GetEtsType() != propertyType) {
+                PandaStringStream ss;
+                ss << "wrong property type: " << EtsTypeToString(field->GetEtsType())
+                   << ", expected: " << EtsTypeToString(propertyType);
+                return ss.str();
+            }
+            if (field->IsReadonly()) {
+                return "property is read-only";
+            }
+            return {};
+        }
+
+        EtsMethod *method = class_->GetInstanceMethod((PandaString(SETTER_BEGIN) + name).c_str(), nullptr);
+        if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 2U ||
+            method->GetArgType(0) != EtsType::OBJECT) {
+            return "wrong property";
+        }
+        if (method->GetArgType(1U) != propertyType) {
+            PandaStringStream ss;
+            ss << "wrong property type: " << EtsTypeToString(method->GetArgType(1U))
+               << ", expected: " << EtsTypeToString(propertyType);
+            return ss.str();
+        }
+        if (method->GetReturnValueType() != EtsType::VOID) {
+            return "wrong property";
+        }
+        return {};
+    }
+
     std::optional<PandaString> VerifyMethod(VMethod *vmethod, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
@@ -1317,6 +1391,18 @@ static std::optional<PandaString> VerifyWriteStaticField(Verifier &v, const ANIA
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_STATIC_FIELD);
     return v.VerifyWriteStaticField(arg.GetValueStaticField(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyReadPropertyByName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_PROPERTY_BY_NAME);
+    return v.VerifyReadPropertyByName(arg.GetValueUTF8String(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyWritePropertyByName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_PROPERTY_BY_NAME);
+    return v.VerifyWritePropertyByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
 static std::optional<PandaString> VerifyMethod(Verifier &v, const ANIArg &arg)
