@@ -60,7 +60,7 @@ function isInstanceOfSet(val: st.Set<string>): boolean {
 
 function testInstanceOf(): void {
     let val1 = STValue.newSTSet();
-    ASSERT_TRUE(!isInstanceOfSet(val1));
+    ASSERT_TRUE(isInstanceOfSet(val1));
 }
 
 function testGetSize(): void {

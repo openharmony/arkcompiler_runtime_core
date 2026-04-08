@@ -70,4 +70,14 @@ TEST_F(TsToEtsSTSetTest, testCheckClearMethod)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCheckClearMethod"));
 }
 
+TEST_F(TsToEtsSTSetTest, testInstanceOfSet)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInstanceOfSet"));
+}
+
+TEST_F(TsToEtsSTSetTest, test_stSet)
+{
+    ASSERT_TRUE(RunJsTestSuite("stset.ts"));
+}
+
 }  // namespace ark::ets::interop::js::testing

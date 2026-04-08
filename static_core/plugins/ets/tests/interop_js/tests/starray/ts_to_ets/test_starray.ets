@@ -32,3 +32,10 @@ function testConsumeArray(): boolean {
     arr.push('2');
     return consumeArray.invoke(arr).toBoolean();
 }
+
+function testInstanceOfArray(): boolean {
+    let dynamicArray = module.getProperty('createEmptyArray');
+    return !(dynamicArray instanceof Array);
+}
+
+export function testArrayProto(arr: Array<number>): void { }

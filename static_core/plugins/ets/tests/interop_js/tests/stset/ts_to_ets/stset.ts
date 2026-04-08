@@ -42,7 +42,9 @@ namespace st {
     }
 }
 
-const STValue = globalThis.gtest.etsVm.STValue;
+const etsVm = globalThis.gtest.etsVm;
+let STValue = etsVm.STValue;
+const testSetProto = etsVm.getFunction('Ltest_stset/ETSGLOBAL;', 'testSetProto');
 
 export function returnSet(): st.Set<string> {
     return STValue.newSTSet();
@@ -104,3 +106,21 @@ export function checkClearMethod(set: st.Set<string>): void {
     set.add('c');
     set.clear();
 }
+
+export function createEmptySet(): Set<number> {
+    return new Set<number>;
+}
+
+function main(): void {
+    let res = false;
+    try {
+        testSetProto(new Set<number>);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Value is not assignable');
+        res = res && e.message.includes('Lstd/core/Set;');
+    }
+    ASSERT_TRUE(res);
+}
+
+main()

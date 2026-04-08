@@ -210,7 +210,7 @@ private:
             {utf::CStringAsMutf8("toSpliced"), {"II[LY;:Lstd/core/Array;", 3, "toSpliced"}},
             {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
-        wArray_ = RegisterClass(PlatformTypes()->escompatArray->GetDescriptor(), nullptr, &W_ARRAY_OVERLOADS);
+        wArray_ = RegisterClass(PlatformTypes()->escompatArray->GetDescriptor(), "Array", &W_ARRAY_OVERLOADS);
         wArray_->GetOverloadNameMapping()["pushOne"] = "push";
         wArray_->GetOverloadNameMapping()["pushArray"] = "push";
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
@@ -247,14 +247,14 @@ private:
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
              {"{ULstd/core/Iterable;Lstd/core/Null;Lstd/core/ReadonlyArray;}:V", 2, "<ctor>"}}};
-        wMap_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreMap->GetDescriptor(), nullptr, &W_MAP_OVERLOADS);
+        wMap_ = RegisterClass(PlatformTypes()->coreMap->GetDescriptor(), "Map", &W_MAP_OVERLOADS);
     }
 
     void RegisterSet()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), {"{U[LY;Lstd/core/Iterable;Lstd/core/Null;}:V", 2, "<ctor>"}}};
-        wSet_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreSet->GetDescriptor(), nullptr, &W_SET_OVERLOADS);
+        wSet_ = RegisterClass(PlatformTypes()->coreSet->GetDescriptor(), "Set", &W_SET_OVERLOADS);
     }
 
     void RegisterDate()
@@ -532,12 +532,6 @@ public:
         wAny_->SetJSBuiltinMatcher([self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
             return self.MAny(ctxx, jsValue, verified);
         });
-
-        ASSERT(wArray_ != nullptr);
-        wArray_->SetJSBuiltinMatcher(
-            [self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
-                return self.MArray(ctxx, jsValue, verified);
-            });
     }
 
 private:

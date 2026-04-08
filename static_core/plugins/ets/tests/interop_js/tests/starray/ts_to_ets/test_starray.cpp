@@ -29,4 +29,15 @@ TEST_F(TsToEtsSTArrayTest, testConsumeArray)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testConsumeArray"));
 }
+
+TEST_F(TsToEtsSTArrayTest, testInstanceOfArray)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInstanceOfArray"));
+}
+
+TEST_F(TsToEtsSTArrayTest, test_stArray)
+{
+    ASSERT_TRUE(RunJsTestSuite("starray.ts"));
+}
+
 }  // namespace ark::ets::interop::js::testing

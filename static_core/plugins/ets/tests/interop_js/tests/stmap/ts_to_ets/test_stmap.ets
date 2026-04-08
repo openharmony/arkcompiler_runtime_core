@@ -113,3 +113,10 @@ function testCheckValuesMethod(): boolean {
     let map: Map<string, double> = new Map<string, double>();
     return checkValuesMethod.invoke(map).toBoolean();
 }
+
+function testInstanceOfMap(): boolean {
+    let dynamicMap = module.getProperty('createEmptyMap');
+    return !(dynamicMap instanceof Map);
+}
+
+export function testMapProto(m: Map<number, number>): void { }
