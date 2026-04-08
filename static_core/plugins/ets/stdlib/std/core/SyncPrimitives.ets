@@ -42,8 +42,7 @@ export interface Lock {
 /// Coroutine mutex. This allows to get exclusive access to the critical section.
 export final class Mutex implements Lock {
     public constructor() {
-        this.waitersList = new WaitersList();
-        this.waiters = 0;
+        this.state = 0;
     }
 
     public lockGuard(callback: () => void): void {
@@ -75,8 +74,7 @@ export final class Mutex implements Lock {
     private static native lock(mutex: Object): void;
     private static native unlock(mutex: Object): void;
 
-    private waitersList: WaitersList;
-    private waiters: int;
+    private state: long;
 }
 
 /// Coroutine one-shot event. This allows to block current coroutine until event is fired
