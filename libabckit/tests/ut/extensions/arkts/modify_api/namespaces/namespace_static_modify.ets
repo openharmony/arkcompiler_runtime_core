@@ -29,7 +29,7 @@ export namespace NS1{
             field1:string;
             
         }
-        const field3:string;
+        const field3:string="";
         function f2(){}
         export enum E1{}
         namespace NS3{
