@@ -4,3 +4,6 @@ ets_tests/ets_escompat_typed_arrays_set_get_part3.ets
 
 #33546
 ets_tests/escape_phi.ets
+
+#24986
+ets_tests/optimize_load_object_boxed.ets
