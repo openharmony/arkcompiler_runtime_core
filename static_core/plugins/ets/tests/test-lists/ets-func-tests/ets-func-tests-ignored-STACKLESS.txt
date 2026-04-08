@@ -2,3 +2,6 @@
 
 # 33782
 spec/07.expressions/7.32.Lambda_Expressions/correctAsyncLambdaReturnValue.ets
+ets_func_tests/std/concurrency/AsyncCondVarTest.ets
+ets_func_tests/std/concurrency/AsyncMutexTest.ets
+ets_func_tests/std/concurrency/AsyncRWLockTest.ets
