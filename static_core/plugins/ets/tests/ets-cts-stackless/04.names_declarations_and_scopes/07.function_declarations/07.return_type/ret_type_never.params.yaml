@@ -1,0 +1,309 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # function: always throws — OK
+    - decl: |-
+        function foo(): never { 
+            throw new Error() 
+        }
+        function main() {
+            try { 
+                foo() 
+            } catch(e) { 
+                arktest.assertTrue(e instanceof Error) 
+            }
+        }
+
+    # function: all branches throw
+    - decl: |-
+        function foo(x: int): never {
+            if (x > 0) {
+                throw new Error("positive")
+            }
+            else {
+                throw new Error("non-positive")
+            }
+        }
+        function main() {
+            try { 
+                foo(1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "positive") 
+            }
+            try {
+                foo(-1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "non-positive") 
+            }
+        }
+
+    # function: calls another never-returning function
+    - decl: |-
+        function fail(): never {
+            throw new Error("fail") 
+        }
+        function foo(): never { 
+            fail() 
+        }
+        function main() {
+            try {
+                foo() 
+            } catch(e) {
+                arktest.assertTrue(e instanceof Error) 
+            }
+        }
+
+    # function: one branch throws, another calls never-returning function
+    - decl: |-
+        function fail(msg: string): never {
+            throw new Error(msg) 
+        }
+        function foo(x: int): never {
+            if (x > 0) {
+                throw new Error("positive")
+            }
+            else {
+                fail("non-positive")
+            }
+        }
+        function main() {
+            try { 
+                foo(1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "positive") 
+            }
+            try {
+                foo(-1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "non-positive") 
+            }
+        }
+
+    # function: chained never calls
+    - decl: |-
+        function fail(msg: string): never { throw new Error(msg) }
+        function foo(x: int): never {
+            if (x == 0) {
+                fail("zero")
+            }
+            else {
+                fail("non-zero")
+            }
+        }
+        function main() {
+            try { 
+                foo(0) 
+            } catch(e) { 
+                arktest.assertEQ(e.message, "zero") 
+            }
+        }
+
+    # lambda: always throws — OK
+    - decl: |-
+        let foo = (): never => { throw new Error() }
+        function main() {
+            try { foo() } catch(e) { arktest.assertTrue(e instanceof Error) }
+        }
+
+    # lambda: throws with message
+    - decl: |-
+        let foo = (msg: string): never => { throw new Error(msg) }
+        function main() {
+            try { 
+                foo("err") 
+            } catch(e) {
+                arktest.assertEQ(e.message, "err") 
+            }
+        }
+
+    # lambda: calls a never-returning function
+    - decl: |-
+        function fail(): never { throw new Error("fail") }
+        let foo = (): never => { fail() }
+        function main() {
+            try { 
+                foo() 
+            } catch(e) {
+                arktest.assertTrue(e instanceof Error) 
+            }
+        }
+
+    # class instance method: always throws — OK
+    - decl: |-
+        class C {
+            foo(): never { throw new Error("C.foo") }
+        }
+        function main() {
+            try {
+                new C().foo()
+            } catch(e) {
+                arktest.assertEQ(e.message, "C.foo") 
+            }
+        }
+
+    # class instance method: all branches throw
+    - decl: |-
+        class C {
+            foo(x: int): never {
+                if (x > 0) {
+                    throw new Error("pos")
+                }
+                else {
+                    throw new Error("neg")
+                }
+            }
+        }
+        function main() {
+            try {
+                new C().foo(1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "pos") 
+            }
+            try {
+                new C().foo(-1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "neg") 
+            }
+        }
+
+    # class instance method: calls another never function
+    - decl: |-
+        function fail(): never { throw new Error("fail") }
+        class C {
+            foo(): never { fail() }
+        }
+        function main() {
+            try {
+                new C().foo() 
+            } catch(e) {
+                arktest.assertTrue(e instanceof Error) 
+            }
+        }
+
+    # static class method: always throws — OK
+    - decl: |-
+        class C {
+            static foo(): never { throw new Error("static") }
+        }
+        function main() {
+            try {
+                C.foo() 
+            } catch(e) {
+                arktest.assertEQ(e.message, "static") 
+            }
+        }
+
+    # static class method: all branches throw
+    - decl: |-
+        class C {
+            static foo(x: int): never {
+                if (x >= 0) {
+                    throw new Error("non-neg")
+                }
+                else {
+                    throw new Error("neg")
+                }
+            }
+        }
+        function main() {
+            try {
+                C.foo(0) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "non-neg") 
+            }
+        }
+
+    # interface default method: always throws — OK
+    - decl: |-
+        interface I {
+            foo(): never { throw new Error("iface") }
+        }
+        class A implements I {}
+        function main() {
+            try { 
+                new A().foo() 
+            } catch(e) {
+                arktest.assertEQ(e.message, "iface") 
+            }
+        }
+
+    # overridden method: always throws — OK
+    - decl: |-
+        class A {
+            foo(): never { throw new Error("A.foo") }
+        }
+        class C extends A {
+            foo(): never { throw new Error("C.foo") }
+        }
+        function main() {
+            try {
+                new C().foo()
+            } catch(e) {
+                arktest.assertEQ(e.message, "C.foo") 
+            }
+        }
+
+    # overridden method: all branches throw
+    - decl: |-
+        class A {
+            foo(x: int): never {
+                if (x > 0) {
+                    throw new Error("A pos")
+                }
+                else {
+                    throw new Error("A neg")
+                }
+            }
+        }
+        class C extends A {
+            foo(x: int): never {
+                if (x > 0) {
+                    throw new Error("C pos")
+                }
+                else {
+                    throw new Error("C neg")
+                }
+            }
+        }
+        function main() {
+            try {
+                new C().foo(1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "C pos") 
+            }
+            try {
+                new C().foo(-1) 
+            } catch(e) {
+                arktest.assertEQ(e.message, "C neg") 
+            }
+        }
+
+    # overridden method: calls another never function
+    - decl: |-
+        function failA(): never { throw new Error("failA") }
+        function failC(): never { throw new Error("failC") }
+        class A {
+            foo(): never { failA() }
+        }
+        class C extends A {
+            foo(): never { failC() }
+        }
+        function main() {
+            try {
+                new C().foo() 
+            } catch(e) {
+                arktest.assertEQ(e.message, "failC") 
+            }
+        }

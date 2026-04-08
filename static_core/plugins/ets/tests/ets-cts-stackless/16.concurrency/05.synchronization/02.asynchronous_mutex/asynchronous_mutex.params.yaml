@@ -1,0 +1,82 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: Asynchronous mutex basic functionality.
+    logic: |-
+      class SharedState {
+        value: string = "nothing"
+      }
+      let whatIsInTheBag: SharedState = new SharedState
+      function checkAndModify(data: SharedState, expected: string, updated: string) {
+        if (data.value != expected) {
+          console.log("race!")
+        }
+        data.value = updated
+      }
+      
+      async function startTest() {
+
+        let lock = new concurrency.stackless.AsyncMutex()
+
+        const f = async () => {
+          await lock.lock();
+          checkAndModify(whatIsInTheBag, "nothing", "paraglider")
+          arktest.assertEQ(whatIsInTheBag.value,  "paraglider")
+          checkAndModify(whatIsInTheBag, "paraglider", "nothing")
+          arktest.assertEQ(whatIsInTheBag.value,  "nothing")
+          lock.unlock()
+        }
+
+        const g = async () => {
+          await lock.lock()
+          checkAndModify(whatIsInTheBag, "nothing", "apple")
+          arktest.assertEQ(whatIsInTheBag.value,  "apple")
+          checkAndModify(whatIsInTheBag, "apple", "nothing")
+          arktest.assertEQ(whatIsInTheBag.value,  "nothing")
+          lock.unlock()
+        }
+        await Promise.all([f(), g()]);
+      }
+  - desc: Asynchronous mutex multi-threaded.
+    logic: |-
+      async function startTest() {
+        let lock = new concurrency.stackless.AsyncMutex()
+        let isLocked = true;
+
+        const ea1 = new EAWorker();
+        ea1.start();
+        ea1.run<undefined>(() => {
+          waitForCompletion(async () => {
+            await lock.lock();
+            arktest.assertTrue(isLocked);
+            lock.unlock();
+          })
+        }).Await();
+      
+        const ea2 = new EAWorker();
+        ea2.start();
+        ea2.run<undefined>(() => {
+          waitForCompletion(async () => {
+            await lock.lock();
+            isLocked = false;
+            Coroutine.Schedule();
+            lock.unlock();
+          })
+        }).Await();
+
+        arktest.assertFalse(isLocked);
+        ea1.quit();
+        ea2.quit();
+      }

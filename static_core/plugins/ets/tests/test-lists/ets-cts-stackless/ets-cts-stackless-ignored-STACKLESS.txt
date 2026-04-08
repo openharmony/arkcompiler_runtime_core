@@ -1,0 +1,14 @@
+# Here are listed tests that fail due to existing implementation bugs
+
+# 33782
+16.concurrency/03.asynchronous_execution/01.async_functions/afunc_35.ets
+16.concurrency/03.asynchronous_execution/01.async_functions/afunc_36.ets
+16.concurrency/03.asynchronous_execution/01.async_functions/async_functions20.ets
+16.concurrency/03.asynchronous_execution/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_generic_1.ets
+16.concurrency/03.asynchronous_execution/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_generic_2.ets
+16.concurrency/03.asynchronous_execution/03.async_methods/ameth_37.ets
+16.concurrency/03.asynchronous_execution/03.async_methods/ameth_38.ets
+16.concurrency/03.asynchronous_execution/03.async_methods/async_method6.ets
+16.concurrency/03.asynchronous_execution/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_generic_1.ets
+16.concurrency/03.asynchronous_execution/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_generic_2.ets
+16.concurrency/03.asynchronous_execution/04.await_expression/awaiting_coroutine_ext_0.ets

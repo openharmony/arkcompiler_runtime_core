@@ -626,4 +626,10 @@ export namespace arktest {
         private failedTests: int = 0;
     }
 
+    export function crashProgram(e: Error): void {
+        console.error(e);
+        let procManager = new StdProcess.ProcessManager();
+        procManager.exit(1);
+    }
+
 }
