@@ -136,18 +136,6 @@ public:
         return 0;
     }
 
-    // Allocation buffer is thread local, but held in multiple mutators per thread.
-    // RefCount records how many mutators holds this allocbuffer.
-    void IncreaseRefCount()
-    {
-        refCount_++;
-    }
-
-    bool DecreaseRefCount()
-    {
-        return --refCount_ <= 0;
-    }
-
     TLAB &GetTLAB()
     {
         return tlab_;
@@ -187,7 +175,6 @@ private:
     // allocate objects which are exposed to runtime thus can not be moved.
     // allocation context is responsible to notify collector when these objects are safe to be collected.
     RegionList tlRawPointerRegions_;
-    int64_t refCount_ { 0 };
     // Record stack roots in concurrent enum phase, waiting for GC to merge these roots
     std::list<BaseObject*> stackRoots_;
 
