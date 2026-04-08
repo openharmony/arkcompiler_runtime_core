@@ -63,6 +63,7 @@ void EtsExecutionContext::CacheBuiltinClasses()
 void EtsExecutionContext::CleanUp()
 {
     taskpoolTaskid_ = INVALID_TASKPOOL_TASK_ID;
+    taskpoolSubmissionId_ = INVALID_TASKPOOL_SUBMISSION_ID;
     etsAniEnv_->CleanUp();
 }
 
@@ -104,6 +105,16 @@ void EtsExecutionContext::SetTaskpoolTaskId(int32_t taskid)
 int32_t EtsExecutionContext::GetTaskpoolTaskId() const
 {
     return taskpoolTaskid_;
+}
+
+void EtsExecutionContext::SetTaskpoolSubmissionId(int32_t submissionId)
+{
+    taskpoolSubmissionId_ = submissionId;
+}
+
+int32_t EtsExecutionContext::GetTaskpoolSubmissionId() const
+{
+    return taskpoolSubmissionId_;
 }
 
 void EtsExecutionContext::ProcessUnhandledRejectedPromises(bool listAllObjects)

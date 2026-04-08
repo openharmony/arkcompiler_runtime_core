@@ -19,6 +19,10 @@ function returnAbc(): string {
     return (() => 'a')() + (() => 'b')() + (() => 'c')();
 }
 
+class SendDataSharedPayloadMarker {
+    public x: int = 1;
+}
+
 async function delay(ms: int): Promise<void> {
     await new Promise<void>((resolve) => {
         setTimeout(() => {
@@ -455,6 +459,311 @@ async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
     arktest.assertEQ(completedCount, 2);
 }
 
+async function sendDataWorkerLocalPayloadReadableAfterScope(): Promise<void> {
+    let receivedFlag: int = -1;
+    let callbackInvoked: boolean = false;
+    let task = new taskpool.Task((): void => {
+        ((): void => {
+            let local: Record<string, Any> = { 'flag': 42 as Any } as Record<string, Any>;
+            taskpool.Task.sendData(local);
+        })();
+    });
+
+    task.onReceiveData((arg: Record<string, Any>): void => {
+        receivedFlag = arg['flag'] as int;
+        callbackInvoked = true;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(callbackInvoked, true);
+    arktest.assertEQ(receivedFlag, 42);
+}
+
+async function sendDataRecordSharesReferenceWithHost(): Promise<void> {
+    let shared: Record<string, Any> = { 'x': 1 as Any } as Record<string, Any>;
+    let sameRef: boolean = false;
+    let task = new taskpool.Task((arg: Record<string, Any>): void => {
+        taskpool.Task.sendData(arg);
+    }, shared);
+
+    task.onReceiveData((arg: Record<string, Any>): void => {
+        sameRef = arg === shared;
+        arg['x'] = 99 as Any;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(sameRef, true);
+    arktest.assertEQ(shared['x'] as int, 99);
+}
+
+async function sendDataArrayBufferSharesReferenceWithHost(): Promise<void> {
+    let buf = new ArrayBuffer(4);
+    let u = new Uint8Array(buf);
+    u[0] = 7;
+    let sameRef: boolean = false;
+    let task = new taskpool.Task((ab: ArrayBuffer): void => {
+        taskpool.Task.sendData(ab);
+    }, buf);
+
+    task.onReceiveData((ab: ArrayBuffer): void => {
+        sameRef = ab === buf;
+        new Uint8Array(ab)[0] = 99;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(sameRef, true);
+    arktest.assertEQ(u[0].toInt(), 99);
+}
+
+async function sendDataSequentialCallbacksPreserveSendOrder(): Promise<void> {
+    let seq: int[] = [];
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(10);
+        taskpool.Task.sendData(20);
+        taskpool.Task.sendData(30);
+    });
+
+    task.onReceiveData((v: int): void => {
+        seq.push(v);
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(seq.length, 3);
+    arktest.assertEQ(seq[0], 10);
+    arktest.assertEQ(seq[1], 20);
+    arktest.assertEQ(seq[2], 30);
+}
+
+async function sendDataPromisePayloadPassThrough(): Promise<void> {
+    let callbackDone = new PromiseWithResolvers<void>();
+    let received: int = -1;
+    let task = new taskpool.Task((): void => {
+        let deferred = new PromiseWithResolvers<int>();
+        taskpool.Task.sendData(deferred.promise);
+        deferred.resolve(2);
+    });
+
+    task.onReceiveData((promise: Promise<int>): void => {
+        promise.then((value: int) => {
+            received = value;
+            callbackDone.resolve(undefined);
+        });
+    });
+
+    await taskpool.execute(task);
+    await callbackDone.promise;
+    arktest.assertEQ(received, 2);
+}
+
+async function sendDataFunctionPayloadPassThrough(): Promise<void> {
+    let received: string = '';
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData((prefix: string): string => prefix + 'hi');
+    });
+
+    task.onReceiveData((fn: (prefix: string) => string): void => {
+        received = fn('say ');
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(received, 'say hi');
+}
+
+async function sendDataCustomClassInstanceSharesReferenceWithHost(): Promise<void> {
+    let marker = new SendDataSharedPayloadMarker();
+    let sameRef: boolean = false;
+    let task = new taskpool.Task((arg: SendDataSharedPayloadMarker): void => {
+        taskpool.Task.sendData(arg);
+    }, marker);
+
+    task.onReceiveData((arg: SendDataSharedPayloadMarker): void => {
+        sameRef = arg === marker;
+        arg.x = 7;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(sameRef, true);
+    arktest.assertEQ(marker.x, 7);
+}
+
+async function sendDataScalarMultiArgsUnchanged(): Promise<void> {
+    let gotA: int = 0;
+    let gotB: string = '';
+    let gotC: boolean = false;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(42, 'hi', true);
+    });
+
+    task.onReceiveData((a: int, b: string, c: boolean): void => {
+        gotA = a;
+        gotB = b;
+        gotC = c;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(gotA, 42);
+    arktest.assertEQ(gotB, 'hi');
+    arktest.assertEQ(gotC, true);
+}
+
+async function sendDataEmptyInvocationStillDispatchesCallback(): Promise<void> {
+    let hits: int = 0;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData();
+    });
+
+    task.onReceiveData((): void => {
+        hits++;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(hits, 1);
+}
+
+async function sendDataPromisePayloadExecuteSucceedsWithNoopCallback(): Promise<void> {
+    let task = new taskpool.Task((): void => {
+        let deferred = new PromiseWithResolvers<bigint>();
+        taskpool.Task.sendData(deferred.promise);
+        deferred.resolve(2n);
+    });
+
+    task.onReceiveData((p: Promise<bigint>): void => {});
+
+    await taskpool.execute(task);
+}
+
+async function sendDataFunctionPayloadExecuteSucceedsWithNoopCallback(): Promise<void> {
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData((x: int): int => x + 1);
+    });
+
+    task.onReceiveData((fn: (x: int) => int): void => {});
+
+    await taskpool.execute(task);
+}
+
+async function sendDataNullPayloadPassThrough(): Promise<void> {
+    let gotNull: boolean = false;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(null);
+    });
+
+    task.onReceiveData((arg: Any): void => {
+        gotNull = (arg === null);
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(gotNull, true);
+}
+
+async function sendDataArraySharesReferenceWithHost(): Promise<void> {
+    let arr: int[] = [1, 2, 3];
+    let sameRef: boolean = false;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(arr);
+    });
+
+    task.onReceiveData((a: int[]): void => {
+        sameRef = a === arr;
+        a[0] = 99;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(sameRef, true);
+    arktest.assertEQ(arr[0], 99);
+}
+
+async function sendDataTypedArraySharesReferenceWithHost(): Promise<void> {
+    let buf = new ArrayBuffer(4);
+    let u8 = new Uint8Array(buf);
+    u8[0] = 7;
+    let sameRef: boolean = false;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(u8);
+    });
+
+    task.onReceiveData((ta: Uint8Array): void => {
+        sameRef = ta === u8;
+        ta[0] = 99;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(sameRef, true);
+    arktest.assertEQ(u8[0].toInt(), 99);
+}
+
+async function sendDataDataViewSharesReferenceWithHost(): Promise<void> {
+    let buf = new ArrayBuffer(8);
+    let dv = new DataView(buf);
+    dv.setInt32(0, 7);
+    let sameRef: boolean = false;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(dv);
+    });
+
+    task.onReceiveData((view: DataView): void => {
+        sameRef = view === dv;
+        view.setInt32(0, 99);
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(sameRef, true);
+    arktest.assertEQ(dv.getInt32(0), 99);
+}
+
+async function sendDataBigIntPayloadPassThrough(): Promise<void> {
+    let expected: bigint = 12345678901234567890n;
+    let received: bigint = 0n;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(expected);
+    });
+
+    task.onReceiveData((v: bigint): void => {
+        received = v;
+    });
+
+    await taskpool.execute(task);
+    arktest.assertEQ(received, expected);
+}
+
+async function sendDataExecuteSettlesOnlyAfterReceiveCallbacks(): Promise<void> {
+    let callbacksDone: int = 0;
+    let executeSettledEarly: boolean = false;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(10);
+        taskpool.Task.sendData(20);
+    });
+
+    task.onReceiveData((): void => {
+        callbacksDone++;
+    });
+
+    let executePromise = taskpool.execute(task);
+    executePromise.then(() => {
+        if (callbacksDone < 2) {
+            executeSettledEarly = true;
+        }
+    });
+    await executePromise;
+    arktest.assertEQ(callbacksDone, 2);
+    arktest.assertEQ(executeSettledEarly, false);
+}
+
+async function sequenceRunnerSendDataDeliveredOnHost(): Promise<void> {
+    let runner = new taskpool.SequenceRunner();
+    let received: int = 0;
+    let task = new taskpool.Task((): void => {
+        taskpool.Task.sendData(42);
+    });
+
+    task.onReceiveData((v: int): void => {
+        received = v;
+    });
+
+    await runner.execute(task);
+    arktest.assertEQ(received, 42);
+}
+
 function identityInt(value: int): int {
     return value;
 }
@@ -528,6 +837,35 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
     commonTaskSuite.addAsyncTest('asyncRunnerExecuteInOnEnqueuedNoDeadlock', asyncRunnerExecuteInOnEnqueuedNoDeadlock);
+    commonTaskSuite.addAsyncTest(
+        'sendDataWorkerLocalPayloadReadableAfterScope', sendDataWorkerLocalPayloadReadableAfterScope);
+    commonTaskSuite.addAsyncTest('sendDataRecordSharesReferenceWithHost', sendDataRecordSharesReferenceWithHost);
+    commonTaskSuite.addAsyncTest(
+        'sendDataArrayBufferSharesReferenceWithHost', sendDataArrayBufferSharesReferenceWithHost);
+    commonTaskSuite.addAsyncTest(
+        'sendDataSequentialCallbacksPreserveSendOrder', sendDataSequentialCallbacksPreserveSendOrder);
+    commonTaskSuite.addAsyncTest('sendDataPromisePayloadPassThrough', sendDataPromisePayloadPassThrough);
+    commonTaskSuite.addAsyncTest('sendDataFunctionPayloadPassThrough', sendDataFunctionPayloadPassThrough);
+    commonTaskSuite.addAsyncTest(
+        'sendDataCustomClassInstanceSharesReferenceWithHost', sendDataCustomClassInstanceSharesReferenceWithHost);
+    commonTaskSuite.addAsyncTest('sendDataScalarMultiArgsUnchanged', sendDataScalarMultiArgsUnchanged);
+    commonTaskSuite.addAsyncTest(
+        'sendDataEmptyInvocationStillDispatchesCallback', sendDataEmptyInvocationStillDispatchesCallback);
+    commonTaskSuite.addAsyncTest(
+        'sendDataPromisePayloadExecuteSucceedsWithNoopCallback',
+        sendDataPromisePayloadExecuteSucceedsWithNoopCallback);
+    commonTaskSuite.addAsyncTest(
+        'sendDataFunctionPayloadExecuteSucceedsWithNoopCallback',
+        sendDataFunctionPayloadExecuteSucceedsWithNoopCallback);
+    commonTaskSuite.addAsyncTest('sendDataNullPayloadPassThrough', sendDataNullPayloadPassThrough);
+    commonTaskSuite.addAsyncTest('sendDataArraySharesReferenceWithHost', sendDataArraySharesReferenceWithHost);
+    commonTaskSuite.addAsyncTest(
+        'sendDataTypedArraySharesReferenceWithHost', sendDataTypedArraySharesReferenceWithHost);
+    commonTaskSuite.addAsyncTest('sendDataDataViewSharesReferenceWithHost', sendDataDataViewSharesReferenceWithHost);
+    commonTaskSuite.addAsyncTest('sendDataBigIntPayloadPassThrough', sendDataBigIntPayloadPassThrough);
+    commonTaskSuite.addAsyncTest(
+        'sendDataExecuteSettlesOnlyAfterReceiveCallbacks', sendDataExecuteSettlesOnlyAfterReceiveCallbacks);
+    commonTaskSuite.addAsyncTest('sequenceRunnerSendDataDeliveredOnHost', sequenceRunnerSendDataDeliveredOnHost);
     commonTaskSuite.addAsyncTest('taskpoolScalingShouldNotOverExpand', taskpoolScalingShouldNotOverExpand);
     commonTaskSuite.addAsyncTest(
         'asyncStackSubmissionKeepsTaskpoolSemantics', asyncStackSubmissionKeepsTaskpoolSemantics);
