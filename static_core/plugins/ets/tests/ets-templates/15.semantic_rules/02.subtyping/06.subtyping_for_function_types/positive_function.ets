@@ -35,51 +35,6 @@ class Derived extends Base {
     b: string = 'd'
 }
 
-//function reference
-function fooBB(p: Base): Base {return p};
-function fooBD(p: Base): Derived {return new Derived()};
-function fooDB(p: Derived): Base { return new Base()};
-function fooDD(p: Derived): Derived { return p};
-
-//function with extra param
-function fooBBN(p: Base, n: number): Base {return p};
-function fooBDN(p: Base, n: number): Derived {return new Derived()};
-function fooDBN(p: Derived, n: number): Base { return new Base()};
-function fooDDN(p: Derived, n: number): Derived { return p};
-
-//function with extra optional param
-function fooBBO(p: Base, n?: number): Base {return p};
-function fooBDO(p: Base, n?: number): Derived {return new Derived()};
-function fooDBO(p: Derived, n?: number): Base { return new Base()};
-function fooDDO(p: Derived, n?: number): Derived { return p};
-
-//function with extra rest param
-function fooBBR(p: Base, ...n: number[]): Base {return p};
-function fooBDR(p: Base, ...n: number[]): Derived {return new Derived()};
-function fooDBR(p: Derived, ...n: number[]): Base { return new Base()};
-function fooDDR(p: Derived, ...n: number[]): Derived { return p};
-
-
-let foobb = fooBB
-let foobd = fooBD
-let foodb = fooDB
-let foodd = fooDD
-
-let foobbn = fooBBN
-let foobdn = fooBDN
-let foodbn = fooDBN
-let fooddn = fooDDN
-
-let foobbo = fooBBO
-let foobdo = fooBDO
-let foodbo = fooDBO
-let fooddo = fooDDO
-
-let foobbr = fooBBR
-let foobdr = fooBDR
-let foodbr = fooDBR
-let fooddr = fooDDR
-
 {{c.decl}}
 
 function main() {
