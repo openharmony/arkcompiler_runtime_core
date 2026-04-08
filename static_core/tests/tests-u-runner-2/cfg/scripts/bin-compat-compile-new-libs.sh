@@ -12,39 +12,54 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Recompile all libs that had .new.ets replacements.
-# Only libs with a .new.ets counterpart are recompiled; others keep their
-# existing .abc from the initial compilation.
+# Recompile all libs that had .new.ets replacements, then restore the
+# original old-lib content from the .orig backups created by
+# bin-compat-copy-new-libs.sh. The recompiled .abc files in
+# intermediate/ keep the new-lib bytecode, while the gen/ source files
+# revert to their old-lib content so a repeat run without
+# --force-generate can start from a clean baseline.
+#
+# Two naming conventions are supported:
+#
+#   1. Non-templated tests:
+#        BASE_GEN          = gen/test
+#        BASE_INTERMEDIATE = intermediate/test
+#        suffix = .ets
+#        new-lib glob = ${BASE_GEN}.libr*.new.ets
+#
+#   2. Templated tests:
+#        BASE_GEN          = gen/test
+#        BASE_INTERMEDIATE = intermediate/test
+#        suffix = _0.ets
+#        new-lib glob = ${BASE_GEN}.libr*.new_0.ets
+#
+# In both cases the old lib is: ${new_lib%.new${suffix}}${suffix}
+# The output ABC path swaps the gen base for the intermediate base.
 #
 # Usage: bin-compat-compile-new-libs.sh <es2panda> <arktsconfig> <extension>
 #        <opt-level> <gen-prefix> <intermediate-prefix>
-#
-# Arguments:
-#   es2panda             - path to es2panda binary
-#   arktsconfig          - path to arktsconfig.json
-#   extension            - source extension (ets)
-#   opt-level            - optimization level (0-2)
-#   gen-prefix           - ${work-dir}/gen/${test-id:parent}/${test-id:stem}
-#   intermediate-prefix  - ${work-dir}/intermediate/${test-id:parent}/${test-id:stem}
 
-set -e
+set -euo pipefail
 
 ES2PANDA="$1"
 ARKTSCONFIG="$2"
 EXTENSION="$3"
 OPT_LEVEL="$4"
-GEN_PREFIX="$5"
-INTERMEDIATE_PREFIX="$6"
+BASE_GEN="$5"
+BASE_INTERMEDIATE="$6"
 
-for new_lib in "${GEN_PREFIX}".libr*.new.ets; do
+suffix=".ets"
+
+if [[ "$BASE_GEN" =~ ^(.+)_([0-9]+)$ ]]; then
+    BASE_GEN="${BASH_REMATCH[1]}"
+    suffix="_${BASH_REMATCH[2]}.ets"
+    BASE_INTERMEDIATE="${6%_${BASH_REMATCH[2]}}"
+fi
+
+for new_lib in ${BASE_GEN}.libr*.new${suffix}; do
     [ -f "$new_lib" ] || continue
-
-    # Source: .libr.new.ets -> .libr.ets (already overwritten by copy-new-libs)
-    lib_file="${new_lib%.new.ets}.ets"
-
-    # Output ABC: swap gen/ prefix for intermediate/, append .abc
-    # gen/test.libr.ets -> intermediate/test.libr.ets.abc
-    output_abc="${INTERMEDIATE_PREFIX}${lib_file#${GEN_PREFIX}}.abc"
+    lib_file="${new_lib%.new${suffix}}${suffix}"
+    output_abc="${BASE_INTERMEDIATE}${lib_file#${BASE_GEN}}.abc"
 
     "$ES2PANDA" \
         "--arktsconfig=${ARKTSCONFIG}" \
@@ -55,10 +70,8 @@ for new_lib in "${GEN_PREFIX}".libr*.new.ets; do
         "$lib_file"
 done
 
-# Restore original library files from .orig backup
-for orig_lib in "${GEN_PREFIX}".libr*.ets.orig; do
+# Restore original library files from .orig backups.
+for orig_lib in ${BASE_GEN}.libr*${suffix}.orig; do
     [ -f "$orig_lib" ] || continue
-    lib_file="${orig_lib%.orig}"
-    cp "$orig_lib" "$lib_file"
-    rm "$orig_lib"
+    mv "$orig_lib" "${orig_lib%.orig}"
 done
