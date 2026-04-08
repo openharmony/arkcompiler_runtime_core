@@ -35,7 +35,6 @@ class TypeAPI {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     native static getTypeKind(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): byte
 
@@ -48,7 +47,6 @@ class TypeAPI {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     native static isValueType(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): boolean
 
@@ -59,7 +57,6 @@ class TypeAPI {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     native static getNullTypeDescriptor(): RuntimeTypeDescriptor
 
@@ -70,7 +67,6 @@ class TypeAPI {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     native static getUndefinedTypeDescriptor(): RuntimeTypeDescriptor
 
@@ -81,7 +77,6 @@ class TypeAPI {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
     */
     native static getClass(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Class | undefined
     /**
@@ -92,7 +87,6 @@ class TypeAPI {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     native static getClassAttributes(cls: Class): int
 
@@ -262,7 +256,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static resolve(td: TypeDescriptor): Type | undefined {
         const callerClass = Class.ofCaller()
@@ -280,7 +273,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
         let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask).toByte()
@@ -357,7 +349,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(): Type {
         //should never be executed since FE lowering this
@@ -372,7 +363,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: boolean): Type {
         return BooleanType.VAL
@@ -386,7 +376,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: byte): Type {
         return ByteType.VAL
@@ -400,7 +389,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: char): Type {
         return CharType.VAL
@@ -414,7 +402,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: short): Type {
         return ShortType.VAL
@@ -428,7 +415,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: int): Type {
         return IntType.VAL
@@ -442,7 +428,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: long): Type {
         return LongType.VAL
@@ -456,7 +441,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: float): Type {
         return FloatType.VAL
@@ -470,7 +454,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: double): Type {
         return DoubleType.VAL
@@ -486,7 +469,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: string): Type {
         return StringType.REF
@@ -500,7 +482,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<boolean>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Boolean()))
@@ -518,7 +499,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<byte>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Byte()))
@@ -536,7 +516,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<char>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Char()))
@@ -554,7 +533,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<short>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Short()))
@@ -572,7 +550,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<int>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Int()))
@@ -590,7 +567,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<long>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Long()))
@@ -608,7 +584,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<float>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Float()))
@@ -626,7 +601,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<double>): Type {
         return ArrayType.getInstance(Class.of(v), TypeAPI.getTypeDescriptor(new Double()))
@@ -646,7 +620,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(v: FixedArray<Object>): Type {
         return ArrayType.getInstance(Class.of(v))
@@ -662,7 +635,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(o: Any): Type {
         const td = TypeAPI.getTypeDescriptor(o)
@@ -680,7 +652,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract isPrimitive(): boolean // Or Composite
 
@@ -691,7 +662,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract isReference(): boolean // Or Value
 
@@ -702,7 +672,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract hasName(): boolean
 
@@ -713,7 +682,6 @@ export abstract class Type extends Object {
      * @param {RuntimeLinker} contextLinker runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     protected constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         this.td = td
@@ -726,7 +694,6 @@ export abstract class Type extends Object {
      * @returns {RuntimeTypeDescriptor}
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getTypeDesc(): RuntimeTypeDescriptor {
         return this.td
@@ -738,7 +705,6 @@ export abstract class Type extends Object {
      * @returns {RuntimeLinker}
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     protected getContextLinker(): RuntimeLinker {
         return this.contextLinker
@@ -750,7 +716,6 @@ export abstract class Type extends Object {
      * @returns {Class | undefined}
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getClass(): Class | undefined {
         return TypeAPI.getClass(this.td, this.contextLinker)
@@ -764,7 +729,6 @@ export abstract class Type extends Object {
      * @returns {boolean}
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     protected subTypeOf(other: Type): boolean {
         if (this.equals(other)) {
@@ -786,7 +750,6 @@ export abstract class Type extends Object {
      * @returns {boolean}
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public assignableFrom(other: Type): boolean {
         if (other.subTypeOf(this)) {
@@ -812,7 +775,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract convertObject(obj: Any): Any;
 
@@ -832,7 +794,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract getName(): string
 
@@ -843,7 +804,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract getLiteral(): string
 
@@ -854,7 +814,6 @@ export abstract class Type extends Object {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         if (this.hasName()) {
@@ -871,7 +830,6 @@ export abstract class Type extends Object {
      * @abstract
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     abstract equals(other: Type): boolean
 
@@ -884,7 +842,6 @@ export abstract class Type extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toRefType(primitiveType: Type): Type {
         if (!primitiveType.isPrimitive()) {
@@ -925,7 +882,6 @@ export abstract class Type extends Object {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class NullType extends Type {
     /**
@@ -935,7 +891,6 @@ export final class NullType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: NullType = new NullType()
 
@@ -944,7 +899,6 @@ export final class NullType extends Type {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor() {
         super(TypeAPI.getTypeDescriptor(null), getBootRuntimeLinker())
@@ -956,7 +910,6 @@ export final class NullType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -968,7 +921,6 @@ export final class NullType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -980,7 +932,6 @@ export final class NullType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return true
@@ -993,7 +944,6 @@ export final class NullType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return "null"
@@ -1005,7 +955,6 @@ export final class NullType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "null"
@@ -1019,7 +968,6 @@ export final class NullType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof NullType
@@ -1033,7 +981,6 @@ export final class NullType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         if (obj != null) {
@@ -1048,7 +995,6 @@ export final class NullType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class UndefinedType extends Type {
     /**
@@ -1058,7 +1004,6 @@ export final class UndefinedType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: UndefinedType = new UndefinedType()
 
@@ -1067,7 +1012,6 @@ export final class UndefinedType extends Type {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor() {
         super(TypeAPI.getTypeDescriptor(undefined), getBootRuntimeLinker())
@@ -1079,7 +1023,6 @@ export final class UndefinedType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1091,7 +1034,6 @@ export final class UndefinedType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -1103,7 +1045,6 @@ export final class UndefinedType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return true
@@ -1116,7 +1057,6 @@ export final class UndefinedType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return "undefined"
@@ -1128,7 +1068,6 @@ export final class UndefinedType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "undefined"
@@ -1142,7 +1081,6 @@ export final class UndefinedType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof UndefinedType
@@ -1156,7 +1094,6 @@ export final class UndefinedType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): add when undefined becomes available")
@@ -1168,7 +1105,6 @@ export final class UndefinedType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class VoidType extends Type {
     /**
@@ -1178,7 +1114,6 @@ export final class VoidType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true)
     /**
@@ -1188,7 +1123,6 @@ export final class VoidType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: VoidType = new VoidType(TypeAPI.getTypeDescriptor(Void.void_instance), false)
 
@@ -1201,7 +1135,6 @@ export final class VoidType extends Type {
      * @param {boolean} value Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, value: boolean) {
         super(td, getBootRuntimeLinker())
@@ -1214,7 +1147,6 @@ export final class VoidType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1226,7 +1158,6 @@ export final class VoidType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.value
@@ -1238,7 +1169,6 @@ export final class VoidType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return true
@@ -1251,7 +1181,6 @@ export final class VoidType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return "void"
@@ -1263,7 +1192,6 @@ export final class VoidType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "void"
@@ -1277,7 +1205,6 @@ export final class VoidType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof VoidType
@@ -1291,7 +1218,6 @@ export final class VoidType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         if (!this.assignableFrom(Type.of(obj))) {
@@ -1307,7 +1233,6 @@ export final class VoidType extends Type {
  * @note Boxed Char and primitive char both have CharType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export final class CharType extends Type {
@@ -1318,7 +1243,6 @@ export final class CharType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: CharType = new CharType(ValueTypeDesc.CHAR, true)
     /**
@@ -1328,7 +1252,6 @@ export final class CharType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: CharType = new CharType(TypeAPI.getTypeDescriptor(new Char()), false)
     private static readonly CLASS = Class.of(new Char())
@@ -1342,7 +1265,6 @@ export final class CharType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -1355,7 +1277,6 @@ export final class CharType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1367,7 +1288,6 @@ export final class CharType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -1379,7 +1299,6 @@ export final class CharType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -1392,7 +1311,6 @@ export final class CharType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -1408,7 +1326,6 @@ export final class CharType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -1425,7 +1342,6 @@ export final class CharType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof CharType
@@ -1439,7 +1355,6 @@ export final class CharType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -1456,7 +1371,6 @@ export final class CharType extends Type {
  * @note Boxed Boolean and primitive boolean both have BooleanType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class BooleanType extends Type {
     /**
@@ -1466,7 +1380,6 @@ export final class BooleanType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: BooleanType = new BooleanType(ValueTypeDesc.BOOLEAN, true)
     /**
@@ -1476,7 +1389,6 @@ export final class BooleanType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: BooleanType = new BooleanType(TypeAPI.getTypeDescriptor(new Boolean()), false)
     private static readonly CLASS = Class.of(new Boolean())
@@ -1490,7 +1402,6 @@ export final class BooleanType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -1503,7 +1414,6 @@ export final class BooleanType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1515,7 +1425,6 @@ export final class BooleanType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -1527,7 +1436,6 @@ export final class BooleanType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -1540,7 +1448,6 @@ export final class BooleanType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -1556,7 +1463,6 @@ export final class BooleanType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -1573,7 +1479,6 @@ export final class BooleanType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof BooleanType
@@ -1587,7 +1492,6 @@ export final class BooleanType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -1604,7 +1508,6 @@ export final class BooleanType extends Type {
  * @note Boxed Byte and primitive byte both have ByteType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class ByteType extends Type {
     /**
@@ -1614,7 +1517,6 @@ export final class ByteType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: ByteType = new ByteType(ValueTypeDesc.BYTE, true)
     /**
@@ -1624,7 +1526,6 @@ export final class ByteType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: ByteType = new ByteType(TypeAPI.getTypeDescriptor(new Byte()), false)
     private static readonly CLASS = Class.of(new Byte())
@@ -1638,7 +1539,6 @@ export final class ByteType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -1651,7 +1551,6 @@ export final class ByteType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1663,7 +1562,6 @@ export final class ByteType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -1675,7 +1573,6 @@ export final class ByteType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -1688,7 +1585,6 @@ export final class ByteType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -1704,7 +1600,6 @@ export final class ByteType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -1721,7 +1616,6 @@ export final class ByteType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof ByteType
@@ -1735,7 +1629,6 @@ export final class ByteType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -1755,7 +1648,6 @@ export final class ByteType extends Type {
  * @note Boxed Short and primitive short both have ShortType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class ShortType extends Type {
     /**
@@ -1765,7 +1657,6 @@ export final class ShortType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: ShortType = new ShortType(ValueTypeDesc.SHORT, true)
     /**
@@ -1775,7 +1666,6 @@ export final class ShortType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: ShortType = new ShortType(TypeAPI.getTypeDescriptor(new Short()), false)
     private static readonly CLASS = Class.of(new Short())
@@ -1789,7 +1679,6 @@ export final class ShortType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -1802,7 +1691,6 @@ export final class ShortType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1814,7 +1702,6 @@ export final class ShortType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -1826,7 +1713,6 @@ export final class ShortType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -1839,7 +1725,6 @@ export final class ShortType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -1855,7 +1740,6 @@ export final class ShortType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -1873,7 +1757,6 @@ export final class ShortType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof ShortType
@@ -1887,7 +1770,6 @@ export final class ShortType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -1907,7 +1789,6 @@ export final class ShortType extends Type {
  * @note Boxed Int and primitive int both have IntType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class IntType extends Type {
     /**
@@ -1917,7 +1798,6 @@ export final class IntType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: IntType = new IntType(ValueTypeDesc.INT, true)
     /**
@@ -1927,7 +1807,6 @@ export final class IntType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: IntType = new IntType(TypeAPI.getTypeDescriptor(new Int()), false)
     private static readonly CLASS = Class.of(new Int())
@@ -1941,7 +1820,6 @@ export final class IntType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -1954,7 +1832,6 @@ export final class IntType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -1966,7 +1843,6 @@ export final class IntType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -1978,7 +1854,6 @@ export final class IntType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -1991,7 +1866,6 @@ export final class IntType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -2007,7 +1881,6 @@ export final class IntType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -2025,7 +1898,6 @@ export final class IntType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof IntType
@@ -2039,7 +1911,6 @@ export final class IntType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -2059,7 +1930,6 @@ export final class IntType extends Type {
  * @note Boxed Long and primitive long both have LongType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class LongType extends Type {
     /**
@@ -2069,7 +1939,6 @@ export final class LongType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL = new LongType(ValueTypeDesc.LONG, true)
     /**
@@ -2079,7 +1948,6 @@ export final class LongType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF = new LongType(TypeAPI.getTypeDescriptor(new Long()), false)
     private static readonly CLASS = Class.of(new Long())
@@ -2093,7 +1961,6 @@ export final class LongType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -2106,7 +1973,6 @@ export final class LongType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -2118,7 +1984,6 @@ export final class LongType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -2130,7 +1995,6 @@ export final class LongType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -2143,7 +2007,6 @@ export final class LongType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -2159,7 +2022,6 @@ export final class LongType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -2177,7 +2039,6 @@ export final class LongType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof LongType
@@ -2191,7 +2052,6 @@ export final class LongType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -2211,7 +2071,6 @@ export final class LongType extends Type {
  * @note Boxed Float and primitive float both have FloatType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class FloatType extends Type {
     /**
@@ -2221,7 +2080,6 @@ export final class FloatType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: FloatType = new FloatType(ValueTypeDesc.FLOAT, true)
     /**
@@ -2231,7 +2089,6 @@ export final class FloatType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: FloatType = new FloatType(TypeAPI.getTypeDescriptor(new Float()), false)
     private static readonly CLASS = Class.of(new Float())
@@ -2245,7 +2102,6 @@ export final class FloatType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -2258,7 +2114,6 @@ export final class FloatType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -2270,7 +2125,6 @@ export final class FloatType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -2282,7 +2136,6 @@ export final class FloatType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -2295,7 +2148,6 @@ export final class FloatType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -2311,7 +2163,6 @@ export final class FloatType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -2329,7 +2180,6 @@ export final class FloatType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof FloatType
@@ -2343,7 +2193,6 @@ export final class FloatType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -2363,7 +2212,6 @@ export final class FloatType extends Type {
  * @note Boxed Double and primitive double both have DoubleType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class DoubleType extends Type {
     /**
@@ -2373,7 +2221,6 @@ export final class DoubleType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly VAL: DoubleType = new DoubleType(ValueTypeDesc.DOUBLE, true)
     /**
@@ -2383,7 +2230,6 @@ export final class DoubleType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: DoubleType = new DoubleType(TypeAPI.getTypeDescriptor(new Double()), false)
     private static readonly CLASS = Class.of(new Double())
@@ -2397,7 +2243,6 @@ export final class DoubleType extends Type {
      * @param {boolean} isValue Whether this is a value type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
         super(td, getBootRuntimeLinker())
@@ -2410,7 +2255,6 @@ export final class DoubleType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -2422,7 +2266,6 @@ export final class DoubleType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return !this.isValue
@@ -2434,7 +2277,6 @@ export final class DoubleType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return !this.isValue
@@ -2447,7 +2289,6 @@ export final class DoubleType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     //NOTE(kirill-mitkin): add error
     public override getName(): string {
@@ -2463,7 +2304,6 @@ export final class DoubleType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         if (this.isValue) {
@@ -2481,7 +2321,6 @@ export final class DoubleType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof DoubleType
@@ -2495,7 +2334,6 @@ export final class DoubleType extends Type {
      * @throws {Error} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -2514,7 +2352,6 @@ export final class DoubleType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class ClassType extends Type {
     private readonly cls: Class
@@ -2529,7 +2366,6 @@ export final class ClassType extends Type {
      * @param {RuntimeLinker} contextLinker runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -2543,7 +2379,6 @@ export final class ClassType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -2555,7 +2390,6 @@ export final class ClassType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -2567,7 +2401,6 @@ export final class ClassType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return true
@@ -2579,7 +2412,6 @@ export final class ClassType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return TypeAPI.getTypeName(this.cls)
@@ -2591,7 +2423,6 @@ export final class ClassType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "class{...}"
@@ -2604,7 +2435,6 @@ export final class ClassType extends Type {
      * @returns {boolean} true if object also has ClassType and their names are the same
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         // Must compare classes, as descriptors might be equal between classes from different contexts
@@ -2619,7 +2449,6 @@ export final class ClassType extends Type {
      * @throws {TypeError} - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getBaseType(): ClassType {
         const base = this.cls.getSuper()
@@ -2632,7 +2461,6 @@ export final class ClassType extends Type {
      * @returns {long} number of interfaces that was implemented by this class directly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getInterfacesNum(): long {
         return TypeAPI.getInterfacesNum(this.cls)
@@ -2646,7 +2474,6 @@ export final class ClassType extends Type {
      * @returns {InterfaceType} type of ith superinterface
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getInterface(i: long): InterfaceType {
         const iface = TypeAPI.getInterface(this.cls, i)
@@ -2676,7 +2503,6 @@ export final class ClassType extends Type {
      * Note that Object class also is super class of B
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getFieldsNum(): long {
         return TypeAPI.getFieldsNum(this.cls)
@@ -2688,7 +2514,6 @@ export final class ClassType extends Type {
      * @returns {long} Number of own fields.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getOwnFieldsNum(): long {
         return TypeAPI.getOwnFieldsNum(this.cls)
@@ -2702,7 +2527,6 @@ export final class ClassType extends Type {
      * @returns {Field} ith Field
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getField(i: long): Field {
         const fieldPtr = TypeAPI.getFieldPtr(this.cls, i)
@@ -2720,7 +2544,6 @@ export final class ClassType extends Type {
      * @returns {Field} ith Field
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getOwnField(i: long): Field {
         const fieldPtr = TypeAPI.getOwnFieldPtr(this.cls, i)
@@ -2738,7 +2561,6 @@ export final class ClassType extends Type {
      * @returns {Field} Field instance with this name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getFieldByName(name: string): Field {
         const fieldPtr = TypeAPI.getFieldPtrByName(this.cls, name)
@@ -2756,7 +2578,6 @@ export final class ClassType extends Type {
      * @throws {TypeError} - If method not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMethodByName(name: string): Method{
         for (let methodIdx = 0; methodIdx < this.getMethodsNum(); ++methodIdx) {
@@ -2795,7 +2616,6 @@ export final class ClassType extends Type {
      * @returns {long} number of methods
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMethodsNum(): long {
         return TypeAPI.getMethodsNum(this.cls)
@@ -2809,7 +2629,6 @@ export final class ClassType extends Type {
      * @returns {Method} ith method
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMethod(i: long): Method {
         const td = TypeAPI.getMethodDescriptor(this.cls, i)
@@ -2829,7 +2648,6 @@ export final class ClassType extends Type {
      * @returns {long} number of constructors
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getConstructorsNum(): long {
         return TypeAPI.getConstructorsNum(this.cls)
@@ -2843,7 +2661,6 @@ export final class ClassType extends Type {
      * @returns {Method} instance representing ith constructor
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getConstructor(i: long): Method {
         const td = TypeAPI.getConstructorDescriptor(this.cls, i)
@@ -2864,7 +2681,6 @@ export final class ClassType extends Type {
      * @returns {boolean} True if the class has a parameterless constructor, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public hasEmptyConstructor(): boolean {
         let num = this.getConstructorsNum()
@@ -2882,7 +2698,6 @@ export final class ClassType extends Type {
      * @returns {boolean} True if class is final.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isFinal(): boolean {
         return (this.attrs & Attributes.FINAL) != 0
@@ -2897,7 +2712,6 @@ export final class ClassType extends Type {
      * @returns {boolean} True if the field exists in this class, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public hasField(name: string): boolean {
         const fieldPtr = TypeAPI.getFieldPtrByName(this.cls, name)
@@ -2911,7 +2725,6 @@ export final class ClassType extends Type {
      * @throws {Error} If class doesn't have a default constructor.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public make(): Object {
         return this.cls.createInstance()
@@ -2926,7 +2739,6 @@ export final class ClassType extends Type {
      * @throws {Error} If no matching constructor found or ambiguous.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public make(args: FixedArray<Any>): Object {
         const argTypes = new Array<Type>(args.length)
@@ -2999,7 +2811,6 @@ export final class ClassType extends Type {
      * @returns {boolean} True if this type is a subtype of other.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     protected override subTypeOf(other: Type): boolean {
         if (super.subTypeOf(other)) {
@@ -3047,7 +2858,6 @@ export final class ClassType extends Type {
      * @throws {Error} If conversion is invalid.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -3063,7 +2873,6 @@ export final class ClassType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class InterfaceType extends Type {
     private cls: Class
@@ -3075,7 +2884,6 @@ export final class InterfaceType extends Type {
      * @param {RuntimeLinker} contextLinker Runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -3086,7 +2894,6 @@ export final class InterfaceType extends Type {
      * @returns {Class} Class of interface
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getClass(): Class {
         return this.cls
@@ -3098,7 +2905,6 @@ export final class InterfaceType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -3110,7 +2916,6 @@ export final class InterfaceType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -3122,7 +2927,6 @@ export final class InterfaceType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return true
@@ -3134,7 +2938,6 @@ export final class InterfaceType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return TypeAPI.getTypeName(this.cls)
@@ -3146,7 +2949,6 @@ export final class InterfaceType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "interface{...}"
@@ -3160,7 +2962,6 @@ export final class InterfaceType extends Type {
      * their names are the same
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         // Must compare classes, as descriptors might be equal between classes from different contexts
@@ -3175,7 +2976,6 @@ export final class InterfaceType extends Type {
      * @returns {boolean} True if this type is a subtype of other.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     protected override subTypeOf(other: Type): boolean {
         if (super.subTypeOf(other)) {
@@ -3193,7 +2993,6 @@ export final class InterfaceType extends Type {
      * @returns {long} Number of interfaces.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getInterfacesNum(): long {
         return TypeAPI.getInterfacesNum(this.cls)
@@ -3207,7 +3006,6 @@ export final class InterfaceType extends Type {
      * @returns {InterfaceType} type of ith superinterface
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getInterface(i: long): InterfaceType {
         const iface = TypeAPI.getInterface(this.cls, i)
@@ -3236,7 +3034,6 @@ export final class InterfaceType extends Type {
      * @returns {long} number of methods
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMethodsNum(): long {
         return TypeAPI.getMethodsNum(this.cls)
@@ -3250,7 +3047,6 @@ export final class InterfaceType extends Type {
      * @returns {Method} ith method
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getMethod(i: long): Method {
         const td = TypeAPI.getMethodDescriptor(this.cls, i)
@@ -3270,7 +3066,6 @@ export final class InterfaceType extends Type {
      * @returns {boolean} True if this interface has the specified super interface
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public hasSuperInterface(expected: InterfaceType): boolean {
         if (this.equals(expected)) {
@@ -3287,7 +3082,6 @@ export final class InterfaceType extends Type {
      * @throws {Error} If conversion is invalid
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -3303,7 +3097,6 @@ export final class InterfaceType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class ArrayType extends Type {
     private elemTD: RuntimeTypeDescriptor
@@ -3332,7 +3125,6 @@ export final class ArrayType extends Type {
      * @param {RuntimeTypeDescriptor} elemTD Element type descriptor
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private constructor(arrayClass: Class, elemTD: RuntimeTypeDescriptor) {
         super(TypeAPI.getClassDescriptor(arrayClass), arrayClass.getLinker())
@@ -3346,7 +3138,6 @@ export final class ArrayType extends Type {
      * @returns {boolean} True if type is assignable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override assignableFrom(other: Type): boolean {
         if (super.assignableFrom(other)) {
@@ -3364,7 +3155,6 @@ export final class ArrayType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static getInstance(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): ArrayType {
         const arrayClass = TypeAPI.getClass(td, contextLinker)!
@@ -3381,7 +3171,6 @@ export final class ArrayType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
         elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)
@@ -3423,7 +3212,6 @@ export final class ArrayType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -3435,7 +3223,6 @@ export final class ArrayType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -3447,7 +3234,6 @@ export final class ArrayType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return false
@@ -3460,7 +3246,6 @@ export final class ArrayType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return ""
@@ -3472,7 +3257,6 @@ export final class ArrayType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return this.getElementType().toString() + "[]"
@@ -3486,7 +3270,6 @@ export final class ArrayType extends Type {
      * their element types are the same
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof ArrayType && (other as ArrayType).getElementType().equals(this.getElementType())
@@ -3498,7 +3281,6 @@ export final class ArrayType extends Type {
      * @returns {Type} element type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getElementType(): Type {
         return Type.resolve(this.elemTD, this.getContextLinker())!
@@ -3514,7 +3296,6 @@ export final class ArrayType extends Type {
      * @returns {Object} new instance of array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public make(length: long): Object {
         return TypeAPI.makeArrayInstance(this.elemTD, this.getContextLinker(), length)
@@ -3528,7 +3309,6 @@ export final class ArrayType extends Type {
      * @throws {Error} If conversion is invalid
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -3547,7 +3327,6 @@ export final class ArrayType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class TupleType extends Type {
     /**
@@ -3557,7 +3336,6 @@ export final class TupleType extends Type {
      * @param {RuntimeLinker} contextLinker Runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -3569,7 +3347,6 @@ export final class TupleType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -3581,7 +3358,6 @@ export final class TupleType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return false
@@ -3593,7 +3369,6 @@ export final class TupleType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return false
@@ -3605,7 +3380,6 @@ export final class TupleType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return ""
@@ -3617,7 +3391,6 @@ export final class TupleType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "[ ..., ...]"
@@ -3630,7 +3403,6 @@ export final class TupleType extends Type {
      * @returns {boolean} true if object also has TupleType
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return false
@@ -3644,7 +3416,6 @@ export final class TupleType extends Type {
      * @throws {Error} Not implemented yet
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): add when tuple becomes available")
@@ -3657,7 +3428,6 @@ export final class TupleType extends Type {
  * @note lambdas, functions and methods have function type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export abstract class FunctionType extends Type {
     private readonly attrs: int
@@ -3673,7 +3443,6 @@ export abstract class FunctionType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -3685,7 +3454,6 @@ export abstract class FunctionType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -3697,7 +3465,6 @@ export abstract class FunctionType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return false
@@ -3709,7 +3476,6 @@ export abstract class FunctionType extends Type {
      * @returns {string} name of type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return ""
@@ -3721,7 +3487,6 @@ export abstract class FunctionType extends Type {
      * @returns {Type} result type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getResultType(): Type {
         const resultTypeTd = this.getResultTypeDescriptor()
@@ -3736,7 +3501,6 @@ export abstract class FunctionType extends Type {
      * they both has same signatures
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return (other instanceof FunctionType) && (other as FunctionType).getTypeDesc() == this.getTypeDesc()
@@ -3750,7 +3514,6 @@ export abstract class FunctionType extends Type {
      * @returns {long} number of parameters
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native getParametersNum(): long
 
@@ -3762,7 +3525,6 @@ export abstract class FunctionType extends Type {
      * @return {TypeAPIParameter} TypeAPIParameter, corresponding ith parameter in signature
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getParameter(i: long): TypeAPIParameter {
         const paramDescriptor = this.getParameterDescriptor(i)
@@ -3779,7 +3541,6 @@ export abstract class FunctionType extends Type {
      * @returns {long} number of type parameters
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getTypeParametersNum(): long {
         return 0
@@ -3798,7 +3559,6 @@ export abstract class FunctionType extends Type {
  * @extends FunctionType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class LambdaType extends FunctionType {
     /**
@@ -3808,7 +3568,6 @@ export final class LambdaType extends FunctionType {
      * @param {RuntimeLinker} contextLinker Runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -3820,7 +3579,6 @@ export final class LambdaType extends FunctionType {
      * @returns {string} Literal representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         let sb = new StringBuilder("(")
@@ -3842,7 +3600,6 @@ export final class LambdaType extends FunctionType {
      * @returns {Object} LambdaType instance
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public make(): Object {
         return TypeAPI.getDeclaringClassImpl(this)!.createInstance()
@@ -3855,7 +3612,6 @@ export final class LambdaType extends FunctionType {
      * @returns {boolean} True if type is assignable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override assignableFrom(other: Type): boolean {
         if (super.assignableFrom(other)) {
@@ -3908,7 +3664,6 @@ export final class LambdaType extends FunctionType {
      * @throws {Error} If conversion is invalid
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -3927,7 +3682,6 @@ export final class LambdaType extends FunctionType {
  * @extends FunctionType
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class MethodType extends FunctionType {
     /**
@@ -3937,7 +3691,6 @@ export final class MethodType extends FunctionType {
      * @param {RuntimeLinker} contextLinker Runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -3949,7 +3702,6 @@ export final class MethodType extends FunctionType {
      * @returns {string} Literal representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         let sb = new StringBuilder("(")
@@ -3979,7 +3731,6 @@ export final class MethodType extends FunctionType {
      * @returns {Type} Type corresponding to method's receiver
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getReceiverType(): Type {
         const receiverTd = this.getReceiverTypeDescriptor()
@@ -3996,7 +3747,6 @@ export final class MethodType extends FunctionType {
      * @returns {boolean} Always false for MethodType
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override assignableFrom(other: Type): boolean {
         return false
@@ -4008,7 +3758,6 @@ export final class MethodType extends FunctionType {
      * @returns {boolean} True if method has a receiver
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public hasReceiver(): boolean {
         return this.getReceiverTypeDescriptor() !== undefined
@@ -4022,7 +3771,6 @@ export final class MethodType extends FunctionType {
      * @throws {Error} Only LambdaType can be converted
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         throw new Error("Only LambdaType can be converted")
@@ -4036,7 +3784,6 @@ export final class MethodType extends FunctionType {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class StringType extends Type {
     /**
@@ -4046,7 +3793,6 @@ export final class StringType extends Type {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly REF: StringType = new StringType()
 
@@ -4055,7 +3801,6 @@ export final class StringType extends Type {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         super(TypeAPI.convertTypeDescriptor("std.core.String"), getBootRuntimeLinker())
@@ -4067,7 +3812,6 @@ export final class StringType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return true
@@ -4079,7 +3823,6 @@ export final class StringType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -4091,7 +3834,6 @@ export final class StringType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return false
@@ -4103,7 +3845,6 @@ export final class StringType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return ""
@@ -4115,7 +3856,6 @@ export final class StringType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "string"
@@ -4128,7 +3868,6 @@ export final class StringType extends Type {
      * @returns {boolean} true if object also has StringType
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return other instanceof StringType
@@ -4142,7 +3881,6 @@ export final class StringType extends Type {
      * @throws {Error} If conversion is invalid
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
@@ -4158,7 +3896,6 @@ export final class StringType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class EnumType extends Type {
     /**
@@ -4168,7 +3905,6 @@ export final class EnumType extends Type {
      * @param {RuntimeLinker} contextLinker Runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -4181,7 +3917,6 @@ export final class EnumType extends Type {
      * @returns {boolean} True if type is assignable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override assignableFrom(other: Type): boolean {
         if (super.assignableFrom(other)) {
@@ -4200,7 +3935,6 @@ export final class EnumType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -4212,7 +3946,6 @@ export final class EnumType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return false
@@ -4224,7 +3957,6 @@ export final class EnumType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return true
@@ -4236,7 +3968,6 @@ export final class EnumType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return ""
@@ -4248,7 +3979,6 @@ export final class EnumType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "enum {...}"
@@ -4261,7 +3991,6 @@ export final class EnumType extends Type {
      * @returns {boolean} true if object also has EnumType and their names are the same
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         // NOTE(shumilov-petr): not implemented
@@ -4274,7 +4003,6 @@ export final class EnumType extends Type {
      * @returns {long} Number of constants
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getConstantsNum(): long {
         // NOTE(shumilov-petr): not implemented
@@ -4289,7 +4017,6 @@ export final class EnumType extends Type {
      * @throws {Error} Not implemented yet
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getConstant(i: long): EnumConstant {
         // NOTE(shumilov-petr): not implemented
@@ -4304,7 +4031,6 @@ export final class EnumType extends Type {
      * @throws {Error} Not implemented yet
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getConstantByName(name: string): EnumConstant {
         // NOTE(shumilov-petr): not implemented
@@ -4319,7 +4045,6 @@ export final class EnumType extends Type {
      * @throws {Error} Not implemented yet
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public create(consts: EnumConstant[]): EnumType {
         // NOTE(shumilov-petr): not implemented
@@ -4334,7 +4059,6 @@ export final class EnumType extends Type {
      * @throws {Error} Not implemented yet
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public make(constantName: string): Object {
         // NOTE(shumilov-petr): not implemented
@@ -4349,7 +4073,6 @@ export final class EnumType extends Type {
      * @throws {Error} Not implemented yet
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): enum conversion")
@@ -4361,7 +4084,6 @@ export final class EnumType extends Type {
  * @extends Type
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class UnionType extends Type {
     /**
@@ -4371,7 +4093,6 @@ export final class UnionType extends Type {
      * @param {RuntimeLinker} contextLinker Runtime linker context
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
@@ -4384,7 +4105,6 @@ export final class UnionType extends Type {
      * @returns {boolean} True if type is assignable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override assignableFrom(other: Type): boolean {
         if (other instanceof UnionType) {
@@ -4402,7 +4122,6 @@ export final class UnionType extends Type {
      * @returns {boolean} true if type is primitive and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isPrimitive(): boolean {
         return false
@@ -4414,7 +4133,6 @@ export final class UnionType extends Type {
      * @returns {boolean} true if type is reference and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override isReference(): boolean {
         return true
@@ -4426,7 +4144,6 @@ export final class UnionType extends Type {
      * @returns {boolean} true if type has name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override hasName(): boolean {
         return false
@@ -4438,7 +4155,6 @@ export final class UnionType extends Type {
      * @returns {string} type name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getName(): string {
         return ""
@@ -4450,7 +4166,6 @@ export final class UnionType extends Type {
      * @returns {string} type literal
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override getLiteral(): string {
         return "(... | ...)"
@@ -4462,7 +4177,6 @@ export final class UnionType extends Type {
      * @returns {long} Number of cases
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getCasesNum(): long {
         return 0
@@ -4475,7 +4189,6 @@ export final class UnionType extends Type {
      * @returns {boolean} true if object also has UnionType and their cases are the same
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override equals(other: Type): boolean {
         return false
@@ -4488,7 +4201,6 @@ export final class UnionType extends Type {
      * @throws {Error} If conversion is invalid
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)

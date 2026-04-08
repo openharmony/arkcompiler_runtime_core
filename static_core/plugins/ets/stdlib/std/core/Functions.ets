@@ -92,7 +92,6 @@ const uriArrayComponent: boolean[];
  * @returns { string }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function decodeURI(uri: string): string {
     return unescapeImpl(
@@ -223,7 +222,6 @@ function encodeURIImpl(uri: string, ok: boolean[]): string {
  * @returns { string } - The encoded result
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function encodeURI(uri: string): string {
     return encodeURIImpl(uri, uriArray)
@@ -238,7 +236,6 @@ export function encodeURI(uri: string): string {
  * @returns { string } - The encoded result
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function decodeURIComponent(uriComponent: string): string {
     return unescapeImpl(
@@ -263,7 +260,6 @@ export function decodeURIComponent(uriComponent: string): string {
  * @returns { string } - A new string representing the provided uriComponent encoded as a URI component.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function encodeURIComponent(uriComponent: String | Number | Boolean): string {
     if (uriComponent instanceof String) {
@@ -293,7 +289,6 @@ export function encodeURIComponent(uriComponent: String | Number | Boolean): str
  * @returns { string } - a new string in which certain characters have been replaced by hexadecimal escape sequences.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @deprecated since 24
  * @useinstead { encodeURIComponent, encodeURI }
  */
@@ -404,7 +399,6 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
  *     the characters that they represent.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  * @deprecated since 24
  * @useinstead { decodeURIComponent, decodeURI }
  */

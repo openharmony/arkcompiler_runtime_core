@@ -83,7 +83,6 @@ function arr_perform_merge(arr: FixedArray<Byte>, startIndex: int, midIndex: int
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: FixedArray<Byte>, startIndex: int, endIndex: int, comp: (lhs: byte, rhs: byte) => int): void {
     if (endIndex <= startIndex) {
@@ -121,7 +120,6 @@ export function arr_sort_stable(arr: FixedArray<Byte>, startIndex: int, endIndex
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: ValueArray<byte>, startIndex: int, endIndex: int, comp: (lhs: byte, rhs: byte) => int): void {
     const fixedArr = stub.toFixedArray(arr)
@@ -194,7 +192,6 @@ function arr_perform_merge(arr: FixedArray<Short>, startIndex: int, midIndex: in
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: FixedArray<Short>, startIndex: int, endIndex: int, comp: (lhs: short, rhs: short) => int): void {
     if (endIndex <= startIndex) {
@@ -232,7 +229,6 @@ export function arr_sort_stable(arr: FixedArray<Short>, startIndex: int, endInde
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: ValueArray<short>, startIndex: int, endIndex: int, comp: (lhs: short, rhs: short) => int): void {
     const fixedArr = stub.toFixedArray(arr)
@@ -305,7 +301,6 @@ function arr_perform_merge(arr: FixedArray<Int>, startIndex: int, midIndex: int,
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: FixedArray<Int>, startIndex: int, endIndex: int, comp: (lhs: int, rhs: int) => int): void {
     if (endIndex <= startIndex) {
@@ -343,7 +338,6 @@ export function arr_sort_stable(arr: FixedArray<Int>, startIndex: int, endIndex:
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: ValueArray<int>, startIndex: int, endIndex: int, comp: (lhs: int, rhs: int) => int): void {
     const fixedArr = stub.toFixedArray(arr)
@@ -416,7 +410,6 @@ function arr_perform_merge(arr: FixedArray<Long>, startIndex: int, midIndex: int
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: FixedArray<Long>, startIndex: int, endIndex: int, comp: (lhs: long, rhs: long) => int): void {
     if (endIndex <= startIndex) {
@@ -454,7 +447,6 @@ export function arr_sort_stable(arr: FixedArray<Long>, startIndex: int, endIndex
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: ValueArray<long>, startIndex: int, endIndex: int, comp: (lhs: long, rhs: long) => int): void {
     const fixedArr = stub.toFixedArray(arr)
@@ -527,7 +519,6 @@ function arr_perform_merge(arr: FixedArray<Float>, startIndex: int, midIndex: in
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: FixedArray<Float>, startIndex: int, endIndex: int, comp: (lhs: float, rhs: float) => int): void {
     if (endIndex <= startIndex) {
@@ -565,7 +556,6 @@ export function arr_sort_stable(arr: FixedArray<Float>, startIndex: int, endInde
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: ValueArray<float>, startIndex: int, endIndex: int, comp: (lhs: float, rhs: float) => int): void {
     const fixedArr = stub.toFixedArray(arr)
@@ -638,7 +628,6 @@ function arr_perform_merge(arr: FixedArray<Double>, startIndex: int, midIndex: i
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: FixedArray<Double>, startIndex: int, endIndex: int, comp: (lhs: double, rhs: double) => int): void {
     if (endIndex <= startIndex) {
@@ -676,7 +665,6 @@ export function arr_sort_stable(arr: FixedArray<Double>, startIndex: int, endInd
  * @param { function } comp The comparator function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function arr_sort_stable(arr: ValueArray<double>, startIndex: int, endIndex: int, comp: (lhs: double, rhs: double) => int): void {
     const fixedArr = stub.toFixedArray(arr)
@@ -726,7 +714,6 @@ function insertionSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int,
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<boolean>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -745,7 +732,6 @@ export function sort(arr: FixedArray<boolean>, startIndex: int, endIndex: int): 
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<boolean>, startIndex: int, endIndex: int): void {
@@ -764,7 +750,6 @@ export function sort(arr: ValueArray<boolean>, startIndex: int, endIndex: int): 
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<boolean>, i: int, j: int): void {
     let temp = arr[i]
@@ -818,7 +803,6 @@ function insertionSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int,
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<boolean>, startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -843,7 +827,6 @@ export function sort_subarray(arr: FixedArray<boolean>, startIndex: int, endInde
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<boolean>, startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
@@ -861,7 +844,6 @@ export function sort_subarray(arr: ValueArray<boolean>, startIndex: int, endInde
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<boolean>, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -883,7 +865,6 @@ export function sort_subarray(arr: ValueArray<boolean>, mustPrecede: (lhs: boole
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<boolean>, startIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -967,7 +948,6 @@ function merge(left: FixedArray<byte>, right: FixedArray<byte>, cmp: (lhs: byte,
  * @returns { FixedArray<byte> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function mergeSort(array: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) => int, begin: int = 0, end: int = 0): FixedArray<byte> {
     if (end == 0) {
@@ -999,7 +979,6 @@ export function mergeSort(array: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) =
  * @returns { ValueArray<byte> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function mergeSort(array: ValueArray<byte>, cmp: (lhs: byte, rhs: byte) => int, begin: int = 0, end: int = 0): ValueArray<byte> {
@@ -1229,7 +1208,6 @@ function quickSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void 
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -1251,7 +1229,6 @@ export function sort(arr: FixedArray<byte>, startIndex: int, endIndex: int): voi
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<byte>, startIndex: int, endIndex: int): void {
@@ -1270,7 +1247,6 @@ export function sort(arr: ValueArray<byte>, startIndex: int, endIndex: int): voi
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<byte>, i: int, j: int): void {
     let temp = arr[i]
@@ -1498,7 +1474,6 @@ function quickSort(arr: FixedArray<byte>, startIndex: int, endIndex: int, mustPr
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<byte>, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -1519,7 +1494,6 @@ export function sort_subarray(arr: FixedArray<byte>, startIndex: int, endIndex: 
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<byte>, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
@@ -1537,7 +1511,6 @@ export function sort_subarray(arr: ValueArray<byte>, startIndex: int, endIndex: 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<byte>, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -1559,7 +1532,6 @@ export function sort_subarray(arr: ValueArray<byte>, mustPrecede: (lhs: byte, rh
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<byte>, startIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -1627,7 +1599,6 @@ function merge(left: FixedArray<short>, right: FixedArray<short>, cmp: (lhs: sho
  * @returns { FixedArray<short> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function mergeSort(array: FixedArray<short>, cmp: (lhs: short, rhs: short) => int, begin: int = 0, end: int = 0): FixedArray<short> {
     if (end == 0) {
@@ -1659,7 +1630,6 @@ export function mergeSort(array: FixedArray<short>, cmp: (lhs: short, rhs: short
  * @returns { ValueArray<short> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function mergeSort(array: ValueArray<short>, cmp: (lhs: short, rhs: short) => int, begin: int = 0, end: int = 0): ValueArray<short> {
@@ -1889,7 +1859,6 @@ function quickSort(arr: FixedArray<short>, startIndex: int, endIndex: int): void
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<short>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -1908,7 +1877,6 @@ export function sort(arr: FixedArray<short>, startIndex: int, endIndex: int): vo
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<short>, startIndex: int, endIndex: int): void {
@@ -1927,7 +1895,6 @@ export function sort(arr: ValueArray<short>, startIndex: int, endIndex: int): vo
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<short>, i: int, j: int): void {
     let temp = arr[i]
@@ -2155,7 +2122,6 @@ function quickSort(arr: FixedArray<short>, startIndex: int, endIndex: int, mustP
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<short>, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -2176,7 +2142,6 @@ export function sort_subarray(arr: FixedArray<short>, startIndex: int, endIndex:
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<short>, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
@@ -2194,7 +2159,6 @@ export function sort_subarray(arr: ValueArray<short>, startIndex: int, endIndex:
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<short>, mustPrecede: (lhs: short, rhs: short) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -2216,7 +2180,6 @@ export function sort_subarray(arr: ValueArray<short>, mustPrecede: (lhs: short, 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<short>, startIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -2271,7 +2234,6 @@ function merge(left: FixedArray<int>, right: FixedArray<int>, cmp: (lhs: int, rh
  * @returns { FixedArray<int> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function mergeSort(array: FixedArray<int>, cmp: (lhs: int, rhs: int) => int, begin: int = 0, end: int = 0): FixedArray<int> {
     if (end == 0) {
@@ -2303,7 +2265,6 @@ export function mergeSort(array: FixedArray<int>, cmp: (lhs: int, rhs: int) => i
  * @returns { ValueArray<int> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function mergeSort(array: ValueArray<int>, cmp: (lhs: int, rhs: int) => int, begin: int = 0, end: int = 0): ValueArray<int> {
@@ -2533,7 +2494,6 @@ function quickSort(arr: FixedArray<int>, startIndex: int, endIndex: int): void {
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<int>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -2552,7 +2512,6 @@ export function sort(arr: FixedArray<int>, startIndex: int, endIndex: int): void
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<int>, startIndex: int, endIndex: int): void {
@@ -2571,7 +2530,6 @@ export function sort(arr: ValueArray<int>, startIndex: int, endIndex: int): void
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<int>, i: int, j: int): void {
     let temp = arr[i]
@@ -2799,7 +2757,6 @@ function quickSort(arr: FixedArray<int>, startIndex: int, endIndex: int, mustPre
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<int>, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -2820,7 +2777,6 @@ export function sort_subarray(arr: FixedArray<int>, startIndex: int, endIndex: i
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<int>, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
@@ -2838,7 +2794,6 @@ export function sort_subarray(arr: ValueArray<int>, startIndex: int, endIndex: i
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<int>, mustPrecede: (lhs: int, rhs: int) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -2860,7 +2815,6 @@ export function sort_subarray(arr: ValueArray<int>, mustPrecede: (lhs: int, rhs:
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<int>, startIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -2915,7 +2869,6 @@ function merge(left: FixedArray<long>, right: FixedArray<long>, cmp: (lhs: long,
  * @returns { FixedArray<long> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function mergeSort(array: FixedArray<long>, cmp: (lhs: long, rhs: long) => int, begin: int = 0, end: int = 0): FixedArray<long> {
     if (end == 0) {
@@ -2947,7 +2900,6 @@ export function mergeSort(array: FixedArray<long>, cmp: (lhs: long, rhs: long) =
  * @returns { ValueArray<long> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function mergeSort(array: ValueArray<long>, cmp: (lhs: long, rhs: long) => int, begin: int = 0, end: int = 0): ValueArray<long> {
@@ -3177,7 +3129,6 @@ function quickSort(arr: FixedArray<long>, startIndex: int, endIndex: int): void 
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<long>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -3196,7 +3147,6 @@ export function sort(arr: FixedArray<long>, startIndex: int, endIndex: int): voi
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<long>, startIndex: int, endIndex: int): void {
@@ -3215,7 +3165,6 @@ export function sort(arr: ValueArray<long>, startIndex: int, endIndex: int): voi
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<long>, i: int, j: int): void {
     let temp = arr[i]
@@ -3443,7 +3392,6 @@ function quickSort(arr: FixedArray<long>, startIndex: int, endIndex: int, mustPr
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<long>, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -3464,7 +3412,6 @@ export function sort_subarray(arr: FixedArray<long>, startIndex: int, endIndex: 
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<long>, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
@@ -3482,7 +3429,6 @@ export function sort_subarray(arr: ValueArray<long>, startIndex: int, endIndex: 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<long>, mustPrecede: (lhs: long, rhs: long) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -3504,7 +3450,6 @@ export function sort_subarray(arr: ValueArray<long>, mustPrecede: (lhs: long, rh
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<long>, startIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -3559,7 +3504,6 @@ function merge(left: FixedArray<float>, right: FixedArray<float>, cmp: (lhs: flo
  * @returns { FixedArray<float> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function mergeSort(array: FixedArray<float>, cmp: (lhs: float, rhs: float) => int, begin: int = 0, end: int = 0): FixedArray<float> {
     if (end == 0) {
@@ -3591,7 +3535,6 @@ export function mergeSort(array: FixedArray<float>, cmp: (lhs: float, rhs: float
  * @returns { ValueArray<float> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function mergeSort(array: ValueArray<float>, cmp: (lhs: float, rhs: float) => int, begin: int = 0, end: int = 0): ValueArray<float> {
@@ -3821,7 +3764,6 @@ function quickSort(arr: FixedArray<float>, startIndex: int, endIndex: int): void
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<float>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -3840,7 +3782,6 @@ export function sort(arr: FixedArray<float>, startIndex: int, endIndex: int): vo
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<float>, startIndex: int, endIndex: int): void {
@@ -3859,7 +3800,6 @@ export function sort(arr: ValueArray<float>, startIndex: int, endIndex: int): vo
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<float>, i: int, j: int): void {
     let temp = arr[i]
@@ -4087,7 +4027,6 @@ function quickSort(arr: FixedArray<float>, startIndex: int, endIndex: int, mustP
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<float>, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -4108,7 +4047,6 @@ export function sort_subarray(arr: FixedArray<float>, startIndex: int, endIndex:
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<float>, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
@@ -4126,7 +4064,6 @@ export function sort_subarray(arr: ValueArray<float>, startIndex: int, endIndex:
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<float>, mustPrecede: (lhs: float, rhs: float) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -4148,7 +4085,6 @@ export function sort_subarray(arr: ValueArray<float>, mustPrecede: (lhs: float, 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<float>, startIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -4203,7 +4139,6 @@ function merge(left: FixedArray<double>, right: FixedArray<double>, cmp: (lhs: d
  * @returns { FixedArray<double> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function mergeSort(array: FixedArray<double>, cmp: (lhs: double, rhs: double) => int, begin: int = 0, end: int = 0): FixedArray<double> {
     if (end == 0) {
@@ -4235,7 +4170,6 @@ export function mergeSort(array: FixedArray<double>, cmp: (lhs: double, rhs: dou
  * @returns { ValueArray<double> } The sorted array.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function mergeSort(array: ValueArray<double>, cmp: (lhs: double, rhs: double) => int, begin: int = 0, end: int = 0): ValueArray<double> {
@@ -4465,7 +4399,6 @@ function quickSort(arr: FixedArray<double>, startIndex: int, endIndex: int): voi
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<double>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -4484,7 +4417,6 @@ export function sort(arr: FixedArray<double>, startIndex: int, endIndex: int): v
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<double>, startIndex: int, endIndex: int): void {
@@ -4503,7 +4435,6 @@ export function sort(arr: ValueArray<double>, startIndex: int, endIndex: int): v
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<double>, i: int, j: int): void {
     let temp = arr[i]
@@ -4731,7 +4662,6 @@ function quickSort(arr: FixedArray<double>, startIndex: int, endIndex: int, must
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<double>, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -4752,7 +4682,6 @@ export function sort_subarray(arr: FixedArray<double>, startIndex: int, endIndex
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<double>, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
@@ -4770,7 +4699,6 @@ export function sort_subarray(arr: ValueArray<double>, startIndex: int, endIndex
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<double>, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -4792,7 +4720,6 @@ export function sort_subarray(arr: ValueArray<double>, mustPrecede: (lhs: double
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<double>, startIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -5029,7 +4956,6 @@ function quickSort(arr: FixedArray<char>, startIndex: int, endIndex: int): void 
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort(arr: FixedArray<char>, startIndex: int, endIndex: int): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -5048,7 +4974,6 @@ export function sort(arr: FixedArray<char>, startIndex: int, endIndex: int): voi
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort(arr: ValueArray<char>, startIndex: int, endIndex: int): void {
@@ -5067,7 +4992,6 @@ export function sort(arr: ValueArray<char>, startIndex: int, endIndex: int): voi
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap(arr: FixedArray<char>, i: int, j: int): void {
     let temp = arr[i]
@@ -5295,7 +5219,6 @@ function quickSort(arr: FixedArray<char>, startIndex: int, endIndex: int, mustPr
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<char>, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -5316,7 +5239,6 @@ export function sort_subarray(arr: FixedArray<char>, startIndex: int, endIndex: 
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 export function sort_subarray(arr: ValueArray<char>, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
@@ -5334,7 +5256,6 @@ export function sort_subarray(arr: ValueArray<char>, startIndex: int, endIndex: 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<char>, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -5356,7 +5277,6 @@ export function sort_subarray(arr: ValueArray<char>, mustPrecede: (lhs: char, rh
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray(arr: FixedArray<char>, startIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
@@ -5378,7 +5298,6 @@ export function sort_subarray(arr: ValueArray<char>, startIndex: int, mustPreced
  * @param { int } j The index of the second element to swap.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function swap<T>(arr: FixedArray<T>, i: int, j: int): void {
     let temp = arr[i]
@@ -5600,7 +5519,6 @@ function quickSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPr
  * @param { int } endIndex The index to end sorting, exclusive.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -5621,7 +5539,6 @@ export function sort_subarray<T>(arr: FixedArray<T>, startIndex: int, endIndex: 
 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 
 /**
@@ -5631,7 +5548,6 @@ export function sort_subarray<T>(arr: FixedArray<T>, startIndex: int, endIndex: 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray<T>(arr: FixedArray<T>, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
@@ -5645,7 +5561,6 @@ export function sort_subarray<T>(arr: FixedArray<T>, mustPrecede: (lhs: T, rhs: 
  * @param { function } mustPrecede The must precede function.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function sort_subarray<T>(arr: FixedArray<T>, startIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)

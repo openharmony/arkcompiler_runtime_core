@@ -22,7 +22,6 @@ package std.core;
  * Represents a singleton class for the void type.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Void {
     /**
@@ -33,7 +32,6 @@ export final class Void {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static readonly void_instance = new Void();
     private constructor() { }

@@ -27,7 +27,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 

@@ -26,7 +26,6 @@ package std.core;
  * @namespace reflect.internals
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect.internals {
 
@@ -37,7 +36,6 @@ export namespace reflect.internals {
  * @extends Types
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Types {
     private readonly static BOXED_DOUBLE = Class.from<Double>()
@@ -59,7 +57,6 @@ export final class Types {
      * @returns { ArrayLike<T> } The same array-like object as the input.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static identity_cast<T>(array: ArrayLike<T>): ArrayLike<T> {
         return array
@@ -73,7 +70,6 @@ export final class Types {
      * @returns { FixedArray<E> } The converted FixedArray instance with element type `E`.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static asFixedArray<E>(obj: object): FixedArray<E> {
         return obj as FixedArray<E>
@@ -89,7 +85,6 @@ export final class Types {
      * @returns { boolean } Returns true if rhsType can be assigned to lhsType; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isAssignableFrom(lhsType: Class, rhsType: Class): boolean {
         return (rhsType.isSubtypeOf(lhsType))
@@ -106,7 +101,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a double type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isDoubleType(type: Class): boolean {
         return type === Types.BOXED_DOUBLE || type === Class.PRIMITIVE_DOUBLE
@@ -120,7 +114,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a boolean type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isBooleanType(type: Class): boolean {
         return type === Types.BOXED_BOOLEAN || type === Class.PRIMITIVE_BOOLEAN
@@ -134,7 +127,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's an int type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isIntType(type: Class): boolean {
         return type === Types.BOXED_INT || type === Class.PRIMITIVE_INT
@@ -148,7 +140,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a long type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isLongType(type: Class): boolean {
         return type === Types.BOXED_LONG || type === Class.PRIMITIVE_LONG
@@ -162,7 +153,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a byte type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isByteType(type: Class): boolean {
         return type === Types.BOXED_BYTE || type === Class.PRIMITIVE_BYTE
@@ -176,7 +166,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a short type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isShortType(type: Class): boolean {
         return type === Types.BOXED_SHORT || type === Class.PRIMITIVE_SHORT
@@ -190,7 +179,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a float type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isFloatType(type: Class): boolean {
         return type === Types.BOXED_FLOAT || type === Class.PRIMITIVE_FLOAT
@@ -204,7 +192,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a char type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isCharType(type: Class): boolean {
         return type === Types.BOXED_CHAR || type === Class.PRIMITIVE_CHAR
@@ -218,7 +205,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a primitive type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isPrimitiveType(type: Class): boolean {
         return Types.isNumericType(type) || Types.isBooleanType(type)
@@ -232,7 +218,6 @@ export final class Types {
      * @returns { boolean } Returns true if it's a numeric type; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isNumericType(type: Class): boolean {
         return Types.isDoubleType(type)
@@ -252,7 +237,6 @@ export final class Types {
  * @returns { Object } The created fixed array object.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function createFixedArray(component: Class, length: int): Object
 

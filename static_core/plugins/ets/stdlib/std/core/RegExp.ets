@@ -25,7 +25,6 @@ package std.core
  * @typedef { Record<String, String | undefined> } RegExpGroupsContainer
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 type RegExpGroupsContainer = Record<String, String | undefined>
 
@@ -34,7 +33,6 @@ type RegExpGroupsContainer = Record<String, String | undefined>
  * @extends Array<String | undefined>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class RegExpResultArray extends Array<String | undefined> {
     /**
@@ -43,7 +41,6 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     readonly isCorrect: boolean
 
@@ -82,7 +79,6 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @returns { Array<String | undefined> } Match result array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get result(): Array<String | undefined> {
         return this
@@ -117,7 +113,6 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @returns { String | undefined } resulting string.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_get(index: int): String | undefined {
         return super.$_get(index)
@@ -129,7 +124,6 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @param { String | undefined } val The value to be set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: String | undefined): void {
         super.$_set(index, val)
@@ -140,7 +134,6 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @returns { Array<Array<int>> } Index array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get indices(): Array<Array<int>> {
         return this.indices_
@@ -153,7 +146,6 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @throws { Error } - When the matching result is empty, throw it.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(): String {
         if (this.length > 0) {
@@ -212,7 +204,6 @@ export class RegExpResultArray extends Array<String | undefined> {
  * @extends RegExpResultArray
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class RegExpMatchArray extends RegExpResultArray {
     private hasIndex_: boolean = true
@@ -227,7 +218,6 @@ export class RegExpMatchArray extends RegExpResultArray {
      * @param { Array<Array<int>> } indices The starting and ending index arrays of each matching substring.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<int>>) {
         super(index, input, result, indices)
@@ -241,7 +231,6 @@ export class RegExpMatchArray extends RegExpResultArray {
      * @param { Array<String | undefined> } result The string array that matches.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(index: int, input: String, result: Array<String | undefined>) {
         this(index, input, result, [])
@@ -256,7 +245,6 @@ export class RegExpMatchArray extends RegExpResultArray {
      * @returns { int | undefined } The starting index of the match.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get index(): int | undefined {
         if (this.hasIndex_) {
@@ -270,7 +258,6 @@ export class RegExpMatchArray extends RegExpResultArray {
      * @returns { String | undefined } The original string.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get input(): String | undefined {
         if (this.hasInput_) {
@@ -284,7 +271,6 @@ export class RegExpMatchArray extends RegExpResultArray {
      * @param { int | undefined } val The index value to be set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set index(val: int | undefined) {
         if (val == undefined) {
@@ -350,7 +336,6 @@ export class RegExpMatchArray extends RegExpResultArray {
  * @extends RegExpResultArray
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class RegExpExecArray extends RegExpResultArray {
     /**
@@ -362,7 +347,6 @@ export class RegExpExecArray extends RegExpResultArray {
      * @param { Array<Array<int>> } indices The start and end index arrays of each matching substring.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<int>>) {
         super(index, input, result, indices)
@@ -376,7 +360,6 @@ export class RegExpExecArray extends RegExpResultArray {
      * @param { Array<String | undefined> } result The array of matched strings.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(index: int, input: String, result: Array<String | undefined>) {
         this(index, input, result, [])
@@ -391,7 +374,6 @@ export class RegExpExecArray extends RegExpResultArray {
      * @returns { int } The starting index of the match.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get index(): int {
         return this.index_
@@ -402,7 +384,6 @@ export class RegExpExecArray extends RegExpResultArray {
      * @returns { String } The original string.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get input(): String {
         return this.input_
@@ -413,7 +394,6 @@ export class RegExpExecArray extends RegExpResultArray {
      * @param { int } val The index value to be set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set index(val: int) {
         this.index_ = val
@@ -424,7 +404,6 @@ export class RegExpExecArray extends RegExpResultArray {
      * @param { String } val The string value to be set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set input(val: String) {
         this.input_ = val
@@ -533,7 +512,6 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
  * @extends Object
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class RegExp extends Object {
     private pattern_: String = ""
@@ -555,7 +533,6 @@ export class RegExp extends Object {
      * @return { String } A string containing the flags used for the regular expression.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get flags(): String {
         if (!this.flagsSorted_) {
@@ -570,7 +547,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if global matching is enabled, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get global(): boolean {
         return this.isGlobal
@@ -581,7 +557,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if dotAll is enabled, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get dotAll(): boolean {
         return this.isDotAll
@@ -592,7 +567,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if indices are included in the match result, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get hasIndices(): boolean {
         return this.isIndices
@@ -603,7 +577,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if case is ignored, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get ignoreCase(): boolean {
         return this.isIgnoreCase
@@ -614,7 +587,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if multiline matching is enabled, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get multiline(): boolean {
         return this.isMultiline
@@ -625,7 +597,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if sticky matching is enabled, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get sticky(): boolean {
         return this.isSticky
@@ -636,7 +607,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if Unicode mode is enabled, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get unicode(): boolean {
         return this.isUnicode
@@ -647,7 +617,6 @@ export class RegExp extends Object {
      * @return { boolean } `true` if Unicode set mode is enabled, `false` otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get unicodeSets(): boolean {
         return this.isUnicodeSets
@@ -658,7 +627,6 @@ export class RegExp extends Object {
      * @return { String } The source of the regular expression.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get source(): String {
         return this.source_
@@ -671,7 +639,6 @@ export class RegExp extends Object {
      * @param { String } [flags] description of flags to be used
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(pattern: String, flags?: String) {
         RegExp.init(this, pattern, flags === undefined ? "" : flags!)
@@ -684,7 +651,6 @@ export class RegExp extends Object {
      * @param { String } [flags] description of flags to be used
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(regexp: RegExp, flags?: String) {
         RegExp.init(this, regexp.pattern_, flags === undefined ? regexp.flags : flags!)
@@ -697,7 +663,6 @@ export class RegExp extends Object {
      * @param { String } [flags] description of flags to be used.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(regexp: RegExp | String, flags?: String) {
         if (regexp instanceof String) {
@@ -728,7 +693,6 @@ export class RegExp extends Object {
      *     otherwise returns null.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public exec(str: String, index: int): RegExpExecArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
@@ -750,7 +714,6 @@ export class RegExp extends Object {
      *     otherwise returns null.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public exec(str: String): RegExpExecArray | null {
         return this.exec(str, this.lastIndex)
@@ -775,7 +738,6 @@ export class RegExp extends Object {
      * @returns { RegExpMatchArray | null } If match succeeds, returns a match result array, otherwise returns null.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private matchInternal(str: String): RegExpMatchArray | null {
         return this.matchInternal(str, this.lastIndex)
@@ -788,7 +750,6 @@ export class RegExp extends Object {
      * @returns { int } If a match is found, returns its starting index; otherwise returns -1.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public search(str: String): int {
         let previousLastIndex: int = this.lastIndex
@@ -809,7 +770,6 @@ export class RegExp extends Object {
      * @returns { String } The new string after replacement.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(str: String, replaceValue: String): String {
         if (this.global) {
@@ -865,7 +825,6 @@ export class RegExp extends Object {
      * @returns { String } The new string after replacement.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public replace(str: String, replacer: (substr: String, args: Object[]) => String): String {
         if (this.global) {
@@ -927,7 +886,6 @@ export class RegExp extends Object {
      * @returns { String[] } The array of substrings after splitting.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public split(str: String, limit: Int | undefined): String[] {
         let unicodeMatching = this.unicode
@@ -993,7 +951,6 @@ export class RegExp extends Object {
      *     otherwise returns null.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public match(str: String): RegExpMatchArray | null {
         if (!this.global) {
@@ -1034,7 +991,6 @@ export class RegExp extends Object {
      * @returns {IterableIterator<RegExpMatchArray>} An iterator that iterates over all match results.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public matchAll(str: String): IterableIterator<RegExpMatchArray> {
         let matcher = new RegExp(this)
@@ -1053,7 +1009,6 @@ export class RegExp extends Object {
      * @returns { boolean } If the string has matches, returns true; otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public test(str: String): boolean {
         if (str.length < this.lastIndex) {
@@ -1079,7 +1034,6 @@ export class RegExp extends Object {
      * @returns { String } The string representation of the regular expression.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return "/" + this.source + "/" + this.flags
@@ -1095,7 +1049,6 @@ export class RegExp extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static advanceStringIndex(s: String, index: int, unicode: boolean): int {
         const HIGH_SURROGATE_START = 0xD800;
@@ -1130,7 +1083,6 @@ export class RegExp extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static $_invoke(pattern: String, flags?: String) : RegExp {
         return new RegExp(pattern, flags)
@@ -1144,7 +1096,6 @@ export class RegExp extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static $_invoke(pattern: RegExp | String, flags?: String) : RegExp {
         return new RegExp(pattern, flags)
@@ -1157,7 +1108,6 @@ export class RegExp extends Object {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static $_invoke(pattern: RegExp | String) : RegExp {
         return new RegExp(pattern)

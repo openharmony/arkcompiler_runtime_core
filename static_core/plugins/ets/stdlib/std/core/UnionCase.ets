@@ -23,7 +23,6 @@ package std.core;
  * Represents a case in a union type, including a name, type, and value.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class UnionCase {
     private name: string = ""
@@ -37,7 +36,6 @@ export final class UnionCase {
      * @returns { boolean } Returns true if it represents a type; otherwise, returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isType(): boolean {
         return false
@@ -48,7 +46,6 @@ export final class UnionCase {
      * @returns { Type } Return the type of the UnionCase instance.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getType(): Type {
         return this.typ!
@@ -60,7 +57,6 @@ export final class UnionCase {
      * @throws { Error } The toString method is not implemented.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         // TODO(shumilov-petr): not implemented

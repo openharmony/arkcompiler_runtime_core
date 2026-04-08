@@ -25,7 +25,6 @@ import { stub } from "arkruntime";
  * Performance-oriented class for string construction
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class StringBuilder {
     private static readonly INITIAL_BUF_SIZE: int = 16;
@@ -39,7 +38,6 @@ export final class StringBuilder {
      * Construct a new builder instance with the initial buffer of 16 chars
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor() {}
 
@@ -49,7 +47,6 @@ export final class StringBuilder {
      * @param { FixedArray<char> } fromChars array that will be used to initialize the builder
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(fromChars: FixedArray<char>) {
         let s: String = new String(fromChars);
@@ -66,7 +63,6 @@ export final class StringBuilder {
      * @param { ValueArray<char> } fromChars array that will be used to initialize the builder
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(fromChars: ValueArray<char>) {
         let s: String = new String(fromChars);
@@ -83,7 +79,6 @@ export final class StringBuilder {
      * @param { char[] } fromChars array that will be used to initialize the builder
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(fromChars: char[]) {
         let s: String = new String(fromChars);
@@ -100,7 +95,6 @@ export final class StringBuilder {
      * @param { String } s string that will be used to initialize the builder
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor (s: String) {
         this.buf[this.index++] = s;
@@ -116,7 +110,6 @@ export final class StringBuilder {
      * @returns { int } length of string accumulated so far
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get stringLength(): int {
         return this.length;
@@ -131,7 +124,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static concatStrings(lhs: String, rhs: String): String
     {
@@ -146,7 +138,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(s: String): StringBuilder;
     private native append(s0: String, s1: String): StringBuilder;
@@ -160,7 +151,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: boolean): StringBuilder;
 
@@ -171,7 +161,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: byte): StringBuilder;
 
@@ -182,7 +171,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: char): StringBuilder;
 
@@ -193,7 +181,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: short): StringBuilder;
 
@@ -204,7 +191,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: int): StringBuilder;
 
@@ -215,7 +201,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: long): StringBuilder;
 
@@ -226,7 +211,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: float): StringBuilder;
 
@@ -237,7 +221,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native append(i: double): StringBuilder;
 
@@ -248,7 +231,6 @@ export final class StringBuilder {
      * @returns { StringBuilder } builder with updated internal buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public append(o: Object): StringBuilder {
         this.append(o.toString());
@@ -260,7 +242,6 @@ export final class StringBuilder {
      * @returns { String } - builder's current buffer as string
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native override toString(): String;
 
@@ -272,7 +253,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(i: boolean): String;
 
@@ -284,7 +264,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(i: byte): String;
 
@@ -296,7 +275,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(i: char): String;
 
@@ -308,7 +286,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(i: short): String;
 
@@ -320,7 +297,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(i: int): String;
 
@@ -332,7 +308,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toString(i: long): String;
 
@@ -344,7 +319,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(f: float): String {
         return Float.toString(f);
@@ -358,7 +332,6 @@ export final class StringBuilder {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(d: double): String {
         return Double.toString(d);

@@ -30,7 +30,6 @@ native function isFuncObjAsyncImpl(target: Object): boolean
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -41,7 +40,6 @@ export namespace reflect {
 * @returns { boolean } Returns true if `target` is an interface initialized with a literal; otherwise returns false.
 * @syscap SystemCapability.Utils.Lang
 * @FaAndStageModel
-* @since 24
 */
 export function isLiteralInitializedInterface(target: Object): boolean {
     return isLiteralInitializedInterfaceImpl(target)
@@ -56,7 +54,6 @@ export function isLiteralInitializedInterface(target: Object): boolean {
  *          with `std.core.AsyncFunctionObject` annotation
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFuncObjAsync(target: Function): boolean {
     return isFuncObjAsyncImpl(target)
@@ -69,7 +66,6 @@ export function isFuncObjAsync(target: Function): boolean {
  * @returns { Array<InstanceMethod> } A new array instance filled with all the class getters
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function getInstanceGettersRecursive(targetClass: Class): Array<InstanceMethod> {
     let res = new Array<InstanceMethod>()
@@ -92,7 +88,6 @@ export function getInstanceGettersRecursive(targetClass: Class): Array<InstanceM
  * @returns { Array<InstanceField> } A new array instance filled with all the class fields
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function getInstanceFieldsRecursive(targetClass: Class): Array<InstanceField> {
     let res = new Array<InstanceField>()
@@ -112,7 +107,6 @@ export function getInstanceFieldsRecursive(targetClass: Class): Array<InstanceFi
  * @returns { InstanceField | undefined } The instance field with the specified name, or undefined if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
 */
 export function getInstanceFieldsRecursiveByName(targetClass: Class, name: string): reflect.InstanceField | undefined {
     let currClass: Class | undefined = targetClass
@@ -134,7 +128,6 @@ export function getInstanceFieldsRecursiveByName(targetClass: Class, name: strin
  * @returns { InstanceMethod | undefined } The instance method with the specified name, or undefined if not found.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
 */
 export function getInstanceMethodsRecursiveByName(targetClass: Class, name: string): reflect.InstanceMethod | undefined {
     let currClass: Class | undefined = targetClass

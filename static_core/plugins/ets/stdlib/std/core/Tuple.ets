@@ -25,7 +25,6 @@ package std.core;
  * Marker interface for tuple types.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface Tuple extends Iterable<Any>
 {
@@ -38,7 +37,6 @@ export interface Tuple extends Iterable<Any>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     unsafeGet(index: int): Any;
 }
@@ -68,7 +66,6 @@ class TupleIterator implements IterableIterator<Any> {
  * @implements Tuple
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple0 implements Tuple
 {
@@ -85,7 +82,6 @@ export class Tuple0 implements Tuple
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return 0;
@@ -98,7 +94,6 @@ export class Tuple0 implements Tuple
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public unsafeGet(index: int): Any {
         throw new IndexOutOfBoundsError();
@@ -110,7 +105,6 @@ export class Tuple0 implements Tuple
      * @returns { IterableIterator<Any> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Any> {
        return new TupleIterator(this);
@@ -122,7 +116,6 @@ export class Tuple0 implements Tuple
  * @extends Tuple0
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple1<T0> extends Tuple0 
 {
@@ -143,7 +136,6 @@ export class Tuple1<T0> extends Tuple0
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 1;
@@ -156,7 +148,6 @@ export class Tuple1<T0> extends Tuple0
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         if (index == 0) {
@@ -171,7 +162,6 @@ export class Tuple1<T0> extends Tuple0
  * @extends Tuple1<T0>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple2<T0, T1> extends Tuple1<T0> 
 {
@@ -192,7 +182,6 @@ export class Tuple2<T0, T1> extends Tuple1<T0>
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 2;
@@ -205,7 +194,6 @@ export class Tuple2<T0, T1> extends Tuple1<T0>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -224,7 +212,6 @@ export class Tuple2<T0, T1> extends Tuple1<T0>
  * @extends Tuple2<T0, T1>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple3<T0, T1, T2> extends Tuple2<T0, T1> 
 {
@@ -245,7 +232,6 @@ export class Tuple3<T0, T1, T2> extends Tuple2<T0, T1>
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 3;
@@ -258,7 +244,6 @@ export class Tuple3<T0, T1, T2> extends Tuple2<T0, T1>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -279,7 +264,6 @@ export class Tuple3<T0, T1, T2> extends Tuple2<T0, T1>
  * @extends Tuple3<T0, T1, T2>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple4<T0, T1, T2, T3> extends Tuple3<T0, T1, T2> 
 {
@@ -300,7 +284,6 @@ export class Tuple4<T0, T1, T2, T3> extends Tuple3<T0, T1, T2>
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 4;
@@ -313,7 +296,6 @@ export class Tuple4<T0, T1, T2, T3> extends Tuple3<T0, T1, T2>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -336,7 +318,6 @@ export class Tuple4<T0, T1, T2, T3> extends Tuple3<T0, T1, T2>
  * @extends Tuple4<T0, T1, T2, T3>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple5<T0, T1, T2, T3, T4> extends Tuple4<T0, T1, T2, T3> 
 {
@@ -357,7 +338,6 @@ export class Tuple5<T0, T1, T2, T3, T4> extends Tuple4<T0, T1, T2, T3>
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 5;
@@ -370,7 +350,6 @@ export class Tuple5<T0, T1, T2, T3, T4> extends Tuple4<T0, T1, T2, T3>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -395,7 +374,6 @@ export class Tuple5<T0, T1, T2, T3, T4> extends Tuple4<T0, T1, T2, T3>
  * @extends Tuple5<T0, T1, T2, T3, T4>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple6<T0, T1, T2, T3, T4, T5> extends Tuple5<T0, T1, T2, T3, T4> 
 {
@@ -416,7 +394,6 @@ export class Tuple6<T0, T1, T2, T3, T4, T5> extends Tuple5<T0, T1, T2, T3, T4>
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 6;
@@ -429,7 +406,6 @@ export class Tuple6<T0, T1, T2, T3, T4, T5> extends Tuple5<T0, T1, T2, T3, T4>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -456,7 +432,6 @@ export class Tuple6<T0, T1, T2, T3, T4, T5> extends Tuple5<T0, T1, T2, T3, T4>
  * @extends Tuple6<T0, T1, T2, T3, T4, T5>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple7<T0, T1, T2, T3, T4, T5, T6> extends Tuple6<T0, T1, T2, T3, T4, T5> 
 {
@@ -477,7 +452,6 @@ export class Tuple7<T0, T1, T2, T3, T4, T5, T6> extends Tuple6<T0, T1, T2, T3, T
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 7;
@@ -490,7 +464,6 @@ export class Tuple7<T0, T1, T2, T3, T4, T5, T6> extends Tuple6<T0, T1, T2, T3, T
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -519,7 +492,6 @@ export class Tuple7<T0, T1, T2, T3, T4, T5, T6> extends Tuple6<T0, T1, T2, T3, T
  * @extends Tuple7<T0, T1, T2, T3, T4, T5, T6>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple8<T0, T1, T2, T3, T4, T5, T6, T7> extends Tuple7<T0, T1, T2, T3, T4, T5, T6> 
 {
@@ -540,7 +512,6 @@ export class Tuple8<T0, T1, T2, T3, T4, T5, T6, T7> extends Tuple7<T0, T1, T2, T
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 8;
@@ -553,7 +524,6 @@ export class Tuple8<T0, T1, T2, T3, T4, T5, T6, T7> extends Tuple7<T0, T1, T2, T
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -584,7 +554,6 @@ export class Tuple8<T0, T1, T2, T3, T4, T5, T6, T7> extends Tuple7<T0, T1, T2, T
  * @extends Tuple8<T0, T1, T2, T3, T4, T5, T6, T7>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple8<T0, T1, T2, T3, T4, T5, T6, T7> 
 {
@@ -605,7 +574,6 @@ export class Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple8<T0, T1, T
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 9;
@@ -618,7 +586,6 @@ export class Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple8<T0, T1, T
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -651,7 +618,6 @@ export class Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple8<T0, T1, T
  * @extends Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8> 
 {
@@ -672,7 +638,6 @@ export class Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple9<T0, 
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 10;
@@ -685,7 +650,6 @@ export class Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple9<T0, 
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -720,7 +684,6 @@ export class Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple9<T0, 
  * @extends Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> extends Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> 
 {
@@ -741,7 +704,6 @@ export class Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> extends Tuple1
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 11;
@@ -754,7 +716,6 @@ export class Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> extends Tuple1
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -791,7 +752,6 @@ export class Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> extends Tuple1
  * @extends Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> extends Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> 
 {
@@ -812,7 +772,6 @@ export class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> extends T
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 12;
@@ -825,7 +784,6 @@ export class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> extends T
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -864,7 +822,6 @@ export class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> extends T
  * @extends Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> extends Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> 
 {
@@ -885,7 +842,6 @@ export class Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> exte
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 13;
@@ -898,7 +854,6 @@ export class Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> exte
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -939,7 +894,6 @@ export class Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> exte
  * @extends Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> extends Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> 
 {
@@ -960,7 +914,6 @@ export class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 14;
@@ -973,7 +926,6 @@ export class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -1016,7 +968,6 @@ export class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
  * @extends Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> extends Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> 
 {
@@ -1037,7 +988,6 @@ export class Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 15;
@@ -1050,7 +1000,6 @@ export class Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -1095,7 +1044,6 @@ export class Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
  * @extends Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> extends Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> 
 {
@@ -1116,7 +1064,6 @@ export class Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 16;
@@ -1129,7 +1076,6 @@ export class Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         switch (index) {
@@ -1176,7 +1122,6 @@ export class Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
  * @extends Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class TupleN<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> extends Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
 {
@@ -1200,7 +1145,6 @@ export class TupleN<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, 
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return 16 + this.$tupleValues.length;
@@ -1213,7 +1157,6 @@ export class TupleN<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, 
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         if (index >= 16 && index < this.length) {

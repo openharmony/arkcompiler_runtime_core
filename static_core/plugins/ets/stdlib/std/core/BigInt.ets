@@ -25,7 +25,6 @@ package std.core;
  * @typedef { BigInt } bigint
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type bigint = BigInt
 
@@ -43,7 +42,6 @@ const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap;
  * @interface BigIntToLocaleStringOptions
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface BigIntToLocaleStringOptions {
     /**
@@ -52,7 +50,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     compactDisplay?: string;
 
@@ -62,7 +59,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     currency?: string;
 
@@ -72,7 +68,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     currencyDisplay?: string;
 
@@ -82,7 +77,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     localeMatcher?: string;
 
@@ -92,7 +86,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { number }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     maximumFractionDigits?: int;
 
@@ -102,7 +95,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { number }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     maximumSignificantDigits?: int;
 
@@ -112,7 +104,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { number }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     minimumFractionDigits?: int;
 
@@ -122,7 +113,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { number }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     minimumIntegerDigits?: int;
 
@@ -132,7 +122,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { number }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     minimumSignificantDigits?: int;
 
@@ -142,7 +131,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     notation?: string;
 
@@ -152,7 +140,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     numberingSystem?: string;
 
@@ -162,7 +149,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     style?: string;
 
@@ -172,7 +158,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     unit?: string;
 
@@ -182,7 +167,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     unitDisplay?: string;
 
@@ -192,7 +176,6 @@ export interface BigIntToLocaleStringOptions {
      * @type { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     useGrouping?: boolean;
 }
@@ -203,7 +186,6 @@ export interface BigIntToLocaleStringOptions {
  * @class BigInt
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class BigInt {
 
@@ -248,7 +230,6 @@ export final class BigInt {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor() {
         this([], 0)
@@ -260,7 +241,6 @@ export final class BigInt {
      * @param { byte } d The byte value to convert.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: byte) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
@@ -273,7 +253,6 @@ export final class BigInt {
      * @param { short } d The short value to convert.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: short) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
@@ -286,7 +265,6 @@ export final class BigInt {
      * @param { int } d The int value to convert.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: int) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
@@ -299,7 +277,6 @@ export final class BigInt {
      * @param { long } d The long value to convert.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: long) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
@@ -313,7 +290,6 @@ export final class BigInt {
      * @throws { RangeError } Throw RangeError when d is not an integer or d is not a safe integer.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: double) {
         // should we cast it to long at then use internal helper?
@@ -337,7 +313,6 @@ export final class BigInt {
      * @param { string } d The string value to convert to BigInt.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: string) {
         let trimmed = d.trim()
@@ -352,7 +327,6 @@ export final class BigInt {
      * @param { boolean } d The boolean value (true=1, false=0).
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: boolean) {
         const oz = d ? 1 : 0
@@ -368,7 +342,6 @@ export final class BigInt {
      * @param { BigInt } d The BigInt object to copy.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(d: BigInt) {
         this(d.bytes, d.sign)
@@ -381,7 +354,6 @@ export final class BigInt {
      * @param { int } sign The sign of the number.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(v: FixedArray<int>, sign: int) {
         this(arkruntime.stub.toValueArray(v), sign)
@@ -394,7 +366,6 @@ export final class BigInt {
      * @param { int } sign The sign of the number.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(v: ValueArray<int>, sign: int) {
         this.bytes = BigInt.stripLeadingZeros(v)
@@ -409,7 +380,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static fromULong(val: long): BigInt {
         let ret = val == 0 ? new BigInt([], 0) : new BigInt(BigInt.fromLongHelper(val, 64, 1), 1)
@@ -423,7 +393,6 @@ export final class BigInt {
      * @returns { boolean } True if equal, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(to: BigInt): boolean {
         if (this.bytes.length != to.bytes.length) {
@@ -447,7 +416,6 @@ export final class BigInt {
      * @returns { boolean } true if the value is a BigInt and equal to this BigInt, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     equals(other: Any): boolean {
         if (!(other instanceof BigInt)) {
@@ -467,7 +435,6 @@ export final class BigInt {
      * @returns { string } A string representing the BigInt formatted according to the locale and options.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: BigIntToLocaleStringOptions): string {
         const numFmtOptions = BigInt.toNumberFormatOptions(options)
@@ -485,7 +452,6 @@ export final class BigInt {
      * @returns { string } A string representing the BigInt formatted according to the locale and options.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         if (options instanceof BigIntToLocaleStringOptions) {
@@ -571,7 +537,6 @@ export final class BigInt {
      * @returns { string } A string representation of the BigInt in base 10.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.toString(10)
@@ -586,7 +551,6 @@ export final class BigInt {
      * @throws { RangeError } Throw RangeError when radix is not between 2 and 36
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(radix: int): string {
         if (radix < 2 || radix > 36) {
@@ -609,7 +573,6 @@ export final class BigInt {
      * @throws { RangeError } Throw RangeError when radix is not between 2 and 36
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(radix?: double): string {
         if (radix == undefined) {
@@ -627,7 +590,6 @@ export final class BigInt {
      * @returns { string } A binary string representation of the BigInt.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toStringAsBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
@@ -646,7 +608,6 @@ export final class BigInt {
      * @returns { string } A decimal string representation of the BigInt.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toStringAsDecimal(): string {
         let digits = this.bytesToDigits(this.bytes)
@@ -683,7 +644,6 @@ export final class BigInt {
      * @throws { Error } Throw RangeError when radix is not between 2 and 36
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toStringAsPowerOfTwoRadix(radix: int): string {
         let chunkSize: int = Math.ceil(Math.log2(radix)).toInt()
@@ -717,7 +677,6 @@ export final class BigInt {
      * @returns { BigInt } The primitive value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): BigInt {
         return this
@@ -733,7 +692,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static asIntN(bits: long, num: BigInt): BigInt {
         if (bits == 0 || num.isZero()) {
@@ -768,7 +726,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static asIntN(bits: Number, num: BigInt): BigInt {
         return BigInt.asIntN(bits.toLong(), num)
@@ -784,7 +741,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static asUintN(bits: long, num: BigInt): BigInt {
         if (bits == 0 || num.isZero()) {
@@ -811,7 +767,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static asUintN(bits: Number, num: BigInt): BigInt {
         return BigInt.asUintN(bits.toLong(), num)
@@ -823,7 +778,6 @@ export final class BigInt {
      * @returns { boolean } True if negative, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public negative(): boolean {
         return this.sign < 0
@@ -835,7 +789,6 @@ export final class BigInt {
      * @returns { boolean } True if positive (including zero), false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public positive(): boolean {
         return this.sign >= 0
@@ -883,7 +836,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the addition.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorAdd(other: BigInt): BigInt {
         let max_len = max(this.length(), other.length()) as int + 1
@@ -938,7 +890,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the subtraction.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorSubtract(other: BigInt): BigInt {
         let rhs = other.negate()
@@ -952,7 +903,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the multiplication.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorMultiply(other: BigInt): BigInt {
         if (this.isZero() || other.isZero()) {
@@ -1116,7 +1066,6 @@ export final class BigInt {
      * @returns { BigInt } The quotient of the division.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorDivide(other: BigInt): BigInt {
         return (this.operatorDivideInternal(other))[0]
@@ -1129,7 +1078,6 @@ export final class BigInt {
      * @returns { BigInt } The remainder.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorModule(other: BigInt): BigInt {
         return (this.operatorDivideInternal(other))[1]
@@ -1163,7 +1111,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the bitwise OR.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorBitwiseOr(other: BigInt): BigInt {
         return this.bitwiseHelper(other, (a:int, b:int) => {return (a | b)})
@@ -1176,7 +1123,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the bitwise AND.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorBitwiseAnd(other: BigInt): BigInt {
         return this.bitwiseHelper(other, (a:int, b:int) => {return (a & b)})
@@ -1189,7 +1135,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the bitwise XOR.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorBitwiseXor(other: BigInt): BigInt {
         return this.bitwiseHelper(other, (a:int, b:int) => {return (a ^ b)})
@@ -1202,7 +1147,6 @@ export final class BigInt {
      * @returns { boolean } True if this is greater than other, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorGreaterThan(other: BigInt): boolean {
         if (this.positive() && other.negative()) {
@@ -1229,7 +1173,6 @@ export final class BigInt {
      * @returns { boolean } True if this is less than other, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorLessThan(other: BigInt): boolean {
         return other > this
@@ -1242,7 +1185,6 @@ export final class BigInt {
      * @returns { boolean } True if this is greater than or equal to other, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorGreaterThanEqual(other: BigInt): boolean {
         return !(other > this)
@@ -1255,7 +1197,6 @@ export final class BigInt {
      * @returns { boolean } True if this is less than or equal to other, false otherwise.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorLessThanEqual(other: BigInt): boolean {
         return !(other < this)
@@ -1269,7 +1210,6 @@ export final class BigInt {
      * @throws { Error } Throw Error when other is negative or other is greater than BigInt.baseSys - 1.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorLeftShift(other: BigInt): BigInt {
         if (other.negative()) {
@@ -1325,7 +1265,6 @@ export final class BigInt {
      * @returns { BigInt } The shifted BigInt.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorRightShift(other: BigInt): BigInt {
         if (other.negative()) {
@@ -1380,7 +1319,6 @@ export final class BigInt {
      * @returns { BigInt } The incremented value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorIncrement(): BigInt {
         return new BigInt("1") + this
@@ -1392,7 +1330,6 @@ export final class BigInt {
      * @returns { BigInt } The decremented value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorDecrement(): BigInt {
         return this - new BigInt("1")
@@ -1410,7 +1347,6 @@ export final class BigInt {
      * @returns { BigInt } The result of the bitwise NOT.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public operatorBitwiseNot(): BigInt {
         let len = this.length() + 1
@@ -1444,7 +1380,6 @@ export final class BigInt {
      * @throws { RangeError } Throw RangeError when exponent is negative.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public pow(exponent: BigInt): BigInt {
         if (exponent.negative()) {
@@ -1499,7 +1434,6 @@ export final class BigInt {
      * @returns { BigInt } The negated value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public negate(): BigInt {
         return new BigInt(this.bytes, this.sign * -1)
@@ -1917,7 +1851,6 @@ export final class BigInt {
      * @returns { double } The double value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public doubleValue(): double {
         let buff = 0 as number
@@ -1934,7 +1867,6 @@ export final class BigInt {
      * @returns { long } The long value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getLong(): long {
         let buff = 0 as long
@@ -1959,7 +1891,6 @@ export final class BigInt {
      * @returns { long } The unsigned long value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getULong(): long {
         return BigInt.asUint64(this).getLong()
@@ -1973,7 +1904,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: BigInt): BigInt {
         return new BigInt(value)
@@ -1987,7 +1917,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: long): BigInt {
         return new BigInt(value)
@@ -2001,7 +1930,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: number): BigInt {
         return new BigInt(value)
@@ -2015,7 +1943,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: string): BigInt {
         return new BigInt(value)
@@ -2029,7 +1956,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: boolean): BigInt {
         return new BigInt(value)
@@ -2043,7 +1969,6 @@ export final class BigInt {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     static $_invoke(value: BigInt | Number | String | Boolean): BigInt {
         if (value instanceof BigInt) {

@@ -20,7 +20,6 @@ package std.concurrency;
  *
  * @namespace concurrency.stackless
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export namespace concurrency.stackless {
 
@@ -29,7 +28,6 @@ export namespace concurrency.stackless {
  *
  * @interface AsyncBaseLock
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export interface AsyncBaseLock {
     lock(): Promise<void>;
@@ -41,7 +39,6 @@ export interface AsyncBaseLock {
  *
  * @interface AsyncRWLock
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export interface AsyncRWLock {
     readLock(): AsyncReadLock;
@@ -53,7 +50,6 @@ export interface AsyncRWLock {
  * Encodes lock state, reader count, and writer count in a single atomic long value.
  *
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 class State {
 
@@ -63,7 +59,6 @@ class State {
      * @param { long } state Current lock state
      * @returns { boolean } True if the lock is unlocked, false otherwise
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static IsUnlocked(state: long): boolean {
         return state == State.UNLOCKED;
@@ -75,7 +70,6 @@ class State {
      * @param { long } state Current lock state
      * @returns { boolean } True if the lock is held by readers, false otherwise
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static HasReadLock(state: long): boolean {
         return (state & State.STATE_MASK) == State.READ_LOCKED;
@@ -87,7 +81,6 @@ class State {
      * @param { long } state Current lock state
      * @returns { boolean } True if the lock is held by a writer, false otherwise
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static HasWriteLock(state: long): boolean {
         return (state & State.STATE_MASK) == State.WRITE_LOCKED;
@@ -99,7 +92,6 @@ class State {
      * @param { long } state Current lock state
      * @returns { boolean } True if there are waiting readers, false otherwise
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static HasReaders(state: long): boolean {
         return (state & State.READERS_MASK) != 0;
@@ -111,7 +103,6 @@ class State {
      * @param { long } state Current lock state
      * @returns { boolean } True if there are waiting writers, false otherwise
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static HasWriters(state: long): boolean {
         return (state & State.WRITERS_MASK) != 0;
@@ -123,7 +114,6 @@ class State {
      * @param { long } state Current lock state
      * @returns { long } Number of waiting readers
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static GetReaders(state: long): long {
         return (state & State.READERS_MASK) >> State.STATE_BITS;
@@ -136,7 +126,6 @@ class State {
      * @returns { long } Updated state value with incremented reader count
      * @throws { RangeError } If the reader count would overflow the maximum allowed value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static IncReaders(state: long): long {
         if ((state & State.READERS_MASK) == State.READERS_MASK) {
@@ -153,7 +142,6 @@ class State {
      * @returns { long } Updated state with reader count and lock state encoded
      * @throws { RangeError } If the reader count would overflow the maximum allowed value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static PrepareReadLock(state: long): long {
         return State.IncReaders(state) | (State.HasWriteLock(state) ? 0 : State.READ_LOCKED);
@@ -166,7 +154,6 @@ class State {
      * @returns { long } Updated state value with incremented writer count
      * @throws { RangeError } If the writer count would overflow the maximum allowed value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static IncWriters(state: long): long {
         if ((state & State.WRITERS_MASK) == State.WRITERS_MASK) {
@@ -183,7 +170,6 @@ class State {
      * @returns { long } Updated state with writer count and lock state encoded
      * @throws { RangeError } If the writer count would overflow the maximum allowed value
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static PrepareWriteLock(state: long): long {
         return State.IncWriters(state) | (State.HasReadLock(state) ? 0 : State.WRITE_LOCKED);
@@ -196,7 +182,6 @@ class State {
      * @returns { long } Updated state value with decremented reader count
      * @throws { RangeError } If the reader count would underflow
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static DecReadersClearState(state: long): long {
         if ((state & State.READERS_MASK) == 0) {
@@ -212,7 +197,6 @@ class State {
      * @returns { long } Updated state value with decremented writer count
      * @throws { RangeError } If the writer count would underflow
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static DecWritersClearState(state: long): long {
         if ((state & State.WRITERS_MASK) == 0) {
@@ -228,7 +212,6 @@ class State {
      * @param { long } state Current lock state with counters updated
      * @returns { long } State with lock bits updated according to readers and writers
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public static ApplyLockState(state: long): long {
         return state | (State.HasReaders(state) ? State.READ_LOCKED :
@@ -266,7 +249,6 @@ class State {
  * @class AsyncReadWriteLock
  * @implements AsyncRWLock
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export class AsyncReadWriteLock implements AsyncRWLock {
     constructor() {
@@ -282,7 +264,6 @@ export class AsyncReadWriteLock implements AsyncRWLock {
      *
      * @returns { AsyncReadLock } Read lock instance
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public readLock(): AsyncReadLock {
         return this.rLock_;
@@ -293,7 +274,6 @@ export class AsyncReadWriteLock implements AsyncRWLock {
      *
      * @returns { AsyncWriteLock } Write lock instance
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public writeLock(): AsyncWriteLock {
         return this.wLock_;
@@ -304,7 +284,6 @@ export class AsyncReadWriteLock implements AsyncRWLock {
      *
      * @returns { Promise<void> } A promise that resolves when the read lock is acquired
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public async executeReadLock(): Promise<void> {
         let oldState = this.state_.load();
@@ -331,7 +310,6 @@ export class AsyncReadWriteLock implements AsyncRWLock {
      *
      * @returns { Promise<void> } A promise that resolves when the write lock is acquired
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public async executeWriteLock(): Promise<void> {
         let oldState = this.state_.load();
@@ -351,7 +329,6 @@ export class AsyncReadWriteLock implements AsyncRWLock {
      * Wakes up waiting writers or readers as appropriate.
      *
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public unlock(): void {
         if (State.IsUnlocked(this.state_.load())) {
@@ -398,7 +375,6 @@ export class AsyncReadWriteLock implements AsyncRWLock {
  * @class AsyncReadLock
  * @implements AsyncBaseLock
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export class AsyncReadLock implements AsyncBaseLock {
     constructor(rwl: AsyncReadWriteLock) {
@@ -410,7 +386,6 @@ export class AsyncReadLock implements AsyncBaseLock {
      *
      * @returns { Promise<void> } A promise that resolves when the read lock is acquired
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public async lock(): Promise<void> {
         await this.rwl_.executeReadLock();
@@ -420,7 +395,6 @@ export class AsyncReadLock implements AsyncBaseLock {
      * Releases the read lock.
      *
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public unlock() {
         this.rwl_.unlock();
@@ -435,7 +409,6 @@ export class AsyncReadLock implements AsyncBaseLock {
  * @class AsyncWriteLock
  * @implements AsyncBaseLock
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export class AsyncWriteLock implements AsyncBaseLock {
     constructor(rwl: AsyncReadWriteLock) {
@@ -447,7 +420,6 @@ export class AsyncWriteLock implements AsyncBaseLock {
      *
      * @returns { Promise<void> } A promise that resolves when the write lock is acquired
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public async lock(): Promise<void> {
         await this.rwl_.executeWriteLock();
@@ -457,7 +429,6 @@ export class AsyncWriteLock implements AsyncBaseLock {
      * Releases the write lock.
      *
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public unlock() {
         this.rwl_.unlock();

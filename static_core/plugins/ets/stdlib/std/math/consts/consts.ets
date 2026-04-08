@@ -24,7 +24,6 @@ package std.math.consts;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const PI: double = 3.141592653589793;
 
@@ -33,7 +32,6 @@ export const PI: double = 3.141592653589793;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const E: double = 2.718281828459045;
 
@@ -42,7 +40,6 @@ export const E: double = 2.718281828459045;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const LN10: double = 2.302585092994046;
 
@@ -51,7 +48,6 @@ export const LN10: double = 2.302585092994046;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const LN2: double = 0.6931471805599453;
 
@@ -60,7 +56,6 @@ export const LN2: double = 0.6931471805599453;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const LOG2E: double = 1.4426950408889634;
 
@@ -69,7 +64,6 @@ export const LOG2E: double = 1.4426950408889634;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const LOG10E: double = 0.4342944819032518;
 
@@ -78,7 +72,6 @@ export const LOG10E: double = 0.4342944819032518;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const SQRT1_2: double = 0.7071067811865476;
 
@@ -87,7 +80,6 @@ export const SQRT1_2: double = 0.7071067811865476;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const SQRT2: double = 1.4142135623730951;
 
@@ -104,7 +96,6 @@ export const SQRT2: double = 1.4142135623730951;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const doubleEpsilon: double = 2.22045e-16;
 
@@ -113,7 +104,6 @@ export const doubleEpsilon: double = 2.22045e-16;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const doubleMinimum: double = 2.2250738585072014E-308;
 
@@ -122,7 +112,6 @@ export const doubleMinimum: double = 2.2250738585072014E-308;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const doubleMaximum: double = 1.7976931348623157E+308;
 
@@ -131,7 +120,6 @@ export const doubleMaximum: double = 1.7976931348623157E+308;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const doubleNaN: double = 0.0 / 0.0;
 
@@ -140,7 +128,6 @@ export const doubleNaN: double = 0.0 / 0.0;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const doubleInf: double = 1.0 / 0.0;
 
@@ -149,6 +136,5 @@ export const doubleInf: double = 1.0 / 0.0;
  * @type {double}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const doubleNegInf: double = -1.0 / 0.0;

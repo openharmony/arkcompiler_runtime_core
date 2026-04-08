@@ -832,7 +832,6 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns { Set<K> } A new set instance containing all of the keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keySet(): Set<K> {
         let res = new Set<K>()

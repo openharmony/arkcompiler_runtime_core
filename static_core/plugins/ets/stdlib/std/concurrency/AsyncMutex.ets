@@ -20,7 +20,6 @@ package std.concurrency;
 *
 * @namespace concurrency.stackless
 * @syscap SystemCapability.Utils.Lang
-* @since 24
 */
 export namespace concurrency.stackless {
 
@@ -29,7 +28,6 @@ export namespace concurrency.stackless {
  *
  * @class AsyncMutex
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export class AsyncMutex {
     constructor() {
@@ -42,7 +40,6 @@ export class AsyncMutex {
      *
      * @returns { Promise<void> } A promise that resolves when the mutex is acquired
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public async lock(): Promise<void> {
         if (this.waiters_.fetchAdd(1) == 0) {
@@ -55,7 +52,6 @@ export class AsyncMutex {
      * Releases the mutex, allowing other coroutines to acquire it.
      *
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     public unlock(): void {
         if (this.waiters_.load() == 0) {

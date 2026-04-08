@@ -24,7 +24,6 @@ package std.testing;
  * @namespace
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace arktest {
     /**
@@ -35,7 +34,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the condition is false.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     function assertCommon(condition: boolean, message: string, description?: string): void {
         if (!condition) {
@@ -50,7 +48,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the condition is false.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     function failingAssertion(message: string, description?: string): never {
         throw new AssertionError((description ? description + "\n" : "") + message)
@@ -63,7 +60,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the condition is false.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertTrue(condition: boolean, comment?: string): void {
         assertCommon(condition, "expected true but was false", comment)
@@ -76,7 +72,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the condition is true.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertFalse(condition: boolean, comment?: string): void {
         assertCommon(!condition, "expected false but was true", comment)
@@ -90,7 +85,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the two values are not equal.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertEQ<T1, T2>(value1: T1, value2: T2, comment?: string): void {
         assertCommon(value1 === value2, "expected equality failed: '" + value1 + "' === '" + value2 + "'", comment);
@@ -104,7 +98,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the two values are equal.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertNE<T1, T2>(value1: T1, value2: T2, comment?: string): void {
         assertCommon(value1 !== value2, "expected non-equality failed: '" + value1 + "' !== '" + value2 + "'", comment);
@@ -119,7 +112,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the difference between the two values exceeds the absolute error.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertDoubleEQ(value1: double, value2: double, absError: double, comment?: string): void {
         let difference = Math.abs(value1 - value2);
@@ -136,7 +128,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is not less than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLT(value1: byte, value2: byte, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
@@ -150,7 +141,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is not less than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLT(value1: short, value2: short, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
@@ -164,7 +154,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is not less than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLT(value1: int, value2: int, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
@@ -178,7 +167,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is not less than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLT(value1: long, value2: long, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
@@ -192,7 +180,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is not less than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLT(value1: float, value2: float, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
@@ -206,7 +193,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is not less than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLT(value1: double, value2: double, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
@@ -220,7 +206,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is greater than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLE(value1: byte, value2: byte, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
@@ -234,7 +219,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is greater than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLE(value1: short, value2: short, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
@@ -248,7 +232,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is greater than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLE(value1: int, value2: int, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
@@ -262,7 +245,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is greater than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLE(value1: long, value2: long, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
@@ -276,7 +258,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is greater than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLE(value1: float, value2: float, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
@@ -290,7 +271,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when the first value is greater than the second value.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function assertLE(value1: double, value2: double, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
@@ -305,7 +285,6 @@ export namespace arktest {
     *     or when the thrown value does not satisfy the test predicate.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function expectThrow(
         cb: () => void,
@@ -332,7 +311,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when no error occurs or when the thrown error does not match the expected error.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function expectError(fn: () => void, expect?: string | Error): void {
         expectThrow(fn, (e) => {
@@ -364,7 +342,6 @@ export namespace arktest {
     * @throws {AssertionError} Thrown when an error occurs.
     * @syscap SystemCapability.Utils.Lang
     * @FaAndStageModel
-    * @since 24
     */
     export function expectNoThrow(fn: () => void): void {
         try {
@@ -378,7 +355,6 @@ export namespace arktest {
      * Represents terminal colors.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     class TermColor {
         /**
@@ -388,7 +364,6 @@ export namespace arktest {
          * @static
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         static readonly BLACK: TermColor = new TermColor(0)
 
@@ -399,7 +374,6 @@ export namespace arktest {
          * @static
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         static readonly RED: TermColor = new TermColor(1)
 
@@ -410,7 +384,6 @@ export namespace arktest {
          * @static
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         static readonly GREEN: TermColor = new TermColor(2)
 
@@ -420,7 +393,6 @@ export namespace arktest {
          * @readonly
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         readonly code: int
 
@@ -433,7 +405,6 @@ export namespace arktest {
          * @returns {string}
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         toString(): string {
             return "" + this.code
@@ -445,7 +416,6 @@ export namespace arktest {
      * @class ArkTest Provides an interface for running a test.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export class ArkTest {
         /**
@@ -454,7 +424,6 @@ export namespace arktest {
          * @param {Function} callback The callback function containing the test body.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         constructor(name: string, callback: () => void) {
             this.name = name;
@@ -466,7 +435,6 @@ export namespace arktest {
          * @returns {boolean} 
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         final run(): boolean {
             let testcaseName: string = this.getFullName();
@@ -505,7 +473,6 @@ export namespace arktest {
          * @returns {string} The full test name.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         final getFullName(): string {
             let name: string = "";
@@ -520,7 +487,6 @@ export namespace arktest {
          * @param {ArkTestsuite} suite The test suite instance.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         public setSuite(suite: ArkTestsuite): void {
             this.suite = suite;
@@ -532,7 +498,6 @@ export namespace arktest {
          * @readonly
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         readonly name: string;
 
@@ -545,7 +510,6 @@ export namespace arktest {
      * @class ArkTestsuite provides interface for running a group of tests
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export class ArkTestsuite {
 
@@ -554,7 +518,6 @@ export namespace arktest {
          * @param {string} name The test suite name.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         constructor(name: string) {
             this.name = name;
@@ -565,7 +528,6 @@ export namespace arktest {
          * Executed before each test runs. Can be overridden in derived classes.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         before(): void {}
 
@@ -573,7 +535,6 @@ export namespace arktest {
          * Executed after each test runs. Can be overridden in derived classes.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         after(): void {}
 
@@ -584,7 +545,6 @@ export namespace arktest {
          * @throws {Error} Thrown when the test name is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         final addTest(name: string, callback: () => void): void {
             this.addTest(new ArkTest(name, callback));
@@ -597,7 +557,6 @@ export namespace arktest {
          * @throws {Error} Thrown when the test name is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         final addAsyncTest(name: string, asyncCallback: () => Promise<void>): void {
             let callback = () => {
@@ -612,7 +571,6 @@ export namespace arktest {
          * @throws {Error} Thrown when the test name is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         final addTest(test: ArkTest): void {
             if (test.name == "") {
@@ -627,7 +585,6 @@ export namespace arktest {
          * @returns {int} The number of failed tests.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         final run(): int {
             let startMs = Date.now();
@@ -661,7 +618,6 @@ export namespace arktest {
          * @readonly
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         readonly name: string;
 

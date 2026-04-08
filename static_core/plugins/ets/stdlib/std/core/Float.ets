@@ -285,7 +285,6 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
         return this.value.toDouble().toLocaleString(locales, options)
@@ -301,7 +300,6 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         if (options instanceof Intl.NumberFormatOptions) {

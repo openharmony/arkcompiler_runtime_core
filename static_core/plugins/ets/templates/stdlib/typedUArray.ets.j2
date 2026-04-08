@@ -113,7 +113,6 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
  * @implements { Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
     /**
@@ -124,7 +123,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly BYTES_PER_ELEMENT: int = {{element['bytes']}}
     /**
@@ -134,7 +132,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly BYTES_PER_ELEMENT: int = {{element['name']}}Array.BYTES_PER_ELEMENT
 
@@ -145,7 +142,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly buffer: ArrayBuffer
 
@@ -161,7 +157,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this(0)
@@ -176,7 +171,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native static toUint8Clamped(val: double): int;
     {%- endif %}
@@ -188,7 +182,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int) {
         this(length.toDouble())
@@ -201,7 +194,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the length is outside the bounds of the buffer, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / {{element['name']}}Array.BYTES_PER_ELEMENT)) {
@@ -219,7 +211,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param { FixedArray<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
@@ -240,7 +231,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param { FixedArray<number> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
@@ -263,7 +253,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param { Array<int> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: Array<int>) {
         this(numbers.length)
@@ -289,7 +278,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param { FixedArray<bigint> } numbers - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(numbers: FixedArray<bigint>) {
         this(numbers.length)
@@ -305,7 +293,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param { {{element['name']}}Array } other - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(other: {{element['name']}}Array) {
         this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
@@ -320,7 +307,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param { Iterable<{{element['subsetTypeValues']}}> } elements - data initializer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(elements: Iterable<{{element['subsetTypeValues']}}>) {
         const items: Object = elements as Object
@@ -361,7 +347,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
@@ -375,7 +360,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
@@ -390,7 +374,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
@@ -438,7 +421,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
@@ -451,7 +433,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
@@ -490,7 +471,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { IterableIterator<{{element['subsetTypeValues']}}> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<{{element['subsetTypeValues']}}> {
          return this.values()
@@ -503,7 +483,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['subsetTypeBoxed']}} | undefined } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public at(index: int): {{element['subsetTypeBoxed']}} | undefined {
         let k: int
@@ -529,7 +508,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['subsetType']}} } - a primitive at index
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     {%- if element['name'] == 'BigUint64' %}
     public $_get(i: int): {{element['subsetType']}} {
@@ -549,7 +527,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: int): void
     {%- endif %}
@@ -562,7 +539,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native $_set(index: int, val: {{element['primitiveType']}}): void
 
@@ -574,7 +550,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
         {%- if element.get('name') == 'BigUint64' %}
@@ -597,7 +572,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int, start: int, end?: int): {{element['name']}}Array {
         let arrayLength: int = this.lengthInt;
@@ -627,7 +601,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public copyWithin(target: int): {{element['name']}}Array {
         this.copyWithinImpl(target, 0, this.lengthInt)
@@ -640,7 +613,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { IterableIterator<{{subsetTypeValuesEntries}}> } - key, value pairs for every entry in the array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public entries(): IterableIterator<{{subsetTypeValuesEntries}}> {
         return new {{element['name']}}ArrayIteratorEntries(this)
@@ -655,7 +627,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - modified {{element['name']}}Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: {{element['primitiveType']}}, start?: int, end?: int): {{element['name']}}Array {
         {%- if element.get('clamped', False) %}
@@ -676,7 +647,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - modified {{element['name']}}Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public fill(value: {{element['subsetType']}}, start?: int, end?: int): {{element['name']}}Array {
         {%- if element.get('name') == 'BigUint64' %}
@@ -699,7 +669,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: {{element['primitiveType']}}): void {
         this.$_set(insertPos, val)
@@ -713,7 +682,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(insertPos: int, val: {{element['subsetType']}}): void {
         this.$_set(insertPos, val)
@@ -728,7 +696,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<{{element['primitiveType']}}>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
@@ -748,7 +715,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<{{element['subsetType']}}>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
@@ -772,7 +738,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<{{element['primitiveType']}}>): void {
         this.set(arr, 0)
@@ -785,7 +750,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(arr: FixedArray<{{element['subsetType']}}>): void {
         this.set(arr, 0)
@@ -800,7 +764,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: {{element['name']}}Array): void
 
@@ -816,7 +779,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native set(array: {{element['name']}}Array, offset: int): void
 
@@ -829,7 +791,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the number of assigned elements exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public set(array: ArrayLike<{% if element['name'] == 'BigUint64' %}BigInt{% else %}number{% endif %}>, offset: int = 0): void {
         const insertPos = offset
@@ -861,7 +822,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(...items: FixedArray<{{argType}}>): {{element['name']}}Array {
         let res = new {{element['name']}}Array(items.length.toInt())
@@ -908,7 +868,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static of(): {{element['name']}}Array {
         return new {{element['name']}}Array(0)
@@ -922,7 +881,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<{{updatedSubsetType}}>): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
@@ -943,7 +901,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(set: Set<{{updatedSubsetType}}>): {{element['name']}}Array {
         const length = set.size;
@@ -971,7 +928,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: {{element['name']}}Array): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
@@ -988,7 +944,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: {{element['signed']}}Array): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
@@ -1005,7 +960,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: Array<{{updatedSubsetType}}>): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
@@ -1021,7 +975,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
         {%- if element.name == 'Uint8Clamped' %}
@@ -1050,7 +1003,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(arrayLike.length)
@@ -1080,7 +1032,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         if (mapfn == undefined) {
@@ -1149,7 +1100,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { boolean } - true if searchElement is in {{element['name']}}Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: {{element['primitiveType']}}, fromIndex: int): boolean {
         {%- if element['name'] == 'BigUint64' %}
@@ -1169,7 +1119,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { boolean } - true if searchElement is in {{element['name']}}Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: {{element['primitiveType']}}): boolean {
         {%- if element['name'] == 'BigUint64' %}
@@ -1191,7 +1140,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { boolean } - true if searchElement is in {{element['name']}}Array, false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public includes(searchElement: {{element['subsetType']}}, fromIndex?: int): boolean {
         {%- if element['name'] == 'BigUint64' %}
@@ -1211,7 +1159,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
@@ -1225,7 +1172,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
@@ -1240,7 +1186,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - index of element if it presents, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public indexOf(searchElement: {{element['subsetType']}}, fromIndex?: int): int {
         {%- if element['subsetType'] == 'BigInt' %}
@@ -1268,7 +1213,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { string } - joined representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public join(separator?: String): string {
         if (separator == undefined) {
@@ -1283,7 +1227,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { IterableIterator<int> } - iterator over keys
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public keys(): IterableIterator<int> {
         return new {{element['name']}}ArrayIteratorKeys(this)
@@ -1296,7 +1239,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -1309,7 +1251,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - right-most index of searchElement. It must be less than length. -1 if not found
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: {{element['subsetType']}}): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
@@ -1323,7 +1264,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
@@ -1338,7 +1278,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public lastIndexOf(searchElement: {{element['subsetType']}}, fromIndex: int | undefined): int {
         {%- if element['subsetType'] == 'BigInt' %}
@@ -1364,7 +1303,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { Error } - function not implemented
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public of(...data: FixedArray<{{element['subsetType']}}>): {{element['name']}}Array {
         throw new Error("{{element['name']}}Array.of: not implemented")
@@ -1376,7 +1314,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - a new {{element['name']}}Array using reversed data from the current one
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native reverse(): {{element['name']}}Array
 
@@ -1390,7 +1327,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *     where end index is excluded
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin?: int, end?: int): {{element['name']}}Array {
         return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
@@ -1411,7 +1347,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *     current {{element['name']}}Array[begin, this.lengthInt].
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int): {{element['name']}}Array {
         return this.sliceFromTo(begin, this.lengthInt)
@@ -1424,7 +1359,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { this } - sorted {{element['name']}}Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native sort(): this;
 
@@ -1437,7 +1371,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { this } - sorted {{element['name']}}Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     {%- if element['name'] == 'BigUint64' %}
     {%- set sortCompareFnRetTy = 'int | BigInt' %}
@@ -1494,7 +1427,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - a new {{element['name']}}Array with the same underlying Buffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public subarray(begin?: int, end?: int): {{element['name']}}Array {
         const len: int = this.lengthInt
@@ -1516,7 +1448,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
@@ -1545,7 +1476,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - a reversed copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toReversed(): {{element['name']}}Array {
         let newArray = new {{element['name']}}Array(this.lengthInt)
@@ -1561,7 +1491,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - a sorted copy
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toSorted(): {{element['name']}}Array {
         return new {{element['name']}}Array(this).sort()
@@ -1573,7 +1502,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { string } - a string representation of the {{element['name']}}Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return this.join(",")
@@ -1585,7 +1513,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { IterableIterator<{{element['subsetTypeValues']}}> } - an iterator
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public values(): IterableIterator<{{element['subsetTypeValues']}}> {
          return new {{element['name']}}ArrayIterator(this)
@@ -1600,7 +1527,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(this)
@@ -1617,7 +1543,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { RangeError } - If the index exceeds the array range, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public with(index: int, value: {{element['subsetType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(this)
@@ -1647,7 +1572,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *     in which case true is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public some(predicate: (element: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1670,7 +1594,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce<U = {{elType}}>(
                 callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => U,
@@ -1694,7 +1617,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { TypeError } - If the {{element['name']}}Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduce(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => {{elType}}): {{elType}} {
         if (this.lengthInt == 0) {
@@ -1720,7 +1642,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { U } - Run the callback function on the entire typed array until the obtained value is completed.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight<U = {{elType}}>(
                 callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => U,
@@ -1744,7 +1665,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { TypeError } - If the {{element['name']}}Array length is 0, throw a TypeError.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reduceRight(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => {{elType}}): {{elType}} {
         if (this.lengthInt == 0) {
@@ -1766,7 +1686,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *     where for each element from current {{element['name']}}Array fn was applied
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public map(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => {{elType}}): {{element['name']}}Array {
         let resBuf = new ArrayBuffer(this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT)
@@ -1787,7 +1706,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *     in which case false is immediately returned.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public every(predicate: (element: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1805,7 +1723,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array } - a new {{element['name']}}Array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{element['name']}}Array {
         let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
@@ -1836,7 +1753,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{elType}} | undefined }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public find(predicate: (value: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}} | undefined {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1858,7 +1774,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{idxType}} } - Index of the first matched element
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findIndex(predicate: (value: {{elType}}, index: {{idxType}}, obj: {{element['name']}}Array) => boolean): {{idxType}} {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1877,7 +1792,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLast(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}} {
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -1896,7 +1810,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{idxType}} } - the index of the last element that satisfies fn, -1 otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public findLastIndex(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{idxType}} {
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -1914,7 +1827,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *     callbackfn function one time for each element in the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public forEach(callbackfn: (value: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => void): void {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1930,7 +1842,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { {{element['name']}}Array }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): {{element['name']}}Array {
         return this
@@ -1942,7 +1853,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get byteOffset(): int {
         return this.byteOffsetInt
@@ -1954,7 +1864,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get byteLength(): int {
         return this.byteLengthInt
@@ -1966,7 +1875,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return this.lengthInt
@@ -1979,7 +1887,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public readonly name: string = "{{element['name']}}Array"
 

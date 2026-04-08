@@ -24,7 +24,6 @@ package std.containers
  * Container namespace providing implementations of various container classes
  * @namespace containers
  * @syscap SystemCapability.Utils.Lang
- * @since 24
  */
 export namespace containers {
 
@@ -32,14 +31,12 @@ export namespace containers {
      * Represents a type that can be either String or undefined
      * @typedef { String | undefined } UndefinableString
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     type UndefinableString = String | undefined
 
     /**
      * A dynamic array class that can contain String or undefined elements
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
      */
     export class UndefinableStringArray {
         /**
@@ -47,7 +44,6 @@ export namespace containers {
          * @type { int }
          * @static
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         /* const */ static ArrayInitSize : int = 16
 
@@ -64,7 +60,6 @@ export namespace containers {
          * @param { int } capacity - The initial capacity of the array
          * @param { UndefinableString } val - The initial value used to fill the array
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         constructor(capacity: int, val: UndefinableString) {
             this.init(capacity, val)
@@ -74,7 +69,6 @@ export namespace containers {
          * Constructs new UndefinableStringArray with required capacity
          * @param { int } capacity - The initial capacity of the array
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         constructor(capacity: int) {
             this.data = new FixedArray<UndefinableString>(capacity)
@@ -84,7 +78,6 @@ export namespace containers {
         /**
          * Constructs new empty UndefinableStringArray
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         constructor() {
             this(UndefinableStringArray.ArrayInitSize)
@@ -94,7 +87,6 @@ export namespace containers {
          * Increases capacity if passed argument is greater than current capacity
          * @param { int } capacity - The new capacity requirement
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
@@ -110,7 +102,6 @@ export namespace containers {
          * Gets the underlying array
          * @returns { String[] } The underlying array containing all non-undefined elements
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public toArray(): String[] {
             let newData = new (String)[this.curSize]("")
@@ -128,7 +119,6 @@ export namespace containers {
          * @returns { FixedArray<String> } A new FixedArray containing all elements
          * @throws { TypeError } If an element is undefined, a type error may be thrown when assigning to FixedArray
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public toFixedArray(): FixedArray<String> {
             let newData: FixedArray<String> = new FixedArray<String>(this.curSize)
@@ -142,7 +132,6 @@ export namespace containers {
          * Converts UndefinableStringArray to a standard (String | undefined) array
          * @returns { (String | undefined)[] } A new (String | undefined) array containing all elements
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public toUndefinableArray(): (String | undefined)[] {
             let newData = new (String | undefined)[this.curSize](undefined)
@@ -168,7 +157,6 @@ export namespace containers {
          * Pushes a value to the end of the array
          * @param { UndefinableString } e - Value to push
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public pushBack(e: UndefinableString): void {
             if (this.curSize == this.data.length) {
@@ -187,7 +175,6 @@ export namespace containers {
          * @returns { UndefinableString } Popped value
          * @throws { RangeError } When the array is empty
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public popBack(): UndefinableString {
             if (this.curSize === 0) {
@@ -201,7 +188,6 @@ export namespace containers {
          * Returns number of elements in the List
          * @returns { int } The number of elements in the array
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public size(): int {
             return this.curSize
@@ -213,7 +199,6 @@ export namespace containers {
          * @returns { UndefinableString } An element at the specified index
          * @throws { RangeError } When index is out of bounds
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public at(index: int): UndefinableString {
             return this.data[index]
@@ -225,7 +210,6 @@ export namespace containers {
          * @param { UndefinableString } e - New value
          * @throws { RangeError } When index is out of bounds
          * @syscap SystemCapability.Utils.Lang
-         * @since 24
          */
         public set(index: int, e: UndefinableString): void {
             this.data[index] = e

@@ -21,7 +21,6 @@ package std.containers;
  * @namespace containers.stackless
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24 static
  */
 export namespace containers.stackless {
 
@@ -31,7 +30,6 @@ export namespace containers.stackless {
      * @interface ConcurrentQueue
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24 static
      */
     export interface ConcurrentQueue<T> {
         /**
@@ -43,7 +41,6 @@ export namespace containers.stackless {
          *     and after capacity becomes available when the queue is full.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         push(element: T): Promise<void>;
 
@@ -55,7 +52,6 @@ export namespace containers.stackless {
          *     and after an element becomes available when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         pop(): Promise<T>;
 
@@ -68,7 +64,6 @@ export namespace containers.stackless {
          *     else false when no space is currently available.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         add(element: T): boolean;
 
@@ -80,7 +75,6 @@ export namespace containers.stackless {
          *     else undefined when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         poll(): T | undefined;
 
@@ -92,7 +86,6 @@ export namespace containers.stackless {
          *     else undefined when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         getFirst(): T | undefined;
 
@@ -104,7 +97,6 @@ export namespace containers.stackless {
          *     else false when at least one element is present.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         isEmpty(): boolean;
 
@@ -116,7 +108,6 @@ export namespace containers.stackless {
          *     else returns 0 when the queue is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         get size(): int;
 
@@ -128,7 +119,6 @@ export namespace containers.stackless {
          *     else returns the implementation maximum when the queue is unbounded.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         get capacity(): int;
 
@@ -140,7 +130,6 @@ export namespace containers.stackless {
          *     else returns 0 when the queue is already full.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24 static
          */
         remainingCapacity(): int;
     }

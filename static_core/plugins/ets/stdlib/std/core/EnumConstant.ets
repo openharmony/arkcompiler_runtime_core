@@ -25,7 +25,6 @@ package std.core;
  * 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class EnumConstant {
     private name: string = ""
@@ -41,7 +40,6 @@ export final class EnumConstant {
      * @returns { Type } get current object's type
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getType(): Type {
         return this.typ!
@@ -53,7 +51,6 @@ export final class EnumConstant {
      * @returns { string } get current object's name
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getName(): string {
         return this.name
@@ -65,7 +62,6 @@ export final class EnumConstant {
      * @returns { int } get current object's value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getValue(): int {
         return this.intVal
@@ -77,7 +73,6 @@ export final class EnumConstant {
      * @returns { string } get current object's stringvalue
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getStringValue(): string {
         return this.strVal
@@ -89,7 +84,6 @@ export final class EnumConstant {
      * @returns { boolean } get current object's hasValue
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public hasValue(): boolean {
         // TODO(shumilov-petr): not implemented
@@ -102,7 +96,6 @@ export final class EnumConstant {
      * @returns { boolean } get current object's hasStringValue
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public hasStringValue(): boolean {
         // TODO(shumilov-petr): not implemented
@@ -120,7 +113,6 @@ export final class EnumConstant {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static create(name: string, typ: Type, v: int): EnumConstant {
         // TODO(shumilov-petr): not implemented
@@ -138,7 +130,6 @@ export final class EnumConstant {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static create(name: string, typ: Type, v: string): EnumConstant {
         // TODO(shumilov-petr): not implemented
@@ -152,7 +143,6 @@ export final class EnumConstant {
      * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         // TODO(shumilov-petr): not implemented

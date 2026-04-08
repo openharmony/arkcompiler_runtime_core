@@ -487,7 +487,6 @@ export namespace taskpool {
      * Provides configs that can be set for the task to execute.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export interface Configs {
         /**
@@ -496,7 +495,6 @@ export namespace taskpool {
          * @type { ?Priority }
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         priority?: Priority;
 
@@ -506,7 +504,6 @@ export namespace taskpool {
          * @type { ?number }
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         timeout?: number;
     }
@@ -1869,7 +1866,6 @@ export namespace taskpool {
      * @returns { Promise<Any> } - Promise for result of executed task
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export function execute(task: Task, configs: Configs): Promise<Any>{
         let timeout: number = configs.timeout ?? Infinity;
@@ -1970,7 +1966,6 @@ export namespace taskpool {
      * @returns { Promise<Array<Any>> } Promise for array of results of executed tasks from the group
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export function execute(group: TaskGroup, configs: Configs): Promise<Array<Any>> {
         let timeout: number = configs.timeout ?? Infinity;

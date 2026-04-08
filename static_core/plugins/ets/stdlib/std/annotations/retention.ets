@@ -24,7 +24,6 @@ package std.annotations;
  * Defines Retention annotation
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export @interface Retention {
     /**
@@ -32,7 +31,6 @@ export @interface Retention {
      * @type { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     policy: string
 };

@@ -25,7 +25,6 @@ type UncaughtErrorListener = StdProcess.UncaughtErrorListener;
  * 
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class ProcessErrorHandler {
     private constructor() {}
@@ -36,7 +35,6 @@ export class ProcessErrorHandler {
      * @param { UncaughtErrorListener } cb - The callback function for handling uncaught errors.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(cb: UncaughtErrorListener) {
         this.callback = cb;
@@ -49,7 +47,6 @@ export class ProcessErrorHandler {
      * @param { Object } error - The uncaught error object that occurred.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public handleUncaughtError(error: Object): void {
         if (error instanceof Error) {
@@ -75,7 +72,6 @@ export class ProcessErrorHandler {
      * @param { UncaughtErrorListener } cb - The new error handling callback function.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public reset(cb: UncaughtErrorListener): void {
         ConcurrencyHelpers.lockGuard(this.mutex, () => {

@@ -27,7 +27,6 @@ package std.core;
  * @interface ReadonlyArray<out T>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface ReadonlyArray<out T> extends ConcatArray<T> {
     /**
@@ -39,7 +38,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     A new array containing the merged elements of the current read-only array and all specified arrays.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     concat(...items: FixedArray<ConcatArray<@types.SkipVarianceCheckDontUseItWillBeRemoved T>>): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
     // Typing and previous overload have to cover it
@@ -51,7 +49,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     A new array iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     entries(): IterableIterator<[int, @types.SkipVarianceCheckDontUseItWillBeRemoved T]>;
 
@@ -66,7 +63,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     every(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 
@@ -81,7 +77,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     A new array containing all elements that pass the test.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     filter(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
 
@@ -97,7 +92,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     or undefined if none.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     find(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined;
 
@@ -113,7 +107,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     or undefined if none.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     findLast(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined;
 
@@ -129,7 +122,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     or -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): int;
 
@@ -145,7 +137,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     or -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): int;
 
@@ -159,7 +150,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { void } No return value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     forEach(action: (value: T, index: int, array: ReadonlyArray<T>) => void): void;
 
@@ -170,7 +160,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { string } A string formed by joining all array elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     join(separator?: string): string;
 
@@ -189,7 +178,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { boolean } Returns true if the specified value is found, otherwise false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     includes(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T, fromIndex?: int): boolean;
 
@@ -207,7 +195,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { int } The index of the first found element in the array, or -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     indexOf(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T, fromIndex?: int): int;
 
@@ -217,7 +204,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { IterableIterator<int> } A new array iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     keys(): IterableIterator<int>;
 
@@ -230,7 +216,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { int } The index of the last specified element in the array, or -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     lastIndexOf(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T): int;
 
@@ -247,7 +232,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { int } The index of the last specified element in the array, or -1 if not found.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     lastIndexOf(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T, fromIndex?: int): int;
 
@@ -261,7 +245,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { Array<U> } A new array where each element is the result of the callback function.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     map<U>(mapper: (value: T, index: int, array: ReadonlyArray<T>) => U): Array<U>;
 
@@ -276,7 +259,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { T } The accumulated result of the function's processing.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     reduce(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => @types.SkipVarianceCheckDontUseItWillBeRemoved T): T;
 
@@ -293,7 +275,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { U } The accumulated result of the reducer function processing.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
@@ -308,7 +289,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { T } The accumulated result of the function's processing.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => @types.SkipVarianceCheckDontUseItWillBeRemoved T): T;
 
@@ -327,7 +307,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { U } The accumulated result of the function's processing.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
@@ -347,7 +326,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     A new array containing the extracted elements.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     slice(start?: int, end?: int): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
 
@@ -363,7 +341,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      *     otherwise returns false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     some(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 
@@ -373,7 +350,6 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @returns { IterableIterator<T> } A new array iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     values(): IterableIterator<T>;
 }

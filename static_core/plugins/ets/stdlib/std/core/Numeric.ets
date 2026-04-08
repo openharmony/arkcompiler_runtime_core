@@ -26,7 +26,6 @@ package std.core;
  * @extends Object
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export abstract class Numeric extends Object {
 
@@ -37,7 +36,6 @@ export abstract class Numeric extends Object {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract toByte(): byte;
 
@@ -47,7 +45,6 @@ export abstract class Numeric extends Object {
      * @returns {int} The int type value of the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract toInt(): int;
 
@@ -57,7 +54,6 @@ export abstract class Numeric extends Object {
      * @returns {short} The short type value of the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract toShort(): short;
 
@@ -67,7 +63,6 @@ export abstract class Numeric extends Object {
      * @returns {long} The long type value of the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract toLong(): long;
 
@@ -77,7 +72,6 @@ export abstract class Numeric extends Object {
      * @returns {float} The float type value of the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract toFloat(): float;
 
@@ -87,7 +81,6 @@ export abstract class Numeric extends Object {
      * @returns {double} The double type value of the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public abstract toDouble(): double;
 }
@@ -98,7 +91,6 @@ export abstract class Numeric extends Object {
  * @extends Numeric
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export abstract class Integral extends Numeric {}
 
@@ -108,6 +100,5 @@ export abstract class Integral extends Numeric {}
  * @extends Numeric
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export abstract class Floating extends Numeric {}

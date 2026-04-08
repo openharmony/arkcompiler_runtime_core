@@ -25,7 +25,6 @@ package std.core;
  * @class BaseEnum
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class BaseEnum<T extends byte | short | int | long | float | double | string> {
     /**
@@ -35,7 +34,6 @@ export class BaseEnum<T extends byte | short | int | long | float | double | str
      * @param { string } name The name of the enum constant.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     constructor(value: T, name: string) {
         this.name = name
@@ -48,7 +46,6 @@ export class BaseEnum<T extends byte | short | int | long | float | double | str
      * @returns { T } The value of the enum constant.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public valueOf(): T {
         return this.value
@@ -60,7 +57,6 @@ export class BaseEnum<T extends byte | short | int | long | float | double | str
      * @returns { string } The name of the enum constant.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getName(): string {
         return this.name
@@ -72,7 +68,6 @@ export class BaseEnum<T extends byte | short | int | long | float | double | str
      * @returns { string } A string representation of the enum constant.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): string {
         return (this.value as Object).toString()

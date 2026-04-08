@@ -62,7 +62,6 @@ package std.core;
 {%- endif %}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 {%- endmacro -%}
 
@@ -70,7 +69,6 @@ package std.core;
  * Marker interface for tuple types.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface Tuple extends Iterable<Any>
 {
@@ -83,7 +81,6 @@ export interface Tuple extends Iterable<Any>
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     unsafeGet(index: int): Any;
 }
@@ -124,7 +121,6 @@ export class Tuple0 implements Tuple
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public get length(): int {
         return 0;
@@ -137,7 +133,6 @@ export class Tuple0 implements Tuple
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public unsafeGet(index: int): Any {
         throw new IndexOutOfBoundsError();
@@ -149,7 +144,6 @@ export class Tuple0 implements Tuple
      * @returns { IterableIterator<Any> } - iterator over all elements
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override $_iterator(): IterableIterator<Any> {
        return new TupleIterator(this);
@@ -177,7 +171,6 @@ export class Tuple{{ narg }}{{ genTupleTypeParamsList(narg) }} extends Tuple{{na
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return {{narg}};
@@ -190,7 +183,6 @@ export class Tuple{{ narg }}{{ genTupleTypeParamsList(narg) }} extends Tuple{{na
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
       {%- if narg == 1 %}
@@ -217,7 +209,6 @@ export class Tuple{{ narg }}{{ genTupleTypeParamsList(narg) }} extends Tuple{{na
  * @extends Tuple{{maxarity}}{{ genTupleTypeParamsList(maxarity) }}
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class TupleN{{ genTupleTypeParamsList(maxarity) }} extends Tuple{{maxarity}}{{ genTupleTypeParamsList(maxarity) }}
 {
@@ -241,7 +232,6 @@ export class TupleN{{ genTupleTypeParamsList(maxarity) }} extends Tuple{{maxarit
      * @returns { int } The length of the tuple.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override get length(): int {
         return {{maxarity}} + this.$tupleValues.length;
@@ -254,7 +244,6 @@ export class TupleN{{ genTupleTypeParamsList(maxarity) }} extends Tuple{{maxarit
      * @returns { Any } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override unsafeGet(index: int): Any {
         if (index >= {{maxarity}} && index < this.length) {

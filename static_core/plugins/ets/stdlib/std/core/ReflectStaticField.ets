@@ -24,7 +24,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -33,7 +32,6 @@ export namespace reflect {
  * @extends Field
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class StaticField extends Field {
     private constructor() { throw new Error("StaticField constructor called") }
@@ -45,7 +43,6 @@ export final class StaticField extends Field {
      * @returns { boolean } If two objects are equal, return true; otherwise, return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: StaticField): boolean {
         return this.fieldPtr == other.fieldPtr
@@ -58,7 +55,6 @@ export final class StaticField extends Field {
      * @throws { OutofMemoryError } if there is no memory to allocate return value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getValue(): Any {
         return super.getValue(undefined)
@@ -71,7 +67,6 @@ export final class StaticField extends Field {
      * @throws { TypeError } if there is an incompatible value.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public setValue(value: Any): void {
         if (this.isReadonly()) {

@@ -25,7 +25,6 @@ import { stub } from "arkruntime"
  * @type { int }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const KEY_NOT_FOUND: int = -1;
 
@@ -52,7 +51,6 @@ export const KEY_NOT_FOUND: int = -1;
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -87,7 +85,6 @@ export function lowerBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}, startIndex:
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -105,7 +102,6 @@ export function lowerBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -140,7 +136,6 @@ export function upperBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}, startIndex:
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -155,7 +150,6 @@ export function upperBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}): int {
  * @returns { FixedArray<{{T}}> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<{{T}}>): FixedArray<{{T}}> {
     const r : FixedArray<{{T}}> = new FixedArray<{{T}}>(src.length);
@@ -179,7 +173,6 @@ export function copyOf(src: FixedArray<{{T}}>): FixedArray<{{T}}> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<{{T}}>, dst: ValueArray<{{T}}>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -194,7 +187,6 @@ export native function copyTo(src: ValueArray<{{T}}>, dst: ValueArray<{{T}}>, ds
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<{{T}}>, dst: FixedArray<{{T}}>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -222,7 +214,6 @@ export function copyTo(src: FixedArray<{{T}}>, dst: FixedArray<{{T}}>, dstStart:
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: FixedArray<{{T}}>, dst: FixedArray<{{T}}>, dstStart: int, srcStart: int, srcEnd: int): void;
 {%- endif %}

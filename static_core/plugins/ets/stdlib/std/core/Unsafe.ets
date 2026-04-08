@@ -33,7 +33,6 @@ package std.core
  * read and write of data at specified memory addresses.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace unsafeMemory {
     /**
@@ -42,7 +41,6 @@ export namespace unsafeMemory {
      * @param { byte } value - The 8-bit signed integer value to write.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeInt8(address: long, value: byte) : void;
 
@@ -52,7 +50,6 @@ export namespace unsafeMemory {
      * @param { boolean } value - The boolean value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeBoolean(address: long, value: boolean) : void;
 
@@ -62,7 +59,6 @@ export namespace unsafeMemory {
      * @param { short } value - The 16-bit signed integer value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeInt16(address: long, value: short) : void;
 
@@ -72,7 +68,6 @@ export namespace unsafeMemory {
      * @param { int } value - The 32-bit signed integer value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeInt32(address: long, value: int) : void;
 
@@ -82,7 +77,6 @@ export namespace unsafeMemory {
      * @param { float } value - The 32-bit single-precision floating-point value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeFloat32(address: long, value: float) : void;
 
@@ -92,7 +86,6 @@ export namespace unsafeMemory {
      * @param { long } value - The 64-bit signed integer value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeInt64(address: long, value: long) : void;
 
@@ -102,7 +95,6 @@ export namespace unsafeMemory {
      * @param { double } value - The 64-bit double-precision floating-point value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeFloat64(address: long, value: double) : void;
 
@@ -112,7 +104,6 @@ export namespace unsafeMemory {
      * @param { number } value - The numeric value to be written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeNumber(address: long, value: number) : void;
 
@@ -123,7 +114,6 @@ export namespace unsafeMemory {
      * @returns { int } The number of bytes written.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function writeString(address: long, value: String) : int;
 
@@ -133,7 +123,6 @@ export namespace unsafeMemory {
      * @returns { byte } The 8-bit signed integer value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readInt8(address: long) : byte;
 
@@ -143,7 +132,6 @@ export namespace unsafeMemory {
      * @returns { boolean } The boolean value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readBoolean(address: long) : boolean;
 
@@ -153,7 +141,6 @@ export namespace unsafeMemory {
      * @returns { short } The 16-bit signed integer value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readInt16(address: long) : short;
 
@@ -163,7 +150,6 @@ export namespace unsafeMemory {
      * @returns { int } The 32-bit signed integer value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readInt32(address: long) : int;
 
@@ -173,7 +159,6 @@ export namespace unsafeMemory {
      * @returns { long } The 64-bit signed integer value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readInt64(address: long) : long;
 
@@ -183,7 +168,6 @@ export namespace unsafeMemory {
      * @returns { float } The 32-bit single-precision floating-point value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readFloat32(address: long) : float;
 
@@ -193,7 +177,6 @@ export namespace unsafeMemory {
      * @returns { double } The 64-bit double-precision floating-point value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readFloat64(address: long) : double;
 
@@ -203,7 +186,6 @@ export namespace unsafeMemory {
      * @returns { number } The numeric value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readNumber(address: long) : number;
 
@@ -214,7 +196,6 @@ export namespace unsafeMemory {
      * @returns { String } The string value read.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function readString(address: long, size: int) : String;
 
@@ -224,7 +205,6 @@ export namespace unsafeMemory {
      * @returns { int } The number of bytes occupied by the string.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     export native function getStringSizeInBytes(value: string): int;
 }

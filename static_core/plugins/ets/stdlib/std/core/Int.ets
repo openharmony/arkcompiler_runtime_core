@@ -270,7 +270,6 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
         const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
@@ -287,7 +286,6 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         if (options instanceof Intl.NumberFormatOptions) {

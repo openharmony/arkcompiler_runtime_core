@@ -24,7 +24,6 @@ package std.core;
  * @namespace reflect
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace reflect {
 
@@ -33,7 +32,6 @@ export namespace reflect {
  * @extends Method
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class StaticMethod extends Method {
     private constructor() { throw new Error("StaticMethod constructor called") }
@@ -43,7 +41,6 @@ export final class StaticMethod extends Method {
      * @returns { boolean } If it is an asynchronous method, return true; otherwise, return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isAsync(): boolean {
         return (this.attributes & Attributes.ASYNC) != 0
@@ -54,7 +51,6 @@ export final class StaticMethod extends Method {
      * @returns { boolean } If it is a getter visitor, return true; otherwise, return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isGetter(): boolean {
         return (this.attributes & Attributes.GETTER) != 0
@@ -65,7 +61,6 @@ export final class StaticMethod extends Method {
      * @returns { boolean } If it is a setter visitor, return true; otherwise, return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isSetter(): boolean {
         return (this.attributes & Attributes.SETTER) != 0
@@ -77,7 +72,6 @@ export final class StaticMethod extends Method {
      * @returns { boolean } If two objects point to the same method, return true; otherwise, return false.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: StaticMethod): boolean {
         return this.methodPtr == other.methodPtr
@@ -91,7 +85,6 @@ export final class StaticMethod extends Method {
      * @throws { TypeError } if there is mismatch in arguments number or types
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public invoke(args?: FixedArray<Any>): Any {
         return super.invoke(undefined, args)

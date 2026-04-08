@@ -25,14 +25,12 @@ package std.annotations;
  * @namespace ani.unsafe
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace ani.unsafe {
     /**
      * Defines Quick annotation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     @Retention("BYTECODE")
     export @interface Quick {};
@@ -40,7 +38,6 @@ export namespace ani.unsafe {
      * Defines Direct annotation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     @Retention("BYTECODE")
     export @interface Direct {};

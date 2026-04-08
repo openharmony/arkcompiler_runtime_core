@@ -41,7 +41,6 @@ class ArrayLikeIterator<T> implements IterableIterator<T> {
  * @interface ArrayLike
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface ArrayLike<out T> extends Iterable<T> {
     /**
@@ -51,7 +50,6 @@ export interface ArrayLike<out T> extends Iterable<T> {
      * @returns { T } The element at the specified index.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     $_get(index: int): T
 
@@ -63,7 +61,6 @@ export interface ArrayLike<out T> extends Iterable<T> {
      * @returns { IterableIterator<T> } An iterator instance.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     $_iterator(): IterableIterator<T> {
         return new ArrayLikeIterator<T>(this)

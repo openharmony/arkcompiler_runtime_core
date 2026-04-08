@@ -25,7 +25,6 @@ package std.core;
  * @typedef { int } UTF_16_CodePoint
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type UTF_16_CodePoint = int;
 
@@ -36,7 +35,6 @@ export type UTF_16_CodePoint = int;
  * @implements Comparable<Char>
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export final class Char extends Object implements Comparable<Char> {
     private value: char;
@@ -46,7 +44,6 @@ export final class Char extends Object implements Comparable<Char> {
      *
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor() {
         this.value = c'\u0000';
@@ -58,7 +55,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @param { char } value a primitive char to create Char from.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(value: char) {
         this.value = value;
@@ -74,7 +70,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static valueOf(value: char): Char {
         // TODO(ivan-tyulyandin): caching is possible
@@ -89,7 +84,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public equals(other: Any): boolean {
         if (this === other) {
@@ -109,7 +103,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override toString(): String {
         return Char.toString(this.value)
@@ -122,7 +115,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { string }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toString(radix: int): string {
         return this.toInt().toString(radix)
@@ -137,7 +129,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static compare(lhs: Char, rhs: Char): boolean {
         return (lhs == rhs);
@@ -151,7 +142,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public override compareTo(other: Char): int {
         if (this.value < other) {
@@ -172,7 +162,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly CHAR_BIT_SIZE: int = 16;
 
@@ -185,7 +174,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MAX_CODE_POINT: int = 0x10FFFF
 
@@ -198,7 +186,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly HIGH_SURROGATE_MIN: char = c'\uD800';
 
@@ -211,7 +198,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly HIGH_SURROGATE_MAX: char = c'\uDBFF';
 
@@ -224,7 +210,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly LOW_SURROGATE_MIN: char = c'\uDC00';
 
@@ -237,7 +222,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly LOW_SURROGATE_MAX: char = c'\uDFFF';
     private static readonly BMP_BORDER: UTF_16_CodePoint = 0x10000;
@@ -250,7 +234,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MIN_VALUE: char = c'\u0000';
 
@@ -262,7 +245,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static readonly MAX_VALUE: char = c'\uFFFF';
 
@@ -272,7 +254,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { byte }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toByte(): byte {
         return this.value.toByte();
@@ -284,7 +265,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { short }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toShort(): short {
         return this.value.toShort();
@@ -296,7 +276,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toInt(): int {
         return this.value.toInt();
@@ -308,7 +287,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLong(): long {
         return this.value.toLong();
@@ -320,7 +298,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { float }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toFloat(): float {
         return this.value.toFloat();
@@ -332,7 +309,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { double }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toDouble(): double {
         return this.value.toDouble();
@@ -344,7 +320,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { char }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toChar(): char {
         return this.value;
@@ -358,7 +333,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toByte(value: char): byte;
 
@@ -370,7 +344,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toShort(value: char): short;
 
@@ -382,7 +355,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toInt(value: char): int;
 
@@ -394,7 +366,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toLong(value: char): long;
 
@@ -406,7 +377,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toFloat(value: char): float;
 
@@ -418,7 +388,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toDouble(value: char): double;
 
@@ -430,7 +399,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toString(value: char): string {
         return String.fromCharCode(value.toInt())
@@ -444,7 +412,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static toChar(value: char): char {
         return value;
@@ -459,7 +426,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isInBasicMultilingualPlane(value: char): boolean {
         if (value.toInt() < Char.BMP_BORDER) {
@@ -477,7 +443,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isInBasicMultilingualPlane(value: UTF_16_CodePoint): boolean {
         if (value < Char.BMP_BORDER) {
@@ -493,7 +458,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isInBasicMultilingualPlane(): boolean {
         return Char.isInBasicMultilingualPlane(this.value);
@@ -508,7 +472,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isValidCodePoint(codePoint: UTF_16_CodePoint): boolean {
         return (codePoint >= 0 && codePoint <= Char.MAX_CODE_POINT &&
@@ -524,7 +487,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static codeUnitsToEncode(value: UTF_16_CodePoint): int {
         if (Char.isInBasicMultilingualPlane(value)) {
@@ -541,7 +503,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isHighSurrogate(value: char): boolean {
         return (Char.HIGH_SURROGATE_MIN.compareTo(value) <= 0)
@@ -556,7 +517,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isLowSurrogate(value: char): boolean {
         return (Char.LOW_SURROGATE_MIN.compareTo(value) <= 0)
@@ -572,7 +532,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static getHighSurrogate(value: UTF_16_CodePoint): char {
         return (((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN.toInt()).toChar()
@@ -587,7 +546,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static getLowSurrogate(value: UTF_16_CodePoint): char {
         return (((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN.toInt()).toChar();
@@ -601,7 +559,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isPartOfSurrogatePair(value: char): boolean {
         return Char.isHighSurrogate(value) || Char.isLowSurrogate(value);
@@ -613,7 +570,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isPartOfSurrogatePair(): boolean {
         return Char.isPartOfSurrogatePair(this.value);
@@ -628,7 +584,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static charsToCodePoint(highValue: char, lowValue: char): UTF_16_CodePoint {
         return ((highValue.toInt() - Char.HIGH_SURROGATE_MIN.toInt()) * 0x400) + (lowValue.toInt() - Char.LOW_SURROGATE_MIN.toInt()) + 0x10000;
@@ -642,7 +597,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isBinDigit(value: char): boolean {
         let diff: int = value.toInt() - Char.toInt(c'0');
@@ -655,7 +609,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isBinDigit(): boolean {
         return Char.isBinDigit(this.value);
@@ -669,7 +622,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isDecDigit(value: char): boolean {
         let diff: int = value.toInt() - Char.toInt(c'0');
@@ -682,7 +634,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isDecDigit(): boolean {
         return Char.isDecDigit(this.value);
@@ -696,7 +647,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isHexDigit(value: char): boolean {
         let isDigit = (0 <= value.compareTo(c'0')) && (value.compareTo(c'9') <= 0)
@@ -711,7 +661,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isHexDigit(): boolean {
         return Char.isHexDigit(this.value);
@@ -725,7 +674,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isLetter(value: char): boolean {
         return (0 <= value.compareTo(c'A')) && (value.compareTo(c'Z') <= 0)
@@ -738,7 +686,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLetter(): boolean {
         return Char.isLetter(this.value);
@@ -752,7 +699,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native isUpperCase(value: char): boolean;
 
@@ -762,7 +708,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isUpperCase(): boolean {
         return Char.isUpperCase(this.value);
@@ -776,7 +721,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native isLowerCase(value: char): boolean
 
@@ -786,7 +730,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public isLowerCase(): boolean {
         return Char.isLowerCase(this.value);
@@ -800,7 +743,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toUpperCase(value: char): char
 
@@ -810,7 +752,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { Char }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toUpperCase(): Char {
         return Char.toUpperCase(this.value);
@@ -824,7 +765,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native toLowerCase(value: char): char
 
@@ -834,7 +774,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { Char }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public toLowerCase(): Char {
         return Char.toLowerCase(this.value);
@@ -848,7 +787,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native isWhiteSpace(value: char): boolean;
 
@@ -858,7 +796,6 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns { boolean }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
      public isWhiteSpace(): boolean {
         return Char.isWhiteSpace(this.value);

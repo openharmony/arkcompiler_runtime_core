@@ -25,7 +25,6 @@ import { stub } from "arkruntime"
  * @type { int }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const KEY_NOT_FOUND: int = -1;
 
@@ -49,7 +48,6 @@ export const KEY_NOT_FOUND: int = -1;
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -84,7 +82,6 @@ export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean, startIn
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -102,7 +99,6 @@ export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -137,7 +133,6 @@ export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean, startIn
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -150,7 +145,6 @@ export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
  * @returns { FixedArray<boolean> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<boolean>): FixedArray<boolean> {
     const r : FixedArray<boolean> = new FixedArray<boolean>(src.length);
@@ -173,7 +167,6 @@ export function copyOf(src: FixedArray<boolean>): FixedArray<boolean> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<boolean>, dst: ValueArray<boolean>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -188,7 +181,6 @@ export native function copyTo(src: ValueArray<boolean>, dst: ValueArray<boolean>
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<boolean>, dst: FixedArray<boolean>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -225,7 +217,6 @@ export function copyTo(src: FixedArray<boolean>, dst: FixedArray<boolean>, dstSt
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -260,7 +251,6 @@ export function lowerBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: i
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<byte>, key: byte): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -278,7 +268,6 @@ export function lowerBoundSearch(arr: FixedArray<byte>, key: byte): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -313,7 +302,6 @@ export function upperBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: i
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<byte>, key: byte): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -326,7 +314,6 @@ export function upperBoundSearch(arr: FixedArray<byte>, key: byte): int {
  * @returns { FixedArray<byte> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<byte>): FixedArray<byte> {
     const r : FixedArray<byte> = new FixedArray<byte>(src.length);
@@ -349,7 +336,6 @@ export function copyOf(src: FixedArray<byte>): FixedArray<byte> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<byte>, dst: ValueArray<byte>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -364,7 +350,6 @@ export native function copyTo(src: ValueArray<byte>, dst: ValueArray<byte>, dstS
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<byte>, dst: FixedArray<byte>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -401,7 +386,6 @@ export function copyTo(src: FixedArray<byte>, dst: FixedArray<byte>, dstStart: i
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<short>, key: short, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -436,7 +420,6 @@ export function lowerBoundSearch(arr: FixedArray<short>, key: short, startIndex:
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<short>, key: short): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -454,7 +437,6 @@ export function lowerBoundSearch(arr: FixedArray<short>, key: short): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<short>, key: short, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -489,7 +471,6 @@ export function upperBoundSearch(arr: FixedArray<short>, key: short, startIndex:
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<short>, key: short): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -502,7 +483,6 @@ export function upperBoundSearch(arr: FixedArray<short>, key: short): int {
  * @returns { FixedArray<short> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<short>): FixedArray<short> {
     const r : FixedArray<short> = new FixedArray<short>(src.length);
@@ -525,7 +505,6 @@ export function copyOf(src: FixedArray<short>): FixedArray<short> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<short>, dst: ValueArray<short>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -540,7 +519,6 @@ export native function copyTo(src: ValueArray<short>, dst: ValueArray<short>, ds
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<short>, dst: FixedArray<short>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -577,7 +555,6 @@ export function copyTo(src: FixedArray<short>, dst: FixedArray<short>, dstStart:
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<int>, key: int, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -612,7 +589,6 @@ export function lowerBoundSearch(arr: FixedArray<int>, key: int, startIndex: int
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<int>, key: int): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -630,7 +606,6 @@ export function lowerBoundSearch(arr: FixedArray<int>, key: int): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<int>, key: int, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -665,7 +640,6 @@ export function upperBoundSearch(arr: FixedArray<int>, key: int, startIndex: int
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<int>, key: int): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -678,7 +652,6 @@ export function upperBoundSearch(arr: FixedArray<int>, key: int): int {
  * @returns { FixedArray<int> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<int>): FixedArray<int> {
     const r : FixedArray<int> = new FixedArray<int>(src.length);
@@ -701,7 +674,6 @@ export function copyOf(src: FixedArray<int>): FixedArray<int> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<int>, dst: ValueArray<int>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -716,7 +688,6 @@ export native function copyTo(src: ValueArray<int>, dst: ValueArray<int>, dstSta
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<int>, dst: FixedArray<int>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -753,7 +724,6 @@ export function copyTo(src: FixedArray<int>, dst: FixedArray<int>, dstStart: int
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<long>, key: long, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -788,7 +758,6 @@ export function lowerBoundSearch(arr: FixedArray<long>, key: long, startIndex: i
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<long>, key: long): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -806,7 +775,6 @@ export function lowerBoundSearch(arr: FixedArray<long>, key: long): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<long>, key: long, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -841,7 +809,6 @@ export function upperBoundSearch(arr: FixedArray<long>, key: long, startIndex: i
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<long>, key: long): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -854,7 +821,6 @@ export function upperBoundSearch(arr: FixedArray<long>, key: long): int {
  * @returns { FixedArray<long> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<long>): FixedArray<long> {
     const r : FixedArray<long> = new FixedArray<long>(src.length);
@@ -877,7 +843,6 @@ export function copyOf(src: FixedArray<long>): FixedArray<long> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<long>, dst: ValueArray<long>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -892,7 +857,6 @@ export native function copyTo(src: ValueArray<long>, dst: ValueArray<long>, dstS
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<long>, dst: FixedArray<long>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -929,7 +893,6 @@ export function copyTo(src: FixedArray<long>, dst: FixedArray<long>, dstStart: i
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<float>, key: float, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -964,7 +927,6 @@ export function lowerBoundSearch(arr: FixedArray<float>, key: float, startIndex:
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<float>, key: float): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -982,7 +944,6 @@ export function lowerBoundSearch(arr: FixedArray<float>, key: float): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<float>, key: float, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -1017,7 +978,6 @@ export function upperBoundSearch(arr: FixedArray<float>, key: float, startIndex:
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<float>, key: float): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -1030,7 +990,6 @@ export function upperBoundSearch(arr: FixedArray<float>, key: float): int {
  * @returns { FixedArray<float> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<float>): FixedArray<float> {
     const r : FixedArray<float> = new FixedArray<float>(src.length);
@@ -1053,7 +1012,6 @@ export function copyOf(src: FixedArray<float>): FixedArray<float> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<float>, dst: ValueArray<float>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -1068,7 +1026,6 @@ export native function copyTo(src: ValueArray<float>, dst: ValueArray<float>, ds
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<float>, dst: FixedArray<float>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -1105,7 +1062,6 @@ export function copyTo(src: FixedArray<float>, dst: FixedArray<float>, dstStart:
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<double>, key: double, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -1140,7 +1096,6 @@ export function lowerBoundSearch(arr: FixedArray<double>, key: double, startInde
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<double>, key: double): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -1158,7 +1113,6 @@ export function lowerBoundSearch(arr: FixedArray<double>, key: double): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<double>, key: double, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -1193,7 +1147,6 @@ export function upperBoundSearch(arr: FixedArray<double>, key: double, startInde
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<double>, key: double): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -1206,7 +1159,6 @@ export function upperBoundSearch(arr: FixedArray<double>, key: double): int {
  * @returns { FixedArray<double> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<double>): FixedArray<double> {
     const r : FixedArray<double> = new FixedArray<double>(src.length);
@@ -1229,7 +1181,6 @@ export function copyOf(src: FixedArray<double>): FixedArray<double> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<double>, dst: ValueArray<double>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -1244,7 +1195,6 @@ export native function copyTo(src: ValueArray<double>, dst: ValueArray<double>, 
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<double>, dst: FixedArray<double>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -1281,7 +1231,6 @@ export function copyTo(src: FixedArray<double>, dst: FixedArray<double>, dstStar
  * @throws { RangeError } Throws if the bounds verification failed
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<char>, key: char, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
@@ -1316,7 +1265,6 @@ export function lowerBoundSearch(arr: FixedArray<char>, key: char, startIndex: i
  * @returns { int } The index such (arr[index] < key) is false. If no such index is found than arr.length
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function lowerBoundSearch(arr: FixedArray<char>, key: char): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
@@ -1334,7 +1282,6 @@ export function lowerBoundSearch(arr: FixedArray<char>, key: char): int {
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<char>, key: char, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -1369,7 +1316,6 @@ export function upperBoundSearch(arr: FixedArray<char>, key: char, startIndex: i
  * @returns { int } The index such (key < arr[index]) is true. If no such index is found than endIndex
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function upperBoundSearch(arr: FixedArray<char>, key: char): int {
     return upperBoundSearch(arr, key, 0, arr.length);
@@ -1382,7 +1328,6 @@ export function upperBoundSearch(arr: FixedArray<char>, key: char): int {
  * @returns { FixedArray<char> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<char>): FixedArray<char> {
     const r : FixedArray<char> = new FixedArray<char>(src.length);
@@ -1405,7 +1350,6 @@ export function copyOf(src: FixedArray<char>): FixedArray<char> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: ValueArray<char>, dst: ValueArray<char>, dstStart: int, srcStart: int, srcEnd: int): void;
 
@@ -1420,7 +1364,6 @@ export native function copyTo(src: ValueArray<char>, dst: ValueArray<char>, dstS
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (srcStart < 0 || srcStart > srcEnd || srcEnd > src.length) {
@@ -1444,7 +1387,6 @@ export function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstStart: i
  * @returns { FixedArray<Any> } The copy of `src`
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function copyOf(src: FixedArray<Any>): FixedArray<Any> {
     const r : FixedArray<Any> = new FixedArray<Any>(src.length);
@@ -1467,6 +1409,5 @@ export function copyOf(src: FixedArray<Any>): FixedArray<Any> {
  * @param { int } srcEnd The last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export native function copyTo(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;

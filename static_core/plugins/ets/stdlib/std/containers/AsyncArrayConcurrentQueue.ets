@@ -20,7 +20,6 @@ package std.containers;
 *
 * @namespace containers.stackless
 * @syscap SystemCapability.Utils.Lang
-* @since 24
 */
 export namespace containers.stackless {
 
@@ -62,7 +61,6 @@ export namespace containers.stackless {
     *
     * @class ArrayConcurrentQueue
     * @syscap SystemCapability.Utils.Lang
-    * @since 24
     */
     export class ArrayConcurrentQueue<T extends Object> implements ConcurrentQueue<T> {
         /**
@@ -70,7 +68,6 @@ export namespace containers.stackless {
         *
         * @param { int } capacity the capacity of the ArrayConcurrentQueue
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         constructor(capacity: int) {
             if (capacity <= 0) {
@@ -89,7 +86,6 @@ export namespace containers.stackless {
         * @param { int } capacity the capacity of the ArrayConcurrentQueue
         * @param { Iterable<T> } iterable the iterable instance to initialize ArrayConcurrentQueue
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         constructor(capacity: int, iterable: Iterable<T>) {
             this(capacity)
@@ -108,7 +104,6 @@ export namespace containers.stackless {
         * @param { T } el Adds an element to the queue, waiting asynchronously if full.
         * @returns { Promise<void> } A Promise that resolves when the element has been successfully added to the queue.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public async push(el: T): Promise<void> {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -124,7 +119,6 @@ export namespace containers.stackless {
         *
         * @returns { Promise<T> } A Promise that resolves when the element has been successfully removed from the queue.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public async pop(): Promise<T> {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -146,7 +140,6 @@ export namespace containers.stackless {
         * @param { T } element the element inserted to the ConcurrentQueue
         * @returns { boolean } True upon success and false if no space is currently available.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override add(element: T): boolean {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -169,7 +162,6 @@ export namespace containers.stackless {
         *
         * @returns { T | undefined } the deleted element or undefined when the queue is empty.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override poll(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -192,7 +184,6 @@ export namespace containers.stackless {
         *
         * @returns { T | undefined } the first element or undefined when the queue is empty.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override getFirst(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -212,7 +203,6 @@ export namespace containers.stackless {
         *
         * @returns { T | undefined } the end element or undefined when the queue is empty.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public getEnd(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -236,7 +226,6 @@ export namespace containers.stackless {
         *
         * @returns { int } size
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override get size(): int {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -258,7 +247,6 @@ export namespace containers.stackless {
         *
         * @returns { boolean } True if a ConcurrentQueue has no elements, otherwise false.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override isEmpty(): boolean {
             return this.size == 0;
@@ -269,7 +257,6 @@ export namespace containers.stackless {
         *
         * @returns { int } the capacity of the ConcurrentQueue.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override get capacity(): int {
             return this.capacitySize;
@@ -280,7 +267,6 @@ export namespace containers.stackless {
         *
         * @returns { int } the remaining capacity of the ConcurrentQueue.
         * @syscap SystemCapability.Utils.Lang
-        * @since 24
         */
         public override remainingCapacity(): int {
             return this.capacitySize - this.size;

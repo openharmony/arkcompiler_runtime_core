@@ -25,7 +25,6 @@ package std.core;
  * @interface ArrayBufferView
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface ArrayBufferView {
     /**
@@ -35,7 +34,6 @@ export interface ArrayBufferView {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     readonly buffer: ArrayBuffer
 
@@ -46,7 +44,6 @@ export interface ArrayBufferView {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     readonly byteLength: int
 
@@ -57,7 +54,6 @@ export interface ArrayBufferView {
      * @readonly
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     readonly byteOffset: int
 }
@@ -69,7 +65,6 @@ export interface ArrayBufferView {
  * @class ArrayBuffer
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export class ArrayBuffer
 {
@@ -79,7 +74,6 @@ export class ArrayBuffer
      * @returns { String } The string representation of the ArrayBuffer.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     toString(): String {
         return "[object ArrayBuffer]";
@@ -93,7 +87,6 @@ export class ArrayBuffer
      * @throws { RangeError } Throws if length or maxByteLength is negative, or length > maxByteLength.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: int, maxByteLength?: int)
     {
@@ -122,7 +115,6 @@ export class ArrayBuffer
      * @param { number } [maxByteLength] Optional maximum size the ArrayBuffer can be resized to.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public constructor(length: number, maxByteLength?: number)
     {
@@ -137,7 +129,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static isView(obj: Object): boolean
     {
@@ -163,7 +154,6 @@ export class ArrayBuffer
      * @returns { ArrayBuffer } A new ArrayBuffer containing the sliced data.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     private sliceInternal(begin: int, end: int): ArrayBuffer {
         const byteLength = this.getByteLength()
@@ -193,7 +183,6 @@ export class ArrayBuffer
      * @throws { TypeError } Throws if the ArrayBuffer is detached.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: int, end?: int): ArrayBuffer {
         if (this.detached) {
@@ -211,7 +200,6 @@ export class ArrayBuffer
      * @returns { ArrayBuffer } The new ArrayBuffer.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public slice(begin: number, end?: number): ArrayBuffer {
         if (end == undefined) return this.slice(begin.toInt())
@@ -226,7 +214,6 @@ export class ArrayBuffer
      * @throws { IndexOutOfBoundsError } Throws if pos is out of bounds.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public final at(pos: int): byte {
         if (this.data !== undefined) {
@@ -245,7 +232,6 @@ export class ArrayBuffer
      * @param { byte } val The byte value to set.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public final set(pos: int, val: byte): void {
         if (this.data !== undefined) {
@@ -264,7 +250,6 @@ export class ArrayBuffer
      * @returns { int } The byte length.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public getByteLength(): int {
         return this._byteLength
@@ -276,7 +261,6 @@ export class ArrayBuffer
      * @returns { int } The byte length.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get byteLength(): int {
         return this._byteLength
@@ -288,7 +272,6 @@ export class ArrayBuffer
      * @returns { boolean } True if the ArrayBuffer has been detached.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get detached(): boolean {
         return this.data != undefined ? false : this.dataAddress == 0
@@ -300,7 +283,6 @@ export class ArrayBuffer
      * @returns { boolean } True if the ArrayBuffer can be resized.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     get resizable(): boolean {
         return this.isResizable
@@ -349,7 +331,6 @@ export class ArrayBuffer
      *     RangeError if the new length is invalid.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public resize(newLen : int): void {
         if (this.detached) {
@@ -384,7 +365,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: ValueArray<byte>): ArrayBuffer {
         const bf = new ArrayBuffer(arr.length)
@@ -400,7 +380,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(arr: FixedArray<byte>): ArrayBuffer {
         const bf = new ArrayBuffer(arr.length)
@@ -416,7 +395,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(u8arr: Uint8Array): ArrayBuffer {
         const arrBuff = u8arr.buffer as ArrayBuffer
@@ -436,7 +414,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(array: double[]): ArrayBuffer {
         const buf = new ArrayBuffer(array.length)
@@ -455,7 +432,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native from(str: string, encoding: string): ArrayBuffer;
 
@@ -469,7 +445,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native from(buff: ArrayBuffer, byteOffset: int, length: int): ArrayBuffer;
 
@@ -483,7 +458,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static from(buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBuffer {
         const resolvedByteOffset = byteOffset ?? 0;
@@ -502,7 +476,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static fromObject(obj: Object, byteOffsetOrEncoding: int | string, length: int): ArrayBuffer {
         if (obj instanceof string) {
@@ -539,7 +512,6 @@ export class ArrayBuffer
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native bytesLength(text: string, encoding: string): int;
 
@@ -553,7 +525,6 @@ export class ArrayBuffer
      * @returns { string } Decoded string.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
@@ -634,7 +605,6 @@ export class ArrayBuffer
      * @throws { RangeError } If the calculated byte offset is out of bounds for the ArrayBuffer.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddI8(index: int, byteOffset: int, value: byte): long;
 
@@ -647,7 +617,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndI8(index: int, byteOffset: int, value: byte): long;
 
@@ -661,7 +630,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeI8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): long;
 
@@ -674,7 +642,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeI8(index: int, byteOffset: int, value: byte): long;
 
@@ -686,7 +653,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadI8(index: int, byteOffset: int): long;
 
@@ -699,7 +665,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrI8(index: int, byteOffset: int, value: byte): long;
 
@@ -712,7 +677,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreI8(index: int, byteOffset: int, value: byte): long;
 
@@ -725,7 +689,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubI8(index: int, byteOffset: int, value: byte): long;
 
@@ -738,7 +701,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorI8(index: int, byteOffset: int, value: byte): long;
 
@@ -751,7 +713,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddI16(index: int, byteOffset: int, value: short): long;
 
@@ -764,7 +725,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndI16(index: int, byteOffset: int, value: short): long;
 
@@ -778,7 +738,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeI16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): long;
 
@@ -791,7 +750,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeI16(index: int, byteOffset: int, value: short): long;
 
@@ -803,7 +761,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadI16(index: int, byteOffset: int): long;
 
@@ -816,7 +773,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrI16(index: int, byteOffset: int, value: short): long;
 
@@ -829,7 +785,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreI16(index: int, byteOffset: int, value: short): long;
 
@@ -842,7 +797,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubI16(index: int, byteOffset: int, value: short): long;
 
@@ -855,7 +809,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorI16(index: int, byteOffset: int, value: short): long;
 
@@ -868,7 +821,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddI32(index: int, byteOffset: int, value: int): long;
 
@@ -881,7 +833,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndI32(index: int, byteOffset: int, value: int): long;
 
@@ -895,7 +846,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeI32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): long;
 
@@ -908,7 +858,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeI32(index: int, byteOffset: int, value: int): long;
 
@@ -920,7 +869,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadI32(index: int, byteOffset: int): long;
 
@@ -933,7 +881,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrI32(index: int, byteOffset: int, value: int): long;
 
@@ -946,7 +893,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreI32(index: int, byteOffset: int, value: int): long;
 
@@ -959,7 +905,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubI32(index: int, byteOffset: int, value: int): long;
 
@@ -972,7 +917,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorI32(index: int, byteOffset: int, value: int): long;
 
@@ -985,7 +929,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddI64(index: int, byteOffset: int, value: long): long;
 
@@ -998,7 +941,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndI64(index: int, byteOffset: int, value: long): long;
 
@@ -1012,7 +954,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeI64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): long;
 
@@ -1025,7 +966,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeI64(index: int, byteOffset: int, value: long): long;
 
@@ -1037,7 +977,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadI64(index: int, byteOffset: int): long;
 
@@ -1050,7 +989,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrI64(index: int, byteOffset: int, value: long): long;
 
@@ -1063,7 +1001,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreI64(index: int, byteOffset: int, value: long): long;
 
@@ -1076,7 +1013,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubI64(index: int, byteOffset: int, value: long): long;
 
@@ -1089,7 +1025,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorI64(index: int, byteOffset: int, value: long): long;
 
@@ -1102,7 +1037,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1115,7 +1049,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1129,7 +1062,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeU8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): long;
 
@@ -1142,7 +1074,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1154,7 +1085,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadU8(index: int, byteOffset: int): long;
 
@@ -1167,7 +1097,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1180,7 +1109,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1193,7 +1121,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1206,7 +1133,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorU8(index: int, byteOffset: int, value: byte): long;
 
@@ -1219,7 +1145,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddU16(index: int, byteOffset: int, value: short): long;
 
@@ -1232,7 +1157,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndU16(index: int, byteOffset: int, value: short): long;
 
@@ -1246,7 +1170,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeU16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): long;
 
@@ -1259,7 +1182,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeU16(index: int, byteOffset: int, value: short): long;
 
@@ -1271,7 +1193,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadU16(index: int, byteOffset: int): long;
 
@@ -1284,7 +1205,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrU16(index: int, byteOffset: int, value: short): long;
 
@@ -1297,7 +1217,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreU16(index: int, byteOffset: int, value: short): long;
 
@@ -1310,7 +1229,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubU16(index: int, byteOffset: int, value: short): long;
 
@@ -1323,7 +1241,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorU16(index: int, byteOffset: int, value: short): long;
 
@@ -1336,7 +1253,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddU32(index: int, byteOffset: int, value: int): long;
 
@@ -1349,7 +1265,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndU32(index: int, byteOffset: int, value: int): long;
 
@@ -1363,7 +1278,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeU32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): long;
 
@@ -1376,7 +1290,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeU32(index: int, byteOffset: int, value: int): long;
 
@@ -1388,7 +1301,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadU32(index: int, byteOffset: int): long;
 
@@ -1401,7 +1313,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrU32(index: int, byteOffset: int, value: int): long;
 
@@ -1414,7 +1325,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreU32(index: int, byteOffset: int, value: int): long;
 
@@ -1427,7 +1337,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubU32(index: int, byteOffset: int, value: int): long;
 
@@ -1440,7 +1349,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorU32(index: int, byteOffset: int, value: int): long;
 
@@ -1453,7 +1361,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAddU64(index: int, byteOffset: int, value: long): long;
 
@@ -1466,7 +1373,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicAndU64(index: int, byteOffset: int, value: long): long;
 
@@ -1480,7 +1386,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicCompareExchangeU64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): long;
 
@@ -1493,7 +1398,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicExchangeU64(index: int, byteOffset: int, value: long): long;
 
@@ -1505,7 +1409,6 @@ export class ArrayBuffer
      * @returns { long } The value at the target location.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicLoadU64(index: int, byteOffset: int): long;
 
@@ -1518,7 +1421,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicOrU64(index: int, byteOffset: int, value: long): long;
 
@@ -1531,7 +1433,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicStoreU64(index: int, byteOffset: int, value: long): long;
 
@@ -1544,7 +1445,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicSubU64(index: int, byteOffset: int, value: long): long;
 
@@ -1557,7 +1457,6 @@ export class ArrayBuffer
      * @returns { long } The value before the operation.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     public native atomicXorU64(index: int, byteOffset: int, value: long): long;
 }
@@ -1568,6 +1467,5 @@ export class ArrayBuffer
  * @typedef { ArrayBuffer } ArrayBufferLike
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export type ArrayBufferLike = ArrayBuffer
