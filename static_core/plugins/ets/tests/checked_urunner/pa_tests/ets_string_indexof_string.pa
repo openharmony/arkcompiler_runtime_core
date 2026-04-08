@@ -1,0 +1,162 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#! CHECKER      String.-last-indexOf String INT
+#! RUN          options: "--compiler-enable-jit=false", entry: "_GLOBAL::main"
+
+#! CHECKER      String.-last-indexOf String JIT
+#! RUN          force_jit: true, options: "--compiler-regex='.*test(Last|)IndexOf.*'", entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::testIndexOfNullThis"
+#! PASS_AFTER   "IrBuilder"
+#! INST_COUNT   /NullCheck/,1
+#! INST_COUNT   /CallStatic \d+ std.core.String::indexOf/,1
+#! PASS_AFTER   "Inline"
+#! INST         /Intrinsic.StdCoreStringIndexOfString/
+#! METHOD       "_GLOBAL::testIndexOfNullKey"
+#! PASS_AFTER   "IrBuilder"
+#! INST_COUNT   /NullCheck/,1
+#! INST_COUNT   /CallStatic \d+ std.core.String::indexOf/,1
+#! PASS_AFTER   "Inline"
+#! INST         /Intrinsic.StdCoreStringIndexOfString/
+#! METHOD       "_GLOBAL::testLastIndexOfNullThis"
+#! PASS_AFTER   "IrBuilder"
+#! INST_COUNT   /NullCheck/,1
+#! INST_COUNT   /CallStatic \d+ std.core.String::lastIndexOf/,1
+#! PASS_AFTER   "Inline"
+#! INST         /Intrinsic.StdCoreStringLastIndexOfString/
+#! METHOD       "_GLOBAL::testLastIndexOfNullKey"
+#! PASS_AFTER   "IrBuilder"
+#! INST_COUNT   /NullCheck/,1
+#! INST_COUNT   /CallStatic \d+ std.core.String::lastIndexOf/,1
+#! PASS_AFTER   "Inline"
+#! INST         /Intrinsic.StdCoreStringLastIndexOfString/
+
+.language eTS
+
+.record arkruntime.annotation.Module <external>
+
+.record std.core.Int <external>
+
+.record std.core.String <external>
+
+.record std.core.Error <external>
+
+.record std.core.NullPointerError <external>
+
+.function i32 testIndexOfNullThis() <static, access.function=public> {
+try_begin_label_0:
+        mov.null v0
+        lda.str "0x1b9"
+        mov.null v1
+        call.acc std.core.String.indexOf:(std.core.String,std.core.String,std.core.Int), v0, v1, v0, 0x1
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testIndexOfNullKey() <static, access.function=public> {
+try_begin_label_0:
+        lda.str "0x1f6"
+        sta.obj v0
+        mov.null v1
+        lda.obj v1
+        call.acc std.core.String.indexOf:(std.core.String,std.core.String,std.core.Int), v0, v1, v0, 0x1
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testLastIndexOfNullThis() <static, access.function=public> {
+try_begin_label_0:
+        mov.null v0
+        lda.str "0x1b9"
+        mov.null v1
+        call.acc std.core.String.lastIndexOf:(std.core.String,std.core.String,std.core.Int), v0, v1, v0, 0x1
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testLastIndexOfNullKey() <static, access.function=public> {
+try_begin_label_0:
+        lda.str "0x1f6"
+        sta.obj v0
+        mov.null v1
+        lda.obj v1
+        call.acc std.core.String.lastIndexOf:(std.core.String,std.core.String,std.core.Int), v0, v1, v0, 0x1
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 main() <static, access.function=public> {
+        call.short testIndexOfNullThis:()
+        addi 0x0
+        sta v0
+        call.short testIndexOfNullKey:()
+        add2 v0
+        sta v0
+        call.short testLastIndexOfNullThis:()
+        add2 v0
+        sta v0
+        call.short testLastIndexOfNullKey:()
+        add2 v0
+        return
+}
+
+.function i32 std.core.String.indexOf(std.core.String a0, std.core.String a1, std.core.Int a2) <external, access.function=public>
+.function i32 std.core.String.lastIndexOf(std.core.String a0, std.core.String a1, std.core.Int a2) <external, access.function=public>

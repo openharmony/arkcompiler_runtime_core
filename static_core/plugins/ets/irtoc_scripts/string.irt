@@ -35,6 +35,10 @@ module Constants
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
   ASCII_CHAR_CACHE_OFFSET = "cross_values::GetPlatformTypesAsciiCharCacheOffset(graph->GetArch())"
   STRING_PACKED_LENGTH_ZERO = "(((uint32_t)0xFFFFFFFF) << common_vm::BaseString::STRING_LENGTH_BITS_NUM) >> common_vm::BaseString::STRING_LENGTH_BITS_NUM"
+  STRING_KMP_PLUS_FLATTENING_OVERHEAD_MIN_PATTERN_LEN = "16"
+  STRING_KMP_MIN_PATTERN_LEN = "coretypes::String::KMP_MIN_PATTERN_LENGTH"
+  STRING_KMP_MIN_SUBJECT_LEN = "128"
+  STRING_MAX_SUBJECT_LEN_BETWEEN_SAFEPOINTS = "40000"
   CHAR_FLIP_CASE_BIT = "1 << 5"
 end
 
@@ -1389,7 +1393,7 @@ function(:StringIndexOfCompressed,
   end_ptr := Add(str_data, Cast(str_data_size).word).ptr
 
   IfImm(Compare(str_data_size, Constants::MEM_BLOCK_32_BYTES).GE.b).Imm(0).NE.Likely.b {
-    end_ptr_aligned := Bitcast(AndI(Bitcast(end_ptr).word).Imm(Constants::MEM_BLOCK_32_ALIGN_MASK).word).ptr
+    end_ptr_aligned := Add(str_data, AndI(Cast(str_data_size).word).Imm(Constants::MEM_BLOCK_32_ALIGN_MASK).word).ptr
 Label(:LoopSimd)
     curr_ptr := Phi(str_data, curr_ptr1).ptr;
     p := Intrinsic(:MEM_CHAR_U8_X32_USING_SIMD, ch, curr_ptr).ptr
@@ -1505,7 +1509,7 @@ function(:StringIndexOfUncompressed,
   end_ptr := Add(str_data, Cast(str_data_size).word).ptr
 
   IfImm(Compare(str_data_size, Constants::MEM_BLOCK_32_BYTES).GE.b).Imm(0).NE.Likely.b {
-    end_ptr_aligned := Bitcast(AndI(Bitcast(end_ptr).word).Imm(Constants::MEM_BLOCK_32_ALIGN_MASK).word).ptr
+    end_ptr_aligned := Add(str_data, AndI(Cast(str_data_size).word).Imm(Constants::MEM_BLOCK_32_ALIGN_MASK).word).ptr
 Label(:LoopSimd)
     curr_ptr := Phi(str_data, curr_ptr1).ptr;
     p := Intrinsic(:MEM_CHAR_U16_X16_USING_SIMD, ch, curr_ptr).ptr
@@ -1541,6 +1545,27 @@ Label(:Loop)
   }
   Return(-1).i32
 }
+
+###
+# get_uncompressed_string_size returns the size in bytes of the uncompressed string
+#
+scoped_macro(:get_uncompressed_string_size) do |str_len_packed|
+  str_data_size_u16 := ShrI(AndI(str_len_packed).Imm(Constants::STRING_DEFLAG_MASK).u32).Imm(Constants::STRING_U16_SIZE_SHIFT).u32
+  if defines.DEBUG
+    # we must be sure that the str_len_packed is the packed length field of an uncompressed string
+    IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).NE.b).Imm(0).NE.Unlikely {
+      Intrinsic(:UNREACHABLE).Terminator.void
+    }
+    # we must check that the str_data_size_u16 value is exactly equal to the doubled value of the string length
+    # (number of chars) encoded in the str_len_packed field.
+    string_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    expected_string_size := ShlI(string_len).Imm(Constants::LOG2_BYTES_PER_U16).u32
+    IfImm(Compare(str_data_size_u16, expected_string_size).NE.b).Imm(0).NE.Unlikely {
+      Intrinsic(:UNREACHABLE).Terminator.void
+    }
+  end
+  str_data_size_u16.u32
+end  # get_uncompressed_string_size
 
 
 def GenerateStringIndexOf(cgmode)
@@ -1580,12 +1605,12 @@ LabelGlobal(:SlicedString)
   sliced_data := get_sliced_data_ptr(str_orig, str_len_packed)
   Goto(:Flat)
 LabelGlobal(:LineString)
-  line_data := Add(Cast(str_orig).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  line_data := AddI(reftoptr(str_orig)).Imm(Constants::STRING_DATA_OFFSET).ptr
 
 Label(:Flat)
   str_data := Phi(tree_data, sliced_data, line_data).ptr
   IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
-    str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFC).u32
+    str_data_size_u16 := get_uncompressed_string_size(str_len_packed)
     # 0 < data size < 16
     If(str_data_size_u16, 16).LT.Unlikely.b {
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
@@ -1751,7 +1776,7 @@ def GenerateStringIndexOfAfter(cgmode)
 
   IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
     offs := Cast(ShlI(start_index).Imm(1).i32).u32
-    data_size_u16 := ShrI(AndI(str_len_packed).Imm(0xFFFFFFFE).u32).Imm(1).u32
+    data_size_u16 := get_uncompressed_string_size(str_len_packed)
     data_size_u16 := Sub(data_size_u16, offs).u32
     data_ptr_u16 := Add(str_data, Cast(offs).word).ptr
     # 0 < data size < 16
@@ -1891,6 +1916,315 @@ end
 
 GenerateStringIndexOfAfter(:FastPath)
 GenerateStringIndexOfAfter(:NativePlus)
+
+###
+# to_common_type - casts `value` to the common type of str_char_type (u8 or u16) and key_char_type (u8 or u16).
+# The common type for u8 and u8 as well as for u16 and u16 is the type itself, for u8 and u16 is the wider one: u16.
+#
+scoped_macro(:to_common_type) do |str_char_type, key_char_type, value|
+  if str_char_type == key_char_type
+    value
+  else
+    Cast(value).u16
+  end
+end  # to_common_type
+
+def GenerateStringIndexOfStringPlain(string_compressed, key_compressed, cgmode = :FastPath)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  str_kind = (string_compressed ? 'Compressed': 'Uncompressed')
+  key_kind = (key_compressed ? 'Compressed': 'Uncompressed')
+  str_char_width = (string_compressed ? Constants::U8_SIZE : Constants::U16_SIZE)
+  key_char_width = (key_compressed ? Constants::U8_SIZE : Constants::U16_SIZE)
+  str_char_type = (string_compressed ? 'u8' : 'u16')
+  key_char_type = (key_compressed ? 'u8' : 'u16')
+  function("StringIndexOf#{str_kind}String#{key_kind}#{suffix}".to_sym,
+            params: {str_data: 'ptr', str_len: 'u32', key_data: 'ptr', key_len: 'u32', start_index: 'u32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+
+    if defines.DEBUG
+      IfImm(Compare(str_len, key_len).B.b).Imm(0).NE.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+
+    first := LoadI(key_data).Imm(0).send(:"#{key_char_type}")
+    first := to_common_type(str_char_type, key_char_type, first)
+
+    if string_compressed
+      i1 := Cast(start_index).word
+      max_offset := Sub(str_len, key_len).word
+      # we take into account the width of the string's char even though we use key_len
+      # because we are going to get the last index of the overlaying key in the string.
+      key_end_offset := Cast(key_len).word
+    else
+      i1 := ShlI(Cast(start_index).word).Imm(Constants::LOG2_BYTES_PER_U16).word
+      max_offset := ShlI(Sub(str_len, key_len).word).Imm(Constants::LOG2_BYTES_PER_U16).word
+      key_end_offset := ShlI(Cast(key_len).word).Imm(Constants::LOG2_BYTES_PER_U16).word
+    end
+  Label(:OuterLoop)
+    i := Phi(i1, i2).word
+    If(i, max_offset).A.Unlikely {
+      Goto(:OuterLoopDone)
+    }
+    str_char_by_i := Load(str_data, i).send(:"#{str_char_type}")
+    str_char_by_i := to_common_type(str_char_type, key_char_type, str_char_by_i)
+    If(str_char_by_i, first).EQ.Likely {
+      Goto(:FirstCharFound)
+    }
+    # while (i <= max && string[i] != first)
+    ii1 := AddI(i).Imm(str_char_width).word
+  Label(:ForFirstCharLoop)
+    ii := Phi(ii1, ii2).word
+    If(ii, max_offset).A.Unlikely {
+      Goto(:FirstCharNotFound)
+    }
+    str_char_by_ii := Load(str_data, ii).send(:"#{str_char_type}")
+    str_char_by_ii := to_common_type(str_char_type, key_char_type, str_char_by_ii)
+    If(str_char_by_ii, first).EQ.Likely {
+      Goto(:FirstCharFound)
+    }
+    ii2 := AddI(ii).Imm(str_char_width).word
+    Goto(:ForFirstCharLoop)
+  Label(:FirstCharFound)
+    # Found the first character, now let's look at the rest of the key
+    si := Phi(i, ii).word
+    j1 := AddI(si).Imm(str_char_width).word
+    # j1 is the offset in the string, last_si is the last offset of the overlaying key in the string.
+    last_si := SubI(Add(j1, key_end_offset).word).Imm(str_char_width).word
+    # for (int k = 1; j < end && string[j] == key[k]; j++, k++) {}
+    k1 := key_char_width
+  Label(:KeyRestLoop)
+    j := Phi(j1, j2).word
+    k := Phi(k1, k2).word
+    If(j, last_si).AE.Unlikely {
+      if string_compressed
+        Return(si).i32
+      else
+        # shift right to get the index from the offset
+        Return(ShrI(si).Imm(Constants::LOG2_BYTES_PER_U16).u32).i32
+      end
+    }
+
+    str_char_by_j := Load(str_data, j).send(:"#{str_char_type}")
+    str_char_by_j := to_common_type(str_char_type, key_char_type, str_char_by_j)
+    key_char_by_k := Load(key_data, k).send(:"#{key_char_type}")
+    key_char_by_k := to_common_type(str_char_type, key_char_type, key_char_by_k)
+    If(str_char_by_j, key_char_by_k).NE.Likely {
+      Goto(:KeyRestDone)
+    }
+    j2 := AddI(j).Imm(str_char_width).word
+    k2 := AddI(k).Imm(key_char_width).word
+    Goto(:KeyRestLoop)
+  Label(:KeyRestDone)
+    i2 := AddI(si).Imm(str_char_width).word
+    Goto(:OuterLoop)
+  Label(:FirstCharNotFound)
+  Label(:OuterLoopDone)
+    Return(-1).i32
+  }
+end  # def GenerateStringIndexOfStringPlain
+
+GenerateStringIndexOfStringPlain(string_compressed = false, key_compressed = false, :FastPath)
+GenerateStringIndexOfStringPlain(string_compressed = false, key_compressed = true, :FastPath)
+GenerateStringIndexOfStringPlain(string_compressed = true, key_compressed = false, :FastPath)
+GenerateStringIndexOfStringPlain(string_compressed = true, key_compressed = true, :FastPath)
+GenerateStringIndexOfStringPlain(string_compressed = false, key_compressed = false, :NativePlus)
+GenerateStringIndexOfStringPlain(string_compressed = false, key_compressed = true, :NativePlus)
+GenerateStringIndexOfStringPlain(string_compressed = true, key_compressed = false, :NativePlus)
+GenerateStringIndexOfStringPlain(string_compressed = true, key_compressed = true, :NativePlus)
+
+###
+# max/min - returns the maximum/minimum i32 value from v1 and v2. Returns v2 when v1 equals to v2.
+# Signed comparison is used.
+#
+[["max", "gt"], ["min", "lt"]].each do |name, cc|
+  scoped_macro("#{name}".to_sym) do |v1, v2|
+    res1 := v2
+    IfImm(Compare(v1, v2).send(:"#{cc.upcase}").b).Imm(0).NE {
+        res2 := v1
+        Goto(:Ret)
+    }
+  Label(:Ret)
+    Phi(res1, res2).i32
+  end  # max/min
+end
+
+###
+# tail_call_string_index_of_string_plain - a macro to make a tail call an implementation of the naïve pattern
+# matching algorithm.
+#
+macro(:tail_call_string_index_of_string_plain) do |name, upname, cgmode|
+  # here we are sure that all of the following variables: `start_index`, `str_len` and `key_len` are greater or
+  # equal to zero and we may pass them implicitly converting to `u32`.
+  if cgmode == :NativePlus
+    Return(Call(0, str_data, str_len, key_data, key_len, start_index).Method(name).i32).i32
+  else
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(str_len).DstReg(regmap[:arg1]).u32
+    LiveOut(key_data).DstReg(regmap[:arg2]).ptr
+    LiveOut(key_len).DstReg(regmap[:arg3]).u32
+    LiveOut(start_index).DstReg(regmap[:arg4]).u32
+    entrypoint = get_entrypoint_offset(upname)
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+  end
+end  # tail_call_string_index_of_string_plain
+
+def GenerateStringIndexOfString(cgmode = :FastPath)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringIndexOfString#{suffix}".to_sym,
+            params: {str_orig: 'ref', key_orig: 'ref', start_index: 'i32', fake1: 'i32', fake2: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+    
+    # Note, 'str_orig' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded, it is the *this* ptr)
+    if defines.DEBUG
+      If(reftoptr(str_orig), nullptr).EQ.b.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+    start_index := max(start_index, 0)
+    # 'key_orig' may be nullptr, so this must be checked. We consider such key as an empty string.
+    If(reftoptr(key_orig), nullptr).EQ.b.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    key_len_packed := LoadI(key_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    # Check if key_orig is empty (return 'min(str_orig.len, start_index)' if so).
+    # Currently, there are two special bits in a packed length:
+    #   - lowest bit in length: 1:compressed/0:uncompressed.
+    #   - second lowest bit in length: 1:string is in string table/0:not in string table.
+    # Thus a string is considered to be empty if packed_length <= 3
+    StaticAssertEQ(Constants::STRING_PACKED_LENGTH_ZERO, 3)
+    IfImm(Compare(key_len_packed, Constants::STRING_PACKED_LENGTH_ZERO).LE.b).Imm(0).NE.Unlikely.b {
+      # str_len is 30-bit in size so u32 -> i32 is safe here.
+      Return(min(ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32, start_index)).i32
+    }
+
+    key_len := ShrI(key_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    max := Sub(str_len, key_len).i32
+    IfImm(Compare(max, start_index).LT.b).Imm(0).NE.Unlikely.b {
+      Return(-1).i32
+    }
+    # We cannot stay in irtoc for a time interval longer than the maximum allowed pause between two consecutive
+    # SafePoints. If the key's length is equal to or larger than Constants::STRING_KMP_MIN_PATTERN_LEN, the string longer
+    # than Constants::STRING_KMP_MIN_SUBJECT_LEN will be processed in C++ (see the going to the SlowPath below).
+    # When the key is shorter than Constants::STRING_KMP_MIN_PATTERN_LEN, benchmarks on the device show that the string
+    # must be shorter than Constants::STRING_MAX_SUBJECT_LEN_BETWEEN_SAFEPOINTS to follow this rule.
+    IfImm(Compare(str_len, Constants::STRING_MAX_SUBJECT_LEN_BETWEEN_SAFEPOINTS).GT.b).Imm(0).NE.Unlikely.b {
+      Goto(:SlowPathEntrypoint)
+    }
+    # If the key is shorter than Constants::STRING_KMP_MIN_PATTERN_LEN, we should stay in Irtoc regardless of the
+    # string's length: the naïve algorithm implemented here is faster than the same algorithm implemented in C++
+    # due to the overhead for overhead for VMHandle creation to be protected from GC triggering during string
+    # flattening plus the overhead for looking for the string in the flattened string cache.
+    IfImm(Compare(key_len, Constants::STRING_KMP_MIN_PATTERN_LEN).LT.b).Imm(0).NE.Likely.b {
+      Goto(:NaiveImpl)
+    }
+    IfImm(Compare(max, start_index).EQ.b).Imm(0).NE.Likely.b {
+      Goto(:NaiveImpl)
+    }
+
+    # If the key is longer than Constants::STRING_KMP_PLUS_FLATTENING_OVERHEAD_MIN_PATTERN_LEN or the string is longer
+    # than the Constants::STRING_KMP_MIN_SUBJECT_LEN, we should go to the "slow" path. The "slow" path is actually
+    # faster than the naïve algorithm implemented here because the total overhead is less than the difference between
+    # the naïve algorithm running time and the running time of the KMP.
+    IfImm(Compare(key_len, Constants::STRING_KMP_PLUS_FLATTENING_OVERHEAD_MIN_PATTERN_LEN).GT.b).Imm(0).NE.Unlikely.b {
+      Goto(:SlowPathEntrypoint)
+    }
+    IfImm(Compare(str_len, Constants::STRING_KMP_MIN_SUBJECT_LEN).GT.b).Imm(0).NE.Unlikely.b {
+      Goto(:SlowPathEntrypoint)
+    }
+
+  Label(:NaiveImpl)
+    dispatch_on_string_type(str_orig, AsGlobalLabel(:LineString),
+                                      AsGlobalLabel(:SlicedString),
+                                      AsGlobalLabel(:TreeString))
+  LabelGlobal(:TreeString)
+    tree_data := get_tree_data_ptr(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    Goto(:Flat)
+  LabelGlobal(:SlicedString)
+    if Options.arch == :x86_64
+      sliced_data := get_sliced_data_ptr(str_orig, Cast(str_len_packed).u64)
+    else
+      sliced_data := get_sliced_data_ptr(str_orig, str_len_packed)
+    end
+    Goto(:Flat)
+  LabelGlobal(:LineString)
+    line_data := AddI(reftoptr(str_orig)).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  Label(:Flat)
+    str_data := Phi(tree_data, sliced_data, line_data).ptr
+
+    dispatch_on_string_type(key_orig, AsGlobalLabel(:LineKey),
+                                      AsGlobalLabel(:SlicedKey),
+                                      AsGlobalLabel(:TreeKey))
+  LabelGlobal(:TreeKey)
+    tree_key_data := get_tree_data_ptr(key_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    Goto(:FlatKey)
+  LabelGlobal(:SlicedKey)
+    if Options.arch == :x86_64
+      sliced_key_data := get_sliced_data_ptr(key_orig, Cast(key_len_packed).u64)
+    else
+      sliced_key_data := get_sliced_data_ptr(key_orig, key_len_packed)
+    end
+    Goto(:FlatKey)
+  LabelGlobal(:LineKey)
+    line_key_data := AddI(reftoptr(key_orig)).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  Label(:FlatKey)
+    key_data := Phi(tree_key_data, sliced_key_data, line_key_data).ptr
+    is_key_uncompressed := Compare(is_string_uncompressed_u32(key_len_packed), 1).EQ.b
+
+    IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
+      IfImm(is_key_uncompressed).Imm(0).NE.Unlikely.b {
+        # string's chars are u16, key's chars are u16
+        tail_call_string_index_of_string_plain("StringIndexOfUncompressedStringUncompressed#{suffix}",
+          "STRING_INDEX_OF_UNCOMPRESSED_STRING_UNCOMPRESSED#{upsuffix}", cgmode)
+      }
+      # string's chars are u16, key's chars are u8
+      tail_call_string_index_of_string_plain("StringIndexOfUncompressedStringCompressed#{suffix}",
+          "STRING_INDEX_OF_UNCOMPRESSED_STRING_COMPRESSED#{upsuffix}", cgmode)
+    }
+
+    IfImm(is_key_uncompressed).Imm(0).NE.Unlikely.b {
+      # string's chars are u8, key's chars are u16
+      tail_call_string_index_of_string_plain("StringIndexOfCompressedStringUncompressed#{suffix}",
+              "STRING_INDEX_OF_COMPRESSED_STRING_UNCOMPRESSED#{upsuffix}", cgmode)
+    }
+    # string's chars are u8, key's chars are u8
+    tail_call_string_index_of_string_plain("StringIndexOfCompressedStringCompressed#{suffix}",
+          "STRING_INDEX_OF_COMPRESSED_STRING_COMPRESSED#{upsuffix}", cgmode)
+  LabelGlobal(:SlowPathEntrypoint)
+  if cgmode == :NativePlus
+    Return(Call(str_orig, key_orig, start_index).Method("StdCoreStringIndexOfString").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, key_orig, start_index, fake1, fake2).AddImm(entrypoint).MethodAsImm("StringIndexOfStringOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+  }
+end  # def GenerateStringIndexOfString
+
+GenerateStringIndexOfString(:FastPath)
+GenerateStringIndexOfString(:NativePlus)
 
 
 function(:StringLastIndexOfCompressedPlain,
@@ -2130,7 +2464,7 @@ LabelGlobal(:LineString)
 Label(:Flat)
   str_data := Phi(tree_data, sliced_data, line_data).ptr
 
-  uncompressed := Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b
+  uncompressed := Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b
   IfImm(uncompressed).Imm(0).NE.Unlikely.b {
     # char is u16 and start_index is zero-based
     If(start_index, 7).LT.Unlikely.b {
@@ -2197,6 +2531,255 @@ end  # GenerateStringLastIndexOf
 
 GenerateStringLastIndexOf(:FastPath)
 GenerateStringLastIndexOf(:NativePlus)
+
+
+def GenerateStringLastIndexOfStringPlain(string_compressed, key_compressed, cgmode = :FastPath)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  str_kind = (string_compressed ? 'Compressed': 'Uncompressed')
+  key_kind = (key_compressed ? 'Compressed': 'Uncompressed')
+  str_char_width = (string_compressed ? Constants::U8_SIZE : Constants::U16_SIZE)
+  key_char_width = (key_compressed ? Constants::U8_SIZE : Constants::U16_SIZE)
+  str_char_type = (string_compressed ? 'u8' : 'u16')
+  key_char_type = (key_compressed ? 'u8' : 'u16')
+  function("StringLastIndexOf#{str_kind}String#{key_kind}#{suffix}".to_sym,
+            params: {str_data: 'ptr', str_len: 'u32', key_data: 'ptr', key_len: 'u32', start_index: 'u32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+
+    if defines.DEBUG
+      IfImm(Compare(str_len, key_len).B.b).Imm(0).NE.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+
+    first := LoadI(key_data).Imm(0).send(:"#{key_char_type}")
+    first := to_common_type(str_char_type, key_char_type, first)
+
+    if key_compressed
+      key_size := Cast(key_len).word
+    else
+      key_size := ShlI(Cast(key_len).word).Imm(Constants::LOG2_BYTES_PER_U16).word
+    end
+
+    if string_compressed
+      i1 := Cast(start_index).word
+    else
+      i1 := ShlI(Cast(start_index).word).Imm(Constants::LOG2_BYTES_PER_U16).word
+    end
+  # We are sure i1 = start_index... >= 0 so that we must start the loop.
+  Label(:OuterLoop)
+    i := Phi(i1, i2).word
+    str_char_by_i := Load(str_data, i).send(:"#{str_char_type}")
+    str_char_by_i := to_common_type(str_char_type, key_char_type, str_char_by_i)
+    If(str_char_by_i, first).EQ.Likely {
+      Goto(:FirstCharFound)
+    }
+    # continue
+    Goto(:FirstCharNotFound)
+  Label(:FirstCharFound)
+    # Found the first character, now let's look at the rest of the key
+    k1 := key_char_width
+    j1 := AddI(i).Imm(str_char_width).word
+    # while (k < key_size)
+  Label(:KeyRestLoop)
+    # k is the offset in key, i + j is the corresponding offset in the string.
+    k := Phi(k1, k2).word
+    j := Phi(j1, j2).word
+    If(k, key_size).AE.Unlikely {
+      if string_compressed
+        Return(i).i32
+      else
+        # shift right to get the index from the offset
+        Return(ShrI(i).Imm(Constants::LOG2_BYTES_PER_U16).u32).i32
+      end
+    }
+
+    str_char_by_j := Load(str_data, j).send(:"#{str_char_type}")
+    str_char_by_j := to_common_type(str_char_type, key_char_type, str_char_by_j)
+    key_char_by_k := Load(key_data, k).send(:"#{key_char_type}")
+    key_char_by_k := to_common_type(str_char_type, key_char_type, key_char_by_k)
+    If(str_char_by_j, key_char_by_k).NE.Likely {
+      Goto(:KeyRestDone)
+    }
+
+    j2 := AddI(j).Imm(str_char_width).word
+    k2 := AddI(k).Imm(key_char_width).word
+    Goto(:KeyRestLoop)
+  Label(:KeyRestDone)
+  Label(:FirstCharNotFound)
+    IfImm(Compare(i, 0).EQ.b).Imm(0).NE.Unlikely {
+       Goto(:OuterLoopDone)
+    }
+    i2 := SubI(i).Imm(str_char_width).word
+    Goto(:OuterLoop)
+  Label(:OuterLoopDone)
+    Return(-1).i32
+  }
+end  # def GenerateStringLastIndexOfStringPlain
+
+GenerateStringLastIndexOfStringPlain(string_compressed = false, key_compressed = false, :FastPath)
+GenerateStringLastIndexOfStringPlain(string_compressed = false, key_compressed = true, :FastPath)
+GenerateStringLastIndexOfStringPlain(string_compressed = true, key_compressed = false, :FastPath)
+GenerateStringLastIndexOfStringPlain(string_compressed = true, key_compressed = true, :FastPath)
+GenerateStringLastIndexOfStringPlain(string_compressed = false, key_compressed = false, :NativePlus)
+GenerateStringLastIndexOfStringPlain(string_compressed = false, key_compressed = true, :NativePlus)
+GenerateStringLastIndexOfStringPlain(string_compressed = true, key_compressed = false, :NativePlus)
+GenerateStringLastIndexOfStringPlain(string_compressed = true, key_compressed = true, :NativePlus)
+
+
+def GenerateStringLastIndexOfString(cgmode = :FastPath)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringLastIndexOfString#{suffix}".to_sym,
+            params: {str_orig: 'ref', key_orig: 'ref', start_index_orig: 'i32', fake1: 'i32', fake2: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+
+    # Note, 'str_orig' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded, it is the *this* ptr)
+    if defines.DEBUG
+      If(reftoptr(str_orig), nullptr).EQ.b.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+    # 'key_orig' may be nullptr, so this must be checked. We consider such key as an empty string.
+    If(reftoptr(key_orig), nullptr).EQ.b.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    key_len_packed := LoadI(key_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    key_len := ShrI(key_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    # "abc".lastIndexOf("ab", -10) will return 0
+    start_index := min(max(start_index_orig, 0), Sub(str_len, key_len).i32)
+    IfImm(Compare(start_index, 0).LT.b).Imm(0).NE.Unlikely.b {
+      Return(-1).i32
+    }
+
+    # Check if key_orig is empty (return the modified 'start_index' if so).
+    IfImm(Compare(key_len, 0).LE.b).Imm(0).NE.Unlikely.b {
+      # str_len is 30-bit in size so u32 -> i32 is safe here.
+      Return(start_index).i32
+    }
+
+    # We cannot stay in irtoc for a time interval longer than the maximum allowed pause between two consecutive
+    # SafePoints. If the key's length is equal to or larger than Constants::STRING_KMP_MIN_PATTERN_LEN, the string longer
+    # than Constants::STRING_KMP_MIN_SUBJECT_LEN will be processed in C++ (see the going to the SlowPath below).
+    # When the key is shorter than Constants::STRING_KMP_MIN_PATTERN_LEN, benchmarks on the device show that the string
+    # must be shorter than Constants::STRING_MAX_SUBJECT_LEN_BETWEEN_SAFEPOINTS to follow this rule.
+    IfImm(Compare(str_len, Constants::STRING_MAX_SUBJECT_LEN_BETWEEN_SAFEPOINTS).GT.b).Imm(0).NE.Unlikely.b {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    # If the key is shorter than Constants::STRING_KMP_MIN_PATTERN_LEN, we should stay in Irtoc regardless of the
+    # string's length: the naïve algorithm implemented here is faster than the same algorithm implemented in C++
+    # due to the overhead for overhead for VMHandle creation to be protected from GC triggering during string
+    # flattening plus the overhead for looking for the string in the flattened string cache.
+    IfImm(Compare(key_len, Constants::STRING_KMP_MIN_PATTERN_LEN).LT.b).Imm(0).NE.Likely.b {
+      Goto(:NaiveImpl)
+    }
+    IfImm(Compare(start_index, 0).EQ.b).Imm(0).NE.Likely.b {
+      Goto(:NaiveImpl)
+    }
+
+    # If the key is longer than Constants::STRING_KMP_PLUS_FLATTENING_OVERHEAD_MIN_PATTERN_LEN or the string is longer
+    # than the Constants::STRING_KMP_MIN_SUBJECT_LEN, we should go to the "slow" path. The "slow" path is actually
+    # faster than the naïve algorithm implemented here because the total overhead is less than the difference between
+    # the naïve algorithm running time and the running time of the KMP.
+    IfImm(Compare(key_len, Constants::STRING_KMP_PLUS_FLATTENING_OVERHEAD_MIN_PATTERN_LEN).GT.b).Imm(0).NE.Unlikely.b {
+      Goto(:SlowPathEntrypoint)
+    }
+    IfImm(Compare(str_len, Constants::STRING_KMP_MIN_SUBJECT_LEN).GT.b).Imm(0).NE.Unlikely.b {
+      Goto(:SlowPathEntrypoint)
+    }
+
+Label(:NaiveImpl)
+    dispatch_on_string_type(str_orig, AsGlobalLabel(:LineString),
+                                      AsGlobalLabel(:SlicedString),
+                                      AsGlobalLabel(:TreeString))
+  LabelGlobal(:TreeString)
+    tree_data := get_tree_data_ptr(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    Goto(:Flat)
+  LabelGlobal(:SlicedString)
+    if Options.arch == :x86_64
+      sliced_data := get_sliced_data_ptr(str_orig, Cast(str_len_packed).u64)
+    else
+      sliced_data := get_sliced_data_ptr(str_orig, str_len_packed)
+    end
+    Goto(:Flat)
+  LabelGlobal(:LineString)
+    line_data := AddI(reftoptr(str_orig)).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  Label(:Flat)
+    str_data := Phi(tree_data, sliced_data, line_data).ptr
+
+    dispatch_on_string_type(key_orig, AsGlobalLabel(:LineKey),
+                                      AsGlobalLabel(:SlicedKey),
+                                      AsGlobalLabel(:TreeKey))
+  LabelGlobal(:TreeKey)
+    tree_key_data := get_tree_data_ptr(key_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    Goto(:FlatKey)
+  LabelGlobal(:SlicedKey)
+    if Options.arch == :x86_64
+      sliced_key_data := get_sliced_data_ptr(key_orig, Cast(key_len_packed).u64)
+    else
+      sliced_key_data := get_sliced_data_ptr(key_orig, key_len_packed)
+    end
+    Goto(:FlatKey)
+  LabelGlobal(:LineKey)
+    line_key_data := AddI(reftoptr(key_orig)).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  Label(:FlatKey)
+    key_data := Phi(tree_key_data, sliced_key_data, line_key_data).ptr
+    is_key_uncompressed := Compare(is_string_uncompressed_u32(key_len_packed), 1).EQ.b
+
+    IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
+      IfImm(is_key_uncompressed).Imm(0).NE.Unlikely.b {
+        # string's chars are u16, key's chars are u16
+        tail_call_string_index_of_string_plain("StringLastIndexOfUncompressedStringUncompressed#{suffix}",
+          "STRING_LAST_INDEX_OF_UNCOMPRESSED_STRING_UNCOMPRESSED#{upsuffix}", cgmode)
+      }
+      # string's chars are u16, key's chars are u8
+      tail_call_string_index_of_string_plain("StringLastIndexOfUncompressedStringCompressed#{suffix}",
+          "STRING_LAST_INDEX_OF_UNCOMPRESSED_STRING_COMPRESSED#{upsuffix}", cgmode)
+    }
+
+    IfImm(is_key_uncompressed).Imm(0).NE.Unlikely.b {
+      # string's chars are u8, key's chars are u16
+      tail_call_string_index_of_string_plain("StringLastIndexOfCompressedStringUncompressed#{suffix}",
+              "STRING_LAST_INDEX_OF_COMPRESSED_STRING_UNCOMPRESSED#{upsuffix}", cgmode)
+    }
+    # string's chars are u8, key's chars are u8
+    tail_call_string_index_of_string_plain("StringLastIndexOfCompressedStringCompressed#{suffix}",
+          "STRING_LAST_INDEX_OF_COMPRESSED_STRING_COMPRESSED#{upsuffix}", cgmode)
+  LabelGlobal(:SlowPathEntrypoint)
+  if cgmode == :NativePlus
+    Return(Call(str_orig, key_orig, start_index_orig).Method("StdCoreStringLastIndexOfString").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_LAST_INDEX_OF_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, key_orig, start_index_orig, fake1, fake2).AddImm(entrypoint).MethodAsImm("StringLastIndexOfStringOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+  }
+end  # def GenerateStringLastIndexOfString
+
+GenerateStringLastIndexOfString(:FastPath)
+GenerateStringLastIndexOfString(:NativePlus)
 
 
 def GenerateStringRepeatTlab(cgmode)
@@ -2336,7 +2919,7 @@ def GenerateStringConcat2Tlab(cgmode)
     src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
 
-    # has no uncompressed then everyting is compressed, data is stored as bytes
+    # has no uncompressed then everything is compressed, data is stored as bytes
     If(has_uncompressed, 0).EQ.b {
       copy_u8_chars(src_str_data1, dst_str_data1, count1)
 
@@ -3049,7 +3632,7 @@ def GenerateStringToCaseTlab(with_locale, tocase, cgmode = :FastPath)
       If(is_string_uncompressed_u32(locale_length), 0).NE.Unlikely {
         Goto(:SlowPathEntrypoint)
       }
-        # we are sure the locale is compressed
+      # we are sure the locale is compressed
       If(get_string_length(Cast(locale_length).u64, Constants::STRING_LENGTH_SHIFT), 2).B.Unlikely {
         Goto(:SlowPathEntrypoint)
       }

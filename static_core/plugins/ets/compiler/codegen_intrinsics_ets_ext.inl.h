@@ -20,4 +20,7 @@
 void CreateStringToCase(IntrinsicInst *inst, RuntimeInterface::EntrypointId fastPathEntrypointId,
                         RuntimeInterface::EntrypointId slowPathEntrypointId, Reg dst, Reg srcStr);
 
+// CC-OFFNXT(G.NAM.03-CPP) RuntimeInterface type identifier
+void CreateStringIndexOfLastIndexOfString(IntrinsicInst *inst, RuntimeInterface::EntrypointId entrypointId, Reg dst,
+                                          SRCREGS src);
 #endif  // PANDA_PLUGINS_ETS_COMPILER_CODEGEN_INTRINSICS_ETS_EXT_INL_H

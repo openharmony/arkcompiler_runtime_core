@@ -217,6 +217,8 @@ module Constants
     STRING_MUTF8_1B_MIN = "0x01"
     STRING_LENGTH_OFFSET = "common_vm::BaseString::LENGTH_AND_FLAGS_OFFSET"
     STRING_LENGTH_SHIFT = "common_vm::BaseString::LengthBits::START_BIT"
+    STRING_U16_SIZE_SHIFT = "common_vm::BaseString::IsInternBit::START_BIT"
+    STRING_DEFLAG_MASK="~((1 << common_vm::BaseString::LengthBits::START_BIT) - 1)"
     STRING_HASHCODE_OFFSET = "common_vm::BaseString::MIX_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
     STRING_TYPE_OFFSET = "cross_values::GetBaseClassStringTypeOffset(GetArch())"
@@ -440,6 +442,6 @@ macro(:reftoptr) do |ref_val|
   if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
     Bitcast(ref_val).ptr
   else
-    Cast(ref_val).SrcType("DataType::REFERENCE").ptr
+    Cast(ref_val).SrcType(Constants::COMPILER_REFERENCE).ptr
   end
 end
