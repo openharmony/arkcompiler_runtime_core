@@ -340,10 +340,6 @@
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_11.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_oicfwok_12.ets
 
-#32611
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_gc_readonly_n.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_readonly_n.ets
-
 #32612
 09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_0.ets
 09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_1.ets
@@ -452,6 +448,11 @@
 
 #33901
 10.interfaces/04.interface_properties/interface_property_declaration_n_6.ets
+
+#34172
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_12_n.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_22_n.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_36_n.ets
 
 #33639
 11.enumerations/enum_decl_25.ets
