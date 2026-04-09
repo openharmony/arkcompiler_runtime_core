@@ -241,9 +241,6 @@
 07.expressions/19.ensure-not-nullish_expression/warn2_4.ets
 07.expressions/19.ensure-not-nullish_expression/warn2_6.ets
 
-#33285
-07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
-
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
