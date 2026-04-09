@@ -39,7 +39,7 @@ let typeArrayList = [
 const expectedAtomicsRangeError = (e: Error): boolean => {
     return e instanceof RangeError &&
         e.code == 401 &&
-        e.message == "Atomics:: Index out of bounds"
+        e.message == "Index out of bounds"
 }
 
 function testAdd() {

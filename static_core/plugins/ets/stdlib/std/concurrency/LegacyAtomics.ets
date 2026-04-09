@@ -59,7 +59,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicAddU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -80,7 +80,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAddI64(index, byteOffset, value.getLong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -109,7 +109,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicAndU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -130,7 +130,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getLong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -162,7 +162,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicCompareExchangeU32(index, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -186,7 +186,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -217,7 +217,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicExchangeU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -239,7 +239,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -267,7 +267,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicLoadU32(index, byteOffset)
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -324,7 +324,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicOrU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -345,7 +345,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicOrU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -374,7 +374,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicStoreU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -395,7 +395,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -424,7 +424,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicSubU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -445,7 +445,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicSubU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -474,7 +474,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicXorU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -495,7 +495,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicXorU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Atomics:: Unhandled array type')
+            throw new Error('Unhandled array type')
         }
     }
 
@@ -746,7 +746,7 @@ export namespace Atomics {
     // https://tc39.es/ecma262/multipage/structured-data.html#sec-validateatomicaccess
     function index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: int): int {
         if (index < 0 || index >= length) {
-            throw new RangeError("Atomics:: Index out of bounds")
+            throw new RangeError("Index out of bounds")
         }
         return startByteOffset + (index * elementSize)
     }
@@ -755,45 +755,45 @@ export namespace Atomics {
         if (typedArray instanceof Int8Array) {
             let notUnionTypedArray = typedArray as Int8Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof Int16Array) {
             let notUnionTypedArray = typedArray as Int16Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof Int32Array) {
             let notUnionTypedArray = typedArray as Int32Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof BigInt64Array) {
             let notUnionTypedArray = typedArray as BigInt64Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof Uint8Array) {
             let notUnionTypedArray = typedArray as Uint8Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof Uint16Array) {
             let notUnionTypedArray = typedArray as Uint16Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof Uint32Array) {
             let notUnionTypedArray = typedArray as Uint32Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else if (typedArray instanceof BigUint64Array) {
             let notUnionTypedArray = typedArray as BigUint64Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
-                throw new RangeError("Atomics:: Index out of bounds")
+                throw new RangeError("Index out of bounds")
             }
         } else {
-            throw new Error("Unhandled array type!");
+            throw new Error("Unhandled array type");
         }
     }
 }
