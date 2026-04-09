@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,17 @@
 
 #include "libarkbase/macros.h"
 #include "include/runtime_options.h"
+#include "plugins/ets/runtime/ani/ani_options.h"
 
 namespace ark::ets {
 
 class EtsVmOptions final {
 public:
-    explicit EtsVmOptions(bool isVerifyANI) : isVerifyANI_(isVerifyANI) {}
+    explicit EtsVmOptions(bool isVerifyANI, bool isWorkaroundNoCrash)
+        : isVerifyANI_(isVerifyANI), isVerifyAniWorkaroundNoCrashIfInvalidUsage_(isWorkaroundNoCrash)
+    {
+    }
+
     ~EtsVmOptions() = default;
 
     bool IsVerifyANI() const
@@ -31,8 +36,14 @@ public:
         return isVerifyANI_;
     }
 
+    bool IsVerifyANIWorkaroundNoCrashIfInvalidUsage() const
+    {
+        return isVerifyAniWorkaroundNoCrashIfInvalidUsage_ && isVerifyANI_;
+    }
+
 private:
-    bool isVerifyANI_;
+    bool isVerifyANI_ {false};
+    bool isVerifyAniWorkaroundNoCrashIfInvalidUsage_ {false};
 
     NO_COPY_SEMANTIC(EtsVmOptions);
     NO_MOVE_SEMANTIC(EtsVmOptions);

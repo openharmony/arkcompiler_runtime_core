@@ -670,7 +670,7 @@ private:
 };
 
 bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> args);
-void VerifyAbortANI(std::string_view functionName, std::string_view message);
+void VerifyReportANI(std::string_view functionName, std::string_view message);
 
 }  // namespace ark::ets::ani::verify
 

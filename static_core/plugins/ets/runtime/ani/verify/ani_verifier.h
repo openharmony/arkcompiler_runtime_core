@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ANI_VERIFIER_H
 
 #include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ani/ani_options.h"
 #include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
@@ -47,11 +48,23 @@ public:
         os::memory::Mutex resolverMapMutex;
     };
 
-    void Abort(const std::string_view message);
+    void Report(const std::string_view message);
+
+    void SetVerifyOptions(bool isWorkaroundNoCrashIfInvalidUsage)
+    {
+        isWorkaroundNoCrashIfInvalidUsage_ = isWorkaroundNoCrashIfInvalidUsage;
+    }
+
     void SetAbortHook(void (*hook)(void *data, const std::string_view message), void *data)
     {
         abortHook_ = hook;
         abortHookData_ = data;
+    }
+
+    void SetErrorHook(void (*hook)(void *data, const std::string_view message), void *data)
+    {
+        errorHook_ = hook;
+        errorHookData_ = data;
     }
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
@@ -73,15 +86,29 @@ public:
     bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
 
 private:
+    void Abort(const std::string_view message);
+    void Error(const std::string_view message);
+
     GlobalData &GetGlobalData()
     {
         return verifyObj_;
     }
 
+    // NOTE: This method must always be private.
+    bool IsWorkaroundNoCrashIfInvalidUsage() const
+    {
+        return isWorkaroundNoCrashIfInvalidUsage_;
+    }
+
     void (*abortHook_)(void *data, const std::string_view message) {};
     void *abortHookData_ {};
 
+    void (*errorHook_)(void *data, const std::string_view message) {};
+    void *errorHookData_ {};
+
     GlobalData verifyObj_;
+
+    bool isWorkaroundNoCrashIfInvalidUsage_ {false};
 
     NO_COPY_SEMANTIC(ANIVerifier);
     NO_MOVE_SEMANTIC(ANIVerifier);

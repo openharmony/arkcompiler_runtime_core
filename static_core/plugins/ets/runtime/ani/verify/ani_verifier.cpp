@@ -137,7 +137,17 @@ bool ANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver)
     return resolvers.find(vresolver) != resolvers.cend();
 }
 
-void ANIVerifier::Abort(const std::string_view message)
+void ANIVerifier::Report(const std::string_view message)
+{
+    if (IsWorkaroundNoCrashIfInvalidUsage()) {
+        ANIVerifier::Error(message);
+    } else {
+        ANIVerifier::Abort(message);
+    }
+}
+
+namespace {
+PandaStringStream BuildMessageWithStackTrace(const std::string_view message)
 {
     PandaStringStream ss;
     ss << message << "\n";
@@ -159,7 +169,23 @@ void ANIVerifier::Abort(const std::string_view message)
         ss << "  Called from:\n";
         ss << "    '[native]'";
     }
+    return ss;
+}
+}  // namespace
 
+void ANIVerifier::Error(const std::string_view message)
+{
+    auto ss = BuildMessageWithStackTrace(message);
+    if (errorHook_ != nullptr) {
+        errorHook_(errorHookData_, ss.str());
+    } else {
+        LOG(ERROR, ANI) << ss.str();
+    }
+}
+
+void ANIVerifier::Abort(const std::string_view message)
+{
+    auto ss = BuildMessageWithStackTrace(message);
     if (abortHook_ != nullptr) {
         abortHook_(abortHookData_, ss.str());
     } else {

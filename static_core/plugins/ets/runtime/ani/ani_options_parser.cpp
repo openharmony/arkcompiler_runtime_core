@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,7 +242,10 @@ OptionsParser::ErrorMsg OptionsParser::RunOptionsParser(PandArgParser &parser, c
 
 void OptionsParser::PrepareEtsVmOptions()
 {
-    SetEtsVmOptions(runtimeOptions_, std::make_unique<EtsVmOptions>(aniOptions_.IsVerifyANI()));
+    bool isVerifyAni = aniOptions_.IsVerifyANI();
+    bool isWorkaroundNoCrash = aniOptions_.IsVerifyANIWorkroundNoCrashIfInvalidUsage();
+
+    SetEtsVmOptions(runtimeOptions_, std::make_unique<EtsVmOptions>(isVerifyAni, isWorkaroundNoCrash));
 }
 
 }  // namespace ark::ets::ani
