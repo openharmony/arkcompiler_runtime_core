@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,14 @@
  */
 
 /*---
-desc: ArithmeticError is thrown by an integer division or integer
-  remainder operator if the right-hand operand expression has the zero value.
+desc: >-
+    Float operand promotes result to float type, so assigning
+    to an integer type causes a compile-time error.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Float' cannot be assigned to type 'Int'"
 ---*/
 
-function main() {
-  let a = 1;
-  let b = 1;
-  let j: int;
-  let expectedException = (e: Error): boolean => { return (e instanceof ArithmeticError) }
-  arktest.expectThrow(() => { let v: boolean = (++a > 0) && (b++ * b++ / j) > 0; }, expectedException)
-  arktest.assertEQ(a != 2 || b != 3, false)
+function main(): void {
+    const r = 3.0f + 5
+    let i: int = r
 }

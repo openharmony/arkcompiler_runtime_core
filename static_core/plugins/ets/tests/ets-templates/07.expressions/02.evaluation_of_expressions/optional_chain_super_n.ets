@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,22 @@
  */
 
 /*---
-desc: If the value of an array index expression is negative,
-  or greater than, or equal to the length of the array,
-  then an array indexing expression throws RangeError.
+desc: >-
+    If the form of primaryExpression is super,
+    then the pattern "super?." is handled as a compile-time error.
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0061: Unexpected super keyword."
 ---*/
 
-function main() {
-
-  let v: int[][] = [[1, 2], [3, 4], [5, 6]];
-  let a = 1;
-  let b = 1;
-
-  let s: String = "X" + (a = 2) + ++v[1][1] + (b = 2);
-  arktest.assertEQ(a, 2);
-  arktest.assertEQ(b, 2);
-    
+class Parent {
+    get x(): int {
+        return 13;
+    }
 }
+
+class Sibling extends Parent {
+    f(): int | undefined {
+        return super?.x;
+    }
+}
+

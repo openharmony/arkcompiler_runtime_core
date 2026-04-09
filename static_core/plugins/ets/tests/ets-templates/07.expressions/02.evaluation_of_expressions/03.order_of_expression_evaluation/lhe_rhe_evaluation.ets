@@ -19,29 +19,32 @@ desc: >-
     the left-hand expression of a binary operator is fully evaluated.
 ---*/
 
-function main() {
+const suite = new arktest.ArkTestsuite("Left-hand evaluated before right-hand in binary operators")
 
+suite.addTest("Lhs abort prevents rhs evaluation", () => {
     let a = new int[2](0);
     let x: int = 1;
     let y: int = 1;
-    let exceptions: int = 0;
-
     try {
-        y = (a[3]) * (--x);  // eval should abort on left-hand
+        y = (a[3]) * (--x);
     } catch (e) {
-        arktest.assertEQ(x,1)
-        arktest.assertEQ(y,1)
-        exceptions++;
+        arktest.assertEQ(x, 1)
+        arktest.assertEQ(y, 1)
     }
-    arktest.assertEQ(exceptions, 1);
+})
 
+suite.addTest("Lhs completes before rhs abort", () => {
+    let a = new int[2](0);
+    let x: int = 1;
+    let y: int = 1;
     try {
-        y = (x++) + (a[3]);  // eval should abort on right-hand
+        y = (x++) + (a[3]);
     } catch (e) {
-        arktest.assertEQ(x,2)
-        arktest.assertEQ(y,1)
-        exceptions++;
+        arktest.assertEQ(x, 2)
+        arktest.assertEQ(y, 1)
     }
-    arktest.assertEQ(exceptions, 2);
+})
 
+function main() {
+    suite.run()
 }
