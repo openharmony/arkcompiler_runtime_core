@@ -662,6 +662,18 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Int8Array } - a new Int8Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Int8Array {
+        return new Int8Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<byte> } items - a set of elements to include in the new array object.
      * @returns { Int8Array } - a new Int8Array
      * @static
@@ -707,18 +719,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofByte(items: ValueArray<byte>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Int8Array } - a new Int8Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Int8Array {
-        return new Int8Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -2315,6 +2315,18 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Int16Array } - a new Int16Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Int16Array {
+        return new Int16Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<short> } items - a set of elements to include in the new array object.
      * @returns { Int16Array } - a new Int16Array
      * @static
@@ -2360,18 +2372,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofShort(items: ValueArray<short>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Int16Array } - a new Int16Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Int16Array {
-        return new Int16Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -3969,6 +3969,18 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Int32Array } - a new Int32Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Int32Array {
+        return new Int32Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { Int32Array } - a new Int32Array
      * @static
@@ -3998,18 +4010,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Int32Array } - a new Int32Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Int32Array {
-        return new Int32Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -5596,6 +5596,18 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { BigInt64Array } - a new BigInt64Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): BigInt64Array {
+        return new BigInt64Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { BigInt64Array } - a new BigInt64Array
      * @static
@@ -5657,18 +5669,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofLong(items: ValueArray<long>): void
     private final native ofBigInt(items: FixedArray<Object>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { BigInt64Array } - a new BigInt64Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): BigInt64Array {
-        return new BigInt64Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<BigInt>.
@@ -7238,6 +7238,18 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Float32Array } - a new Float32Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Float32Array {
+        return new Float32Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { Float32Array } - a new Float32Array
      * @static
@@ -7283,18 +7295,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofFloat(items: ValueArray<float>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Float32Array } - a new Float32Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Float32Array {
-        return new Float32Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<number>.
@@ -8808,6 +8808,18 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Float64Array } - a new Float64Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Float64Array {
+        return new Float64Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { Float64Array } - a new Float64Array
      * @static
@@ -8837,18 +8849,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Float64Array } - a new Float64Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Float64Array {
-        return new Float64Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<number>.

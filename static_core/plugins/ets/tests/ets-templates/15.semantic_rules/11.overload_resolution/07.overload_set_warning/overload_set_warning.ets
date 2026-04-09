@@ -17,7 +17,7 @@
 desc: A compile-time warning is issued if the order of entities in an overload 
       set implies that some overloaded entity can never be selected for a call.
 tags: [compile-only]
-expected_out: "TODO: CTWarning unknown"
+expected_out: "Warning W2323: The order of entities in an overload set implies that the overloaded entity with the signature '(p: String) => undefined' will never be selected for a call, as the preceding entity with the signature '(p: Double|String) => undefined' prevails."
 ---*/
 
 function f1(p: number) {}

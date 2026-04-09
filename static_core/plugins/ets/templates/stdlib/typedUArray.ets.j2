@@ -807,6 +807,19 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             {%- endif %}
         }
     }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @returns { {{element['name']}}Array } - a new {{element['name']}}Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): {{element['name']}}Array {
+        return new {{element['name']}}Array(0)
+    }
+
     {%- set types_to_generate = ['number', 'int'] %}
     {%- if element['primitiveTypeWide'] != 'int' %}{%- do types_to_generate.append(element['primitiveTypeWide']) %}{%- endif %}
     {%- if element['name'] == 'BigUint64' %}{%- do types_to_generate.append('bigint') %}{%- endif %}
@@ -860,18 +873,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     private final native ofLong(items: ValueArray<long>): void
     private final native ofBigInt(items: FixedArray<Object>): void
     {%- endif %}
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { {{element['name']}}Array } - a new {{element['name']}}Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): {{element['name']}}Array {
-        return new {{element['name']}}Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<{{updatedSubsetType}}>.
@@ -1318,6 +1319,19 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public native reverse(): {{element['name']}}Array
 
     /**
+     * Creates a slice of current {{element['name']}}Array using range [begin, this.lengthInt].
+     *
+     * @param { int } begin - start index to be taken into slice.
+     * @returns { {{element['name']}}Array } - a new {{element['name']}}Array with elements of
+     *     current {{element['name']}}Array[begin, this.lengthInt].
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public slice(begin: int): {{element['name']}}Array {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current {{element['name']}}Array using range [begin, end]
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice}
      *
@@ -1337,19 +1351,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         const relEnd = normalizeIndex(end, this.lengthInt)
         let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffsetInt, relEnd * this.BYTES_PER_ELEMENT + this.byteOffsetInt)
         return new {{element['name']}}Array(buf)
-    }
-
-    /**
-     * Creates a slice of current {{element['name']}}Array using range [begin, this.lengthInt].
-     *
-     * @param { int } begin - start index to be taken into slice.
-     * @returns { {{element['name']}}Array } - a new {{element['name']}}Array with elements of
-     *     current {{element['name']}}Array[begin, this.lengthInt].
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public slice(begin: int): {{element['name']}}Array {
-        return this.sliceFromTo(begin, this.lengthInt)
     }
 
 

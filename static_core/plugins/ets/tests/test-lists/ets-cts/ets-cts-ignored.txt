@@ -524,9 +524,6 @@
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_3.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_4.ets
 
-#32946 no warning issued if overloaded entity can never be selected for a call
-15.semantic_rules/11.overload_resolution/07.overload_set_warning/overload_set_warning.ets
-
 #34495 Incorrect behavior of instanceof with type erasure
 15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_0.ets
 15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_1.ets
