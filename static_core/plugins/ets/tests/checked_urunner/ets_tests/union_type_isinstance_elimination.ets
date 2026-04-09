@@ -36,6 +36,14 @@
 //! PASS_AFTER      "Codegen"
 //! INST_COUNT      "IsInstance", 1
 //!
+//! METHOD          "union_type_isinstance_elimination.ETSGLOBAL::checkEliminationForNonnullUnionType"
+//! PASS_AFTER      "IrBuilder"
+//! INST            "NullCheck"
+//! PASS_BEFORE     "Peepholes"
+//! INST            "IsInstance"
+//! PASS_AFTER      "Codegen"
+//! INST_NOT        "IsInstance"
+//!
 //! METHOD          "union_type_isinstance_elimination.ETSGLOBAL::checkEliminationForInterfaces"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
@@ -74,6 +82,11 @@ function checkEliminationForEnumArrayTemplateTypes() {
     arktest.assertEQ(z instanceof Promise | Array | undefined | A | Record, true);
 }
 
+function checkEliminationForNonnullUnionType() {
+    let x: 'a' | 'b' | Error | int | undefined = 'a';
+    arktest.assertEQ(x instanceof string | Error, true);
+}
+
 interface I1<U, V> {}
 interface I2<U, V> {}
 interface II1<U, V> extends I1<U, V>, I2<U, V> {}
@@ -93,5 +106,6 @@ function main(): void {
     checkElimination();
     checkEliminationForBaseType();
     checkEliminationForEnumArrayTemplateTypes();
+    checkEliminationForNonnullUnionType();
     checkEliminationForInterfaces();
 }

@@ -162,6 +162,14 @@ entrypoints:
   - ark::Class*
   - ark::ObjectHeader*
 
+- name: NullClassCastExceptionUnresolved
+  entrypoint: NullClassCastExceptionUnresolvedEntrypoint
+  bridge: entrypoint
+  properties: [no_return]
+  signature:
+  - void
+  - uint32_t
+
 - name: NegativeArraySizeException
   entrypoint: NegativeArraySizeExceptionEntrypoint
   bridge: entrypoint

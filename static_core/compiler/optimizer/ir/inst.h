@@ -5023,11 +5023,9 @@ public:
     void SetIsClassCastCheck(bool isClassCastCheck = true)
     {
         SetField<IsClassCastCheck>(isClassCastCheck);
-        // NOTE(lyupaanastasia): remove after supporting throw class cast exception from nullcheck
-        if (isClassCastCheck) {
-            SetFlag(inst_flags::CAN_DEOPTIMIZE);
-        }
     }
+
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 private:
     using IsImplicitFlag = LastField::NextFlag;

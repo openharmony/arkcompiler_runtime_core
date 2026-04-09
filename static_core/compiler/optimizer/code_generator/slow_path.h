@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,7 +140,7 @@ private:
     DeoptimizeType deoptimizeType_;
 };
 
-class SlowPathImplicitNullCheck : public SlowPathEntrypoint {
+class SlowPathExplicitNullCheck : public SlowPathEntrypoint {
 public:
     using SlowPathEntrypoint::SlowPathEntrypoint;
 
@@ -214,6 +214,12 @@ public:
 
 private:
     Reg classReg_ {INVALID_REGISTER};
+};
+
+class SlowPathNullCheckCastUnresolved : public SlowPathEntrypoint {
+public:
+    using SlowPathEntrypoint::SlowPathEntrypoint;
+    void GenerateImpl(Codegen *codegen) override;
 };
 
 class SlowPathAbstract : public SlowPathEntrypoint {
