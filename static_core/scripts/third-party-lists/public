@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,7 +35,7 @@ zlib,https://gitcode.com/openharmony/third_party_zlib,branch,OpenHarmony-5.0.1-R
 # ARK compiler:
 asmjit,https://github.com/asmjit/asmjit,commit,8474400e82c3ea65bd828761539e5d9b25f6bd83,with_patches,no_submodules
 elfio,https://gitcode.com/openharmony/third_party_elfio,branch,OpenHarmony_feature_20250328,no_patches,no_submodules
-vixl,https://gitcode.com/openharmony/third_party_vixl.git,commit,62c46148189503cc1f220185ab753338211d03f2,with_patches,no_submodules
+vixl,https://gitcode.com/openharmony/third_party_vixl.git,commit,4d97e1c9709bf2e5701c38b38f65d29836eedaf2,no_patches,no_submodules
 zydis,https://github.com/zyantific/zydis,tag,v3.2.1,with_patches,no_submodules
 flatbuffers,https://gitcode.com/openharmony/third_party_flatbuffers,tag,OpenHarmony-v6.0-Release,no_patches,no_submodules
 
