@@ -28,7 +28,7 @@ export class ArraySort {
 
   /**
    * Specifics of the array to be sorted.
-   * @Param "sorted", "sorted_reversed"
+   * @Param "sorted", "sorted_reversed", "unsorted"
    */
   distribution: String = "sorted";
 
@@ -54,6 +54,11 @@ export class ArraySort {
           this.intsInitial[i] = size - i;
         }
         break;
+      case "unsorted":
+        for (let i = 0; i < size; i++) {
+          this.intsInitial[i] = Double.toInt(random() * size);
+        }
+        break;
       default:
         break;
     }
@@ -74,5 +79,37 @@ export class ArraySort {
    */
   public baseline(): void {
     copyTo(this.intsInitial, this.ints, 0, 0, this.size);
+  }
+
+  /**
+   * @Benchmark
+   */
+  public sortAndCountReplacements(): int | string | undefined {
+    copyTo(this.intsInitial, this.ints, 0, 0, this.size);
+    sort(this.ints);
+    let replacements: int = 0;
+    let size = this.size
+    for (let i = 0; i < size; i++) {
+      if (this.intsInitial[i] != this.ints[i]) {
+        replacements++;
+      }
+    }
+    if (replacements == 0) {
+      if (this.distribution == "sorted") {
+        return "Zero replacements OK for sorted";
+      }
+      else {
+        return undefined;
+      }
+    }
+    if (replacements == size) {
+      if (this.distribution == "sorted_reversed") {
+        return "Size of array is OK for sorted reversed";
+      }
+      else {
+        return undefined;
+      }
+    }
+    return replacements;
   }
 }

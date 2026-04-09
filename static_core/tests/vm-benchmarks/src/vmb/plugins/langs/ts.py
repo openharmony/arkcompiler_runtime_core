@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,7 @@ class Lang(LangBase):
         r'({)?\s*$')
     __re_func = re.compile(
         r'^\s*(public)?\s+(?P<func>\w+)\s*'
-        r'\(\s*\)\s*:\s*(?P<type>\w+)\s*(throws)?\s*({)?\s*$')
+        r'\(\s*\)\s*:\s*(?P<type>[\w<>\[\]]+(?:\s*\|\s*[\w<>\[\]]+)*)\s*(throws)?\s*({)?\s*$')
     __re_func_void = re.compile(
         r'^\s*(public)?\s+(?P<func>\w+)\s*'
         r'\(\s*\)\s*(throws)?\s*({)?\s*$')
@@ -62,7 +62,10 @@ class Lang(LangBase):
         """Override LangBase to cope with omitted void."""
         m = re.search(self.re_func, line)  # type: ignore
         if m:
-            return m.group("func"), m.group("type")
+            func_type = m.group("type")
+            if '|' in func_type:
+                func_type = 'Object'
+            return m.group("func"), func_type
         m = re.search(self.__re_func_void, line)  # type: ignore
         ret = None
         if m:
