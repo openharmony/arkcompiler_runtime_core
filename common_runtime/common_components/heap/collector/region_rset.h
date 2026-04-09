@@ -73,7 +73,8 @@ public:
                                   HeapAddress regionStart, HeapAddress end)
     {
         for (size_t i = 0; i < cardCnt_; i++) {
-            CardElement card = GetCardTable()[i];
+            std::atomic<CardElement> *cardPtr = reinterpret_cast<std::atomic<CardElement> *>(&GetCardTable()[i]);
+            CardElement card = cardPtr->load(std::memory_order_relaxed);
             size_t index = kBitsPerWord;
             while (card != 0) {
                 index = static_cast<size_t>(__builtin_ctzll(card));
