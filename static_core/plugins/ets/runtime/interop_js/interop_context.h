@@ -162,7 +162,8 @@ public:
     NO_COPY_SEMANTIC(InteropCtx);
     NO_MOVE_SEMANTIC(InteropCtx);
 
-    PANDA_PUBLIC_API static void Init(EtsExecutionContext *executionCtx, napi_env env);
+    PANDA_PUBLIC_API static void Init(EtsExecutionContext *executionCtx, napi_env env,
+                                      bool isJsEnvCreatedExternally = false);
     ~InteropCtx();
 
     static void Destroy(void *ptr);
@@ -191,6 +192,11 @@ public:
     {
         ASSERT(jsEnv_ != nullptr);
         return jsEnv_;
+    }
+
+    bool IsJsEnvCreatedExternally() const
+    {
+        return isJsEnvCreatedExternally_;
     }
 
     mem::GlobalObjectStorage *Refstor() const
@@ -458,7 +464,7 @@ protected:
     }
 
 private:
-    explicit InteropCtx(EtsExecutionContext *executionCtx, napi_env env);
+    explicit InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJsEnvCreatedExternally);
     void InitJsValueFinalizationRegistry(EtsExecutionContext *executionCtx);
     void InitExternalInterfaces();
 
@@ -511,7 +517,7 @@ private:
 
     // JSVM context
     napi_env jsEnv_ {};
-    bool isJsEnvNewCreateFlag_ {true};
+    bool isJsEnvCreatedExternally_ {false};
 
     // various per-JSVM interfaces
     ExternalIfaceTable interfaceTable_;

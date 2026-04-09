@@ -411,16 +411,16 @@ void InteropCtx::InitExternalInterfaces()
         ASSERT(status == napi_ok);
     });
 
-    interfaceTable_.SetIsJSEnvNewCreateFunction([this]() -> bool { return isJsEnvNewCreateFlag_; });
+    interfaceTable_.SetIsJsEnvCreatedExternallyFunction(
+        []() -> bool { return InteropCtx::Current()->IsJsEnvCreatedExternally(); });
 
 #endif
     interfaceTable_.SetCreateInteropCtxFunction(
-        [this](EtsExecutionContext *executionCtx, ExternalIfaceTable::JSEnv jsEnv, bool isJsEnvNewCreate) {
-            isJsEnvNewCreateFlag_ = isJsEnvNewCreate;
+        [](EtsExecutionContext *executionCtx, ExternalIfaceTable::JSEnv jsEnv, bool isJsEnvCreatedExternally) {
             auto env = static_cast<napi_env>(jsEnv);
             {
                 ScopedManagedCodeThread managedScope(executionCtx->GetMT());
-                InteropCtx::Init(executionCtx, env);
+                InteropCtx::Init(executionCtx, env, isJsEnvCreatedExternally);
             }
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
             INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
@@ -430,9 +430,10 @@ void InteropCtx::InitExternalInterfaces()
         });
 }
 
-InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env)
+InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJsEnvCreatedExternally)
     : sharedEtsVmState_(SharedEtsVmState::GetInstance(executionCtx->GetPandaVM())),
       jsEnv_(env),
+      isJsEnvCreatedExternally_(isJsEnvCreatedExternally),
       constStringStorage_(this),
       commonJSObjectCache_(this),
       stackInfoManager_(this, executionCtx)
@@ -810,9 +811,10 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     std::abort();
 }
 
-void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env)
+void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env, bool isJsEnvCreatedExternally)
 {
-    auto *ctx = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(executionCtx, env);
+    auto *ctx =
+        Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(executionCtx, env, isJsEnvCreatedExternally);
     ASSERT(ctx != nullptr);
     auto *worker = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetWorker();
     worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
