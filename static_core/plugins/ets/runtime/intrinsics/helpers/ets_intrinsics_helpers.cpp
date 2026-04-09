@@ -136,7 +136,7 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
         return 0;
     }
     if (ToDigit(str[startIndex]) >= radix) {
-        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreFormatError,
                           "String does not contain a valid number");
         return 0;
     }
@@ -147,7 +147,7 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
             break;
         }
         if (result < (std::numeric_limits<T>::min() + digit) / radix) {
-            ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
+            ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreFormatError,
                               "Value exceeds integer limits");
             return 0;
         }
@@ -162,7 +162,7 @@ T StringToInt(EtsString *str, uint8_t radix)
     auto ps = str->TrimLeft()->GetMutf8();
     PandaString::size_type index = 0;
     if (index >= ps.size()) {
-        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreFormatError,
                           "String does not contain a valid number");
         return 0;
     }
@@ -171,7 +171,7 @@ T StringToInt(EtsString *str, uint8_t radix)
         ++index;
     }
     if (index >= ps.size()) {
-        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreFormatError,
                           "String does not contain a valid number");
         return 0;
     }
@@ -183,7 +183,7 @@ T StringToInt(EtsString *str, uint8_t radix)
         return result;
     }
     if (result < -std::numeric_limits<T>::max()) {
-        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreFormatError,
                           "Value exceeds integer limits");
         return 0;
     }

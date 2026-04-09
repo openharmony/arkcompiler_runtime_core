@@ -39,7 +39,7 @@ static std::optional<Span<Class *>> CheckAndTransformInterfaces(EtsObjectArray *
                 PandaOStringStream msg;
                 msg << "All given to Proxy classes must be an interface. But given class '"
                     << proxyInterfaces[idx]->GetName() << " is not an interface";
-                ark::ets::ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatTypeError,
+                ark::ets::ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreTypeError,
                                             msg.str().c_str());
                 allocator->Free(proxyInterfaces.Data());
                 return std::nullopt;

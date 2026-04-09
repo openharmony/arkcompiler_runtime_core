@@ -220,10 +220,10 @@ private:
     {
         wRangeError_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreRangeError->GetDescriptor(), "RangeError");
         wReferenceError_ =
-            RegisterClassWithLeafMatcher(PlatformTypes()->escompatReferenceError->GetDescriptor(), "ReferenceError");
+            RegisterClassWithLeafMatcher(PlatformTypes()->coreReferenceError->GetDescriptor(), "ReferenceError");
         wSyntaxError_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreSyntaxError->GetDescriptor(), "SyntaxError");
-        wURIError_ = RegisterClassWithLeafMatcher(PlatformTypes()->escompatURIError->GetDescriptor(), "URIError");
-        wTypeError_ = RegisterClassWithLeafMatcher(PlatformTypes()->escompatTypeError->GetDescriptor(), "TypeError");
+        wURIError_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreURIError->GetDescriptor(), "URIError");
+        wTypeError_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreTypeError->GetDescriptor(), "TypeError");
         ASSERT(wRangeError_ != nullptr);
         ASSERT(wReferenceError_ != nullptr);
         ASSERT(wSyntaxError_ != nullptr);

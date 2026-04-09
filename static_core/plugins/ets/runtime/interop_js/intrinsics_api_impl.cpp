@@ -461,7 +461,7 @@ static ALWAYS_INLINE inline bool CheckEtsObjectFoundException(EtsExecutionContex
 {
     if (EtsReferenceNullish(executionCtx, etsObject)) {
         PandaString message = "Need object";
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message.c_str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message.c_str());
         return true;
     }
     return false;
@@ -1039,7 +1039,7 @@ uint8_t ESValueAnyInstanceOf(EtsObject *etsObject, EtsObject *ctor)
     bool result = false;
     if (etsObject == nullptr || ctor == nullptr) {
         PandaString message = "Need object";
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message.c_str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message.c_str());
     } else {
         result = EtsIsinstance(executionCtx->GetMT(), etsObject, ctor);
     }

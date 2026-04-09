@@ -97,7 +97,7 @@ bool JSONStringifier::SerializeGetters(EtsExecutionContext *executionCtx, EtsHan
             // but it's still possible to manually emit bytecode with arbitrary number of parameters
             // in "%%get-" method.
             // `TypeError` is thrown here to align native implementation with managed `getGettersKeyValuePairs`.
-            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                               "Expected zero arguments in getter");
             return false;
         }
@@ -192,7 +192,7 @@ bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "cyclic object value");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "cyclic object value");
         return false;
     }
 
@@ -225,7 +225,7 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
 
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "cyclic object value");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "cyclic object value");
         return false;
     }
 
@@ -550,7 +550,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
 
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "cyclic object value");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "cyclic object value");
         return false;
     }
 
@@ -647,7 +647,7 @@ bool JSONStringifier::SerializeJsonSerializable(EtsHandle<EtsObject> &value)
 
     EtsHandle<EtsObject> resObj(executionCtx, result);
     if (!resObj->IsStringClass()) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "toJSON must return string");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "toJSON must return string");
         return false;
     }
 

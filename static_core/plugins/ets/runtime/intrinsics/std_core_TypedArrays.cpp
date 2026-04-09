@@ -49,7 +49,7 @@ static void *GetNativeData(T *array)
     auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*array->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
         EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "ArrayBuffer was detached");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "ArrayBuffer was detached");
         return nullptr;
     }
     return arrayBuffer->GetData();
@@ -1213,7 +1213,7 @@ T *EtsCoreTypedArraySortWrapper(T *thisArray, bool withNaN = false)
         auto executionCtx = EtsExecutionContext::GetCurrent();
         [[maybe_unused]] EtsHandleScope scope(executionCtx);
         EtsHandle<EtsObject> handle(executionCtx, thisArray);
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "ArrayBuffer was detached");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "ArrayBuffer was detached");
         return static_cast<T *>(handle.GetPtr());
     }
     void *dataPtr = arrayBuffer->GetData();

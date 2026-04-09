@@ -448,7 +448,7 @@ static void ThrowEtsFieldNotFoundException(EtsExecutionContext *executionCtx, co
                                            const char *fieldName)
 {
     PandaString message = "Field " + PandaString(fieldName) + " not found in " + PandaString(holderClassDescriptor);
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
 static void ThrowEtsMethodNotFoundException(EtsExecutionContext *executionCtx, const char *holderClassDescriptor,
@@ -456,19 +456,19 @@ static void ThrowEtsMethodNotFoundException(EtsExecutionContext *executionCtx, c
 {
     PandaString message = "Method " + PandaString(methodName) + "(" + methodSignature + ") not found in " +
                           PandaString(holderClassDescriptor);
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
 static void ThrowEtsInvalidKey(EtsExecutionContext *executionCtx, const char *classSignature)
 {
     PandaString message = "Invalid key type: " + PandaString(classSignature);
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
 static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, const char *classSignature)
 {
     PandaString message = "Invalid operand type: " + PandaString(classSignature);
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
 static inline EtsMethod *FindGetMethod(EtsExecutionContext *executionCtx, EtsClass *cls)

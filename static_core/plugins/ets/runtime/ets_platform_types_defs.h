@@ -96,11 +96,10 @@
     TP("Lstd/core/ClassCastError;", coreClassCastError)                                                               \
     TP("Lstd/core/ExceptionInInitializerError;", coreExceptionInInitializerError)                                     \
     TP("Lstd/core/NullPointerError;", coreNullPointerError)                                                           \
-    /* Escompat errors */                                                                                             \
-    TP("Lescompat/TypeError;", escompatTypeError)                                                                     \
-    TP("Lescompat/FormatError;", escompatFormatError)                                                                 \
-    TP("Lescompat/ReferenceError;", escompatReferenceError)                                                           \
-    TP("Lescompat/URIError;", escompatURIError)                                                                       \
+    TP("Lstd/core/TypeError;", coreTypeError)                                                                         \
+    TP("Lstd/core/FormatError;", coreFormatError)                                                                     \
+    TP("Lstd/core/ReferenceError;", coreReferenceError)                                                               \
+    TP("Lstd/core/URIError;", coreURIError)                                                                           \
     /* ToStringCache */                                                                                               \
     TP("Lstd/core/DoubleToStringCacheElement;", coreDoubleToStringCacheElement)                                       \
     TP("Lstd/core/FloatToStringCacheElement;", coreFloatToStringCacheElement)                                         \

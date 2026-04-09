@@ -45,7 +45,7 @@ static EtsMethod *ResolveInvokeMethod(EtsExecutionContext *executionCtx, VMHandl
         return nullptr;
     }
     if (!func->GetClass()->IsFunction()) {
-        ThrowEtsException(executionCtx, PlatformTypes()->escompatTypeError,
+        ThrowEtsException(executionCtx, PlatformTypes()->coreTypeError,
                           "Method have to be instance of std.core.Function");
     }
     auto *method = func->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreFunctionUnsafeCall);

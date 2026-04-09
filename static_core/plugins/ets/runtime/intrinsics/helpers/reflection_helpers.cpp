@@ -24,7 +24,7 @@ namespace ark::ets::intrinsics::helpers {
 static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, const char *classSignature)
 {
     PandaString message = "Invalid operand type: " + PandaString(classSignature);
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, message);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
 bool CheckPrimitiveReciever(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
@@ -140,15 +140,14 @@ EtsMethod *ValidateAndResolveInstanceMethod(EtsExecutionContext *executionCtx, E
         PandaOStringStream ss;
         ss << "Object type [" << thisObj->GetClass()->GetRuntimeClass()->GetName()
            << "] is not compatible with method owner type [" << method->GetClass()->GetRuntimeClass()->GetName() << ']';
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, ss.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, ss.str());
         return nullptr;
     }
 
     // Resolve virtual method - this is instance-method specific
     EtsMethod *resolved = thisObj->GetClass()->ResolveVirtualMethod(method);
     if (resolved == nullptr) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
-                          "Virtual method resolution failed");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, "Virtual method resolution failed");
         return nullptr;
     }
     return resolved;
@@ -165,7 +164,7 @@ bool ValidateInstanceField(EtsExecutionContext *executionCtx, EtsObject *thisObj
 
     // Validate that thisObj is subtype of method owner
     if (!field->GetDeclaringClass()->IsAssignableFrom(thisObj->GetClass())) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                           "Object type is not compatible with field owner type");
         return false;
     }
@@ -260,7 +259,7 @@ Value GetPrimitiveValue(EtsExecutionContext *executionCtx, EtsObject *thisObj, E
         case EtsType::UNKNOWN:
             break;
     }
-    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                       "Failed to resolve primitive field type");
     return Value(0);
 }
