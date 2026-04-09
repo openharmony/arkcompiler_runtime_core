@@ -90,6 +90,7 @@ export class Autofixer {
     [
       ts.SyntaxKind.TypeAliasDeclaration,
       [
+        this[FaultID.RemoveLimitDecorator].bind(this),
         this[FaultID.StringTypeAlias].bind(this),
         this[FaultID.IndexAccessType].bind(this),
         this[FaultID.ConditionalTypes].bind(this),
@@ -1186,14 +1187,7 @@ export class Autofixer {
           if (isNonInterop(node)) {
             return undefined;
           }
-          const typeAliasDeclaration = ts.factory.createTypeAliasDeclaration(
-          node.modifiers,
-          node.name,
-          node.typeParameters,
-          ts.factory.createTypeReferenceNode(JSValue)
-          );
-
-          return typeAliasDeclaration;
+          continue ;
         }
         if (!(ts.isMethodSignature(member) && member.questionToken)) {
           updatedMembers.push(member);
@@ -1488,7 +1482,7 @@ export class Autofixer {
    * Rule: `remove-limit-decorator`
    */
   private [FaultID.RemoveLimitDecorator](node: ts.Node): ts.VisitResult<ts.Node> {
-    if (!ts.isFunctionDeclaration(node) && !ts.isClassDeclaration(node)) {
+    if (!ts.isFunctionDeclaration(node) && !ts.isClassDeclaration(node) &&  !ts.isTypeAliasDeclaration(node)) {
       return node;
     }
 
@@ -1501,6 +1495,19 @@ export class Autofixer {
       const expression = decorator.expression;
       return !(ts.isIdentifier(expression) && LIMIT_DECORATOR.includes(expression.text));
     });
+     if (ts.isClassDeclaration(node)) {
+      const existingModifiers = node.modifiers?.filter(m => !ts.isDecorator(m)) || [];
+      const newModifiers = [...filteredDecorators, ...existingModifiers];
+      
+      return this.context.factory.updateClassDeclaration(
+        node,
+        newModifiers as any,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        node.members
+      );
+    }
     (node as any).illegalDecorators = filteredDecorators;
 
     return node;
@@ -1935,7 +1942,7 @@ export class Autofixer {
       }
       for (const decl of symbol.getDeclarations() || []) {
         const sourceFilePath = decl.getSourceFile().fileName;
-        const sourceName = path.basename(sourceFilePath, Extension.DTS);
+        const sourceName = getBaseNameFromFilePath(sourceFilePath);
         if (isInvalidSDK(sourceName)) {
           return this.context.factory.createTypeReferenceNode(
             this.context.factory.createIdentifier(JSValue)
@@ -3194,17 +3201,35 @@ function mergeOverloadedMembers(
   // Step 2: Merge overloaded methods
   const mergedMembers: (ts.TypeElement | ts.ClassElement)[] = [];
   memberMap.forEach(({ signatures }, name) => {
-    if (signatures.length > 1) {
-      const mergedSignature = mergeSignatures(signatures, context);
-      mergedMembers.push(mergedSignature);
-    } else {
+    const genericSignatures: ts.SignatureDeclarationBase[] = [];
+    const nonGenericSignatures: ts.SignatureDeclarationBase[] = [];
+
       signatures.forEach(signature => {
+       if (signature.typeParameters && signature.typeParameters.length > 0) {
+          genericSignatures.push(signature);
+        } else {
+          nonGenericSignatures.push(signature);
+        }
+      });
+
+      genericSignatures.forEach(signature => {
         if (ts.isTypeElement(signature)) {
           mergedMembers.push(signature);
         } else if (ts.isClassElement(signature)) {
           mergedMembers.push(signature);
         }
       });
+
+    if (nonGenericSignatures.length > 1) {
+      const mergedSignature = mergeSignatures(nonGenericSignatures, context);
+      mergedMembers.push(mergedSignature);
+    } else if (nonGenericSignatures.length === 1) {
+      const signature = nonGenericSignatures[0];
+      if (ts.isTypeElement(signature)) {
+        mergedMembers.push(signature);
+      } else if (ts.isClassElement(signature)) {
+        mergedMembers.push(signature);
+      }
     }
   });
 

@@ -42,12 +42,12 @@ export declare interface Validator1 {
     validate1(param0: string | number): boolean;
 }
 export declare interface Transformer1 {
-    transform1<T>(param0: T[] | T): T[] | T;
+    transform1<T>(input: T[]): T[];
+    transform1<T>(input: T): T;
 }
 export declare interface Formatter3 {
     format1(param0: string | number | Date, param1?: number | string): Any | string;
 }
-
 export declare interface WrapperTypes {
   foo(param0: number, param1?: number): string;
 }

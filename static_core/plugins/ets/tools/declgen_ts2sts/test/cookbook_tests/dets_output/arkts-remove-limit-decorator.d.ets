@@ -13,13 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare interface StringIndexedObject {
-    length: number;
-}
-export declare interface NumberIndexedObject {
-}
-export declare interface MixedIndexObject {
-    version: number;
-    name: string;
+export type SendableFuncType = () => void;
+export declare class testSendable {
 }
 
