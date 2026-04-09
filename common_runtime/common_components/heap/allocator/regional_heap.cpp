@@ -135,6 +135,7 @@ TLAB* RegionalHeap::CreateTLAB()
     }
     RegionDesc* region = this->AllocateThreadLocalRegion<AllocBufferType::YOUNG>();
     if (UNLIKELY_CC(region == nullptr)) {
+        allocBuffer->SetRegion(RegionDesc::NullRegion());
         return nullptr;
     }
 
