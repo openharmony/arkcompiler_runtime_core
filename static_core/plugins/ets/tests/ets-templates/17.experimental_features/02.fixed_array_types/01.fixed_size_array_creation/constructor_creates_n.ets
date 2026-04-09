@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-/*---
-desc: >-
-    A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
-    as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
+{% for c in cases %}
 
-    {{c.desc}}
+/*---
+desc: Invalid constructor for creating an instance of FixedArray
+tags: [compile-only, negative]
+expected_out: "{{c.exp_out | replace('\"', '\\\"')}}"
 ---*/
 
-{{c.decl}}
+abstract class MyAbstractClass {}
+
+interface IInterface {}
+
+class IImpl implements IInterface {}
 
 function main() {
-    {{c.use|indent}}
+    let a = new {{c.decl}}
 }
-{%- endfor %}
+
+{% endfor %}

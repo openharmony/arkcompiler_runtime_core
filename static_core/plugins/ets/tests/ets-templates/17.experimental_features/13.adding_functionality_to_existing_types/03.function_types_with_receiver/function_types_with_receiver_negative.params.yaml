@@ -108,3 +108,12 @@ cases:
       let f: FA
       f = fb
     out: "Semantic error ESE0318: Type '((p1: B) => String)' cannot be assigned to type '((p1: A) => String)'"
+  
+  - decl: | # The method call syntax cannot be used when assigning the actual entity to a variable of function type with receiver
+      class A {}
+      type FA = (this: A) => void
+      function foo(this: A): void {}
+    use: |
+      let a: A = new A()
+      let f: FA = a.foo
+    out: "Semantic error ESE0087: Property 'foo' does not exist on type 'A'"
