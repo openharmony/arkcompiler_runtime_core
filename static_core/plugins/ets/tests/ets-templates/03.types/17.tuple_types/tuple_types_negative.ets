@@ -19,6 +19,8 @@ desc: >-
     A tuple type is a reference type created as a fixed set of other types.
     The value of a tuple type is a group of values of types that comprise
     the tuple type.
+expected_out: >-
+    {{c.expected_out}}
 tags: [negative, compile-only]
 ---*/
 {{c.decl}}

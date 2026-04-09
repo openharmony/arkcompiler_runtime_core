@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,15 +21,36 @@ top_level_class_modifiers:
 constraints:
   - type: number
     use: byte
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Double' constraint
+
   - type: short
     use: long
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Short' constraint
+
   - type: int
     use: long
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Int' constraint
+
   - type: byte
     use: char
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'Byte' constraint
+
   - type: char
     use: byte
+    expected_out: |- 
+         Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Char' constraint
+
   - type: string
     use: char
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'String' constraint
+
   - type: char
     use: string
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'String' should be a subtype of 'Char' constraint
+
