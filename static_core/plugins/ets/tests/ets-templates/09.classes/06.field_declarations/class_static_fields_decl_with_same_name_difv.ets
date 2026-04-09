@@ -17,22 +17,28 @@ limitations under the License.
 
 /*---
 desc: >-
+    Static members of a superclass are not inherited. The subclass
+    which wants to use static members of its superclass
+    must use explicit qualification using the superclass name.
+assert: >-
     Checking static field declaration in derived class
     with same name and same type as in superclass.
-params: hiding with different type
-tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+params: initializing static fields in field initializers
 ---*/
 
 class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+  static field: {{c.check_type}} = {{c.base_value}}
 }
 
 class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+  static field: {{c.check_type}} = {{c.derived_value}}
 }
 
 function main(): void {
+  arktest.assertTrue(A.field instanceof {{c.check_type}})
+  arktest.assertEQ(A.field, {{c.derived_value}})
+  arktest.assertTrue(Base.field instanceof {{c.check_type}})
+  arktest.assertEQ(Base.field, {{c.base_value}})
 }
 
 {% endfor %}

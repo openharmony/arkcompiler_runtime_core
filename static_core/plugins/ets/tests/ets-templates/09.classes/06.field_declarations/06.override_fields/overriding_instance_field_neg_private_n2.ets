@@ -13,28 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different value
+    A compile-time error occurs if an attempt is made
+    to override private member
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE1365480: The 'override' modifier is invalid here because the property 'num' is private in class 'C'."
 ---*/
 
-class Base {
-  static field: {{c.check_type}} = {{c.base_value}}
+class C {
+  private num: number = 1
 }
 
-class A extends Base {
-  static field: {{c.check_type}} = {{c.derived_value}}
+class D extends C {
+  protected override num: number = 2
 }
 
 function main(): void {
-  arktest.assertTrue(A.field instanceof {{c.check_type}})
-  arktest.assertEQ(A.field, {{c.derived_value}})
-  arktest.assertTrue(Base.field instanceof {{c.check_type}})
-  arktest.assertEQ(Base.field, {{c.base_value}})
 }
-
-{% endfor %}
