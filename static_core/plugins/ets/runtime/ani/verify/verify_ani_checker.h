@@ -74,6 +74,7 @@
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
     X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
     X(VERIFY_METHOD_NAME,                   VerifyMethodName)                     \
+    X(VERIFY_STATIC_METHOD_NAME,            VerifyStaticMethodName)               \
     X(VERIFY_METHOD_RETURN_TYPE,            VerifyMethodReturnType)               \
     X(VERIFY_SIGNATURE,                     VerifySignature)                      \
     X(VERIFY_ARRAY_INDEX,                   VerifyArrayIndex)                     \
@@ -200,8 +201,8 @@ namespace ark::ets::ani::verify {
 
 PandaString NormalizeMethodNameForAni(const char *name);
 
-ani_status ResolveInstanceMethodByName(EtsClass *klass, const char *name, const char *signature, EtsMethod **result);
-
+ani_status ResolveNamedMethod(EtsClass *klass, const char *name, const char *signature, bool isStaticMethod,
+                              EtsMethod **result);
 enum class AccessMode {
     READ,
     READWRITE,
@@ -318,6 +319,11 @@ public:
     static ANIArg MakeForMethodName(const char *ptr, std::string_view name)
     {
         return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_METHOD_NAME);
+    }
+
+    static ANIArg MakeForStaticMethodName(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_STATIC_METHOD_NAME);
     }
 
     static ANIArg MakeForSignature(const char *ptr, std::string_view name)

@@ -182,6 +182,20 @@ static ani_status ResolveClassMethodByName(EtsClass *klass, const char *name, co
     return ANI_OK;
 }
 
+ani_status ResolveNamedMethod(EtsClass *klass, const char *name, const char *signature, bool isStaticMethod,
+                              EtsMethod **result)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(name != nullptr);
+    ASSERT(result != nullptr);
+
+    PandaString methodName = NormalizeMethodNameForAni(name);
+    if (isStaticMethod) {
+        return ResolveClassMethodByName<true>(klass, methodName.c_str(), signature, result);
+    }
+    return ResolveClassMethodByName<false>(klass, methodName.c_str(), signature, result);
+}
+
 PandaString NormalizeMethodNameForAni(const char *name)
 {
     ASSERT(name != nullptr);
@@ -195,16 +209,6 @@ PandaString NormalizeMethodNameForAni(const char *name)
         methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%set-");
     }
     return methodName;
-}
-
-ani_status ResolveInstanceMethodByName(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
-{
-    ASSERT(klass != nullptr);
-    ASSERT(name != nullptr);
-    ASSERT(result != nullptr);
-
-    PandaString methodName = NormalizeMethodNameForAni(name);
-    return ResolveClassMethodByName<false>(klass, methodName.c_str(), signature, result);
 }
 
 static ANIArg::AniMethodArgs MakeMethodArgsFromVvaArgs(EtsMethod *etsMethod, va_list *vvaArgs)
@@ -783,14 +787,25 @@ public:
         return {};
     }
 
-    VerificationResult VerifyMethodName(const char *name)
+    VerificationResult VerifyMethodNameImpl(const char *name, bool isStatic)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
             return err;
         }
         name_ = name;
+        isStaticMethodResolve_ = isStatic;
         return {};
+    }
+
+    VerificationResult VerifyMethodName(const char *name)
+    {
+        return VerifyMethodNameImpl(name, false);
+    }
+
+    VerificationResult VerifyStaticMethodName(const char *name)
+    {
+        return VerifyMethodNameImpl(name, true);
     }
 
     VerificationResult VerifySignature(const char *signature)
@@ -1247,7 +1262,7 @@ private:
         if (class_ == nullptr || name_ == nullptr) {
             return nullptr;
         }
-        ResolveInstanceMethodByName(class_, name_, signature_, &resolvedMethod_);
+        ResolveNamedMethod(class_, name_, signature_, isStaticMethodResolve_, &resolvedMethod_);
         return resolvedMethod_;
     }
 
@@ -1258,6 +1273,7 @@ private:
     const char *name_ {};
     const char *signature_ {};
     bool methodByNameResolved_ {false};
+    bool isStaticMethodResolve_ {false};
     EtsMethod *resolvedMethod_ {nullptr};
     std::optional<ANIArg::AniMethodArgs> methodArgsForExtInfo_ {};
     VArray *currentArray_ {};
@@ -1341,6 +1357,12 @@ static VerificationResult VerifyMethodName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_NAME);
     return v.VerifyMethodName(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyStaticMethodName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_METHOD_NAME);
+    return v.VerifyStaticMethodName(arg.GetValueUTF8String());
 }
 
 static VerificationResult VerifyMethodReturnType(Verifier &v, const ANIArg &arg)

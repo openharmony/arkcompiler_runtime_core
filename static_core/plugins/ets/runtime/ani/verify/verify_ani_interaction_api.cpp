@@ -133,18 +133,53 @@ static ANIArg::AniMethodArgs GetVArgsByVVAArgs(impl::VMethod *vmethod, va_list v
     return GetVArgsByVVAArgs(GetEtsMethodIfPointerValid(vmethod), vvaArgs);
 }
 
-static EtsMethod *GetEtsMethodByName(VEnv *venv, VObject *vobject, const char *name, const char *signature)
+template <bool IS_STATIC, typename TRef>
+static EtsMethod *GetEtsMethodByNameImpl(VEnv *venv, TRef *vref, const char *name, const char *signature)
 {
+    ASSERT(venv != nullptr);
+    ASSERT(vref != nullptr);
+
     ScopedManagedCodeFix s(venv->GetEnv());
-    EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
-    ASSERT(etsObject != nullptr);
+
+    EtsClass *etsClass = nullptr;
+    if constexpr (IS_STATIC) {
+        etsClass = s.ToInternalType(vref->GetRef());
+    } else {
+        auto *etsObject = s.ToInternalType(vref->GetRef());
+        ASSERT(etsObject != nullptr);
+        etsClass = etsObject->GetClass();
+    }
+
+    ASSERT(etsClass != nullptr);
 
     EtsMethod *method = nullptr;
-    ani_status status = ResolveInstanceMethodByName(etsObject->GetClass(), name, signature, &method);
+    ani_status status = ResolveNamedMethod(etsClass, name, signature, IS_STATIC, &method);
     if (UNLIKELY(status != ANI_OK || method == nullptr)) {
         return nullptr;
     }
     return method;
+}
+
+static EtsMethod *GetEtsMethodByName(VEnv *venv, VObject *vobject, const char *name, const char *signature)
+{
+    return GetEtsMethodByNameImpl<false>(venv, vobject, name, signature);
+}
+
+static ani_status ResolveVerifiedStaticMethodByName(VEnv *venv, VClass *vclass, const char *name, const char *signature,
+                                                    VStaticMethod **vstaticmethod)
+{
+    ASSERT(vstaticmethod != nullptr);
+
+    ani_static_method staticMethodHandle {};
+    ani_status status = GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, &staticMethodHandle);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    *vstaticmethod = venv->GetVerifiedStaticMethod(staticMethodHandle);
+    ASSERT(*vstaticmethod != nullptr);
+    return ANI_OK;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3167,329 +3202,1138 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_V(VEnv *venv, VClas
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean(VEnv *venv, VClass *vclass, const char *name,
                                                                       const char *signature, ani_boolean *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_V(venv->GetEnv(), cls, name,
-                                                                                        signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::BOOLEAN),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                           signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(VEnv *venv, VClass *vclass, const char *name,
                                                                         const char *signature, ani_boolean *result,
-                                                                        const ani_value *args)
+                                                                        const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), cls, name, signature, result,
-                                                                           args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::BOOLEAN),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                           signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(VEnv *venv, VClass *vclass, const char *name,
                                                                         const char *signature, ani_boolean *result,
-                                                                        va_list args)
+                                                                        va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_V(venv->GetEnv(), cls, name, signature, result,
-                                                                           args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::BOOLEAN),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                           signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char(VEnv *venv, VClass *vclass, const char *name,
                                                                    const char *signature, ani_char *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_V(venv->GetEnv(), cls, name,
-                                                                                     signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_A(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_char *result,
-                                                                     const ani_value *args)
+                                                                     const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), cls, name, signature, result,
-                                                                        args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_V(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_char *result,
-                                                                     va_list args)
+                                                                     va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_V(venv->GetEnv(), cls, name, signature, result,
-                                                                        args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte(VEnv *venv, VClass *vclass, const char *name,
                                                                    const char *signature, ani_byte *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_V(venv->GetEnv(), cls, name,
-                                                                                     signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_byte *result,
-                                                                     const ani_value *args)
+                                                                     const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), cls, name, signature, result,
-                                                                        args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_V(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_byte *result,
-                                                                     va_list args)
+                                                                     va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_V(venv->GetEnv(), cls, name, signature, result,
-                                                                        args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short(VEnv *venv, VClass *vclass, const char *name,
                                                                     const char *signature, ani_short *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_V(venv->GetEnv(), cls, name,
-                                                                                      signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(VEnv *venv, VClass *vclass, const char *name,
                                                                       const char *signature, ani_short *result,
-                                                                      const ani_value *args)
+                                                                      const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), cls, name, signature, result,
-                                                                         args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_V(VEnv *venv, VClass *vclass, const char *name,
                                                                       const char *signature, ani_short *result,
-                                                                      va_list args)
+                                                                      va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_V(venv->GetEnv(), cls, name, signature, result,
-                                                                         args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int(VEnv *venv, VClass *vclass, const char *name,
                                                                   const char *signature, ani_int *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status =
-        GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_V(venv->GetEnv(), cls, name, signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                       signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(VEnv *venv, VClass *vclass, const char *name,
                                                                     const char *signature, ani_int *result,
-                                                                    const ani_value *args)
+                                                                    const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), cls, name, signature, result,
-                                                                       args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                       signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_V(VEnv *venv, VClass *vclass, const char *name,
                                                                     const char *signature, ani_int *result,
-                                                                    va_list args)
+                                                                    va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_V(venv->GetEnv(), cls, name, signature, result,
-                                                                       args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                       signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long(VEnv *venv, VClass *vclass, const char *name,
                                                                    const char *signature, ani_long *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_V(venv->GetEnv(), cls, name,
-                                                                                     signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_long *result,
-                                                                     const ani_value *args)
+                                                                     const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), cls, name, signature, result,
-                                                                        args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_V(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_long *result,
-                                                                     va_list args)
+                                                                     va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_V(venv->GetEnv(), cls, name, signature, result,
-                                                                        args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float(VEnv *venv, VClass *vclass, const char *name,
                                                                     const char *signature, ani_float *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_V(venv->GetEnv(), cls, name,
-                                                                                      signature, result, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(VEnv *venv, VClass *vclass, const char *name,
                                                                       const char *signature, ani_float *result,
-                                                                      const ani_value *args)
+                                                                      const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), cls, name, signature, result,
-                                                                         args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, result, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_V(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_V(VEnv *venv, VClass *vclass, const char *name,
                                                                       const char *signature, ani_float *result,
-                                                                      va_list args)
+                                                                      va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_V(venv->GetEnv(), cls, name, signature, result,
-                                                                         args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double(VEnv *venv, VClass *vclass, const char *name,
                                                                      const char *signature, ani_double *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_V(venv->GetEnv(), cls, name,
-                                                                                       signature, result, args);
-    va_end(args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                          signature, result, args.data());
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(VEnv *venv, VClass *vclass, const char *name,
+                                                                       const char *signature, ani_double *result,
+                                                                       const ani_value *vargs)
+{
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                          signature, result, vargs);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_V(VEnv *venv, VClass *vclass, const char *name,
+                                                                       const char *signature, ani_double *result,
+                                                                       va_list vvaArgs)
+{
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                          signature, result, args.data());
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(VEnv *venv, VClass *vclass, const char *name,
+                                                                  const char *signature, VRef **vresult, ...)
+{
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, vresult);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::OBJECT),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    auto args = GetVValueArgs(venv, methodArgs);
+    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, &result, args.data());
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(VEnv *venv, ani_class cls, const char *name,
-                                                                       const char *signature, ani_double *result,
-                                                                       const ani_value *args)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(VEnv *venv, VClass *vclass, const char *name,
+                                                                    const char *signature, VRef **vresult,
+                                                                    const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), cls, name, signature, result,
-                                                                          args);
-}
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_V(VEnv *venv, ani_class cls, const char *name,
-                                                                       const char *signature, ani_double *result,
-                                                                       va_list args)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_V(venv->GetEnv(), cls, name, signature, result,
-                                                                          args);
-}
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(VEnv *venv, ani_class cls, const char *name,
-                                                                  const char *signature, ani_ref *result, ...)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status =
-        GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_V(venv->GetEnv(), cls, name, signature, result, args);
-    va_end(args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::OBJECT),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, &result, vargs);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(VEnv *venv, ani_class cls, const char *name,
-                                                                    const char *signature, ani_ref *result,
-                                                                    const ani_value *args)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(VEnv *venv, VClass *vclass, const char *name,
+                                                                    const char *signature, VRef **vresult,
+                                                                    va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), cls, name, signature, result,
-                                                                       args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::OBJECT),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    auto args = GetVValueArgs(venv, methodArgs);
+    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                         signature, &result, args.data());
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(VEnv *venv, ani_class cls, const char *name,
-                                                                    const char *signature, ani_ref *result,
-                                                                    va_list args)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_V(venv->GetEnv(), cls, name, signature, result,
-                                                                       args);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(VEnv *venv, VClass *vclass, const char *name,
                                                                    const char *signature, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, signature);
-    ani_status status =
-        GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_V(venv->GetEnv(), cls, name, signature, args);
-    va_end(args);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, signature);
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::VOID),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(VEnv *venv, ani_class cls, const char *name,
-                                                                     const char *signature, const ani_value *args)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(VEnv *venv, VClass *vclass, const char *name,
+                                                                     const char *signature, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), cls, name, signature, args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vstaticmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::VOID),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, vargs);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_V(VEnv *venv, ani_class cls, const char *name,
-                                                                     const char *signature, va_list args)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_V(VEnv *venv, VClass *vclass, const char *name,
+                                                                     const char *signature, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_V(venv->GetEnv(), cls, name, signature, args);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+
+    VStaticMethod *vstaticmethod = nullptr;
+    ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vstaticmethod, vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethod(vstaticmethod, "method", EtsType::VOID),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
+                                                                        signature, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
