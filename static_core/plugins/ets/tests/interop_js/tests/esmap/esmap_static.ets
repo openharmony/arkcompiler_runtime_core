@@ -14,7 +14,8 @@
 */
 
 import { es, ESUser, returnESUserMap, testUserMapName, testUserMapAge,
-        esFuncMapTest, returnSameMap, createEmptyMap } from 'testDecl';
+        esFuncMapTest, returnSameMap, createEmptyMap,
+        emptyMap, numberMap } from 'testDecl';
 
 function testGetSize(): boolean {
     let esMap1: es.Map<string, number> = createEmptyMap<string, number>();
@@ -238,6 +239,37 @@ function testLargeMap(): boolean {
     return true;
 }
 
+function testNewMap(): boolean {
+    let global = ESValue.getGlobal();
+    let mapClass = global.getProperty('Map');
+    let esMap1 = mapClass.instantiate().unwrap() as es.Map<string, number>;
+    arktest.assertEQ(esMap1.size, 0);
+    esMap1.set('key1', 100);
+    esMap1.set('key2', 200);
+    arktest.assertEQ(esMap1.size, 2);
+    arktest.assertEQ(esMap1.get('key1'), 100);
+    arktest.assertEQ(esMap1.get('key2'), 200);
+    arktest.assertTrue(esMap1.delete('key1'));
+    arktest.assertTrue(esMap1.delete('key2'));
+    arktest.assertTrue(!esMap1.delete('key3'));
+    arktest.assertEQ(esMap1.size, 0);
+    return true;
+}
+
+function testIsMap(): boolean {
+    let global = ESValue.getGlobal();
+    let mapClass = global.getProperty('Map');
+    let esMap1 = mapClass.instantiate().unwrap() as es.Map<string, number>;
+    arktest.assertTrue(ESValue.wrap(esMap1).instanceOf(mapClass));
+    arktest.assertTrue(ESValue.wrap(numberMap).instanceOf(mapClass));
+    arktest.assertTrue(ESValue.wrap(emptyMap).instanceOf(mapClass));
+
+    let staticMap = new Map<string, number>();
+    staticMap.set('key1', 1);
+    arktest.assertTrue(!ESValue.wrap(staticMap).instanceOf(mapClass));
+    return true;
+}
+
 function testAll(): void {
     testGetSize();
     testSetGetHas();
@@ -257,4 +289,6 @@ function testAll(): void {
     testESMapEtsToTs();
     testLargeMap();
     testSameESMap();
+    testNewMap();
+    testIsMap();
 }

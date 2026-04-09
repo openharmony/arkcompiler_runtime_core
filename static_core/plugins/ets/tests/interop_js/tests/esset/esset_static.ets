@@ -14,7 +14,8 @@
 */
 
 import { es, ESUser, returnESUserSet, testUserSetName, testUserSetAge,
-        esFuncSetTest, returnSameSet, createEmptySet } from 'testDecl';
+        esFuncSetTest, returnSameSet, createEmptySet,
+        emptySet, numberSet } from 'testDecl';
 
 function testGetSize(): boolean {
     let esSet1: es.Set<string> = createEmptySet<string>();
@@ -210,6 +211,37 @@ function testLargeSet(): boolean {
     return true;
 }
 
+function testNewSet(): boolean {
+    let global = ESValue.getGlobal();
+    let setClass = global.getProperty('Set');
+    let esSet1 = setClass.instantiate().unwrap() as es.Set<string>;
+    arktest.assertEQ(esSet1.size, 0);
+    esSet1.add('test1');
+    esSet1.add('test2');
+    arktest.assertEQ(esSet1.size, 2);
+    arktest.assertTrue(esSet1.has('test1'));
+    arktest.assertTrue(esSet1.has('test2'));
+    arktest.assertTrue(esSet1.delete('test1'));
+    arktest.assertTrue(esSet1.delete('test2'));
+    arktest.assertTrue(!esSet1.delete('test3'));
+    arktest.assertEQ(esSet1.size, 0);
+    return true;
+}
+
+function testIsSet(): boolean {
+    let global = ESValue.getGlobal();
+    let setClass = global.getProperty('Set');
+    let esSet1 = setClass.instantiate().unwrap() as es.Set<string>;
+    arktest.assertTrue(ESValue.wrap(esSet1).instanceOf(setClass));
+    arktest.assertTrue(ESValue.wrap(numberSet).instanceOf(setClass));
+    arktest.assertTrue(ESValue.wrap(emptySet).instanceOf(setClass));
+
+    let staticSet = new Set<string>();
+    staticSet.add('test');
+    arktest.assertTrue(!ESValue.wrap(staticSet).instanceOf(setClass));
+    return true;
+}
+
 function testAll(): void {
     testGetSize();
     testAddHas();
@@ -227,4 +259,6 @@ function testAll(): void {
     testEmptySetOperations();
     testSetChaining();
     testLargeSet();
+    testNewSet();
+    testIsSet();
 }

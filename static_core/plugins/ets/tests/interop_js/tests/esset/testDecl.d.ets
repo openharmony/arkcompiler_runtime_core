@@ -25,6 +25,9 @@ export declare function esFuncSetTest(set: es.Set<number>, func: (set: es.Set<nu
 export declare function returnSameSet(): es.Set<number>;
 export declare function createEmptySet<T>(): es.Set<T>;
 
+export declare let emptySet: es.Set<string>;
+export declare let numberSet: es.Set<number>;
+
 export declare namespace es {
     export class Set<T> {
         add(value: T): this;

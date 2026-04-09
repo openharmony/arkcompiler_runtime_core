@@ -30,6 +30,9 @@ export declare function esFuncMapTest(
     ) => boolean
 ): boolean;
 
+export declare let emptyMap: es.Map<string, number>;
+export declare let numberMap: es.Map<string, number>;
+
 export declare namespace es {
     export class Map<K, V> {
         set(key: K, value: V): this;
