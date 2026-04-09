@@ -3,21 +3,33 @@
 ## 说明
 
 `es.Array/Map/Set`是静态中定义的动态`Array`/`Map`/`Set`，即静态在访问动态的`Array`/`Map`/`Set`时所使用的类型。
-`es.Array/Map/Set`暂时不支持通过new关键字来新建`Array`/`Map`/`Set`，目前只支持通过动态内导出`Array`/`Map`/`Set`或者导出返回函数等方式来获取动态的`Array`/`Map`/`Set`。
+目前支持通过获取动态`Array`类来初始化，通过动态内导出`Array`/`Map`/`Set`，或者导出返回函数等方式来获取动态的`Array`/`Map`/`Set`。
 示例如下：
 ```ts
 // arkts_sta.ets
-import {arr, returnArray} from 'arkts_dyn.ets';
+import {esArray2, returnArray} from 'arkts_dyn.ets';
 import es from '@ohos.lang.interop';
 
 function foo(){
-    let a = arr[1]; // a == 2
-    let esArray: es.Array<number> = returnArray<number>(1, 2);
-    let b = esArray[1]; // b == 2
+    // 通过获取Array类来初始化
+    let global = ESValue.getGlobal();
+    let arrayClass = global.getProperty(`Array`);
+    let esArray1 = arrayClass.instantiate().unwrap() as es.Array<string>; // 创建空es数组，初始大小为0
+    
+    // 通过获取动态内导出的Array来初始化
+    let a = esArray2[1]; // a == 2
+    esArray1.push(a);
+
+    // 通过获取动态内导出的返回值为数组的函数来初始化
+    let esArray3: es.Array<number> = returnArray<number>(1, 2);
+    let b = esArray3[1]; // b == 2
+    esArray1.push(b);
+
+    let c = esArray1.length; // c == 2
 }
 
 // arkts_dyn.ets
-export let arr: Array<number> = [1, 2];
+export let esArray2: Array<number> = [1, 2];
 
 export function returnArray<T>(...values: T[]): T[]{
     retrun [...values];
