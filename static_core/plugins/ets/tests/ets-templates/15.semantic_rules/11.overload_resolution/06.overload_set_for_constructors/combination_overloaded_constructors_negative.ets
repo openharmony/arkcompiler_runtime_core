@@ -17,7 +17,7 @@
 desc: If an overload set is a combination of implicitly and explicitly overloaded entities,
       then an explicit overload list must contain the name of an implicitly overloaded entity.
 tags: [compile-only, negative]
-expected_out: "TODO: Expected output is unknown"
+expected_out: "Semantic error ESE0143: Unresolved reference fromString"
 ---*/
 
 class C {
