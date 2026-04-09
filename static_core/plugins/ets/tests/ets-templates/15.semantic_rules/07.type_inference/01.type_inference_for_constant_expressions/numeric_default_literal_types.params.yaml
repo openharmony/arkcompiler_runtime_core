@@ -19,6 +19,7 @@ cases:
   - { use: "1.0f", value: '1', use_type: ": int | float", expected_type: int }
   - { use: "123", value: '(1).toByte()', use_type: ": short", expected_type: short }
   - { use: "127", value: '(1).toShort()', use_type: ": int", expected_type: int }
+  - { use: "127", value: '(1).toShort()', use_type: ": byte", expected_type: byte }
   - { use: "128", value: '(1).toInt()', use_type: ": long", expected_type: long }
   - { use: "3.14", value: '1', use_type: ": string | Object", expected_type: int }
   - { use: "1", value: '1.0', use_type: ": string | Object", expected_type: double }

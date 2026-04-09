@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,12 @@
 {% for c in cases %}
 /*---
 desc:
-    The type of expression of a union numeric type for Constant Expressions is first evaluated from the expression.
-    The evaluated union numeric result type can be inferred to a numeric target type from the context.
+    The type of expression of a numeric type for Constant Expressions is first evaluated from the expression.
+    The evaluated numeric result type can be inferred to a numeric target type from the context.
+tags: [compile-only, negative]
 ---*/
 
 function main() {
     let a {{c.use_type}} = {{c.use}}
-    a = {{c.value}}
-    arktest.assertTrue(a instanceof {{c.expected_type}})
 }
-
 {% endfor %}

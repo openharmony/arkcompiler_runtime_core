@@ -15,6 +15,7 @@
 
 /*---
 desc: Two EAWorkers can execute jobs independently
+tags: [no-warmup]
 ---*/
 
 async function startTest() {
