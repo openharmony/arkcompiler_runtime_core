@@ -63,7 +63,6 @@ function(add_ets_coroutines_test)
         set(fe_options "")
         if (impl STREQUAL "STACKLESS")
             list(APPEND fe_options "--stackless-coros=true")
-            list(APPEND impl_option "--interpreter-type=cpp")
         endif()
 
         foreach(workers_count ${ARG_WORKERS})

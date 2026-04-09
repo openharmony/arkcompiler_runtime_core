@@ -28,80 +28,101 @@
 #     async_foo(p, new Object(), new Object())
 # }
 
+.record Y <external>
+
 .record arkruntime.AsyncContext <external>
+
+.record arkruntime.annotation.Async <external>
+
+.record arkruntime.annotation.Module <external>
+
+.record stackless_async_params.ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public, ets.annotation.type=class, ets.annotation.class=arkruntime.annotation.Module, ets.annotation.id=id_1356, ets.annotation.element.name=exported, ets.annotation.element.type=array, ets.annotation.element.value=> {
+}
+
 .record std.core.Object <external>
+
 .record std.core.Promise <external>
 
-.function arkruntime.AsyncContext arkruntime.AsyncContext.current() <native, external, static, access.function=public>
-.function std.core.Promise arkruntime.AsyncContext.resolve(arkruntime.AsyncContext a0, std.core.Object a1)
-    <native, external, access.function=public>
-.function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
-.function std.core.Object std.core.Promise.awaitResolution(std.core.Promise a0) <native, external, access.function=public>
-.function std.core.Promise std.core.Promise.resolve(std.core.Object a0) <external, static, access.function=public>
+.record std.core.StringBuilder <external>
 
-.function std.core.Promise async_foo(std.core.Promise a0, std.core.Object a1, std.core.Object a2) {
+.function arkruntime.AsyncContext arkruntime.AsyncContext.current() <native, external, static, access.function=public>
+
+.function void stackless_async_params.ETSGLOBAL._cctor_() <cctor, static> {
+    return.void
+}
+
+.function std.core.Promise stackless_async_params.ETSGLOBAL.async_foo(std.core.Promise a0, std.core.Object a1, std.core.Object a2) <static, access.function=public> {
     call.short <static> arkruntime.AsyncContext.current:()
-    sta.obj v3
-    lda.obj v3
-    sta.obj v5
-    ets.async.dispatch v5
-    initobj.short std.core.Object._ctor_:(std.core.Object)
     sta.obj v4
+    ets.async.dispatch v4
+    initobj.short std.core.Object._ctor_:(std.core.Object)
+    sta.obj v3
     lda.obj a0
-    sta.obj v5
-    call.virt.short std.core.Promise.awaitResolution:(std.core.Promise), v5
+    sta.obj v4
+    call.virt.short std.core.Promise.awaitResolution:(std.core.Promise), v4
     checkcast arkruntime.AsyncContext
-    sta.obj v6
-    ets.async.suspend v6
-    sta.obj v7
-    checkcast.nonnull std.core.Object
-    lda.obj a1
-    sta.obj v8
-    lda.obj a2
-    sta.obj v9
-    lda.obj v4
-    sta.obj v10
-    call <static> pick:(std.core.Object,std.core.Object,std.core.Object), v8, v9, v10
     sta.obj v5
-    call.short <static> arkruntime.AsyncContext.current:()
+    ets.async.suspend v5
+    call.virt.short arkruntime.AsyncContext.awaitResult:(arkruntime.AsyncContext), v5
     sta.obj v6
-    lda.obj v6
+    checkcast std.core.Object
+    lda.obj a1
     sta.obj v7
-    ets.istrue v7
-    jeqz jump_label_0
-    lda.obj v6
-    sta.obj v9
-    checkcast.nonnull arkruntime.AsyncContext
+    lda.obj a2
     sta.obj v8
+    lda.obj v3
+    sta.obj v9
+    call <static> stackless_async_params.ETSGLOBAL.pick:(std.core.Object,std.core.Object,std.core.Object), v7, v8, v9
+    sta.obj v4
+    call.short <static> arkruntime.AsyncContext.current:()
+    sta.obj v5
     lda.obj v5
-    sta.obj v9
-    call.short arkruntime.AsyncContext.resolve:(arkruntime.AsyncContext,std.core.Object), v8, v9
-    sta.obj v9
-    checkcast.nonnull std.core.Promise
+    sta.obj v6
+    ets.istrue v6
+    jeqz jump_label_0
+    lda.obj v5
+    sta.obj v8
+    checkcast.nonnull arkruntime.AsyncContext
+    sta.obj v7
+    lda.obj v4
+    sta.obj v8
+    call.short arkruntime.AsyncContext.resolve:(arkruntime.AsyncContext,Y), v7, v8
+    sta.obj v8
+    checkcast std.core.Promise
     jmp jump_label_1
 jump_label_0:
-    lda.obj v5
-    sta.obj v9
-    call.short <static> std.core.Promise.resolve:(std.core.Object), v9
-    sta.obj v9
-    checkcast.nonnull std.core.Promise
+    lda.obj v4
+    sta.obj v8
+    call.short <static> std.core.Promise.resolve:(Y), v8
+    sta.obj v8
+    checkcast std.core.Promise
 jump_label_1:
     return.obj
 }
 
-.function void main() <static> {
+.function void stackless_async_params.ETSGLOBAL.main() <static, access.function=public> {
     initobj.short std.core.Object._ctor_:(std.core.Object)
-    call.acc.short <static> std.core.Promise.resolve:(std.core.Object), v0, 0x0
+    call.acc.short <static> std.core.Promise.resolve:(Y), v0, 0x0
     sta.obj v0
-    checkcast.nonnull std.core.Promise
+    checkcast std.core.Promise
     initobj.short std.core.Object._ctor_:(std.core.Object)
     sta.obj v1
     initobj.short std.core.Object._ctor_:(std.core.Object)
-    call.acc <static> async_foo:(std.core.Promise,std.core.Object,std.core.Object), v0, v1, v0, 0x2
+    call.acc <static> stackless_async_params.ETSGLOBAL.async_foo:(std.core.Promise,std.core.Object,std.core.Object), v0, v1, v0, 0x2
     return.void
 }
 
-.function std.core.Object pick(std.core.Object a0, std.core.Object a1, std.core.Object a2) {
+.function std.core.Object stackless_async_params.ETSGLOBAL.pick(std.core.Object a0, std.core.Object a1, std.core.Object a2) <static, access.function=public> {
     lda.obj a2
     return.obj
 }
+
+.function std.core.Promise std.core.Promise.resolve(Y a0) <external, static, access.function=public>
+
+.function Y arkruntime.AsyncContext.awaitResult(arkruntime.AsyncContext a0) <native, external, access.function=public>
+
+.function std.core.Promise arkruntime.AsyncContext.resolve(arkruntime.AsyncContext a0, Y a1) <native, external, access.function=public>
+
+.function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
+
+.function Y std.core.Promise.awaitResolution(std.core.Promise a0) <native, external, access.function=public>
