@@ -12,11 +12,24 @@
 # limitations under the License.
 
 --- # Self dependency tests
-self_dependency:
-  - T extends T
-  - U<T extends T>
-  - U<W<T extends T>>
-  - U<U<T extends T>>
-  - T extends U, U extends T
-  - T extends U, U extends W, W extends T
-  - T extends R, R extends T | undefined
+cases:
+  - self_dependency: T extends T
+    expected_out: "Semantic error ESE0184: Type parameter 'T' has circular constraint dependency."
+  - decl: class U<R> {}
+    self_dependency: U<T extends T>
+    expected_out: "Syntax error ESY0228: Unexpected token, expected '>'."
+  - decl: |- 
+      abstract class U<R> {}
+      class W<S> {}
+    self_dependency: U<W<T extends T>>
+    expected_out: "Syntax error ESY0228: Unexpected token, expected '>'."
+  - decl: class U<R> {}
+    self_dependency: U<U<T extends T>>
+    expected_out: "Syntax error ESY0228: Unexpected token, expected '>'."
+  - self_dependency: T extends U, U extends T
+    expected_out: "Semantic error ESE0184: Type parameter 'U' has circular constraint dependency."
+  - self_dependency: T extends U, U extends W, W extends T
+    expected_out: "Semantic error ESE0184: Type parameter 'W' has circular constraint dependency."
+  - self_dependency: T extends R, R extends T | undefined
+    expected_out: "Semantic error ESE0184: Type parameter 'R' has circular constraint dependency."
+

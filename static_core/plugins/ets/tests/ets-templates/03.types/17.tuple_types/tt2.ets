@@ -12,7 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
-{%- for c in cases %}
 
 /*---
 desc: >-
@@ -20,11 +19,20 @@ desc: >-
     The value of a tuple type is a group of values of types that comprise
     the tuple type.
 ---*/
-{{c.decl}}
 
-function main() {
+const testSuite = new arktest.ArkTestsuite("Readonly_tuple_neg");
+{%- for c in cases %}
+{{c.decl}}
+{%- set fun_name = 'testCase' + loop.index0 | string %}
+function {{fun_name}}() {
     let v: [{{c.type}}] = [{{c.val}}]
     let q = v
-    arktest.assertTrue( v === q && v[0] == q[0] )
+    arktest.assertEQ(v, q)
+    arktest.assertEQ(v[0], q[0])
 }
-{%- endfor %}
+testSuite.addTest("{{fun_name}}", {{fun_name}})
+{% endfor %}
+
+function main(): int {
+    return testSuite.run()
+}

@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -20,6 +20,8 @@ desc: >-
     If no constraint is declared, then the type parameter is not compatible with Object
     If type parameter T has type constraint S, then the
     actual type of the generic instantiation must be assignable to S (see Assignability).
+expected_out: >- 
+    {{case.expected_out}}
 tags: [compile-only, negative]
 ---*/
 
