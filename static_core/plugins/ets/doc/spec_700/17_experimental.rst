@@ -1457,31 +1457,14 @@ is available:
 
     max("a", "b") // Compile-time error, no function to call
 
-A name in an *overload set* can be the name of an implicitly overloaded entity.
-In this case, :ref:`Overload Resolution` checks each implicitly overloaded
-entity for this name, and not a single entity only. The implicitly overloaded
-entities are checked in the order of declaration.
+Each identifier in an *explicit overload declaration* must denote exactly one
+accessible entity.
 
-The use of a combination of explicit and implicit overloads is represented
-in the example below:
+If an identifier denotes an implicitly overloaded name, then a
+:index:`compile-time error` occurs.
 
-.. code-block:: typescript
-   :linenos:
-
-    // Implicitly overloaded functions:
-    function minimum(a: number, b: number): number {/*body*/}
-    function minimum(...a: number[]): number {/*body*/}
-
-    // Function with the distinct name:
-    function minInt(a: int, b: int): int {/*body*/}
-
-    // overload set contains 'minInt' and two functions named 'minimum'
-    overload min {minInt, minimum}
-
-    // Overload resolution selects first appropriate function:
-    min(1, 2)    // minInt is called
-    min(3.14, 2) // min(a: number, b: number) is called
-    min(1, 2, 3) // min(...a: number[]) is called
+An *explicit overload declaration* never expands an implicitly overloaded name
+into several entities.
 
 An overloaded entity in an *explicit overload declaration* can be *generic*
 (see :ref:`Generics`).
@@ -1595,8 +1578,11 @@ Explicit Function Overload
     syntax
     qualified name
 
-A :index:`compile-time error` occurs if an *identifier* in the list refers
-to no accessible function.
+A :index:`compile-time error` occurs if an *identifier* in the list:
+
+- refers to no accessible function;
+- refers to an implicitly overloaded function name; or
+- refers to a non-function entity.
 
 All overloaded functions must be in the same module or namespace scope (see
 :ref:`Scopes`). Otherwise, a :index:`compile-time error` occurs. The erroneous
@@ -1629,9 +1615,10 @@ overload declarations are represented in the example below:
     import
 
 A name of an *explicit function overload* can be the same as the name of a
-function or implicitly overloaded functions in the same scope,
-but the name must be used in the overloaded list, otherwise
-a :index:`compile-time` occurs.
+function in the same scope only if that name denotes exactly one accessible
+function and that function is used in the overloaded list. If that name denotes
+an implicitly overloaded function set, then a :index:`compile-time error`
+occurs.
 This situation is represented in the following example:
 
 .. code-block:: typescript
@@ -1649,6 +1636,12 @@ This situation is represented in the following example:
 
     // Invalid overload, as 'bar' does not appear in the list:
     overload bar {foo, fooString} // Compile-time error
+
+    function baz(n: number): number {/*body1*/}
+    function baz(s: string): string {/*body2*/}
+
+    // Invalid overload, as 'baz' denotes an implicitly overloaded function set:
+    overload baz {baz, fooString} // Compile-time error
 
     let name: string = "abc"
 
@@ -1781,6 +1774,9 @@ A :index:`compile-time error` occurs if:
 
 -  *Identifier* in the overloaded method list refers to no accessible
    method (either declared or inherited) of the current class;
+
+-  *Identifier* in the overloaded method list refers to an implicitly
+   overloaded method name;
 
 -  *Explicit overload* is:
 
@@ -2002,6 +1998,12 @@ The syntax is presented below:
     explicitInterfaceMethodOverload:
         'overload' identifier overloadList
         ;
+
+Each identifier in an *explicit interface method overload* list must denote
+exactly one accessible interface method.
+
+A :index:`compile-time error` occurs if an identifier refers to no accessible
+method, to a non-method entity, or to an implicitly overloaded method name.
 
 The use of an *explicit interface method overload* is represented in the
 example below:

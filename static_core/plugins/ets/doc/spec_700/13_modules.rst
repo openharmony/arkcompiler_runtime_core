@@ -736,9 +736,9 @@ is used. In the latter case, the bounded entity is no longer accessible (see
 :ref:`Accessible`) under the original name.
 
 If an *identifier* refers to an *overloaded function* (see
-:ref:`Overloading`), then all accessible overloaded functions are imported,
-including *explicitly overloaded functions* (see
-:ref:`Explicit Function Overload`).
+:ref:`Overloading`), then all accessible overloaded functions are imported.
+An exported *explicit function overload* (see
+:ref:`Explicit Function Overload`) is imported by its own exported name.
 
 .. code-block:: typescript
    :linenos:
@@ -746,16 +746,19 @@ including *explicitly overloaded functions* (see
     // File1
     export function foo(p: number): void {} // #1
     export function foo(p: string): void {} // #2
+    export function fooString(p: string): void {}
     export function fooBoolean(p: Boolean): void {}
-    export overload foo {foo, fooBoolean}
+    export overload bar {fooBoolean, fooString}
 
     function foo() {} // #3
 
     // File2
     import {foo} from "File1"  // all exported 'foo' are imported
+    import {bar} from "File1"  // exported explicit overload is imported by its own name
     foo(5)          // #1 is called
     foo("a string") // #2 is called
-    foo(true)       // fooBoolean is called
+    bar(true)       // fooBoolean is called
+    bar("a string") // fooString is called
     foo()           // Compile-time error, as #3 is not exported
 
 *Selective binding* that uses exported entities is represented in the examples

@@ -3535,29 +3535,19 @@ Forming an Overload Set
     frontend_status: None
 
 Only a single *overload set* is created for each overloaded name in a scope.
-An overload set combines entities that are overloaded implicitly and explicitly.
-If an entity is not overloaded, then an *overload set* contains the very entity
-for the entity name. The order of an *overload set* is determined as follows:
+An overload set is formed in exactly one of the following ways:
 
-#. If an overload set is formed from *implicit overloads* only, then
-   the order of the *overload set* corresponds to the textual order of
-   entity declaration;
+#. If a call uses a name that denotes an *explicit overload declaration*,
+   then the overload set consists of the entities listed in that declaration,
+   in the listed order.
 
-#. If an overload set is formed from *explicit overloads* only, then
-   the order of the *overload set* is the same as the order of the entities
-   listed.
+#. Otherwise, if a call uses a name that denotes *implicit overloading*,
+   then the overload set consists of the implicitly overloaded entities in
+   textual declaration order.
 
-#. If an overload set is a combination of implicitly and explicitly overloaded
-   entities, then:
-
-   - An *explicit overload* list must contain the name of an implicitly
-     overloaded entity. Otherwise, a :index:`compile-time error` occurs.
-
-   - The order is based on the order of the *explicit overload* list as an
-     *explicit overload* has a higher priority.
-     All implicitly overloaded entities are listed in the textual order of
-     declaration, and are included into the *explicit overload* list at the
-     position of the overloaded name.
+A :index:`compile-time error` occurs if an identifier in an explicit overload
+declaration denotes an implicitly overloaded name rather than one accessible
+entity.
 
 The textual position of an *explicit overload* does not influence
 the order in the *overload set*. An *explicit overload* is effectively processed
@@ -3580,38 +3570,34 @@ Overload Set for Functions
 .. meta:
     frontend_status: None
 
-For a given function name, the overload set is formed from
-implicitly overloaded functions (see :ref:`Implicit Function Overloading`)
-and from functions listed in :ref:`Explicit Function Overload` (see
-:ref:`Forming an Overload Set`).
+For a given function name, the overload set is formed as follows:
 
-The example below illustrates how *overload set* is formed and used
-by *overload resolution*:
+- If the name denotes an *explicit function overload*, then the overload set
+  is the ordered list declared by that overload.
+
+- Otherwise, if the name denotes *implicit function overloading*, then the
+  overload set consists of the same-name functions in textual declaration
+  order.
+
+No overload set for functions combines an explicit overload declaration with an
+implicit overload set. The examples below illustrate both forms:
 
 .. code-block:: typescript
    :linenos:
 
-    function fooN(n: number) {}
-
     function foo() {}           // implicitly overloaded foo#1
     function foo(b: boolean) {} // implicitly overloaded foo#2
+    // The overload set for 'foo' is {foo#1, foo#2}
 
-    function fooX(x?: number) {}
+    function foo0() {}
+    function foo1(b: boolean) {}
+    overload bar {foo0, foo1}
+    // The overload set for 'bar' is {foo0, foo1}
 
-    overload foo {fooN, foo, fooX}
-    // The overload set for 'foo' is {fooN, foo#1, foo#2, fooX}
-
-    overload bar {fooX, foo}
-    // The overload set for 'bar' is {fooX, foo#1, foo#2}
-
-    foo(1) // fooN is called
-    bar(1) // fooX is called
-
-    foo()  // foo#1 is called
-    bar()  // fooX is called
-
+    foo()     // foo#1 is called
     foo(true) // foo#2 is called
-    bar(true) // foo#2 is called
+    bar()     // foo0 is called
+    bar(true) // foo1 is called
 
 |
 
@@ -3625,18 +3611,17 @@ Overload Set for Interface Methods
 
 An overload set for a given interface is formed from the following:
 
-- Implicitly overloaded methods (see :ref:`Implicit Method Overloading`);
-
-- Explicitly overloaded methods listed in
+- Either implicitly overloaded methods (see :ref:`Implicit Method Overloading`)
+  declared in the interface, or explicitly overloaded methods listed in
   :ref:`Explicit Interface Method Overload`;
 
 - Overload sets from superinterfaces, if any.
 
 The following steps are taken to form an overload set:
 
-#. Explicitly and implicitly overloaded methods defined
-   in a given interface are added into the overload set in the order
-   described in :ref:`Forming an Overload Set`.
+#. The local overload set for a given name is formed in the interface by using
+   either implicit overloading or an explicit overload declaration, in the
+   order described in :ref:`Forming an Overload Set`.
 
 #. Overload sets from each direct superinterface are added at the end of an
    overload set in the order of the ``implements`` clauses. A method that is
@@ -3659,11 +3644,10 @@ represented in the example below:
     }
 
     interface J {
-        foo(x: number) // #1
-        foo(s: string) // #2
-        fooOpt(x?: number)
-        overload foo { foo, fooOpt}
-        // The overload set for 'foo' is {foo#1, foo#2, fooOpt}
+        fooNum(x: number)
+        fooStr(s: string)
+        overload foo { fooNum, fooStr }
+        // The overload set for 'foo' is {fooNum, fooStr}
     }
 
 Overload sets for an interface with superinterfaces is represented in the
@@ -3700,34 +3684,6 @@ above) is represented in the example below:
         */
     }
 
-Combining implicit and explicit overloads is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-        foo(s: string)  // #1
-        fooOpt(x?: number)
-        overload foo {fooOpt, foo}
-        // The overload set is {fooOpt, foo#1}
-    }
-
-    interface J1 extends I {
-        foo(b: boolean) // #2
-        /* The overload set is {foo#2, fooOpt, foo#1}
-           Formed as: {foo#2} append set(I)={fooOpt, foo#1}
-        */
-    }
-
-    interface J2 extends I {
-        foo(b: boolean) // #2
-        overload foo {foo, fooOpt}
-        /* The overload set is {foo#2, fooOpt, foo#1}
-           Formed as: {foo#2, fooOpt} append set(A)={fooOpt, foo#1}
-           Second occurrence of fooOpt is skipped.
-        */
-    }
-
 |
 
 .. _Overload Set for Class Static Methods:
@@ -3738,14 +3694,20 @@ Overload Set for Class Static Methods
 .. meta:
     frontend_status: None
 
-An overload set of static methods for a given class is formed from implicitly
-overloaded methods (see :ref:`Implicit Method Overloading`), and from the
-methods listed in :ref:`Explicit Class Method Overload`.
+An overload set of static methods for a given class is formed as follows:
+
+- If the name denotes an *explicit class method overload*, then the overload
+  set is the ordered list declared by that overload.
+
+- Otherwise, if the name denotes *implicit method overloading*, then the
+  overload set consists of the same-name static methods in textual declaration
+  order.
 
 The algorithm that defines the order of an *overload set* considers only the
 static methods defined directly in a class scope (see
 :ref:`Forming an Overload Set`) because static methods are not inherited.
 
+Static explicit and static implicit overloading do not combine for one name.
 The formation and the use of an *overload set* by the *overload resolution* is
 represented in the example below:
 
@@ -3754,17 +3716,14 @@ represented in the example below:
 
     class C {
 
-        static foo() {}           // implicitly overloaded foo#1
-        static foo(b: boolean) {} // implicitly overloaded foo#2
-        static fooX(x?: number) {}
-
-        static overload foo {foo, fooX}
-        // The overload set for 'foo' is {foo#1, foo#2, fooX}
+        static foo0() {}
+        static foo1(b: boolean) {}
+        static overload foo {foo0, foo1}
+        // The overload set for 'foo' is {foo0, foo1}
     }
 
-    C.foo(1)    // fooX is called
-    C.foo()     // foo#1 is called
-    C.foo(true) // foo#2 is called
+    C.foo()     // foo0 is called
+    C.foo(true) // foo1 is called
 
 |
 
@@ -3779,18 +3738,18 @@ Overload Set for Class Instance Methods
 An overload set for class instance methods of a given class is formed from
 the following:
 
-- Implicitly overloaded methods (see :ref:`Implicit Method Overloading`);
-
-- Explicitly overloaded methods listed in :ref:`Explicit Class Method Overload`;
+- Either implicitly overloaded methods (see :ref:`Implicit Method Overloading`)
+  declared in the class, or explicitly overloaded methods listed in
+  :ref:`Explicit Class Method Overload`;
 
 - Methods from a direct superclass, if any.
 
 
 The following steps are taken to form an overload set:
 
-#. Explicitly and implicitly overloaded methods defined
-   in a given class are added into an overload set in the order
-   described in :ref:`Forming an Overload Set`, including the
+#. The local overload set for a given name is formed in the class by using
+   either implicit overloading or an explicit overload declaration, in the
+   order described in :ref:`Forming an Overload Set`, including the
    methods that override or implement methods from supertypes.
 
 #. Overload set from a direct superclass (if any) is added at the end of an
@@ -3817,11 +3776,10 @@ superinterface is represented in the example below:
     }
 
     class D {
-        foo(x: number) {} // #1
-        foo(s: string) {} // #2
-        fooOpt(x?: number) {}
-        overload foo { foo, fooOpt}
-        // The overload set for 'foo' is {foo#1, foo#2, fooOpt}
+        fooNum(x: number) {}
+        fooStr(s: string) {}
+        overload foo { fooNum, fooStr }
+        // The overload set for 'foo' is {fooNum, fooStr}
     }
 
 An overload set for a class with a superclass and a superinterface is represented
