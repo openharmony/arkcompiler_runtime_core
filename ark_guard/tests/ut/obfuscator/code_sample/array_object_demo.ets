@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ interface Obj2 {
 function pickCard(x: Obj1[]): number {
     return Math.floor(0.5 * x.length);
 }
-function pickCard(x: Obj2[]): string {
+function pickCard(x: Obj2): string {
     return 'pickCardTest';
 }
 function pickCard(x: number): Obj1 {
@@ -39,9 +39,9 @@ console.log('test8', pickedCard1.card === 10);
 // CC-OFFNXT(G.AOD.03) for test purposes
 console.log('test8', pickedCard1.suit === 'spades');
 
-let arr2: Obj2[] = [{suit: 'asd'}];
+let obj2 = {suit: 'asd'} as Obj2;
 // CC-OFFNXT(G.AOD.03) for test purposes
-console.log(pickCard(arr2));
+console.log(pickCard(obj2));
 
 let pickedCard2 = pickCard(15);
 // CC-OFFNXT(G.AOD.03) for test purposes

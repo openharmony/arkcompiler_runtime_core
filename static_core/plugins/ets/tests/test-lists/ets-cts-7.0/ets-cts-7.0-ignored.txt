@@ -1008,9 +1008,6 @@
 15.semantic_rules/10.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_4.ets
 15.semantic_rules/10.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
 
-#32850 no CTE if 2 generic functions are overload equivalent
-15.semantic_rules/10.overloading/04.overload_equivalent_signatures/overload_equivalent_signatures_negative_6.ets
-
 #31167 RTE if class overrides overloaded method in superinterface
 15.semantic_rules/10.overloading/first_match/first_match_1c_1i_7.ets
 15.semantic_rules/10.overloading/first_match/first_match_1c_1i_8.ets

@@ -38,7 +38,7 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "N" )
           arktest.assertEQ( c.met(new Number()),  "N" )
-    
+
     #step2_2
     - decl: |-
           class C {
@@ -64,7 +64,7 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "NR" )
           arktest.assertEQ( c.met(new Number()),  "NR" )
-    
+
     #step2_4
     - decl: |-
           class C {
@@ -182,7 +182,7 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "nD2", "Failed at default parameter" )
           arktest.assertEQ( c.met(4, 5),  "nD2", "Failed at rest parameter" )
-    
+
     #step2_12
     - decl: |-
           class C {
@@ -199,7 +199,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  'n' )
           arktest.assertEQ( c.met(new Number(), new Number(), new Number()),  'NR' )
           arktest.assertEQ( c.met(1, 2,  new Number()),  'NR' )
-    
+
     #step2_13
     - decl: |-
           class C {
@@ -216,7 +216,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  'N' )
           arktest.assertEQ( c.met(new Number(), new Number(), new Number()),  'nR' )
           arktest.assertEQ( c.met(1, 2, 3),  'nR' )
-    
+
     #step2_14
     - decl: |-
           class C {
@@ -232,7 +232,7 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
-    
+
     #step2_15
     - decl: |-
           class C {
@@ -322,7 +322,7 @@ cases:
 
           let b: B = new B()
           arktest.assertEQ( b.met(false),  "B-false" )
-    
+
     #step2_20
     - decl: |-
           class C {
@@ -358,22 +358,3 @@ cases:
           // more than one applicable method
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
-    
-    #step2_22
-    - decl: |-
-        class C {
-            met(p: number): string {
-                return 'test'
-            }
-            met(...p: number[]): string {
-                return 'spread_test'
-            }
-            met(...args: Any[]): Any {
-                return 'neverever'
-            }
-        }
-      use: |-
-        // first match method within several appliable
-        let c: C = new C()
-        arktest.assertEQ( c.met(0.0),  "test" )
-        arktest.assertEQ( c.met(0.0, 1, 2, 3),  'spread_test' )
