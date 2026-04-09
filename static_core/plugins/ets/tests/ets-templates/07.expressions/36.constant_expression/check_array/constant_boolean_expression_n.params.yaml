@@ -35,4 +35,4 @@ cases:
 
     # Combined
     - { expression: '(true && false) || true', if_true: -10, if_false: 5 }
-    - { expression: 'true && !false', if_true: 10, if_false: -5 }
+    - { expression: 'true && !false', if_true: -5, if_false: 10 }
