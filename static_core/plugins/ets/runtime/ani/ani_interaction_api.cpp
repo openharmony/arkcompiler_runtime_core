@@ -710,8 +710,7 @@ ani_status Type_GetSuperClass(ani_env *env, ani_type type, ani_class *result)
         ASSERT(superCls->IsClass());
         return s.AddLocalRef(superCls->AsObject(), reinterpret_cast<ani_ref *>(result));
     }
-    *result = nullptr;
-    return ANI_OK;
+    return ManagedCodeAccessor::GetUndefinedRef(reinterpret_cast<ani_ref *>(result));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

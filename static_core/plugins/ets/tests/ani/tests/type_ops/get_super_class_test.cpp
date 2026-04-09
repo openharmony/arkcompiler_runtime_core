@@ -30,10 +30,12 @@ public:
 
         ani_type typeRef = cls;
         ASSERT_EQ(env_->Type_GetSuperClass(typeRef, &cls), ANI_OK);
+        ani_boolean isUndefined {};
+        ASSERT_EQ(env_->Reference_IsUndefined(cls, &isUndefined), ANI_OK);
         if constexpr (HAS_SUPERCLASS) {
-            ASSERT_NE(cls, nullptr);
+            ASSERT_EQ(isUndefined, ANI_FALSE);
         } else {
-            ASSERT_EQ(cls, nullptr);
+            ASSERT_EQ(isUndefined, ANI_TRUE);
         }
     }
 
