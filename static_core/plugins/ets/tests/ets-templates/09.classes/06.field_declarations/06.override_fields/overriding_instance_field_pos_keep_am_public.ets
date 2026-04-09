@@ -17,9 +17,9 @@ limitations under the License.
 
 /*---
 desc: >-
-    An overriding member can keep an access modifier
-    of a member that is inherited or implemented.
-    Otherwise, a compile-time error occurs.
+    A compile-time error occurs if: Access Modifiers of the overriding field
+    and of the overridden field are different.
+params: keep public access modifier
 ---*/
 
 class Base {
@@ -39,10 +39,15 @@ function get_field(a: Base): {{c.check_type}} {
 
 function main(): void {
   let a: A = new A()
+  let b: Base = new Base()
   arktest.assertTrue(a.field instanceof {{c.check_type}})
   arktest.assertEQ(a.field, {{c.override_value}})
   arktest.assertEQ(a.get_field(), {{c.override_value}})
   arktest.assertEQ(get_field(a), {{c.override_value}})
+  arktest.assertTrue(b.field instanceof {{c.check_type}})
+  arktest.assertEQ(b.field, {{c.base_value}})
+  arktest.assertEQ(b.get_field(), {{c.base_value}})
+  arktest.assertEQ(get_field(b), {{c.base_value}})
 }
 
 {% endfor %}

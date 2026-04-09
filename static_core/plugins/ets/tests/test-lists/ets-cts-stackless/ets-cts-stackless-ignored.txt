@@ -478,18 +478,6 @@
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_gc_readonly_n.ets
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_readonly_n.ets
 
-#32612
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_0.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_1.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_2.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_3.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_4.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_5.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_6.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_7.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_8.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_9.ets
-
 #32624
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_gc_obcf.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_0.ets

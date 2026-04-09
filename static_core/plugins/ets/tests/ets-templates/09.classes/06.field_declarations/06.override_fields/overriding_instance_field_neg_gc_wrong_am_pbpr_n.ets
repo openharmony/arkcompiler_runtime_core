@@ -13,34 +13,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: base and derived static fields initialized through static block
+    A compile-time error occurs if: Access Modifiers of the overriding field
+    and of the overridden field are different.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE1600001: Access modifier of field 'f' in class 'D' and in the base class 'Base' must be the same."
 ---*/
 
-class Base {
-  static field: {{c.check_type}}
-  static {
-    Base.field = {{c.base_value}}
+class Base<T> {
+  f: T
+  constructor(v: T) {
+    this.f = v
   }
 }
 
-class A extends Base {
-  static field: {{c.check_type}}
-  static {
-    A.field = {{c.derived_value}}
+class D<T> extends Base<T> {
+  private f: T
+  constructor(v: T) {
+    super(v)
+    this.f = v
   }
 }
 
 function main(): void {
-  arktest.assertTrue(A.field instanceof {{c.check_type}})
-  arktest.assertEQ(A.field, {{c.derived_value}})
-  arktest.assertTrue(Base.field instanceof {{c.check_type}})
-  arktest.assertEQ(Base.field, {{c.base_value}})
 }
-
-{% endfor %}
