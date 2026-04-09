@@ -820,6 +820,9 @@
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
 
+#34033 readonly T[] and ReadonlyArray<T> identity
+15.semantic_rules/03.type_identity/readonly_arrays_identity.ets
+
 #33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 
@@ -959,28 +962,6 @@
 #33934 Unexpected CTE on char relational operations with char literals
 17.experimental_features/01.type_char/02.char_operations/rel_literals.ets
 17.experimental_features/01.type_char/02.char_operations/rel_loc_const.ets
-
-#33619 ignored till ValueArray implementation
-17.experimental_features/03.value_array_types/value_array_init.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_0.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_1.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_2.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_3.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_4.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_5.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_6.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_7.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_8.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_9.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_10.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_11.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_12.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_13.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_14.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_15.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_16.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_17.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_18.ets
 
 #28490
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_2.ets

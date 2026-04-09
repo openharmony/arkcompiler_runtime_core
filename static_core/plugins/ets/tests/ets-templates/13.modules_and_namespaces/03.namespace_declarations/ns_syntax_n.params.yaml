@@ -13,26 +13,19 @@
 
 ---
 cases:
-    - type: byte | '1'
-    #both byte and char are value types, but union is not permitted
-    - type: char | byte
-    - type: FixedArray<int>
-    - type: Array<byte>
-    #class
-    - type: A
-    #enum
-    - type: Color
-    - type: string
-    - type: String
-    - type: "'2'"
-    - type: Object
-    - type: number[]
-    - type: Function
-    - type: 'null'
-    - type: 'undefined'
-    - type: never
-    - type: void
-    - type: Any
-    - type: Record<number, int>
-    #multidimensional insted of value type
-    - type: ValueArray<int>
+  - doc: Namespace cannot be used as object - assignment is not allowed
+    decl: |-
+        namespace A {}
+        namespace B {}
+        A = B
+    expected: "Syntax error ESY0318: Namespace cannot be used as object."
+
+  - doc: Namespace identifier is not a string literal
+    decl: |-
+        namespace A\u0027 {}
+    expected: "Syntax error ESY0263: Invalid identifier part."
+
+  - doc: Comma-separated namespace declaration is not allowed
+    decl: |-
+        namespace A,B {}
+    expected: "Syntax error ESY0227: Unexpected token ','."

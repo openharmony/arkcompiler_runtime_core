@@ -13,21 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: |-
-    Value array type is the built-in type written as ValueArray<T> and characterized by the fact:
-    Any instance of array type contains elements of type T. T must be a value type
-    Test assertions:
-    - If ValueArray is used with non-value type argument, then a compile-time error occurs
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE1547180: ValueArray requires a primitive type argument: numeric, boolean or char type."
+desc: >-
+    Readonly array type with elements of type T can have the following two syntax forms:
+    • readonly T[], and
+    • ReadonlyArray<T>
 ---*/
 
-class A {}
-
-enum Color { Red, Green, Blue }
-
-let x: ValueArray<{{c.type}}>
-
-{%- endfor %}
+function main(): void {
+    let arr: readonly [number] = [1];
+    //'readonly [Double]' must be able to assign to type 'ReadonlyArray<Double>
+    let arr2: ReadonlyArray<Double> = arr
+}
