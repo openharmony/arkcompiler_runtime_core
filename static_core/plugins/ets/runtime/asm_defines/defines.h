@@ -17,6 +17,7 @@
 #define PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context_wrapper.h"
 #include "plugins/ets/runtime/ets_platform_types_irtoc_offsets.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"

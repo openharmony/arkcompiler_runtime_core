@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 // NOLINTBEGIN(readability-identifier-naming)
+DEFINE_VALUE(MANAGED_THREAD_TYPE_OFFSET, ark::ManagedThread::GetManagedThreadTypeOffset())
+DEFINE_VALUE(MANAGED_THREAD_TYPE_WORKER_THREAD, static_cast<uint32_t>(ark::ManagedThread::ThreadType::THREAD_TYPE_WORKER_THREAD))
+DEFINE_VALUE(ETS_COROUTINE_EXECUTION_CONTEXT_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset())
+DEFINE_VALUE(ETS_EXECUTION_CONTEXT_WRAPPER_OFFSET, ark::ets::EtsExecutionContextWrapper::GetExecutionContextOffset())
+DEFINE_VALUE(ETS_EXECUTION_CONTEXT_PROMISE_CLASS_OFFSET, ark::ets::EtsExecutionContext::GetTlsPromiseClassPointerOffset())
+DEFINE_VALUE(ETS_EXECUTION_CONTEXT_NULL_VALUE_OFFSET, ark::ets::EtsExecutionContext::GetTlsNullValueOffset())
+DEFINE_VALUE(ETS_EXECUTION_CONTEXT_ANI_ENV_OFFSET, ark::ets::EtsExecutionContext::GetTlsAniEnvOffset())
+DEFINE_VALUE(ETS_EXECUTION_CONTEXT_LOCAL_STORAGE_OFFSET, ark::ets::EtsExecutionContext::GetLocalStorageOffset())
+// Compatibility aliases for old coroutine
 DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetTlsPromiseClassPointerOffset())
 DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetTlsNullValueOffset())
 DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetExecutionContextOffset() + ark::ets::EtsExecutionContext::GetTlsAniEnvOffset())

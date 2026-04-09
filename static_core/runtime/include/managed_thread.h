@@ -74,7 +74,7 @@ struct CustomTLSData {
 class ManagedThread : public Mutator {
 public:
     // NOTE(ipetrov): Do we need ManagedThread types?
-    enum class ThreadType {
+    enum class ThreadType : uint32_t {
         THREAD_TYPE_NONE,
         THREAD_TYPE_MANAGED,
         THREAD_TYPE_MT_MANAGED,
@@ -234,6 +234,11 @@ public:
     static constexpr uint32_t GetStackFrameAllocatorOffset()
     {
         return MEMBER_OFFSET(ManagedThread, stackFrameAllocator_);
+    }
+
+    static constexpr uint32_t GetManagedThreadTypeOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, mThreadType_);
     }
 
     ark::mem::InternalAllocator<>::LocalSmallObjectAllocator *GetLocalInternalAllocator() const
