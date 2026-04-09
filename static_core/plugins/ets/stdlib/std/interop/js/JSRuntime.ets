@@ -547,10 +547,6 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static loadModuleWithAbc(m: String, abcFilePath: String): JSValue {
-        JSRuntime.checkIntrinsicMethod();
-    }
-
     // ===================
     // Public API
     // ===================

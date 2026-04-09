@@ -51,6 +51,4 @@ export final class DebuggerAPI {
     public static native setLocalLong(regNumber: long, value: long): void
 
     public static native setLocalObject(regNumber: long, value: Object): void
-
-    public static native getCallerABCPath(): String
 }

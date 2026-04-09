@@ -491,17 +491,6 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeLoadModuleIntrinsic
     clear_flags: [can_throw, heap_inv]
 
-  - name: JSRuntimeLoadModuleWithAbc
-    space: ets
-    class_name: std.interop.js.JSRuntime
-    method_name: loadModuleWithAbc
-    static: true
-    signature:
-      ret: std.interop.js.JSValue
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeLoadModuleWithAbcIntrinsic
-    clear_flags: [can_throw, heap_inv]
-
   - name: JSRuntimeStrictEqual
     space: ets
     class_name: std.interop.js.JSRuntime
