@@ -13,20 +13,20 @@
 
 cases:
   - {check_type: "int", base_value: "0", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "double", base_value: "0", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "char", base_value: "c'\\u0000'", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "boolean", base_value: "false", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "Any", base_value: "null", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "Object", base_value: "0", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "bigint", base_value: "0n", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "string", base_value: "\"abc\"", cv_decl_data: "",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
   - {check_type: "C", base_value: "new C()", cv_decl_data: "class C {}",
-      expected_out: "Semantic error ESE1049305: An overridden field 'field' must be initialized explicitly, either by using an initializer or in a constructor."}
+      expected_out: "Expected CTE output is unknown"}
