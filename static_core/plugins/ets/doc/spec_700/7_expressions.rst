@@ -3953,8 +3953,7 @@ If type ``T`` is not *preserved up to undefined* by :ref:`Type Erasure`, then a
 *Generic type* (see :ref:`Generics`) in the form of *type name* (see
 :ref:`Type References`) can be used as the operand ``T`` of an ``instanceof``
 expression. In this case, the check is performed against the *erased* type
-(see :ref:`Type Erasure`). The ``type`` of an ``instanceof`` expression
-is used for *smart cast* (see :ref:`Smart Casts and Smart Types`) if applicable.
+(see :ref:`Type Erasure`).
 
 The approach is represented in the following example:
 
@@ -3970,8 +3969,8 @@ The approach is represented in the following example:
       console.log(x instanceof B)        // OK
       console.log(x instanceof B<T>)     // Compile-time error, B<T> is not preserved up to undefined
 
-      if(a instanceof B) {  // OK, type of instanceof is used for smart
-                            // cast in `if` clause
+      if(a instanceof B) {  // OK, type of instanceof is used for type
+                            // checking in `if` clause
          let b = a as B<T>  // OK
       }
    }
@@ -3995,8 +3994,7 @@ a :index:`compile-time warning` is issued:
         console.log(d instanceof E) // warning, expression is always false
     }
 
-The ``type`` of an ``instanceof`` expression is used for *smart cast*
-(see :ref:`Smart Casts and Smart Types`) if applicable.
+The ``type`` of an ``instanceof`` expression is used for type checking if applicable.
 
 .. index::
    instanceof expression
@@ -4009,7 +4007,6 @@ The ``type`` of an ``instanceof`` expression is used for *smart cast*
    operand
    semantic check
    type cast
-   smart cast
    instantiated generic type
    generic type
    type name
@@ -4234,7 +4231,7 @@ This situation is represented in the following example:
 
 :ref:`instanceof Expression` can be used to prevent a :index:`runtime error`.
 Moreover, the :ref:`instanceof Expression` makes *cast conversion* unnecessary
-in many cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
+in many cases:
 
 .. code-block:: typescript
    :linenos:
@@ -4246,7 +4243,7 @@ in many cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`
 
     function printName(x: Object) {
         if (x instanceof Person) {
-            // no need to cast, type of 'x' is 'Person' here
+            // no need to cast, access to 'name' is type-safe here
             console.log(x.name)
         } else {
             console.log("not a Person")
@@ -4261,7 +4258,6 @@ in many cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`
    operator
    expression
    cast conversion
-   smart cast
 
 If the evaluation of a *cast expression* is known at compile time to
 always succeed or throw ``ClassCastError`` at runtime, then
@@ -6817,7 +6813,7 @@ is issued as follows:
 
     function  foo(b: boolean | undefined) {
         let n: number | boolean = 1
-        b == n // Compile-time warning, expression is always false due to smart cast
+        b == n // Compile-time warning, expression is always false
                // (type of `n` is `number` and does not overlap with type of `b`)
         n == 1 // Compile-time warning, expression is
                // always true because `n` initialized with 1 and never modified
