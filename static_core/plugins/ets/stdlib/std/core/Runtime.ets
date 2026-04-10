@@ -171,6 +171,9 @@ export final class Runtime {
         return Runtime.anyToString(a);
     }
 
+    static createNeverError(): Error {
+        return new NeverError("unreachable: never");
+    }
 }
 
 class ErrorOptionsImpl implements ErrorOptions {

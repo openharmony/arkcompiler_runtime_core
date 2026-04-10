@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-class NeverError extends Error { }
+class CustomNeverError extends Error { }
 
 function neverErr(): never {
-    throw new NeverError();
+    throw new CustomNeverError();
 }
 
 interface ReturnObj {
@@ -47,7 +47,7 @@ function overrideMethods() {
     let baseClass: Base = Base.create();
 
     // success overriding of returnNever() method
-    arktest.expectThrow(() => { baseClass.returnNever() }, (e) => e instanceof NeverError)
+    arktest.expectThrow(() => { baseClass.returnNever() }, (e) => e instanceof CustomNeverError)
 }
 
 function main() {

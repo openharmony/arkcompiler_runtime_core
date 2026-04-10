@@ -58,6 +58,8 @@ public:
 %       combination_flags += "InstTypeThrow_"
 %   elsif i.properties.include?('return')
 %       combination_flags += "InstTypeReturn_"
+%   elsif i.properties.include?('call')
+%       combination_flags += "InstTypeCall_"
 %   else
 %       combination_flags += "InstTypeNormal_"
 %   end
@@ -107,6 +109,10 @@ public:
 %    "InstTypeReturn_" => %(
 %        const InstructionType instType = InstructionType::RETURN;
 %        LOG_INST();
+%    ),
+%    "InstTypeCall_" => %(
+%        const InstructionType instType = InstructionType::CALL;
+%        LOG_INST() << (EXC_SRC ? " (exception source)" : "" );
 %    ),
 %    "InstTypeNormal_" => %(
 %        const InstructionType instType = InstructionType::NORMAL;

@@ -218,6 +218,8 @@ EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Val
             return EtsBoxPrimitive<EtsLong>::Create(executionCtx, returnValue.GetAs<EtsLong>());
         case panda_file::Type::TypeId::REFERENCE:
             return EtsObject::FromCoreType(returnValue.GetAs<ObjectHeader *>());
+        case panda_file::Type::TypeId::NOVALUE:
+            return nullptr;
         default:
             LOG(FATAL, COROUTINES) << "Unsupported return type: " << returnType;
             break;

@@ -17,4 +17,5 @@ set(TYPE_SOURCES
 )
 
 set(TYPE_TESTS_SOURCES
+    ${VERIFICATION_SOURCES_DIR}/type/tests/type_test.cpp
 )

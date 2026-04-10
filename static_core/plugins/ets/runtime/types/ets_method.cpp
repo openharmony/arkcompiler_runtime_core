@@ -63,7 +63,7 @@ ani_status EtsMethod::Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue
 {
     Value res = GetPandaMethod()->Invoke(s.GetExecutionContext()->GetMT(), args);
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
-    if (GetReturnValueType() == EtsType::VOID) {
+    if (GetReturnValueType() == EtsType::VOID || GetReturnValueType() == EtsType::NOVALUE) {
         // Return any value, will be ignored
         *result = EtsValue(0);
         return ANI_OK;
@@ -167,8 +167,10 @@ static EtsClass *ResolveTypePrimitive(panda_file::Type type, EtsClassLinker *cla
             return classLinker->GetClassRoot(EtsClassRoot::DOUBLE);
         case panda_file::Type::TypeId::VOID:
             return classLinker->GetClassRoot(EtsClassRoot::VOID);
+        case panda_file::Type::TypeId::NOVALUE:
+            return classLinker->GetClassRoot(EtsClassRoot::NOVALUE);
         default:
-            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
+            LOG(FATAL, RUNTIME) << "ResolveArgType: type not a valid ets type for " << type;
             return nullptr;
     };
 }

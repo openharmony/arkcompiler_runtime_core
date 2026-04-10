@@ -175,11 +175,11 @@ inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super)
     if (super->IsUnionClass()) {
         return IsAssignableToUnion(sub, super);
     }
+    if (sub->IsNeverClass() || sub->IsPrimitiveNeverClass()) {
+        return true;
+    }
     if (super->IsAnyClass()) {
         return !sub->IsPrimitive();
-    }
-    if (sub->IsNeverClass()) {
-        return true;
     }
     if (super->IsObjectClass()) {
         // Primitives and reference classes without base
@@ -207,11 +207,11 @@ inline static bool RefIsAssignableToNoSuper(const Class *sub, const Class *super
     if (sub == super) {
         return true;
     }
+    if (sub->IsNeverClass() || sub->IsPrimitiveNeverClass()) {
+        return true;
+    }
     if (super->IsAnyClass()) {
         return !sub->IsPrimitive();
-    }
-    if (sub->IsNeverClass()) {
-        return true;
     }
     if (super->IsObjectClass()) {
         // Primitives and reference classes without base

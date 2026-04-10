@@ -19,7 +19,6 @@ cases:
   - {type: long, val: 9223372036854775808, exp_out: "Syntax error ESY0249: Invalid number."}
 
   - {type: void, val: 1,  exp_out: "Semantic error ESE0326: Cannot cast number literal to 'undefined'"}
-  - {type: never, val: 1, exp_out: "Semantic error ESE0305: Cast to 'never' is prohibited"}
 
   - {type: byte, val: "[1, 2]",   exp_out: "Semantic error ESE0326: Cannot cast array literal to 'Byte'"}
   - {type: short, val: "[1, 2]",  exp_out: "Semantic error ESE0326: Cannot cast array literal to 'Short'"}
@@ -27,6 +26,6 @@ cases:
   - {type: long, val: "[1, 2]",   exp_out: "Semantic error ESE0326: Cannot cast array literal to 'Long'"}
   - {type: float, val: "[1, 2]",  exp_out: "Semantic error ESE0326: Cannot cast array literal to 'Float'"}
   - {type: double, val: "[1, 2]", exp_out: "Semantic error ESE0326: Cannot cast array literal to 'Double'"}
-  
+
   - {type: NumE, val: 2, decl: 'enum NumE {A, B}', exp_out: "Semantic error ESE593373: Conversion from 'Int' to 'NumE' is not supported. Please use 'EnumType.fromValue(value)'"}
   - {type: StrE, val: "'aaa'", decl: 'enum StrE {S1 = "abc", S2 = "bbb"}', exp_out: "Semantic error ESE593373: Conversion from '\\\"aaa\\\"' to 'StrE' is not supported. Please use 'EnumType.fromValue(value)'"}

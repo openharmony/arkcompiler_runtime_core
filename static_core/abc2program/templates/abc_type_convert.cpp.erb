@@ -30,6 +30,8 @@ pandasm::Type AbcTypeConverter::PandaFileTypeToPandasmType(const panda_file::Typ
         pandasmType = pandasm::Type::FromDescriptor(stringTable_.GetStringById(pda.GetReferenceType(refIdx++)));
 % elsif (type.name == "tagged")
         pandasmType = pandasm::Type("any", 0);
+% elsif (type.properties.include?("none") && type.asm_name)
+        pandasmType = pandasm::Type("<%= type.asm_name %>", 0);
 % else
         pandasmType = pandasm::Type("<%= type.name %>", 0);
 % end
@@ -49,7 +51,11 @@ pandasm::Type AbcTypeConverter::FieldTypeToPandasmType(const uint32_t& type) con
 % PandaFile::types.each do |type|
 % if (type.name != "reference" && type.name != "tagged")
     case panda_file::Type::TypeId::<%= type.name.upcase %>:
+%     if type.properties.include?("none") && type.asm_name
+        fieldType = pandasm::Type("<%= type.asm_name %>", 0);
+%     else
         fieldType = pandasm::Type("<%= type.name %>", 0);
+%     end
         break;
 % end
 % end

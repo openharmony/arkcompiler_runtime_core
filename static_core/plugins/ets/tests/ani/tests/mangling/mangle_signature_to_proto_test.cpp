@@ -65,6 +65,21 @@ TEST_F(MangleSignatureToProtoTest, PrimitiveSignature)
                                                panda_file::Type {panda_file::Type::TypeId::F64},
                                            },
                                            Method::Proto::RefTypeVector {}));
+
+    CheckSignatureParsing(":w", Method::Proto(
+                                    Method::Proto::ShortyVector {
+                                        panda_file::Type {panda_file::Type::TypeId::NOVALUE},
+                                    },
+                                    Method::Proto::RefTypeVector {}));
+
+    CheckSignatureParsing("U:w", Method::Proto(
+                                     Method::Proto::ShortyVector {
+                                         panda_file::Type {panda_file::Type::TypeId::NOVALUE},
+                                         panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                     },
+                                     Method::Proto::RefTypeVector {
+                                         std::string_view {"Lstd/core/Object;"},
+                                     }));
 }
 
 TEST_F(MangleSignatureToProtoTest, ObjectsSignature)

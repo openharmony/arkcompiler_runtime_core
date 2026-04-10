@@ -727,6 +727,8 @@ bool JSONStringifier::HandleField([[maybe_unused]] EtsExecutionContext *executio
             AppendJSONPrimitive(v, hasContent);
             break;
         }
+        case EtsType::NOVALUE:
+            UNREACHABLE();
         default:
             auto fieldObj = EtsHandle<EtsObject>(EtsExecutionContext::GetCurrent(), obj->GetFieldObject(etsField));
             if (fieldObj.GetPtr() == nullptr || fieldObj->GetClass()->IsFunction()) {

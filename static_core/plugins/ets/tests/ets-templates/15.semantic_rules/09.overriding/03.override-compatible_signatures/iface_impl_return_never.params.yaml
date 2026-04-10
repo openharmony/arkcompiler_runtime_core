@@ -1,0 +1,37 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - iface_ret: Any
+  - iface_ret: Object
+  - iface_ret: string
+  - iface_ret: boolean
+  - iface_ret: byte
+  - iface_ret: short
+  - iface_ret: int
+  - iface_ret: long
+  - iface_ret: float
+  - iface_ret: double
+  - iface_ret: number
+  - iface_ret: char
+  - iface_ret: bigint
+  - iface_ret: undefined
+  - iface_ret: 'null'
+  - iface_ret: Error
+  - iface_ret: 'Array<int>'
+  - iface_ret: 'FixedArray<int>'
+  - iface_ret: '(p: int) => int'
+  - iface_ret: 'string|undefined'
+  - iface_ret: 'Object|null'
+  - iface_ret: void

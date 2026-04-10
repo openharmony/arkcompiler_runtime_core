@@ -57,6 +57,7 @@ static TypedValue GetArrayElementValueStatic(const coretypes::Array &array, size
             return TypedValue::U64(array.GetPrimitive<uint64_t>(offset));
         case panda_file::Type::TypeId::REFERENCE:
             return TypedValue::Reference(array.GetObject(offset));
+        case panda_file::Type::TypeId::NOVALUE:
         case panda_file::Type::TypeId::TAGGED:
         default:
             UNREACHABLE();
@@ -96,6 +97,7 @@ static TypedValue GetFieldValueStatic(T object, const Field &field)
             return TypedValue::U64(object->template GetFieldPrimitive<uint64_t>(field.GetOffset()));
         case panda_file::Type::TypeId::REFERENCE:
             return TypedValue::Reference(object->GetFieldObject(field.GetOffset()));
+        case panda_file::Type::TypeId::NOVALUE:
         case panda_file::Type::TypeId::TAGGED:
         default:
             UNREACHABLE();

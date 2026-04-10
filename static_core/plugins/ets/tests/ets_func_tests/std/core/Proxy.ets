@@ -753,6 +753,7 @@ function isProxyTestPrimitives() {
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_DOUBLE))
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_NUMBER))
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_VOID))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_NEVER))
 }
 
 class ProxyChild extends reflect.Proxy {

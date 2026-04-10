@@ -264,6 +264,9 @@ compatibility_checks:
       void:
         _default: wrong_formal_param
         unknown: invalid
+      novalue:
+        _default: wrong_formal_param
+        unknown: invalid
       u1:
         unknown: invalid
         ok:

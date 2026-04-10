@@ -2914,6 +2914,7 @@ public:
         return true;
     }
 
+    // NOLINTNEXTLINE(readability-function-size)
     template <typename NameGetter>
     bool CheckMethodArgs(NameGetter nameGetter, const PandaVector<Type> &formalArgs, Span<int> regs,
                          Type constructedType = Type {})
@@ -3011,7 +3012,13 @@ public:
             }
         }
 
-        SetAcc(GetTypeSystem()->GetMethodSignature(method)->result);
+        auto resultType = GetTypeSystem()->GetMethodSignature(method)->result;
+        SetAcc(resultType);
+
+        // Callee never returns; stop tracing — successors are unreachable.
+        if (resultType == Type::Bot()) {
+            return false;
+        }
 
         MoveToNextInst<FORMAT>();
         return true;

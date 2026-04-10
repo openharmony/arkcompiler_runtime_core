@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -423,6 +423,21 @@ TEST_F(FunctionCallVoidTest, check_initialization_void_a)
     args[1U].i = INT_VAL2;
     ASSERT_EQ(env_->Function_Call_Void_A(fn1, args), ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_void_test.ops"));
+}
+
+TEST_F(FunctionCallVoidTest, function_call_void_never)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.ops", &ns), ANI_OK);
+    ani_function fn {};
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "fooNever", ":w", &fn), ANI_OK);
+
+    ASSERT_EQ(env_->Function_Call_Void(fn), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+    ani_value args[1] = {};
+    ASSERT_EQ(env_->Function_Call_Void_A(fn, args), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing

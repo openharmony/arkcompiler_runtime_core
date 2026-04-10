@@ -617,6 +617,7 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
                 return envANIVerifier->IsValidRefInCurrentFrame(reinterpret_cast<VRef *>(v.r));
+            case panda_file::Type::TypeId::NOVALUE: return false;
             // clang-format on
             default:
                 break;
@@ -634,6 +635,7 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
                 return envANIVerifier->IsValidRefInCurrentFrame(reinterpret_cast<VRef *>(v.r));
+            case panda_file::Type::TypeId::NOVALUE: return false;
             // clang-format on
             default:
                 break;
@@ -1532,7 +1534,7 @@ public:
                << ", expected: " << EtsTypeToString(propertyType);
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
-        if (method->GetReturnValueType() != EtsType::VOID) {
+        if (method->GetReturnValueType() != EtsType::VOID && method->GetReturnValueType() != EtsType::NOVALUE) {
             return {"wrong property", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -2463,6 +2465,7 @@ static PandaString GetAniTypeByType(panda_file::Type type)
         case panda_file::Type::TypeId::F32:       return "ani_float";
         case panda_file::Type::TypeId::F64:       return "ani_double";
         case panda_file::Type::TypeId::REFERENCE: return "ani_ref";
+        case panda_file::Type::TypeId::NOVALUE: return "novalue";
         default: UNREACHABLE();
     }
     // clang-format on

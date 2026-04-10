@@ -118,13 +118,13 @@ interface InvokeTester {
     funcRestParamsObj(v?: Object, ...v1: Object[]): Class
 }
 
-class NeverError extends Error {}
+class CustomNeverError extends Error {}
 
 class NeverClass {
     funcGetNever1(n: never): void {}
     funcGetNever2(a: Object, n: never): void {}
     funcReturnNever(): never {
-        throw new NeverError()
+        throw new CustomNeverError()
     }
 }
 
@@ -659,7 +659,7 @@ function invokeMethodWithNever(neverTester: NeverClass): void {
     let neverTesterMethod2 = neverTesterType.getInstanceMethod("funcGetNever2")!
     arktest.expectThrow(() => { neverTesterMethod2.invoke(neverTester, [new Object(), neverType]) }, (e) => e instanceof TypeError)
     let neverTesterMethod3 = neverTesterType.getInstanceMethod("funcReturnNever")!
-    arktest.expectThrow(() => { neverTesterMethod3.invoke(neverTester) }, (e) => e instanceof NeverError)
+    arktest.expectThrow(() => { neverTesterMethod3.invoke(neverTester) }, (e) => e instanceof CustomNeverError)
 }
 
 function testReflectMethodInvoke(): void {
@@ -700,12 +700,13 @@ class NeverTypeClass {
 }
 
 function testNeverMethods(): void{
+    let typePrimitiveNever = Class.PRIMITIVE_NEVER
     let typeNever = Class.from<never>()
     let testNeverType = Class.from<NeverTypeClass>()
 
     let returnNever = testNeverType.getInstanceMethod("returnNever")!
     let paramNever = testNeverType.getInstanceMethod("paramNever")!
-    arktest.assertEQ(returnNever.getReturnType(), typeNever)
+    arktest.assertEQ(returnNever.getReturnType(), typePrimitiveNever)
     arktest.assertEQ(paramNever.getParameterType(0)!, typeNever)
 }
 

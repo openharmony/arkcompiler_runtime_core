@@ -509,6 +509,11 @@ public:
         return (GetFlags() & NEVER_CLASS) != 0;
     }
 
+    bool IsPrimitiveNeverClass() const
+    {
+        return GetType().GetId() == panda_file::Type::TypeId::NOVALUE;
+    }
+
     void SetStringClass()
     {
         SetFlags(GetFlags() | STRING_CLASS);

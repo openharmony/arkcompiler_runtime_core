@@ -153,6 +153,7 @@ static size_t ParseType(char type, const std::string_view data, PandaString &str
         case 'l': str.push_back('J'); return 1;
         case 'f': str.push_back('F'); return 1;
         case 'd': str.push_back('D'); return 1;
+        case 'w': str.push_back('X'); return 1;
         case 'Y': str.append("LY;"); return 1;
         case 'N': str.append("LN;"); return 1;
         case 'U': str.append("Lstd/core/Object;"); return 1;
@@ -234,6 +235,8 @@ static EtsType GetTypeByFirstChar(char c)
             return EtsType::FLOAT;
         case 'd':
             return EtsType::DOUBLE;
+        case 'w':
+            return EtsType::NOVALUE;
         default:
             return EtsType::UNKNOWN;
     }

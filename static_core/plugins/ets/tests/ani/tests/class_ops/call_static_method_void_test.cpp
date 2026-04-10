@@ -539,5 +539,21 @@ TEST_F(CallStaticMethodTest, check_initialization8)
     ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_void_test.Grandchild"));
 }
 
+TEST_F(CallStaticMethodTest, call_static_method_void_never)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_void_test.Operations", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "fooNever", ":w", &method), ANI_OK);
+
+    ASSERT_EQ(env_->Class_CallStaticMethod_Void(cls, method), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+    ani_value args[1] = {};
+    ASSERT_EQ(env_->Class_CallStaticMethod_Void_A(cls, method, args), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

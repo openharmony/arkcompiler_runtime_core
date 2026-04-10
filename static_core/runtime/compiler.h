@@ -605,6 +605,11 @@ public:
         return ClassCast(klass)->IsUnionClass();
     }
 
+    bool IsNeverClass(ClassPtr klass) const override
+    {
+        return ClassCast(klass)->IsNeverClass();
+    }
+
     uintptr_t GetManagedType(uintptr_t klass) const override;
 
     ark::Class *TypeCast(uintptr_t klass) const
@@ -700,6 +705,8 @@ private:
                 return compiler::DataType::FLOAT64;
             case panda_file::Type::TypeId::REFERENCE:
                 return compiler::DataType::REFERENCE;
+            case panda_file::Type::TypeId::NOVALUE:
+                return compiler::DataType::VOID;
             case panda_file::Type::TypeId::TAGGED:
                 return compiler::DataType::ANY;
             default:

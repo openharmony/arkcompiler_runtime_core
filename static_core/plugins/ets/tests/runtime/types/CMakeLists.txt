@@ -24,6 +24,7 @@ panda_ets_add_gtest(
         ets_array_test.cpp
         ets_method_test.cpp
         ets_class_file_test.cpp
+        ets_type_novalue_test.cpp
     LIBRARIES
         arkruntime
         arkassembler

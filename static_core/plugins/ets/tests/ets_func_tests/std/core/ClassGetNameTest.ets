@@ -173,4 +173,5 @@ function testGetNamePrimitives() {
     arktest.assertEQ(Class.PRIMITIVE_LONG.getName(), "i64")
     arktest.assertEQ(Class.PRIMITIVE_FLOAT.getName(), "f32")
     arktest.assertEQ(Class.PRIMITIVE_DOUBLE.getName(), "f64")
+    arktest.assertEQ(Class.PRIMITIVE_NEVER.getName(), "novalue")
 }

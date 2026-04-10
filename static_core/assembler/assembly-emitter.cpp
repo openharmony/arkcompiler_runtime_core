@@ -70,6 +70,7 @@ std::unordered_map<Type::TypeId, PrimitiveTypeItem *> CreatePrimitiveTypes(ItemC
     res.insert({Type::TypeId::F32, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::F32)});
     res.insert({Type::TypeId::F64, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::F64)});
     res.insert({Type::TypeId::TAGGED, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::TAGGED)});
+    res.insert({Type::TypeId::NOVALUE, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::NOVALUE)});
     return res;
 }
 

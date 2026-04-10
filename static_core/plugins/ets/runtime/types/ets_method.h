@@ -70,8 +70,8 @@ public:
     EtsType GetArgType(size_t idx) const
     {
         EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
-        if (etsType == EtsType::VOID) {
-            LOG(FATAL, RUNTIME) << "VOID parameter";
+        if (etsType == EtsType::VOID || etsType == EtsType::NOVALUE) {
+            LOG(FATAL, RUNTIME) << "VOID or NOVALUE parameter";
         }
         return etsType;
     }
@@ -85,8 +85,8 @@ public:
     EtsType GetEffectiveArgType(size_t idx) const
     {
         EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetEffectiveArgType(idx));
-        if (etsType == EtsType::VOID) {
-            LOG(FATAL, RUNTIME) << "VOID parameter";
+        if (etsType == EtsType::VOID || etsType == EtsType::NOVALUE) {
+            LOG(FATAL, RUNTIME) << "VOID or NOVALUE parameter";
         }
         return etsType;
     }

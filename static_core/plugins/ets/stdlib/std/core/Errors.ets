@@ -358,6 +358,27 @@ export final class ClassCastError extends Error {
 }
 
 /**
+ * Represents error that signals an unreachable `never` location was entered.
+ * Emitted as a statically-dead terminator after never-returning calls and on
+ * reads of never-typed fields/locals so the bytecode optimizer sees a clean
+ * basic-block termination.
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ */
+export final class NeverError extends Error {
+    /**
+     * Constructs a new NeverError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     */
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NeverError", message, options)
+    }
+}
+
+/**
  * Represents error that is thrown when attempting to store an object of different type in array of type-erased objects
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
