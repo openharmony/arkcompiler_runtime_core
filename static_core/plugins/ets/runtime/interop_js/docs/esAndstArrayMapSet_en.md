@@ -4,7 +4,7 @@
 
 `es.Array/Map/Set` are dynamic `Array`/`Map`/`Set` defined in static code, i.e., the types used by static code to access dynamic `Array`/`Map`/`Set`.
 
-`es.Array/Map/Set` does not temporarily support creating new `Array`/`Map`/`Set` instances via the `new` keyword. Currently, dynamic `Array`/`Map`/`Set` can only be obtained by exporting `Array`/`Map`/`Set` from dynamic code, or exporting return functions, etc.
+Currently, dynamic `Array`/`Map`/`Set` can only be obtained by retrieving the dynamic `Array` class to initialize, exporting `Array`/`Map`/`Set` from dynamic code, or exporting return functions.
 
 Examples are as follows:
 ```ts
@@ -13,9 +13,21 @@ import {arr, returnArray} from 'arkts_dyn.ets';
 import es from '@ohos.lang.interop';
 
 function foo(){
-    let a = arr[1]; // a == 2
-    let esArray: es.Array<number> = returnArray<number>(1, 2);
-    let b = esArray[1]; // b == 2
+    // Initialize by obtaining the Array class
+    let global = ESValue.getGlobal();
+    let arrayClass = global.getProperty(`Array`);
+    let esArray1 = arrayClass.instantiate().unwrap() as es.Array<string>; // Create an empty es array with an initial size of 0
+    
+    // Initialize by obtaining an Array from dynamic internal exports
+    let a = esArray2[1]; // a == 2
+    esArray1.push(a);
+
+    // Initialize by acquiring a dynamically exported function that returns an array
+    let esArray3: es.Array<number> = returnArray<number>(1, 2);
+    let b = esArray3[1]; // b == 2
+    esArray1.push(b);
+
+    let c = esArray1.length; // c == 2
 }
 
 // arkts_dyn.ets
