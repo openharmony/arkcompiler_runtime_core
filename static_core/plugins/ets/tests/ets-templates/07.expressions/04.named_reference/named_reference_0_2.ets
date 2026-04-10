@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,14 @@
  */
 
 /*---
-desc: Reference global variables.
+desc: Simple name refers to the accessor name
 ---*/
 
-let x: string = 'abc';
+let pAge: int = 16
+
+get age(): int { return pAge; }
+
 
 function main(): void {
-  let y: string = x;
-  arktest.assertEQ(y, 'abc');
+    let localAge = age
 }
