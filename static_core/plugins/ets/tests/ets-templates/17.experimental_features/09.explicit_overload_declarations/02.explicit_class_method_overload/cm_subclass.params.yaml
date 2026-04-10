@@ -23,14 +23,14 @@ cases:
   - { list: 'fooI, fooN, fooS', class: c, param: 2.2,     value: 'A.fooN' }
   - { list: 'fooI, fooN, fooS', class: c, param: "'Hi!'", value: 'A.fooS' }
 
-  - { list: 'fooN',             class: c, param: 2.2,     value: 'A.fooN' }
-  - { list: 'fooS',             class: c, param: "'Hi!'", value: 'A.fooS' }
-  - { list: 'fooI',             class: c, param: 1,       value: 'C.fooI' }
-  - { list: 'fooI, fooN',       class: c, param: 1,       value: 'C.fooI' }
-  - { list: 'fooI, fooN',       class: c, param: 2.2,     value: 'A.fooN' }
-  - { list: 'fooI, fooS',       class: c, param: 1,       value: 'C.fooI' }
-  - { list: 'fooI, fooS',       class: c, param: "'Hi!'", value: 'A.fooS' }
-  - { list: 'fooN, fooI',       class: c, param: 2.2,     value: 'A.fooN' }
-  - { list: 'fooN, fooI',       class: c, param: 1,       value: 'A.fooN' }
-  - { list: 'fooS, fooI',       class: c, param: "'Hi!'", value: 'A.fooS' }
-  - { list: 'fooS, fooI',       class: c, param: 1,       value: 'C.fooI' }
+  - { list: 'fooN, fooS',       class: c, param: 2.2,     value: 'A.fooN' }
+  - { list: 'fooS, fooN',       class: c, param: "'Hi!'", value: 'A.fooS' }
+  - { list: 'fooI, fooS, fooN', class: c, param: 1,       value: 'C.fooI' }
+  - { list: 'fooI, fooN, fooS', class: c, param: 1,       value: 'C.fooI' }
+  - { list: 'fooI, fooN, fooS', class: c, param: 2.2,     value: 'A.fooN' }
+  - { list: 'fooI, fooS, fooN', class: c, param: 1,       value: 'C.fooI' }
+  - { list: 'fooI, fooS, fooN', class: c, param: "'Hi!'", value: 'A.fooS' }
+  - { list: 'fooN, fooI, fooS', class: c, param: 2.2,     value: 'A.fooN' }
+  - { list: 'fooN, fooI, fooS', class: c, param: 1,       value: 'A.fooN' }
+  - { list: 'fooS, fooI, fooN', class: c, param: "'Hi!'", value: 'A.fooS' }
+  - { list: 'fooS, fooI, fooN', class: c, param: 1,       value: 'C.fooI' }

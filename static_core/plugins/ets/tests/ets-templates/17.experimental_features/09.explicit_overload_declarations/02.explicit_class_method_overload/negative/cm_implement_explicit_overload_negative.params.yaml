@@ -13,8 +13,23 @@
 
 ---
 cases:
-  - { expl_over: '' }
-  - { expl_over: 'overload foo { f2, f4 }' }
-  - { expl_over: 'overload foo { f1, f2 }' }
-  - { expl_over: 'overload foo { f3, f4 }' }
-  - { expl_over: 'overload foo { f1, f3, f4 }' }
+  - {
+      expl_over: 'overload foo { f2 }',
+      expected_out: "Semantic error ESE0390: Method 'f1' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload."
+    }
+  - {
+      expl_over: 'overload foo { f2, f4 }',
+      expected_out: "Semantic error ESE0390: Method 'f1' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload."
+    }
+  - {
+      expl_over: 'overload foo { f1, f2 }',
+      expected_out: "Semantic error ESE0390: Method 'f3' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload."
+    }
+  - {
+      expl_over: 'overload foo { f3, f4 }',
+      expected_out: "Semantic error ESE0390: Method 'f2' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload."
+    }
+  - {
+      expl_over: 'overload foo { f1, f3, f4 }',
+      expected_out: "Semantic error ESE0390: Method 'f2' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload."
+    }
