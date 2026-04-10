@@ -15,7 +15,7 @@
 
 //! CHECKER       AOT. Check that SimplifyStringBuilder inline methods
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-inlining=true"
+//! RUN_PAOC      options: "--compiler-inlining=true --compiler-regex=.*main.*"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
 //! PASS_AFTER    "BranchElimination"
@@ -32,7 +32,7 @@
 
 //! CHECKER       AOT. Check that SimplifyStringBuilder doesn't inline methods if inlining is disabled
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-inlining=false"
+//! RUN_PAOC      options: "--compiler-inlining=false --compiler-regex=.*main.*"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
 //! PASS_AFTER    "BranchElimination"
@@ -44,7 +44,7 @@
 
 //! CHECKER       AOT. Check that SimplifyStringBuilder doesn't inline methods if methods in blacklist
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>,std.core.StringBuilder::%%get-stringLength'"
+//! RUN_PAOC      options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>,std.core.StringBuilder::%%get-stringLength' --compiler-regex=.*main.*"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
 //! PASS_AFTER    "BranchElimination"
@@ -56,7 +56,7 @@
 
 //! CHECKER       AOT. Check that methods are inlined if SimplifyStringBuilder is disabled
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-simplify-string-builder=false"
+//! RUN_PAOC      options: "--compiler-simplify-string-builder=false --compiler-regex=.*main.*"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
 //! PASS_BEFORE   "Inline"
@@ -69,7 +69,7 @@
 //! CHECKER       JIT. Check that SimplifyStringBuilder inline methods
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
-//!               options: "--compiler-inlining=true",
+//!               options: "--compiler-inlining=true --compiler-regex=.*main.*",
 //!               entry: "ets_string_builder_inline.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
@@ -88,7 +88,7 @@
 //! CHECKER       JIT. Check that SimplifyStringBuilder doesn't inline methods if inlining is disabled
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
-//!               options: "--compiler-inlining=false",
+//!               options: "--compiler-inlining=false --compiler-regex=.*main.*",
 //!               entry: "ets_string_builder_inline.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
@@ -102,7 +102,7 @@
 //! CHECKER       JIT. Check that SimplifyStringBuilder doesn't inline methods if methods in blacklist
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
-//!               options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>,std.core.StringBuilder::%%get-stringLength'",
+//!               options: "--compiler-inlining-blacklist='std.core.StringBuilder::<ctor>,std.core.StringBuilder::%%get-stringLength' --compiler-regex=.*main.*",
 //!               entry: "ets_string_builder_inline.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
@@ -116,7 +116,7 @@
 //! CHECKER       JIT. Check that methods are inlined if SimplifyStringBuilder is disabled
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
-//!               options: "--compiler-simplify-string-builder=false",
+//!               options: "--compiler-simplify-string-builder=false --compiler-regex=.*main.*",
 //!               entry: "ets_string_builder_inline.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_builder_inline.ETSGLOBAL::main"
