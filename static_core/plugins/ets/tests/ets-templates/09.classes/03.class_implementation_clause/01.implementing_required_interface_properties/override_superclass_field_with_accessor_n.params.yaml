@@ -50,5 +50,5 @@ cases:
       class C1 extends A {
         get s(): string { return "str" }
       }
-    expected_out: "Semantic error ESE129829: 'n' is defined as an accessor in class 'C', but is overridden here in 'C1' as an instance property."
+    expected_out: "Semantic error ESE129829: 's' is defined as an accessor in class 'A', but is overridden here in 'C1' as an instance property."
     doc: getter overrides field from abstract superclass that implements interface property
