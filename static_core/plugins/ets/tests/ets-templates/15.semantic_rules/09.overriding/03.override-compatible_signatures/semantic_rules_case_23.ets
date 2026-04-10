@@ -16,6 +16,7 @@
 /*---
 desc: Ensuring that method override in subclasses keeps union return types unchanged.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: Class member methodOne with type String in Derived cannot override methodOne with type Double field from class Base because the overriding return type is not compatible with the other return type."
 ---*/
 
 class Base {

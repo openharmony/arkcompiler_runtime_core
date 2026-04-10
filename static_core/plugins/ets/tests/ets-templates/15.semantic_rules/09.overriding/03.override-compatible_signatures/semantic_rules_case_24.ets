@@ -16,6 +16,7 @@
 /*---
 desc: Verifying compatibility in mixed inheritance (class and interface).
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: Class member methodOne with type Double in Derived cannot override methodOne with type String field from class Base because the overriding return type is not compatible with the other return type."
 ---*/
 
 type ConditionalType<T> = T extends string ? number : boolean;
