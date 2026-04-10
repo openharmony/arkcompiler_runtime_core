@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: runtime
+description: "Runs Ark runtime for the prepared ABC test artifacts"
 parameters:
     ark-timeout: 180
     build: ${PANDA_BUILD}

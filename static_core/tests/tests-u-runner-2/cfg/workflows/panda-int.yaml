@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: arkts-int
+description: "Compiles and verifies ETS tests, then runs them in Ark interpreter mode without JIT."
 parameters:
     # common
     build: ${PANDA_BUILD}

@@ -130,7 +130,7 @@ class TestSuiteOptions(IOptions):
             dest=f"{dest}{TestSuiteOptions.__FILTER}",
             help="Glob pattern to select tests relative to test root."
                  "If the pattern matches directories, tests inside them are included recursively. ")
-        repeats_group = parser.add_mutually_exclusive_group(required=False)
+        repeats_group = config.add_mutually_exclusive_group(required=False)
         repeats_group.add_argument(
             f'--{TestSuiteOptions.__REPEATS}', action='store',
             type=lambda arg: check_int(arg, f"--{TestSuiteOptions.__REPEATS}", is_zero_allowed=False),
@@ -156,7 +156,7 @@ class TestSuiteOptions(IOptions):
             help='if set the tests marked as `compile-only` are excluded from launch. '
                  'By default, all tests are launched.')
 
-        TestListsOptions.add_cli_args(parser, dest)
+        TestListsOptions.add_cli_args(config, dest)
         ETSOptions.add_cli_args(parser, dest)
         GroupsOptions.add_cli_args(parser, dest)
 

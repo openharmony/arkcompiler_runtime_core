@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: checker
+description: "Runs the Ruby checker pipeline to validate test behavior across Ark runtime and AOT configurations."
 parameters:
     build: ${PANDA_BUILD}
     checked: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/checked

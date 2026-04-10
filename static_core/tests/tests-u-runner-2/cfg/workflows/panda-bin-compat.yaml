@@ -14,6 +14,8 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: panda-bin-compat
+description: "Checks binary compatibility by running tests with old libraries, switching to rebuilt libraries, 
+            and rerunning compile/verify/runtime steps."
 parameters:
     # common
     build: ${PANDA_BUILD}

@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: run-ani-tests
+description: "Compiles .ets parts of ANI tests with es2panda, then executes the gtest parts of ANI tests"
 workflow-kind: gtest
 parameters:
     build: ${PANDA_BUILD}
