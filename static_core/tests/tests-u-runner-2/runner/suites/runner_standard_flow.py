@@ -79,9 +79,9 @@ class RunnerStandardFlow(RunnerFileBased):
         return Path("/tmp") / self.suite_name
 
     def create_execution_plan(self) -> None:
-        _LOGGER.short(f"\n{utils.pretty_divider()}")
-        _LOGGER.short(f"Execution plan for the test suite '{self.name}'")
-        _LOGGER.short(self.config.workflow.pretty_str())
+        _LOGGER.all(f"\n{utils.pretty_divider()}")
+        _LOGGER.all(f"Execution plan for the test suite '{self.name}'")
+        _LOGGER.all(self.config.workflow.pretty_str())
 
     def create_coverage_html(self) -> None:
         """
