@@ -21,7 +21,9 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/thread_scopes.h"
+#include "runtime/mem/local_object_handle.h"
 #include "runtime/mem/vm_handle.h"
+#include "runtime/mem/vm_handle-inl.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/line_string.h"
@@ -277,6 +279,63 @@ TEST_F(StaticObjectHelpersTest, TestArray)
     };
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(array, handler);
     ASSERT_EQ(1, count);
+}
+
+TEST_F(StaticObjectHelpersTest, TestLocalObjectHandle)
+{
+    ObjectHeader *object = NewTestInstance(R"(
+        .record Test {
+            i32 field
+        }
+    )");
+    ASSERT_NE(nullptr, object);
+
+    ScopedManagedCodeThread s(GetThread());
+    LocalObjectHandle<ObjectHeader> handle(GetThread(), object);
+    ASSERT_EQ(handle.GetPtr(), object);
+}
+
+TEST_F(StaticObjectHelpersTest, TestVMHandleAndVMMutableHandleUpdate)
+{
+    ObjectHeader *first = NewTestInstance(R"(
+        .record Test {
+            i32 field
+        }
+    )");
+    ASSERT_NE(nullptr, first);
+
+    ObjectHeader *second = NewTestInstance(R"(
+        .record Test2 {
+            i32 field
+        }
+    )");
+    ASSERT_NE(nullptr, second);
+
+    ScopedManagedCodeThread s(GetThread());
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(GetThread());
+
+    VMHandle<ObjectHeader> vmHandle(GetThread(), first);
+    ASSERT_EQ(vmHandle.GetPtr(), first);
+
+    VMMutableHandle<ObjectHeader> mutableHandle(GetThread(), first);
+    ASSERT_EQ(mutableHandle.GetPtr(), first);
+    mutableHandle.Update(second);
+    ASSERT_EQ(mutableHandle.GetPtr(), second);
+}
+
+TEST_F(StaticObjectHelpersTest, TestVMHandleFromLocalObjectHandle)
+{
+    ObjectHeader *object = NewTestInstance(R"(
+        .record Test {
+            i32 field
+        }
+    )");
+    ASSERT_NE(nullptr, object);
+
+    ScopedManagedCodeThread s(GetThread());
+    LocalObjectHandle<ObjectHeader> localHandle(GetThread(), object);
+    VMHandle<ObjectHeader> vmHandle(localHandle);
+    ASSERT_EQ(vmHandle.GetPtr(), object);
 }
 
 }  // namespace ark::mem

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "runtime/handle_base.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/handle_scope.h"
+#include "runtime/mem/object_helpers.h"
 
 namespace ark {
 
@@ -36,6 +37,9 @@ public:
 
     explicit VMHandle(ManagedThread *thread, ObjectHeader *object)
     {
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+        mem::ValidateObject(mem::RootType::ROOT_THREAD, object);
+#endif
         if (object != nullptr) {
             ASSERT(thread != nullptr);
             auto scope = thread->GetTopScope<ObjectHeader *>();
@@ -97,6 +101,9 @@ public:
         scope_ = thread->GetTopScope<ObjectHeader *>();
         ASSERT(scope_ != nullptr);
         if (object != nullptr) {
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+            mem::ValidateObject(mem::RootType::ROOT_THREAD, object);
+#endif
             this->address_ = scope_->NewHandle(object);
         } else {
             this->address_ = reinterpret_cast<uintptr_t>(nullptr);
@@ -107,6 +114,9 @@ public:
     void Update(ObjectHeader *object)
     {
         ASSERT(object != nullptr);
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+        mem::ValidateObject(mem::RootType::ROOT_THREAD, object);
+#endif
         if (this->address_ == reinterpret_cast<uintptr_t>(nullptr)) {
             this->address_ = scope_->NewHandle(object);
         } else {

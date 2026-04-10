@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,10 @@ inline VMHandle<T>::VMHandle(mem::GlobalObjectStorage *globalStorage, mem::Refer
     : HandleBase(globalStorage->GetAddressForRef(reference))
 {
     ASSERT(reference != nullptr);
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+    mem::ValidateObject(mem::RootType::ROOT_THREAD,
+                        *reinterpret_cast<ObjectHeader **>(globalStorage->GetAddressForRef(reference)));
+#endif
 }
 
 }  // namespace ark

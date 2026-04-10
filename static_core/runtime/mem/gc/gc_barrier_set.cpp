@@ -98,6 +98,11 @@ void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, void *store
         return;
     }
 
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+    ValidateObject(reinterpret_cast<const ObjectHeader *>(objAddr),
+                   reinterpret_cast<const ObjectHeader *>(storedValAddr));
+#endif
+
     LOG(DEBUG, GC) << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
 
     if (ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
@@ -218,6 +223,9 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
     if (storedValAddr == nullptr) {
         return;
     }
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+    ValidateObject(reinterpret_cast<const ObjectHeader *>(objAddr), reinterpret_cast<ObjectHeader *>(storedValAddr));
+#endif
     common_vm::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
                                          storedValAddr, Mutator::GetCurrent());
 #endif  // ARK_USE_COMMON_RUNTIME
@@ -232,6 +240,10 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
     while (begin < end) {
         auto value = *begin;
         if (value != 0) {
+#if defined(PANDA_ENABLE_DFX_MEMORY_CHECK)
+            ValidateObject(reinterpret_cast<const ObjectHeader *>(objAddr),
+                           reinterpret_cast<ObjectHeader *>(ToVoidPtr(value)));
+#endif
             common_vm::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), static_cast<void *>(begin),
                                                  ToVoidPtr(value), Mutator::GetCurrent());
         }
