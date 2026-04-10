@@ -314,14 +314,14 @@ void ManagedThread::InitForStackOverflowCheck(size_t nativeStackReservedSize, si
     if (guardSize < ark::os::mem::GetPageSize()) {
         guardSize = ark::os::mem::GetPageSize();
     }
-    if (stackSize <= nativeStackReservedSize + nativeStackProtectedSize + guardSize) {
+    if (stackSize <= nativeStackReservedSize + nativeStackProtectedSize) {
         LOG(ERROR, RUNTIME) << "InitForStackOverflowCheck: stack size not enough, stack_base = " << stackBase
                             << ", stack_size = " << stackSize << ", guard_size = " << guardSize;
         return;
     }
     LOG(DEBUG, RUNTIME) << "InitForStackOverflowCheck: stack_base = " << stackBase << ", stack_size = " << stackSize
                         << ", guard_size = " << guardSize;
-    nativeStackBegin_ = ToUintPtr(stackBase) + guardSize;
+    nativeStackBegin_ = ToUintPtr(stackBase);
     nativeStackEnd_ = nativeStackBegin_ + nativeStackProtectedSize + nativeStackReservedSize;
     nativeStackReservedSize_ = nativeStackReservedSize;
     nativeStackProtectedSize_ = nativeStackProtectedSize;
