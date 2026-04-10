@@ -496,10 +496,6 @@
 #33640
 11.enumerations/01.enumeration_base_type/enum_int_n_2.ets
 
-#33805
-11.enumerations/01.enumeration_base_type/enum_int_n_16.ets
-11.enumerations/01.enumeration_base_type/enum_str_n_10.ets
-
 #33978
 11.enumerations/01.enumeration_base_type/enum_int_5.ets
 
@@ -519,15 +515,6 @@
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_0_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_1_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_2_0.ets
-
-#33805
-11.enumerations/02.enumeration_with_explicit_base_type/enum_double_n_cevwi_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_cevwi_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_byte_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_int_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_long_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_short_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_string_n_cevwi_0.ets
 
 #33976
 11.enumerations/02.enumeration_with_explicit_base_type/enum_double_n_mot_0.ets
