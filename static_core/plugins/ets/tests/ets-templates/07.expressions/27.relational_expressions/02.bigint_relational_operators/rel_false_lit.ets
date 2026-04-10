@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-{%- for c in cases %}
-
+{% yaml 'rel_false.params.yaml' as yaml_file %}
 /*---
-desc: Case of if not both operants are bigint
+desc: Case of if not both operands are bigint
 ---*/
 
-let b: bigint = {{c.b}}
-
-function main() {
-    arktest.assertTrue(b {{c.op}} {{c.exp}})
+function main(): int {
+    let tests = new arktest.ArkTestsuite('BigInt relational operations with numeric')
+{%- for c in yaml_file.cases %}
+    tests.addTest('{{loop.index}}', () => {
+        arktest.assertFalse({{c.b}} {{c.op}} {{c.exp}}, 'Failed: {{c.b}} {{c.op}} {{c.exp}}')
+    })
+{% endfor %}
+    return tests.run()
 }
-{%- endfor %}

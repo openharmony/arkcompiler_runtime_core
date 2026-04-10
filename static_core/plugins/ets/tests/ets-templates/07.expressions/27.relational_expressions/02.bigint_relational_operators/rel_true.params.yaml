@@ -16,7 +16,6 @@ cases:
     - { b: '2n', exp: '1', op: '>' }
     - { b: '5n', exp: '3', op: '>' }
     - { b: '10n', exp: '5', op: '>' }
-    - { b: '100n', exp: '50', op: '>' }
 
     - { b: '0n', exp: '1', op: '<' }
     - { b: '1n', exp: '2', op: '<' }
@@ -28,22 +27,38 @@ cases:
     - { b: '2n', exp: '1.9', op: '>' }
     - { b: '5n', exp: '3.7', op: '>' }
     - { b: '10n', exp: '5.2', op: '>' }
+    - { b: '1n', exp: 'Float.NEGATIVE_INFINITY', op: '>' }
+    - { b: '1n', exp: 'Float.MIN_VALUE', op: '>' }
+    - { b: '1n', exp: 'Double.NEGATIVE_INFINITY', op: '>' }
+    - { b: '1n', exp: 'Double.MIN_VALUE', op: '>' }
 
     - { b: '0n', exp: '1.1', op: '<' }
     - { b: '1n', exp: '2.5', op: '<' }
     - { b: '3n', exp: '5.8', op: '<' }
     - { b: '5n', exp: '10.3', op: '<' }
     - { b: '2n', exp: '2.5', op: '<' }
+    - { b: '-1n', exp: Float.POSITIVE_INFINITY, op: '<' }
+    - { b: '-1n', exp: Float.MAX_VALUE, op: '<' }
+    - { b: '-1n', exp: Double.POSITIVE_INFINITY, op: '<' }
+    - { b: '-1n', exp: Double.MAX_VALUE, op: '<' }
 
     - { b: '1n', exp: '1', op: '>=' }
     - { b: '2n', exp: '1', op: '>=' }
     - { b: '5n', exp: '5', op: '>=' }
     - { b: '10n', exp: '5', op: '>=' }
+    - { b: '1n', exp: 'Float.NEGATIVE_INFINITY', op: '>=' }
+    - { b: '1n', exp: 'Float.MIN_VALUE', op: '>=' }
+    - { b: '1n', exp: 'Double.NEGATIVE_INFINITY', op: '>=' }
+    - { b: '1n', exp: 'Double.MIN_VALUE', op: '>=' }
 
     - { b: '0n', exp: '0', op: '<=' }
     - { b: '1n', exp: '2', op: '<=' }
     - { b: '3n', exp: '3', op: '<=' }
     - { b: '5n', exp: '10', op: '<=' }
+    - { b: '-1n', exp: Float.POSITIVE_INFINITY, op: '<=' }
+    - { b: '-1n', exp: Float.MAX_VALUE, op: '<=' }
+    - { b: '-1n', exp: Double.POSITIVE_INFINITY, op: '<=' }
+    - { b: '-1n', exp: Double.MAX_VALUE, op: '<=' }
 
     - { b: 'new BigInt(1)', exp: '0', op: '>' }
     - { b: 'new BigInt(2)', exp: '1', op: '>' }
@@ -51,6 +66,3 @@ cases:
     - { b: 'new BigInt(3)', exp: '5', op: '<' }
     - { b: 'new BigInt(5)', exp: '5', op: '>=' }
     - { b: 'new BigInt(3)', exp: '3', op: '<=' }
-
-
-

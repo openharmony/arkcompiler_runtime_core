@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,31 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-{%- for c in cases %}
-
+{% yaml 'rel_false.params.yaml' as yaml_file %}
 /*---
-desc: >-
-    Bigint comparison, if type of both operands is bigint.
+desc: Case of if not both operands are bigint
 ---*/
 
-let ba: bigint[] = [
-    {%- for v in c['values'] %}
-    {{v}}{{ ", " if not loop.last }}
-    {%- endfor %}
-]
-
-function main(): void {
-	for (let i: int = 0; i < ba.length - 1; i++) {
-		for (let j: int = i + 1; j < ba.length; j++) {
-			let a = ba[i]
-			let b = ba[j]
-
-			arktest.assertFalse(a < b)
-			arktest.assertFalse(b < a)
-			arktest.assertFalse(a + 1n < b)
-			arktest.assertFalse(b + 1n < a)
-		}
-	}
-}
+{%- for c in yaml_file.cases %}
+let b_{{loop.index}} = {{c.b}}
 {%- endfor %}
+
+function main(): int {
+    let tests = new arktest.ArkTestsuite('BigInt relational operations with numeric')
+{%- for c in yaml_file.cases %}
+    tests.addTest('{{loop.index}}', () => {
+        arktest.assertFalse(b_{{loop.index}} {{c.op}} {{c.exp}}, `Failed: ${ b_{{loop.index}} } {{c.op}} {{c.exp}}`)
+    })
+{% endfor %}
+    return tests.run()
+}

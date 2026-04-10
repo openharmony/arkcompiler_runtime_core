@@ -3034,14 +3034,6 @@
 07.expressions/18.typeof_expression/negative_1.ets
 07.expressions/18.typeof_expression/negative_2.ets
 07.expressions/18.typeof_expression/negative_3.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_0.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_1.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_2.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_3.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_4.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_5.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_6.ets
-07.expressions/27.relational_expressions/02.bigint_relational_operators/rel_n_7.ets
 07.expressions/27.relational_expressions/01.numeric_relational_operators/comparison_n_0.ets
 07.expressions/27.relational_expressions/01.numeric_relational_operators/comparison_n_1.ets
 07.expressions/27.relational_expressions/01.numeric_relational_operators/comparison_n_2.ets
