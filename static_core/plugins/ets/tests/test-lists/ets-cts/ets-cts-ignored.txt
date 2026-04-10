@@ -273,6 +273,13 @@
 09.classes/04.class_members/static_field_not_inherited_n.ets
 09.classes/04.class_members/static_method_not_inherited_n.ets
 
+#34137
+09.classes/06.field_declarations/04.field_initialization/class_fields_ctw_this_5.ets
+
+#34133
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_super_n.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_n.ets
+
 #33804
 09.classes/06.field_declarations/access_static_field_neg_23.ets
 09.classes/06.field_declarations/access_static_field_neg_24.ets
