@@ -14,27 +14,21 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static field initialization with keyword 'super'.
-assert: >-
-    If the instance field initializer expression uses
-    this or super directly in any form,then a compile-time warning occurs.
-expected_out: {"compiler": "Warning W0010: The instance field initializer expression cannot use the super."}
+desc: >-
+    If the initializer expression uses super or this in any form, then a compile-time warning occurs.
+    If such use occurs then runtime error can occur.
+expected_out: "issue #"
+tags: [negative]
 ---*/
 
 class A {
-  private _y: int = 5
-
-  public get y(): int {
-    return this._y
+  public x: string = this.bar()
+  public bar(): string {
+    console.log(this.x)
+    return "some str"
   }
 }
 
-class B extends A {
-  public x: int = super.y
-}
-
 function main(): void {
-    let instance: B = new B()
-
-    arktest.assertEQ(instance.x, 5)
+  let instance: A = new A();
 }
