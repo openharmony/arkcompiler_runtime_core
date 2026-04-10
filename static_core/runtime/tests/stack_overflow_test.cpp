@@ -30,11 +30,21 @@
 
 namespace ark::test {
 
+static const size_t MIN_PERMS_LENGTH = 3;
+static const char PERM_NONE = '-';
+static const uint32_t SECOND_PERM_INDEX = 2;
+
 struct StackVmaInfo {
     uintptr_t start;
     uintptr_t end;
     std::string perms;
 };
+
+static bool IsVmaProtNone(const StackVmaInfo &vma)
+{
+    return vma.perms.size() >= MIN_PERMS_LENGTH && vma.perms[0] == PERM_NONE && vma.perms[1] == PERM_NONE &&
+           vma.perms[SECOND_PERM_INDEX] == PERM_NONE;
+}
 
 static std::vector<StackVmaInfo> ParseStackVmas()
 {
@@ -57,6 +67,30 @@ static std::vector<StackVmaInfo> ParseStackVmas()
         }
     }
     return stackVmas;
+}
+
+static std::vector<StackVmaInfo> ParseVmasInRange(uintptr_t rangeStart, uintptr_t rangeEnd)
+{
+    std::vector<StackVmaInfo> result;
+    std::ifstream mapsFile("/proc/self/maps");
+    if (!mapsFile.is_open()) {
+        return result;
+    }
+
+    std::string line;
+    while (std::getline(mapsFile, line)) {
+        StackVmaInfo vma;
+        char dash;
+        std::stringstream ss(line);
+        ss >> std::hex >> vma.start >> dash >> vma.end >> vma.perms;
+        if (dash != '-' || vma.perms.empty()) {
+            continue;
+        }
+        if (vma.start < rangeEnd && vma.end > rangeStart) {
+            result.push_back(vma);
+        }
+    }
+    return result;
 }
 
 class StackOverflowTest : public testing::Test {
@@ -150,6 +184,50 @@ TEST_F(StackOverflowTest, DisableEnableStackOverflowCheck)
     EXPECT_DEATH_IF_SUPPORTED({ ptr[0] = 2; }, "");
 
     thread_->ManagedCodeEnd();
+}
+
+TEST_F(StackOverflowTest, NoGapBetweenSystemGuardAndProtectedZone)
+{
+    ASSERT_NE(thread_, nullptr);
+    ASSERT_GT(thread_->GetNativeStackProtectedSize(), 0U);
+
+    uintptr_t protectedBegin = thread_->GetNativeStackBegin();
+    size_t protectedSize = thread_->GetNativeStackProtectedSize();
+    uintptr_t protectedEnd = protectedBegin + protectedSize;
+
+    void *stackBase = nullptr;
+    size_t stackSize = 0;
+    size_t guardSize = 0;
+    ASSERT_TRUE(thread_->RetrieveStackInfo(stackBase, stackSize, guardSize));
+
+    uintptr_t searchStart = ToUintPtr(stackBase);
+    if (searchStart > protectedBegin) {
+        searchStart = protectedBegin;
+    }
+    if (guardSize > 0 && searchStart >= guardSize) {
+        searchStart -= guardSize;
+    }
+
+    auto vmas = ParseVmasInRange(searchStart, protectedEnd);
+    ASSERT_FALSE(vmas.empty()) << "No VMAs found in stack range";
+
+    std::sort(vmas.begin(), vmas.end(), [](const StackVmaInfo &a, const StackVmaInfo &b) { return a.start < b.start; });
+
+    std::vector<StackVmaInfo> protNoneVmas;
+    for (const auto &vma : vmas) {
+        if (IsVmaProtNone(vma)) {
+            protNoneVmas.push_back(vma);
+        }
+    }
+
+    ASSERT_FALSE(protNoneVmas.empty()) << "No PROT_NONE VMAs found in stack range";
+
+    for (size_t i = 1; i < protNoneVmas.size(); i++) {
+        EXPECT_EQ(protNoneVmas[i - 1].end, protNoneVmas[i].start)
+            << "Found " << std::dec << (protNoneVmas[i].start - protNoneVmas[i - 1].end)
+            << " bytes gap between PROT_NONE regions [" << std::hex << protNoneVmas[i - 1].end << ", "
+            << protNoneVmas[i].start << "). This indicates a hole between system guard and runtime protected zone.";
+    }
 }
 
 }  // namespace ark::test
