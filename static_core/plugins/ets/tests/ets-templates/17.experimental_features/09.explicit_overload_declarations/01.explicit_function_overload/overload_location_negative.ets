@@ -17,7 +17,7 @@ limitations under the License.
 /*---
 desc: All overloaded functions must be in the same module or namespace scope. Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
 ---*/
 
 import {foo1} from "./module.ets"

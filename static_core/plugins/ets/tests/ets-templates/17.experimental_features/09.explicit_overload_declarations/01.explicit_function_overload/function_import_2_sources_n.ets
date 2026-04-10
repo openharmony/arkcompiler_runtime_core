@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,8 +16,10 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Overload function from 2 sources imported functions
+desc: Overload function from 2 sources imported functions. All overloaded functions must be in the same module or namespace scope
+tags: [compile-only, negative]
 files: [./modules/function_export_a_{{c.name}}.ets, ./modules/function_export_b_{{c.name}}.ets]
+expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
 ---*/
 
 import {foo as fooA} from "./modules/function_export_a_{{c.name}}.ets";
