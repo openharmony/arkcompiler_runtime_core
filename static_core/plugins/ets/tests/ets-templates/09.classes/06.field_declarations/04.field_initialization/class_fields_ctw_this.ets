@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-{% for timing in ["compile", "runtime"] %}
 {% for c in cases %}
 
 {% for decl in c.decl_variants %}
@@ -25,7 +24,7 @@
 {% endif %}
 {% for cv in check_variants %}
 
-{% set logic_data  = "  " %}
+{% set logic_data  = c.logic_data %}
 
 {% set ns = namespace() %}
 
@@ -46,10 +45,7 @@ desc: {{c.desc}}
 assert: >-
     If the instance field initializer expression uses
     this or super directly in any form,then a compile-time warning occurs.
-{% if 'compile' in timing %}
-tags: [compile-only]
 expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
-{% endif %}
 ---*/
 
 {{decl}}
@@ -58,7 +54,6 @@ function main(): void {
 {{logic_data}}
 }
 
-{% endfor %}
 {% endfor %}
 {% endfor %}
 {% endfor %}
