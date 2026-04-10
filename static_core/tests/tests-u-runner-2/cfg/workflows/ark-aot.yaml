@@ -13,6 +13,7 @@
 
 type: workflow
 workflow-name: ark-aot
+description: "Builds AOT output for the prepared ABC test using ark_aot."
 parameters:
     aot-timeout: 30
     build: ${PANDA_BUILD}

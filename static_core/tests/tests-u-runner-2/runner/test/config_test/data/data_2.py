@@ -27,6 +27,7 @@ args = {
         'runner-api-level': '0.0.0.1',
         'type': 'workflow',
         'workflow-name': 'echo',
+        'description': "Workflow config for test_suite_config_test2",
         'parameters': {
             'string-param': 'hello',
             'int-param': 20,
@@ -43,7 +44,8 @@ args = {
                     '${test-id}'
                 ],
                 'timeout': '${parameters.int-param}',
-                'can-be-instrumented': '${parameters.bool-param}'
+                'can-be-instrumented': '${parameters.bool-param}',
+                'description': 'Simple echo step'
             }
         }
     },

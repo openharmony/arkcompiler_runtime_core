@@ -13,6 +13,8 @@
 
 type: workflow
 workflow-name: panda-aot
+description: "Compiles and verifies ETS tests, builds AOT code with ark_aot, 
+            then runs the test with Ark using the generated AOT file."
 parameters:
     # common
     build: ${PANDA_BUILD}

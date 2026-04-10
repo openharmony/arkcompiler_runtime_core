@@ -54,7 +54,6 @@ class TestSuiteConfigTest1(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *[])
         cli.parse_args()
 
@@ -105,7 +104,6 @@ class TestSuiteConfigTest1(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *args)
         cli.parse_args()
 

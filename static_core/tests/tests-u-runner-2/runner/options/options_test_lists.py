@@ -53,12 +53,12 @@ class TestListsOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
+    def add_cli_args(parser: argparse._ArgumentGroup, dest: str | None = None) -> None:
         TestListsOptions.add_test_list_cli_args(parser, dest)
         TestListsOptions.add_tags_cli_args(parser, dest)
 
     @staticmethod
-    def add_test_list_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
+    def add_test_list_cli_args(parser: argparse._ArgumentGroup, dest: str | None = None) -> None:
         # Test lists options
         parser.add_argument(
             f'--{TEST_LIST}', default=None,
@@ -97,7 +97,7 @@ class TestListsOptions(IOptions):
                  'Check the test suite documentation whether the updater is available.')
 
     @staticmethod
-    def add_tags_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
+    def add_tags_cli_args(parser: argparse._ArgumentGroup, dest: str | None = None) -> None:
         # Test lists options
         parser.add_argument(
             f'--{TEST_LIST_ARCH}', action='store',

@@ -13,6 +13,7 @@
 
 type: workflow
 workflow-name: ark-aot-pgo
+description: "Runs Ark to collect profile data and then performs profile-guided AOT compilation with ark_aot."
 parameters:
     # ark
     ark-timeout: 210
