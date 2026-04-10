@@ -96,7 +96,7 @@ class D extends C {
 }
 
 class E extends D {
-    private count_: int;
+    private count_: int = 0;
     public override func(a: int, b: int): void {
         this.count_ = (a - b) as int;
     }

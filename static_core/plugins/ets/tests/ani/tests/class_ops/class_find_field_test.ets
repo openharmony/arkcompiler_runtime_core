@@ -76,5 +76,5 @@ class Parent {
 }
 class Child extends Parent {
     childField: int;
-    overridedField: int;
+    overridedField: int = 0;
 }

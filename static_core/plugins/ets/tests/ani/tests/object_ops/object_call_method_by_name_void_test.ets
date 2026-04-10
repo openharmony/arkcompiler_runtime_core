@@ -141,7 +141,7 @@ final class C extends B {
         return this.intValue;
     }
 
-	private intValue: int;
+	private intValue: int = 0;
 }
 
 class CheckWrongSignature {

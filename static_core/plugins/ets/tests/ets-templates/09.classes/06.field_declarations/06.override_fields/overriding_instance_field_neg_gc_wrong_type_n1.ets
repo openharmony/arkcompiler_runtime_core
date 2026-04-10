@@ -20,7 +20,7 @@ desc: >-
     class instantiated with a parameter of the same type as the type
     of the field in the derived class.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE52491: f in D cannot override f in B because overriding type is not compatible with the base type."
+expected_out: "Semantic error ESE1049305: An overridden field 'f' must be initialized explicitly, either by using an initializer or in a constructor."
 ---*/
 
 class B<T> {
