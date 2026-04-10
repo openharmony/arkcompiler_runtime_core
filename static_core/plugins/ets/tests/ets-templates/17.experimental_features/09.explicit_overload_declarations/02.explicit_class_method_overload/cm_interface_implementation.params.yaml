@@ -13,32 +13,30 @@
 
 ---
 cases:
-  - { list: 'f1',                 param: '1',     value: 'f1' }
-  - { list: 'f2',                 param: 'true',  value: 'f2' }
-  - { list: 'f3',                 param: '2.5',   value: 'f3' }
-  - { list: 'f4',                 param: '"Kim"', value: 'f4' }
-  - { list: 'f5',                 param: '8, 12', value: 'f5' }
-  - { list: 'f1, f2',             param: 'true',  value: 'f2' }
-  - { list: 'f1, f3',             param: '2.5',   value: 'f3' }
-  - { list: 'f1, f4',             param: '15',    value: 'f1' }
-  - { list: 'f1, f5',             param: '8, 12', value: 'f5' }
-  - { list: 'f2, f3',             param: 'true',  value: 'f2' }
-  - { list: 'f2, f4',             param: '"Kim"', value: 'f4' }
-  - { list: 'f2, f5',             param: '8, 12', value: 'f5' }
-  - { list: 'f3, f4',             param: '"Kim"', value: 'f4' }
-  - { list: 'f3, f5',             param: '12',    value: 'f3' }
-  - { list: 'f4, f5',             param: '8, 12', value: 'f5' }
-  - { list: 'f1, f2, f3',         param: '1',     value: 'f1' }
-  - { list: 'f1, f2, f4',         param: 'true',  value: 'f2' }
-  - { list: 'f1, f2, f5',         param: '8, 12', value: 'f5' }
-  - { list: 'f1, f3, f4',         param: '"Kim"', value: 'f4' }
-  - { list: 'f1, f3, f5',         param: '1',     value: 'f1' }
-  - { list: 'f1, f4, f5',         param: '8, 12', value: 'f5' }
-  - { list: 'f2, f3, f4',         param: '10.5',  value: 'f3' }
-  - { list: 'f2, f3, f5',         param: '15',    value: 'f3' }
-  - { list: 'f2, f4, f5',         param: 'false', value: 'f2' }
+  - { list: 'f1, f2, f3, f4',     param: '1',     value: 'f1' }
+  - { list: 'f2, f1, f3, f4',     param: 'true',  value: 'f2' }
+  - { list: 'f3, f2, f1, f4',     param: '2.5',   value: 'f3' }
+  - { list: 'f4, f2, f3, f1',     param: '"Kim"', value: 'f4' }
+  - { list: 'f5, f1, f2, f3, f4', param: '8, 12', value: 'f5' }
+  - { list: 'f1, f3, f2, f4',     param: '2.5',   value: 'f3' }
+  - { list: 'f1, f4, f3, f2',     param: '15',    value: 'f1' }
+  - { list: 'f1, f5, f3, f4, f2', param: '8, 12', value: 'f5' }
+  - { list: 'f2, f3, f1, f4',     param: 'true',  value: 'f2' }
+  - { list: 'f2, f4, f3, f1',     param: '"Kim"', value: 'f4' }
+  - { list: 'f2, f5, f3, f4, f1', param: '8, 12', value: 'f5' }
+  - { list: 'f3, f4, f1, f2',     param: '"Kim"', value: 'f4' }
+  - { list: 'f3, f5, f1, f2, f4', param: '12',    value: 'f3' }
+  - { list: 'f4, f5, f1, f2, f3', param: '8, 12', value: 'f5' }
+  - { list: 'f1, f2, f4, f3',     param: 'true',  value: 'f2' }
+  - { list: 'f1, f2, f5, f3, f4', param: '8, 12', value: 'f5' }
+  - { list: 'f1, f3, f4, f2',     param: '"Kim"', value: 'f4' }
+  - { list: 'f1, f3, f5, f2, f4', param: '1',     value: 'f1' }
+  - { list: 'f1, f4, f5, f3, f2', param: '8, 12', value: 'f5' }
+  - { list: 'f2, f3, f4, f1',     param: '10.5',  value: 'f3' }
+  - { list: 'f2, f3, f5, f1, f4', param: '15',    value: 'f3' }
+  - { list: 'f2, f4, f5, f3, f1', param: 'false', value: 'f2' }
   - { list: 'f1, f2, f3, f4',     param: '10.5',  value: 'f3' }
-  - { list: 'f1, f2, f3, f5',     param: 'true',  value: 'f2' }
+  - { list: 'f1, f2, f3, f5, f4', param: 'true',  value: 'f2' }
   - { list: 'f1, f2, f3, f4, f5', param: '15',    value: 'f1' }
   - { list: 'f1, f2, f3, f4, f5', param: 'false', value: 'f2' }
   - { list: 'f1, f2, f3, f4, f5', param: '10.5',  value: 'f3' }
