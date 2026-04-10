@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,7 +19,9 @@ limitations under the License.
 desc: >-
     The constraint is denoted as any type except the case when constraint is a single final class
     (see Final Classes) or becomes a single final class as a result of union normalization
-    (see Union Types Normalization). Then a compile-time error occurs.
+    (see Union Types Normalization).
+    {{c.desc}}
+tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}
