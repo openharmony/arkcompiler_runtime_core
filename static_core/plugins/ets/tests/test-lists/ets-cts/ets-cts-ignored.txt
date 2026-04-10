@@ -124,9 +124,6 @@
 #33015
 07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_interface_context_n.ets
 
-#33086
-07.expressions/06.object_literal/02.object_literal_of_interface_type/interface_literals_negative_0.ets
-
 #28898 Iterable refused as spread
 07.expressions/07.spread_expression/iterable0.ets
 07.expressions/07.spread_expression/iterable1.ets
