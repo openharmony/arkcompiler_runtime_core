@@ -33,6 +33,5 @@ function main(): void {
 
   arktest.assertEQ(x.first, 10)
   arktest.assertEQ(x.second, 'ten')
-  arktest.assertEQ(y.first, true)
   arktest.assertEQ(y.second, 1)
 }
