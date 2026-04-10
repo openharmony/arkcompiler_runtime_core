@@ -20,9 +20,10 @@ from pathlib import Path
 from typing import Any, Optional, cast
 
 from runner import utils
-from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
+from runner.common_exceptions import FileNotFoundException, InvalidConfiguration, MacroSyntaxError
 from runner.logger import Log
-from runner.options.macros import MacroNotExpanded, Macros, ParameterNotFound
+from runner.macro_utils import has_macro
+from runner.options.macros import MacroNotExpanded, Macros
 from runner.options.options import IOptions
 from runner.options.options_step import RawStepData, Step, StepKind
 from runner.options.options_test_suite import TestSuiteOptions
@@ -126,7 +127,7 @@ class WorkflowOptions(IOptions):
         return '\n'.join(result)
 
     def __expand_macro_for_param(self, value_in_workflow: str | list, param: str) -> str | list:
-        if (isinstance(value_in_workflow, str) and utils.has_macro(value_in_workflow) and
+        if (isinstance(value_in_workflow, str) and has_macro(value_in_workflow) and
                 not self.__test_suite.is_defined_in_collections(param)):
             return self.__expand_macro_for_str(value_in_workflow)
         if isinstance(value_in_workflow, list):
@@ -239,9 +240,7 @@ class WorkflowOptions(IOptions):
     def __expand_macro_for_str(self, value_in_workflow: str) -> str | list[str]:
         try:
             return Macros.correct_macro(value_in_workflow, self)
-        except ParameterNotFound as pnf:
-            _LOGGER.all(str(pnf))
-        except MacroNotExpanded as pnf:
+        except (MacroSyntaxError, MacroNotExpanded) as pnf:
             _LOGGER.all(str(pnf))
         return value_in_workflow
 
@@ -250,7 +249,7 @@ class WorkflowOptions(IOptions):
         for value in value_in_workflow:
             try:
                 expanded_value = Macros.correct_macro(value, self)
-            except (ParameterNotFound, MacroNotExpanded) as pnf:
+            except (MacroSyntaxError, MacroNotExpanded) as pnf:
                 _LOGGER.all(str(pnf))
                 return value_in_workflow
             if isinstance(expanded_value, list):

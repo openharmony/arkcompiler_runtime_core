@@ -47,12 +47,14 @@ args = {
                 'executable-path': (Path(__file__).parent.parent.parent.parent /
                                    'extensions/generators/ets_arkjs_xgc/ark_js_napi_cli_runner.sh').as_posix(),
                 'args': [
-                    '--work-dir ${parameters.work-dir}/intermediate',
+                    '--work-dir',
+                    '${parameters.work-dir}/intermediate',
                     '--build-dir .',
                     '--stub-file ./gen/arkcompiler/ets_runtime/stub.an',
                     '--enable-force-gc=false',
                     '--open-ark-tools=true',
-                    '--entry-point ${test-id}',
+                    '--entry-point',
+                    '${test-id}',
                     '${parameters.work-dir}/intermediate/${test-id}.abc'
                     ],
                 'env': {

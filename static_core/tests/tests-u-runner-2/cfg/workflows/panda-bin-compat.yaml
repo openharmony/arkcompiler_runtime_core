@@ -67,7 +67,7 @@ steps:
         executable-path: /bin/bash
         args:
             - "${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner-2/cfg/scripts/bin-compat-copy-new-libs.sh"
-            - "${parameters.work-dir}/gen/${test-id-name}"
+            - "${parameters.work-dir}/gen/${test-id:parent}/${test-id:stem}"
         timeout: 30
     compile-new-libs:
         executable-path: /bin/bash
@@ -77,8 +77,8 @@ steps:
             - "${parameters.arktsconfig}"
             - "${parameters.extension}"
             - "${parameters.opt-level}"
-            - "${parameters.work-dir}/gen/${test-id-name}"
-            - "${parameters.work-dir}/intermediate/${test-id-name}"
+            - "${parameters.work-dir}/gen/${test-id:parent}/${test-id:stem}"
+            - "${parameters.work-dir}/intermediate/${test-id:parent}/${test-id:stem}"
         timeout: 60
     verify-new-libs:
         executable-path: ${parameters.build}/bin/verifier
