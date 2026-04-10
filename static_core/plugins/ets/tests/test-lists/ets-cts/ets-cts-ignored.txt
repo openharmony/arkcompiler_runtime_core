@@ -777,6 +777,29 @@
 #32038 Interface has methods
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_4.ets
 
+#31873 [ArkTS][CTE] incorrect computed smart type for typeof v === "string"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_1.ets
+
+#34132 branching on v === e not working
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_19.ets
+
+#31873 [ArkTS][CTE] incorrect computed smart type for typeof v === "string"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_8.ets
+
+#34130 Branching on typeof bigint doesn't work
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_9.ets
+
+#31874 [ArkTS][CTE] incorrect computed smart type for typeof v === "undefined"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_11.ets
+
+#31871 [ArkTS][CTE] incorrect computed smart type for typeof v === "[name_of_a_numeric_type]"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_12.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_13.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_14.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_15.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_16.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_17.ets
+
 #31017 override method in superinterface with the same private in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
 
