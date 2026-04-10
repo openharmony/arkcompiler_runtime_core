@@ -292,35 +292,6 @@ def indent(times: int) -> str:
     return "    " * times
 
 
-def has_macro(prop_value: str) -> bool:
-    pattern = r"\$\{([^\}]+)\}"
-    match = re.search(pattern, str(prop_value))
-    return match is not None
-
-
-def list_has_macros(args: list[str]) -> bool:
-    for arg in args:
-        if has_macro(arg):
-            return True
-    return False
-
-
-def get_all_macros(prop_value: str) -> list[str]:
-    pattern = r"\$\{([^\}]+)\}"
-    result: list[str] = []
-    for match in re.finditer(pattern, prop_value):
-        result.append(match.group(1))
-    return result
-
-
-def replace_macro(prop_value: str, macro: str, replacing_value: str) -> str:
-    pattern = r"\$\{" + macro + r"\}"
-    if macro in prop_value:
-        match = re.sub(pattern, replacing_value, prop_value, count=0, flags=re.IGNORECASE)
-        return match
-    return prop_value
-
-
 def expand_file_name(arg: str) -> str | None:
     if arg is None or arg.startswith("${"):
         return arg

@@ -250,11 +250,24 @@ steps:
 ```
 The values can contain macros detected by `${}`. The macro's name is yaml path to the wished property.
 
-### Special macros
-In workflow/test-suite configuration files following special macros are supported:
+### Special macro
+In workflow/test-suite configuration files following special macro is supported:
 - `${test-id}` refers to the test file name (or path to the test file if some folder hierarchy is used from the TEST_ROOT).
-- `${test-id-name}` refers to the same test file name, but without all suffixes.
-All special macros are expanded at last call just before the binary executing.
+The special macro is expanded at last call just before the binary executing.
+
+### Macro modifiers
+
+In workflow/test-suite configuration files following macro modifiers are supported:
+
+| Modifier | Description                         | Example input       | Example output |
+|----------|-------------------------------------|---------------------|----------------------------------------------------------------|
+| -        | Expands macro as is                 | `${test-id}`        | `/path/to/test.ets`                                            |
+| `parent` | Extracts parent directory           | `${test-id:parent}` | `/path/to`                                                     |
+| `name`   | Extracts filename with extension    | `${test-id:name}`   | `test.ets`                                                     |
+| `stem`   | Extracts filename without extension | `${test-id:stem}`   | `test`                                                         |
+
+Macro modifiers can be used where test paths or file references need to be dynamically manipulated based on the test context or requirements.
+
 
 ## ETS ES checked dependencies
 - `ruby` (installed by default with `$PROJECT/static_core/scripts/install-deps-ubuntu -i=dev`)

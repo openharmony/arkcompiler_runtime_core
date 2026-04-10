@@ -42,4 +42,4 @@ steps:
         args:
             - "--boot-panda-files=stdlib"
             - ${test-id}
-            - ${test-id-name}
+            - ${test-id:stem}

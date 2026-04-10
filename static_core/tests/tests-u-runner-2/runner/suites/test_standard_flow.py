@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, cast
 from typing_extensions import Self
 
 from runner import utils
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import InvalidConfiguration, MacroNotExpanded
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.flows.itest_flow import ITestFlow
@@ -35,7 +35,8 @@ from runner.extensions.flows.test_flow_registry import workflow_registry
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
-from runner.options.macros import Macros, ParameterNotFound
+from runner.macro_utils import has_macro, list_has_macros
+from runner.options.macros import Macros
 from runner.options.options import IOptions
 from runner.options.options_step import Step, StepKind
 from runner.options.options_step_utils import StepFields
@@ -397,7 +398,7 @@ class TestStandardFlow(ITestFlow, Test):
         """
         cmd_env = self.flow_utils.get_step_env(step)
         flags = step.args[:]
-        while utils.list_has_macros(flags):
+        while list_has_macros(flags):
             flags = self.__expand_last_call_in_args(flags)
         stdout = self.__expand_last_call_in_path(step.stdout) if step.stdout else step.stdout
         stderr = self.__expand_last_call_in_path(step.stderr) if step.stderr else step.stderr
@@ -588,11 +589,11 @@ class TestStandardFlow(ITestFlow, Test):
 
     def __expand_last_call_in_line(self, arg: str) -> list[str]:
         line: str = arg
-        while utils.has_macro(line):
+        while has_macro(line):
             line = Macros.process_special_macros(line, self.test_id)
             try:
                 expanded_line: str | list[str] = Macros.correct_macro(line, self.test_extra_params)
-            except ParameterNotFound:
+            except MacroNotExpanded:
                 expanded_line = Macros.correct_macro(line, self.test_env.config.workflow)
             line = " ".join(expanded_line) if isinstance(expanded_line, list) else expanded_line
         return line.split()
