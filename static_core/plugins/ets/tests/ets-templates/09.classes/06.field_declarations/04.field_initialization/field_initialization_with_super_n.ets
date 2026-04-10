@@ -14,14 +14,24 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static field 'f' have reference to itself.
-assert: >-
-    If the instance field initializer expression uses
-    this or super directly in any form,then a compile-time warning occurs.
-tags: [compile-only]
-expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
+desc: >-
+    If the initializer expression uses super or this in any form, then a compile-time warning occurs.
+    If such use occurs then runtime error can occur.
+expected_out: "issue #34133"
+tags: [negative]
 ---*/
 
-class C {
-  public f: int = this.f + 5
+class A {
+  public x: string = this.bar()
+  public bar(): string {
+    return this.x
+  }
+}
+class C extends A{
+  public y: string = super.bar()
+}
+
+function main(): void {
+    let instance: C = new C();
+    console.log(instance.y)
 }

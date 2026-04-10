@@ -13,27 +13,14 @@
  * limitations under the License.
  */
 
-{% for timing in ["compile", "runtime"] %}
 {% for c in cases %}
 
 {% for decl in c.decl_variants %}
 
-{% if 'check_variants' in c %}
-  {% set check_variants=c.check_variants %}
-{% else %}
-  {% set check_variants=[{}] %}
-{% endif %}
+{% set check_variants=c.check_variants %}
 {% for cv in check_variants %}
 
-{% set logic_data  = "  " %}
-
 {% set ns = namespace() %}
-
-{% set ns.logic_data = logic_data %}
-{% for k, v in cv.items() %}
-  {% set ns.logic_data = ns.logic_data|replace("[" ~ k ~ "]", v) %}
-{% endfor %}
-{% set logic_data=ns.logic_data %}
 
 {% set ns.decl = decl %}
 {% for k, v in cv.items() %}
@@ -46,19 +33,15 @@ desc: {{c.desc}}
 assert: >-
     If the instance field initializer expression uses
     this or super directly in any form,then a compile-time warning occurs.
-{% if 'compile' in timing %}
-tags: [compile-only]
 expected_out: "Warning W0010: The instance field initializer expression cannot use the super."
-{% endif %}
 ---*/
 
 {{decl}}
 
 function main(): void {
-{{logic_data}}
+  arktest.assertEQ(new A().field, {{cv.check_value}} )
 }
 
-{% endfor %}
 {% endfor %}
 {% endfor %}
 {% endfor %}
