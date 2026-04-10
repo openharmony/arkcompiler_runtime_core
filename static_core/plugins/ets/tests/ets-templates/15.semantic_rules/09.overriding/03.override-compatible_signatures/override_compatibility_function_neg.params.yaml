@@ -24,6 +24,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Base) => Derived)): void in Derived not overriding any method"
 #1
     - base: |-
           foo(i: (j: Base) => Base): void {
@@ -34,6 +36,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Derived) => Derived)): void in Derived not overriding any method"
 #2
     - base: |-
           foo(i: (j: Derived) => Base): void {
@@ -44,6 +48,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Base) => Base)): void in Derived not overriding any method"
 #3
     - base: |-
           foo(i: (j: Derived) => Base): void {
@@ -54,6 +60,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Base) => Derived)): void in Derived not overriding any method"
 #4
     - base: |-
           foo(i: (j: Derived) => Base): void {
@@ -64,6 +72,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Derived) => Derived)): void in Derived not overriding any method"
 #5
     - base: |-
           foo(i: (j: Derived) => Derived): void {
@@ -74,6 +84,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Base) => Base)): void in Derived not overriding any method"
 #6
     - base: |-
           foo(i: (j: Derived) => Derived): void {
@@ -84,6 +96,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Base) => Derived)): void in Derived not overriding any method"
 
     # FUNCTION, RETURN TYPE
 #7
@@ -98,6 +112,8 @@ cases:
               return (i: Derived): Base => new Base
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Derived) => Base) in Derived cannot override foo with type ((p1: Base) => Base) field from class Base because the overriding return type is not compatible with the other return type."
 #8
     - base: |-
           foo(): (i: Base) => Base {
@@ -110,6 +126,8 @@ cases:
               return (i: Derived): Derived => new Derived
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Derived) => Derived) in Derived cannot override foo with type ((p1: Base) => Base) field from class Base because the overriding return type is not compatible with the other return type."
 #9
     - base: |-
           foo(): (i: Base) => Derived {
@@ -122,6 +140,8 @@ cases:
               return (i: Base): Base => new Base
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Base) => Base) in Derived cannot override foo with type ((p1: Base) => Derived) field from class Base because the overriding return type is not compatible with the other return type."
 #10
     - base: |-
           foo(): (i: Base) => Derived {
@@ -134,6 +154,8 @@ cases:
               return (i: Derived): Base => new Base
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Derived) => Base) in Derived cannot override foo with type ((p1: Base) => Derived) field from class Base because the overriding return type is not compatible with the other return type."
 #11
     - base: |-
           foo(): (i: Base) => Derived {
@@ -146,6 +168,8 @@ cases:
               return (i: Derived): Derived => new Derived
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Derived) => Derived) in Derived cannot override foo with type ((p1: Base) => Derived) field from class Base because the overriding return type is not compatible with the other return type."
 #12
     - base: |-
           foo(): (i: Derived) => Derived {
@@ -158,6 +182,8 @@ cases:
               return (i: Base): Base => new Base
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Base) => Base) in Derived cannot override foo with type ((p1: Derived) => Derived) field from class Base because the overriding return type is not compatible with the other return type."
 #13
     - base: |-
           foo(): (i: Derived) => Derived {
@@ -170,3 +196,5 @@ cases:
               return (i: Derived): Base => new Base
           }
       params: override-incompatible return type
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type ((p1: Derived) => Base) in Derived cannot override foo with type ((p1: Derived) => Derived) field from class Base because the overriding return type is not compatible with the other return type."

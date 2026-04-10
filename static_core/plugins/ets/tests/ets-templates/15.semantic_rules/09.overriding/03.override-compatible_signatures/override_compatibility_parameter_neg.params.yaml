@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,8 @@ cases:
               }
           }
       params: different number of type parameters
+      expected_out: |-
+        "Semantic error ESE0136: Method foo<J>(i: J): void in Derived<T> not overriding any method"
 
     - base: |-
           class Base {
@@ -41,6 +43,8 @@ cases:
               }
           }
       params: override-incompatible type parameter (covariant)
+      expected_out: |-
+        "Semantic error ESE150729: Class member foo with type void in Derived cannot override foo with type void field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
 
     - decl: |-
           interface I {}
@@ -58,6 +62,8 @@ cases:
               }
           }
       params: override-incompatible type parameter (covariance)
+      expected_out: |-
+        "Semantic error ESE150729: Class member foo with type void in Derived cannot override foo with type void field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
 
     - decl: |-
           interface I {}
@@ -74,6 +80,8 @@ cases:
               }
           }
       params: different number of type parameters
+      expected_out: |-
+        "Semantic error ESE0136: Method foo<J>(i: J, j: J): void in Derived not overriding any method"
 
     # TYPE PARAMETER, RETURN TYPE
     - base: |-
@@ -91,3 +99,5 @@ cases:
               }
           }
       params: override-incompatible constraints (covariance)
+      expected_out: |-
+        "Semantic error ESE150729: Class member foo with type J in Derived cannot override foo with type T field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."

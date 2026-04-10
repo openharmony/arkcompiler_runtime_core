@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ desc: >-
         • Override a private method of a superclass;
 
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: Class member public_foo with type String in Derived cannot override public_foo with type void field from class Base because the overriding return type is not compatible with the other return type."
 ---*/
 
 let res: number = 0;
