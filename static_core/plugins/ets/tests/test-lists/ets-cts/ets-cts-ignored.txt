@@ -1130,10 +1130,6 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
 
-#2364 (public)
-23.binary_compatibility/renamed_function/renamed_function.ets
-23.binary_compatibility/renamed_namespace/renamed_namespace.ets
-
 #33617
 23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_class_field/effective_type_class_field.ets
 23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_variable/effective_type_variable.ets
