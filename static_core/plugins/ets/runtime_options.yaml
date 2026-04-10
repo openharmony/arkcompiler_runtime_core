@@ -261,3 +261,8 @@ options:
     type: bool
     default: false
     description: "jobs"
+
+- name: verify-ani
+  type: bool
+  default: false
+  description: "Use this to identify invalid ANI API usage during development. Note: May incur a slight performance overhead"
