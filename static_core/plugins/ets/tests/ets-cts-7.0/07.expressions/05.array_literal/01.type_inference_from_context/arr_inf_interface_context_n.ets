@@ -20,7 +20,7 @@ desc: >-
   assignable to T in a generic superinterface I<T>, a compile-time error
   occurs.
 tags: [compile-only, negative]
-expected_out: 'SomeI is not a superinterface of Array'
+expected_out: "Semantic error ESE1195013: The type of array literal [1, 2] cannot be inferred as SomeI, as interface SomeI is not a superinterface of Array."
 ---*/
 
 interface SomeI {}
