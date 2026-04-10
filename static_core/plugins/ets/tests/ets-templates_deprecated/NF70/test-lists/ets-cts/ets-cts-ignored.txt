@@ -2018,10 +2018,6 @@
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_3.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_4.ets
 
-#32412 CTE if explicit overload for constructor used
-15.semantic_rules/11.overload_resolution/06.overload_set_for_constructors/combination_overloaded_constructors.ets
-15.semantic_rules/11.overload_resolution/06.overload_set_for_constructors/combination_overloaded_constructors_negative.ets
-
 #32946 no warning issued if overloaded entity can never be selected for a call
 15.semantic_rules/11.overload_resolution/07.overload_set_warning/overload_set_warning.ets
 
