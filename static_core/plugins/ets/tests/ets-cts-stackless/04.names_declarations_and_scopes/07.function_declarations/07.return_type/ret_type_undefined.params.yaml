@@ -1,0 +1,136 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+function_decls:
+    # function: empty body (no return statement) — OK per spec foo3
+    - decl: |-
+          function foo(): undefined {}
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # function: explicit 'return' — OK
+    - decl: |-
+          function foo(): undefined { return }
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # function: explicit 'return undefined' — OK
+    - decl: |-
+          function foo(): undefined { return undefined }
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # function: conditional with return undefined on all paths
+    - decl: |-
+          let flag = true
+          function foo(): undefined {
+              if (flag) return undefined
+              else return undefined
+          }
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # lambda: empty body — OK per spec foo4
+    - decl: |-
+          let foo = (): undefined => {}
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # lambda: explicit 'return' — OK
+    - decl: |-
+          let foo = (): undefined => { return }
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # lambda: explicit 'return undefined' — OK
+    - decl: |-
+          let foo = (): undefined => { return undefined }
+      call: |-
+          let v = foo()
+          arktest.assertTrue(v == undefined)
+
+    # class instance method: empty body — OK
+    - decl: |-
+          class A {
+              foo(): undefined {}
+          }
+      call: |-
+          let a = new A()
+          let v = a.foo()
+          arktest.assertTrue(v == undefined)
+
+    # class instance method: explicit 'return' — OK
+    - decl: |-
+          class A {
+              foo(): undefined { return }
+          }
+      call: |-
+          let a = new A()
+          let v = a.foo()
+          arktest.assertTrue(v == undefined)
+
+    # class instance method: explicit 'return undefined' — OK
+    - decl: |-
+          class A {
+              foo(): undefined { return undefined }
+          }
+      call: |-
+          let a = new A()
+          let v = a.foo()
+          arktest.assertTrue(v == undefined)
+
+    # static class method: empty body — OK
+    - decl: |-
+          class A {
+              static foo(): undefined {}
+          }
+      call: |-
+          let v = A.foo()
+          arktest.assertTrue(v == undefined)
+
+    # static class method: explicit 'return undefined' — OK
+    - decl: |-
+          class A {
+              static foo(): undefined { return undefined }
+          }
+      call: |-
+          let v = A.foo()
+          arktest.assertTrue(v == undefined)
+
+    # abstract class method: empty body — OK
+    - decl: |-
+          abstract class A {
+              foo(): undefined {}
+          }
+      call: |-
+          let a: A = {}
+          let v = a.foo()
+          arktest.assertTrue(v == undefined)
+
+    # interface default method: empty body — OK
+    - decl: |-
+          interface I {
+              foo(): undefined {}
+          }
+          class A implements I {}
+      call: |-
+          let a = new A()
+          let v = a.foo()
+          arktest.assertTrue(v == undefined)

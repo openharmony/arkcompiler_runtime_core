@@ -1,0 +1,112 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Interfaces with static members and type parameters inside
+cases:
+  - desc: Lock prevents concurrent access to critical section.
+    decl: |-
+      async function delay(d: int) {
+        return new Promise<void>((res, rej) => {
+          setTimeout(res, d, undefined)
+        })
+      }
+
+      async function startTest() {
+        let lock = new AsyncLock();
+        let concurrentCount = 0;
+        let maxConcurrent = 0;
+        const totalTasks = 10;
+          
+        const task = async () => {
+          await lock.lockAsync(async () => {
+          concurrentCount++;
+          maxConcurrent = Math.max(maxConcurrent, concurrentCount).toInt();
+          await delay((Math.random() * 10 + 5).toInt())
+          concurrentCount--;
+          }, AsyncLockMode.EXCLUSIVE);
+        };
+          
+        const tasks = new Array<Promise<void>>(totalTasks).map(() => task());
+        await Promise.all(tasks);
+        arktest.assertEQ(maxConcurrent, 1);
+        arktest.assertEQ(concurrentCount, 0);
+      }
+    logic: |-
+      waitForCompletion(startTest);
+
+  - desc: Lock prevents data races.
+    decl: |-
+      async function delay(d: int) {
+        return new Promise<void>((res, rej) => {
+          setTimeout(res, d, undefined)
+        })
+      }
+      async function startTest() {
+        let lock = new AsyncLock();
+        let sharedCounter = 0;
+        const iterations = 30;
+        const concurrentTasks = 3;
+        
+        const incrementTask = async () => {
+          for (let i = 0; i < iterations; i++) {
+            await lock.lockAsync(async () => {
+              const temp = sharedCounter;
+              await delay(0)
+              sharedCounter = temp + 1;
+            }, AsyncLockMode.EXCLUSIVE);
+          }
+        };
+        
+        const tasks = new Array<Promise<void>>(concurrentTasks).map(() => incrementTask());
+        await Promise.all(tasks);
+        const expected = concurrentTasks * iterations;
+
+        arktest.assertEQ(sharedCounter, expected);
+      }
+    logic: |-
+      waitForCompletion(startTest);
+
+  - desc: Multiple locks work independently.
+    decl: |-
+      async function delay(d: int) {
+        return new Promise<void>((res, rej) => {
+          setTimeout(res, d, undefined)
+        })
+      }
+      async function startTest() {
+        const lock1 = new AsyncLock();
+        const lock2 = new AsyncLock();
+        let lock1Counter = 0;
+        let lock2Counter = 0;
+        
+        const task1 = async () => {
+          await lock1.lockAsync(async () => {
+            lock1Counter++;
+            await delay(50);
+          }, AsyncLockMode.EXCLUSIVE);
+        };
+        
+        const task2 = async () => {
+          await lock2.lockAsync(async () => {
+            lock2Counter++;
+            await delay(50);
+          }, AsyncLockMode.EXCLUSIVE);
+        };
+        
+        await Promise.all([task1(), task2()]);
+        
+        arktest.assertEQ(lock1Counter, 1);
+        arktest.assertEQ(lock2Counter, 1);
+      }
+    logic: |-
+      waitForCompletion(startTest);
