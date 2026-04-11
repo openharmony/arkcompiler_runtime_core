@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -21,10 +21,19 @@ desc: >-
     and has no methods or fields available for use.
     Lack of constraint effectively means extends Object|null|undefined.
     If the constraint S is a non-nullish type (see Nullish Types), then T is also non-nullish.
-    {{case.doc}}
+expected_out: 
+    - "Semantic error ESE0170: Type 'CType<T>' is generic but type argument were not provided."
+    - "Semantic error ESE0156: Type alias declaration is not generic, but type parameters were provided"
 tags: [compile-only, negative]
 ---*/
 
-{{case.code}}
+class AType {}
+type A = AType
+class CType<T extends A> {}
+type C = CType
+      
+function main() {
+    new C<{{case.type}}>()
+}
 
 {% endfor %}

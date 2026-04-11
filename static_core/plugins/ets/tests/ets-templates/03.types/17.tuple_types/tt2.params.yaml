@@ -13,17 +13,18 @@
 
 ---
 cases:
-    - { type: byte, val: 127 }
+    - { type: byte, val: "127" }
     - { type: short, val: 'Short.MAX_VALUE' }
-    - { type: int, val: 42 }
+    - { type: int, val: "42" }
     - { type: long, val: Long.MIN_VALUE }
     - { type: boolean, val: 'true' }
     - { type: char, val: "c'Z'"}
     - { type: float, val: Float.POSITIVE_INFINITY }
-    - { type: double, val: 3.1415926 }
-    - { type: number, val: -0.0000001 }
+    - { type: double, val: "3.1415926" }
+    - { type: number, val: "-0.0000001" }
+    - { type: bigint, val: "-100909090909090909090909090909090909845353n" }
 
-    - { type: Byte, val: new Byte(-128 as byte) }
+    - { type: Byte, val: new Byte((-128).toByte()) }
     - { type: Short, val: '(Short.MIN_VALUE + 1).toShort()' }
     - { type: Int, val: '42 * 42' }
     - { type: Long, val: 'Long.MAX_VALUE - 1' }
@@ -32,8 +33,9 @@ cases:
     - { type: Float, val: Float.NEGATIVE_INFINITY }
     - { type: Double, val: '3.1415926 * 2' }
     - { type: Number, val: '-0.0000001 + 0.0001' }
+    - { type: BigInt, val: "456456n" }
 
-    - { type: Any, val: 1 }
+    - { type: Any, val: "1" }
     - { type: "null", val: "null" }
     - { type: "undefined", val: "undefined" }
     - { type: "int | string", val: "1" }
@@ -50,9 +52,9 @@ cases:
       val: new A()
 
     - decl: |-
-        class A {}
-        class B extends A {}
-      type: A
+        class A0 {}
+        class B extends A0 {}
+      type: A0
       val: new B()
 
     - { type: string, val: '"abc"' }
@@ -61,26 +63,26 @@ cases:
     - { type: 'Object[]', val: '[[0]]' }
 
     - decl: |-
-        enum Color { Red, Green, Blue }
-      type: Color
-      val: Color.Green
+        enum Color0 { Red, Green, Blue }
+      type: Color0
+      val: Color0.Green
 
     - decl: |-
-        enum Color { Red, Green, Blue }
-      type: 'Color[]'
-      val: '[Color.Green]'
+        enum Color1 { Red, Green, Blue }
+      type: 'Color1[]'
+      val: '[Color1.Green]'
 
     - decl: |-
-        type F = (s: string) => string
-      type: F
+        type F0 = (s: string) => string
+      type: F0
       val: '(s: string): string => { return s + s }'
 
     - decl: |-
-        type F = (s: string) => string
+        type F1 = (s: string) => string
         function foo(s: string): string {
             return "abc" + s
         }
-      type: F[]
+      type: F1[]
       val: '[(s: string): string => { return s + s }, foo]'
 
     - decl: |-

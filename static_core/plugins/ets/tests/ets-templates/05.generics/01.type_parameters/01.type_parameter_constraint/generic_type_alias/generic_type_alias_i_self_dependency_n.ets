@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,14 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for sd in self_dependency %}
+{% for c in cases %}
 {% for kind in kinds %}
 
 /*---
 desc: A compile-time error occurs if a type parameter in the type parameter section depends on itself.
+expected_out: >- 
+    {{c.expected_out}}
 tags: [compile-only, negative]
-params: >
-  {{sd}}
+params: >-
+  {{c.self_dependency}}
 ---*/
 {{kind}}  SomeType {}
 type T = SomeType
@@ -34,7 +36,7 @@ type T3<Z> = SomeType3<Z>
 {{kind}}  SomeType4<Z> {}
 type T4<Z> = SomeType4<Z>
 
-interface X<{{sd}}> {}
+interface X<{{c.self_dependency}}> {}
 
 function main(): void {}
 

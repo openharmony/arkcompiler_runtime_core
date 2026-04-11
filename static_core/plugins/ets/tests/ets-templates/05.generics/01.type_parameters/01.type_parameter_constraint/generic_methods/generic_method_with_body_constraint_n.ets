@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -13,13 +13,17 @@
 * limitations under the License.
 ---*/
 
-{% for c in constraints %}
-{% for mm in method_modifiers %}
+{% yaml "generic_method_abstr_and_with_body_constraint.data.yaml" as dt %}
+{% for c in dt.constraints %}
+{% for mm in dt.method_modifiers %}
 
 /*---
 desc: >-
     If type parameter T has type constraint S, then the actual type of the generic instantiation must be
     compatible with S (see Type Compatibility).
+expected_out:
+    - "Semantic error ESE0127: No matching call signature for foo()"
+    - "{{c.expected_out}}"
 tags: [compile-only, negative]
 ---*/
 
