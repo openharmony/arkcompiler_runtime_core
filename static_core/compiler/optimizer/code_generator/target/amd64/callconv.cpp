@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,6 +137,7 @@ Location Amd64ParameterInfo::GetNextLocation(DataType::Type type)
     return Location::MakeRegister(target.GetParamRegId(currentScalarNumber_++));
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frameInfo)
 {
     auto encoder = GetEncoder();
@@ -174,9 +175,6 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
     encoder->EncodeSub(spReg, spReg, Imm(2U * DOUBLE_WORD_SIZE_BYTES));
     encoder->EncodeStr(GetTarget().GetParamReg(0), MemRef(spReg, DOUBLE_WORD_SIZE_BYTES));
 
-    // Reset OSR flag and set HasFloatRegsFlag
-    auto flags {static_cast<uint64_t>(frameInfo.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
-    encoder->EncodeSti(flags, sizeof(flags), MemRef(spReg));
     // Allocate space for locals
     encoder->EncodeSub(spReg, spReg, Imm(DOUBLE_WORD_SIZE_BYTES * (CFrameSlots::Start() - CFrameData::Start())));
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
@@ -187,6 +185,24 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
     SET_CFI_CALLEE_VREGS(VRegMask(static_cast<size_t>(calleeVregs)));
     PushRegs(calleeRegs, calleeVregs);
     SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
+
+    // Set HasFloatRegsFlag
+    // No need to reset OSR flag because x86_64 doesn't support OSR mode
+    auto flags {static_cast<uint64_t>(frameInfo.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
+    if (IsPandaMode()) {
+        ScopedTmpReg flagsReg(encoder);
+        auto threadReg = Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType());
+        constexpr uint64_t TAG = 0x1;
+        encoder->EncodeAnd(flagsReg, threadReg, Imm(TAG));
+        encoder->EncodeAnd(threadReg, threadReg, Imm(~TAG));
+        encoder->EncodeShl(flagsReg, flagsReg, Imm(CFrameLayout::IsResumedFlag::START_BIT));
+        if (flags != 0) {
+            encoder->EncodeOr(flagsReg, flagsReg, Imm(flags));
+        }
+        encoder->EncodeStr(flagsReg, MemRef(fpReg, -CFrameFlags::Start() * DOUBLE_WORD_SIZE_BYTES));
+    } else {
+        encoder->EncodeSti(flags, sizeof(flags), MemRef(fpReg, -CFrameFlags::Start() * DOUBLE_WORD_SIZE_BYTES));
+    }
 
     encoder->EncodeSub(
         spReg, spReg,

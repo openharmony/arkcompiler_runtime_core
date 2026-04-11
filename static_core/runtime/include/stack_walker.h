@@ -133,6 +133,11 @@ public:
         return IsCFrame() || GetIFrame() != nullptr;
     }
 
+    bool IsResumed() const
+    {
+        return IsCFrame() ? GetCFrame().IsResumed() : GetIFrame()->IsResumed();
+    }
+
     template <typename Func>
     bool IterateObjects(Func func)
     {

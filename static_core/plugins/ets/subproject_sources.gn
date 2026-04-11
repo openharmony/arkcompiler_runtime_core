@@ -199,6 +199,7 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/ets_to_string_cache.cpp",
   "runtime/intrinsics/helpers/json_helper.cpp",
   "runtime/intrinsics/helpers/regexp_preparser.cpp",
+  "runtime/intrinsics/helpers/intrinsic_await_promise_impl.cpp",
   "runtime/main_worker_external_scheduler.cpp",
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",
@@ -230,6 +231,7 @@ srcs_runtime = [
   "runtime/ets_utils.cpp",
   "runtime/static_object_accessor.cpp",
   "runtime/static_type_converter.cpp",
+  "runtime/entrypoints/ets_async_entrypoints.cpp",
   "runtime/entrypoints/ets_proxy_entrypoints.cpp",
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/core/regexp/RegExp.cpp",
@@ -353,6 +355,7 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
   srcs_runtime += [
     "runtime/ani/arch/amd64/ets_ani_entry_point_amd64.S",
     "runtime/ani/arch/amd64/ets_async_entry_point_amd64.S",
+    "runtime/entrypoints/arch/amd64/ets_async_stubs_amd64.S",
     "runtime/entrypoints/arch/amd64/ets_proxy_entry_point_amd64.S",
   ]
 } else if (current_cpu == "arm64") {

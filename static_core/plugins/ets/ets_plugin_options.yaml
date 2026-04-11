@@ -101,6 +101,8 @@
         end_native_method_obj_codegen: EtsEndNativeMethodObj
         check_native_exception_codegen: EtsCheckNativeException
         wrap_object_native_codegen: EtsWrapObjectNative
+        async_suspend_codegen: EtsAsyncSuspend
+        async_dispatch_codegen: EtsAsyncDispatch
         pipeline_includes: plugins/ets/compiler/optimizer/ets_pipeline_includes.inl.h
         optimizations_after_unroll: plugins/ets/compiler/optimizer/ets_optimizations_after_unroll.inl
       runtime_defines:

@@ -1655,6 +1655,11 @@ public:
         UNREACHABLE();
     }
 
+    virtual bool HasAsyncAnnotation([[maybe_unused]] MethodPtr methodPtr) const
+    {
+        return false;
+    }
+
     virtual ClassPtr GetRetValueClass([[maybe_unused]] MethodPtr methodPtr) const
     {
         UNREACHABLE();

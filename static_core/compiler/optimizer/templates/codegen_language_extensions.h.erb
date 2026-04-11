@@ -155,3 +155,29 @@ inline void WrapObjectNative([[maybe_unused]] WrapObjectNativeInst *inst)
     LOG(WARNING, COMPILER) << "Cannot encode WrapObjectNative";
     GetEncoder()->SetFalseResult();
 }
+
+inline void AsyncSuspend([[maybe_unused]] Inst *inst)
+{
+    [[maybe_unused]] auto *graph = inst->GetBasicBlock()->GetGraph();
+% Common::each_plugin_suboption("compiler_extensions", "async_suspend_codegen") do |async_suspend_codegen, plugin_lang|
+    if (graph->GetLanguage() == SourceLanguage::<%= plugin_lang %>) {
+        <%= async_suspend_codegen %>(inst);
+        return;
+    }
+% end
+    LOG(WARNING, COMPILER) << "Cannot encode AsyncSuspend";
+    GetEncoder()->SetFalseResult();
+}
+
+inline void AsyncDispatch([[maybe_unused]] Inst *inst)
+{
+    [[maybe_unused]] auto *graph = inst->GetBasicBlock()->GetGraph();
+% Common::each_plugin_suboption("compiler_extensions", "async_dispatch_codegen") do |async_dispatch_codegen, plugin_lang|
+    if (graph->GetLanguage() == SourceLanguage::<%= plugin_lang %>) {
+        <%= async_dispatch_codegen %>(inst);
+        return;
+    }
+% end
+    LOG(WARNING, COMPILER) << "Cannot encode AsyncDispatch";
+    GetEncoder()->SetFalseResult();
+}

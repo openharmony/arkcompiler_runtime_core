@@ -121,6 +121,11 @@ EtsLong EtsAsyncContext::GetAwaitId() const
     return ObjectAccessor::GetPrimitive<EtsLong>(this, MEMBER_OFFSET(EtsAsyncContext, awaitId_));
 }
 
+void EtsAsyncContext::SetPc(EtsInt pc)
+{
+    ObjectAccessor::SetPrimitive<EtsInt>(this, MEMBER_OFFSET(EtsAsyncContext, pc_), pc);
+}
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ASYNC_CONTEXT_INL_H

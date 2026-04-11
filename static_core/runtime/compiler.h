@@ -321,7 +321,8 @@ public:
             methodPtr->GetVerificationStage() != Method::VerificationStage::VERIFIED_OK) {
             return false;
         }
-        return !(methodPtr->IsIntrinsic() || methodPtr->IsNative() || methodPtr->IsAbstract());
+        return !(methodPtr->IsIntrinsic() || methodPtr->IsNative() || methodPtr->IsAbstract() ||
+                 HasAsyncAnnotation(methodPtr));
     }
 
     bool IsMethodNativeApi(MethodPtr method) const override;

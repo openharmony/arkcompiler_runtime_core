@@ -62,9 +62,10 @@ public:
             MIRROR_FIELD_INFO(EtsAsyncContext, returnValue_, "returnValue"),
             MIRROR_FIELD_INFO(EtsAsyncContext, refValues_, "refValues"),
             MIRROR_FIELD_INFO(EtsAsyncContext, primValues_, "primValues"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, frameOffsets_, "frameOffsets"),
+            MIRROR_FIELD_INFO(EtsAsyncContext, pc_, "pc"),
             MIRROR_FIELD_INFO(EtsAsyncContext, refCount_, "refCount"),
             MIRROR_FIELD_INFO(EtsAsyncContext, primCount_, "primCount"),
-            MIRROR_FIELD_INFO(EtsAsyncContext, frameOffsets_, "frameOffsets"),
             MIRROR_FIELD_INFO(EtsAsyncContext, awaitId_, "awaitId"),
             MIRROR_FIELD_INFO(EtsAsyncContext, compiledCode_, "compiledCode"),
         };

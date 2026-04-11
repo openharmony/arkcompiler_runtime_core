@@ -5951,6 +5951,8 @@ intrinsics:
       ret: Y
       args: []
     impl: ark::ets::intrinsics::EtsAwaitPromise
+    codegen_arch: [amd64]
+    codegen_func: CreateAsyncContextInit
 
 ######################
 # std.core.Coroutine #
