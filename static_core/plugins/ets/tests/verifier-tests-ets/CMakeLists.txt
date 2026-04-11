@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ets_call_name)
+
 add_subdirectory(access_modifiers)
 add_subdirectory(instructions)
 
@@ -22,6 +22,5 @@ add_custom_target(
 add_dependencies(
     ets_verifier_tests 
     ets_verify_access_modifiers
-    ets_verify_call_name
     verifier
 )

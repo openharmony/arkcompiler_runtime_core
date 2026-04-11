@@ -253,7 +253,10 @@ public:
     }
 
 private:
-    bool IsSuitableForInline(const BytecodeInstruction *inst) override;
+    bool IsSuitableForInline([[maybe_unused]] const BytecodeInstruction *inst) override
+    {
+        return true;
+    }
 };
 
 }  // namespace ark::compiler

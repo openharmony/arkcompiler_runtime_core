@@ -267,7 +267,7 @@ void SlowPathUnresolved::GenerateImpl(Codegen *codegen)
     auto slotImm = Is64BitsArch(arch) ? TypedImm(slotAddr_) : TypedImm(down_cast<uint32_t>(slotAddr_));
 
     ScopedTmpReg valueReg(codegen->GetEncoder());
-    if (GetInst()->GetOpcode() == Opcode::ResolveVirtual || GetInst()->GetOpcode() == Opcode::ResolveByName) {
+    if (GetInst()->GetOpcode() == Opcode::ResolveVirtual) {
         codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, argReg_, typeIdImm, slotImm);
     } else if (GetEntrypoint() == EntrypointId::GET_UNKNOWN_CALLEE_METHOD ||
                GetEntrypoint() == EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS) {

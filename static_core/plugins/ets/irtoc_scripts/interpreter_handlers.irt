@@ -14,96 +14,6 @@
 
 include_relative '../../plugins/ets/irtoc_scripts/common.irt'
 
-macro(:lookup_field_by_name) do |v, id|
-  res := cache_entry(id, false, false, :ptr, nil).ptr
-  res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
-  method_flag = AndI(res_u64).Imm(0x1).u64
-  If(res, 0).NE.Likely {
-    If(method_flag, 0x1).NE.Likely {
-      field_class := LoadI(res).Imm(Constants::FIELD_CLASS_OFFSET).ref
-      If(field_class, v).EQ.Likely {
-        field_0 := res
-        Goto(:Exit_0)
-      }
-    }
-  }
-  field_1 := call_runtime("LookupFieldByNameEntrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
-  Label(:Exit_0)
-  Phi(field_0.ptr, field_1.ptr).ptr
-end
-
-['short', 'long', 'obj'].each do |flavor|
-  macro(:"lookup_getter_by_name_#{flavor}") do |v, id|
-    res := cache_entry(id, false, false, :ptr, nil)
-    res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
-    method_flag = AndI(res_u64).Imm(0x1).u64
-    If(res, 0).NE.Likely {
-      If(method_flag, 0x1).EQ.Likely {
-        method_class := LoadI(res).Imm(Constants::METHOD_CLASS_OFFSET).ref
-        If(method_class, v).EQ.Likely {
-          method_0 := res
-          Goto(:Exit_1)
-        }
-      }
-    }
-    method_1 := call_runtime("LookupGetterByName#{flavor.capitalize}Entrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
-    Label(:Exit_1)
-    Phi(method_0, method_1).ptr
-  end
-end
-
-['short', 'long', 'obj'].each do |flavor|
-  macro(:"lookup_setter_by_name_#{flavor}") do |v, id|
-    res := cache_entry(id, false, false, :ptr, nil)
-    res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
-    method_flag = AndI(res_u64).Imm(0x1).u64
-    If(res, 0).NE.Likely {
-      If(method_flag, 0x1).EQ.Likely {
-        method_class := LoadI(res).Imm(Constants::METHOD_CLASS_OFFSET).ref
-        If(method_class, v).EQ.Likely {
-          method_0 := res
-          Goto(:Exit_1)
-        }
-      }
-    }
-    method_1 := call_runtime("LookupSetterByName#{flavor.capitalize}Entrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
-    Label(:Exit_1)
-    Phi(method_0, method_1).ptr
-  end
-end
-
-macro(:lookup_method_by_name) do |v, id|
-  res := cache_entry(id, false, false, :ptr, nil)
-  res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
-  method_flag = AndI(res_u64).Imm(0x1).u64
-  If(res, 0).NE.Likely {
-    If(method_flag, 0x1).EQ.Likely {
-      method_class := LoadI(res).Imm(Constants::METHOD_CLASS_OFFSET).ref
-      If(method_class, v).EQ.Likely {
-        method_0 := res
-        Goto(:Exit_1)
-      }
-    }
-  }
-  method_1 := call_runtime("LookupMethodByNameEntrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
-  Label(:Exit_1)
-  Phi(method_0, method_1).ptr
-end
-
-['static', 'virt'].each do |dispatch|
-  ['short', 'long', 'range'].each do |flavor|
-    macro(:"handle_ets_launch_#{dispatch}_#{flavor}") do |v, id|
-      # TODO(mbolshov): verify method
-      method_ptr = get_callee(id, dispatch == 'virt', false, v)
-      verify(method_ptr, false)
-      set_acc_object(call_runtime("LaunchFromInterpreter#{flavor.capitalize}", method_ptr, %frame, pc).ptr)
-      If(acc, 0).EQ {
-        move_to_exception
-      }
-    end
-  end
-end
-
 macro(:handle_ets_ldnullvalue) do
   set_acc_object(ets_nullvalue).ref
 end
@@ -148,48 +58,6 @@ macro(:"load_field_obj") do |field, klass|
   Load(klass, offset).SetNeedReadBarrier(true).ref
 end
 
-['short', 'long', 'obj'].each do |flavor|
-  macro(:"handle_ets_ldobj_name_#{flavor}") do |v, id, size|
-    klass := vreg_value(v).ref
-    If(klass, 0).EQ.Unlikely {
-      call_runtime("ThrowNullPointerExceptionFromInterpreter").void
-      move_to_exception
-    }
-    field := lookup_field_by_name(klass, id)
-    if flavor != 'obj'
-      acc := acc.u64
-    else
-      acc := acc.ref
-    end
-    If(field, 0).NE.Likely {
-      acc_fast := send(:"load_field_#{flavor}", field, klass)
-    } Else {
-      method := send(:"lookup_getter_by_name_#{flavor}", klass, id)
-      If(method, 0).EQ.Unlikely {
-        call_runtime("ThrowEtsExceptionNoSuchGetterEntrypoint", klass, id, get_method_ptr()).void
-        move_to_exception
-      }
-      method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
-      nargs := u32toword(LoadI(method).Imm(Constants::METHOD_NUM_ARGS_OFFSET).u32)
-      generic_call(id, size, false, method, nargs, lambda do |new_frame, num_vregs, _, new_moffset|
-        copy_reg(new_frame, num_vregs, v, new_moffset)
-      end)
-      dec_pc := SubI(pc).Imm(size).ptr
-    }
-    if flavor != 'obj'
-      set_acc_primitive(Phi(acc_fast.u64, acc.u64).u64)
-    else
-      set_acc_object(Phi(acc_fast.ref, acc.ref).ref)
-    end
-    frame := Phi(%frame, frame).ptr
-    if Options.arm64?
-      moffset := Phi(%moffset, moffset).word
-      method_ptr := Phi(%method_ptr, method_ptr).ptr
-    end
-    pc := Phi(%pc, dec_pc).ptr
-  end
-end
-
 macro(:"store_field_short") do |field, klass|
   acc_field := acc
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
@@ -217,48 +85,7 @@ macro(:"store_field_obj") do |field, klass|
   Store(klass, offset, acc).SetNeedWriteBarrier(true).ref
 end
 
-['short', 'long', 'obj'].each do |flavor|
-  macro(:"handle_ets_stobj_name_#{flavor}") do |v, id, size|
-    klass := vreg_value(v).ref
-    If(klass, 0).EQ.Unlikely {
-      call_runtime("ThrowNullPointerExceptionFromInterpreter").void
-      move_to_exception
-    }
-    field := lookup_field_by_name(klass, id)
-    If(field, 0).NE.Likely {
-      send(:"store_field_#{flavor}", field, klass)
-      Goto(:Exit_)
-    } Else {
-      method := send(:"lookup_setter_by_name_#{flavor}", klass, id)
-      If(method, 0).EQ.Unlikely {
-        call_runtime("ThrowEtsExceptionNoSuchSetterEntrypoint", klass, id, get_method_ptr()).void
-        move_to_exception
-      }
-      method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
-      nargs := u32toword(LoadI(method).Imm(Constants::METHOD_NUM_ARGS_OFFSET).u32)
-      generic_call(id, size, false, method, nargs, lambda do |new_frame, num_vregs, _, new_moffset|
-        copy_reg(new_frame, num_vregs, v, new_moffset)
-        copy_acc_to_reg(new_frame, frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(1).word), new_moffset)
-      end)
-      dec_pc := SubI(pc).Imm(size).ptr
-    }
-    Label(:Exit_)
-    if flavor == 'short'
-      acc := Phi(%acc, %acc, acc).u32
-    elsif flavor == 'long'
-      acc := Phi(%acc, %acc, acc).u64
-    elsif flavor == 'obj'
-      acc := Phi(%acc, %acc, acc).ref
-    end
-    acc_tag := Phi(%acc_tag, %acc_tag, acc_tag).u64
-    frame := Phi(%frame, %frame, frame).ptr
-    if Options.arm64?
-      moffset := Phi(%moffset, %moffset, moffset).word
-      method_ptr := Phi(%method_ptr, %method_ptr, method_ptr).ptr
-    end
-    pc := Phi(%pc, %pc, dec_pc).ptr
-  end
-end
+
 
 macro(:is_null) do |obj|
   Compare(obj, 0).b
@@ -338,79 +165,6 @@ end
     result := Phi(result_0, result_1, result_2, result_3).b
     set_acc_primitive(btou8(result))
   end
-end
-
-macro(:"handle_ets_call_name_short") do |v1, v2, id, size|
-  klass := vreg_value(v1).ref
-  If(klass, 0).EQ.Unlikely {
-    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
-    move_to_exception
-  }
-  method := lookup_method_by_name(klass, id)
-  If(method, 0).EQ.Unlikely {
-    call_runtime("ThrowEtsExceptionNoSuchMethodEntrypoint", klass, id, get_method_ptr()).void
-    move_to_exception
-  }
-  method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
-  copy_lambda := lambda { |new_frame, num_vregs, _, new_moffset|
-    copy_reg(new_frame, num_vregs, v1, new_moffset)
-    copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2, new_moffset)
-  }
-  generic_call(id, size, false, method, 2, copy_lambda)
-end
-
-macro(:"handle_ets_call_name_long") do |v1, v2, v3, v4, id, size|
-  klass := vreg_value(v1).ref
-  If(klass, 0).EQ.Unlikely {
-    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
-    move_to_exception
-  }
-  method := lookup_method_by_name(klass, id)
-  If(method, 0).EQ.Unlikely {
-    call_runtime("ThrowEtsExceptionNoSuchMethodEntrypoint", klass, id, get_method_ptr()).void
-    move_to_exception
-  }
-  method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
-  copy_lambda := lambda { |new_frame, num_vregs, _, new_moffset|
-    copy_reg(new_frame, num_vregs, v1, new_moffset)
-    copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2, new_moffset)
-    copy_reg(new_frame, AddI(num_vregs).Imm(2).word, v3, new_moffset)
-    copy_reg(new_frame, AddI(num_vregs).Imm(3).word, v4, new_moffset)
-  }
-  generic_call(id, size, false, method, 4, copy_lambda)
-end
-
-macro(:"handle_ets_call_name_range") do |v, id, size|
-  klass := vreg_value(v).ref
-  If(klass, 0).EQ.Unlikely {
-    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
-    move_to_exception
-  }
-  method := lookup_method_by_name(klass, id)
-  If(method, 0).EQ.Unlikely {
-    call_runtime("ThrowEtsExceptionNoSuchMethodEntrypoint", klass, id, get_method_ptr()).void
-    move_to_exception
-  }
-  method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
-  copy_lambda := lambda { |new_frame, num_vregs, num_args, new_moffset|
-    dst_ptr_0 := frame_vreg_ptr(new_frame, num_vregs)
-    src_ptr_0 := vreg_ptr(v)
-    i0 := 0
-    Label(:Head)  # TODO(mbolshov): use While loops when they are ready
-    i := Phi(i0, i1).word
-    If(i, num_args).EQ.Unlikely do
-      Goto(:Exit)
-    end
-    offset := Mul(i, Constants::VREGISTER_SIZE).word
-    dst_ptr := Add(dst_ptr_0, offset).ptr
-    src_ptr := Add(src_ptr_0, offset).ptr
-    set_value(dst_ptr, get_value(src_ptr).i64)
-    set_tag_frame(new_frame, dst_ptr, get_tag(src_ptr), new_moffset)
-    i1 := Add(i, 1).word
-    Goto(:Head)
-    Label(:Exit)
-  }
-  generic_call(id, size, false, method, nil, copy_lambda)
 end
 
 macro(:handle_ets_nullcheck) do

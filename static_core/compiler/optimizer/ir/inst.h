@@ -890,8 +890,7 @@ public:
     }
     bool IsMethodResolver() const
     {
-        return opcode_ == Opcode::ResolveVirtual || opcode_ == Opcode::ResolveStatic ||
-               opcode_ == Opcode::ResolveByName;
+        return opcode_ == Opcode::ResolveVirtual || opcode_ == Opcode::ResolveStatic;
     }
     bool IsFieldResolver() const
     {

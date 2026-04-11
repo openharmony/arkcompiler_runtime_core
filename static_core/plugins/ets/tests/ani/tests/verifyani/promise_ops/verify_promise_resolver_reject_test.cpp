@@ -25,7 +25,7 @@ public:
         VerifyAniTest::SetUp();
 
         std::string rejected = "rejected";
-        ASSERT_EQ(env_->String_NewUTF8(rejected.c_str(), rejected.size(), &errStr), ANI_OK);
+        ASSERT_EQ(env_->String_NewUTF8(rejected.c_str(), rejected.size(), &errStr_), ANI_OK);
         ani_ref undef {};
         ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
 
@@ -36,24 +36,24 @@ public:
 
         ani_object errObj {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ASSERT_EQ(env_->Object_New(cls, ctor, &errObj, errStr, undef), ANI_OK);
-        err = static_cast<ani_error>(errObj);
+        ASSERT_EQ(env_->Object_New(cls, ctor, &errObj, errStr_, undef), ANI_OK);
+        err_ = static_cast<ani_error>(errObj);
 
         ani_object promise {};
-        ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
+        ASSERT_EQ(env_->Promise_New(&resolver_, &promise), ANI_OK);
     }
 
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes, readability-identifier-naming)
-    ani_error err;
-    ani_string errStr;
-    ani_resolver resolver;
+    ani_error err_;
+    ani_string errStr_;
+    ani_resolver resolver_;
     // NOLINTEND(misc-non-private-member-variables-in-classes, readability-identifier-naming)
 };
 
 TEST_F(PromiseResolverRejectTest, wrong_env)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, resolver, err), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, resolver_, err_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"resolver", "ani_resolver"},
@@ -64,7 +64,7 @@ TEST_F(PromiseResolverRejectTest, wrong_env)
 
 TEST_F(PromiseResolverRejectTest, wrong_rejection)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -75,7 +75,7 @@ TEST_F(PromiseResolverRejectTest, wrong_rejection)
 
 TEST_F(PromiseResolverRejectTest, wrong_resolver)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, nullptr, err), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, nullptr, err_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver", "wrong resolver"},
@@ -99,7 +99,7 @@ TEST_F(PromiseResolverRejectTest, throw_error)
 {
     ThrowError();
 
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, err), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, err_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"resolver", "ani_resolver"},
@@ -113,7 +113,7 @@ TEST_F(PromiseResolverRejectTest, throw_error)
 TEST_F(PromiseResolverRejectTest, bad_resolver)
 {
     const auto fakeRef = reinterpret_cast<ani_resolver>(static_cast<long>(0x0ff0f1f));  // NOLINT(google-runtime-int)
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, fakeRef, err), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, fakeRef, err_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver", "wrong resolver"},
@@ -124,12 +124,12 @@ TEST_F(PromiseResolverRejectTest, bad_resolver)
 
 TEST_F(PromiseResolverRejectTest, success)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, err), ANI_OK);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, err_), ANI_OK);
 }
 
 TEST_F(PromiseResolverRejectTest, string_rejection)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, reinterpret_cast<ani_error>(errStr)), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, reinterpret_cast<ani_error>(errStr_)), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -142,7 +142,7 @@ TEST_F(PromiseResolverRejectTest, undef_rejection)
 {
     ani_ref undef {};
     ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, reinterpret_cast<ani_error>(undef)), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, reinterpret_cast<ani_error>(undef)), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -155,7 +155,7 @@ TEST_F(PromiseResolverRejectTest, null_rejection)
 {
     ani_ref null {};
     ASSERT_EQ(env_->GetNull(&null), ANI_OK);
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, reinterpret_cast<ani_error>(null)), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, reinterpret_cast<ani_error>(null)), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -168,7 +168,7 @@ TEST_F(PromiseResolverRejectTest, cls_rejection)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_promise_resolver_reject_test.A", &cls), ANI_OK);
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, reinterpret_cast<ani_error>(cls)), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, reinterpret_cast<ani_error>(cls)), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -180,7 +180,7 @@ TEST_F(PromiseResolverRejectTest, cls_rejection)
 TEST_F(PromiseResolverRejectTest, bad_rejection)
 {
     const auto fakeRef = reinterpret_cast<ani_error>(static_cast<long>(0x0ff0f1f));  // NOLINT(google-runtime-int)
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, fakeRef), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, fakeRef), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -191,9 +191,9 @@ TEST_F(PromiseResolverRejectTest, bad_rejection)
 
 TEST_F(PromiseResolverRejectTest, double_rejection)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, err), ANI_OK);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, err_), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, err), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver_, err_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver", "wrong resolver"},

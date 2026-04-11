@@ -275,12 +275,6 @@ public:
         return 0;
     }
 
-    virtual MethodPtr ResolveLookUpCall([[maybe_unused]] FieldPtr rawField, [[maybe_unused]] ClassPtr klass,
-                                        [[maybe_unused]] bool isSetter)
-    {
-        return nullptr;
-    }
-
     virtual SourceLanguage GetMethodSourceLanguage([[maybe_unused]] MethodPtr method) const
     {
         return SourceLanguage::PANDA_ASSEMBLY;
@@ -1336,11 +1330,6 @@ public:
     virtual FieldPtr ResolveField([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t unused,
                                   [[maybe_unused]] bool isStatic, [[maybe_unused]] bool allowExternal,
                                   [[maybe_unused]] uint32_t *classId)
-    {
-        return nullptr;
-    }
-
-    virtual FieldPtr ResolveLookUpField([[maybe_unused]] FieldPtr rawField, [[maybe_unused]] ClassPtr klass)
     {
         return nullptr;
     }

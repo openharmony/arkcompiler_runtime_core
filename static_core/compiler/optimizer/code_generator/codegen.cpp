@@ -1543,7 +1543,7 @@ void Codegen::CreateAlignmentValue(Reg alignmentReg, Reg tmpReg, size_t alignmen
 
 Reg GetObjectReg(Codegen *codegen, Inst *inst)
 {
-    ASSERT(inst->IsCall() || inst->GetOpcode() == Opcode::ResolveVirtual || inst->GetOpcode() == Opcode::ResolveByName);
+    ASSERT(inst->IsCall() || inst->GetOpcode() == Opcode::ResolveVirtual);
     auto location = inst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
     auto objReg = codegen->ConvertRegister(location.GetValue(), inst->GetInputType(0));

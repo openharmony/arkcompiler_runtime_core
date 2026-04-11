@@ -207,7 +207,7 @@ bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* i
 % runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^checkcast.nonnull/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/,
 %                  /^monitor/,
 %                  /^any.ldbyname/, /^any.stbyname/, /^any.ldbyidx/, /^any.stbyidx/, /^any.ldbyval/, /^any.stbyval/, /^any.call/, /^any.call.new/,
-%                  /^ets.typeof/, /^ets.call.name/, /^ets.nullcheck/, /^ets.equals/, /^ets.strictequals/
+%                  /^ets.typeof/, /^ets.nullcheck/, /^ets.equals/, /^ets.strictequals/
 %                 ]
 % Panda::instructions.each do |inst|
     // NOLINTNEXTLINE(bugprone-branch-clone)
@@ -249,21 +249,5 @@ bool IrBuilderExternalInliningAnalysisForLLVMAot::IsSuitableForInline(const Byte
     return false;
 }
 
-// NOLINTNEXTLINE(readability-function-size)
-bool IrBuilderExternalInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* inst) {
-    switch(inst->GetOpcode()) {
-    // NOTE(compiler): Exclude methods with 'ets.ldobj.*' instructions from external inlinig as it is impossible 
-    //                 to pass 'File Index' value without changing sinature of these instructions in isa.yml #27876
-% blacklisted_insts = ['ets.ldobj.name.obj', 'ets.ldobj.name.64', 'ets.ldobj.name']
-% Panda::instructions.select { |inst| blacklisted_insts.include?(inst.mnemonic) }.each do |inst|  
-    // NOLINTNEXTLINE(bugprone-branch-clone)
-    case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
-        return false;
-% end
-    default:
-        return true;
-    }
-    return true;
-}
 // NOLINTEND(readability-identifier-naming)
 }  // namespace ark::compiler

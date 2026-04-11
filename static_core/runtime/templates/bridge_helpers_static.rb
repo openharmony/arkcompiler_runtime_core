@@ -30,7 +30,7 @@ end
 
 def get_call_insns()
   Panda::instructions.select do |insn|
-     ((insn.properties.include?("call") || insn.stripped_mnemonic == "initobj" || insn.mnemonic.include?("ldobj.name")) && !(insn.properties.include? "dynamic"))
+     ((insn.properties.include?("call") || insn.stripped_mnemonic == "initobj") && !(insn.properties.include? "dynamic"))
   end
 end
 
