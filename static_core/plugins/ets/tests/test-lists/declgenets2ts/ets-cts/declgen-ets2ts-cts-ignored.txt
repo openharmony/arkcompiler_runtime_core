@@ -1874,7 +1874,7 @@
 16.concurrency/03.asynchronous_execution/03.async_methods/return_type_is_promise/negative_cases/async_method_returns_not_promise_8.ets
 16.concurrency/03.asynchronous_execution/03.async_methods/return_type_is_promise/negative_cases/async_method_returns_not_promise_9.ets
 16.concurrency/03.asynchronous_execution/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_class_interface_36.ets
-16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_2.ets
+16.concurrency/04.parallel_execution/02.eaworker_api/domain_ea_2.ets
 17.experimental_features/02.fixed_array_types/fixed_array_extends_n.ets
 17.experimental_features/05.indexable_types/ind_expr_0.ets
 17.experimental_features/05.indexable_types/ind_expr_1.ets
