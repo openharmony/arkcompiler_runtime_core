@@ -411,8 +411,13 @@ void InteropCtx::InitExternalInterfaces()
         ASSERT(status == napi_ok);
     });
 
-    interfaceTable_.SetIsJsEnvCreatedExternallyFunction(
-        []() -> bool { return InteropCtx::Current()->IsJsEnvCreatedExternally(); });
+    interfaceTable_.SetIsJsEnvCreatedExternallyFunction([]() -> bool {
+        auto *ctx = InteropCtx::Current();
+        if (ctx == nullptr) {
+            return false;
+        }
+        return ctx->IsJsEnvCreatedExternally();
+    });
 
 #endif
     interfaceTable_.SetCreateInteropCtxFunction(
