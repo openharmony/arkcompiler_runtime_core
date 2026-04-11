@@ -2624,7 +2624,7 @@ class UnifiedJsonParser {
     }
 
     private parseStringWithEscape(start: int): jsonx.JsonElement {
-        let result = ""
+        let result = new StringBuilder()
         let lastEnd = start
 
         while (this.index < this.length) {
@@ -2636,15 +2636,15 @@ class UnifiedJsonParser {
 
             if (currentChar == c'\\') {
                 if (lastEnd < this.index - 1) {
-                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
+                    result.append(this.source.substring(lastEnd, this.index - 1))
                 }
-                result = result.concat(this.parseEscape())
+                result.append(this.parseEscape())
                 lastEnd = this.index
             } else if (currentChar == c'"') {
                 if (lastEnd < this.index - 1) {
-                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
+                    result.append(this.source.substring(lastEnd, this.index - 1))
                 }
-                return jsonx.JsonElement.createString(result)
+                return jsonx.JsonElement.createString(result.toString())
             }
         }
 
