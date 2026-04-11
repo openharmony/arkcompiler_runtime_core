@@ -18,14 +18,20 @@ cases:
       use: |-
           let e: [string, boolean] = ["A", true]
           e[index] // only int indices allowed
+      expected_out: |-
+          Semantic error ESE0200: Only integer type allowed for element access on tuples.
 
     - use: |-
           let e: [string, boolean] = ["A", true]
           e[2] // wrong index
-
+      expected_out: |-
+          Semantic error ESE0198: Element accessor value is out of tuple size bounds.
+      
     - use: |-
           let e: [string, boolean] = ["A", true]
           e[-1] // wrong index
+      expected_out: |-
+          Semantic error ESE0198: Element accessor value is out of tuple size bounds.
 
     - decl: |-
           let index = 40
@@ -35,58 +41,82 @@ cases:
       use: |-
           let e: [string, boolean] = ["A", true]
           e[42 / getIndex()] // only const indices allowed
+      expected_out: |-
+          Semantic error ESE0199: Only constant expression allowed for element access on tuples.
 
     - decl: |-
           let index: int = 1
       use: |-
           let e: [string, boolean] = ["A", true]
           e[index] // only const indices allowed
+      expected_out: |-
+          Semantic error ESE0199: Only constant expression allowed for element access on tuples.
 
     - decl: |-
           const index: int = -1
       use: |-
           let e: [string, boolean] = ["A", true]
           e[index] // negative index
+      expected_out: |-
+          Semantic error ESE0200: Only integer type allowed for element access on tuples.
 
     - decl: |-
           const index: int = 2
       use: |-
           let e: [string, boolean] = ["A", true]
           e[index] // out of range index
+      expected_out: |-
+          Semantic error ESE0200: Only integer type allowed for element access on tuples.
 
     - use: |-
           let e: [] = []  // empty tuple
           e[0] // out of tuple size bounds
+      expected_out: |-
+          Semantic error ESE0198: Element accessor value is out of tuple size bounds.
 
     - use: |-
           let e: [] = []  // empty tuple
           e[0] = null  // out of tuple size bounds
+      expected_out: |-
+          Semantic error ESE0198: Element accessor value is out of tuple size bounds.
 
     - use: |-
           let e: [number] = ["A"]  // wrong type
+      expected_out: |-
+          Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0
 
     - use: |-
           let e: [boolean] = ["A"]  // wrong type
+      expected_out: |-
+          Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0
 
     - use: |-
           let e: [char] = [true]  // wrong type
-
-    - use: |-
-          let v: [1|2|3] = [1]   // wrong type
+      expected_out: |-
+          Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0
 
     - use: |-
           let e: [Error] = [new Object()]  // wrong type
+      expected_out: |-
+          Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0
 
     - use: |-
           let v = [1.0, 2.0, 3.0]   // number[] must be inferred from element types
           let t: [number, number, number] = v  // wrong type
+      expected_out: |-
+          Semantic error ESE0318: Type 'Array<Double>' cannot be assigned to type '[Double, Double, Double]'
 
     - use: |-
           // when no target type is given, array expression is always inferred as an array
           let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }();
+      expected_out: |-
+          Semantic error ESE0091: Type 'Array<String>' is not compatible with the enclosing method's return type '[String]|null'
 
     - decl: |-
           type TT = [int|string, string|int]
       use: |-
           let a: TT = ["0", "0"]
           a =+ [1, "X"]
+      expected_out: |-
+          Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.
+

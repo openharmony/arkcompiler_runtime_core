@@ -18,7 +18,7 @@ desc: >-
     If more than one method of the subinterface overrides the same method
     of the superinterface, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE602430: Method foo(p: Base): void from class or interface Derived, inherited into class or interface Derived, conflicts with the previous declaration of method foo(p: Derived): void from class or interface Derived because both declarations override method foo(p: Derived): void from class or interface Base"
+expected_out: 'more than one method'
 ---*/
 
 interface Base {

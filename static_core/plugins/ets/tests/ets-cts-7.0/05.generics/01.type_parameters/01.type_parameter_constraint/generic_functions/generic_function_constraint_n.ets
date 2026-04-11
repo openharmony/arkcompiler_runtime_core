@@ -19,6 +19,10 @@
 desc: >-
     If type parameter T has type constraint S, then the actual type of the generic instantiation must be
     compatible with S (see Type Compatibility).
+expected_out:
+{%- for eo in c.expected_out %}
+    - "{{eo}}"
+{% endfor %}
 tags: [compile-only, negative]
 ---*/
 

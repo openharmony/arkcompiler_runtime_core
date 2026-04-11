@@ -16,6 +16,7 @@
 /*---
 desc: Ensuring that method override in subclasses keeps conditional types unchanged.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'String'"
 ---*/
 
 type ConditionalType<T> = T extends string ? number : boolean;

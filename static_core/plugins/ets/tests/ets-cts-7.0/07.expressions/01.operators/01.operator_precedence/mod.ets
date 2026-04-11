@@ -17,108 +17,159 @@
 desc: remainder operator with other operators
 ---*/
 
-function main() {
+function modMul(a: int, b: int, c: int): int { return a * b % c }
+function modDiv(a: int, b: int, c: int): int { return a / b % c }
+function modAdd(a: int, b: int, c: int): int { return a + b % c }
+function modSub(a: int, b: int, c: int): int { return a - b % c }
+function modCastRes(a: int, b: int): int { return (a % b).toByte() }
+function modCastOp(a: int, b: int): int { return a.toByte() % b }
+function modShl(a: int, b: int, c: int): int { return a << b % c }
+function modShr(a: int, b: int, c: int): int { return a >> b % c }
+function modUshr(a: int, b: int, c: int): int { return -a >>> b % c }
+function modLt(a: int, b: int, c: int): boolean { return a < b % c }
+function modLe(a: int, b: int, c: int): boolean { return a <= b % c }
+function modGt(a: int, b: int, c: int): boolean { return a > b % c }
+function modGe(a: int, b: int, c: int): boolean { return a >= b % c }
+function modEqEq(a: int, b: int, c: int): boolean { return a == b % c }
+function modNeq(a: int, b: int, c: int): boolean { return a != b % c }
+function modBitAnd(a: int, b: int, c: int): int { return a & b % c }
+function modBitOr(a: int, b: int, c: int): int { return a | b % c }
+function modBitXor(a: int, b: int, c: int): int { return a ^ b % c }
+function modTernBranch(a: int, b: int, c: int): int { return a > b ? c : a % c }
+function modTernCond(a: int, b: int, c: int, d: int): int { return a % b > c ? c : d }
+function modAssignAdd(a: int, b: int, c: int): int { return a += b % c }
+function modAssignSub(a: int, b: int, c: int): int { return a -= b % c }
+function modAssignMul(a: int, b: int, c: int): int { return a *= b % c }
+function modAssignDiv(a: int, b: int, c: int): int { return a /= b % c }
+function modAssignAnd(a: int, b: int, c: int): int { return a &= b % c }
+function modAssignOr(a: int, b: int, c: int): int { return a |= b % c }
+function modAssignXor(a: int, b: int, c: int): int { return a ^= b % c }
+function modAssignShl(a: int, b: int, c: int): int { return a <<= b % c }
+function modAssignShr(a: int, b: int, c: int): int { return a >>= b % c }
+function modAssignUshr(a: int, b: int, c: int): int { return a >>>= b % c }
 
-    	let res: int, t2 = 2, t3 = 3, t4 = 4, t7 = 7, t8 = 8, t255 = 255, t518 = 518;
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Remainder operator precedence")
 
-	// multiplication
-	res = t3 * t7 % t3
-	arktest.assertEQ(res, 0)
+    suite.addTest("multiplication", () => {
+        arktest.assertEQ(modMul(3, 7, 3), 0)
+    })
 
-	// division
-	res = t8 / t3 % t2
-	arktest.assertEQ(res, 0)
+    suite.addTest("division", () => {
+        arktest.assertEQ(modDiv(8, 3, 2), 0)
+    })
 
-	// addition
-	res = t2 + t7 % t2
-	arktest.assertEQ(res, 3)
+    suite.addTest("addition", () => {
+        arktest.assertEQ(modAdd(2, 7, 2), 3)
+    })
 
-	// subtraction
-	res = t8 - t7 % t4
-	arktest.assertEQ(res, 5)
+    suite.addTest("subtraction", () => {
+        arktest.assertEQ(modSub(8, 7, 4), 5)
+    })
 
-	// modulo
-	res = (t518 % t255).toByte()
-	arktest.assertEQ(res, 8)
+    suite.addTest("cast on result", () => {
+        arktest.assertEQ(modCastRes(518, 255), 8)
+    })
 
-	// cast
-	res = t518.toByte() % t255
-	arktest.assertEQ(res, 6)
+    suite.addTest("cast on operand", () => {
+        arktest.assertEQ(modCastOp(518, 255), 6)
+    })
 
-	// shifts
-	res = t4 << t3 % t2
-	arktest.assertEQ(res, 8)
+    suite.addTest("left shift", () => {
+        arktest.assertEQ(modShl(4, 3, 2), 8)
+    })
 
-	res = t255 >> t3 % t2
-	arktest.assertEQ(res, 127)
+    suite.addTest("right shift", () => {
+        arktest.assertEQ(modShr(255, 3, 2), 127)
+    })
 
-	res = - t255 >>> t7 % t4
-	arktest.assertEQ(res, 536870880)
+    suite.addTest("unsigned right shift", () => {
+        arktest.assertEQ(modUshr(255, 7, 4), 536870880)
+    })
 
-	// relational
-	arktest.assertFalse(t8 < t518 % t255)
-	arktest.assertFalse(t255 <= t518 % t255)
-	arktest.assertFalse(t3 > t7 % t4)
-	arktest.assertFalse(t2 >= t7 % t4)
-	arktest.assertFalse(t4 == t8 % t3)
-	arktest.assertFalse(t2 != t8 % t3)
+    suite.addTest("relational <", () => {
+        arktest.assertFalse(modLt(8, 518, 255))
+    })
 
-	// bitwise
-	res = t7 & t255 % t7
-	arktest.assertEQ(res, 3)
+    suite.addTest("relational <=", () => {
+        arktest.assertFalse(modLe(255, 518, 255))
+    })
 
-	res = t8 | t3 % t2
-	arktest.assertEQ(res, 9)
+    suite.addTest("relational >", () => {
+        arktest.assertFalse(modGt(3, 7, 4))
+    })
 
-	res = t255 ^ t7 % t2
-	arktest.assertEQ(res, 254)
+    suite.addTest("relational >=", () => {
+        arktest.assertFalse(modGe(2, 7, 4))
+    })
 
-	// ternary
-	res = t8 > t2 ? t4 : t8 % t4
-	arktest.assertEQ(res, 4)
+    suite.addTest("equality ==", () => {
+        arktest.assertFalse(modEqEq(4, 8, 3))
+    })
 
-	res = t7 % t4 > t2 ? t2 : t8
-	arktest.assertEQ(res, 2)
+    suite.addTest("equality !=", () => {
+        arktest.assertFalse(modNeq(2, 8, 3))
+    })
 
-	// assignments
-	res = t2 += t7 % t3
-	arktest.assertEQ(res, 3)
-	t2 = 2
+    suite.addTest("bitwise AND", () => {
+        arktest.assertEQ(modBitAnd(7, 255, 7), 3)
+    })
 
-	res = t2 -= t7 % t3
-	arktest.assertEQ(res, 1)
-	t2 = 2
+    suite.addTest("bitwise OR", () => {
+        arktest.assertEQ(modBitOr(8, 3, 2), 9)
+    })
 
-	res = t8 *= t7 % t3
-	arktest.assertEQ(res, 8)
-	t8 = 8
+    suite.addTest("bitwise XOR", () => {
+        arktest.assertEQ(modBitXor(255, 7, 2), 254)
+    })
 
-	res = t8 /= t7 % t2
-	arktest.assertEQ(res, 8)
-	t8 = 8
+    suite.addTest("ternary in branch", () => {
+        arktest.assertEQ(modTernBranch(8, 2, 4), 4)
+    })
 
-	res = t3 &= t7 % t3
-	arktest.assertEQ(res, 1)
-	t3 = 3
+    suite.addTest("ternary in condition", () => {
+        arktest.assertEQ(modTernCond(7, 4, 2, 8), 2)
+    })
 
-	res = t2 |= t7 % t3
-	arktest.assertEQ(res, 3)
-	t2 = 2
+    suite.addTest("assignment +=", () => {
+        arktest.assertEQ(modAssignAdd(2, 7, 3), 3)
+    })
 
-	res = t255 ^= t7 % t4
-	arktest.assertEQ(res, 252)
-	t255 = 255
+    suite.addTest("assignment -=", () => {
+        arktest.assertEQ(modAssignSub(2, 7, 3), 1)
+    })
 
-	res = t4 <<= t3 % t2
-	arktest.assertEQ(res, 8)
-	t4 = 4
+    suite.addTest("assignment *=", () => {
+        arktest.assertEQ(modAssignMul(8, 7, 3), 8)
+    })
 
-	res = t255 >>= t3 % t2
-	arktest.assertEQ(res, 127)
-	t255 = 255
+    suite.addTest("assignment /=", () => {
+        arktest.assertEQ(modAssignDiv(8, 7, 2), 8)
+    })
 
-	res = t255 >>>= t3 % t2
-	arktest.assertEQ(res, 127)
-	t255 = 255
-    
+    suite.addTest("assignment &=", () => {
+        arktest.assertEQ(modAssignAnd(3, 7, 3), 1)
+    })
+
+    suite.addTest("assignment |=", () => {
+        arktest.assertEQ(modAssignOr(2, 7, 3), 3)
+    })
+
+    suite.addTest("assignment ^=", () => {
+        arktest.assertEQ(modAssignXor(255, 7, 4), 252)
+    })
+
+    suite.addTest("assignment <<=", () => {
+        arktest.assertEQ(modAssignShl(4, 3, 2), 8)
+    })
+
+    suite.addTest("assignment >>=", () => {
+        arktest.assertEQ(modAssignShr(255, 3, 2), 127)
+    })
+
+    suite.addTest("assignment >>>=", () => {
+        arktest.assertEQ(modAssignUshr(255, 3, 2), 127)
+    })
+
+    return suite.run()
 }

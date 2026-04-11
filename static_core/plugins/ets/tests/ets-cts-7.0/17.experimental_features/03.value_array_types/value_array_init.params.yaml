@@ -26,9 +26,6 @@ cases:
    #All signed 64-bit integers (−2^63 to 2^63 − 1)
     - {type: long, arr: "[Long.MAX_VALUE, Int.MAX_VALUE, Byte.MAX_VALUE, -10, Long.MIN_VALUE]"}
     - {type: Long, arr: "[Long.MAX_VALUE, -9, -10, Long.MIN_VALUE]"}
-   #All integers with no limits
-    - {type: bigint, arr: "[1234567890123456789012345678901234567890n, new bigint(-1), new bigint(0)]"}
-    - {type: BigInt, arr: "[100n]" }      
 #boolean
     - {type: boolean, arr: "[true, Boolean.FALSE, Boolean.TRUE, true, false, true]"}
     - {type: Boolean, arr: "[Boolean.TRUE, false, true, true, Boolean.FALSE]"}

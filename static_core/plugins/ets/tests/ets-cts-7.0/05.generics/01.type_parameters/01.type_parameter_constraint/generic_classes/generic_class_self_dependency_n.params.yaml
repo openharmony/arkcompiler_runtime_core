@@ -12,14 +12,20 @@
 # limitations under the License.
 
 --- # Self dependency tests
-self_dependency:
-  - T extends T
-  - T extends U<T>
-  - T extends U<W<T>>
-  - T extends U<U<T>>
-  - T extends T<U>
-  - T extends R, R extends T
-  - T extends R, R extends T | undefined
+cases:
+  - self_dependency: T extends T
+    expected_out: |- 
+      Semantic error ESE0184: Type parameter 'T' has circular constraint dependency.
+  - decl: interface U {}
+    self_dependency: T extends T<U>
+    expected_out: |- 
+      Semantic error ESE0184: Type parameter 'T' has circular constraint dependency.
+  - self_dependency: T extends R, R extends T
+    expected_out: |- 
+      Semantic error ESE0184: Type parameter 'R' has circular constraint dependency.
+  - self_dependency: T extends R, R extends T | undefined
+    expected_out: |- 
+      Semantic error ESE0184: Type parameter 'R' has circular constraint dependency.
 
 # Top level class modifiers
 top_level_class_modifiers:

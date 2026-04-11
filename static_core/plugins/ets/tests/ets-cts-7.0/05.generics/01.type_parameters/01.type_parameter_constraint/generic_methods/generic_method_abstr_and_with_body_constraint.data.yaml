@@ -1,0 +1,67 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Method modifiers for implemented methods
+abstr_or_native_method_modifiers:
+  - abstract
+  - static native
+  - native static
+  - native
+
+# Method modifiers for implemented methods
+method_modifiers:
+  - static
+  - ""
+
+# Type constraints for generic parameters
+constraints:
+  - type: number
+    use: byte
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Double' constraint
+
+  - type: short
+    use: long
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Short' constraint
+
+  - type: int
+    use: long
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Int' constraint
+
+  - type: byte
+    use: char
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'Byte' constraint
+
+  - type: char
+    use: byte
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Char' constraint
+
+  - type: string
+    use: char
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'String' constraint
+
+  - type: char
+    use: string
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'String' should be a subtype of 'Char' constraint
+
+  - type: boolean
+    use: bigint
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'BigInt' should be a subtype of 'Boolean' constraint
+

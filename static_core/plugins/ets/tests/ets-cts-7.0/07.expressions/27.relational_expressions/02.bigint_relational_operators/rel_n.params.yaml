@@ -22,4 +22,4 @@ cases:
     - { b: '0n', exp: 'new Error()', op: '>=' }
 
     - { b: 'new BigInt(0)', exp: '"0"', op: '>' }
-    - { b: 'new BigInt(0)', exp: '"0"', op: '>=' } 
+    - { b: 'new BigInt(0)', exp: '"0"', op: '>=' }

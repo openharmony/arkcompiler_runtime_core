@@ -19,6 +19,7 @@ desc: >-
     and its setter is provided, then this property can be used as a part of an object literal.
     Otherwise, a compile-time error occurs
 tags: [compile-only, negative]
+expected_out: 'Semantic error ESE0209: Cannot assign to this property because it is readonly.'
 ---*/
 
 class Err {

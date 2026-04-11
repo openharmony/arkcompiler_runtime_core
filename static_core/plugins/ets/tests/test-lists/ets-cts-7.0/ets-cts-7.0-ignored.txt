@@ -59,12 +59,6 @@
 #29318
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
-#34042
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_17.ets
-07.expressions/07.spread_expression/spex_const_15.ets
-07.expressions/07.spread_expression/spex_func_15.ets
-07.expressions/07.spread_expression/spex_meth_15.ets
-
 #30760
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
 
@@ -80,9 +74,6 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_undefined_8.ets
 
 #26666 (cts #47 - bad array element type)
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined1.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined1u.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined2.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined4.ets
@@ -121,6 +112,9 @@
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_1.ets
 
+#34099
+06.contexts_and_conversions/03.numeric_operator_contexts/02.char_conversions_for_relational_and_equality_operands/conversions_char.ets
+
 #31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
 20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
 
@@ -129,9 +123,6 @@
 
 #33015
 07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_interface_context_n.ets
-
-#33086
-07.expressions/06.object_literal/02.object_literal_of_interface_type/interface_literals_negative_0.ets
 
 #28898 Iterable refused as spread
 07.expressions/07.spread_expression/iterable0.ets
@@ -203,13 +194,6 @@
 #32103
 07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
 
-#33188
-07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_0.ets
-07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_1.ets
-07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_2.ets
-07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_3.ets
-07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_4.ets
-
 #33191
 07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_0.ets
 07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_1.ets
@@ -241,68 +225,18 @@
 07.expressions/19.ensure-not-nullish_expression/warn2_4.ets
 07.expressions/19.ensure-not-nullish_expression/warn2_6.ets
 
-#33285
-07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
-
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
 #33627
 07.expressions/22.binary_expressions/numeric_type_exp.ets
 
-#33844
-07.expressions/22.binary_expressions/type_combinations_n_geq3_ES_boolean.ets
-07.expressions/22.binary_expressions/type_combinations_n_greater3_ES_boolean.ets
-07.expressions/22.binary_expressions/type_combinations_n_leq3_ES_boolean.ets
-07.expressions/22.binary_expressions/type_combinations_n_less3_ES_boolean.ets
-07.expressions/22.binary_expressions/type_combinations_n_less3_boolean_ES.ets
-
-#33845
-07.expressions/22.binary_expressions/type_combinations_n_eq4_byte_foo_type.ets
-07.expressions/22.binary_expressions/type_combinations_n_eq4_foo_type_byte.ets
-07.expressions/22.binary_expressions/type_combinations_n_eq4_foo_type_null.ets
-07.expressions/22.binary_expressions/type_combinations_n_eq4_foo_type_undefined.ets
-07.expressions/22.binary_expressions/type_combinations_n_eq_ext4_foo_type_byte.ets
-07.expressions/22.binary_expressions/type_combinations_n_neq4_foo_type_byte.ets
-07.expressions/22.binary_expressions/type_combinations_n_neq_ext4_foo_type_byte.ets
-
 
 #33379
 07.expressions/23.multiplicative_expressions/02.division/bigint_div_by_zero_n.ets
 
-#33380
-07.expressions/24.exponentiation_expression/bigint_exp_negative_n.ets
-
 #32703
 07.expressions/24.exponentiation_expression/inf_27.ets
-
-#33172 Expected warning message is not produced
-07.expressions/28.equality_expressions/eq_warn_false_0.ets
-07.expressions/28.equality_expressions/eq_warn_false_1.ets
-07.expressions/28.equality_expressions/eq_warn_false_10.ets
-07.expressions/28.equality_expressions/eq_warn_false_11.ets
-07.expressions/28.equality_expressions/eq_warn_false_12.ets
-07.expressions/28.equality_expressions/eq_warn_false_2.ets
-07.expressions/28.equality_expressions/eq_warn_false_3.ets
-07.expressions/28.equality_expressions/eq_warn_false_4.ets
-07.expressions/28.equality_expressions/eq_warn_false_5.ets
-07.expressions/28.equality_expressions/eq_warn_false_6.ets
-07.expressions/28.equality_expressions/eq_warn_false_7.ets
-07.expressions/28.equality_expressions/eq_warn_false_8.ets
-07.expressions/28.equality_expressions/eq_warn_false_9.ets
-07.expressions/28.equality_expressions/eq_warn_true_0.ets
-07.expressions/28.equality_expressions/eq_warn_true_1.ets
-07.expressions/28.equality_expressions/eq_warn_true_10.ets
-07.expressions/28.equality_expressions/eq_warn_true_11.ets
-07.expressions/28.equality_expressions/eq_warn_true_12.ets
-07.expressions/28.equality_expressions/eq_warn_true_2.ets
-07.expressions/28.equality_expressions/eq_warn_true_3.ets
-07.expressions/28.equality_expressions/eq_warn_true_4.ets
-07.expressions/28.equality_expressions/eq_warn_true_5.ets
-07.expressions/28.equality_expressions/eq_warn_true_6.ets
-07.expressions/28.equality_expressions/eq_warn_true_7.ets
-07.expressions/28.equality_expressions/eq_warn_true_8.ets
-07.expressions/28.equality_expressions/eq_warn_true_9.ets
 
 #30340 &&= ||= ??= still not supported in code
 07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
@@ -320,56 +254,6 @@
 07.expressions/36.constant_expression/check_enum/constant_cast_expression.ets
 07.expressions/36.constant_expression/check_tuple/tuple_index.ets
 
-#33996 No CTE on negative array size provided as a constant expression
-07.expressions/36.constant_expression/check_array/constant_bitwise_complement_n.ets
-07.expressions/36.constant_expression/check_array/constant_bitwise_expression_n_0.ets
-07.expressions/36.constant_expression/check_array/constant_bitwise_expression_n_1.ets
-07.expressions/36.constant_expression/check_array/constant_bitwise_expression_n_2.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_0.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_1.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_10.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_11.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_12.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_13.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_14.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_2.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_3.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_4.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_5.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_6.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_7.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_8.ets
-07.expressions/36.constant_expression/check_array/constant_boolean_expression_n_9.ets
-07.expressions/36.constant_expression/check_array/constant_calculation_n_0.ets
-07.expressions/36.constant_expression/check_array/constant_calculation_n_1.ets
-07.expressions/36.constant_expression/check_array/constant_calculation_n_2.ets
-07.expressions/36.constant_expression/check_array/constant_calculation_n_3.ets
-07.expressions/36.constant_expression/check_array/constant_calculation_n_4.ets
-07.expressions/36.constant_expression/check_array/constant_cast_expression_n.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_0.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_1.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_10.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_11.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_2.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_3.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_4.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_5.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_6.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_7.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_8.ets
-07.expressions/36.constant_expression/check_array/constant_chained_expression_n_9.ets
-07.expressions/36.constant_expression/check_array/constant_logical_expression_n_0.ets
-07.expressions/36.constant_expression/check_array/constant_logical_expression_n_1.ets
-07.expressions/36.constant_expression/check_array/constant_logical_expression_n_2.ets
-07.expressions/36.constant_expression/check_array/constant_logical_expression_n_3.ets
-07.expressions/36.constant_expression/check_array/constant_logical_expression_n_4.ets
-07.expressions/36.constant_expression/check_array/constant_logical_expression_n_5.ets
-07.expressions/36.constant_expression/check_array/constant_shift_n_0.ets
-07.expressions/36.constant_expression/check_array/constant_shift_n_1.ets
-07.expressions/36.constant_expression/check_array/constant_shift_n_2.ets
-07.expressions/36.constant_expression/check_array/constant_unary_minus_n.ets
-07.expressions/36.constant_expression/check_array/constant_unary_plus_n.ets
-
 #29971
 08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
 08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
@@ -379,18 +263,22 @@
 08.statements/12.return_statements/return_6.ets
 08.statements/12.return_statements/return_7.ets
 
-#32625
-09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/implementing_property_neg_simple_wrong_type_n.ets
-
 #33998 no CTE override superclass field by accessor
-09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_0.ets
-09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_1.ets
-09.classes/03.class_implementation_clause/02.implementing_required_interface_properties/override_superclass_field_with_accessor_n_2.ets
+09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/override_superclass_field_with_accessor_n_0.ets
+09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/override_superclass_field_with_accessor_n_1.ets
+09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/override_superclass_field_with_accessor_n_2.ets
 
 #33993
 09.classes/04.class_members/static_accessor_not_inherited_n.ets
 09.classes/04.class_members/static_field_not_inherited_n.ets
 09.classes/04.class_members/static_method_not_inherited_n.ets
+
+#34137
+09.classes/06.field_declarations/04.field_initialization/class_fields_ctw_this_5.ets
+
+#34133
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_super_n.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_n.ets
 
 #33804
 09.classes/06.field_declarations/access_static_field_neg_23.ets
@@ -424,27 +312,6 @@
 09.classes/10.inheritance/inheritance_static_members_from_superclass_1.ets
 09.classes/10.inheritance/inheritance_static_members_from_superclass_2.ets
 09.classes/10.inheritance/inheritance_static_members_from_superclass_3.ets
-
-#32625
-09.classes/06.field_declarations/implementing_property_wrong_type_neg1.ets
-09.classes/06.field_declarations/implementing_property_wrong_type_neg2.ets
-
-#33992
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.derived_class_lambda_not_def_not_init_0.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.derived_class_lambda_not_def_not_init_1.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.derived_class_lambda_not_def_not_init_2.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.derived_class_not_def_not_init_0.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.derived_class_not_def_not_init_1.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.derived_class_not_def_not_init_2.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.method_call_lambda_not_def_not_init_0.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.method_call_lambda_not_def_not_init_1.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.method_call_lambda_not_def_not_init_2.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.method_call_not_def_not_init_0.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.method_call_not_def_not_init_1.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.method_call_not_def_not_init_2.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.outside_class_not_def_not_init_0.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.outside_class_not_def_not_init_1.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/readonly_static_field_class/readonly_static_field_neg.outside_class_not_def_not_init_2.ets
 
 #32586
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_0.ets
@@ -481,18 +348,6 @@
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_gc_readonly_n.ets
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_readonly_n.ets
 
-#32612
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_0.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_1.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_2.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_3.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_4.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_5.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_6.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_7.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_8.ets
-09.classes/06.field_declarations/06.override_fields/hiding_static_field_neg_wrong_type_n_9.ets
-
 #32624
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_gc_obcf.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_0.ets
@@ -509,10 +364,6 @@
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_11.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_12.ets
 
-#32625
-09.classes/06.field_declarations/06.override_fields/implementing_property_neg_obcf_wrong_type_n1.ets
-09.classes/06.field_declarations/06.override_fields/implementing_property_neg_obcf_wrong_type_n2.ets
-
 #33480
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_gc_obcfwok.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcfwok_0.ets
@@ -528,17 +379,6 @@
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcfwok_10.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcfwok_11.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcfwok_12.ets
-
-#33482
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_0.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_1.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_2.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_3.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_4.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_5.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_6.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_7.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_ii_n_8.ets
 
 #27886 Issues with default values
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_1.ets
@@ -637,10 +477,6 @@
 #33640
 11.enumerations/01.enumeration_base_type/enum_int_n_2.ets
 
-#33805
-11.enumerations/01.enumeration_base_type/enum_int_n_16.ets
-11.enumerations/01.enumeration_base_type/enum_str_n_10.ets
-
 #33978
 11.enumerations/01.enumeration_base_type/enum_int_5.ets
 
@@ -660,15 +496,6 @@
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_0_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_1_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_2_0.ets
-
-#33805
-11.enumerations/02.enumeration_with_explicit_base_type/enum_double_n_cevwi_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_float_n_cevwi_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_byte_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_int_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_long_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_n_cevwi_short_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_string_n_cevwi_0.ets
 
 #33976
 11.enumerations/02.enumeration_with_explicit_base_type/enum_double_n_mot_0.ets
@@ -810,45 +637,6 @@
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_11.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_12.ets
 
-#33806
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_1.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_1.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_1.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_1.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_1.ets
-
-#33807
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_2.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_3.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_4.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_5.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_byte_6.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_2.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_3.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_4.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_5.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_int_6.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_2.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_3.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_4.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_5.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_long_6.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_2.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_3.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_4.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_5.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_n_asmmbei_short_6.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_2.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_3.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_4.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_5.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_n_6.ets
-
 #33977
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_uemviie_0_0.ets
 
@@ -926,19 +714,26 @@
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
 
+#34033 readonly T[] and ReadonlyArray<T> identity
+15.semantic_rules/03.type_identity/readonly_arrays_identity.ets
+
 #33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 
 #33872 Incorrect type inference for constant expression
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_21.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_29.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_37.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_45.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_25.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_33.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_logical_shift_const_21.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_logical_shift_const_29.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_logical_shift_const_37.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_logical_shift_const_45.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_operations_multiply_divide_const_25.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_operations_multiply_divide_const_33.ets
 
 #33616
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_literals_n_26.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_literals_n_26.ets
+
+#34114
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_operations_const_2.ets
 
 #32075 Cannot use type 'void' as value.
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_1.ets
@@ -949,6 +744,35 @@
 
 #32038 Interface has methods
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_4.ets
+
+#31873 [ArkTS][CTE] incorrect computed smart type for typeof v === "string"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_1.ets
+
+#34132 branching on v === e not working
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_19.ets
+
+#31873 [ArkTS][CTE] incorrect computed smart type for typeof v === "string"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_8.ets
+
+#34130 Branching on typeof bigint doesn't work
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_9.ets
+
+#31874 [ArkTS][CTE] incorrect computed smart type for typeof v === "undefined"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_11.ets
+
+#31871 [ArkTS][CTE] incorrect computed smart type for typeof v === "[name_of_a_numeric_type]"
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_12.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_13.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_14.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_15.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_16.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_17.ets
+
+#30553 Intersection types in smart casts not yet supported
+15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_2.ets
+15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_5.ets
+15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_8.ets
+15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_0.ets
 
 #31017 override method in superinterface with the same private in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
@@ -992,7 +816,7 @@
 #16840
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method.ets
 
-#32086 overload functions from the same scope
+#32086 Semantic error ESE0384: overloaded name must refer to an accessible method
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_0.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_1.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_2.ets
@@ -1003,6 +827,15 @@
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_7.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_8.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_9.ets
+
+#34121 Implicit overload from different modules doesn't lead to CTE
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_0.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_1.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_2.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_3.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_5.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_7.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_neg_9.ets
 
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/10.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_4.ets
@@ -1029,10 +862,6 @@
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_3.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_negative_4.ets
 
-#32412 CTE if explicit overload for constructor used
-15.semantic_rules/11.overload_resolution/06.overload_set_for_constructors/combination_overloaded_constructors.ets
-15.semantic_rules/11.overload_resolution/06.overload_set_for_constructors/combination_overloaded_constructors_negative.ets
-
 #32946 no warning issued if overloaded entity can never be selected for a call
 15.semantic_rules/11.overload_resolution/07.overload_set_warning/overload_set_warning.ets
 
@@ -1046,6 +875,14 @@
 
 #33911
 16.concurrency/06.api_details_and_restrictions/02.using_the_asynchronous_api/async_main_entry_point.ets
+
+#34177
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_other_jobs.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_promise_callbacks.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_suspendable_jobs.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_mixed_priorities_grouping.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_promise_callback_before_other_job.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_suspendable_before_other_job.ets
 
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
@@ -1062,28 +899,6 @@
 #33934 Unexpected CTE on char relational operations with char literals
 17.experimental_features/01.type_char/02.char_operations/rel_literals.ets
 17.experimental_features/01.type_char/02.char_operations/rel_loc_const.ets
-
-#33619 ignored till ValueArray implementation
-17.experimental_features/03.value_array_types/value_array_init.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_0.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_1.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_2.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_3.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_4.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_5.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_6.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_7.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_8.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_9.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_10.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_11.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_12.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_13.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_14.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_15.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_16.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_17.ets
-17.experimental_features/03.value_array_types/value_array_wrong_types_n_18.ets
 
 #28490
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_2.ets
@@ -1154,6 +969,26 @@
 #33437
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_29.ets
 
+#34142 CTE ESE0384 instead of ESE503573
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_0.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_1.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_2.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_3.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_4.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_5.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_6.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_7.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_8.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_9.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_10.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_11.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/function_import_2_sources_n_12.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/overload_location_negative_2.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/overload_location_negative_3.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/overload_location_negative_4.ets
+17.experimental_features/09.explicit_overload_declarations/01.explicit_function_overload/overload_location_negative_6.ets
+
+
 #29122
 17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_18.ets
 17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_19.ets
@@ -1216,17 +1051,14 @@
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_4.ets
 
 #28758 new overloaded functions with receiver don't work with numeric types
-17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_24.ets
+17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets
 
-#33621
-17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_n_10.ets
-
-#31311
-17.experimental_features/13.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_8.ets
+#34098
+17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/same_names.ets
 
 #33332
-17.experimental_features/13.adding_functionality_to_existing_types/04.function_types_with_receiver/function_types_with_receiver_21.ets
-17.experimental_features/13.adding_functionality_to_existing_types/04.function_types_with_receiver/function_types_with_receiver_22.ets
+17.experimental_features/13.adding_functionality_to_existing_types/03.function_types_with_receiver/function_types_with_receiver_20.ets
+17.experimental_features/13.adding_functionality_to_existing_types/03.function_types_with_receiver/function_types_with_receiver_21.ets
 
 #33744
 17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
@@ -1244,10 +1076,3 @@
 #33617
 23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_class_field/effective_type_class_field.ets
 23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_variable/effective_type_variable.ets
-
-#34010
-23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_class_method/effective_type_class_method.ets
-#34011
-23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_interface_field/effective_type_interface_field.ets
-#34012
-23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_interface_method/effective_type_interface_method.ets

@@ -24,6 +24,7 @@ desc: >-
         • Override a private method of a superclass;
 
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: Class member public_foo with type String in Derived cannot override public_foo with type void field from class Base because the overriding return type is not compatible with the other return type."
 ---*/
 
 let res: number = 0;

@@ -20,7 +20,7 @@ desc: >-
     a constant expression that is evaluated to a negative integer value
     at compile time.
 tags: [compile-only, negative]
-expected_out: "TODO: Size is negative"
+expected_out: "Semantic error ESE708183: Array size cannot be negative."
 ---*/
 
 let data = new int[{{c.expression}}](0)

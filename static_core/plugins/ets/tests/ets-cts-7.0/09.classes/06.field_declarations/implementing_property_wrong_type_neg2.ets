@@ -20,7 +20,7 @@ desc: >-
     types of the field and all properties must be the same.
     Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Expected CTE output is unknown"
+expected_out: "Semantic error ESE0136: Method f(%%property-f: B3): void in CC2 not overriding any method"
 ---*/
 
 // Two unrelated interfaces

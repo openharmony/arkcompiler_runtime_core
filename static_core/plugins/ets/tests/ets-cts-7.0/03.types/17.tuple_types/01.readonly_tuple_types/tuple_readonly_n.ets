@@ -18,12 +18,12 @@ desc: Tuple type with prefix readonly negative.
 tags: [compile-only, negative]
 expected_out: "Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter"
 ---*/
-
+{%yaml "tuple_readonly.data.yaml" as dt %}
 function main(): int {
     
     let testSuite = new arktest.ArkTestsuite("Readonly_tuple_neg");
   
-    {% for c in cases %}
+    {% for c in dt.cases %}
 
         testSuite.addTest("{{c.type}}_readonlyTuple_neg", () => {
           let y: readonly [{{c.type}}] = [{{c.use}}]

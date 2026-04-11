@@ -18,13 +18,17 @@ cases:
     - base: |-
           foo(i: [Object, Object]): void {}
       derived: |-
-          override foo(i: [Object, Base]): void {}
+        override foo(i: [Object, Base]): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: [Object, Base]): void in Derived not overriding any method"
     # override-incompatible argument type
 #1
     - base: |-
           foo(i: [Base, Base]): void {}
       derived: |-
           override foo(i: [Object, Base]): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: [Object, Base]): void in Derived not overriding any method"
 
     # override-incompatible argument type
 #2
@@ -32,6 +36,8 @@ cases:
           foo(i: [Base, Base]): void {}
       derived: |-
           override foo(i: [Object, Object]): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: [Object, Object]): void in Derived not overriding any method"
 
     # override-incompatible return type
 #3
@@ -43,6 +49,8 @@ cases:
           override foo(): [Object, Base] {
               return [new Object(), new Base()];
           }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type [Object, Base] in Derived cannot override foo with type [Object, Object] field from class Base because the overriding return type is not compatible with the other return type."
 
     # override-incompatible return type
 #4
@@ -54,6 +62,8 @@ cases:
           override foo(): [Object, Object] {
               return [new Object(), new Object()];
           }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type [Object, Object] in Derived cannot override foo with type [Object, Base] field from class Base because the overriding return type is not compatible with the other return type."
 
     # override-incompatible return type
 #5
@@ -65,6 +75,8 @@ cases:
           override foo(): [Base, Base] {
               return [new Base(), new Base()];
           }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type [Base, Base] in Derived cannot override foo with type [Object, Object] field from class Base because the overriding return type is not compatible with the other return type."
 
     # override-incompatible argument (covariance)
 #6
@@ -72,6 +84,8 @@ cases:
           foo(i: Object): void {}
       derived: |-
           override foo(i: Base): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Base): void in Derived not overriding any method"
 
     # override-incompatible return value (contravariance)
 #7
@@ -83,6 +97,8 @@ cases:
           override foo(): Object {
               return new Object();
           }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type Object in Derived cannot override foo with type Base field from class Base because the overriding return type is not compatible with the other return type."
 
     # override-incompatible argument (contravariance)
 #8
@@ -94,6 +110,8 @@ cases:
           override foo(i: (j: Object) => Base): void {
               i(new Object());
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Object) => Base)): void in Derived not overriding any method"
 
     # override-incompatible return type (covariance)
 #9
@@ -105,6 +123,8 @@ cases:
           override foo(i: (j: Object) => Base): void {
               i(new Object());
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: ((p1: Object) => Base)): void in Derived not overriding any method"
 
     # override-incompatible argument (contravariance)
 #10
@@ -112,6 +132,8 @@ cases:
           foo(i: Object[]): void {}
       derived: |-
           override foo(i: Base[]): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Array<Base>): void in Derived not overriding any method"
 
     # override-incompatible argument (contravariance)
 #11
@@ -119,6 +141,8 @@ cases:
           foo(i: Object[]): void {}
       derived: |-
           override foo(i: Base[]): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Array<Base>): void in Derived not overriding any method"
 
     # override-incompatible argument (covariance)
 #12
@@ -126,6 +150,8 @@ cases:
           foo(i: Base[]): void {}
       derived: |-
           override foo(i: Object[]): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Array<Object>): void in Derived not overriding any method"
 
     # override-incompatible return type (contravariance)
 #13
@@ -137,3 +163,5 @@ cases:
           override foo(): Object[] {
               return new Object[2];
           }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type Array<Object> in Derived cannot override foo with type Array<Base> field from class Base because the overriding return type is not compatible with the other return type."

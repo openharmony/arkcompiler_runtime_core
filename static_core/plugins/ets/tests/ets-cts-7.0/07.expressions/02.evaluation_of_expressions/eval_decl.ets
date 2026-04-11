@@ -47,12 +47,27 @@ function inc(p: int): int {
     return p + 1;
 }
 
-function main() {
+const suite = new arktest.ArkTestsuite("Expression in declaration context")
 
+suite.addTest("Field initializer with side effect", () => {
     let a: A = new A(inc);
     arktest.assertEQ(a.fld, 45)
+})
+
+suite.addTest("Static initializer evaluates expression", () => {
     arktest.assertEQ(A.i, 13)
+})
+
+suite.addTest("Method invocation uses side-effected global", () => {
+    let a: A = new A(inc);
     arktest.assertEQ(a.meth(), 4)
+})
+
+suite.addTest("Global set by field initializer side effect", () => {
+    let a: A = new A(inc);
     arktest.assertEQ(sg, 3)
-    
+})
+
+function main() {
+    suite.run()
 }

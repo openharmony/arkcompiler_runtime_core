@@ -13,19 +13,24 @@
 
 ---
 cases:
+#0
     # void return type
-    - use: |-
-          // entry point function main, inferred void, negative
-          function main() {
+    - tags: compile-only
+      use: |-
+          // entry point function main, wrong argument array
+          function main(ar: FixedArray<T>) {
               arktest.assertTrue(false)
           }
-
-    - use: |-
-          // entry point function main, explicit void, negative
-          function main(): void {
+      expected: "Semantic error ESE0135: Only 'FixedArray<string>' type argument is allowed."
+#1
+    - tags: compile-only
+      use: |-
+          // entry point function main, explicit void, wrong argument union type
+          function main(ar: FixedArray<string>|int = ['1']): void {
               arktest.assertTrue(false)
           }
-
+      expected: "Semantic error ESE0135: Only 'FixedArray<string>' type argument is allowed."
+#2
     - tags: compile-only
       use: |-
           // entry point function main, explicit void, compile-time negative
@@ -35,21 +40,8 @@ cases:
               }
               return
           }
-
-    # explicit int return type
-    - use: |-
-          // entry point function main, explicit int, negative
-          function main(): int {
-              return 1
-          }
-
-    - use: |-
-          enum Color { Red, Green, Blue }
-          // entry point function main, explicit int, negative
-          function main(): int {
-              return Color.Green
-          }
-
+      expected: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
+#3
     - tags: compile-only
       use: |-
           // entry point function main, explicit int, compile-time negative
@@ -59,66 +51,41 @@ cases:
                   throw new Error()
               }
           }
-
+      expected: "Semantic error ESE0103: Function with a non void return type must return a value."
+#4
     - tags: compile-only
       use: |-
           // entry point function main, explicit int, compile-time negative
           function main(): int {
               if (false) {
-                  return // CTE, wrong return type
+                  return // CTE, Missing return value
               }
               return 0
           }
+      expected: "Semantic error ESE0032: Missing return value."
 
-    # inferred int return type
-    - use: |-
-          // entry point function main, inferred int, negative
-          function main() {
-              return 1
-          }
-
-    # exported function main, void return type
-    - use: |-
-          // entry point exported function main, inferred void, negative
-          let res = ''
-          export function main() {
-              if (true) {
-                  arktest.assertNE(res, '')
-              }
-              return
-          }
-
-    - use: |-
-          // entry point exported function main, explicit void, negative
-          let res = ''
-          export function main(): void {
-              if (true) {
-                  arktest.assertNE(res, '')
-              }
-              return
-          }
-
-    # exported function main, int return type
-    - use: |-
-          // entry point exported function main, inferred int, negative
-          export function main() {
-              return 1
-          }
-
-    - use: |-
-          // entry point exported function main, explicit int, negative
+    # exported function main without explicit return type (void return type)
+#5  
+    - tags: compile-only
+      use: |-
+          // entry point exported function main, explicit int
+          //smart cast for non-local variables doesn't work
+          let tp: int|boolean = 1
           export function main(): int {
-              return 1
+              return tp
           }
+      expected: "Semantic error ESE0091: Type 'Int|Boolean' is not compatible with the enclosing method's return type 'Int'"
 
     # invalid return type
+#6
     - tags: compile-only
       use: |-
           let res = ''
           function main(): void {
               return res == '' ? 0 : 1 // CTE, wrong return type
           }
-
+      expected: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
+#7
     - tags: compile-only
       use: |-
           enum Color { Red, Green, Blue }
@@ -126,50 +93,36 @@ cases:
           function main(): void {
               return res == '' ? Color.Red : Color.Green // CTE, wrong return type
           }
-
-    - use: |-
-          enum Color { Red, Green, Blue }
-          let res = ''
-          function main() {
-              return res == '' ? Color.Red : Color.Green
-          }
-
+      expected: "Semantic error ESE0091: Type 'Color' is not compatible with the enclosing method's return type 'void'"
+#8
     - use: |-
           function main() {
               return 0.0
           }
-
+      expected_runtime: "[TID 1698d0] E/runtime: Method 'f64 main_n_8.ETSGLOBAL::main()' has invalid signature"
+#9
     - tags: compile-only
       use: |-
           function main(): int {
               return 0.0  // wrong return type
           }
-
-    - tags: compile-only
-      use: |-
-          function main(): number { // wrong return type
-              return 0.0
-          }
-
-    - tags: compile-only
-      use: |-
-          function main(): byte { // wrong return type
-              return (0).toByte()
-          }
-
+      expected: "Semantic error ESE0091: Type 'Double' is not compatible with the enclosing method's return type 'Int'"
+#10
     - tags: compile-only
       use: |-
           let res = ''
           function main(): string { // wrong return type
               return res
           }
-
+      expected: "Semantic error ESE0088: Bad return type, main enable only void or int type."
+#11
     - use: |-
           let v: int|string = 0
           function main() {
               return v
           }
-
+      expected_runtime: "[TID 1698a2] E/runtime: Method '{Ustd.core.Int,std.core.String} main_n_11.ETSGLOBAL::main()' has invalid signature"
+#12
     - tags: compile-only
       use: |-
           let v: int|string = 0
@@ -180,32 +133,26 @@ cases:
               }
               return 0
           }
+      expected: "Semantic error ESE0091: Type 'Int|String' is not compatible with the enclosing method's return type 'Int'"
 
     # overloading
+#13
     - tags: compile-only
       use: |-
-          function main(): void
-          function main(p: FixedArray<string>): void
+          function main(): void {}
+          function main(p: FixedArray<string>): void {}
           function main(...p: Any[]): Any { // CTE, overload signatures not permitted
               if (true) {
                   return
               }
               throw new Error()
           }
-
-    - tags: compile-only
-      use: |-
-          function main(): int
-          function main(p: FixedArray<string>): int
-          function main(...p: Any[]): Any { // CTE, overload signatures not permitted
-              if (true) {
-                  return 0
-              }
-              throw new Error()
-          }
+      expected: "Semantic error ESE0373: Main overload is not enabled"
 
     # The unhandled error led to the exit
+#14
     - use: |-
           function main(): void {
               throw new Error();
           }
+      expected_runtime: "Unhandled exception: std.core.Error"

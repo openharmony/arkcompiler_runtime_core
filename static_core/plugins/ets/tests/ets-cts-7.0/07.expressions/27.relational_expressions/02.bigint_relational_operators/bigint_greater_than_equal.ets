@@ -61,6 +61,7 @@ function main(): int {
   suite.addTest("Large numbers", () => {
     arktest.assertEQ(9223372036854775808n >= 9223372036854775807n, true);
     arktest.assertEQ(9223372036854775807n >= 9223372036854775807n, true);
+    arktest.assertEQ(9223372036854775806n >= 9223372036854775807n, false);
   });
 
   return suite.run();

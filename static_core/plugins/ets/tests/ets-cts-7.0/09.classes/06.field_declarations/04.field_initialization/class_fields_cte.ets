@@ -47,9 +47,16 @@
 {% endfor %}
 {% set decl=ns.decl %}
 
+{% if 'out' in c %}
+  {% set error=c.out %}
+{% else %}
+  {% set error=cv.out %}
+{% endif %}
+
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
+expected_out: "{{error}}"
 ---*/
 
 {{decl}}

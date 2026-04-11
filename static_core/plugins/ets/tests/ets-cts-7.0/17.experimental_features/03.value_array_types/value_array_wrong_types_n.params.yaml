@@ -24,7 +24,7 @@ cases:
     - type: Color
     - type: string
     - type: String
-    - type: '2'
+    - type: "'2'"
     - type: Object
     - type: number[]
     - type: Function

@@ -19,7 +19,7 @@ cases:
     literal: "{a: 'a'}"
     call: a = "b"
     expected: |-
-      TODO: CTE expected - getter and parameter type of a setter are not of the same type
+      Semantic error ESE0319: Type 'Double' is not compatible with type 'String' at property 'a'
 
   - decl: |-
       a: string

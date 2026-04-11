@@ -21,39 +21,95 @@ top_level_class_modifiers:
 constraints:
   - type: void
     use: Object
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Object' should be a subtype of 'void' constraint
+
   - type: void
     use: Any
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Any' should be a subtype of 'void' constraint
+
   - type: number
     use: byte
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Double' constraint
+
   - type: short
     use: long
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Short' constraint
+
   - type: int
     use: long
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Int' constraint
+
   - type: byte
     use: char
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'Byte' constraint
+
   - type: char
     use: byte
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Char' constraint
+
   - type: string
     use: char
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'String' constraint
+
   - type: char
     use: string
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'String' should be a subtype of 'Char' constraint
+
   - type: '"a"'
     use: string
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'String' should be a subtype of '"a"' constraint
+
   - type: Array<int>
     use: Tuple
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Tuple' should be a subtype of 'Array<Int>' constraint
+
   - type: Array<char>
     use: FixedArray<char>
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'FixedArray<Char>' should be a subtype of 'Array<Char>' constraint
+
   - type: FixedArray<string>
     use: Array<string>
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Array<String>' should be a subtype of 'FixedArray<String>' constraint
+
   - type: FixedArray<string>
     use: Tuple
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Tuple' should be a subtype of 'FixedArray<String>' constraint
+
   - type: Tuple
     use: FixedArray<char>
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'FixedArray<Char>' should be a subtype of 'Tuple' constraint
+
   - type: Tuple
     use: Array<string>
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Array<String>' should be a subtype of 'Tuple' constraint
+
   - type: Object
     use: Any
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Any' should be a subtype of 'Object' constraint
+
   - type: Object
     use: Object | undefined
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Object|undefined' should be a subtype of 'Object' constraint
+
   - type: undefined
     use: Object | undefined
+    expected_out: |-
+        Semantic error ESE0228: Type argument 'Object|undefined' should be a subtype of 'undefined' constraint

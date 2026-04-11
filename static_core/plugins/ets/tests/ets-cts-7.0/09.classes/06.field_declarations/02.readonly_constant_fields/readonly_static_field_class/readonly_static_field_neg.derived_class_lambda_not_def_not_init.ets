@@ -19,7 +19,7 @@
 /*---
 desc: Checking for changing the value in derived class. (lambda, not init static field, not default value)
 expected_out: >- 
-    Semantic error ESE0280: Property 'fieldA' might not have been initialized.
+    Semantic error ESE4002: Cannot assign to a readonly field fieldA
 tags: [compile-only, negative]
 ---*/
 

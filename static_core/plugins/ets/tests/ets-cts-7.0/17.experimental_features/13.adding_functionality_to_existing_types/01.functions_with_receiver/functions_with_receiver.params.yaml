@@ -57,12 +57,6 @@ cases:
       let a: A = new A()
       f(a, 1)
   - decl: |
-      class A {}
-      function f(this: A, n: number) {}
-    use: |
-      let a: A = new A()
-      a.f(1)
-  - decl: |
       class A {
         foo() {}  
       }
@@ -268,3 +262,11 @@ cases:
       let tc: TR = (this: DSL) => 'Call A: run'
       
       arktest.assertEQ('Call A: run-Call A: run', dsl.alias(tc))
+
+  - decl: | # A function with receiver can be defined in a namespace, can be accessed in the form of a qualifiedName only
+      namespace NS {
+        export class A {}
+        export function foo(this: A): string { return "call" }
+      }
+    use:
+      arktest.assertEQ(NS.foo(new NS.A), "call") 

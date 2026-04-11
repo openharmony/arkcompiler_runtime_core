@@ -18,6 +18,7 @@
 /*---
 desc: CTE if not both operands are bigints
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
 ---*/
 
 let b: bigint = {{c.b}}
