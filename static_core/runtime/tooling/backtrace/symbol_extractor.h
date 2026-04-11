@@ -17,19 +17,9 @@
 #define PANDA_RUNTIME_TOOLING_BACKTRACE_SYMBOL_EXTRACTOR_H
 
 #include "libarkfile/file.h"
+#include "runtime/tooling/backtrace/base_defs.h"
 
 namespace ark::tooling {
-
-struct MethodInfo {
-    uintptr_t methodId;   // NOLINT(misc-non-private-member-variables-in-classes)
-    uintptr_t codeBegin;  // NOLINT(misc-non-private-member-variables-in-classes)
-    uint32_t codeSize;    // NOLINT(misc-non-private-member-variables-in-classes)
-    MethodInfo(uintptr_t id, uintptr_t begin, uint32_t size) : methodId(id), codeBegin(begin), codeSize(size) {}
-    friend bool operator<(const MethodInfo &lhs, const MethodInfo &rhs)
-    {
-        return lhs.codeBegin < rhs.codeBegin;
-    }
-};
 
 class ArkSymbolExtractor final {
 public:

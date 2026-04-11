@@ -204,6 +204,7 @@ srcs_runtime = [
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",
   "runtime/ani/ani_helpers.cpp",
+  "runtime/tooling/internal_api.cpp",
   "runtime/types/ets_class.cpp",
   "runtime/types/ets_arraybuffer.cpp",
   "runtime/types/ets_escompat_array.cpp",
@@ -323,7 +324,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/xgc/xgc.cpp",
     "runtime/interop_js/xgc/xgc_vm_adaptor.cpp",
     "runtime/interop_js/xref_object_operator.cpp",
-    "runtime/tooling/internal_api.cpp",
+    "runtime/interop_js/tooling/internal_api.cpp",
   ]
 
   if (ark_ets_hybrid) {

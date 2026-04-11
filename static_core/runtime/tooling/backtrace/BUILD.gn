@@ -15,6 +15,7 @@ import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 
 config("arkbacktrace_config") {
     include_dirs = [
+        "$ark_root",
         "$ark_root/runtime",
     ]
 }
@@ -23,6 +24,7 @@ ohos_static_library("arkbacktrace") {
     sources = [
         "backtrace.cpp",
         "symbol_extractor.cpp",
+        "base_defs.cpp",
     ]
 
     public_configs = [
@@ -31,10 +33,13 @@ ohos_static_library("arkbacktrace") {
 
     include_dirs = [
         "$ark_root",
+        "$ark_root/../",
+        "$ark_root/../common_runtime/common_interfaces",
         "$ark_root/runtime/include",
         "$ark_root/runtime/tooling/backtrace",
         "$target_gen_dir",
         "$target_gen_dir/../../",
+        "$target_gen_dir/../../generated",
     ]
 
     deps = [
@@ -49,7 +54,7 @@ ohos_static_library("arkbacktrace") {
     cflags = []
 
     if (current_os == "mingw") {
-        cflags += [ 
+        cflags += [
             "-Wno-inconsistent-dllimport",
             "-Wno-error=inconsistent-dllimport",
         ]

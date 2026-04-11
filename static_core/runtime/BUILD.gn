@@ -312,6 +312,8 @@ _libarkruntime_calculated_sources = [
   "timing.cpp",
   "tooling/backtrace/backtrace.cpp",
   "tooling/backtrace/symbol_extractor.cpp",
+  "tooling/backtrace/local_stacktrace.cpp",
+  "tooling/backtrace/base_defs.cpp",
   "tooling/coverage_listener.cpp",
   "tooling/debug_inf.cpp",
   "tooling/debugger.cpp",
