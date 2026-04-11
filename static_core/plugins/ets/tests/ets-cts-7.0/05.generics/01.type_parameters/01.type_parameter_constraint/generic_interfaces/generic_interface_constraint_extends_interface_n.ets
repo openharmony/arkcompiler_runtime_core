@@ -13,7 +13,7 @@
 * limitations under the License.
 ---*/
 
-{% for type in types %}
+{% for c in cases %}
 
 /*---
 desc: >-
@@ -24,6 +24,8 @@ desc: >-
       • Type parameter U that depends on S.
 
     generic parameters with wrong constraint in extends
+expected_out: >-
+    {{c.expected_out}}
 tags: [compile-only, negative]
 ---*/
 
@@ -35,7 +37,7 @@ interface E<T extends A | C> {}
 interface F<T, S extends T> {}
 
 function main(): void {
-    let i: {{type}} = {}
+    let i: {{c.type}} = {}
 }
 
 {% endfor %}

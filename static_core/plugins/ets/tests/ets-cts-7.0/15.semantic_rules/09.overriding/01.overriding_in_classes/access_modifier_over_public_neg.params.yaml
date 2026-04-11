@@ -19,25 +19,25 @@ cases:
       class Derived extends Base {
         protected override public_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Base because overridden method has weaker access privilege."
+    expected_out: "Semantic error ESE873275: Class member public_foo with type void in Derived cannot override public_foo with type void field from class Base because the overridden method has weaker access privileges."
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived implements Interface {
         protected override public_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Interface because overridden method has weaker access privilege."
+    expected_out: "Semantic error ESE985118: Class member public_foo with type void in Derived cannot implement public_foo with type void property from interface Interface because the implementing return type is not compatible with the interface return type."
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived extends Base {
         private override public_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Base because overridden method has weaker access privilege."
+    expected_out: "Semantic error ESE873275: Class member public_foo with type void in Derived cannot override public_foo with type void field from class Base because the overridden method has weaker access privileges."
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived implements Interface {
         private override public_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0141: public_foo(): void in Derived cannot override public_foo(): void in Interface because overridden method has weaker access privilege."
+    expected_out: "Semantic error ESE985118: Class member public_foo with type void in Derived cannot implement public_foo with type void property from interface Interface because the implementing return type is not compatible with the interface return type."

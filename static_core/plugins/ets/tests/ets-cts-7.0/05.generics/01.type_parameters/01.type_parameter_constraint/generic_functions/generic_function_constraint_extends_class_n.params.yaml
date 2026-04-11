@@ -12,11 +12,29 @@
 # limitations under the License.
 
 --- # Type constraints for generic parameters
-calls:
-  - foo<C>()
-  - foo<Object>()
-  - bar<Object>()
-  - zoo<B, A>()
-  - zoo<C, A>()
-  - zoo<A, C>()
+cases:
+  - call: foo<C>()
+    expected_out: 
+      - "Semantic error ESE0127: No matching call signature for foo()"
+      - "Semantic error ESE0228: Type argument 'C' should be a subtype of 'A' constraint"
+  - call: foo<Object>()
+    expected_out: 
+      - "Semantic error ESE0127: No matching call signature for foo()"
+      - "Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A' constraint"
+  - call: bar<Object>()
+    expected_out: 
+      - "Semantic error ESE0127: No matching call signature for bar()"
+      - "Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A|C' constraint"
+  - call: zoo<B, A>()
+    expected_out: 
+      - "Semantic error ESE0127: No matching call signature for zoo()"
+      - "Semantic error ESE0228: Type argument 'A' should be a subtype of 'B' constraint"
+  - call: zoo<C, A>()
+    expected_out: 
+      - "Semantic error ESE0127: No matching call signature for zoo()"
+      - "Semantic error ESE0228: Type argument 'A' should be a subtype of 'C' constraint"
+  - call: zoo<A, C>()
+    expected_out: 
+      - "Semantic error ESE0127: No matching call signature for zoo()"
+      - "Semantic error ESE0228: Type argument 'C' should be a subtype of 'A' constraint"
 

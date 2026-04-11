@@ -19,7 +19,11 @@
 /*---
 desc: Type combinations not listed in the table cause a compile-time error if a combination
       is detected at compile time, or a runtime error otherwise..
+{% if pair.expect_cte is defined and not pair.expect_cte %}
+tags: []
+{% else %}
 tags: [compile-only, negative]
+{% endif %}
 expected_out: {{pair.expected_out}}
 test_suffix: "{{op.op.name}}_{{pair.type1.0}}_{{pair.type2.0}}"
 ---*/

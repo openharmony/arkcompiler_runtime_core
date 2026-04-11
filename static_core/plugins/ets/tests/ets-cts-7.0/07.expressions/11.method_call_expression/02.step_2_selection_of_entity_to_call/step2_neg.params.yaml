@@ -93,3 +93,22 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
+
+    #step2_13
+    - decl: |-
+        class C {
+            met(p: number): string {
+                return 'test'
+            }
+            met(...p: number[]): string {
+                return 'spread_test'
+            }
+            met(...args: Any[]): Any {
+                return 'neverever'
+            }
+        }
+      use: |-
+        // first match method within several appliable
+        let c: C = new C()
+        arktest.assertEQ( c.met(0.0),  "test" )
+        arktest.assertEQ( c.met(0.0, 1, 2, 3),  'spread_test' )

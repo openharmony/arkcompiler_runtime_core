@@ -34,7 +34,7 @@ cases:
                   return s + n + "F"
               }
           }
-      expected_out: "Semantic error ESE0141: meth(s: String, n: Double): String in F cannot override meth(s: String, n: Double): String in A because overridden method is final."
+      expected_out: "Semantic error ESE1324203: Class member meth with type String in F cannot override meth with type String field from class A because the overridden method is final."
 
     # cannot reduce the visibility
     - decl: |-
@@ -48,7 +48,7 @@ cases:
                   return s + n + "F"
               }
           }
-      expected_out: "Semantic error ESE0141: meth(s: String, n: Double): String in F cannot override meth(s: String, n: Double): String in A because overridden method is final."
+      expected_out: "Semantic error ESE1324203: Class member meth with type String in F cannot override meth with type String field from class A because the overridden method is final."
 
     # final method cannot be overridden with another final
     - decl: |-
@@ -62,7 +62,7 @@ cases:
                   return s + n + "F"
               }
           }
-      expected_out: "Semantic error ESE0141: meth(s: String, n: Double): String in F cannot override meth(s: String, n: Double): String in A because overridden method is final."
+      expected_out: "Semantic error ESE1324203: Class member meth with type String in F cannot override meth with type String field from class A because the overridden method is final."
 
     # final method cannot be overridden in descendants
     - decl: |-
@@ -78,7 +78,7 @@ cases:
                   return s + n + "F"
               }
           }
-      expected_out: "Semantic error ESE0141: meth(s: String, n: Double): String in F cannot override meth(s: String, n: Double): String in A because overridden method is final."
+      expected_out: "Semantic error ESE1324203: Class member meth with type String in F cannot override meth with type String field from class A because the overridden method is final."
 
     # final cannot be abstract
     - decl: |-
@@ -146,4 +146,4 @@ cases:
           class B<T extends Z> extends A<T> {
               meth(s: T): string { return s.m() + "B" }  // CTE
           }
-      expected_out: " Semantic error ESE0141: meth(s: T): String in B<T> cannot override meth(s: T): String in A<T> because overridden method is final."
+      expected_out: "Semantic error ESE1324203: Class member meth with type String in B<T> cannot override meth with type String field from class A<T> because the overridden method is final."

@@ -13,89 +13,225 @@
 
 ---
 cases:
-    # single type param
-    - decl: |-
-          foobb = foobd // OK: identical parameter types, and covariant return type
-      check: |-
-          arktest.assertTrue(foobb(new Derived) instanceof Base)
-    - decl: |-
-          foodb = foobd // OK: contravariant parameter types, and covariant return type
-      check: |-
-          arktest.assertTrue(foodb(new Derived) instanceof Derived)
-    - decl: |-
-          foodb = foodd // OK: identical parameter types, and covariant return type
-      check: |-
-          arktest.assertTrue(foodb(new Derived) instanceof Derived)
-    - decl: |-
-          foodd = foobd // OK: contravariant parameter types, and identical return type
-      check: |-
-          arktest.assertTrue(foodd(new Derived) instanceof Base)
-    # subtype has less parameters
-    - decl: |-
-          foobbn = foobb
-      check: |-
-          arktest.assertTrue(foobbn(new Base, 1) instanceof Base)
-    - decl: |-
-          foobbo = foobb
-      check: |-
-          arktest.assertTrue(foobbo(new Base) instanceof Base)
-    # subtype has less parameters, parameter is identical and return type covariant
-    - decl: |-
-          foobbn = foobd
-      check: |-
-          arktest.assertTrue(foobbn(new Derived, 1) instanceof Base)
-    - decl: |-
-          foobbo = foobd
-      check: |-
-          arktest.assertTrue(foobbo(new Derived) instanceof Base)
-    # subtype has less parameters, parameter is contravariant and return type covariant
-    - decl: |-
-          foodbn = foobd
-      check: |-
-          arktest.assertTrue(foodbn(new Derived, 1) instanceof Base)
-    - decl: |-
-          foodbo = foobd
-      check: |-
-          arktest.assertTrue(foodbo(new Derived) instanceof Base)
-    # parameter types identical and return type covariant
-    - decl: |-
-          foodbn = fooddn
-      check: |-
-          arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
-    - decl: |-
-          foodbo = fooddo
-      check: |-
-          arktest.assertTrue(foodbo(new Derived) instanceof Derived)
-    - decl: |-
-          foodbr = fooddr
-      check: |-
-          arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Derived)
-    # rest or optional in param, another param contravariant and return type covariant
-    - decl: |-
-          foodbn = foobdn
-      check: |-
-          arktest.assertTrue(foodbn(new Derived, 1) instanceof Base)
-    - decl: |-
-          foodbo = foobdo
-      check: |-
-          arktest.assertTrue(foodbo(new Derived) instanceof Base)
-    - decl: |-
-          foodbr = foobdr
-      check: |-
-          arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Base)
-    # rest or optional in param, another param contravariant and return type identical
-    - decl: |-
-          foodbn = foobbn
-      check: |-
-          let r = foodbn.unsafeCall(new Base, 1.0)
-          arktest.assertTrue(r instanceof Base)
-    - decl: |-
-          foodbo = foobbo
-      check: |-
-          let r = foodbo.unsafeCall(new Base)
-          arktest.assertTrue(r instanceof Base)
-    - decl: |-
-          foodbr = foobbr
-      check: |-
-          let r = foodbr.unsafeCall(new Base, 1.0, 2.0, 3.0)
-          arktest.assertTrue(r instanceof Base)
+  # single type param
+  - decl: |-
+      //generic function references
+      function fooBB<T>(p: T): T {return p}
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+
+      let foobb = fooBB<Base>
+      let foobd = fooBD<Base,Derived>
+
+      foobb = foobd // OK: identical parameter types, and covariant return type
+    check: |-
+      arktest.assertTrue(foobb(new Derived) instanceof Base)
+
+  - decl: |-
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+      function fooDB<G extends T, T>(p: G): T { return p as T};
+
+      let foobd = fooBD<Base,Derived>
+      let foodb = fooDB<Derived,Base>
+
+      foodb = foobd // OK: contravariant parameter types, and covariant return type
+    check: |-
+      arktest.assertTrue(foodb(new Derived) instanceof Derived)
+
+  - decl: |-
+      function fooDB<G extends T, T>(p: G): T { return p as T};
+      function fooDD<G extends T, T>(p: G): G { return p};
+
+      let foodb = fooDB<Derived,Base>
+      let foodd = fooDD<Derived,Derived>
+
+      foodb = foodd // OK: identical parameter types, and covariant return type
+    check: |-
+      arktest.assertTrue(foodb(new Derived) instanceof Derived)
+
+  - decl: |-
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+      function fooDD<G extends T, T>(p: G): G { return p};
+
+      let foobd = fooBD<Base,Derived>
+      let foodd = fooDD<Derived,Derived>
+
+      foodd = foobd // OK: contravariant parameter types, and identical return type
+    check: |-
+      arktest.assertTrue(foodd(new Derived) instanceof Base)
+
+  # subtype has fewer parameters
+  - decl: |-
+      function fooBB<T>(p: T): T {return p}
+      //generic function with extra param
+      function fooBBN<T>(p: T, n: number): T {return p};
+
+      let foobb = fooBB<Base>
+      let foobbn = fooBBN<Base>
+
+      foobbn = foobb
+    check: |-
+      arktest.assertTrue(foobbn(new Base, 1) instanceof Base)
+
+  - decl: |-
+      function fooBB<T>(p: T): T {return p}
+      //generic function with extra optional param
+      function fooBBO<T>(p: T, n?: number): T {return p};
+
+      let foobb = fooBB<Base>
+      let foobbo = fooBBO<Base>
+
+      foobbo = foobb
+    check: |-
+      arktest.assertTrue(foobbo(new Base) instanceof Base)
+
+  # subtype has fewer parameters, parameter is identical and return type covariant
+  - decl: |-
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+      function fooBBN<T>(p: T, n: number): T {return p};
+
+      let foobd = fooBD<Base,Derived>
+      let foobbn = fooBBN<Base>
+
+      foobbn = foobd
+    check: |-
+      arktest.assertTrue(foobbn(new Derived, 1) instanceof Base)
+
+  - decl: |-
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+      function fooBBO<T>(p: T, n?: number): T {return p};
+
+      let foobd = fooBD<Base,Derived>
+      let foobbo = fooBBO<Base>
+
+      foobbo = foobd
+    check: |-
+      arktest.assertTrue(foobbo(new Derived) instanceof Base)
+
+  # subtype has fewer parameters, parameter is contravariant and return type covariant
+  - decl: |-
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+      function fooDBN<G extends T, T>(p: G, n: number): T { return p as T};
+
+      let foobd = fooBD<Base,Derived>
+      let foodbn = fooDBN<Derived,Base>
+
+      foodbn = foobd
+    check: |-
+      arktest.assertTrue(foodbn(new Derived, 1) instanceof Base)
+
+  - decl: |-
+      function fooBD<T, G extends T>(p: T): G {return p as G}
+      function fooDBO<G extends T, T>(p: G, n?: number): T { return p as T};
+
+      let foobd = fooBD<Base,Derived>
+      let foodbo = fooDBO<Derived,Base>
+
+      foodbo = foobd
+    check: |-
+      arktest.assertTrue(foodbo(new Derived) instanceof Base)
+
+  # parameter types identical and return type covariant
+  - decl: |-
+      function fooDBN<G extends T, T>(p: G, n: number): T { return p as T};
+      function fooDDN<G extends T, T>(p: G, n: number): G { return p};
+
+      let foodbn = fooDBN<Derived,Base>
+      let fooddn = fooDDN<Derived,Derived>
+
+      foodbn = fooddn
+    check: |-
+      arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
+
+  - decl: |-
+      function fooDBO<G extends T, T>(p: G, n?: number): T { return p as T};
+      function fooDDO<G extends T, T>(p: G, n?: number): G { return p};
+
+      let foodbo = fooDBO<Derived,Base>
+      let fooddo = fooDDO<Derived,Derived>
+
+      foodbo = fooddo
+    check: |-
+      arktest.assertTrue(foodbo(new Derived) instanceof Derived)
+
+  - decl: |-
+      function fooDBR<G extends T, T>(p: G, ...n: number[]): T { return p as T};
+      function fooDDR<G extends T, T>(p: G, ...n: number[]): G { return p};
+
+      let foodbr = fooDBR<Derived,Base>
+      let fooddr = fooDDR<Derived,Derived>
+
+      foodbr = fooddr
+    check: |-
+      arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Derived)
+
+  # rest or optional in param, another param contravariant and return type covariant
+  - decl: |-
+      function fooBDN<T, G extends T>(p: T, n: number): G {return p as G};
+      function fooDBN<G extends T, T>(p: G, n: number): T { return p as T};
+
+      let foobdn = fooBDN<Base,Derived>
+      let foodbn = fooDBN<Derived,Base>
+
+      foodbn = foobdn
+    check: |-
+      arktest.assertTrue(foodbn(new Derived, 1) instanceof Base)
+
+  - decl: |-
+      function fooBDO<T, G extends T>(p: T, n?: number): G {return p as G};
+      function fooDBO<G extends T, T>(p: G, n?: number): T { return p as T};
+
+      let foobdo = fooBDO<Base,Derived>
+      let foodbo = fooDBO<Derived,Base>
+
+      foodbo = foobdo
+    check: |-
+      arktest.assertTrue(foodbo(new Derived) instanceof Base)
+
+  - decl: |-
+      function fooBDR<T, G extends T>(p: T, ...n: number[]): G {return p as G};
+      function fooDBR<G extends T, T>(p: G, ...n: number[]): T { return p as T};
+
+      let foobdr = fooBDR<Base,Derived>
+      let foodbr = fooDBR<Derived,Base>
+
+      foodbr = foobdr
+    check: |-
+      arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Base)
+
+  # rest or optional in param, another param contravariant and return type identical
+  - decl: |-
+      function fooBBN<T>(p: T, n: number): T {return p};
+      function fooDBN<G extends T, T>(p: G, n: number): T { return p as T};
+
+      let foobbn = fooBBN<Base>
+      let foodbn = fooDBN<Derived,Base>
+
+      foodbn = foobbn
+    check: |-
+      let r = foodbn.unsafeCall(new Base, 1.0)
+      arktest.assertTrue(r instanceof Base)
+
+  - decl: |-
+      function fooBBO<T>(p: T, n?: number): T {return p};
+      function fooDBO<G extends T, T>(p: G, n?: number): T { return p as T};
+
+      let foobbo = fooBBO<Base>
+      let foodbo = fooDBO<Derived,Base>
+
+      foodbo = foobbo
+    check: |-
+      let r = foodbo.unsafeCall(new Base)
+      arktest.assertTrue(r instanceof Base)
+
+  - decl: |-
+      //generic function with extra rest param
+      function fooBBR<T>(p: T, ...n: number[]): T {return p};
+      function fooDBR<G extends T, T>(p: G, ...n: number[]): T { return p as T};
+
+      let foobbr = fooBBR<Base>
+      let foodbr = fooDBR<Derived,Base>
+
+      foodbr = foobbr
+    check: |-
+      let r = foodbr.unsafeCall(new Base, 1.0, 2.0, 3.0)
+      arktest.assertTrue(r instanceof Base)

@@ -16,11 +16,11 @@ limitations under the License.
 /*---
 desc: Tuple type with prefix readonly.
 ---*/
-
+{%yaml "tuple_readonly.data.yaml" as dt %}
 function main(): int {
     let testSuite = new arktest.ArkTestsuite("Readonly_tuple");
   
-    {% for c in cases %}
+    {% for c in dt.cases %}
         testSuite.addTest("{{c.type}}_readonlyTuple", () => {
         let y: readonly [{{c.type}}] = [{{c.use}}]
     });

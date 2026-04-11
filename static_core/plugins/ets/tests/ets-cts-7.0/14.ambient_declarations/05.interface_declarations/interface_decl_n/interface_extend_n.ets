@@ -15,7 +15,9 @@ limitations under the License.
 /*---
 desc: Ambient Interface implementations
 tags: [negative, compile-only]
-expected_out: 'Semantic error ESE0141: a(): String|undefined in Extended cannot override a(): String in A because overriding return type is not compatible with the other return type.'
+expected_out: >-
+    Semantic error ESE985118: Class member a with type String|undefined in Extended cannot implement a with type String property from interface A
+    because the implementing return type is not compatible with the interface return type.
 ---*/
 
 import { A } from './interface_declarations2.d'

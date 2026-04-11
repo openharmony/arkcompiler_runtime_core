@@ -62,7 +62,7 @@ cases:
   - desc: |-
       >-
         Create FixedArray with type that has constructor
-        that can be called with no argument provided
+        with default parameter value
     decl: |-
       class C {
         n: number = 0
@@ -80,8 +80,7 @@ cases:
 
   - desc: |-
       >-
-        Create FixedArray with type that has constructor
-        that can be called with no argument provided
+        Create FixedArray with constructor having optional parameter
     decl: |-
       class C {
         n: number = 0
@@ -101,8 +100,7 @@ cases:
 
   - desc: |-
       >-
-        Create FixedArray with type that has constructor
-        that can be called with no argument provided
+        Create FixedArray with constructor having rest parameter
     decl: |-
       class C {
         n: number = 0

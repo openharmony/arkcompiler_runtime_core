@@ -19,7 +19,7 @@ limitations under the License.
 desc: Overload function combination of local and imported functions
 files: [./modules/function_export_all.ets]
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method."
+expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
 ---*/
 
 import {{c.import}} from "./modules/function_export_all.ets";

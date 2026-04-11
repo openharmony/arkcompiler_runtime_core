@@ -19,8 +19,7 @@ cases:
     check: |-
       let d: D = new D()
       arktest.assertTrue(d instanceof C)
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: expression is always true'
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
   - decl: |-
       class C {}
@@ -29,8 +28,7 @@ cases:
     check: |-
       let d: D = new D()
       arktest.assertFalse(d instanceof E)
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: expression is always false'
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as false'
 
   - decl: |-
       interface I {}
@@ -38,16 +36,14 @@ cases:
     check: |-
       let d: D = new D()
       arktest.assertTrue(d instanceof I)
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: expression is always true'
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
   - decl: |-
       class D {}
     check: |-
       let d: D = new D()
       arktest.assertTrue(d instanceof D)
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: expression is always true'
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
   - decl: |-
       class A {}
@@ -56,5 +52,23 @@ cases:
     check: |-
       let c: C = new C()
       arktest.assertTrue(c instanceof A)
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: expression is always true'
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+  - decl: |-
+      class C {}
+      class D extends C {}
+      type AliasD = D
+    check: |-
+      let x: AliasD = new D()
+      arktest.assertTrue(x instanceof C)
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+  - decl: |-
+      class C {}
+      class D extends C {}
+      class W { fld: D = new D() }
+    check: |-
+      let w: W = new W()
+      arktest.assertTrue(w.fld instanceof C)
+    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+

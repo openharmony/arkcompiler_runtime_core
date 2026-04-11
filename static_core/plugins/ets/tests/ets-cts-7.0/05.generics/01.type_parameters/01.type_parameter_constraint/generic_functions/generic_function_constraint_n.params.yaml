@@ -15,22 +15,43 @@
 constraints:
   - type: number
     use: byte
-    p: 1 as byte
+    p: (1).toByte()
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(Byte)"
+        - "Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Double' constraint"
   - type: short
     use: long
-    p: 1 as long
+    p: (1).toLong()
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(Long)"
+        - "Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Short' constraint"
   - type: int
     use: long
-    p: 1 as long
+    p: (1).toLong()
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(Long)"
+        - "Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Int' constraint"
   - type: byte
     use: char
     p: c'A'
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(Char)"
+        - "Semantic error ESE0228: Type argument 'Char' should be a subtype of 'Byte' constraint"
   - type: char
     use: byte
-    p: 1 as byte
+    p: (1).toByte()
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(Byte)"
+        - "Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Char' constraint"
   - type: string
     use: char
     p: c'A'
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(Char)"
+        - "Semantic error ESE0228: Type argument 'Char' should be a subtype of 'String' constraint"
   - type: char
     use: string
     p: '"str"'
+    expected_out:
+        - "Semantic error ESE0127: No matching call signature for foo(\\\"str\\\")"
+        - "Semantic error ESE0228: Type argument 'String' should be a subtype of 'Char' constraint"

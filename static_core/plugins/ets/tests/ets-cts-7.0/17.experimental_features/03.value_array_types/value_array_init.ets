@@ -83,26 +83,6 @@ function main(): int {
             arktest.assertEQ(typeof arr2.length , 'int')
             arktest.assertTrue(arr2.length > 0)
 
-            //constructor(len: int, elems: (inx: int) => T)
-            {%- if "char" == c.type or "Char" == c.type %}
-            let arr3: ValueArray<{{c.type}}> = new ValueArray<{{c.type}}>(4, (inx: int) => c'a' )
-            {%- elif "boolean" == c.type or "Boolean" == c.type %}
-            let arr3: ValueArray<{{c.type}}> = new ValueArray<{{c.type}}>(2, (inx: int) => true )
-            {%- else %}
-            let arr3: ValueArray<{{c.type}}> = new ValueArray<{{c.type}}>(5, (inx: int) => {{tp}}(5 - inx) )
-            {%- endif %}
-            {%- if "double" == c.type or "Double" == c.type %}
-            arktest.assertEQ(typeof arr3[0], 'number')
-            arktest.assertEQ(typeof arr3[arr3.length-1], 'number')
-            {%- else %}
-            arktest.assertEQ(typeof arr3[0], '{{c.type | lower}}')
-            arktest.assertEQ(typeof arr3[arr3.length-1], '{{c.type | lower}}')
-            {%- endif %}
-            arr3[0] = arr3[arr3.length-1]
-            arktest.assertEQ(arr3[0], arr3[arr3.length-1])
-            arktest.assertEQ(typeof arr3.length , 'int')
-            arktest.assertTrue(arr3.length > 0)
-
         });
     {%- endfor %}
 

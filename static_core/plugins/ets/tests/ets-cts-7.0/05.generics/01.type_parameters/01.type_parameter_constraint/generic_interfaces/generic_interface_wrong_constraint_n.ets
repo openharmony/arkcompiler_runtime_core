@@ -19,6 +19,8 @@
 desc: >-
     If type parameter T has type constraint S, then the actual type of the generic instantiation must be
     compatible with S (see Type Compatibility).
+expected_out: >-
+      {{c.expected_out}}
 tags: [compile-only, negative]
 ---*/
 

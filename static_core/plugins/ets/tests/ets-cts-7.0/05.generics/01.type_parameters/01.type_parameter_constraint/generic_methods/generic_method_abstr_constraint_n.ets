@@ -13,13 +13,17 @@
 * limitations under the License.
 ---*/
 
-{% for mm in abstr_or_native_method_modifiers %}
-{% for c in constraints %}
+{% yaml "generic_method_abstr_and_with_body_constraint.data.yaml" as dt %}
+{% for mm in dt.abstr_or_native_method_modifiers %}
+{% for c in dt.constraints %}
 
 /*---
 desc: >-
     If type parameter T has type constraint S, then the actual type of the generic instantiation must be
     compatible with S (see Type Compatibility).
+expected_out:
+    - "Semantic error ESE0127: No matching call signature for foo()"
+    - "{{c.expected_out}}"
 tags: [compile-only, negative]
 ---*/
 

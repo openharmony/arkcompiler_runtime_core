@@ -19,7 +19,7 @@ desc: >-
   If the second operand of type bigint is negative,
   then a compile-time error occurs when detected at compile time.
 tags: [compile-only, negative]
-expected_out: 'Exponent must be non-negative'
+expected_out: 'Semantic error ESE655064: Exponentiation expressions cannot have a negative bigint exponent.'
 ---*/
 
 function main(): void {

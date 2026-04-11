@@ -19,11 +19,23 @@ desc: >-
     (except conditional operators ‘&&’, ‘||’, and ‘?:’) is fully evaluated.
 ---*/
 
-function main() {
+const suite = new arktest.ArkTestsuite("Short-circuit conditional operators")
 
+suite.addTest("OR short-circuits when lhs is true", () => {
     let a: boolean[] = [true, false];
     arktest.assertTrue(a[0] || a[5]);
+})
+
+suite.addTest("AND short-circuits when lhs is false", () => {
+    let a: boolean[] = [true, false];
     arktest.assertFalse(a[1] && a[5]);
+})
+
+suite.addTest("Ternary skips unevaluated branch", () => {
+    let a: boolean[] = [true, false];
     arktest.assertTrue(a[1] ? a[5] : a[0]);
-    
+})
+
+function main() {
+    suite.run()
 }

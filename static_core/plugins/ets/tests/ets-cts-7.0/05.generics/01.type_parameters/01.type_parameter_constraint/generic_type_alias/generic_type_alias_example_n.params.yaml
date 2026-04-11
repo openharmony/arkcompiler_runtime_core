@@ -14,6 +14,11 @@
 ---
 cases:
   - decl: let x = new G<Sometype>
+    expected_out: ""
   - decl: let h4 = new H<Object>
+    expected_out: "Semantic error ESE0228: Type argument 'Object' should be a subtype of 'BaseType|SomeTypeType' constraint"
   - decl: let e2 = new Exotic<"cc">
+    expected_out: "Semantic error ESE0228: Type argument '\"cc\"' should be a subtype of '\"aa\"|\"bb\"' constraint"
   - decl: let b2 = new BType<'f0'>
+    expected_out: "Semantic error ESE0228: Type argument '\"f0\"' should be a subtype of '\"f1\"|\"f2\"|\"f3\"' constraint"
+    

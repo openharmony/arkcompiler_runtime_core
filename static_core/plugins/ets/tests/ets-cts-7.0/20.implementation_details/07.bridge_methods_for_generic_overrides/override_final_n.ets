@@ -16,7 +16,9 @@
 /*---
 desc: Cannot override final method.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0141: process(v: String): String in Child cannot override process(v: String): String in Base<T> because overridden method is final."
+expected_out: >-
+    Semantic error ESE1324203: Class member process with type String in Child cannot override process with type String field from class Base<T>
+    because the overridden method is final.
 ---*/
 
 class Base<T> {

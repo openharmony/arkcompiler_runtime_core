@@ -17,6 +17,17 @@
 /*---
 desc: Program execution starts from the execution of a program entry point
 tags: [no-warmup, negative, {{c.tags}}]
+{% if c.expected is defined %}
+expected_out: "{{c.expected}}"
+{% elif c.expected_out_runtime is defined %}
+expected_out:
+  runtime:
+    - "{{c.expected_out_runtime}}"
+{% else %}
+expected_error:
+  runtime: 
+    - "{{c.expected_runtime}}"
+{% endif %}
 ---*/
 
 {{c.use}}

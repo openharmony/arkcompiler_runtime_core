@@ -136,7 +136,7 @@ cases:
               fld: string|number|undefined = 42.0
           }
           class BB extends B {
-              fld: 'a'|string|number|undefined
+              fld: 'a'|string|number|undefined = undefined
           }
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB

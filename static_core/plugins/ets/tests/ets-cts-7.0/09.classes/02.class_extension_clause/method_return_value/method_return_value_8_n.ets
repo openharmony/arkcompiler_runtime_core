@@ -19,8 +19,8 @@ desc: >-
     An error is reported when the subclass recompiles the parent class method.
 tags: [negative, compile-only]
 expected_out: >-
-    Semantic error ESE0141: getValue(): String in Child cannot override getValue(): Double
-    in Parent because overriding return type is not compatible with the other return type.
+    Semantic error ESE0141: Class member getValue with type String in Child cannot override getValue with type Double field from class Parent
+    because the overriding return type is not compatible with the other return type.
 ---*/
 
 class Parent {

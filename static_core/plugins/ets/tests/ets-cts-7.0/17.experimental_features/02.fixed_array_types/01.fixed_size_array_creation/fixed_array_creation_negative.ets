@@ -28,13 +28,6 @@ expected_out:  "Semantic error ESE0318: Type '{{cc.initType}}' cannot be assigne
 
 ---*/
 
-abstract class MyAbstractClass {}
-
-interface IInterface {}
-
-class IImpl implements IInterface {
-}
-
 type AT = {{ctype}}
 
 function main(): void {

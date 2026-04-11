@@ -22,7 +22,7 @@ cases:
       }
       class C extends B implements I {
       }
-    expected_out: "Semantic error ESE0141: n(): String in C cannot override n(): Double in I because overriding return type is not compatible with the other return type."
+    expected_out: "Semantic error ESE985118: Class member n with type String in C cannot implement n with type Double property from interface I because the implementing return type is not compatible with the interface return type."
     doc: superclass field type string conflicts with interface property type number
 
   - decl: |-
@@ -34,7 +34,7 @@ cases:
       }
       class C extends B implements I {
       }
-    expected_out: "Semantic error ESE0141: n(): Boolean in C cannot override n(): Int in I because overriding return type is not compatible with the other return type."
+    expected_out: "Semantic error ESE985118: Class member n with type Boolean in C cannot implement n with type Int property from interface I because the implementing return type is not compatible with the interface return type."
     doc: superclass field type boolean conflicts with interface property type int
 
   - decl: |-
@@ -46,5 +46,5 @@ cases:
       }
       class C extends B implements I {
       }
-    expected_out: "Semantic error ESE0141: n(): String in C cannot override n(): Double in I because overriding return type is not compatible with the other return type."
+    expected_out: "Semantic error ESE985118: Class member n with type String in C cannot implement n with type Double property from interface I because the implementing return type is not compatible with the interface return type."
     doc: superclass field type string conflicts with readonly interface property type number

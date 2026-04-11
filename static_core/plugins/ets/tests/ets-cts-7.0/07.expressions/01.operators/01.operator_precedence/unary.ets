@@ -17,358 +17,433 @@
 desc: unary minus, plus, and bitwise complement operators with other lower precedence operators
 ---*/
 
-function main() {
-	let i: int, b: boolean, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255 = 255, t258 = 258
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Unary operators precedence")
 
-	// multiplication
-	i = + t2 * t4; arktest.assertEQ(i, 8)
-	i = + + t2 * t4; arktest.assertEQ(i, 8)
-	i = - t2 * t4; arktest.assertEQ(i, -8)
-	i = - - t2 * t4; arktest.assertEQ(i, 8)
-	i = ~ t2 * t4; arktest.assertEQ(i, -12)
-	i = ~ ~ t2 * t4; arktest.assertEQ(i, 8)
-	i = + - t2 * t4; arktest.assertEQ(i, -8)
-	i = + ~ t2 * t4; arktest.assertEQ(i, -12)
-	i = - + t2 * t4; arktest.assertEQ(i, -8)
-	i = - ~ t2 * t4; arktest.assertEQ(i, 12)
-	i = ~ + t2 * t4; arktest.assertEQ(i, -12)
-	i = ~ - t2 * t4; arktest.assertEQ(i, 4)
+    suite.addTest("multiplication", () => {
+        let i: int, t2 = 2, t4 = 4
 
-	// division
-	i = + t8 / t2; arktest.assertEQ(i, 4)
-	i = + + t8 / t2; arktest.assertEQ(i, 4)
-	i = - t8 / t2; arktest.assertEQ(i, -4)
-	i = - - t8 / t2; arktest.assertEQ(i, 4)
-	i = ~ t8 / t2; arktest.assertEQ(i, -4)
-	i = ~ ~ t8 / t2; arktest.assertEQ(i, 4)
-	i = + - t8 / t2; arktest.assertEQ(i, -4)
-	i = + ~ t8 / t2; arktest.assertEQ(i, -4)
-	i = - + t8 / t2; arktest.assertEQ(i, -4)
-	i = - ~ t8 / t2; arktest.assertEQ(i, 4)
-	i = ~ + t8 / t2; arktest.assertEQ(i, -4)
-	i = ~ - t8 / t2; arktest.assertEQ(i, 3)
+        i = + t2 * t4; arktest.assertEQ(i, 8)
+        i = + + t2 * t4; arktest.assertEQ(i, 8)
+        i = - t2 * t4; arktest.assertEQ(i, -8)
+        i = - - t2 * t4; arktest.assertEQ(i, 8)
+        i = ~ t2 * t4; arktest.assertEQ(i, -12)
+        i = ~ ~ t2 * t4; arktest.assertEQ(i, 8)
+        i = + - t2 * t4; arktest.assertEQ(i, -8)
+        i = + ~ t2 * t4; arktest.assertEQ(i, -12)
+        i = - + t2 * t4; arktest.assertEQ(i, -8)
+        i = - ~ t2 * t4; arktest.assertEQ(i, 12)
+        i = ~ + t2 * t4; arktest.assertEQ(i, -12)
+        i = ~ - t2 * t4; arktest.assertEQ(i, 4)
+    })
 
-	// modulo
-	i = + t8 % t3; arktest.assertEQ(i, 2)
-	i = + + t8 % t3; arktest.assertEQ(i, 2)
-	i = - t8 % t3; arktest.assertEQ(i, -2)
-	i = - - t8 % t3; arktest.assertEQ(i, 2)
-	i = ~ t8 % t2; arktest.assertEQ(i, -1)
-	i = ~ ~ t8 % t3; arktest.assertEQ(i, 2)
-	i = + - t8 % t3; arktest.assertEQ(i, -2)
-	i = + ~ t8 % t2; arktest.assertEQ(i, -1)
-	i = - + t8 % t3; arktest.assertEQ(i, -2)
-	i = - ~ t8 % t2; arktest.assertEQ(i, 1)
-	i = ~ + t8 % t2; arktest.assertEQ(i, -1)
-	i = ~ - t8 % t2; arktest.assertEQ(i, 1)
+    suite.addTest("division", () => {
+        let i: int, t2 = 2, t8 = 8
 
-	// addition
-	i = + t2 + t4; arktest.assertEQ(i, 6)
-	i = + + t2 + t4; arktest.assertEQ(i, 6)
-	i = - t2 + t4; arktest.assertEQ(i, 2)
-	i = - - t2 + t4; arktest.assertEQ(i, 6)
-	i = ~ t2 + t4; arktest.assertEQ(i, 1)
-	i = ~ ~ t2 + t4; arktest.assertEQ(i, 6)
-	i = + - t2 + t4; arktest.assertEQ(i, 2)
-	i = + ~ t2 + t4; arktest.assertEQ(i, 1)
-	i = - + t2 + t4; arktest.assertEQ(i, 2)
-	i = - ~ t2 + t4; arktest.assertEQ(i, 7)
-	i = ~ + t2 + t4; arktest.assertEQ(i, 1)
-	i = ~ - t2 + t4; arktest.assertEQ(i, 5)
+        i = + t8 / t2; arktest.assertEQ(i, 4)
+        i = + + t8 / t2; arktest.assertEQ(i, 4)
+        i = - t8 / t2; arktest.assertEQ(i, -4)
+        i = - - t8 / t2; arktest.assertEQ(i, 4)
+        i = ~ t8 / t2; arktest.assertEQ(i, -4)
+        i = ~ ~ t8 / t2; arktest.assertEQ(i, 4)
+        i = + - t8 / t2; arktest.assertEQ(i, -4)
+        i = + ~ t8 / t2; arktest.assertEQ(i, -4)
+        i = - + t8 / t2; arktest.assertEQ(i, -4)
+        i = - ~ t8 / t2; arktest.assertEQ(i, 4)
+        i = ~ + t8 / t2; arktest.assertEQ(i, -4)
+        i = ~ - t8 / t2; arktest.assertEQ(i, 3)
+    })
 
-	// subtraction
-	i = + t2 - t4; arktest.assertEQ(i, -2)
-	i = + + t2 - t4; arktest.assertEQ(i, -2)
-	i = - t2 - t4; arktest.assertEQ(i, -6)
-	i = - - t2 - t4; arktest.assertEQ(i, -2)
-	i = ~ t2 - t4; arktest.assertEQ(i, -7)
-	i = ~ ~ t2 - t4; arktest.assertEQ(i, -2)
-	i = + - t2 - t4; arktest.assertEQ(i, -6)
-	i = + ~ t2 - t4; arktest.assertEQ(i, -7)
-	i = - + t2 - t4; arktest.assertEQ(i, -6)
-	i = - ~ t2 - t4; arktest.assertEQ(i, -1)
-	i = ~ + t2 - t4; arktest.assertEQ(i, -7)
-	i = ~ - t2 - t4; arktest.assertEQ(i, -3)
+    suite.addTest("modulo", () => {
+        let i: int, t2 = 2, t3 = 3, t8 = 8
 
-	// casting
-	i = (+ t258).toByte(); arktest.assertEQ(i, 2)
-	i = (+ + t258).toByte(); arktest.assertEQ(i, 2)
-	i = (- t258).toByte(); arktest.assertEQ(i, -2)
-	i = (- - t258).toByte(); arktest.assertEQ(i, 2)
-	i = (~ t258).toByte(); arktest.assertEQ(i, -3)
-	i = (~ ~ t258).toByte(); arktest.assertEQ(i, 2)
-	i = (+ - t258).toByte(); arktest.assertEQ(i, -2)
-	i = (+ ~ t258).toByte(); arktest.assertEQ(i, -3)
-	i = (- + t258).toByte(); arktest.assertEQ(i, -2)
-	i = (- ~ t258).toByte(); arktest.assertEQ(i, 3)
-	i = (~ + t258).toByte(); arktest.assertEQ(i, -3)
-	i = (~ - t258).toByte(); arktest.assertEQ(i, 1)
+        i = + t8 % t3; arktest.assertEQ(i, 2)
+        i = + + t8 % t3; arktest.assertEQ(i, 2)
+        i = - t8 % t3; arktest.assertEQ(i, -2)
+        i = - - t8 % t3; arktest.assertEQ(i, 2)
+        i = ~ t8 % t2; arktest.assertEQ(i, -1)
+        i = ~ ~ t8 % t3; arktest.assertEQ(i, 2)
+        i = + - t8 % t3; arktest.assertEQ(i, -2)
+        i = + ~ t8 % t2; arktest.assertEQ(i, -1)
+        i = - + t8 % t3; arktest.assertEQ(i, -2)
+        i = - ~ t8 % t2; arktest.assertEQ(i, 1)
+        i = ~ + t8 % t2; arktest.assertEQ(i, -1)
+        i = ~ - t8 % t2; arktest.assertEQ(i, 1)
+    })
 
-	// right shift
-	i = + t255 >> t3; arktest.assertEQ(i, 31)
-	i = + + t255 >> t3; arktest.assertEQ(i, 31)
-	i = - t255 >> t3; arktest.assertEQ(i, -32)
-	i = - - t255 >> t3; arktest.assertEQ(i, 31)
-	i = ~ t255 >> t3; arktest.assertEQ(i, -32)
-	i = ~ ~ t255 >> t3; arktest.assertEQ(i, 31)
-	i = + - t255 >> t3; arktest.assertEQ(i, -32)
-	i = + ~ t255 >> t3; arktest.assertEQ(i, -32)
-	i = - + t255 >> t3; arktest.assertEQ(i, -32)
-	i = - ~ t255 >> t3; arktest.assertEQ(i, 32)
-	i = ~ + t255 >> t3; arktest.assertEQ(i, -32)
-	i = ~ - t255 >> t3; arktest.assertEQ(i, 31)
+    suite.addTest("addition", () => {
+        let i: int, t2 = 2, t4 = 4
 
-	// right shift unsigned
-	i = + t255 >>> t3; arktest.assertEQ(i, 31)
-	i = + + t255 >>> t3; arktest.assertEQ(i, 31)
-	i = - t255 >>> t3; arktest.assertEQ(i, 536870880)
-	i = - - t255 >>> t3; arktest.assertEQ(i, 31)
-	i = ~ t255 >>> t3; arktest.assertEQ(i, 536870880)
-	i = ~ ~ t255 >>> t3; arktest.assertEQ(i, 31)
-	i = + - t255 >>> t3; arktest.assertEQ(i, 536870880)
-	i = + ~ t255 >>> t3; arktest.assertEQ(i, 536870880)
-	i = - + t255 >>> t3; arktest.assertEQ(i, 536870880)
-	i = - ~ t255 >>> t3; arktest.assertEQ(i, 32)
-	i = ~ + t255 >>> t3; arktest.assertEQ(i, 536870880)
-	i = ~ - t255 >>> t3; arktest.assertEQ(i, 31)
+        i = + t2 + t4; arktest.assertEQ(i, 6)
+        i = + + t2 + t4; arktest.assertEQ(i, 6)
+        i = - t2 + t4; arktest.assertEQ(i, 2)
+        i = - - t2 + t4; arktest.assertEQ(i, 6)
+        i = ~ t2 + t4; arktest.assertEQ(i, 1)
+        i = ~ ~ t2 + t4; arktest.assertEQ(i, 6)
+        i = + - t2 + t4; arktest.assertEQ(i, 2)
+        i = + ~ t2 + t4; arktest.assertEQ(i, 1)
+        i = - + t2 + t4; arktest.assertEQ(i, 2)
+        i = - ~ t2 + t4; arktest.assertEQ(i, 7)
+        i = ~ + t2 + t4; arktest.assertEQ(i, 1)
+        i = ~ - t2 + t4; arktest.assertEQ(i, 5)
+    })
 
-	// left shift
-	i = + t255 << t3; arktest.assertEQ(i, 2040)
-	i = + + t255 << t3; arktest.assertEQ(i, 2040)
-	i = - t255 << t3; arktest.assertEQ(i, -2040)
-	i = - - t255 << t3; arktest.assertEQ(i, 2040)
-	i = ~ t255 << t3; arktest.assertEQ(i, -2048)
-	i = ~ ~ t255 << t3; arktest.assertEQ(i, 2040)
-	i = + - t255 << t3; arktest.assertEQ(i, -2040)
-	i = + ~ t255 << t3; arktest.assertEQ(i, -2048)
-	i = - + t255 << t3; arktest.assertEQ(i, -2040)
-	i = - ~ t255 << t3; arktest.assertEQ(i, 2048)
-	i = ~ + t255 << t3; arktest.assertEQ(i, -2048)
-	i = ~ - t255 << t3; arktest.assertEQ(i, 2032)
+    suite.addTest("subtraction", () => {
+        let i: int, t2 = 2, t4 = 4
 
-	// equality
-	b = + t2 == 2; arktest.assertTrue(b)
-	b = + + t2 == 2; arktest.assertTrue(b)
-	b = - t2 == -2; arktest.assertTrue(b)
-	b = - - t2 == 2; arktest.assertTrue(b)
-	b = ~ t2 == -3; arktest.assertTrue(b)
-	b = ~ ~ t2 == 2; arktest.assertTrue(b)
-	b = + - t2 == -2; arktest.assertTrue(b)
-	b = + ~ t2 == -3; arktest.assertTrue(b)
-	b = - + t2 == -2; arktest.assertTrue(b)
-	b = - ~ t2 == 3; arktest.assertTrue(b)
-	b = ~ + t2 == -3; arktest.assertTrue(b)
-	b = ~ - t2 == 1; arktest.assertTrue(b)
+        i = + t2 - t4; arktest.assertEQ(i, -2)
+        i = + + t2 - t4; arktest.assertEQ(i, -2)
+        i = - t2 - t4; arktest.assertEQ(i, -6)
+        i = - - t2 - t4; arktest.assertEQ(i, -2)
+        i = ~ t2 - t4; arktest.assertEQ(i, -7)
+        i = ~ ~ t2 - t4; arktest.assertEQ(i, -2)
+        i = + - t2 - t4; arktest.assertEQ(i, -6)
+        i = + ~ t2 - t4; arktest.assertEQ(i, -7)
+        i = - + t2 - t4; arktest.assertEQ(i, -6)
+        i = - ~ t2 - t4; arktest.assertEQ(i, -1)
+        i = ~ + t2 - t4; arktest.assertEQ(i, -7)
+        i = ~ - t2 - t4; arktest.assertEQ(i, -3)
+    })
 
-	// not equality
-	b = + t2 != 2; arktest.assertFalse(b)
-	b = + + t2 != 2; arktest.assertFalse(b)
-	b = - t2 != -2; arktest.assertFalse(b)
-	b = - - t2 != 2; arktest.assertFalse(b)
-	b = ~ t2 != -3; arktest.assertFalse(b)
-	b = ~ ~ t2 != 2; arktest.assertFalse(b)
-	b = + - t2 != -2; arktest.assertFalse(b)
-	b = + ~ t2 != -3; arktest.assertFalse(b)
-	b = - + t2 != -2; arktest.assertFalse(b)
-	b = - ~ t2 != 3; arktest.assertFalse(b)
-	b = ~ + t2 != -3; arktest.assertFalse(b)
-	b = ~ - t2 != 1; arktest.assertFalse(b)
+    suite.addTest("casting", () => {
+        let i: int, t258 = 258
 
-	// bitwise and
-	i = + t255 & t4; arktest.assertEQ(i, 4)
-	i = + + t255 & t4; arktest.assertEQ(i, 4)
-	i = - t2 & t4; arktest.assertEQ(i, 4)
-	i = - - t255 & t4; arktest.assertEQ(i, 4)
-	i = ~ t2 & t4; arktest.assertEQ(i, 4)
-	i = ~ ~ t255 & t4; arktest.assertEQ(i, 4)
-	i = + - t2 & t4; arktest.assertEQ(i, 4)
-	i = + ~ t2 & t4; arktest.assertEQ(i, 4)
-	i = - + t2 & t4; arktest.assertEQ(i, 4)
-	i = - ~ t3 & t4; arktest.assertEQ(i, 4)
-	i = ~ + t3 & t4; arktest.assertEQ(i, 4)
-	i = ~ - t255 & t4; arktest.assertEQ(i, 4)
+        i = (+ t258).toByte(); arktest.assertEQ(i, 2)
+        i = (+ + t258).toByte(); arktest.assertEQ(i, 2)
+        i = (- t258).toByte(); arktest.assertEQ(i, -2)
+        i = (- - t258).toByte(); arktest.assertEQ(i, 2)
+        i = (~ t258).toByte(); arktest.assertEQ(i, -3)
+        i = (~ ~ t258).toByte(); arktest.assertEQ(i, 2)
+        i = (+ - t258).toByte(); arktest.assertEQ(i, -2)
+        i = (+ ~ t258).toByte(); arktest.assertEQ(i, -3)
+        i = (- + t258).toByte(); arktest.assertEQ(i, -2)
+        i = (- ~ t258).toByte(); arktest.assertEQ(i, 3)
+        i = (~ + t258).toByte(); arktest.assertEQ(i, -3)
+        i = (~ - t258).toByte(); arktest.assertEQ(i, 1)
+    })
 
-	// bitwise or
-	i = + t2 | t4; arktest.assertEQ(i, 6)
-	i = + + t2 | t4; arktest.assertEQ(i, 6)
-	i = - t255 | t4; arktest.assertEQ(i, -251)
-	i = - - t2 | t4; arktest.assertEQ(i, 6)
-	i = ~ t255 | t4; arktest.assertEQ(i, -252)
-	i = ~ ~ t2 | t4; arktest.assertEQ(i, 6)
-	i = + - t255 | t4; arktest.assertEQ(i, -251)
-	i = + ~ t255 | t4; arktest.assertEQ(i, -252)
-	i = - + t255 | t4; arktest.assertEQ(i, -251)
-	i = - ~ t255 | t4; arktest.assertEQ(i, 260)
-	i = ~ + t255 | t4; arktest.assertEQ(i, -252)
-	i = ~ - t255 | t4; arktest.assertEQ(i, 254)
+    suite.addTest("right shift", () => {
+        let i: int, t3 = 3, t255 = 255
 
-	// bitwise exclusive or
-	i = + t255 ^ t4; arktest.assertEQ(i, 251)
-	i = + + t255 ^ t4; arktest.assertEQ(i, 251)
-	i = - t255 ^ t4; arktest.assertEQ(i, -251)
-	i = - - t255 ^ t4; arktest.assertEQ(i, 251)
-	i = ~ t255 ^ t4; arktest.assertEQ(i, -252)
-	i = ~ ~ t255 ^ t4; arktest.assertEQ(i, 251)
-	i = + - t255 ^ t3; arktest.assertEQ(i, -254)
-	i = + ~ t3 ^ t2; arktest.assertEQ(i, -2)
-	i = - + t255 ^ t3; arktest.assertEQ(i, -254)
-	i = - ~ t255 ^ t4; arktest.assertEQ(i, 260)
-	i = ~ + t3 ^ t2; arktest.assertEQ(i, -2)
-	i = ~ - t4 ^ t255; arktest.assertEQ(i, 252)
+        i = + t255 >> t3; arktest.assertEQ(i, 31)
+        i = + + t255 >> t3; arktest.assertEQ(i, 31)
+        i = - t255 >> t3; arktest.assertEQ(i, -32)
+        i = - - t255 >> t3; arktest.assertEQ(i, 31)
+        i = ~ t255 >> t3; arktest.assertEQ(i, -32)
+        i = ~ ~ t255 >> t3; arktest.assertEQ(i, 31)
+        i = + - t255 >> t3; arktest.assertEQ(i, -32)
+        i = + ~ t255 >> t3; arktest.assertEQ(i, -32)
+        i = - + t255 >> t3; arktest.assertEQ(i, -32)
+        i = - ~ t255 >> t3; arktest.assertEQ(i, 32)
+        i = ~ + t255 >> t3; arktest.assertEQ(i, -32)
+        i = ~ - t255 >> t3; arktest.assertEQ(i, 31)
+    })
 
-	// multiplication assignment
-	i = t2 *= + t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
-	i = t2 *= + + t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
-	i = t2 *= - t4; arktest.assertEQ(i, -8); arktest.assertEQ(t2, -8); t2 = 2
-	i = t2 *= - - t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
-	i = t2 *= ~ t4; arktest.assertEQ(i, -10); arktest.assertEQ(t2, -10); t2 = 2
-	i = t2 *= ~ ~ t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
-	i = t2 *= + - t4; arktest.assertEQ(i, -8); arktest.assertEQ(t2, -8); t2 = 2
-	i = t2 *= + ~ t4; arktest.assertEQ(i, -10); arktest.assertEQ(t2, -10); t2 = 2
-	i = t2 *= - + t4; arktest.assertEQ(i, -8); arktest.assertEQ(t2, -8); t2 = 2
-	i = t2 *= - ~ t4; arktest.assertEQ(i, 10); arktest.assertEQ(t2, 10); t2 = 2
-	i = t2 *= ~ + t4; arktest.assertEQ(i, -10); arktest.assertEQ(t2, -10); t2 = 2
-	i = t2 *= ~ - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+    suite.addTest("right shift unsigned", () => {
+        let i: int, t3 = 3, t255 = 255
 
-	// division assignment
-	i = t8 /= + t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
-	i = t8 /= + + t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
-	i = t8 /= - t2; arktest.assertEQ(i, -4); arktest.assertEQ(t8, -4); t8 = 8
-	i = t8 /= - - t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
-	i = t8 /= ~ t2; arktest.assertEQ(i, -2); arktest.assertEQ(t8, -2); t8 = 8
-	i = t8 /= ~ ~ t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
-	i = t8 /= + - t2; arktest.assertEQ(i, -4); arktest.assertEQ(t8, -4); t8 = 8
-	i = t8 /= + ~ t2; arktest.assertEQ(i, -2); arktest.assertEQ(t8, -2); t8 = 8
-	i = t8 /= - + t2; arktest.assertEQ(i, -4); arktest.assertEQ(t8, -4); t8 = 8
-	i = t8 /= - ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 /= ~ + t2; arktest.assertEQ(i, -2); arktest.assertEQ(t8, -2); t8 = 8
-	i = t8 /= ~ - t2; arktest.assertEQ(i, 8); arktest.assertEQ(t8, 8); t8 = 8
+        i = + t255 >>> t3; arktest.assertEQ(i, 31)
+        i = + + t255 >>> t3; arktest.assertEQ(i, 31)
+        i = - t255 >>> t3; arktest.assertEQ(i, 536870880)
+        i = - - t255 >>> t3; arktest.assertEQ(i, 31)
+        i = ~ t255 >>> t3; arktest.assertEQ(i, 536870880)
+        i = ~ ~ t255 >>> t3; arktest.assertEQ(i, 31)
+        i = + - t255 >>> t3; arktest.assertEQ(i, 536870880)
+        i = + ~ t255 >>> t3; arktest.assertEQ(i, 536870880)
+        i = - + t255 >>> t3; arktest.assertEQ(i, 536870880)
+        i = - ~ t255 >>> t3; arktest.assertEQ(i, 32)
+        i = ~ + t255 >>> t3; arktest.assertEQ(i, 536870880)
+        i = ~ - t255 >>> t3; arktest.assertEQ(i, 31)
+    })
 
-	// modulo assignment
-	i = t8 %= + t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= + + t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= - t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= - - t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= ~ ~ t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= + - t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= + ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= - + t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= - ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= ~ + t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
-	i = t8 %= ~ - t255; arktest.assertEQ(i, 8); arktest.assertEQ(t8, 8); t8 = 8
+    suite.addTest("left shift", () => {
+        let i: int, t3 = 3, t255 = 255
 
-	// addition assignment
-	i = t2 += + t4; arktest.assertEQ(i, 6); t2 = 2
-	i = t2 += + + t4; arktest.assertEQ(i, 6); t2 = 2
-	i = - t2 + t4; arktest.assertEQ(i, 2); t2 = 2
-	i = - - t2 + t4; arktest.assertEQ(i, 6); t2 = 2
-	i = ~ t2 + t4; arktest.assertEQ(i, 1); t2 = 2
-	i = ~ ~ t2 + t4; arktest.assertEQ(i, 6); t2 = 2
-	i = + - t2 + t4; arktest.assertEQ(i, 2); t2 = 2
-	i = + ~ t2 + t4; arktest.assertEQ(i, 1); t2 = 2
-	i = - + t2 + t4; arktest.assertEQ(i, 2); t2 = 2
-	i = - ~ t2 + t4; arktest.assertEQ(i, 7); t2 = 2
-	i = ~ + t2 + t4; arktest.assertEQ(i, 1); t2 = 2
-	i = ~ - t2 + t4; arktest.assertEQ(i, 5); t2 = 2
+        i = + t255 << t3; arktest.assertEQ(i, 2040)
+        i = + + t255 << t3; arktest.assertEQ(i, 2040)
+        i = - t255 << t3; arktest.assertEQ(i, -2040)
+        i = - - t255 << t3; arktest.assertEQ(i, 2040)
+        i = ~ t255 << t3; arktest.assertEQ(i, -2048)
+        i = ~ ~ t255 << t3; arktest.assertEQ(i, 2040)
+        i = + - t255 << t3; arktest.assertEQ(i, -2040)
+        i = + ~ t255 << t3; arktest.assertEQ(i, -2048)
+        i = - + t255 << t3; arktest.assertEQ(i, -2040)
+        i = - ~ t255 << t3; arktest.assertEQ(i, 2048)
+        i = ~ + t255 << t3; arktest.assertEQ(i, -2048)
+        i = ~ - t255 << t3; arktest.assertEQ(i, 2032)
+    })
 
-	// subtraction assignment
-	i = t2 -= + t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
-	i = t2 -= + + t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
-	i = t2 -= - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t2 -= - - t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
-	i = t2 -= ~ t4; arktest.assertEQ(i, 7); arktest.assertEQ(t2, 7); t2 = 2
-	i = t2 -= ~ ~ t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
-	i = t2 -= + - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t2 -= + ~ t4; arktest.assertEQ(i, 7); arktest.assertEQ(t2, 7); t2 = 2
-	i = t2 -= - + t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t2 -= - ~ t4; arktest.assertEQ(i, -3); arktest.assertEQ(t2, -3); t2 = 2
-	i = t2 -= ~ + t4; arktest.assertEQ(i, 7); arktest.assertEQ(t2, 7); t2 = 2
-	i = t2 -= ~ - t4; arktest.assertEQ(i, -1); arktest.assertEQ(t2, -1); t2 = 2
+    suite.addTest("equality", () => {
+        let b: boolean, t2 = 2
 
-	// right shift assignment
-	i = t255 >>= + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>= + + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>= - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
-	i = t255 >>= - - t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>= ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
-	i = t255 >>= ~ ~ t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>= + - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
-	i = t255 >>= + ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
-	i = t255 >>= - + t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
-	i = t255 >>= - ~ t3; arktest.assertEQ(i, 15); arktest.assertEQ(t255, 15); t255 = 255
-	i = t255 >>= ~ + t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
-	i = t255 >>= ~ - t3; arktest.assertEQ(i, 63); arktest.assertEQ(t255, 63); t255 = 255
+        b = + t2 == 2; arktest.assertTrue(b)
+        b = + + t2 == 2; arktest.assertTrue(b)
+        b = - t2 == -2; arktest.assertTrue(b)
+        b = - - t2 == 2; arktest.assertTrue(b)
+        b = ~ t2 == -3; arktest.assertTrue(b)
+        b = ~ ~ t2 == 2; arktest.assertTrue(b)
+        b = + - t2 == -2; arktest.assertTrue(b)
+        b = + ~ t2 == -3; arktest.assertTrue(b)
+        b = - + t2 == -2; arktest.assertTrue(b)
+        b = - ~ t2 == 3; arktest.assertTrue(b)
+        b = ~ + t2 == -3; arktest.assertTrue(b)
+        b = ~ - t2 == 1; arktest.assertTrue(b)
+    })
 
-	// right shift unsigned assignment
-	i = t255 >>>= + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>>= + + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>>= - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
-	i = t255 >>>= - - t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>>= ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
-	i = t255 >>>= ~ ~ t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
-	i = t255 >>>= + - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
-	i = t255 >>>= + ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
-	i = t255 >>>= - + t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
-	i = t255 >>>= - ~ t3; arktest.assertEQ(i, 15); arktest.assertEQ(t255, 15); t255 = 255
-	i = t255 >>>= ~ + t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
-	i = t255 >>>= ~ - t3; arktest.assertEQ(i, 63); arktest.assertEQ(t255, 63); t255 = 255
+    suite.addTest("not equality", () => {
+        let b: boolean, t2 = 2
 
-	// left shift assignment
-	i = t255 <<= + t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
-	i = t255 <<= + + t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
-	i = t255 <<= - t3; arktest.assertEQ(i, -536870912); arktest.assertEQ(t255, -536870912); t255 = 255
-	i = t255 <<= - - t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
-	i = t255 <<= ~ t3; arktest.assertEQ(i, -268435456); arktest.assertEQ(t255, -268435456); t255 = 255
-	i = t255 <<= ~ ~ t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
-	i = t255 <<= + - t3; arktest.assertEQ(i, -536870912); arktest.assertEQ(t255, -536870912); t255 = 255
-	i = t255 <<= + ~ t3; arktest.assertEQ(i, -268435456); arktest.assertEQ(t255, -268435456); t255 = 255
-	i = t255 <<= - + t3; arktest.assertEQ(i, -536870912); arktest.assertEQ(t255, -536870912); t255 = 255
-	i = t255 <<= - ~ t3; arktest.assertEQ(i, 4080); arktest.assertEQ(t255, 4080); t255 = 255
-	i = t255 <<= ~ + t3; arktest.assertEQ(i, -268435456); arktest.assertEQ(t255, -268435456); t255 = 255
-	i = t255 <<= ~ - t3; arktest.assertEQ(i, 1020); arktest.assertEQ(t255, 1020); t255 = 255
+        b = + t2 != 2; arktest.assertFalse(b)
+        b = + + t2 != 2; arktest.assertFalse(b)
+        b = - t2 != -2; arktest.assertFalse(b)
+        b = - - t2 != 2; arktest.assertFalse(b)
+        b = ~ t2 != -3; arktest.assertFalse(b)
+        b = ~ ~ t2 != 2; arktest.assertFalse(b)
+        b = + - t2 != -2; arktest.assertFalse(b)
+        b = + ~ t2 != -3; arktest.assertFalse(b)
+        b = - + t2 != -2; arktest.assertFalse(b)
+        b = - ~ t2 != 3; arktest.assertFalse(b)
+        b = ~ + t2 != -3; arktest.assertFalse(b)
+        b = ~ - t2 != 1; arktest.assertFalse(b)
+    })
 
-	// bitwise and assignment
-	i = t255 &= + t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
-	i = t255 &= + + t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
-	i = t4 &= - t2; arktest.assertEQ(i, 4); arktest.assertEQ(t4, 4); t4 = 4
-	i = t255 &= - - t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
-	i = t2 &= ~ t4; arktest.assertEQ(i, 2); arktest.assertEQ(t2, 2); t2 = 2
-	i = t255 &= ~ ~ t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
-	i = t4 &= + - t2; arktest.assertEQ(i, 4); arktest.assertEQ(t4, 4); t4 = 4
-	i = t2 &= + ~ t4; arktest.assertEQ(i, 2); arktest.assertEQ(t2, 2); t2 = 2
-	i = t4 &= - + t2; arktest.assertEQ(i, 4); arktest.assertEQ(t4, 4); t4 = 4
-	i = t3 &= - ~ t4; arktest.assertEQ(i, 1); arktest.assertEQ(t3, 1); t3 = 3
-	i = t3 &= ~ + t4; arktest.assertEQ(i, 3); arktest.assertEQ(t3, 3); t3 = 3
-	i = t255 &= ~ - t4; arktest.assertEQ(i, 3); arktest.assertEQ(t255, 3); t255 = 255
+    suite.addTest("bitwise and", () => {
+        let i: int, t2 = 2, t3 = 3, t4 = 4, t255 = 255
 
-	// bitwise or assignment
-	i = t2 |= + t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t2 |= + + t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t255 |= - t4; arktest.assertEQ(i, -1); arktest.assertEQ(t255, -1); t255 = 255
-	i = t2 |= - - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t4 |= ~ t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
-	i = t2 |= ~ ~ t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
-	i = t255 |= + - t4; arktest.assertEQ(i, -1); arktest.assertEQ(t255, -1); t255 = 255
-	i = t4 |= + ~ t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
-	i = t255 |= - + t4; arktest.assertEQ(i, -1); arktest.assertEQ(t255, -1); t255 = 255
-	i = t4 |= - ~ t255; arktest.assertEQ(i, 260); arktest.assertEQ(t4, 260); t4 = 4
-	i = t4 |= ~ + t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
-	i = t4 |= ~ - t255; arktest.assertEQ(i, 254); arktest.assertEQ(t4, 254); t4 = 4
+        i = + t255 & t4; arktest.assertEQ(i, 4)
+        i = + + t255 & t4; arktest.assertEQ(i, 4)
+        i = - t2 & t4; arktest.assertEQ(i, 4)
+        i = - - t255 & t4; arktest.assertEQ(i, 4)
+        i = ~ t2 & t4; arktest.assertEQ(i, 4)
+        i = ~ ~ t255 & t4; arktest.assertEQ(i, 4)
+        i = + - t2 & t4; arktest.assertEQ(i, 4)
+        i = + ~ t2 & t4; arktest.assertEQ(i, 4)
+        i = - + t2 & t4; arktest.assertEQ(i, 4)
+        i = - ~ t3 & t4; arktest.assertEQ(i, 4)
+        i = ~ + t3 & t4; arktest.assertEQ(i, 4)
+        i = ~ - t255 & t4; arktest.assertEQ(i, 4)
+    })
 
-	// bitwise exclusive or assignment
-	i = t4 ^= + t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
-	i = t4 ^= + + t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
-	i = t4 ^= - t255; arktest.assertEQ(i, -251); arktest.assertEQ(t4, -251); t4 = 4
-	i = t4 ^= - - t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
-	i = t4 ^= ~ t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
-	i = t4 ^= ~ ~ t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
-	i = t3 ^= + - t255; arktest.assertEQ(i, -254); arktest.assertEQ(t3, -254); t3 = 3
-	i = t2 ^= + ~ t3; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
-	i = t3 ^= - + t255; arktest.assertEQ(i, -254); arktest.assertEQ(t3, -254); t3 = 3
-    i = t4 ^= - ~ t255; arktest.assertEQ(i, 260); arktest.assertEQ(t4, 260); t4 = 4
-	i = t2 ^= ~ + t3; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
-	i = t255 ^= ~ - t4; arktest.assertEQ(i, 252); arktest.assertEQ(t255, 252); t255 = 255
+    suite.addTest("bitwise or", () => {
+        let i: int, t2 = 2, t4 = 4, t255 = 255
 
-    
+        i = + t2 | t4; arktest.assertEQ(i, 6)
+        i = + + t2 | t4; arktest.assertEQ(i, 6)
+        i = - t255 | t4; arktest.assertEQ(i, -251)
+        i = - - t2 | t4; arktest.assertEQ(i, 6)
+        i = ~ t255 | t4; arktest.assertEQ(i, -252)
+        i = ~ ~ t2 | t4; arktest.assertEQ(i, 6)
+        i = + - t255 | t4; arktest.assertEQ(i, -251)
+        i = + ~ t255 | t4; arktest.assertEQ(i, -252)
+        i = - + t255 | t4; arktest.assertEQ(i, -251)
+        i = - ~ t255 | t4; arktest.assertEQ(i, 260)
+        i = ~ + t255 | t4; arktest.assertEQ(i, -252)
+        i = ~ - t255 | t4; arktest.assertEQ(i, 254)
+    })
+
+    suite.addTest("bitwise exclusive or", () => {
+        let i: int, t2 = 2, t3 = 3, t4 = 4, t255 = 255
+
+        i = + t255 ^ t4; arktest.assertEQ(i, 251)
+        i = + + t255 ^ t4; arktest.assertEQ(i, 251)
+        i = - t255 ^ t4; arktest.assertEQ(i, -251)
+        i = - - t255 ^ t4; arktest.assertEQ(i, 251)
+        i = ~ t255 ^ t4; arktest.assertEQ(i, -252)
+        i = ~ ~ t255 ^ t4; arktest.assertEQ(i, 251)
+        i = + - t255 ^ t3; arktest.assertEQ(i, -254)
+        i = + ~ t3 ^ t2; arktest.assertEQ(i, -2)
+        i = - + t255 ^ t3; arktest.assertEQ(i, -254)
+        i = - ~ t255 ^ t4; arktest.assertEQ(i, 260)
+        i = ~ + t3 ^ t2; arktest.assertEQ(i, -2)
+        i = ~ - t4 ^ t255; arktest.assertEQ(i, 252)
+    })
+
+    suite.addTest("multiplication assignment", () => {
+        let i: int, t2 = 2, t4 = 4
+
+        i = t2 *= + t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
+        i = t2 *= + + t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
+        i = t2 *= - t4; arktest.assertEQ(i, -8); arktest.assertEQ(t2, -8); t2 = 2
+        i = t2 *= - - t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
+        i = t2 *= ~ t4; arktest.assertEQ(i, -10); arktest.assertEQ(t2, -10); t2 = 2
+        i = t2 *= ~ ~ t4; arktest.assertEQ(i, 8); arktest.assertEQ(t2, 8); t2 = 2
+        i = t2 *= + - t4; arktest.assertEQ(i, -8); arktest.assertEQ(t2, -8); t2 = 2
+        i = t2 *= + ~ t4; arktest.assertEQ(i, -10); arktest.assertEQ(t2, -10); t2 = 2
+        i = t2 *= - + t4; arktest.assertEQ(i, -8); arktest.assertEQ(t2, -8); t2 = 2
+        i = t2 *= - ~ t4; arktest.assertEQ(i, 10); arktest.assertEQ(t2, 10); t2 = 2
+        i = t2 *= ~ + t4; arktest.assertEQ(i, -10); arktest.assertEQ(t2, -10); t2 = 2
+        i = t2 *= ~ - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+    })
+
+    suite.addTest("division assignment", () => {
+        let i: int, t2 = 2, t8 = 8
+
+        i = t8 /= + t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
+        i = t8 /= + + t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
+        i = t8 /= - t2; arktest.assertEQ(i, -4); arktest.assertEQ(t8, -4); t8 = 8
+        i = t8 /= - - t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
+        i = t8 /= ~ t2; arktest.assertEQ(i, -2); arktest.assertEQ(t8, -2); t8 = 8
+        i = t8 /= ~ ~ t2; arktest.assertEQ(i, 4); arktest.assertEQ(t8, 4); t8 = 8
+        i = t8 /= + - t2; arktest.assertEQ(i, -4); arktest.assertEQ(t8, -4); t8 = 8
+        i = t8 /= + ~ t2; arktest.assertEQ(i, -2); arktest.assertEQ(t8, -2); t8 = 8
+        i = t8 /= - + t2; arktest.assertEQ(i, -4); arktest.assertEQ(t8, -4); t8 = 8
+        i = t8 /= - ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 /= ~ + t2; arktest.assertEQ(i, -2); arktest.assertEQ(t8, -2); t8 = 8
+        i = t8 /= ~ - t2; arktest.assertEQ(i, 8); arktest.assertEQ(t8, 8); t8 = 8
+    })
+
+    suite.addTest("modulo assignment", () => {
+        let i: int, t2 = 2, t3 = 3, t8 = 8, t255 = 255
+
+        i = t8 %= + t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= + + t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= - t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= - - t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= ~ ~ t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= + - t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= + ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= - + t3; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= - ~ t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= ~ + t2; arktest.assertEQ(i, 2); arktest.assertEQ(t8, 2); t8 = 8
+        i = t8 %= ~ - t255; arktest.assertEQ(i, 8); arktest.assertEQ(t8, 8); t8 = 8
+    })
+
+    suite.addTest("addition assignment", () => {
+        let i: int, t2 = 2, t4 = 4
+
+        i = t2 += + t4; arktest.assertEQ(i, 6); t2 = 2
+        i = t2 += + + t4; arktest.assertEQ(i, 6); t2 = 2
+        i = - t2 + t4; arktest.assertEQ(i, 2); t2 = 2
+        i = - - t2 + t4; arktest.assertEQ(i, 6); t2 = 2
+        i = ~ t2 + t4; arktest.assertEQ(i, 1); t2 = 2
+        i = ~ ~ t2 + t4; arktest.assertEQ(i, 6); t2 = 2
+        i = + - t2 + t4; arktest.assertEQ(i, 2); t2 = 2
+        i = + ~ t2 + t4; arktest.assertEQ(i, 1); t2 = 2
+        i = - + t2 + t4; arktest.assertEQ(i, 2); t2 = 2
+        i = - ~ t2 + t4; arktest.assertEQ(i, 7); t2 = 2
+        i = ~ + t2 + t4; arktest.assertEQ(i, 1); t2 = 2
+        i = ~ - t2 + t4; arktest.assertEQ(i, 5); t2 = 2
+    })
+
+    suite.addTest("subtraction assignment", () => {
+        let i: int, t2 = 2, t4 = 4
+
+        i = t2 -= + t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
+        i = t2 -= + + t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
+        i = t2 -= - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t2 -= - - t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
+        i = t2 -= ~ t4; arktest.assertEQ(i, 7); arktest.assertEQ(t2, 7); t2 = 2
+        i = t2 -= ~ ~ t4; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
+        i = t2 -= + - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t2 -= + ~ t4; arktest.assertEQ(i, 7); arktest.assertEQ(t2, 7); t2 = 2
+        i = t2 -= - + t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t2 -= - ~ t4; arktest.assertEQ(i, -3); arktest.assertEQ(t2, -3); t2 = 2
+        i = t2 -= ~ + t4; arktest.assertEQ(i, 7); arktest.assertEQ(t2, 7); t2 = 2
+        i = t2 -= ~ - t4; arktest.assertEQ(i, -1); arktest.assertEQ(t2, -1); t2 = 2
+    })
+
+    suite.addTest("right shift assignment", () => {
+        let i: int, t3 = 3, t255 = 255
+
+        i = t255 >>= + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>= + + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>= - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
+        i = t255 >>= - - t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>= ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
+        i = t255 >>= ~ ~ t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>= + - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
+        i = t255 >>= + ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
+        i = t255 >>= - + t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
+        i = t255 >>= - ~ t3; arktest.assertEQ(i, 15); arktest.assertEQ(t255, 15); t255 = 255
+        i = t255 >>= ~ + t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
+        i = t255 >>= ~ - t3; arktest.assertEQ(i, 63); arktest.assertEQ(t255, 63); t255 = 255
+    })
+
+    suite.addTest("right shift unsigned assignment", () => {
+        let i: int, t3 = 3, t255 = 255
+
+        i = t255 >>>= + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>>= + + t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>>= - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
+        i = t255 >>>= - - t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>>= ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
+        i = t255 >>>= ~ ~ t3; arktest.assertEQ(i, 31); arktest.assertEQ(t255, 31); t255 = 255
+        i = t255 >>>= + - t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
+        i = t255 >>>= + ~ t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
+        i = t255 >>>= - + t255; arktest.assertEQ(i, 127); arktest.assertEQ(t255, 127); t255 = 255
+        i = t255 >>>= - ~ t3; arktest.assertEQ(i, 15); arktest.assertEQ(t255, 15); t255 = 255
+        i = t255 >>>= ~ + t255; arktest.assertEQ(i, 255); arktest.assertEQ(t255, 255); t255 = 255
+        i = t255 >>>= ~ - t3; arktest.assertEQ(i, 63); arktest.assertEQ(t255, 63); t255 = 255
+    })
+
+    suite.addTest("left shift assignment", () => {
+        let i: int, t3 = 3, t255 = 255
+
+        i = t255 <<= + t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
+        i = t255 <<= + + t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
+        i = t255 <<= - t3; arktest.assertEQ(i, -536870912); arktest.assertEQ(t255, -536870912); t255 = 255
+        i = t255 <<= - - t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
+        i = t255 <<= ~ t3; arktest.assertEQ(i, -268435456); arktest.assertEQ(t255, -268435456); t255 = 255
+        i = t255 <<= ~ ~ t3; arktest.assertEQ(i, 2040); arktest.assertEQ(t255, 2040); t255 = 255
+        i = t255 <<= + - t3; arktest.assertEQ(i, -536870912); arktest.assertEQ(t255, -536870912); t255 = 255
+        i = t255 <<= + ~ t3; arktest.assertEQ(i, -268435456); arktest.assertEQ(t255, -268435456); t255 = 255
+        i = t255 <<= - + t3; arktest.assertEQ(i, -536870912); arktest.assertEQ(t255, -536870912); t255 = 255
+        i = t255 <<= - ~ t3; arktest.assertEQ(i, 4080); arktest.assertEQ(t255, 4080); t255 = 255
+        i = t255 <<= ~ + t3; arktest.assertEQ(i, -268435456); arktest.assertEQ(t255, -268435456); t255 = 255
+        i = t255 <<= ~ - t3; arktest.assertEQ(i, 1020); arktest.assertEQ(t255, 1020); t255 = 255
+    })
+
+    suite.addTest("bitwise and assignment", () => {
+        let i: int, t2 = 2, t3 = 3, t4 = 4, t255 = 255
+
+        i = t255 &= + t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
+        i = t255 &= + + t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
+        i = t4 &= - t2; arktest.assertEQ(i, 4); arktest.assertEQ(t4, 4); t4 = 4
+        i = t255 &= - - t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
+        i = t2 &= ~ t4; arktest.assertEQ(i, 2); arktest.assertEQ(t2, 2); t2 = 2
+        i = t255 &= ~ ~ t4; arktest.assertEQ(i, 4); arktest.assertEQ(t255, 4); t255 = 255
+        i = t4 &= + - t2; arktest.assertEQ(i, 4); arktest.assertEQ(t4, 4); t4 = 4
+        i = t2 &= + ~ t4; arktest.assertEQ(i, 2); arktest.assertEQ(t2, 2); t2 = 2
+        i = t4 &= - + t2; arktest.assertEQ(i, 4); arktest.assertEQ(t4, 4); t4 = 4
+        i = t3 &= - ~ t4; arktest.assertEQ(i, 1); arktest.assertEQ(t3, 1); t3 = 3
+        i = t3 &= ~ + t4; arktest.assertEQ(i, 3); arktest.assertEQ(t3, 3); t3 = 3
+        i = t255 &= ~ - t4; arktest.assertEQ(i, 3); arktest.assertEQ(t255, 3); t255 = 255
+    })
+
+    suite.addTest("bitwise or assignment", () => {
+        let i: int, t2 = 2, t4 = 4, t255 = 255
+
+        i = t2 |= + t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t2 |= + + t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t255 |= - t4; arktest.assertEQ(i, -1); arktest.assertEQ(t255, -1); t255 = 255
+        i = t2 |= - - t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t4 |= ~ t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
+        i = t2 |= ~ ~ t4; arktest.assertEQ(i, 6); arktest.assertEQ(t2, 6); t2 = 2
+        i = t255 |= + - t4; arktest.assertEQ(i, -1); arktest.assertEQ(t255, -1); t255 = 255
+        i = t4 |= + ~ t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
+        i = t255 |= - + t4; arktest.assertEQ(i, -1); arktest.assertEQ(t255, -1); t255 = 255
+        i = t4 |= - ~ t255; arktest.assertEQ(i, 260); arktest.assertEQ(t4, 260); t4 = 4
+        i = t4 |= ~ + t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
+        i = t4 |= ~ - t255; arktest.assertEQ(i, 254); arktest.assertEQ(t4, 254); t4 = 4
+    })
+
+    suite.addTest("bitwise exclusive or assignment", () => {
+        let i: int, t2 = 2, t3 = 3, t4 = 4, t255 = 255
+
+        i = t4 ^= + t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
+        i = t4 ^= + + t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
+        i = t4 ^= - t255; arktest.assertEQ(i, -251); arktest.assertEQ(t4, -251); t4 = 4
+        i = t4 ^= - - t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
+        i = t4 ^= ~ t255; arktest.assertEQ(i, -252); arktest.assertEQ(t4, -252); t4 = 4
+        i = t4 ^= ~ ~ t255; arktest.assertEQ(i, 251); arktest.assertEQ(t4, 251); t4 = 4
+        i = t3 ^= + - t255; arktest.assertEQ(i, -254); arktest.assertEQ(t3, -254); t3 = 3
+        i = t2 ^= + ~ t3; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
+        i = t3 ^= - + t255; arktest.assertEQ(i, -254); arktest.assertEQ(t3, -254); t3 = 3
+        i = t4 ^= - ~ t255; arktest.assertEQ(i, 260); arktest.assertEQ(t4, 260); t4 = 4
+        i = t2 ^= ~ + t3; arktest.assertEQ(i, -2); arktest.assertEQ(t2, -2); t2 = 2
+        i = t255 ^= ~ - t4; arktest.assertEQ(i, 252); arktest.assertEQ(t255, 252); t255 = 255
+    })
+
+    return suite.run()
 }
