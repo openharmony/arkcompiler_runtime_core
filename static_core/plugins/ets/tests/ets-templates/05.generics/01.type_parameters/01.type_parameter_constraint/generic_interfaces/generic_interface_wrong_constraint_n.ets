@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 desc: >-
     If type parameter T has type constraint S, then the actual type of the generic instantiation must be
     compatible with S (see Type Compatibility).
+expected_out: >-
+      {{c.expected_out}}
 tags: [compile-only, negative]
 ---*/
 
