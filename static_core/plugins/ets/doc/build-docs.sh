@@ -122,7 +122,7 @@ function build_sphinx_document()
     sphinx-build ${build_options} -b html "${src_dir}" "${BUILD_DIR}/${target}-html"
 
     # NB! Markdown for the spec is not skipped (mark-up too complex)
-    if [[ "${target}" != "spec" ]] && [[ "${target}" != "spec_700" ]]; then
+    if [[ "${target}" != "spec" ]] && [[ "${target}" != "spec_700" ]] && [[ "${target}" != "spec_700_zh" ]]; then
         echo "${target}: Building Markdown"
         sphinx-build ${build_options} -b markdown "${src_dir}" "${BUILD_DIR}/${target}-md"
         python3 "${SCRIPT_DIR}/merge_markdown.py" "${SCRIPT_DIR}" "${target}" "${BUILD_DIR}"
@@ -132,12 +132,21 @@ function build_sphinx_document()
     local build_dir_latex="${BUILD_DIR}/${target}-latex"
     sphinx-build ${build_options} -t ispdf -b latex "${src_dir}" "${build_dir_latex}"
     pushd "${build_dir_latex}"
-        latexmk -f -silent -pdf -dvi- -ps- *.tex || true
+        local tex_files=( *.tex )
+        if [[ "${target}" == "spec_700_zh" ]]; then
+            XINDYOPTS='-L general -C utf8 -M sphinx.xdy' \
+                latexmk -f -silent -pdf -dvi- -ps- "${tex_files[@]}" || true
+        fi
+        latexmk -f -silent -pdf -dvi- -ps- "${tex_files[@]}" || true
         mv *.pdf "${BUILD_DIR}"
     popd
 }
 
-set -e
+function check_translation_layout()
+{
+    python3 "${SCRIPT_DIR}/check_translation.py" \
+        --layout-only
+}
 
 if [[ -n "${ARTIFACTS_DIR}" ]]; then
     echo "Detected ARTIFACTS_DIR, BUILD_DIR will be set to ${ARTIFACTS_DIR}"
@@ -155,7 +164,7 @@ for i in "$@"; do
         BUILD_DIR=${i//[-a-z]*=/}
         ;;
     --build-type=*)
-        BUILD_TYPE=${i//[-a-z]*=/}
+        BUILD_DIR=${i//[-a-z]*=/}
         if ! [[ "${BUILD_TYPE}" =~ ^(debug|release)$ ]]; then
             echo "FATAL: Unknown build type ${BUILD_TYPE}. Supported values: debug, release"
             exit 1
@@ -268,6 +277,10 @@ if [[ "${BUILD_SPEC_700}" == "yes" ]]; then
     python3 "${SCRIPT_DIR}/validate_spec.py" "${SCRIPT_DIR}/spec_700"
     build_sphinx_document spec_700 "${SCRIPT_DIR}/spec_700"
     rm -f ${SCRIPT_DIR}/spec_700/*.plantuml
+
+    echo "spec_700_zh: Building Chinese 7.0 delivery specification"
+    check_translation_layout
+    build_sphinx_document spec_700_zh "${SCRIPT_DIR}/zh/spec_700"
 fi
 
 if [[ "${BUILD_COOKBOOK}" == "yes" ]]; then

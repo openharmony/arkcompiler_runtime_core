@@ -10,34 +10,30 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+
 .. _Lexical Elements:
 
-Lexical Elements
-################
+词法元素
+################################################################################
 
 .. meta:
     frontend_status: Done
 
-This chapter discusses the lexical structure of the |LANG| programming language.
+本章讨论 |LANG| 编程语言的词法结构。
 
 |
 
 .. _Unicode Characters:
 
-Use of Unicode Characters
-*************************
+Unicode 字符的使用
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-The |LANG| programming language uses characters of the Unicode Character
-set [1]_ as its terminal symbols. The Unicode UTF-16 encoding represents
-text in sequences of 16-bit code units.
+|LANG| 编程语言使用 Unicode 字符集 [1]_ 中的字符作为其终结符。Unicode 的 UTF-16 编码以 16 位代码单元序列表示文本。
 
-The term *Unicode code point* is used in this specification only where such
-representation is relevant to refer to the Unicode Character set and the
-UTF-16 encoding. Where such representation is irrelevant to the discussion,
-the generic term *character* is used.
+在本规范中，仅当需要涉及 Unicode 字符集和 UTF-16 编码这种表示方式时，才使用术语 *Unicode code point*。在这种表示方式与讨论无关的地方，则使用更通用的术语 *character*。
 
 .. index::
    terminal symbol
@@ -49,18 +45,18 @@ the generic term *character* is used.
 
 .. _Lexical Input Elements:
 
-Lexical Input Elements
-**********************
+词法输入元素
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-The language has the following types of *lexical input elements*:
+该语言具有以下几类*词法输入元素*：
 
--  :ref:`White Spaces`,
--  :ref:`Line Separators`,
--  :ref:`Tokens`, and
--  :ref:`Comments`.
+-  :ref:`White Spaces`
+-  :ref:`Line Separators`
+-  :ref:`Tokens`
+-  :ref:`Comments`
 
 .. index::
    white space
@@ -73,30 +69,22 @@ The language has the following types of *lexical input elements*:
 
 .. _White Spaces:
 
-White Spaces
-************
+空白符
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*White spaces* are lexical input elements that separate tokens from one another.
-White spaces include the following:
+空白符是将 token 相互分隔开的词法输入元素。空白符包括：
 
-- Space (U+0020),
+- 空格（U+0020）；
+- 水平制表符（U+0009）；
+- 垂直制表符（U+000B）；
+- 换页符（U+000C）；
+- 不换行空格（U+00A0）；以及
+- 零宽不换行空格（U+FEFF）。
 
-- Horizontal tabulation (U+0009),
-
-- Vertical tabulation (U+000B),
-
-- Form feed (U+000C),
-
-- No-break space (U+00A0), and
-
-- Zero-width no-break space (U+FEFF).
-
-White spaces improve source code readability and help avoiding ambiguities.
-White spaces are ignored by the syntactic grammar (see :ref:`Grammar Summary`).
-White spaces never occur within a single token, but can occur within a comment.
+空白符提高源代码可读性并有助于避免歧义。空白符会被语法文法忽略（参见 :ref:`Grammar Summary`）。空白符不会出现在单个 token 内部，但可以出现在注释内部。
 
 .. index::
    lexical input
@@ -115,26 +103,20 @@ White spaces never occur within a single token, but can occur within a comment.
 
 .. _Line Separators:
 
-Line Separators
-***************
+行分隔符
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*Line separators* are lexical input elements that separate tokens from one
-another and divide sequences of Unicode input characters into lines.
-Line separators include the following:
+行分隔符是将 token 相互分隔、并将 Unicode 输入字符序列划分为多行的词法输入元素。行分隔符包括：
 
-- Newline character (U+000A or ASCII <LF>),
+- 换行符（U+000A 或 ASCII <LF>）；
+- 回车符（U+000D 或 ASCII <CR>）；
+- 行分隔符字符（U+2028 或 ASCII <LS>）；以及
+- 段分隔符字符（U+2029 或 ASCII <PS>）。
 
-- Carriage return character (U+000D or ASCII <CR>),
-
-- Line separator character (U+2028 or ASCII <LS>), and
-
-- Paragraph separator character (U+2029 or ASCII <PS>).
-
-Line separators improve source code readability. Any sequence of line
-separators is considered a single separator.
+行分隔符提高源代码可读性。任意一串连续的行分隔符都被视为一个分隔符。
 
 .. index::
    lexical input
@@ -143,33 +125,26 @@ separators is considered a single separator.
    line separator character
    paragraph separator character
 
-Line separators are often handled as white spaces, except where line
-separators have special meanings. See :ref:`Semicolons` for more details.
+除在具有特殊含义的场景外，行分隔符通常按空白符处理。详见 :ref:`Semicolons`。
 
 |
 
 .. _Tokens:
 
-Tokens
-******
+Token
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-Tokens form the vocabulary of the language. There are four classes of tokens:
+Token 构成语言的词汇表。Token 分为四类：
 
--  :ref:`Identifiers`,
--  :ref:`Keywords`,
--  :ref:`Operators and Punctuators`, and
--  :ref:`Literals`.
+-  :ref:`Identifiers`
+-  :ref:`Keywords`
+-  :ref:`Operators and Punctuators`
+-  :ref:`Literals`
 
-*Token* is the only lexical input element that can act as a terminal symbol
-of the syntactic grammar (see :ref:`Grammar Summary`). In the process of
-tokenization, the next token is always the longest sequence of characters that
-form a valid token. Tokens are separated by white spaces (see
-:ref:`White spaces`), operators, or punctuators (see
-:ref:`Operators and Punctuators`). White spaces are ignored by the syntactic
-grammar (see :ref:`Grammar Summary`).
+*Token* 是唯一可以作为语法文法终结符的词法输入元素（见 :ref:`Grammar Summary`）。在词法切分过程中，下一个 token 总是由能够构成合法 token 的最长字符序列组成。Token 之间通过空白符（见 :ref:`White Spaces`）、运算符或标点符号（见 :ref:`Operators and Punctuators`）分隔。空白符会被语法文法忽略（见 :ref:`Grammar Summary`）。
 
 .. index::
    line separator
@@ -191,24 +166,19 @@ grammar (see :ref:`Grammar Summary`).
 
 .. _Identifiers:
 
-Identifiers
-***********
+标识符
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*Identifier* is a sequence of one or more valid Unicode characters. The
-Unicode grammar of identifiers is based on character properties
-specified by the Unicode Standard.
+*Identifier* 是由一个或多个合法 Unicode 字符组成的序列。标识符的 Unicode 文法基于 Unicode 标准中规定的字符属性。
 
-The first character in an identifier must be ``'$'``, ``'_'``, or any Unicode
-code point with the Unicode property 'ID_Start'[2]_. Other characters
-must be Unicode code points with the Unicode property or one of the following
-characters:
+标识符的首字符必须是 ``'$'``、``'_'``，或任意具有 Unicode 属性 ``ID_Start`` 的 Unicode 码点 [2]_。其余字符必须是具有相应 Unicode 属性的码点，或下列字符之一：
 
--  ``'$'`` (\\U+0024),
--  ``'``Zero-Width Non-Joiner``'`` (``<ZWNJ>``, \\U+200C), or
--  ``'``Zero-Width Joiner``'`` (``<ZWJ>``, \\U+200D).
+-  ``'$'`` (\\U+0024)
+-  ``'``Zero-Width Non-Joiner``'`` (``<ZWNJ>``, \\U+200C)
+-  ``'``Zero-Width Joiner``'`` (``<ZWJ>``, \\U+200D)
 
 .. index::
    identifier
@@ -274,26 +244,21 @@ characters:
       : UNICODE_CLASS_ND
       ;
 
-The Unicode character categories *UNICODE_CLASS_LU*, *UNICODE_CLASS_LL*,
-*UNICODE_CLASS_LT*, *UNICODE_CLASS_LM*, *UNICODE_CLASS_LO*, and
-*UNICODE_CLASS_ND* are discussed in detail in :ref:`Grammar Summary`.
+Unicode 字符类别 *UNICODE_CLASS_LU*、*UNICODE_CLASS_LL*、*UNICODE_CLASS_LT*、*UNICODE_CLASS_LM*、*UNICODE_CLASS_LO* 和 *UNICODE_CLASS_ND* 会在 :ref:`Grammar Summary` 中详细讨论。
 
 |
 
 .. _Keywords:
 
-Keywords
-********
+关键字
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*Keywords* are reserved words with meanings permanently predefined in |LANG|.
-Keywords are case-sensitive. The exact spelling of keywords grouped by types
-is presented in the four tables below.
+*Keywords* 是在 |LANG| 中具有永久预定义含义的保留字。关键字区分大小写。下列四个表给出了按类型分组后的关键字精确拼写。
 
-1. *Hard keywords* are reserved in any context. Hard keywords cannot be used as
-identifiers:
+1. *Hard keywords* 在任何上下文中都是保留字。硬关键字不能作为标识符使用：
 
 .. index::
    keyword
@@ -333,40 +298,7 @@ identifiers:
 |   ``else``         |   ``interface``   |   ``switch``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
-
-.. +--------------------+-------------------+------------------+------------------+
-   |                    |                   |                  |                  |
-   +====================+===================+==================+==================+
-   |   ``abstract``     |   ``enum``        |   ``let``        |   ``super``      |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``as``           |   ``export``      |   ``native``     |   ``this``       |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``async``        |   ``extends``     |   ``new``        |   ``throw``      |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``await``        |   ``false``       |   ``null``       |   ``true``       |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``break``        |   ``final``       |   ``overload``   |   ``try``        |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``case``         |   ``for``         |   ``override``   |   ``typeof``     |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``class``        |   ``function``    |   ``private``    |   ``undefined``  |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``const``        |   ``if``          |   ``protected``  |   ``while``      |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``constructor``  |   ``implements``  |   ``public``     |                  |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``continue``     |   ``import``      |   ``return``     |                  |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``default``      |   ``in``          |   ``sealed``     |                  |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``do``           |   ``instanceof``  |   ``static``     |                  |
-   +--------------------+-------------------+------------------+------------------+
-   |   ``else``         |   ``interface``   |   ``switch``     |                  |
-   +--------------------+-------------------+------------------+------------------+
-
-
-2. Names and aliases of predefined types are also *hard keywords*. They cannot
-be used as identifiers:
+2. 预定义类型的名称及其别名也属于 *hard keywords*，不能用作标识符：
 
 +---------------+---------------+
 | Primary Name  | Alias         |
@@ -400,8 +332,7 @@ be used as identifiers:
 | ``void``      |               |
 +---------------+---------------+
 
-3. *Soft keywords* have special meanings reserved in certain contexts. However,
-soft keywords are valid identifiers elsewhere:
+3. *Soft keywords* 只在特定上下文中具有保留含义；在其他位置，它们仍然是合法标识符：
 
 .. index::
    keyword
@@ -426,8 +357,7 @@ soft keywords are valid identifiers elsewhere:
 |      ``module``    |                    |
 +--------------------+--------------------+
 
-4. The following identifiers are also considered *soft keywords* reserved for
-the future use in |LANG|, or currently used as soft keywords in |TS|:
+4. 下列标识符也被视为 *soft keywords*，保留供 |LANG| 将来使用，或当前已在 |TS| 中作为软关键字使用：
 
 .. index::
    identifier
@@ -439,27 +369,21 @@ the future use in |LANG|, or currently used as soft keywords in |TS|:
 |    ``is``     |   ``memo``    |   ``struct``  |    ``var``    |  ``yield``     |
 +---------------+---------------+---------------+---------------+----------------+
 
-
 |
 
 .. _Operators and Punctuators:
 
-Operators and Punctuators
-*************************
+运算符与标点符号
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*Operators* are tokens that denote various actions to be performed on values.
-Operators include addition, subtraction, comparison, and other. The keywords
-``instanceof`` and ``typeof`` also act as operators.
+*Operators* 是表示对值执行各种操作的 token，例如加法、减法、比较等。关键字 ``instanceof`` 和 ``typeof`` 也起运算符作用。
 
-*Punctuators* are tokens that separate, complete, or otherwise organize program
-elements and parts. Punctuators include commas, semicolons, parentheses, square
-brackets, etc.
+*Punctuators* 是用于分隔、结束或以其他方式组织程序元素和组成部分的 token。标点符号包括逗号、分号、圆括号、方括号等。
 
-Operators and punctuators are represented by the following sequences of
-characters:
+运算符和标点符号由下列字符序列表示：
 
 .. index::
    operator
@@ -498,14 +422,14 @@ characters:
 
 .. _Literals:
 
-Literals
-********
+字面量
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*Literals* are values of certain types (see :ref:`Predefined Types` and
-:ref:`Literal Types`).
+*Literals* 是 :ref:`预定义类型 <Predefined Types>` 或
+:ref:`字面量类型 <Literal Types>` 的值。
 
 .. code-block:: abnf
 
@@ -521,8 +445,7 @@ Literals
       | CharLiteral
       ;
 
-Each literal is described in detail below. The experimental ``char literal``
-is discussed in :ref:`char Literals`.
+下面将分别详细说明每一种字面量。实验性的 ``char literal`` 在对应的 :ref:`char Literals` 说明中讨论。
 
 .. index::
    literal
@@ -532,27 +455,25 @@ is discussed in :ref:`char Literals`.
 
 .. _Numeric Literals:
 
-Numeric Literals
-================
+数值字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-*Numeric literals* include integer and floating-point literals.
+*Numeric literals* 包括整数和浮点数字面量。
 
 |
 
 .. _Integer Literals:
 
-Integer Literals
-================
+整数字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-Integer literals represent numbers that have neither a decimal point nor
-an exponential part. Integer literals can be written with radices 16
-(hexadecimal), 10 (decimal), 8 (octal), and 2 (binary) as follows:
+整数字面量表示既不包含小数点也不包含指数部分的数字。整数字面量可以使用 16 进制（hexadecimal）、10 进制（decimal）、8 进制（octal）和 2 进制（binary）书写，如下所示：
 
 .. index::
    integer
@@ -613,78 +534,68 @@ an exponential part. Integer literals can be written with radices 16
       [0-1]
       ;
 
-Integral literals with different radices are represented by the examples below:
+不同进制的整数字面量示例如下：
 
 .. code-block:: typescript
    :linenos:
 
-    153         // decimal literal
-    153_000     // decimal literal
-    0xBAD       // hex literal
-    0x7FFF_FFFF // hex literal
-    0o777       // octal literal
-    0b101       // binary literal
+    153 // decimal literal
+    1_153 // decimal literal
+    0xBAD3 // hex literal
+    0xBAD_3 // hex literal
+    0o777 // octal literal
+    0b101 // binary literal
 
-The underscore character ``'_'`` between successive
-digits can be used to improve readability.
-Underscore characters in such positions do not change the values of literals.
-However, the underscore character must be neither the very first nor the very
-last symbol of an integer literal.
+连续数字之间可以插入下划线字符 ``'_'`` 以提高可读性。位于这些位置的下划线不会改变字面量的值。但是，下划线既不能位于整数字面量的最开头，也不能位于其最后。
 
 .. index::
    underscore character
    compiler-internal integer type
 
-The type of an integer literal is the *compiler-internal integer type*
-(see :ref:`Specifics of Constant Expressions Evaluation`) which is used
-during constants expression evaluation.
-:ref:`Type Inference for Constant Expressions` is always applied
-after evaluating a constant expression to infer the type of a numeric constant
-expression, assigning it to a predefined numeric type. 
+整数字面量的类型是 compiler-internal integer type（见
+:ref:`Specifics of Constant Expressions Evaluation`），该类型用于常量表达式求值。
+:ref:`Type Inference for Constant Expressions` 总是在常量表达式求值后应用，
+用于把数值常量表达式推断为某个预定义数值类型。
 
-If an integer literal is a part of a constant expression
-(see :ref:`Constant Expressions`) a value of the literal can be out of range
-of type ``long``, but the value of the whole integer contsant expression
-must be in the range of type ``long`` or the type determined by the context.
+如果整数字面量是常量表达式的一部分（见 :ref:`Constant Expressions`），
+其值可以超出 ``long`` 的范围，但整个整数常量表达式的值必须落在 ``long``
+范围内，或者由上下文决定类型。
 
-The example below illustrates how type inference is used to determine the type
-of constant expressions (note that ``'-'`` is not a part of an integer literal
-but :ref:`Unary Minus` operator):
+下面的示例说明了常量表达式如何通过类型推断确定类型。注意 ``'-'`` 不是整数字面量的一部分，
+而是 :ref:`Unary Minus` 运算符：
 
 .. code-block:: typescript
-  :linenos:
+   :linenos:
 
-   const max_int1 = 21474836477 // OK, type: int, value: max(int)
-   const max_int2 = 0x7FFFFFFF  // OK, type: int, value: max(int)
-   
-   const min_int1 = - 2147483648 // OK, type: int, value: min(int)
-   const min_int2 = - 0x80000000 // OK, type: int, value: min(int)
+    const max_int1 = 21474836477 // OK, type: int, value: max(int)
+    const max_int2 = 0x7FFFFFFF  // OK, type: int, value: max(int)
 
-   const long1    =   0x80000000 // OK, type: long
-   
-   const err1: int = 2147483648 // Compile-time error, the value is out of range for 'int'
-   
-   const max_long = 0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
-   const min_long = - 0x8000_0000_0000_0000 // OK, type: long, value: min(long)
-   
-   const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
-   const err3 = 9223372036854775808   // Compile-time error, the value is too large
+    const min_int1 = - 2147483648 // OK, type: int, value: min(int)
+    const min_int2 = - 0x80000000 // OK, type: int, value: min(int)
 
-   const max_long2 = 0x7FFF_FFFF_FFFF_FFFF + 10 - 10  // OK, type: long, value: max(long)
+    const long1    =   0x80000000 // OK, type: long
+
+    const err1: int = 2147483648 // Compile-time error, the value is out of range for 'int'
+
+    const max_long = 0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
+    const min_long = - 0x8000_0000_0000_0000 // OK, type: long, value: min(long)
+
+    const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
+    const err3 = 9223372036854775808   // Compile-time error, the value is too large
+
+    const max_long2 = 0x7FFF_FFFF_FFFF_FFFF + 10 - 10  // OK, type: long, value: max(long)
 
 |
 
 .. _Floating-Point Literals:
 
-Floating-Point Literals
-=======================
+浮点数字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-*Floating-point literals* represent decimal numbers and consist of a
-whole-number part, a decimal point, a fraction part, an exponent, and
-a ``float`` type suffix as follows:
+*Floating-point literals* 表示十进制数，由整数部分、小数点、小数部分、指数部分以及 ``float`` 类型后缀组成，形式如下：
 
 .. code-block:: abnf
 
@@ -706,7 +617,7 @@ a ``float`` type suffix as follows:
         'f'
         ;
 
-The concept is represented by the examples below:
+这一概念示例如下：
 
 .. code-block:: typescript
    :linenos:
@@ -719,20 +630,14 @@ The concept is represented by the examples below:
     1e10
     1e10f
 
-The underscore character ``'_'`` between successive
-digits can be used to improve readability.
-Underscore characters in such positions do not change the values of literals.
-However, the underscore character must be neither the very first nor the very
-last symbol of a literal.
+连续数字之间可以插入下划线字符 ``'_'`` 以提高可读性。位于这些位置的下划线不会改变字面量的值。但是，下划线既不能位于字面量的最开头，也不能位于其最后。
 
-Floating-point literals are of floating-point types that match literals as
-follows:
+浮点数字面量属于与其匹配的浮点类型，规则如下：
 
-- If *float type suffix* is present, then ``float``;
-- Otherwise, ``double`` (type ``number`` is an alias to ``double``).
+- 如果存在 *float type suffix*，则类型为 ``float``；
+- 否则类型为 ``double``（类型 ``number`` 是 ``double`` 的别名）。
 
-If a floating-point literal is too large for its type, then a
-:index:`compile-time error` occurs:
+如果浮点数字面量对其类型来说过大，则发生 :index:`compile-time error`：
 
 .. code-block:: typescript
    :linenos:
@@ -758,18 +663,18 @@ If a floating-point literal is too large for its type, then a
 
 .. _Bigint Literals:
 
-Bigint Literals
-===============
+Bigint 字面量
+================================================================================
 
 .. meta:
     frontend_status: Partly
     todo: hex, octal, binary literals
 
-*Bigint literals* represent integer numbers with an unlimited number of digits.
+*Bigint literals* 表示位数不受限制的整数。
 
-*Bigint literals* are always of type ``bigint`` (see :ref:`Type bigint`).
+Bigint 字面量的类型始终为 bigint（见 :ref:`Type bigint`）。
 
-A ``bigint`` literal is an *integer literal* followed by the symbol ``'n'``:
+``bigint`` 字面量是在*整数字面量*后追加符号 ``'n'`` 得到的：
 
 .. code-block:: abnf
 
@@ -779,7 +684,7 @@ A ``bigint`` literal is an *integer literal* followed by the symbol ``'n'``:
 .. BigIntLiteral: IntegerLiteral 'n';
 
 
-The concept is represented by the examples below:
+这一概念示例如下：
 
 .. code-block:: typescript
 
@@ -789,13 +694,9 @@ The concept is represented by the examples below:
 
 .. 0xBAD_3n // bigint literal in hexadecimal notation
 
-The underscore character ``'_'`` between successive digits can be used to
-improve readability. Underscore characters in such positions do not change
-the values of literals. However, the underscore character must be neither
-the very first nor the very last symbol of a ``bigint`` literal.
+连续数字之间可以插入下划线字符 ``'_'`` 以提高可读性。位于这些位置的下划线不会改变字面量的值。但是，下划线既不能位于 ``bigint`` 字面量的最开头，也不能位于其最后。
 
-Strings that represent numbers or any integer value can be converted to
-``bigint`` by using built-in functions as follows:
+表示数字的字符串或任意整数值，都可以通过内建函数转换为 ``bigint``，如下所示：
 
 .. code-block-meta:
     skip
@@ -814,9 +715,7 @@ Strings that represent numbers or any integer value can be converted to
    number
    integer value
 
-Two methods allow taking *bitsCount* lower bits of a ``bigint`` number and
-return them as results. Signed and unsigned versions are both possible as
-follows:
+有两个方法可以截取 ``bigint`` 数值的低 *bitsCount* 位并将其作为结果返回。它们分别提供有符号和无符号版本：
 
 .. code-block:: typescript
 
@@ -831,14 +730,13 @@ follows:
 
 .. _Boolean Literals:
 
-Boolean Literals
-================
+布尔字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-*Boolean literal* values are represented by the two keywords: ``true`` and
-``false``.
+*Boolean literal* 的值由两个关键字表示：``true`` 和 ``false``。
 
 .. code-block:: abnf
 
@@ -846,7 +744,7 @@ Boolean Literals
         'true' | 'false'
         ;
 
-*Boolean literals* are of the ``boolean`` type.
+*Boolean literals* 的类型为 ``boolean``。
 
 .. index::
    keyword
@@ -858,20 +756,16 @@ Boolean Literals
 
 .. _String Literals:
 
-String Literals
-===============
+字符串字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-*String literals* comprise zero or more characters enclosed between
-single or double quotes. A *multiline string* literal (see
-:ref:`Multiline String Literal`) is a special form of a string literal.
+*String literals* 由零个或多个字符组成，并包裹在单引号或双引号之间。*multiline string* 字面量（见 :ref:`Multiline String Literal`）是字符串字面量的一种特殊形式。
 
-*String literals* are of the literal type that corresponds to the literal.
-If an operator is applied to the literal, then the literal type is replaced
-for ``string`` (see :ref:`Type string`).
+String 字面量的类型是与字面量本身对应的字面量类型。如果对该字面量应用了运算符，则该字面量类型会被替换为 string（见 :ref:`Type string`）。
 
 .. index::
    string literal
@@ -903,14 +797,9 @@ for ``string`` (see :ref:`Type string`).
         | ~[1-9xu\r\n]
         ;
 
-Characters in *string literals* normally represent themselves. However,
-certain non-graphic characters can be represented by explicit specifications
-or Unicode codes. Such constructs are called *escape sequences*.
+字符串字面量中的字符通常按其本身解释。不过，一些不可见字符可以通过显式写法或 Unicode 编码来表示，这类构造称为 *escape sequences*。
 
-Escape sequences can represent graphic characters within a *string literal*,
-e.g., single quotes (``'``), double quotes (``"``), backslashes (``\``),
-and more. An escape sequence always starts with the backslash character
-``'\'``, followed by one of the following characters:
+转义序列也可以在*字符串字面量*中表示可见字符，例如单引号（``'``）、双引号（``"``）、反斜杠（``\``）等。转义序列总是以反斜杠字符 ``'\'`` 开始，后接下列字符之一：
 
 .. index::
    string literal
@@ -919,38 +808,19 @@ and more. An escape sequence always starts with the backslash character
    single quote
    double quotes
 
--  ``"`` (double quote, U+0022),
-
-.. ” "
-
--  ``'`` (neutral single quote, U+0027),
-
-.. ’ U+2019
-
--  ``b`` (backspace, U+0008),
-
--  ``f`` (form feed, U+000c),
-
--  ``n`` (linefeed, U+000a),
-
--  ``r`` (carriage return, U+000d),
-
--  ``t`` (horizontal tab, U+0009),
-
--  ``v`` (vertical tab, U+000b),
-
--  ``\`` (backslash, U+005c),
-
--  ``x`` and two hexadecimal digits (like ``7F``),
-
--  ``u`` and four hexadecimal digits that form a fixed Unicode escape
-   sequence like ``\u005c``,
-
--  ``u{`` and at least one hexadecimal digit followed by ``}`` that form
-   a bounded Unicode escape sequence like ``\u{5c}``, and
-
--  Any single character except digits from '1' to '9' and characters ``'x'``,
-   ``'u'``, ``'CR'``, and ``'LF'``.
+-  ``"`` （双引号，U+0022）
+-  ``'`` （中性单引号，U+0027）
+-  ``b`` （退格，U+0008）
+-  ``f`` （换页，U+000c）
+-  ``n`` （换行，U+000a）
+-  ``r`` （回车，U+000d）
+-  ``t`` （水平制表符，U+0009）
+-  ``v`` （垂直制表符，U+000b）
+-  ``\`` （反斜杠，U+005c）
+-  ``x`` 加两个十六进制数字（如 ``7F``）
+-  ``u`` 加四个十六进制数字，构成固定长度 Unicode 转义序列，例如 ``\u005c``
+-  ``u{`` 加至少一个十六进制数字，再跟 ``}``，构成有界 Unicode 转义序列，例如 ``\u{5c}``
+-  除数字 ``1`` 至 ``9`` 以及字符 ``'x'``、``'u'``、``'CR'``、``'LF'`` 之外的任意单个字符
 
 .. index::
    string literal
@@ -963,7 +833,7 @@ and more. An escape sequence always starts with the backslash character
    hexadecimal
    Unicode escape sequence
 
-Escape sequences are represented in the examples below:
+转义序列示例如下：
 
 .. code-block:: typescript
    :linenos:
@@ -980,17 +850,13 @@ Escape sequences are represented in the examples below:
 
 .. _Multiline String Literal:
 
-Multiline String Literal
-========================
+多行字符串字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-*Multiline strings* can contain arbitrary text enclosed between backtick
-characters ``'`` \` ``'``. The backlash character ``'\'`` is an escape for the
-next character. Multiline strings can contain any character except an unescaped
-backtick. The end of a line is handled as a newline character:
-
+*Multiline strings* 可以包含任意文本，并由反引号字符 ``'`` \` ``'`` 包围。反斜杠字符 ``'\'`` 用于转义其后的下一个字符。多行字符串可以包含任意字符，但不能包含未转义的反引号。行尾会按换行字符处理：
 
 .. index::
    string literal
@@ -1019,10 +885,9 @@ backtick. The end of a line is handled as a newline character:
         '\\' [\r\n\u2028\u2029]+
         ;
 
-The grammar of *embeddedExpression* is described in
-:ref:`String Interpolation Expressions`.
+*embeddedExpression* 的文法会在 :ref:`String Interpolation Expressions` 中描述。
 
-A *multiline string* is represented in the example below:
+多行字符串示例如下：
 
 .. code-block:: typescript
    :linenos:
@@ -1041,9 +906,9 @@ A *multiline string* is represented in the example below:
     console.log(sentence2)
 
 .. note::
-   Leading spaces are neither squeezed nor trimmed.
+   行首空格既不会被压缩，也不会被裁剪。
 
-The output is represented in the example below:
+输出如下：
 
 ::
 
@@ -1058,9 +923,7 @@ The output is represented in the example below:
   backticks
 
 
-*MultilineString* literals are of literal types corresponding to literals.
-If an operator is applied to a literal, then the literal type is replaced for
-``string`` (see :ref:`Type String`).
+MultilineString 字面量的类型是与其字面量值对应的字面量类型。如果对其应用运算符，则该字面量类型会被替换为 string（见 :ref:`Type String`）。
 
 .. index::
    multiline string
@@ -1073,15 +936,13 @@ If an operator is applied to a literal, then the literal type is replaced for
 
 .. _Undefined Literal:
 
-``Undefined`` Literal
-=====================
+``Undefined`` 字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-*Undefined literal* is the only literal of types ``void`` and ``undefined``
-(see :ref:`Type undefined or void`) to denote a reference with a value that is
-not defined. The *undefined literal* is represented by the keyword ``undefined``:
+*Undefined literal* 是类型 ``void`` 和 ``undefined``（见 :ref:`Type undefined or void`）中唯一的字面量，用于表示其值尚未定义的引用。*undefined literal* 由关键字 ``undefined`` 表示：
 
 .. code-block:: abnf
 
@@ -1099,15 +960,13 @@ not defined. The *undefined literal* is represented by the keyword ``undefined``
 
 .. _Null Literal:
 
-``Null`` Literal
-================
+``Null`` 字面量
+================================================================================
 
 .. meta:
     frontend_status: Done
 
-*Null literal* is the only literal of type ``null`` (see :ref:`Type null`) to
-denote a reference without pointing at any entity. The null literal is
-represented by the keyword ``null``:
+*Null literal* 是类型 ``null``（见 :ref:`Type null`）中唯一的字面量，用于表示一个不指向任何实体的引用。null 字面量由关键字 ``null`` 表示：
 
 .. code-block:: abnf
 
@@ -1115,8 +974,7 @@ represented by the keyword ``null``:
         'null'
         ;
 
-The value is typically used for types like ``T | null``
-(see :ref:`Nullish Types`).
+该值通常用于 ``T | null`` 这样的类型（见 :ref:`Nullish Types`）。
 
 .. index::
    null literal
@@ -1128,29 +986,22 @@ The value is typically used for types like ``T | null``
 
 .. _Comments:
 
-Comments
-********
+注释
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-*Comment* is a piece of text stream added to document and complement the
-source code. Comments are insignificant for the syntactic grammar (see
-:ref:`Grammar Summary`).
+*Comment* 是加入到文本流中、用于说明和补充源代码的文本片段。注释对于语法文法（见 :ref:`Grammar Summary`）没有意义。
 
-*Line comments* begin with the sequence of characters ``'//'`` as in the
-example below, and end with the line separator character. Any character
-or sequence of characters between those characters is allowed but ignored.
+*Line comments* 以字符序列 ``'//'`` 开始，如下例所示，并在行分隔符处结束。这两个界定符之间可以出现任意字符或字符序列，但都会被忽略。
 
 .. code-block:: typescript
    :linenos:
 
     // This is a line comment
 
-*Multiline comments* begin with the sequence of characters ``'\*'`` as
-in the example below, and end with the first subsequent sequence of characters
-``'*/'``. Any character or sequence of characters between them is allowed but
-ignored.
+*Multiline comments* 以字符序列 ``'/*'`` 开始，如下例所示，并在之后遇到的第一个字符序列 ``'*/'`` 处结束。它们之间允许出现任意字符或字符序列，但都会被忽略。
 
 .. code-block:: typescript
    :linenos:
@@ -1159,7 +1010,7 @@ ignored.
         This is a multiline comment
     */
 
-Comments cannot be nested.
+注释不能嵌套。
 
 .. index::
    comment
@@ -1170,15 +1021,13 @@ Comments cannot be nested.
 
 .. _Semicolons:
 
-Semicolons
-**********
+分号
+********************************************************************************
 
 .. meta:
     frontend_status: Done
 
-Declarations and statements are usually terminated by a line separator (see
-:ref:`Line Separators`). A semicolon must be used in some cases to separate
-syntax productions written in a single line, or to avoid ambiguity.
+声明和语句通常以行分隔符结束（见 :ref:`Line Separators`）。在某些情况下，必须使用分号来分隔写在同一行中的语法产生式，或者避免歧义。
 
 .. index::
    declaration

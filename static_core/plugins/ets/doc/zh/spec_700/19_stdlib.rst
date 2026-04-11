@@ -10,45 +10,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Contributors:
 
-Contributors
-############
+.. _Standard Library:
 
-Language design lead:
+标准库
+################################################################################
 
-- Nedoria Aleksei
+.. meta:
+    frontend_status: Partly
 
-Contributors:
+|LANG| 语言的标准库定义了一组必需的类型、变量、常量、函数和注解，为高效、便捷的编程提供 API。
 
-- Bronnikov Georgy
-- Cherkashin Vyacheslav
-- Gavrin Evgeny
-- Grebenschikov Konstantin
-- Fang Lou
-- Huo Qingyi
-- Kanatov Alexey
-- Nedoria Aleksei
-- Olshevsky Vladimir
-- Pavlyuk Alexander
-- Pei Jiajun
-- Polyakov Alexander
-- Pukhov Vsevolod
-- Qiu Yu
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Wan Mingxiang
-- Wu Hongfei
-- Xian Yuqiang
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
+标准库全部元素的详细说明位于另一份独立文档中，该文档是 |LANG| 发行包的一部分。该文档还定义了一组可在所有 |LANG| 模块中直接访问的导出实体。
 
 .. raw:: pdf
 

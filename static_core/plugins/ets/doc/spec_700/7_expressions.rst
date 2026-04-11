@@ -7479,8 +7479,7 @@ The syntax of *assignment expression* is presented below:
         : '='
         | '+='  | '-='  | '*='   | '/='  | '%=' | '**='
         | '<<=' | '>>=' | '>>>='
-        | '&='  | '|='  | '^=' | '&&=' | '||='
-        | '??='
+        | '&='  | '|='  | '^='
         ;
 
     lhsExpression:
@@ -7731,10 +7730,6 @@ A compound assignment expression in the form ``lhsExpression op= rhsExpression``
 is equivalent to ``lhsExpression = ((lhsExpression) op (rhsExpression)) as T``,
 where ``T`` is the type of *lhsExpression*, except that *lhsExpression*
 is evaluated only once.
-
-While the nullish-coalescing assignment (``??=``) only evaluates the right
-operand, and assigns to the left operand if the left operand is ``null`` or
-``undefined``.
 
 An assignment expression can be evaluated at runtime in one
 of the following ways:

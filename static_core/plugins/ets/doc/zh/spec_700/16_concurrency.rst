@@ -10,45 +10,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Contributors:
 
-Contributors
-############
+.. _Concurrency:
 
-Language design lead:
+并发
+################################################################################
 
-- Nedoria Aleksei
+.. meta:
+    frontend_status: Done
 
-Contributors:
-
-- Bronnikov Georgy
-- Cherkashin Vyacheslav
-- Gavrin Evgeny
-- Grebenschikov Konstantin
-- Fang Lou
-- Huo Qingyi
-- Kanatov Alexey
-- Nedoria Aleksei
-- Olshevsky Vladimir
-- Pavlyuk Alexander
-- Pei Jiajun
-- Polyakov Alexander
-- Pukhov Vsevolod
-- Qiu Yu
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Wan Mingxiang
-- Wu Hongfei
-- Xian Yuqiang
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
+.. include:: ../spec_700_concurrency/01_concurrency_overview.rst
+.. include:: ../spec_700_concurrency/02_concurrency_async.rst
+.. include:: ../spec_700_concurrency/03_concurrency_parallel.rst
+.. include:: ../spec_700_concurrency/04_concurrency_synchronization.rst
+.. include:: ../spec_700_concurrency/05_concurrency_apis.rst
+.. include:: ../spec_700_concurrency/06_concurrency_runtime.rst
 
 .. raw:: pdf
 

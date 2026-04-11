@@ -10,9 +10,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+
 .. _Grammar Summary:
 
-Grammar Summary
+文法汇总
 ###############
 
 .. code-block:: abnf
@@ -880,7 +881,7 @@ Grammar Summary
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
         | ambientAccessorDeclaration
-        | typeAlias        
+        | typeAlias
         )
         ;
 
@@ -1028,7 +1029,7 @@ Grammar Summary
         '[' expression ']'
         ;
 
-    arrayElement: 
+    arrayElement:
         expression
     ;
 

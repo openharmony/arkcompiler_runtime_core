@@ -10,46 +10,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Contributors:
 
-Contributors
-############
+运行时系统
+################################################################################
 
-Language design lead:
-
-- Nedoria Aleksei
-
-Contributors:
-
-- Bronnikov Georgy
-- Cherkashin Vyacheslav
-- Gavrin Evgeny
-- Grebenschikov Konstantin
-- Fang Lou
-- Huo Qingyi
-- Kanatov Alexey
-- Nedoria Aleksei
-- Olshevsky Vladimir
-- Pavlyuk Alexander
-- Pei Jiajun
-- Polyakov Alexander
-- Pukhov Vsevolod
-- Qiu Yu
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Wan Mingxiang
-- Wu Hongfei
-- Xian Yuqiang
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
-
-.. raw:: pdf
-
-   PageBreak
+.. include:: ../spec_700_runtime/01_intro.rst
+.. include:: ../spec_700_runtime/02_fully_qualified_name.rst
+.. include:: ../spec_700_runtime/03_binary_file_format.rst
+.. include:: ../spec_700_runtime/04_runtime_type_system.rst
+.. include:: ../spec_700_runtime/05_runtime_name.rst
+.. include:: ../spec_700_runtime/06_language_representation_in_binary_file.rst
+.. include:: ../spec_700_runtime/07_verification.rst

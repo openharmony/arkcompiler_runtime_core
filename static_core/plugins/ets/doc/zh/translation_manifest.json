@@ -1,0 +1,245 @@
+{
+  "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+  "files": [
+    {
+      "source_path": "spec_700/0_authors.rst",
+      "zh_path": "zh/spec_700/0_authors.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/10_interfaces.rst",
+      "zh_path": "zh/spec_700/10_interfaces.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/11_enums.rst",
+      "zh_path": "zh/spec_700/11_enums.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/12_errors.rst",
+      "zh_path": "zh/spec_700/12_errors.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/13_modules.rst",
+      "zh_path": "zh/spec_700/13_modules.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/14_ambients.rst",
+      "zh_path": "zh/spec_700/14_ambients.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/15_semantics.rst",
+      "zh_path": "zh/spec_700/15_semantics.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/16_concurrency.rst",
+      "zh_path": "zh/spec_700/16_concurrency.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/17_experimental.rst",
+      "zh_path": "zh/spec_700/17_experimental.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/18_annotations.rst",
+      "zh_path": "zh/spec_700/18_annotations.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/19_stdlib.rst",
+      "zh_path": "zh/spec_700/19_stdlib.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/1_intro.rst",
+      "zh_path": "zh/spec_700/1_intro.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/20_implementation.rst",
+      "zh_path": "zh/spec_700/20_implementation.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/21_runtime.rst",
+      "zh_path": "zh/spec_700/21_runtime.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/22_grammar.rst",
+      "zh_path": "zh/spec_700/22_grammar.rst",
+      "source_commit": "064878885486b88c041cbfc6563be8119461f9eb",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/23_binary_compatibility.rst",
+      "zh_path": "zh/spec_700/23_binary_compatibility.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/24_build_system.rst",
+      "zh_path": "zh/spec_700/24_build_system.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/2_lexical.rst",
+      "zh_path": "zh/spec_700/2_lexical.rst",
+      "source_commit": "064878885486b88c041cbfc6563be8119461f9eb",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/3_types.rst",
+      "zh_path": "zh/spec_700/3_types.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/4_names.rst",
+      "zh_path": "zh/spec_700/4_names.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/5_generics.rst",
+      "zh_path": "zh/spec_700/5_generics.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/6_conversions.rst",
+      "zh_path": "zh/spec_700/6_conversions.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/7_expressions.rst",
+      "zh_path": "zh/spec_700/7_expressions.rst",
+      "source_commit": "064878885486b88c041cbfc6563be8119461f9eb",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/8_statements.rst",
+      "zh_path": "zh/spec_700/8_statements.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/9_classes.rst",
+      "zh_path": "zh/spec_700/9_classes.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700/index.rst",
+      "zh_path": "zh/spec_700/index.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/01_concurrency_overview.rst",
+      "zh_path": "zh/spec_700_concurrency/01_concurrency_overview.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/02_concurrency_async.rst",
+      "zh_path": "zh/spec_700_concurrency/02_concurrency_async.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/03_concurrency_parallel.rst",
+      "zh_path": "zh/spec_700_concurrency/03_concurrency_parallel.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/04_concurrency_synchronization.rst",
+      "zh_path": "zh/spec_700_concurrency/04_concurrency_synchronization.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/05_concurrency_apis.rst",
+      "zh_path": "zh/spec_700_concurrency/05_concurrency_apis.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/06_concurrency_runtime.rst",
+      "zh_path": "zh/spec_700_concurrency/06_concurrency_runtime.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_concurrency/07_concurrency_interop.rst",
+      "zh_path": "zh/spec_700_concurrency/07_concurrency_interop.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/01_intro.rst",
+      "zh_path": "zh/spec_700_runtime/01_intro.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/02_fully_qualified_name.rst",
+      "zh_path": "zh/spec_700_runtime/02_fully_qualified_name.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/03_binary_file_format.rst",
+      "zh_path": "zh/spec_700_runtime/03_binary_file_format.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/04_runtime_type_system.rst",
+      "zh_path": "zh/spec_700_runtime/04_runtime_type_system.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/05_runtime_name.rst",
+      "zh_path": "zh/spec_700_runtime/05_runtime_name.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/06_language_representation_in_binary_file.rst",
+      "zh_path": "zh/spec_700_runtime/06_language_representation_in_binary_file.rst",
+      "source_commit": "f80c69ca65dafd3ed70c9b7a2b4db81682f3534b",
+      "translation_status": "translated"
+    },
+    {
+      "source_path": "spec_700_runtime/07_verification.rst",
+      "zh_path": "zh/spec_700_runtime/07_verification.rst",
+      "source_commit": "0b322bc463af995bb9d0c2ab4952afc842f8224c",
+      "translation_status": "translated"
+    }
+  ]
+}

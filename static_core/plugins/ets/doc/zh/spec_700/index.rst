@@ -10,46 +10,36 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Contributors:
 
-Contributors
-############
+|LANG| 规范 7.0.0
+================================================================================
 
-Language design lead:
+.. toctree::
+   :numbered:
+   :maxdepth: 3
 
-- Nedoria Aleksei
-
-Contributors:
-
-- Bronnikov Georgy
-- Cherkashin Vyacheslav
-- Gavrin Evgeny
-- Grebenschikov Konstantin
-- Fang Lou
-- Huo Qingyi
-- Kanatov Alexey
-- Nedoria Aleksei
-- Olshevsky Vladimir
-- Pavlyuk Alexander
-- Pei Jiajun
-- Polyakov Alexander
-- Pukhov Vsevolod
-- Qiu Yu
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Wan Mingxiang
-- Wu Hongfei
-- Xian Yuqiang
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
-
-.. raw:: pdf
-
-   PageBreak
+   /1_intro
+   /2_lexical
+   /3_types
+   /4_names
+   /5_generics
+   /6_conversions
+   /7_expressions
+   /8_statements
+   /9_classes
+   /10_interfaces
+   /11_enums
+   /12_errors
+   /13_modules
+   /14_ambients
+   /15_semantics
+   /16_concurrency
+   /17_experimental
+   /18_annotations
+   /19_stdlib
+   /20_implementation
+   /21_runtime
+   /22_grammar
+   /23_binary_compatibility
+   /24_build_system
+   /0_authors
