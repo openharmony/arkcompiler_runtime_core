@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,23 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% yaml 'not_bigint.params.yaml' as yaml_file %}
+{%- for c in yaml_file.cases %}
 
 /*---
-desc: CTE if not both operands are bigints
-tags: [compile-only, negative]
+desc: >-
+    If one operand is of type bigint, and the other is of a numeric type, then the
+    result is false.
+    If an equality expression is known at compile time to always evaluate to false
+    or true at runtime, then a compile-time warning is issued.
+expected_out: { compiler: ["Warning W65001: The equality expression is always false."] }
 ---*/
 
-let b: bigint = {{c.b}}
+let b = 0n
 
-function main(): void {
-	arktest.assertFalse(b {{c.op}} {{c.exp}})
+function main() {
+    let a = {{c.exp}}
+    arktest.assertNE(a, b)
+    arktest.assertFalse(a == b)
 }
 {%- endfor %}
