@@ -1370,16 +1370,6 @@
     - ark::ObjectHeader*
     - ark::ets::EtsReference*
 
-- name: ResolveCallByName
-  entrypoint: ResolveCallByNameEntrypoint
-  bridge: entrypoint
-  properties: []
-  signature:
-  - uintptr_t
-  - const ark::Method*
-  - ark::ObjectHeader*
-  - size_t
-
 - name: Int8ArrayFillInternal
   entrypoint: Int8ArrayFillInternal
   bridge: none

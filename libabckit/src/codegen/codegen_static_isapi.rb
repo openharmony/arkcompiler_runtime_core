@@ -555,15 +555,6 @@ def call_me_from_template
     plain('ets.typeof', r(0))
   end
 
-  visit('EtsLdObjByNameIntrinsic') do
-    field_id_from_imm = 'enc->irInterface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]))'
-    switch(type,
-      [case_(b32_types, 'ets.ldobj.name', r(0), field_id_from_imm),
-       case_(b64_types, 'ets.ldobj.name.64', r(0), field_id_from_imm),
-       case_(['REFERENCE'], 'ets.ldobj.name.obj', r(0), field_id_from_imm)]
-    )
-  end
-
   # Empty visitors for IR instructions we want to ignore
   # (Add missing IRs on demand)
   %w[NullCheck BoundsCheck ZeroCheck NegativeCheck SafePoint

@@ -2851,12 +2851,6 @@ void EncodeVisitor::VisitObjByIndexCheck(GraphVisitor *visitor, Inst *inst)
     UNREACHABLE();
 }
 
-void EncodeVisitor::VisitResolveByName(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->ResolveCallByName(inst->CastToResolveByName());
-}
-
 void EncodeVisitor::VisitStringFlatCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto *cg = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
