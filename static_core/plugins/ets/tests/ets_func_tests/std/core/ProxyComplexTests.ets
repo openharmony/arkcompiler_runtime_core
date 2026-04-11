@@ -122,7 +122,6 @@ interface E5 extends E2 {
 }
 
 interface E6 extends E5 {
-    foo(x: Derived): double
     foo(x: Base): double
 }
 
