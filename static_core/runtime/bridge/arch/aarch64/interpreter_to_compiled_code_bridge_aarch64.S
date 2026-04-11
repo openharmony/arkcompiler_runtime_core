@@ -499,3 +499,8 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     CFI_DEF_CFA(sp, 0)
     ret
     CFI_ENDPROC
+
+.global MAKE_ASM_NAME(ResumeAsyncCompiledCode)
+TYPE_FUNCTION(ResumeAsyncCompiledCode)
+MAKE_ASM_NAME(ResumeAsyncCompiledCode):
+    ret

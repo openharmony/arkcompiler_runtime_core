@@ -32,7 +32,8 @@ export final class AsyncContext {
     private primCount: long;
 
     private awaitId: long = -1;
-    private compiledCode: long = 0;
+    private compiledCode: long = -1;
+    private pc: int = -1;
 
     /**
      * Method creates AsyncContext represents context of current async function

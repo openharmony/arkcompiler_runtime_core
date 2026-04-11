@@ -43,6 +43,9 @@
 #include "runtime/handle_base-inl.h"
 #include "runtime/handle_scope-inl.h"
 #include "libarkfile/type_helper.h"
+#include "runtime/include/language_context.h"
+#include "runtime/plugins.h"
+#include "libarkfile/annotation_data_accessor.h"
 #include "verification/public.h"
 #include "verification/util/is_system.h"
 
@@ -604,6 +607,27 @@ void Method::StopProfiling()
 bool Method::IsProxy() const
 {
     return GetClass()->IsProxy();
+}
+
+bool Method::HasAsyncAnnotation() const
+{
+    const panda_file::File &pf = *GetPandaFile();
+    panda_file::MethodDataAccessor mda(pf, GetFileId());
+    auto langCtx = LanguageContext(plugins::GetLanguageContextBase(GetClass()->GetSourceLang()));
+    const auto *asyncAnnoDesc = langCtx.GetAsyncAnnotationDescriptor();
+    if (asyncAnnoDesc == nullptr) {
+        return false;
+    }
+    auto asyncAnnoDescStr = std::string(utf::Mutf8AsCString(asyncAnnoDesc));
+    bool hasAsyncAnnotation = false;
+    mda.EnumerateAnnotations([&](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        auto className = panda_file::StringDataToString(pf.GetStringData(ada.GetClassId()));
+        if (className == asyncAnnoDescStr) {
+            hasAsyncAnnotation = true;
+        }
+    });
+    return hasAsyncAnnotation;
 }
 
 /* static */

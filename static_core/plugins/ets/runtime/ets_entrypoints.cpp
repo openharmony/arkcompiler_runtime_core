@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_entrypoints.h"
+#include "plugins/ets/runtime/types/ets_async_context.h"
 
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/job_launch.h"
@@ -29,6 +30,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_string_case_conversion.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_await_promise_impl.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -41,6 +43,19 @@
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/include/class_linker-inl.h"
+#include "types/ets_object.h"
+#include "intrinsics.h"
+#include "types/ets_promise.h"
+
+#include "execution/stackless/stackless_job_manager.h"
+#include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_async_context-inl.h"
+#include "plugins/ets/runtime/job_queue.h"
+#include "runtime/execution/job_events.h"
+#include "runtime/include/mem/panda_containers.h"
+#include "runtime/execution/stackless/suspendable_job.h"
 
 namespace ark::ets {
 
@@ -320,6 +335,7 @@ extern "C" void BeginGeneralNativeMethod()
     ASSERT(executionCtx != nullptr);
     auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
 
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr uint32_t MAX_LOCAL_REF = 4096;
     if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
         LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
@@ -363,6 +379,7 @@ extern "C" void BeginQuickNativeMethod()
     ASSERT(executionCtx != nullptr);
     auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
 
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr uint32_t MAX_LOCAL_REF = 4096;
     if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
         LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
@@ -450,6 +467,12 @@ extern "C" EtsBoolean EtsStringEqualsEntrypoint(coretypes::String *str1, coretyp
 extern "C" EtsBoolean EtsDefaultLocaleAllowsFastLatinCaseConversion()
 {
     return ToEtsBoolean(ark::ets::intrinsics::caseconversion::DefaultLocaleAllowsFastLatinCaseConversion());
+}
+
+extern "C" EtsObject *EtsStacklessInitAsyncContextEntrypoint(EtsPromise *promise, uint32_t refCount, uint32_t primCount,
+                                                             uint32_t pc)
+{
+    return ark::ets::intrinsics::helpers::EtsAwaitPromiseImpl(promise, refCount, primCount, pc);
 }
 
 }  // namespace ark::ets

@@ -884,6 +884,8 @@ public:
 
     PANDA_PUBLIC_API bool IsProxy() const;
 
+    PANDA_PUBLIC_API bool HasAsyncAnnotation() const;
+
     ProfilingData *GetProfilingData()
     {
         if (UNLIKELY(IsNative() || IsProxy())) {

@@ -201,7 +201,12 @@ inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs,
         }
     }
 
-    uint64_t retValue = InvokeCompiledCodeWithArgArray(values.get(), currentFrame, this, thread);
+    uint64_t retValue = 0U;
+    if (UNLIKELY(callFlags.IsResumed())) {
+        retValue = ResumeAsyncCompiledCode(values.get(), currentFrame, this, thread);
+    } else {
+        retValue = InvokeCompiledCodeWithArgArray(values.get(), currentFrame, this, thread);
+    }
 
     thread->SetCurrentFrameKind(frameKind);
     thread->SetCurrentFrame(currentFrame);

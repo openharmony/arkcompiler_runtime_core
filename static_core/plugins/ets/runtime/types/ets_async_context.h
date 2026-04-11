@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ASYNC_CONTEXT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ASYNC_CONTEXT_H
 
+#include <cstdint>
 #include "libarkbase/mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -32,7 +33,16 @@ class EtsAsyncContextTest;
 
 class EtsAsyncContext final : public EtsObject {
 public:
-    static EtsAsyncContext *Create(EtsExecutionContext *executionCtx);
+    /**
+     * Creates a new EtsAsyncContext instance.
+     * executionCtx - current execution context
+     * refSize, primSize and pc are coming from compiler (-1 means we are in interpreter frame)
+     * refSize - maximum number of references in current graph
+     * primSize - maximum number of primitives in current graph
+     * pc - the program counter of the suspension point, used for stack unwinding in stack
+     */
+    static EtsAsyncContext *Create(EtsExecutionContext *executionCtx, int32_t refSize = -1, int32_t primSize = -1,
+                                   int32_t pc = -1);
     static EtsAsyncContext *GetCurrent(EtsExecutionContext *executionCtx);
 
     inline void SetReturnValue(EtsExecutionContext *executionCtx, EtsPromise *returnValue);
@@ -44,6 +54,7 @@ public:
     inline void SetFrameOffsets(EtsExecutionContext *executionCtx, EtsShortArray *frameOffsets);
     inline void SetCompiledCode(EtsLong compiledCode);
     inline void SetAwaitId(EtsLong awaitId);
+    inline void SetPc(EtsInt pc);
 
     inline EtsPromise *GetReturnValue(EtsExecutionContext *executionCtx) const;
     inline EtsPromise *GetAwaitee(EtsExecutionContext *executionCtx) const;
@@ -124,11 +135,18 @@ private:
     ObjectPointer<EtsLongArray> primValues_;
     ObjectPointer<EtsShortArray> frameOffsets_;
 
+// NOTE: Refactor layout #34102
+#ifdef PANDA_32_BIT_MANAGED_POINTER
+    EtsInt pc_;
+#endif
     EtsLong refCount_;
     EtsLong primCount_;
 
     EtsLong awaitId_;
     EtsLong compiledCode_;
+#ifndef PANDA_32_BIT_MANAGED_POINTER
+    EtsInt pc_;
+#endif
 
     friend class test::EtsAsyncContextTest;
 };

@@ -17,7 +17,6 @@
 #include "exec_context.h"
 #include "libarkfile/file_items.h"
 #include "include/thread_scopes.h"
-#include "plugins.h"
 #include "verification_context.h"
 
 #include "verification/jobs/job.h"
@@ -55,8 +54,6 @@ namespace ark::verifier {
 
 using TryBlock = panda_file::CodeDataAccessor::TryBlock;
 using CatchBlock = panda_file::CodeDataAccessor::CatchBlock;
-
-bool CheckAsyncAnnotation(Method const *method);
 
 VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const *job)
 {
@@ -115,7 +112,7 @@ VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const
     3. Check async annotation
     */
     // NOTE(panferovi) should this be moved to the plugin??
-    verifCtx.SetAsyncAnnotation(CheckAsyncAnnotation(method));
+    verifCtx.SetAsyncAnnotation(method->HasAsyncAnnotation());
 
     /*
     4. add Start entry of method
@@ -312,26 +309,6 @@ VerificationStatus VerifyMethod(VerificationContext &verifCtx)
     }
 
     return worstSoFar;
-}
-
-bool CheckAsyncAnnotation(Method const *method)
-{
-    const panda_file::File &pf = *method->GetPandaFile();
-    panda_file::MethodDataAccessor mda(pf, method->GetFileId());
-    auto langCtx = LanguageContext(plugins::GetLanguageContextBase(method->GetClass()->GetSourceLang()));
-    const auto *asyncAnnoDesc = langCtx.GetAsyncAnnotationDescriptor();
-    auto hasAsyncAnnotation = false;
-    if (asyncAnnoDesc != nullptr) {
-        auto asyncAnnoDescStr = std::string(utf::Mutf8AsCString(asyncAnnoDesc));
-        mda.EnumerateAnnotations([&](panda_file::File::EntityId annId) {
-            panda_file::AnnotationDataAccessor ada(pf, annId);
-            auto className = panda_file::StringDataToString(pf.GetStringData(ada.GetClassId()));
-            if (className == asyncAnnoDescStr) {
-                hasAsyncAnnotation = true;
-            }
-        });
-    }
-    return hasAsyncAnnotation;
 }
 
 }  // namespace ark::verifier

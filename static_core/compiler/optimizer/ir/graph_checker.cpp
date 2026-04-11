@@ -1199,12 +1199,28 @@ void GraphChecker::ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, cons
 {
     auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(),
                            [ss, otherInst](Input input) { return ss->GetDataFlowInput(input.GetInst()) == otherInst; });
-    CHECKER_DO_IF_NOT_AND_PRINT(it != ss->GetInputs().end(),
-                                std::cerr << "Instruction v" << otherInst->GetId() << " dominates SaveStateSuspend v"
-                                          << ss->GetId() << " and SaveStateSuspend dominates its users, "
-                                          << "but it is not an input of SaveStateSuspend:\n"
-                                          << *otherInst << std::endl
-                                          << *ss << std::endl);
+    bool isSaved = it != ss->GetInputs().end();
+    if (!isSaved) {
+        bool isNullPtrOrConst = otherInst->IsConst() || otherInst->GetOpcode() == Opcode::NullPtr;
+        if (isNullPtrOrConst && ss->GetImmediates() != nullptr) {
+            uint64_t rawValue =
+                otherInst->GetOpcode() == Opcode::NullPtr ? 0 : otherInst->CastToConstant()->GetRawValue();
+            auto type = otherInst->GetType();
+            // There are no INT64 in dynamic (same like in OptimizeSaveStateConstantInputs).
+            if (type == DataType::INT64 && ss->GetBasicBlock()->GetGraph()->IsDynamicMethod()) {
+                type = DataType::INT32;
+            }
+            isSaved = std::any_of(
+                ss->GetImmediates()->begin(), ss->GetImmediates()->end(),
+                [rawValue, type](const SaveStateImm &imm) { return imm.value == rawValue && imm.type == type; });
+        }
+    }
+    CHECKER_DO_IF_NOT_AND_PRINT(isSaved, std::cerr << "Instruction v" << otherInst->GetId()
+                                                   << " dominates SaveStateSuspend v" << ss->GetId()
+                                                   << " and SaveStateSuspend dominates its users, "
+                                                   << "but it is not an input of SaveStateSuspend:\n"
+                                                   << *otherInst << std::endl
+                                                   << *ss << std::endl);
 }
 
 namespace {

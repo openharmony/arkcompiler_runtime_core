@@ -942,4 +942,13 @@ void Codegen::CreateArrayCopyWithin(IntrinsicInst *inst, [[maybe_unused]] Reg ds
                  src[FOURTH_OPERAND]);
 }
 
+void Codegen::CreateAsyncContextInit(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
+{
+    auto promise = src[FIRST_OPERAND];
+    auto pc = GetEncoder()->GetCursorOffset() - GetStartCodeOffset();
+    CallRuntime(inst, EntrypointId::ETS_STACKLESS_INIT_ASYNC_CONTEXT, dst, {}, promise,
+                TypedImm(GetGraph()->GetMaxRefCountAtSuspend()), TypedImm(GetGraph()->GetMaxPrimCountAtSuspend()),
+                TypedImm(pc));
+}
+
 }  // namespace ark::compiler

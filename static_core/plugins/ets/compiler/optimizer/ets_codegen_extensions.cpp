@@ -14,8 +14,34 @@
  */
 
 #include "compiler/optimizer/code_generator/codegen.h"
+#include "compiler/optimizer/analysis/liveness_analyzer.h"
 
 namespace ark::compiler {
+// SaveState keeps the input itself, but after regalloc its real location may change.
+// Read the location from liveness at SaveState.
+static Location GetSaveStateInputLocation(Codegen *codegen, SaveStateInst *saveState, size_t inputIdx)
+{
+    ASSERT(codegen->GetGraph()->IsAnalysisValid<LivenessAnalyzer>());
+    auto &la = codegen->GetGraph()->GetAnalysis<LivenessAnalyzer>();
+    auto targetLifeNumber = la.GetInstLifeIntervals(saveState)->GetBegin();
+    auto inputInst = saveState->GetDataFlowInput(inputIdx);
+    ASSERT(inputInst != nullptr);
+    auto interval = la.GetInstLifeIntervals(inputInst)->FindSiblingAt(targetLifeNumber);
+    ASSERT(interval != nullptr);
+    return interval->GetLocation();
+}
+
+static void EmitAsyncStubCall(Codegen *codegen, Inst *inst, RuntimeInterface::EntrypointId entrypoint)
+{
+    auto encoder = codegen->GetEncoder();
+    ScopedTmpReg tmpReg(encoder, true);
+    codegen->GetEntrypoint(tmpReg, entrypoint);
+    encoder->MakeCall(tmpReg);
+
+    if (inst->IsSaveState() || inst->GetSaveState() != nullptr) {
+        codegen->CreateStackMap(inst);
+    }
+}
 
 void Codegen::EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, [[maybe_unused]] SRCREGS &src)
 {
@@ -176,6 +202,55 @@ void Codegen::EtsWrapObjectNative(WrapObjectNativeInst *wrapObject)
     GetEncoder()->EncodeAdd(dstReg, SpReg(), Imm(GetStackOffset(location)));
     // don't apply stack ref mask, since it is empty
     ASSERT(GetRuntime()->GetStackReferenceMask() == 0U);
+}
+
+void Codegen::EtsAsyncSuspend(Inst *inst)
+{
+    if (GetArch() != Arch::X86_64) {
+        LOG(WARNING, COMPILER) << "Compiled ETS async suspend stub is implemented only for x86_64";
+        GetEncoder()->SetFalseResult();
+        return;
+    }
+
+    auto saveStateSuspend = static_cast<SaveStateInst *>(inst);
+    auto asyncContextLocation =
+        GetSaveStateInputLocation(this, saveStateSuspend, saveStateSuspend->GetAsyncContextIndex());
+    auto param = GetTarget().GetParamReg(0, ConvertDataType(DataType::REFERENCE, GetArch()));
+    if (asyncContextLocation.IsAnyRegister()) {
+        ASSERT(asyncContextLocation.IsRegisterValid());
+        auto asyncContextReg = ConvertRegister(asyncContextLocation.GetValue(), DataType::REFERENCE);
+        // Move AsyncContext only when it's not already in the first argument register.
+        if (asyncContextReg.GetId() != param.GetId()) {
+            GetEncoder()->EncodeMov(param, asyncContextReg);
+        }
+    } else if (asyncContextLocation.IsAnyStack()) {
+        GetEncoder()->EncodeLdr(param, false, GetMemRefForSlot(CFrameLayout::OffsetOrigin::SP, asyncContextLocation));
+    } else {
+        UNREACHABLE();
+        GetEncoder()->SetFalseResult();
+        return;
+    }
+
+    EmitAsyncStubCall(this, inst, RuntimeInterface::EntrypointId::ETS_ASYNC_SUSPEND_STUB);
+}
+
+void Codegen::EtsAsyncDispatch(Inst *inst)
+{
+    if (GetArch() != Arch::X86_64) {
+        LOG(WARNING, COMPILER) << "Compiled ETS async dispatch stub is implemented only for x86_64";
+        GetEncoder()->SetFalseResult();
+        return;
+    }
+
+    auto encoder = GetEncoder();
+    auto asyncContext = ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
+    auto param = GetTarget().GetParamReg(0, asyncContext.GetType());
+    // Move AsyncContext only when it's not already in the first argument register.
+    if (asyncContext.GetId() != param.GetId()) {
+        encoder->EncodeMov(param, asyncContext);
+    }
+
+    EmitAsyncStubCall(this, inst, RuntimeInterface::EntrypointId::ETS_ASYNC_DISPATCH_STUB);
 }
 
 }  // namespace ark::compiler

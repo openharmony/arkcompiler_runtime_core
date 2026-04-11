@@ -115,6 +115,7 @@ public:
     bool IsClassBoxedFloat(ClassPtr klass) const override;
     bool IsClassBoxedDouble(ClassPtr klass) const override;
     compiler::DataType::Type GetBoxedClassDataType(ClassPtr klass) const override;
+    bool HasAsyncAnnotation(MethodPtr methodPtr) const override;
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/ets_interop_runtime_interface-inl.h"
