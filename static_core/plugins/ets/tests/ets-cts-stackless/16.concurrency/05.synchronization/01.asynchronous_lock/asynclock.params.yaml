@@ -1,0 +1,80 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: AsyncLock constructor creates instance.
+    logic: |-
+      let lock = new AsyncLock();
+      let p = lock.lockAsync<void>(() => {});
+      arktest.assertFalse(lock == null);
+      arktest.assertTrue(lock instanceof object);
+      arktest.assertTrue(p instanceof object);
+
+  - desc: Basic lockAsync functionality.
+    decl: |-
+      async function delay() {
+        return new Promise<void>((res, rej) => {
+          setTimeout(res, 1, undefined)
+        })
+      }
+
+      async function startTest() {
+        let lock = new AsyncLock();
+        let acquired = false;
+        const p1 = lock.lockAsync<void>(async () => {
+          acquired = true;
+        });
+
+        await delay();
+        arktest.assertTrue(acquired);
+        await p1;
+      }
+    logic: |-
+      waitForCompletion(startTest);
+
+  - desc: Operations execute sequentially.
+    decl: |-
+      async function delay(d: int) {
+        return new Promise<void>((res, rej) => {
+          setTimeout(res, d, undefined)
+        })
+      }
+
+      async function startTest() {
+        let lock = new AsyncLock();
+        const executionOrder: int[] = [];
+        
+        const task = async (id: int, d: int) => {
+          const p = lock.lockAsync<void>(async () => {
+            await delay(d);
+            executionOrder.push(id);
+          });
+          await p;
+        };
+        
+        const promises = [
+          task(1, 100),
+          task(2, 50),
+          task(3, 10)
+        ];
+        
+        await Promise.all(promises);
+        
+        arktest.assertEQ(executionOrder.length, 3);
+        arktest.assertEQ(executionOrder[0], 1);
+        arktest.assertEQ(executionOrder[1], 2);
+        arktest.assertEQ(executionOrder[2], 3);
+      }
+    logic: |-
+      waitForCompletion(startTest);

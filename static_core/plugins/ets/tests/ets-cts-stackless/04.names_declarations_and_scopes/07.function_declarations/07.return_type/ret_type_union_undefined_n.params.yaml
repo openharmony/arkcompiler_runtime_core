@@ -1,0 +1,67 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+function_decls:
+    # function: undefined | number, returns a value on one path
+    - decl: |-
+          let flag = false
+          function foo(): undefined | number {
+              if (flag) return true
+          }
+      expected_out: |-
+          Semantic error ESE0091: Type 'Boolean' is not compatible
+          with the enclosing method's return type 'undefined|Double'
+
+    # function: number | undefined, returns value
+    - decl: |-
+          function foo(): number | undefined {
+              return false
+          }
+      expected_out: |-
+          Semantic error ESE0091: Type 'Boolean' is not compatible
+          with the enclosing method's return type 'Double|undefined'
+
+    # lambda: undefined | int, returns value
+    - decl: |-
+          let foo = (): undefined | int => {
+              return "abc"
+          }
+      expected_out: |-
+          Semantic error ESE0091: Type '\"abc\"' is not compatible with
+          the enclosing method's return type 'undefined|Int'
+
+    # lambda: undefined | boolean, returns value on one path
+    - decl: |-
+          let flag = false
+          let foo = (): undefined | boolean => {
+              if (flag) {
+                  return 1
+              }
+          }
+      expected_out: |-
+          Semantic error ESE0091: Type 'Int' is not compatible
+          with the enclosing method's return type 'undefined|Boolean'
+
+    # class instance method: int | undefined, returns value on one path
+    - decl: |-
+          class A {
+              foo(b: boolean): int | undefined {
+                  if (b) {
+                      return 7f
+                  }
+              }
+          }
+      expected_out: |-
+          Semantic error ESE0091: Type 'Float' is not compatible
+          with the enclosing method's return type 'Int|undefined'
