@@ -38,6 +38,7 @@ static_core/docs/                     @igelhaus
 static_core/docs/memory-management*   @dmitriitr
 static_core/docs/task_manager.md      @dmitriitr
 static_core/dprof/                    @slynkodenis @v-cherkashin
+static_core/execution/                @konstanting ^dmitriitr ^molotkovmikhail
 static_core/extras/                   @igelhaus
 static_core/gn/                       @igelhaus
 static_core/irtoc/                    @Prof @mbolshov @asidorov ^wanzixuan330 ^chernykhsergey ^gitee-dakeQI ^LeechyLiang @sukhikhalexander
@@ -134,6 +135,7 @@ static_core/plugins/ets/isa/                             @mbolshov @gitee-dakeQI
 static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon ^asidorov ^gitee-dakeQI
 static_core/plugins/ets/runtime/                         @vpukhov @slynkodenis
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/*execution*              ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis @liyiming13
 static_core/plugins/ets/runtime/ets_class_linker_context.cpp                  @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_class_linker_context.h                    @vpukhov @slynkodenis @shilei123
@@ -152,7 +154,10 @@ static_core/plugins/ets/runtime/ets_native_library.h                          @v
 static_core/plugins/ets/runtime/ets_native_library_provider.cpp               @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_native_library_provider.h                 @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof ^gitee-dakeQI
+static_core/plugins/ets/runtime/external_iface_table.h   ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
+static_core/plugins/ets/runtime/main_worker_external_scheduler.cpp            ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/unhandled_manager        ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 ^templinkonstantin
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^templinkonstantin ^chernykhsergey
 static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis @liyiming13
@@ -162,15 +167,20 @@ static_core/runtime/include/tooling/                     @slynkodenis ^kurnevich
 static_core/runtime/tests/tooling/                       @slynkodenis ^kurnevichstanislav
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^asidorov
 static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @artemu @ipetrov ^shemetovphilip
-static_core/plugins/ets/runtime/interop_js/                                   @igelhaus ^nazarovkonstantin @vpukhov @slynkodenis @benzunfu
+static_core/plugins/ets/runtime/interop_js/                                   @igelhaus ^nazarovkonstantin @vpukhov @slynkodenis @benzunfu ^molotkovmikhail ^ipetrov ^atremu
 static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @artemu ^ipetrov ^molotkovmikhail
+static_core/plugins/ets/runtime/intrinsics/*concurrency* ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof @schernykh
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @schernykh ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @schernykh ^slynkodenis ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcFile.cpp               @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
+static_core/plugins/ets/runtime/intrinsics/std_core_ExclusiveLauncher.cpp     ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/intrinsics/std_core_Job.cpp                   ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/intrinsics/std_core_Promise.cpp               ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/runtime/intrinsics/std_core_SyncPrimitives.cpp        ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_Timers.cpp                ^anton-sysoev @magikarp777 @molotkovmikhail ^ivan-tyulyandin @Nojpg @schernykh ^slynkodenis ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @artemu
 static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @artemu
@@ -205,7 +215,7 @@ static_core/plugins/ets/tests/ets-cts-7.0/                                    @a
 static_core/plugins/ets/tests/ets-templates/                                  ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
 static_core/plugins/ets/tests/ets_sdk/                                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039
-static_core/plugins/ets/tests/interop_js/                                     @igelhaus ^nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav @slynkodenis @benzunfu
+static_core/plugins/ets/tests/interop_js/                                     @igelhaus ^nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav @slynkodenis @benzunfu @molotkovmikhail ^ipetrov ^atremu
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
@@ -217,9 +227,11 @@ static_core/plugins/ets/runtime/hybrid/mem/                                   ^d
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @artemu ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @artemu ^ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^artemu ^wang_zhaoyong ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5 @molotkovmikhail
 static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   ^ipetrov ^dmitriitr ^konstanting @molotkovmikhail @kastenalexey ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/stdlib/std/containers/*BlockingQueue.ets              @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/stdlib/std/containers/*Concurren*                     @molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/stdlib/std/containers/WaitersLits.ets                 @molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/stdlib/std/core/AbcRuntimeLinker.ets                  @vpukhov @slynkodenis @shilei123 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/BootRuntimeLinker.ets                 @vpukhov @slynkodenis @shilei123 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
@@ -253,6 +265,7 @@ static_core/plugins/ets/tests/ets_test_suite/gc/                              @a
 static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @artemu ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @artemu ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
+static_core/plugins/ets/tests/interop_js/eacoro/                              @igelhaus ^nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav @slynkodenis @benzunfu @konstanting
 static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus ^nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav @slynkodenis @benzunfu
 static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^artemu
 static_core/plugins/ets/tests/native/promise/                                 @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
