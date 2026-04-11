@@ -34,6 +34,7 @@ class EtsClass;
 
 namespace ark::ets::interop::js::ets_proxy {
 
+class SharedReference;
 using EtsClassWrappersCache = WrappersCache<EtsClass *, EtsClassWrapper>;
 
 class EtsClassWrapper {
@@ -142,6 +143,9 @@ private:
 
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
     void BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method);
+    void ProcessMethods(napi_env &env, Span<EtsMethodSet *> methods, std::vector<napi_property_descriptor> &jsProps,
+                        GetterSetterPropsMap &propMap);
+    void InitToJSON(napi_env env, napi_value jsCtor);
     void SetUpMimicHandler(napi_env env);
     bool SetupJsProxyWrapper(InteropCtx *ctx, EtsClass *etsClass);
     void DefineJSClass(napi_env env, const std::vector<napi_property_descriptor> &jsProps, napi_value *jsCtor);
@@ -152,6 +156,14 @@ private:
 
     static napi_value JSCtorCallback(napi_env env, napi_callback_info cinfo);
     bool CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_value jsThis, Span<napi_value> jsArgs);
+
+    static napi_value ToJSONCallback(napi_env env, napi_callback_info cinfo);
+
+    static std::optional<PandaString> SerializeETSObject(EtsExecutionContext *executionCtx, InteropCtx *ctx,
+                                                         EtsHandle<EtsObject> &objHandle);
+    static napi_value JSJsonParse(napi_env env, const PandaString &jsonStr);
+    SharedReference *SetupSharedReference(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject, napi_value jsThis,
+                                          bool notExtensible);
 
     Span<EtsFieldWrapper> GetFields()
     {
@@ -186,6 +198,7 @@ private:
     bool needProxy_ = false;
     napi_ref jsProxyCtorRef_ {};
     napi_ref jsProxyHandlerRef_ {};
+    napi_ref toJsonFnRef_ {};  // Cached toJSON function for instance-level serialization
 
     static constexpr const char *INTERFACE_ITERABLE_NAME = "std.core.IterableIterator";
 };
