@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,52 +13,191 @@
 
 ---
 cases:
-  - decl: |-
-      class C<T extends float|Int> {} // -> Numeric
+  # Union with numeric types (no normalization - remains as float|Int)
+  - desc: "Union constraint with numeric types - float variant"
+    tags: |-
+    decl: |-
+      class C<T extends float|Int> {}
       function main() {
           new C<float>()
+      }
+  
+  - desc: "Union constraint with numeric types - Int variant"
+    tags: |-
+    decl: |-
+      class C<T extends float|Int> {}
+      function main() {
           new C<Int>()
       }
 
-  - decl: |-
-      final class C<T extends float|Int> {} // -> Numeric
+  - desc: "Union constraint with numeric types - final class and float"
+    tags: |-
+    decl: |-
+      final class C<T extends float|Int> {}
       function main() {
           new C<float>()
+      }
+  
+  - desc: "Union constraint with numeric types - final class and Int"
+    tags: |-
+    decl: |-
+      final class C<T extends float|Int> {}
+      function main() {
+          new C<Int>()
+      }
+  
+  - desc: "Union constraint with numeric types - abstract class and float"
+    tags: |-
+    decl: |-
+      abstract class AC<T extends float|Int> {}
+      class C<T extends float|Int> extends AC<T> {}
+      function main() {
+          new C<float>()
+      }
+  
+  - desc: "Union constraint with numeric types - abstract class and Int"
+    tags: |-
+    decl: |-
+      abstract class AC<T extends float|Int> {}
+      class C<T extends float|Int> extends AC<T> {}
+      function main() {
           new C<Int>()
       }
 
-  - decl: |-
-      abstract class AC<T extends float|Int> {} // -> Numeric
-      class C<T extends float|Int> extends AC<T> {} // -> Numeric
+  # Union with floating types (no normalization - remains as float|number)
+  - desc: "Union constraint with floating types - float variant"
+    tags: |-
+    decl: |-
+      class C<T extends float|number> {}
       function main() {
           new C<float>()
-          new C<Int>()
       }
-
-  - decl: |-
-      class C<T extends float|number> {} // -> Floating
+  
+  - desc: "Union constraint with floating types - number variant"
+    tags: |-
+    decl: |-
+      class C<T extends float|number> {}
+      function main() {
+          new C<number>()
+      }
+  
+  - desc: "Union constraint with floating types - final class and float"
+    tags: |-
+    decl: |-
+      final class C<T extends float|number> {}
       function main() {
           new C<float>()
+      }
+  
+  - desc: "Union constraint with floating types - final class and number"
+    tags: |-
+    decl: |-
+      final class C<T extends float|number> {}
+      function main() {
+          new C<number>()
+      }
+  
+  - desc: "Union constraint with floating types - abstract class and float"
+    tags: |-
+    decl: |-
+      abstract class AC<T extends float|number> {}
+      class C<T extends float|number> extends AC<T> {}
+      function main() {
+          new C<float>()
+      }
+  
+  - desc: "Union constraint with floating types - abstract class and number"
+    tags: |-
+    decl: |-
+      abstract class AC<T extends float|number> {}
+      class C<T extends float|number> extends AC<T> {}
+      function main() {
           new C<number>()
       }
 
-  - decl: |-
-      final class C<T extends float|number> {} // -> Floating
+  # Same type normalization
+  - desc: "Same type normalization (number|number -> number)"
+    tags: compile-only
+    decl: |-
+      class C<T extends number|number> {}
+
+  # String literal normalization
+  - desc: "String literal absorbed by string"
+    tags: compile-only
+    decl: |-
+      class C<T extends "literal"|string> {}
+  
+  # Union with nullish types
+  - desc: "Union with null normalization (string|null)"
+    tags: |-
+    decl: |-
+      class C<T extends string|null> {}
       function main() {
-          new C<float>()
+          new C<string>()
+      }
+  
+  - desc: "Union with null - null variant (string|null)"
+    tags: |-
+    decl: |-
+      class C<T extends string|null> {}
+      function main() {
+          new C<null>()
+      }
+  
+  - desc: "Union with undefined normalization (number|undefined)"
+    tags: |-
+    decl: |-
+      class C<T extends number|undefined> {}
+      function main() {
           new C<number>()
       }
-
-  - decl: |-
-      abstract class AC<T extends float|number> {} // -> Floating
-      class C<T extends float|number> extends AC<T> {} // -> Floating
+  
+  - desc: "Union with undefined - undefined variant (number|undefined)"
+    tags: |-
+    decl: |-
+      class C<T extends number|undefined> {}
       function main() {
-          new C<float>()
-          new C<number>()
+          new C<undefined>()
       }
 
-  - decl: |-
-      class C<T extends number|number> {} // -> number
-
-  - decl: |-
-      class C<T extends "literal"|string> {} // -> string
+  # Union with classes
+  - desc: "Union with classes (Base|Derived)"
+    tags: |-
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+      class C<T extends Base|Derived> {}
+      function main() {
+          new C<Base>()
+      }
+  
+  - desc: "Union with classes - derived variant (Base|Derived)"
+    tags: |-
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+      class C<T extends Base|Derived> {}
+      function main() {
+          new C<Derived>()
+      }
+  
+  # Union with unrelated classes
+  - desc: "Union with unrelated classes (ClassA|ClassB)"
+    tags: |-
+    decl: |-
+      class ClassA {}
+      class ClassB {}
+      class C<T extends ClassA|ClassB> {}
+      function main() {
+          new C<ClassA>()
+      }
+  
+  - desc: "Union with unrelated classes - ClassB variant"
+    tags: |-
+    decl: |-
+      class ClassA {}
+      class ClassB {}
+      class C<T extends ClassA|ClassB> {}
+      function main() {
+          new C<ClassB>()
+      }
