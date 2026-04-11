@@ -18,6 +18,7 @@
 #include <iostream>
 #include <filesystem>
 #include "runtime/tooling/backtrace/backtrace.h"
+#include "runtime/tooling/backtrace/base_defs.h"
 #include "runtime/include/managed_thread.h"
 #include "libarkbase/utils/logger.h"
 

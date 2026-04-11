@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTERNAL_API_H
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTERNAL_API_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TOOLING_INTERNAL_API_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TOOLING_INTERNAL_API_H
 
-#include "libarkbase/macros.h"
-#include <functional>
+#include "runtime/tooling/backtrace/base_defs.h"
+#include "runtime/tooling/backtrace/local_stacktrace.h"
 
-namespace ark::ets::interop::js {
+extern "C" int ArkParseArkFrameInfoLocal(ark::tooling::LocalTrace localTracePtr, uintptr_t byteCodePc,
+                                         uintptr_t mapBase, uintptr_t loadOffset, ark::tooling::Function *function);
+extern "C" void ArkCreateLocalStackTrace(ark::tooling::LocalTrace *localTracePtr);
+extern "C" void ArkDestroyLocalStackTrace(ark::tooling::LocalTrace localTracePtr);
 
-PANDA_PUBLIC_API bool ForEachFrameInUnionStack(
-    const std::function<void(const void *frame, bool isStaticFrame)> &callback);
-
-PANDA_PUBLIC_API bool UnionStackIsEmpty(bool *isEmpty);
-
-}  // namespace ark::ets::interop::js
-
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTERNAL_API_H
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TOOLING_INTERNAL_API_H

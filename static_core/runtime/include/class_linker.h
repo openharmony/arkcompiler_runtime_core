@@ -435,6 +435,8 @@ private:
 
     mutable os::memory::Mutex pandaFilesLock_;
     mutable os::memory::Mutex bootPandaFilesLock_;
+    // After classlinker supports the pandafile unloading, the unloaded pandafile needs to be removed from cache in
+    // ark::tooling::LocalStackTrace.
     PandaVector<PandaFileLoadData> pandaFiles_ GUARDED_BY(pandaFilesLock_);
 
     PandaUniquePtr<AotManager> aotManager_;

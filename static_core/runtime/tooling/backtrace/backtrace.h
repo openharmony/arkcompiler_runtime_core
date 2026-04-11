@@ -21,23 +21,11 @@
 
 namespace ark::tooling {
 
-constexpr uint16_t FUNCTIONNAME_MAX = 1024;
-constexpr uint16_t PACKAGENAME_MAX = 1024;
-constexpr uint16_t URL_MAX = 1024;
 constexpr uint32_t ARKFRAME_SIZE = 16;
 constexpr uint32_t ARKPC_OFFSET = 8;
 constexpr uint32_t FP_SIZE = sizeof(uintptr_t);
 
-// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-struct Function {
-    char functionName[FUNCTIONNAME_MAX];  // NOLINT(modernize-avoid-c-arrays)
-    char packageName[PACKAGENAME_MAX];    // NOLINT(modernize-avoid-c-arrays)
-    char url[URL_MAX];                    // NOLINT(modernize-avoid-c-arrays)
-    int32_t line = 0;
-    int32_t column = 0;
-    uintptr_t codeBegin;
-    uintptr_t codeSize;
-};
+struct Function;
 
 enum class StepFrameType : uint8_t {
     NATIVE_FRAME = 0,
