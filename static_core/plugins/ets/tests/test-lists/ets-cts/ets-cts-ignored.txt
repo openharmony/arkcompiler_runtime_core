@@ -963,6 +963,14 @@
 #33911
 16.concurrency/06.api_details_and_restrictions/02.using_the_asynchronous_api/async_main_entry_point.ets
 
+#34177
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_other_jobs.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_promise_callbacks.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_suspendable_jobs.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_mixed_priorities_grouping.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_promise_callback_before_other_job.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_suspendable_before_other_job.ets
+
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0002.ets
