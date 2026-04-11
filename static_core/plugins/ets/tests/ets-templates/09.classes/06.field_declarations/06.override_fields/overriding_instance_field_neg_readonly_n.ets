@@ -18,7 +18,7 @@ desc: >-
     A compile-time error occurs if a field is not declared as readonly
     in a superclass, while an overriding field is marked as readonly
 tags: [compile-only, negative]
-expected_out: "Expected CTE output is unknown"
+expected_out: "Semantic error ESE1484256: Class D cannot extend class C because field field has readonly modifier."
 ---*/
 
 class C {

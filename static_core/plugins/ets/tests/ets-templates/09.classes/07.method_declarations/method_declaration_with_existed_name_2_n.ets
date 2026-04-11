@@ -19,7 +19,9 @@ desc: >-
     It is a compile-time error for the body of a class declaration to declare a method with the name
     that is already used for field or a member type in this declaration.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0216: Cannot inherit from class Base, because method run is inherited with a different declaration type"
+expected_out: >-
+    Semantic error ESE0216: Class Derive cannot extend class Base
+    because the overriding declaration type for method run is not compatible with the declaration type required by the base class.
 ---*/
 
 class Base {
