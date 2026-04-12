@@ -3,8 +3,6 @@
 # 33782
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_35.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_36.ets
-16.concurrency/03.asynchronous_execution/01.async_functions/async_functions7.ets
-16.concurrency/03.asynchronous_execution/01.async_functions/async_functions19.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/async_functions20.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_generic_1.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_generic_2.ets

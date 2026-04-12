@@ -64,8 +64,8 @@
 09.classes/04.class_members/met/sepmod_5.ets
 
 # The following tests fail on verifier due to es2panda failures on dependent files
-15.semantic_rules/10.overloading/overloading_for_functions/function_import_from_same_cu.ets
-15.semantic_rules/10.overloading/overloading_for_functions/function_import_from_same_cu_2.ets
+15.semantic_rules/09.overloading/overloading_for_functions/function_import_from_same_cu.ets
+15.semantic_rules/09.overloading/overloading_for_functions/function_import_from_same_cu_2.ets
 
 # 20423 es2panda aborts due to assertion error when run with '--debug-info'
 07.expressions/07.spread_expression/spex_28.ets
