@@ -50,14 +50,14 @@ cases:
       function foo<V,U>(): void {}
     expected_out: "Semantic error ESE0130: Function foo is already declared."
 
-  - decl: |-
+  - decl: |- 
       class X {}
       class Y {}
       class Z {}
       // naming formal parameters or type variables differently
       function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): V { return v; }
       function foo<U extends X, V extends Y, T extends Z>(u: U, v: V, t: T): V { return v; }
-    expected_out: "qq"
+    expected_out: "Semantic error ESE0131: Function foo with this assembly signature already declared."
 
   - decl: |-
       class Y {}

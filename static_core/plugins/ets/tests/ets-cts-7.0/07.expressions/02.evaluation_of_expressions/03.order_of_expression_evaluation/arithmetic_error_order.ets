@@ -20,38 +20,41 @@ desc: >-
     can throw ArithmeticError only after the evaluations of both operands complete normally.
 ---*/
 
-function main() {
+const suite = new arktest.ArkTestsuite("ArithmeticError order of evaluation")
 
+suite.addTest("Division: lhs RangeError takes precedence over rhs division by zero", () => {
     let a = new int[2](0);
-    let x: int = 42;
-    let exceptions: int = 0;
-
+    let x: int = 37;
     try {
-        x = a[2] / 0;  // eval should abort on left-hand
+        x = a[2] / 0;
     } catch (e) {
         arktest.assertTrue(e instanceof RangeError);
-        exceptions++;
     }
-    arktest.assertEQ(exceptions, 1);
-    arktest.assertEQ(x, 42);
+    arktest.assertEQ(x, 37);
+})
 
+suite.addTest("Remainder: lhs RangeError takes precedence over rhs remainder by zero", () => {
+    let a = new int[2](0);
+    let x: int = 37;
     try {
-        x = a[2] % 0;  // eval should abort on left-hand
+        x = a[2] % 0;
     } catch (e) {
         arktest.assertTrue(e instanceof RangeError);
-        exceptions++;
     }
-    arktest.assertEQ(exceptions, 2);
-    arktest.assertEQ(x, 42);
+    arktest.assertEQ(x, 37);
+})
 
+suite.addTest("Remainder by zero throws ArithmeticError after both operands evaluated", () => {
+    let a = new int[2](0);
+    let x: int = 37;
     try {
-        x = a[0] % a[1];  // both hands should be evaluated
+        x = a[0] % a[1];
     } catch (e) {
         arktest.assertTrue(e instanceof ArithmeticError);
-        exceptions++;
     }
-    arktest.assertEQ(exceptions, 3);
-    arktest.assertEQ(x, 42);
+    arktest.assertEQ(x, 37);
+})
 
-    
+function main() {
+    suite.run()
 }

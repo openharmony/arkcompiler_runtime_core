@@ -21,7 +21,7 @@ desc: >-
 ---*/
 
 let sg: String = "a";
-let ig: int = 42;
+let ig: int = 39;
 
 function foo(p: int, s: String): int {
     sg += s;
@@ -37,38 +37,49 @@ class A {
   }
 }
 
+const suite = new arktest.ArkTestsuite("Expression evaluation side effects")
+
+suite.addTest("Assignment side effect", () => {
+  sg = "a";
+  ig = 39;
+  let i: int = (sg += "b").length.toInt() + (ig = 43);
+  arktest.assertEQ(i, 45)
+  arktest.assertEQ(sg, "ab")
+  arktest.assertEQ(ig, 43)
+})
+
+suite.addTest("Increment side effect", () => {
+  ig = 43;
+  let k: int = ig++ + ++ig;
+  arktest.assertEQ(k, 88)
+  arktest.assertEQ(ig, 45)
+})
+
+suite.addTest("Decrement side effect", () => {
+  ig = 45;
+  let j: int = ig-- + --ig;
+  arktest.assertEQ(j, 88)
+  arktest.assertEQ(ig, 43)
+})
+
+suite.addTest("Function call side effect", () => {
+  sg = "ab";
+  ig = 43;
+  let m: int = foo(88, sg);
+  arktest.assertEQ(m, 86)
+  arktest.assertEQ(ig, -1)
+  arktest.assertEQ(sg, "abab")
+})
+
+suite.addTest("Method call side effect", () => {
+  sg = "abab";
+  ig = -1;
+  let n: int = new A().meth(86, sg);
+  arktest.assertEQ(n, 82)
+  arktest.assertEQ(ig, 1)
+  arktest.assertEQ(sg, "abababab")
+})
+
 function main() {
-
-	sg = "a"; // reset due to jit mode warmup
-	ig = 42;
-
-	// assignment side effect
-	let i: int = (sg += "b").length.toInt() + (ig = 43);
-	arktest.assertEQ(i, 45)
-	arktest.assertEQ(sg, "ab")
-	arktest.assertEQ(ig, 43)
-
-	// increment side effect
-	let k: int = ig++ + ++ig;
-	arktest.assertEQ(k, 88)
-	arktest.assertEQ(ig, 45)
-
-	// decrement side effect
-	let j: int = ig-- + --ig;
-	arktest.assertEQ(j, 88)
-	arktest.assertEQ(ig, 43)
-
-	// function call side effect
-	let m: int = foo(j, sg);
-	arktest.assertEQ(m, 86)
-	arktest.assertEQ(ig, -1)
-	arktest.assertEQ(sg, "abab")
-
-	// method call side effect
-	let n: int = new A().meth(m, sg);
-	arktest.assertEQ(n, 82)
-	arktest.assertEQ(ig, 1)
-	arktest.assertEQ(sg, "abababab")
-
-    
+  suite.run()
 }

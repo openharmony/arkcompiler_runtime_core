@@ -13,27 +13,11 @@
 
 ---
 cases:
-  - code: |-
-      class AType {}
-      type A = AType
-      class CType<T extends A> {}
-      type C = CType
-      function main() {
-          new C<Object>()
-      }
-  - code: |-
-      class AType {}
-      type A = AType
-      class CType<T extends A> {}
-      type C = CType
-      function main() {
-          new C<null>()
-      }
-  - code: |-
-      class AType {}
-      type A = AType
-      class CType<T extends A> {}
-      type C = CType
-      function main() {
-          new C<undefined>()
-      }
+    - type: "Object"
+    - type: "null"
+    - type: "undefined"
+    - type: "Any"
+    - type: "undefined | null"
+    - type: "Object | undefined | null"
+    - type: "Any | null"
+    - type: "Object | undefined"

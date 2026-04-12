@@ -12,10 +12,24 @@
 # limitations under the License.
 
 --- # Wrong type constraints for generic parameters
-types:
-  - D<C>
-  - D<Object>
-  - E<Object>
-  - F<B, A>
-  - F<C, A>
-  - F<A, C>
+cases:
+  - type: D<C>
+    expected_out: |-
+      Semantic error ESE0228: Type argument 'C' should be a subtype of 'A' constraint
+  - type: D<Object>
+    expected_out: |- 
+      Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A' constraint
+  - type: E<Object>
+    expected_out: |- 
+      Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A|C' constraint
+  - type: F<B, A>
+    expected_out: |- 
+      Semantic error ESE0228: Type argument 'A' should be a subtype of 'B' constraint
+  - type: F<C, A>
+    expected_out: |- 
+      Semantic error ESE0228: Type argument 'A' should be a subtype of 'C' constraint
+  - type: F<A, C>
+    expected_out: |- 
+      Semantic error ESE0228: Type argument 'C' should be a subtype of 'A' constraint
+
+

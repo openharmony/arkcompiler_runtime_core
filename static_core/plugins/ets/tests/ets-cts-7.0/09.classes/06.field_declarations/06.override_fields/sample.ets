@@ -15,9 +15,8 @@
 
 /*---
 desc: >-
-    While extending a class or implementing interfaces, a field declared in a superclass or
-    a superintertafce can be overridden by field with the same name and the same static or
-    non-static status.
+    While extending a class or implementing interfaces, a instance field declared in a superclass or
+    a superintertafce can be overridden by field with the same name.
 tags: [negative]
 ---*/
 

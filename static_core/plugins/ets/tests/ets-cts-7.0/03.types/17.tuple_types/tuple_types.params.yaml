@@ -22,7 +22,9 @@ cases:
           let e2a = e2
           arktest.assertTrue( e1a instanceof Object )
           arktest.assertTrue( e2a instanceof Object )
-          arktest.assertTrue( e1 == e1a && e2 == e2a && e1a != e2a )
+          arktest.assertEQ( e1, e1a )
+          arktest.assertEQ( e2, e2a ) 
+          arktest.assertNE( e1a, e2a )
 
     - use: |-
           let e: [boolean, string] = [true, "A"]
@@ -38,20 +40,20 @@ cases:
           let e: [][] = []  // array of empty tuples
           let f: [][] = [[]]
           let g: [][] = [[],[]]
-          arktest.assertTrue( e.length == 0 )
-          arktest.assertTrue( f.length == 1 )
-          arktest.assertTrue( g.length == 2 )
+          arktest.assertEQ( e.length, 0 )
+          arktest.assertEQ( f.length, 1 )
+          arktest.assertEQ( g.length, 2 )
 
     - use: |-
           let e: [string, string][] = []    // one-dimensional array of tuples
           let f: [string, string][][] = []  // two-dimensional array of tuples
-          arktest.assertTrue( e.length == 0 )
-          arktest.assertTrue( f.length == 0 )
+          arktest.assertEQ( e.length, 0 )
+          arktest.assertEQ( f.length, 0 )
 
           e = [["a", "b"]]
           f = [e, e]
-          arktest.assertTrue( e[0][0] == "a" )
-          arktest.assertTrue( f[0][0][0] == "a" )
+          arktest.assertEQ( e[0][0], "a" )
+          arktest.assertEQ( f[0][0][0], "a" )
 
     - decl: |-
           type TUPLE = [number, string, boolean, Object]
@@ -61,9 +63,9 @@ cases:
           e[1] = "B"
           e[2] = false
           e[3] = e
-          arktest.assertTrue( (e[3] as TUPLE)[0] == 33.0 )
-          arktest.assertTrue( (e[3] as TUPLE)[1] == "B" )
-          arktest.assertTrue( (e[3] as TUPLE)[2] == false )
+          arktest.assertEQ( (e[3] as TUPLE)[0], 33.0 )
+          arktest.assertEQ( (e[3] as TUPLE)[1], "B" )
+          arktest.assertEQ( (e[3] as TUPLE)[2], false )
 
     - decl: |-
           function foo(v: [number, string]): [string, string] {
@@ -71,8 +73,8 @@ cases:
           }
       use: |-
           let res = foo([42.0, "test"])
-          arktest.assertTrue( res[0] === "test42" )
-          arktest.assertTrue( res[1] === "test" )
+          arktest.assertEQ( res[0], "test42" )
+          arktest.assertEQ( res[1], "test" )
 
     - decl: |-
           class A<T> {
@@ -87,8 +89,8 @@ cases:
       use: |-
           let a: A<[string, string]> = new A<[string, string]>(["A", "B"])
           let res = a.getFld()
-          arktest.assertTrue( res[0] === "A" )
-          arktest.assertTrue( res[1] === "B" )
+          arktest.assertEQ( res[0], "A" )
+          arktest.assertEQ( res[1], "B" )
 
     - decl: |-
           class A<T extends [number, boolean]> {
@@ -103,8 +105,8 @@ cases:
       use: |-
           let a: A<[number, boolean]> = new A<[number, boolean]>([1.0, true])
           let res = a.getFld()
-          arktest.assertTrue( res[0] == 1.0 )
-          arktest.assertTrue( res[1] == true )
+          arktest.assertEQ( res[0], 1.0 )
+          arktest.assertEQ( res[1], true )
 
     - decl: |-
           class A<T> {
@@ -123,12 +125,12 @@ cases:
           let a: A<[string|null, string|null] | null> = new A<[string|null, string|null] | null>(null)
           a.setFld(["A", null])
           let res = a.getFld()
-          arktest.assertTrue( res![0] === "A" )
-          arktest.assertTrue( res![1] === null )
+          arktest.assertEQ( res![0], "A" )
+          arktest.assertEQ( res![1], null )
 
     - use: |-
           let e: [string, boolean] = ["A", true]
-          arktest.assertTrue( e[1] == true ) // const indices allowed
+          arktest.assertEQ( e[1], true ) // const indices allowed
 
     - decl: |-
           function foo(p: string[]) {
@@ -136,7 +138,7 @@ cases:
           }
       use: |-
           let v = foo(["A", "B"])  // array type must be inferred from context
-          arktest.assertTrue( v == "A" )
+          arktest.assertEQ( v, "A" )
 
     - decl: |-
           function foo(p: [string, string]) {
@@ -144,7 +146,7 @@ cases:
           }
       use: |-
           let v = foo(["A", "B"])  // tuple type must be inferred from context
-          arktest.assertTrue( v == "A" )
+          arktest.assertEQ( v, "A" )
 
     - use: |-
           let v: [number, number] = [1.0, 2.0]
@@ -154,7 +156,7 @@ cases:
     - use: |-
           let v: [string] = ["A"]
           let p = v as [string]  // cast to the same type
-          arktest.assertTrue( p[0] == "A" )
+          arktest.assertEQ( p[0], "A" )
 
     - use: |-
           let v: [string]|null = ["A"]
@@ -166,32 +168,35 @@ cases:
           type TUPLE = [number, string]
       use: |-
           let v: [TUPLE, [number, TUPLE]] = [[1.0, "A"], [2.0, [3.0, "B"]]]
-          arktest.assertTrue( v[0][0] == 1.0 )
-          arktest.assertTrue( v[0][1] == "A" )
-          arktest.assertTrue( v[1][0] == 2.0 )
-          arktest.assertTrue( v[1][1][0] == 3.0 )
-          arktest.assertTrue( v[1][1][1] == "B" )
+          arktest.assertEQ( v[0][0], 1.0 )
+          arktest.assertEQ( v[0][1], "A" )
+          arktest.assertEQ( v[1][0], 2.0 )
+          arktest.assertEQ( v[1][1][0], 3.0 )
+          arktest.assertEQ( v[1][1][1], "B" )
 
     - use: |-
           // test Array.push with tuple literal [boolean, int]
           let arr: Array<[boolean, int]> = new Array<[boolean, int]>()
           arr.push([true, 1])
           arr.push([false, 2])
-          arktest.assertTrue( arr.length == 2 )
-          arktest.assertTrue( arr[0][0] == true )
-          arktest.assertTrue( arr[0][1] == 1 )
-          arktest.assertTrue( arr[1][0] == false )
-          arktest.assertTrue( arr[1][1] == 2 )
+          arktest.assertEQ( arr.length, 2 )
+          arktest.assertEQ( arr[0][0], true )
+          arktest.assertEQ( arr[0][1], 1 )
+          arktest.assertEQ( arr[1][0], false )
+          arktest.assertEQ( arr[1][1], 2 )
 
     - use: |-
           let v: [string]|null = ():[string]|null => { let x:[string] = ["A"]; return x; }();
-          arktest.assertTrue( v?.[0] == "A" )
+          arktest.assertEQ( v?.[0], "A" )
           v = ():[string]|null => { return null; }();
-          arktest.assertTrue( v?.[0] === undefined )
+          arktest.assertEQ( v?.[0], undefined )
 
     - use: |-
           let e: [] = []  // empty tuple
           arktest.assertTrue( e instanceof Object )
+          arktest.assertTrue( e instanceof Tuple )
+          let t: Tuple = e  // empty tuple is identical to Tuple
+          arktest.assertTrue( t instanceof Tuple )
 
     - decl: |-
           type TT = [int, string]

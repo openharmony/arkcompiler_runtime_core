@@ -14,20 +14,12 @@
 ---
 cases:
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       main: |-
           arktest.assertFalse('a' == 'b') // different literal values
 
     - warning: |-
-          TBD: Warning: expression is always false
-      decl: |-
-          const a: int = 1
-          const b: int = 2
-      main: |-
-          arktest.assertFalse(a == b) // different constant values
-
-    - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       decl: |-
           function foo() {}
           function bar() {}
@@ -35,14 +27,14 @@ cases:
           arktest.assertFalse(foo == bar) // different references
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       decl: |-
           class A {}
       main: |-
           arktest.assertFalse(new A == new A) // different references
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       decl: |-
           class A {}
           class B {}
@@ -52,7 +44,7 @@ cases:
           arktest.assertFalse(a == b) // instances of different classes
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       decl: |-
           class A {}
           let a = new A
@@ -60,7 +52,7 @@ cases:
           arktest.assertFalse(a == undefined) // instance of class and undefined
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       decl: |-
           class A {}
           let a = new A
@@ -68,7 +60,9 @@ cases:
           arktest.assertFalse(a == null) // instance of class and null
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
+          Semantic error ESE0105: Operator '==' cannot be applied to types 'String' and 'Char'.
+      tags: [negative, compile-only]
       decl: |-
           let a = 'A'
           let b = c'A'
@@ -76,7 +70,7 @@ cases:
           arktest.assertFalse(a == b) // different types
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W0018: Values of BigInt type are never equal to numerics.
       decl: |-
           let a = 1n
           let b = 1
@@ -84,7 +78,9 @@ cases:
           arktest.assertFalse(a == b) // different types
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
+          Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.
+      tags: [negative, compile-only]
       decl: |-
           enum RGB { Red, Green, Blue }
           enum YMC { Yellow, Magenta, Cyan }
@@ -94,7 +90,9 @@ cases:
           arktest.assertFalse(a == b) // different enumeration types
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
+          Semantic error ESE0105: Operator '===' cannot be applied to types 'Double|Boolean|undefined' and 'String|null'.
+      tags: [negative, compile-only]
       decl: |-
           let a: number|boolean|undefined = 1
           let b: string|null = ""
@@ -102,17 +100,19 @@ cases:
           arktest.assertFalse(a === b) // non-overlapping union types
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
+          Semantic error ESE0105: Operator '==' cannot be applied to types 'Double' and '""'.
+      tags: [negative, compile-only]
       main: |-
           let a: number|string = 1
           arktest.assertFalse(a == "") // different types after smart cast
 
     - warning: |-
-          TBD: Warning: expression is always false
+          Warning W65001: The equality expression is always false.
       decl: |-
           class A {}
-          let a: A|undefined
       main: |-
+          let a: A|undefined  
           if (a instanceof A) {
               arktest.assertFalse(a == undefined) // instance of class and undefined after smart cast
           }

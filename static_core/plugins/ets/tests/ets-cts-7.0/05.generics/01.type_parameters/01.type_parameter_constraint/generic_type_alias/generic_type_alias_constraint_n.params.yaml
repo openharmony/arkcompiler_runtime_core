@@ -21,15 +21,36 @@ top_level_class_modifiers:
 constraints:
   - type: number
     use: byte
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Double' constraint
+
   - type: short
     use: long
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Short' constraint
+
   - type: int
     use: long
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Long' should be a subtype of 'Int' constraint
+
   - type: byte
     use: char
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'Byte' constraint
+
   - type: char
     use: byte
+    expected_out: |- 
+         Semantic error ESE0228: Type argument 'Byte' should be a subtype of 'Char' constraint
+
   - type: string
     use: char
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'Char' should be a subtype of 'String' constraint
+
   - type: char
     use: string
+    expected_out: |- 
+        Semantic error ESE0228: Type argument 'String' should be a subtype of 'Char' constraint
+

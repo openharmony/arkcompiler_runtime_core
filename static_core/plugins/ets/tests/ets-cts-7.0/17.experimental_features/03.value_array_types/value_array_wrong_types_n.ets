@@ -21,7 +21,7 @@ desc: |-
     Test assertions:
     - If ValueArray is used with non-value type argument, then a compile-time error occurs
 tags: [compile-only, negative]
-expected_out: "TODO"
+expected_out: "Semantic error ESE1547180: ValueArray requires a primitive type argument: numeric, boolean or char type."
 ---*/
 
 class A {}

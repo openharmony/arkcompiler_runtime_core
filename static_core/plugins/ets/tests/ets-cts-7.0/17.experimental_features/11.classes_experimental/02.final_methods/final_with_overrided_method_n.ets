@@ -16,7 +16,9 @@ limitations under the License.
 /*---
 desc: Final overrided method version
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0141: method(): void in C cannot override method(): void in B because overridden method is final."
+expected_out: >-
+    Semantic error ESE1324203: Class member method with type void in C cannot override method with type void field from class B
+    because the overridden method is final.
 ---*/
 
 class A {

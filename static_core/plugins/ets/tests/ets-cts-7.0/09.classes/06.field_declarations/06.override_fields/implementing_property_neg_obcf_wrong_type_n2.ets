@@ -17,7 +17,9 @@ limitations under the License.
 desc: >-
     Compile-time error, conflict in overriding
 tags: [compile-only, negative]
-expected_out: "Expected CTE output is unknown"
+expected_out: >-
+  Semantic error ESE985118: Class member num with type Boolean in D cannot implement num with type Double property from interface I
+  because the implementing return type is not compatible with the interface return type.
 ---*/
 
 class C {

@@ -17,7 +17,9 @@ limitations under the License.
 desc: >-
     Wrong type for implementation of the interface property
 tags: [compile-only, negative]
-expected_out: "Expected CTE output is unknown"
+expected_out: >-
+  Semantic error ESE985118: Class member num with type Int in A cannot implement num with type Double property from interface I
+  because the implementing return type is not compatible with the interface return type.
 ---*/
 
 interface I {

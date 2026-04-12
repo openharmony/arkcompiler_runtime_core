@@ -17,7 +17,7 @@
 desc: |-
     If an nullish-coalescing expression is known at compile time to always evaluate to the left-hand-side
     expression or to the right-hand-side expression at runtime, then a compile-time warning is issued.
-expected_out: ["warning: left-hand-side expression is always used", "warning: right-hand-side expression is always used", "warning: right-hand-side expression is always used", "warning: right-hand-side expression is always used", "warning: right-hand-side expression is always used"]
+expected_out: ["Warning W971874: result of the nullish-coalescing expression is equal to its left-hand-side expression value.", "Warning W1068706: result of the nullish-coalescing expression is equal to its right-hand-side expression value.", "Warning W1068706: result of the nullish-coalescing expression is equal to its right-hand-side expression value.", "Warning W1068706: result of the nullish-coalescing expression is equal to its right-hand-side expression value.", "Warning W1068706: result of the nullish-coalescing expression is equal to its right-hand-side expression value."]
 ---*/
 
 

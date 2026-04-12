@@ -21,6 +21,7 @@ desc: >-
     always false, except the compatibility with class type
     Object as any type is a subtype of Object.
 tags: [compile-only, negative]
+expected_out: {{c.expected_out}}
 ---*/
 
 class Base {

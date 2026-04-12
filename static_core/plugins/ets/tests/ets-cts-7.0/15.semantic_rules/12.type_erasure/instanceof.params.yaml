@@ -60,11 +60,17 @@ cases:
     - decl: |-
           let x: [Promise<number>|undefined, Array<string>|Array<number>] = [undefined, ['']]
       use: |-
+          arktest.assertTrue(
+            ((): Object => x)() instanceof Tuple // OK
+          )
 
 
     - decl: |-
           let x: [Array<number>, FixedArray<string>|Array<number>] = [[1.0], [1.0]]
       use: |-
+          arktest.assertTrue(
+            ((): Object => x)() instanceof Tuple // OK
+          )
 
     # string literal types erased
     - decl: |-

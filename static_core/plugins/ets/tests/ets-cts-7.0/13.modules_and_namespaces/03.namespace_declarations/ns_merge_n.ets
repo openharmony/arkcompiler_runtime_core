@@ -20,6 +20,7 @@ desc: >-
       Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
       {{c.doc}}
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 {{c.decl}}

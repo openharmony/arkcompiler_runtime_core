@@ -17,107 +17,159 @@
 desc: multiplicative operator with other operators
 ---*/
 
-function main() {
+function mulDiv(a: int, b: int, c: int): int { return a / b * c }
+function mulMod(a: int, b: int, c: int): int { return a % b * c }
+function mulAdd(a: int, b: int, c: int): int { return a + b * c }
+function mulSub(a: int, b: int, c: int): int { return a - b * c }
+function mulCastRes(a: int, b: int): int { return a * b.toByte() }
+function mulCastOp(a: int, b: int): int { return a.toByte() * b }
+function mulShl(a: int, b: int, c: int): int { return a << b * c }
+function mulShrNeg(a: int, b: int, c: int): int { return -a >> b * c }
+function mulUshrNeg(a: int, b: int, c: int): int { return -a >>> b * c }
+function mulLt(a: int, b: int, c: int): boolean { return a < b * c }
+function mulLe(a: int, b: int, c: int): boolean { return a <= b * c }
+function mulGt(a: int, b: int, c: int): boolean { return a > b * c }
+function mulGe(a: int, b: int, c: int): boolean { return a >= b * c }
+function mulEqEq(a: int, b: int, c: int): boolean { return a == b * c }
+function mulNeq(a: int, b: int, c: int): boolean { return a != b * c }
+function mulBitAnd(a: int, b: int, c: int): int { return a & b * c }
+function mulBitOr(a: int, b: int, c: int): int { return a | b * c }
+function mulBitXor(a: int, b: int, c: int): int { return a ^ b * c }
+function mulTernBranch(a: int, b: int, c: int): int { return a <= b ? b : a * b }
+function mulTernCond(a: int, b: int, c: int, d: int): int { return a * b > c ? c : d }
+function mulAssignAdd(a: int, b: int, c: int): int { return a += b * c }
+function mulAssignSub(a: int, b: int, c: int): int { return a -= b * c }
+function mulAssignDiv(a: int, b: int, c: int): int { return a /= b * c }
+function mulAssignMod(a: int, b: int, c: int): int { return a %= b * c }
+function mulAssignAnd(a: int, b: int, c: int): int { return a &= b * c }
+function mulAssignOr(a: int, b: int, c: int): int { return a |= b * c }
+function mulAssignXor(a: int, b: int, c: int): int { return a ^= b * c }
+function mulAssignShl(a: int, b: int, c: int): int { return a <<= b * c }
+function mulAssignShr(a: int, b: int, c: int): int { return a >>= b * c }
+function mulAssignUshr(a: int, b: int, c: int): int { return a >>>= b * c }
 
-    	let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255 = 255
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Multiplicative operator precedence")
 
-	// division
-	res = t8 / t3 * t2
-	arktest.assertEQ(res, 4)
+    suite.addTest("division", () => {
+        arktest.assertEQ(mulDiv(8, 3, 2), 4)
+    })
 
-	// modulo
-	res = t8 % t3 * t2
-	arktest.assertEQ(res, 4)
+    suite.addTest("modulo", () => {
+        arktest.assertEQ(mulMod(8, 3, 2), 4)
+    })
 
-	// addition
-	res = t2 + t4 * t3
-	arktest.assertEQ(res, 14)
+    suite.addTest("addition", () => {
+        arktest.assertEQ(mulAdd(2, 4, 3), 14)
+    })
 
-	// subtraction
-	res = t2 - t3 * t4
-	arktest.assertEQ(res, -10)
+    suite.addTest("subtraction", () => {
+        arktest.assertEQ(mulSub(2, 3, 4), -10)
+    })
 
-	// cast
-	res = t2 * t255.toByte()
-	arktest.assertEQ(res, -2)
+    suite.addTest("cast on result", () => {
+        arktest.assertEQ(mulCastRes(2, 255), -2)
+    })
 
-	res = t255.toByte() * t3
-	arktest.assertEQ(res, -3)
+    suite.addTest("cast on operand", () => {
+        arktest.assertEQ(mulCastOp(255, 3), -3)
+    })
 
-	// shifts
-	res = t4 << t3 * t2
-	arktest.assertEQ(res, 256)
+    suite.addTest("left shift", () => {
+        arktest.assertEQ(mulShl(4, 3, 2), 256)
+    })
 
-	res = - t255 >> t2 * t3
-	arktest.assertEQ(res, -4)
+    suite.addTest("right shift", () => {
+        arktest.assertEQ(mulShrNeg(255, 2, 3), -4)
+    })
 
-	res = - t255 >>> t2 * t3
-	arktest.assertEQ(res, 67108860)
+    suite.addTest("unsigned right shift", () => {
+        arktest.assertEQ(mulUshrNeg(255, 2, 3), 67108860)
+    })
 
-	// relational
-	arktest.assertFalse(t255 < t8 * t8)
-	arktest.assertFalse(t255 <= t2 * t8)
-	arktest.assertFalse(t2 > t8 * t4)
-	arktest.assertFalse(t4 >= t8 * t4)
-	arktest.assertFalse(t2 == t2 * t4)
-	arktest.assertFalse(t8 != t4 * t2)
+    suite.addTest("relational <", () => {
+        arktest.assertFalse(mulLt(255, 8, 8))
+    })
 
-	// bitwise
-	res = t255 & t4 * t8
-	arktest.assertEQ(res, 32)
+    suite.addTest("relational <=", () => {
+        arktest.assertFalse(mulLe(255, 2, 8))
+    })
 
-	res = t3 | t4 * t2
-	arktest.assertEQ(res, 11)
+    suite.addTest("relational >", () => {
+        arktest.assertFalse(mulGt(2, 8, 4))
+    })
 
-	res = t255 ^ t8 * t2
-	arktest.assertEQ(res, 239)
+    suite.addTest("relational >=", () => {
+        arktest.assertFalse(mulGe(4, 8, 4))
+    })
 
-	// ternary
-	res = t3 <= t4 ? t4 : t3 * t4
-	arktest.assertEQ(res, 4)
+    suite.addTest("equality ==", () => {
+        arktest.assertFalse(mulEqEq(2, 2, 4))
+    })
 
-	res = t4 * t2 > t4 ? t4 : t3
-	arktest.assertEQ(res, 4)
+    suite.addTest("equality !=", () => {
+        arktest.assertFalse(mulNeq(8, 4, 2))
+    })
 
-	// assignments
-	res = t2 += t4 * t3
-	arktest.assertEQ(res, 14)
-	t2 = 2
+    suite.addTest("bitwise AND", () => {
+        arktest.assertEQ(mulBitAnd(255, 4, 8), 32)
+    })
 
-	res = t2 -= t4 * t3
-	arktest.assertEQ(res, -10)
-	t2 = 2
+    suite.addTest("bitwise OR", () => {
+        arktest.assertEQ(mulBitOr(3, 4, 2), 11)
+    })
 
-	res = t8 /= t2 * t3
-	arktest.assertEQ(res, 1)
-	t8 = 8
+    suite.addTest("bitwise XOR", () => {
+        arktest.assertEQ(mulBitXor(255, 8, 2), 239)
+    })
 
-	res = t8 %= t2 * t3
-	arktest.assertEQ(res, 2)
-	t8 = 8
+    suite.addTest("ternary in branch", () => {
+        arktest.assertEQ(mulTernBranch(3, 4, 0), 4)
+    })
 
-	res = t255 &= t2 * t3
-	arktest.assertEQ(res, 6)
-	t255 = 255
+    suite.addTest("ternary in condition", () => {
+        arktest.assertEQ(mulTernCond(4, 2, 4, 3), 4)
+    })
 
-	res = t2 |= t3 * t4
-	arktest.assertEQ(res, 14)
-	t2 = 2
+    suite.addTest("assignment +=", () => {
+        arktest.assertEQ(mulAssignAdd(2, 4, 3), 14)
+    })
 
-	res = t255 ^= t4 * t8
-	arktest.assertEQ(res, 223)
-	t255 = 255
+    suite.addTest("assignment -=", () => {
+        arktest.assertEQ(mulAssignSub(2, 4, 3), -10)
+    })
 
-	res = t4 <<= t3 * t2
-	arktest.assertEQ(res, 256)
-	t4 = 4
+    suite.addTest("assignment /=", () => {
+        arktest.assertEQ(mulAssignDiv(8, 2, 3), 1)
+    })
 
-	res = t255 >>= t2 * t3
-	arktest.assertEQ(res, 3)
-	t255 = 255
+    suite.addTest("assignment %=", () => {
+        arktest.assertEQ(mulAssignMod(8, 2, 3), 2)
+    })
 
-	res = t255 >>>= t3 * t2
-	arktest.assertEQ(res, 3)
-	t255 = 255
-    
+    suite.addTest("assignment &=", () => {
+        arktest.assertEQ(mulAssignAnd(255, 2, 3), 6)
+    })
+
+    suite.addTest("assignment |=", () => {
+        arktest.assertEQ(mulAssignOr(2, 3, 4), 14)
+    })
+
+    suite.addTest("assignment ^=", () => {
+        arktest.assertEQ(mulAssignXor(255, 4, 8), 223)
+    })
+
+    suite.addTest("assignment <<=", () => {
+        arktest.assertEQ(mulAssignShl(4, 3, 2), 256)
+    })
+
+    suite.addTest("assignment >>=", () => {
+        arktest.assertEQ(mulAssignShr(255, 2, 3), 3)
+    })
+
+    suite.addTest("assignment >>>=", () => {
+        arktest.assertEQ(mulAssignUshr(255, 3, 2), 3)
+    })
+
+    return suite.run()
 }

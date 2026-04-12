@@ -16,6 +16,7 @@
 /*---
 desc: Derived class cannot have non-compatible constraints of type parameters
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0228: Type argument 'ContravariantTypeParameter' should be a subtype of 'Derived' constraint"
 ---*/
 
 class Base {}

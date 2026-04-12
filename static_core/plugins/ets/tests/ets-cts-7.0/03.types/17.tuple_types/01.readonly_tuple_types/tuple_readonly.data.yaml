@@ -1,0 +1,110 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - type: byte
+    use: "1"
+  - type: short
+    use: "1"
+  - type: int
+    use: "1"
+  - type: byte
+    use: Byte.MIN_VALUE
+  - type: short
+    use: Short.MAX_VALUE
+  - type: int
+    use: -0x23_4Abf
+  - type: int
+    use: Int.MIN_VALUE
+  - type: long
+    use: "1"
+  - type: long
+    use: Long.MAX_VALUE
+  - type: float
+    use: "1.0f"
+  - type: float
+    use: "1.0"
+  - type: double
+    use: "1.0"
+  - type: number
+    use: "1.0"
+  - type: char
+    use: "c'1'"
+  - type: char
+    use: "c'\\u{2603}'" 
+  - type: boolean
+    use: "true"
+  - type: bigint 
+    use: "54667476857967478698456873986794387698679869874560720969725986729867952879876927560267024n"
+  - type: object
+    use: "0"
+  - type: Byte
+    use: "-0b1001"
+  - type: Short
+    use: "0o1234"
+  - type: Byte
+    use: Byte.MAX_VALUE
+  - type: Short
+    use: Short.MIN_VALUE
+  - type: Int
+    use: "-1111"
+  - type: Int
+    use: Int.MAX_VALUE
+  - type: Long
+    use: "145637568736587634"
+  - type: Long
+    use: Long.MIN_VALUE
+  - type: Float
+    use: "12222.2345564564f"
+  - type: Float
+    use: "11.001f"
+  - type: Double
+    use: "14.0000000000123"
+  - type: Number
+    use: "14.0000000000123"
+  - type: Char
+    use: "c'\\n'"
+  - type: Char
+    use: "c'⏳'" 
+  - type: Boolean
+    use: "true"
+  - type: BigInt 
+    use: "-8n"
+  - type: Object
+    use: new Object()
+  - type: String
+    use: "'abc'"
+  - type: string
+    use: "\"33_АбвгдеЁ ☔ \\u{263A} 微笑 (wēixiào)\""
+  - type: "Any"
+    use: "1"
+  - type: "Object"
+    use: "new Object()"
+  - type: "null"
+    use: "null"
+  - type: "undefined"
+    use: "undefined"
+  - type: "int | string"
+    use: "1"
+  - type: "int | string"
+    use: "'abc'"
+  - type: "int[]"
+    use: "[1, 0]"
+  - type: "Array<int>"
+    use: "[1]"
+  - type: "FixedArray<int>"
+    use: "[1, 0]"
+  - type: "() => void"
+    use: "(): void => {}"
+  - type: "'abc' | 'def'"
+    use: "'abc'"

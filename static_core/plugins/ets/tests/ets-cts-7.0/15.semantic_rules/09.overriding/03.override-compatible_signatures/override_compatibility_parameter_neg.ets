@@ -34,7 +34,7 @@ desc: >-
 
 params: {{c.params}}
 tags: [compile-only, negative]
-
+expected_out: {{c.expected_out}}
 ---*/
 
 let res: number = 0;

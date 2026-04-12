@@ -31,6 +31,7 @@ desc: >-
     - Constraints of W1 , . . . Wl are to be contravariant (see Contravariance)
     to the appropriate constraints of V1 , . . . Vk .
 tags: [compile-only, negative]
+expected_out: {{c.expected_out}}
 ---*/
 
 let res: number = 0;
