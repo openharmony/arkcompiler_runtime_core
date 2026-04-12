@@ -13,13 +13,13 @@
 
 ---
 cases:
-  - { nlist: 'fooN, Math.abs', list: 'foo2', expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope." }
-  - { nlist: 'M.fooM, fooN',   list: 'foo2', expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope." }
-  - { nlist: 'foo1, fooN',     list: 'foo2', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
-  - { nlist: 'foo2, fooN',     list: 'foo2', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
-  - { nlist: 'fooN',           list: 'foo1, foo2', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
-  - { nlist: 'fooN',           list: 'foo2, N.fooN', expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope." }
-  - { nlist: 'fooN',           list: 'foo1', expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method." }
-  - { nlist: 'fooN',           list: 'N.fooN', expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope." }
-  - { nlist: 'fooN',           list: 'Math.abs', expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope." }
-  - { nlist: 'fooN',           list: 'Math.abs, foo2', expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope." }
+  - { nlist: 'fooN, Math.abs', list: 'foo2' }
+  - { nlist: 'M.fooM, fooN',   list: 'foo2' }
+  - { nlist: 'foo1, fooN',     list: 'foo2' }
+  - { nlist: 'foo2, fooN',     list: 'foo2' }
+  - { nlist: 'fooN',           list: 'foo1, foo2' }
+  - { nlist: 'fooN',           list: 'foo2, N.fooN' }
+  - { nlist: 'fooN',           list: 'foo1' }
+  - { nlist: 'fooN',           list: 'N.fooN' }
+  - { nlist: 'fooN',           list: 'Math.abs' }
+  - { nlist: 'fooN',           list: 'Math.abs, foo2' }

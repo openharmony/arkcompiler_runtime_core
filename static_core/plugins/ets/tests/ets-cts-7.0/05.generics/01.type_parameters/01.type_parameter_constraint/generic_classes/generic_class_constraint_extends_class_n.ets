@@ -13,7 +13,7 @@
 * limitations under the License.
 ---*/
 
-{% for call in calls %}
+{% for c in cases %}
 
 /*---
 desc: >-
@@ -22,6 +22,10 @@ desc: >-
     while T directly depends on the following
       • S; or
       • Type parameter U that depends on S.
+expected_out: 
+    - "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Object'"
+    - "Semantic error ESE0010: Value is possibly nullish."
+    - "{{c.expected_out}}"
 tags: [compile-only, negative]
 ---*/
 
@@ -40,7 +44,7 @@ class F<T> {
 class G<T, S extends T> {}
 
 function main(): void {
-    {{call}}
+    {{c.call}}
 }
 
 {% endfor %}

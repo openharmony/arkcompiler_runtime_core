@@ -24,6 +24,8 @@ cases:
           override foo(): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type void in Derived cannot override foo with type Int field from class Base because the overriding return type is not compatible with the other return type."
 
     # different arguments number 0:1
     - base: |-
@@ -34,6 +36,8 @@ cases:
           override foo(i: int): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Int): void in Derived not overriding any method"
 
     # different arguments number 2:1
     - base: |-
@@ -44,6 +48,8 @@ cases:
           override foo(i: int): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Int): void in Derived not overriding any method"
 
     # same type parameters number, wrong parameters in prototype 2
     - base: |-
@@ -54,6 +60,8 @@ cases:
           override foo<A, C>(i: A, j: A): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo<A, C>(i: A, j: A): void in Derived not overriding any method"
 
     # same type parameters number, different parameters
     - base: |-
@@ -64,6 +72,8 @@ cases:
           override foo<A, C>(i: A, j: C): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo<A, C>(i: A, j: C): void in Derived not overriding any method"
 
     # different type parameters number
     - base: |-
@@ -74,6 +84,8 @@ cases:
           override foo<B>(i: B, j: B): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo<B>(i: B, j: B): void in Derived not overriding any method"
 
     # different type parameters number
     - base: |-
@@ -84,3 +96,5 @@ cases:
           override foo<B>(i: Number): void {
               res = 2;
           }
+      expected_out: |-
+        "Semantic error ESE0136: Method foo<B>(i: Double): void in Derived not overriding any method"

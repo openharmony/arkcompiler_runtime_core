@@ -17,7 +17,11 @@
 desc: |-
     If an expression preceding a chaining operator is known at compile time to always evaluate to a nullish
     value (undefined or null) or a non-nullish value at runtime, then a compile-time warning is issued.
-expected_out: {"compiler": "warning: expression is always evaluated as nullish or non-nullish"}
+{% if 'compile' in timing %}
+tags: []
+expected_out: "Warning W65001: The equality expression is always false."
+{% endif %}
+test_suffix: "{{timing}}"
 ---*/
 
 class Example {

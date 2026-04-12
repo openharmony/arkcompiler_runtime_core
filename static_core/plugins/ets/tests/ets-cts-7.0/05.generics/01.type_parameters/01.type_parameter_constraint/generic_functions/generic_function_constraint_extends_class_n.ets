@@ -13,7 +13,7 @@
 * limitations under the License.
 ---*/
 
-{% for call in calls %}
+{% for c in cases %}
 
 /*---
 desc: >-
@@ -22,18 +22,22 @@ desc: >-
     while T directly depends on the following
       • S; or
       • Type parameter U that depends on S.
+expected_out:
+{%- for eo in c.expected_out %}
+    - "{{eo}}"
+{% endfor %}
 tags: [compile-only, negative]
 ---*/
 
 class A {}
 class B extends A{}
 class C {}
-function foo<T extends A> {}
-function bar<T extends A | C> {}
+function foo<T extends A>() {}
+function bar<T extends A | C>() {}
 function zoo<T, S extends T>() {}
 
 function main(): void {
-    {{call}}
+    {{c.call}}
 }
 
 {% endfor %}

@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    The type of a standalone expression (like just a + b) can be determined entirely
-    from the content of the expression; the type of any other expression may be
-    influenced by its target type
+  The type of a standalone expression (like just a + b) can be determined entirely
+  from the content of the expression; the type of any other expression may be
+  influenced by its target type.
 ---*/
 
 function foo(a: byte): int {
@@ -76,9 +75,42 @@ function foo(a: Object): int {
   return 32;
 }
 
-{{c.defs}}
+const suite = new arktest.ArkTestsuite("Standalone expression type resolution via overload")
+
+suite.addTest("Int arithmetic yields int", () => {
+  let v = 1;
+  let w = v * 12;
+  arktest.assertEQ(foo(v + w), 4)
+})
+
+suite.addTest("Mixed long/int assignment yields long", () => {
+  let v: long = 1;
+  let w: int = 12;
+  arktest.assertEQ(foo(v = w / 2 + (v.toShort()) - (48).toByte()), 5)
+})
+
+suite.addTest("Array literal with short element yields FixedArray<short>", () => {
+  arktest.assertEQ(foo([(1).toShort(), 2, 3]), 102)
+})
+
+suite.addTest("Array literal with Object and string yields Object", () => {
+  arktest.assertEQ(foo([new Object(), "abc"]), 32)
+})
+
+suite.addTest("Array literal with Int yields FixedArray<int>", () => {
+  arktest.assertEQ(foo([new Int(1), 2, 3]), 104)
+})
+
+suite.addTest("Double array element access yields double", () => {
+  let d: Double[];
+  arktest.assertEQ(foo(14 + (d = [1.0, 2.0, 3.0])[1]), 7)
+})
+
+suite.addTest("Long array assignment expression yields long", () => {
+  let k = new Long[3](0);
+  arktest.assertEQ(foo(14 + (k[2] = (2).toLong()) + k[2] * (k[1] = (1).toLong())), 5)
+})
 
 function main() {
-  arktest.assertEQ(foo({{c.exp}}), {{c.res}})
+  suite.run()
 }
-{% endfor %}

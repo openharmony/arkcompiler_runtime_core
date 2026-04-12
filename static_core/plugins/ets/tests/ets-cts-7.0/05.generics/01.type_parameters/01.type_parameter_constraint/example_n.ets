@@ -17,6 +17,7 @@
 desc: >-
     No type parameter has a default value, and initialization is mandatory for variables and fields of a type parameter (see
     Field Initialization)
+expected_out: "Semantic error ESE0280: Property 'field' might not have been initialized."
 tags: [compile-only, negative]
 ---*/
 

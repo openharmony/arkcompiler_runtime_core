@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for sd in self_dependency %}
+{% for c in cases %}
 {% for cm in top_level_class_modifiers %}
 /*---
 desc: >
@@ -21,13 +21,16 @@ desc: >
     The scope of a type parameter name in a class or interface declaration is that entire declaration,
     excluding static member declarations... A compile-time error occurs if a type parameter in the
     type parameter section depends on itself directly or indirectly.
+expected_out: >-
+    {{c.expected_out}}
 params: >
-    {{sd}}
+    {{c.self_dependency}}
     {{cm}}
 tags: [compile-only,negative]
 ---*/
 
-{{cm}} class A<{{sd}}> {}
+{{c.decl}}
+{{cm}} class A<{{c.self_dependency}}> {}
 
 {% endfor %}
 {% endfor %}

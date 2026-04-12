@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
 /*---
-desc: {{ c.desc }}
+desc: >-
+    BigInt relational operations with local variables.
 ---*/
 
-let b: bigint = {{c.b}};
-let x_var: number = {{c.operand_val}};
-
-function main() {
-    let actual_outcome: boolean = (b {{c.op}} x_var)
-    arktest.assertTrue(actual_outcome == {{c.expected_bool}}) // Test PASSES if actual outcome matches expected
+function main(): int {
+     let tests = new arktest.ArkTestsuite('BigInt relational operations with local variables')
+{%- for c in cases %}
+    tests.addTest(' {{c.desc}}. {{loop.index}}', () => {
+        let a = {{c.b}}
+        let b = {{c.operand_val}}
+        arktest.assertEQ(a {{c.op}} b, {{c.expected_bool}})
+    })
+{% endfor %}
+    return tests.run()
 }
-{%- endfor %} 

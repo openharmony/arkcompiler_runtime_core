@@ -13,6 +13,6 @@
 
 --- # List of valid access modifiers
 modifiers:
-  - {m1: "public", m2: "protected", expected: "Semantic error ESE0141: m(): Int in C cannot override m(): Int in A because overridden method has weaker access privilege." }
-  - {m1: "public", m2: "private", expected: "Semantic error ESE0141: m(): Int in C cannot override m(): Int in A because overridden method has weaker access privilege." }
-  - {m1: "protected", m2: "private", expected: "Semantic error ESE0141: m(): Int in C cannot override m(): Int in A because overridden method has weaker access privilege." }
+  - {m1: "public", m2: "protected", expected: "Semantic error ESE873275: Class member m with type Int in C cannot override m with type Int field from class A because the overridden method has weaker access privileges." }
+  - {m1: "public", m2: "private", expected: "Semantic error ESE873275: Class member m with type Int in C cannot override m with type Int field from class A because the overridden method has weaker access privileges." }
+  - {m1: "protected", m2: "private", expected: "Semantic error ESE873275: Class member m with type Int in C cannot override m with type Int field from class A because the overridden method has weaker access privileges." }

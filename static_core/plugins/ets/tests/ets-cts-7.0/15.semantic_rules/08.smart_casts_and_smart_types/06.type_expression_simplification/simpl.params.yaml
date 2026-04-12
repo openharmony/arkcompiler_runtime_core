@@ -1,0 +1,357 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+    - decl: |-
+          interface I {}
+          interface J {}
+          class A {}
+          class B extends A implements I, J {}
+
+          function foo1(i: I) {
+              if (i instanceof J) {
+                  if (i instanceof A) {
+                      return // (I & J) & A
+                  }
+              }
+              arktest.assertTrue(false, 'wrong type intersection')
+          }
+          function foo2(j: J) {
+              if (j instanceof I) {
+                  if (j instanceof A) {
+                      return // (J & I) & A
+                  }
+              }
+              arktest.assertTrue(false, 'wrong type intersection')
+          }
+          function foo3(i: I) {
+              if (i instanceof A) {
+                  if (i instanceof J) {
+                      return // (I & A) & J
+                  }
+              }
+              arktest.assertTrue(false, 'wrong type intersection')
+          }
+      main: |-
+          // associativity: (I & J) & A = (I & A) & J
+          let v = new B()
+          foo1(v)
+          foo2(v)
+          foo3(v)
+
+    - decl: |-
+          interface I {}
+          interface J {}
+          class A {}
+          class B extends A implements I, J {}
+
+          function ij(i: I) {
+              if (i instanceof J) {
+                  // I & J
+              } else {
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+          function ji(j: J) {
+              if (j instanceof I) {
+                  // J & I
+              } else {
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+      main: |-
+          // commutativity: I & J = J & I
+          let v = new B()
+          ij(v)
+          ji(v)
+
+    - decl: |-
+          class A {}
+          class B extends A {}
+
+          function foo_a(a: A) {
+              if (a instanceof B) {
+                  // A & B = B
+                  vb = a
+              } else {
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+
+          function foo_b(b: B) {
+              if (b instanceof A) {
+                  // B & A = B
+                  vb = b
+              } else {
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+
+          let vb: B
+      main: |-
+          // intersection with subtyping: A & B = B
+          let v = new B()
+          foo_a(v)
+          foo_b(v)
+
+    - decl: |-
+          class A {}
+
+          function foo_a(a: A) {
+              if (a instanceof Any) {
+                  // A & Any = A
+                  va = a
+                  return
+              }
+              arktest.assertTrue(false, 'wrong type intersection')
+          }
+
+          function foo_b(b: Any) {
+              if (b instanceof A) {
+                  // Any & A = A
+                  va = b
+                  return
+              }
+              arktest.assertTrue(false, 'wrong type intersection')
+          }
+
+          let va: A
+      main: |-
+          // intersection with subtyping: A & Any = A
+          let v = new A()
+          foo_a(v)
+          foo_b(v)
+
+    - decl: |-
+          class A {}
+          class C {}
+
+          function foo_a(a: A) {
+              if (a instanceof C) {
+                  // A & C = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+
+          function foo_c(c: C) {
+              if (c instanceof A) {
+                  // C & A = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+      main: |-
+          // neither transitively extends the other: A & C = never
+          foo_a(new A())
+          foo_c(new C())
+
+    - decl: |-
+          class A {}
+          class B extends A {}
+
+          function foo_b(b: B) {
+              if (b instanceof A) {
+                  // B & A = B
+                  vb = b
+              } else {
+                  // B - A = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+
+          let vb: B
+      main: |-
+          // difference with subtyping: B - A = never
+          foo_b(new B())
+
+    - decl: |-
+          class A {}
+
+          function foo(a: A) {
+              if (a instanceof Any) {
+                  // A & Any = A
+                  va = a
+              } else {
+                  // A - Any = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+          }
+
+          let va: A
+      main: |-
+          // difference with subtyping: A - Any = never
+          foo(new A())
+
+    - decl: |-
+          function foo(p: string|bigint|undefined|null): string {
+              if (p == undefined) {
+                  return ''
+              } else {
+                  // string|bigint|undefined|null - undefined|null = string|bigint
+                  return p.toString()
+              }
+          }
+      main: |-
+          // difference with subtyping, union types
+          arktest.assertEQ(foo('abc'), 'abc')
+          arktest.assertEQ(foo(100n), '100')
+          arktest.assertEQ(foo(undefined), '')
+          arktest.assertEQ(foo(null), '')
+
+    - decl: |-
+          function foo<T>(p: T): string {
+              // (T-undefined-null)|undefined|null = T
+              let x: NonNullable<T>|undefined|null = p
+              return '' + x
+          }
+      main: |-
+          // difference with subtyping, union types
+          arktest.assertEQ(foo<string|bigint|undefined>('a'), 'a')
+          arktest.assertEQ(foo<string|bigint|undefined>(100n), '100')
+          arktest.assertEQ(foo<string|bigint|undefined>(undefined), 'undefined')
+          arktest.assertEQ(foo<string|bigint|undefined|null>(null), 'null')
+
+    - decl: |-
+          interface I {}
+          final class A {}
+
+          function foo(a: A) {
+              if (a instanceof I) {
+                  // A & I = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              } else {
+                  // A - I = A
+                  va = a
+              }
+          }
+
+          let va: A
+      main: |-
+          // final class with unrelated interface intersection
+          foo(new A())
+
+    - decl: |-
+          class A {}
+
+          function foo(a: A) {
+              if (a instanceof undefined) {
+                  // A & undefined = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              } else {
+                  // A - undefined = A
+                  va = a
+              }
+          }
+
+          let va: A
+      main: |-
+          // intersection between a class and undefined
+          foo(new A())
+
+    - decl: |-
+          interface I {}
+          interface J {}
+          class A {}
+
+          function foo(p: I | (J | A)) {
+              return 'OK'
+          }
+
+          let v: (I | J) | A = new A()
+      main: |-
+          // associativity of union operator: (I | J) | A = I | (J | A)
+          arktest.assertEQ(foo(v), 'OK')
+
+    - decl: |-
+          class A {}
+          class B {}
+
+          function foo(p: B | A) {
+              return 'OK'
+          }
+
+          let v: A | B = new A()
+      main: |-
+          // commutativity of union operator: A | B = B | A
+          arktest.assertEQ(foo(v), 'OK')
+
+    - decl: |-
+          class A {}
+          class B extends A {}
+
+          function foo(p: A | B) {
+              va = p
+              return 'OK'
+          }
+
+          let v: A | B = new B()
+          let va: A
+      main: |-
+          // subtyping with union: A | B = A
+          arktest.assertEQ(foo(v), 'OK')
+
+    - decl: |-
+          class A {}
+
+          function foo(p: A | never) {
+              va = p
+              return 'OK'
+          }
+
+          let v: A | never = new A()
+          let va: A
+      main: |-
+          // subtyping with union: A | never = A
+          arktest.assertEQ(foo(v), 'OK')
+
+    - decl: |-
+          class A {}
+
+          function foo(p: A | Any) {
+              va = p
+              return 'OK'
+          }
+
+          let v: A | Any = new A()
+          let va: Any
+      main: |-
+          // subtyping with union: A | Any = Any
+          arktest.assertEQ(foo(v), 'OK')
+
+    - decl: |-
+          type UT = string | bigint | null
+
+          function foo(p: UT) {
+              v = p
+              return 'OK'
+          }
+
+          let v: NonNullable<UT> | null
+      main: |-
+          // difference with subtyping: (A - B) | B = A
+          arktest.assertEQ(foo(100n), 'OK')
+          arktest.assertEQ(foo(null), 'OK')
+
+    - decl: |-
+          type UT = string | bigint | null
+
+          function foo(p: NonNullable<UT>) {
+              if (p instanceof null) {
+                  // (A - B) & B = never
+                  arktest.assertTrue(false, 'wrong type intersection')
+              }
+              return 'OK'
+          }
+      main: |-
+          // difference with subtyping: (A - B) & B = never
+          arktest.assertEQ(foo(100n), 'OK')
+          arktest.assertEQ(foo('abc'), 'OK')

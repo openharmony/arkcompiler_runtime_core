@@ -13,110 +13,246 @@
 
 ---
 cases:
-    # single type param
-    - decl: |-
-          foobb = foobd // OK: identical parameter types, and covariant return type
-      check: |-
-          arktest.assertTrue(foobb(new Base) instanceof Derived)
-          arktest.assertEQ(foobb(new Base).b, 'd')
-    - decl: |-
-          foodb = foobd // OK: contravariant parameter types, and covariant return type
-      check: |-
-          let r = foodb.unsafeCall(new Base)
-          arktest.assertTrue(r instanceof Derived)
-          arktest.assertEQ((r as Base).b, 'd')
-    - decl: |-
-          foodb = foodd // OK: identical parameter types, and covariant return type
-      check: |-
-          arktest.assertTrue(foodb(new Derived) instanceof Derived)
-          arktest.assertEQ(foodb(new Derived).b, 'd')
-    - decl: |-
-          foodd = foobd // OK: contravariant parameter types, and identical return type
-      check: |-
-          let r = foodd.unsafeCall(new Base)
-          arktest.assertTrue(r instanceof Derived)
-          arktest.assertEQ((r as Base).b, 'd')
-    # subtype has less parameters
-    - decl: |-
-          foobbn = foobb
-      check: |-
-          arktest.assertTrue(foobbn(new Base, 1) instanceof Base)
-          arktest.assertEQ(foobbn(new Base, 1).b, 'b')
-    - decl: |-
-          foobbo = foobb
-      check: |-
-          arktest.assertTrue(foobbo(new Base) instanceof Base)
-          arktest.assertEQ(foobbo(new Base).b, 'b')
-    # subtype has less parameters, parameter is identical and return type covariant
-    - decl: |-
-          foobbn = foobd
-      check: |-
-          arktest.assertTrue(foobbn(new Base, 1) instanceof Derived)
-          arktest.assertEQ(foobbn(new Base, 1).b, 'd')
-    - decl: |-
-          foobbo = foobd
-      check: |-
-          arktest.assertTrue(foobbo(new Base) instanceof Derived)
-          arktest.assertEQ(foobbo(new Base).b, 'd')
-    # subtype has less parameters, parameter is contravariant and return type covariant
-    - decl: |-
-          foodbn = foobd
-      check: |-
-          arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
-          arktest.assertEQ(foodbn(new Derived, 1).b, 'd')
-    - decl: |-
-          foodbo = foobd
-      check: |-
-          arktest.assertTrue(foodbo(new Derived) instanceof Derived)
-          arktest.assertEQ(foodbo(new Derived).b, 'd')
-    # parameter types identical and return type covariant
-    - decl: |-
-          foodbn = fooddn
-      check: |-
-          arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
-          arktest.assertEQ(foodbn(new Derived, 1).b, 'd')
-    - decl: |-
-          foodbo = fooddo
-      check: |-
-          arktest.assertTrue(foodbo(new Derived) instanceof Derived)
-          arktest.assertEQ(foodbo(new Derived).b, 'd')
-    - decl: |-
-          foodbr = fooddr
-      check: |-
-          arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Derived)
-          arktest.assertEQ(foodbr(new Derived, 1, 2, 3).b, 'd')
-    # rest or optional in param, another param contravariant and return type covariant
-    - decl: |-
-          foodbn = foobdn
-      check: |-
-          arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
-          arktest.assertEQ(foodbn(new Derived, 1).b, 'd')
-    - decl: |-
-          foodbo = foobdo
-      check: |-
-          arktest.assertTrue(foodbo(new Derived) instanceof Derived)
-          arktest.assertEQ(foodbo(new Derived).b, 'd')
-    - decl: |-
-          foodbr = foobdr
-      check: |-
-          arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Derived)
-          arktest.assertEQ(foodbr(new Derived, 1, 2, 3).b, 'd')
-    # rest or optional in param, another param contravariant and return type identical
-    - decl: |-
-          foodbn = foobbn
-      check: |-
-          let r = foodbn.unsafeCall(new Base, 1.0)
-          arktest.assertTrue(r instanceof Base)
-          arktest.assertEQ((r as Base).b, 'b')
-    - decl: |-
-          foodbo = foobbo
-      check: |-
-          let r = foodbo.unsafeCall(new Base)
-          arktest.assertTrue(r instanceof Base)
-          arktest.assertEQ((r as Base).b, 'b')
-    - decl: |-
-          foodbr = foobbr
-      check: |-
-          let r = foodbr.unsafeCall(new Base, 1.0, 2.0, 3.0)
-          arktest.assertTrue(r instanceof Base)
-          arktest.assertEQ((r as Base).b, 'b')
+  # single type param
+  - decl: |-
+      //function reference
+      function fooBB(p: Base): Base {return p};
+      function fooBD(p: Base): Derived {return new Derived()};
+      
+      let foobb = fooBB
+      let foobd = fooBD
+      
+      foobb = foobd // OK: identical parameter types, and covariant return type
+    check: |-
+      arktest.assertTrue(foobb(new Base) instanceof Derived)
+      arktest.assertEQ(foobb(new Base).b, 'd')
+
+  - decl: |-
+      function fooBD(p: Base): Derived {return new Derived()};
+      function fooDB(p: Derived): Base { return new Base()};
+
+      let foobd = fooBD
+      let foodb = fooDB
+      
+      foodb = foobd // OK: contravariant parameter types, and covariant return type
+    check: |-
+      let r = foodb.unsafeCall(new Base)
+      arktest.assertTrue(r instanceof Derived)
+      arktest.assertEQ((r as Base).b, 'd')
+
+  - decl: |-
+      function fooDB(p: Derived): Base { return new Base()};
+      function fooDD(p: Derived): Derived { return p};
+
+      let foodb = fooDB
+      let foodd = fooDD
+      
+      foodb = foodd // OK: identical parameter types, and covariant return type
+    check: |-
+      arktest.assertTrue(foodb(new Derived) instanceof Derived)
+      arktest.assertEQ(foodb(new Derived).b, 'd')
+
+  - decl: |-
+      function fooBD(p: Base): Derived {return new Derived()};
+      function fooDD(p: Derived): Derived { return p};
+
+      let foobd = fooBD
+      let foodd = fooDD
+      
+      foodd = foobd // OK: contravariant parameter types, and identical return type
+    check: |-
+      let r = foodd.unsafeCall(new Base)
+      arktest.assertTrue(r instanceof Derived)
+      arktest.assertEQ((r as Base).b, 'd')
+
+  # subtype has fewer parameters
+  - decl: |-
+      function fooBB(p: Base): Base {return p};
+      //function with extra param
+      function fooBBN(p: Base, n: number): Base {return p};
+
+      let foobb = fooBB
+      let foobbn = fooBBN
+
+      foobbn = foobb
+    check: |-
+      arktest.assertTrue(foobbn(new Base, 1) instanceof Base)
+      arktest.assertEQ(foobbn(new Base, 1).b, 'b')
+
+  - decl: |-
+      function fooBB(p: Base): Base {return p};
+      //function with extra optional param
+      function fooBBO(p: Base, n?: number): Base {return p};
+
+      let foobb = fooBB
+      let foobbo = fooBBO
+
+      foobbo = foobb
+    check: |-
+      arktest.assertTrue(foobbo(new Base) instanceof Base)
+      arktest.assertEQ(foobbo(new Base).b, 'b')
+
+  # subtype has fewer parameters, parameter is identical and return type covariant
+  - decl: |-
+      function fooBD(p: Base): Derived {return new Derived()};
+      function fooBBN(p: Base, n: number): Base {return p};
+
+      let foobd = fooBD
+      let foobbn = fooBBN
+      
+      foobbn = foobd
+    check: |-
+      arktest.assertTrue(foobbn(new Base, 1) instanceof Derived)
+      arktest.assertEQ(foobbn(new Base, 1).b, 'd')
+
+  - decl: |-
+      function fooBD(p: Base): Derived {return new Derived()};
+      function fooBBO(p: Base, n?: number): Base {return p};
+
+      let foobd = fooBD
+      let foobbo = fooBBO
+      
+      foobbo = foobd
+    check: |-
+      arktest.assertTrue(foobbo(new Base) instanceof Derived)
+      arktest.assertEQ(foobbo(new Base).b, 'd')
+
+  # subtype has fewer parameters, parameter is contravariant and return type covariant
+  - decl: |-
+      function fooBD(p: Base): Derived {return new Derived()};
+      function fooDBN(p: Derived, n: number): Base { return new Base()};
+
+      let foobd = fooBD
+      let foodbn = fooDBN
+      
+      foodbn = foobd
+    check: |-
+      arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
+      arktest.assertEQ(foodbn(new Derived, 1).b, 'd')
+
+  - decl: |-
+      function fooBD(p: Base): Derived {return new Derived()};
+      function fooDBO(p: Derived, n?: number): Base { return new Base()};
+
+      let foobd = fooBD
+      let foodbo = fooDBO
+      
+      foodbo = foobd
+    check: |-
+      arktest.assertTrue(foodbo(new Derived) instanceof Derived)
+      arktest.assertEQ(foodbo(new Derived).b, 'd')
+
+  # parameter types identical and return type covariant
+  - decl: |-
+      function fooDBN(p: Derived, n: number): Base { return new Base()};
+      function fooDDN(p: Derived, n: number): Derived { return p};
+      
+      let foodbn = fooDBN
+      let fooddn = fooDDN
+
+      foodbn = fooddn
+    check: |-
+      arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
+      arktest.assertEQ(foodbn(new Derived, 1).b, 'd')
+
+  - decl: |-
+      function fooDBO(p: Derived, n?: number): Base { return new Base()};
+      function fooDDO(p: Derived, n?: number): Derived { return p};
+
+      let foodbo = fooDBO
+      let fooddo = fooDDO
+
+      foodbo = fooddo
+    check: |-
+      arktest.assertTrue(foodbo(new Derived) instanceof Derived)
+      arktest.assertEQ(foodbo(new Derived).b, 'd')
+
+  - decl: |-
+      function fooDDR(p: Derived, ...n: number[]): Derived { return p};
+      function fooDBR(p: Derived, ...n: number[]): Base { return new Base()};
+
+      let fooddr = fooDDR
+      let foodbr = fooDBR
+
+      foodbr = fooddr
+    check: |-
+      arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Derived)
+      arktest.assertEQ(foodbr(new Derived, 1, 2, 3).b, 'd')
+
+  # rest or optional in param, another param contravariant and return type covariant
+  - decl: |-
+      function fooBDN(p: Base, n: number): Derived {return new Derived()};
+      function fooDBN(p: Derived, n: number): Base { return new Base()};
+      
+      let foobdn = fooBDN
+      let foodbn = fooDBN
+
+      foodbn = foobdn
+    check: |-
+      arktest.assertTrue(foodbn(new Derived, 1) instanceof Derived)
+      arktest.assertEQ(foodbn(new Derived, 1).b, 'd')
+
+  - decl: |-
+      function fooBDO(p: Base, n?: number): Derived {return new Derived()};
+      function fooDBO(p: Derived, n?: number): Base { return new Base()};
+      
+      let foobdo = fooBDO
+      let foodbo = fooDBO
+
+      foodbo = foobdo
+    check: |-
+      arktest.assertTrue(foodbo(new Derived) instanceof Derived)
+      arktest.assertEQ(foodbo(new Derived).b, 'd')
+
+  - decl: |-
+      function fooBDR(p: Base, ...n: number[]): Derived {return new Derived()};
+      function fooDBR(p: Derived, ...n: number[]): Base { return new Base()};
+
+      let foobdr = fooBDR
+      let foodbr = fooDBR
+
+      foodbr = foobdr
+    check: |-
+      arktest.assertTrue(foodbr(new Derived, 1, 2, 3) instanceof Derived)
+      arktest.assertEQ(foodbr(new Derived, 1, 2, 3).b, 'd')
+
+  # rest or optional in param, another param contravariant and return type identical
+  - decl: |-
+      function fooBBN(p: Base, n: number): Base {return p};
+      function fooDBN(p: Derived, n: number): Base { return new Base()};
+
+      let foobbn = fooBBN
+      let foodbn = fooDBN
+
+      foodbn = foobbn
+    check: |-
+      let r = foodbn.unsafeCall(new Base, 1.0)
+      arktest.assertTrue(r instanceof Base)
+      arktest.assertEQ((r as Base).b, 'b')
+
+  - decl: |-
+      function fooBBO(p: Base, n?: number): Base {return p};
+      function fooDBO(p: Derived, n?: number): Base { return new Base()};
+
+      let foobbo = fooBBO
+      let foodbo = fooDBO
+
+      foodbo = foobbo
+    check: |-
+      let r = foodbo.unsafeCall(new Base)
+      arktest.assertTrue(r instanceof Base)
+      arktest.assertEQ((r as Base).b, 'b')
+
+  - decl: |-
+      //function with extra rest param
+      function fooBBR(p: Base, ...n: number[]): Base {return p};
+      function fooDBR(p: Derived, ...n: number[]): Base { return new Base()};
+
+      let foobbr = fooBBR
+      let foodbr = fooDBR
+
+      foodbr = foobbr
+    check: |-
+      let r = foodbr.unsafeCall(new Base, 1.0, 2.0, 3.0)
+      arktest.assertTrue(r instanceof Base)
+      arktest.assertEQ((r as Base).b, 'b')

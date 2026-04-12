@@ -12,10 +12,16 @@
 # limitations under the License.
 
 ---
-calls:
-  - new D<C>
-  - new D<Object>
-  - new E<Object>
-  - new G<B, A>
-  - new G<C, A>
-  - new G<A, C>
+cases:
+  - call: new D<C>
+    expected_out: "Semantic error ESE0228: Type argument 'C' should be a subtype of 'A' constraint"
+  - call: new D<Object>
+    expected_out: "Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A' constraint"
+  - call: new E<Object>
+    expected_out: "Semantic error ESE0228: Type argument 'Object' should be a subtype of 'A|C' constraint"
+  - call: new G<B, A>
+    expected_out: "Semantic error ESE0228: Type argument 'A' should be a subtype of 'B' constraint"
+  - call: new G<C, A>
+    expected_out: "Semantic error ESE0228: Type argument 'A' should be a subtype of 'C' constraint"
+  - call: new G<A, C>
+    expected_out: "Semantic error ESE0228: Type argument 'C' should be a subtype of 'A' constraint"

@@ -54,7 +54,7 @@ cases:
       class C implements I {
         f: boolean = false
       }
-    expected_out: "Semantic error ESE0141: f(): Boolean in C cannot override f(): Int in I because overriding return type is not compatible with the other return type."
+    expected_out: "Semantic error ESE985118: Class member f with type Boolean in C cannot implement f with type Int property from interface I because the implementing return type is not compatible with the interface return type."
     doc: incorrect field type
 
   - decl: |-
@@ -74,7 +74,7 @@ cases:
       class D implements J {
         n: number = 1
       }
-    expected_out: "Semantic error ESE0136: Method n(%%property-n: Double): void in D not overriding any method"
+    expected_out: "Semantic error ESE0319: Type 'Double' is not compatible with type 'String' at property 'n'"
     doc: different getter and setter types
 
   - decl: |-
@@ -85,5 +85,38 @@ cases:
       class D implements J {
         n: string = "1"
       }
-    expected_out: "Semantic error ESE0141: n(): String in D cannot override n(): Double in J because overriding return type is not compatible with the other return type."
+    expected_out: "Semantic error ESE0319: Type 'Double' is not compatible with type 'String' at property 'n'"
     doc: different getter and setter types
+
+  - decl: |-
+      interface I {
+        get n(): number
+      }
+      class C implements I {
+        n: string = ""
+      }
+    expected_out: "Semantic error ESE985118: Class member n with type String in C cannot implement n with type Double property from interface I because the implementing return type is not compatible with the interface return type."
+    doc: reviewer case - getter-only interface property implemented by incompatible field type
+
+  - decl: |-
+      interface J {
+        get n(): number
+        set n(x: number)
+      }
+      class D implements J {
+        n: string = ""
+      }
+    expected_out: "Semantic error ESE0136: Method n(): String in D not overriding any method"
+    doc: reviewer case - getter/setter with same type implemented by incompatible field type
+
+  - decl: |-
+      interface K {
+        get n(): number
+        set n(x: string)
+      }
+      class E {
+        n: number = 1
+      }
+      class F extends E implements K {}
+    expected_out: "Semantic error ESE0319: Type 'Double' is not compatible with type 'String' at property 'n'"
+    doc: reviewer case - inherited field used for implementation must still respect getter/setter mismatch rule

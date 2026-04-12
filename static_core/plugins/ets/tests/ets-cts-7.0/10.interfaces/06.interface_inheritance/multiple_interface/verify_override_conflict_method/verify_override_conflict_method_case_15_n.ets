@@ -19,8 +19,8 @@ desc: >-
     with the same name causes a compile-time error.
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE0141: CONSTANT(): undefined in TestClass cannot override CONSTANT(): String
-    in InterfaceA because overriding return type is not compatible with the other return type.
+    Semantic error ESE985118: Class member CONSTANT with type undefined in TestClass cannot implement CONSTANT with type String property from interface InterfaceA
+    because the implementing return type is not compatible with the interface return type.
 ---*/
 
 interface InterfaceA {
