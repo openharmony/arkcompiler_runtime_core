@@ -25,7 +25,6 @@ package std.annotations
  * Mark an object which was initialized with a literal.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 @Retention("RUNTIME")
 export @interface InterfaceObjectLiteral {}

@@ -25,7 +25,6 @@ package std.annotations;
  * @namespace functions
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export namespace functions {
     /**
@@ -33,7 +32,6 @@ export namespace functions {
      * Mark function which contain optional param and rest param.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
-     * @since 24
      */
     @Retention("RUNTIME")
     export @interface OptionalParametersAnnotation {
@@ -42,7 +40,6 @@ export namespace functions {
          * @type { int }
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
-         * @since 24
          */
         minArgCount: int
     };
