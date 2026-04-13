@@ -57,7 +57,7 @@ interface I4 extends I3 {
         foo_i4_p1(p: P1): string { return "I4" }
         foo_i4_p2(p: P2): string { return "I4" }
         foo_i4_p3(p: P3): string { return "I4" }
-        overload foo { foo, foo_i4_p1, foo_i4_p2, foo_i4_p3 }
+        overload foo { foo, foo_i4_p1, foo_i4_p2, foo_i4_p3, foo_i3_p1, foo_i3_p2, foo_i3_p3, foo_i3_p4 }
     }
 interface I5 { 
         foo(): void

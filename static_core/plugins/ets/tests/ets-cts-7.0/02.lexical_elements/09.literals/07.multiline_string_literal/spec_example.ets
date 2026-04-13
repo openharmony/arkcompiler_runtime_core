@@ -14,9 +14,22 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Multi-line string literals that can include embedded expressions are called Template literals
-tags: [compile-only]
+desc: >-
+    Multi-line string literals that can include embedded expressions are called Template literals
+    MultilineString literals are of literal types corresponding to literals. If an operator is applied to a literal, then the literal
+    type is replaced for string
 ---*/
 
-let sentence = `This is an example of multi-line string,
+const sentence = `This is an example of multi-line string,
  which should be enclosed in backticks (\`)`
+
+ function main() {
+    arktest.assertTrue(sentence instanceof string)
+    arktest.assertTrue(`MultilineTest` + '' instanceof string)
+    
+    let copy = ''
+    for(let letter of sentence) {
+        copy += letter
+    }
+    arktest.assertEQ(copy, sentence)
+ }
