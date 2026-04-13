@@ -24,9 +24,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_map.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "include/mem/panda_containers.h"
 #include "intrinsics.h"
 
 namespace ark::ets::intrinsics::helpers {
@@ -62,34 +60,16 @@ void JSONStringifier::AppendJSONPrimitive(const PandaString &value, bool hasCont
     }
 }
 
-bool JSONStringifier::SerializeFields(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent,
-                                      PandaUnorderedSet<PandaString> &serializedKeys)
+bool JSONStringifier::SerializeFields(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent)
 {
     ASSERT(value.GetPtr() != nullptr);
-    // Subclass field shadows base with same JSON name: last assignment wins in base-first walk.
-    PandaUnorderedMap<PandaString, ark::Field *> winnerByKey;
-    value->GetClass()->EnumerateBaseClasses([&](EtsClass *c) {
-        for (auto &field : c->GetRuntimeClass()->GetFields()) {
-            auto *ef = EtsField::FromRuntimeField(&field);
-            if (ef->IsPublic() && !ef->IsStatic()) {
-                winnerByKey[ResolveDisplayName(ef)] = &field;
-            }
-        }
-        return false;
-    });
-
+    auto keys = PandaUnorderedSet<PandaString>();
     bool isSuccessful = false;
+
     value->GetClass()->EnumerateBaseClasses([&](EtsClass *c) {
-        for (auto &field : c->GetRuntimeClass()->GetFields()) {
-            auto *ef = EtsField::FromRuntimeField(&field);
-            if (!ef->IsPublic() || ef->IsStatic()) {
-                continue;
-            }
-            auto win = winnerByKey.find(ResolveDisplayName(ef));
-            if (win == winnerByKey.end() || win->second != &field) {
-                continue;
-            }
-            if (!HandleField(executionCtx, value, ef, hasContent, serializedKeys)) {
+        auto fields = c->GetRuntimeClass()->GetFields();
+        for (auto &field : fields) {
+            if (!HandleField(executionCtx, value, EtsField::FromRuntimeField(&field), hasContent, keys)) {
                 isSuccessful = false;
                 return true;
             }
@@ -97,123 +77,6 @@ bool JSONStringifier::SerializeFields(EtsExecutionContext *executionCtx, EtsHand
         }
         return false;
     });
-    return isSuccessful;
-}
-
-bool JSONStringifier::SerializeGetters(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj, bool &hasContent,
-                                       PandaUnorderedSet<PandaString> &serializedKeys)
-{
-    ASSERT(obj.GetPtr() != nullptr);
-
-    for (auto iter = helpers::InstanceMethodsIterator(obj->GetClass(), true); !iter.IsEmpty(); iter.Next()) {
-        auto *method = iter.Value();
-        std::string_view methodName = method->GetName();
-        if (methodName.find(GETTER_BEGIN) != 0) {
-            continue;
-        }
-
-        if (UNLIKELY(method->GetNumArgs() != 1)) {
-            // All getters must have only a single argument corresponding to `this`,
-            // but it's still possible to manually emit bytecode with arbitrary number of parameters
-            // in "%%get-" method.
-            // `TypeError` is thrown here to align native implementation with managed `getGettersKeyValuePairs`.
-            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
-                              "Expected zero arguments in getter");
-            return false;
-        }
-
-        PandaString jsonKey(methodName.substr(std::string_view(GETTER_BEGIN).size()));
-        if (serializedKeys.find(jsonKey) != serializedKeys.end()) {
-            continue;
-        }
-
-        Value selfArg(obj->GetCoreType());
-        auto *result = helpers::InvokeAndResolveReturnValue(method, executionCtx, &selfArg);
-        if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
-            return false;
-        }
-
-        if (result == nullptr) {
-            continue;
-        }
-        key_ = jsonKey;
-        EtsHandle value(executionCtx, result);
-        if (!AppendJSONString(value, hasContent)) {
-            return false;
-        }
-        serializedKeys.insert(jsonKey);
-        hasContent = true;
-    }
-    return true;
-}
-
-bool JSONStringifier::SerializeInterfaceList(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value,
-                                             bool &hasContent, PandaUnorderedSet<PandaString> &serializedKeys)
-{
-    ASSERT(value.GetPtr() != nullptr);
-    auto *cls = value->GetClass();
-    bool isSuccessful = true;
-    if (FromEtsBoolean(IsLiteralInitializedInterface(value.GetPtr()))) {
-        return true;
-    }
-
-    cls->EnumerateVtable([&](Method *method) {
-        auto *etsMethod = EtsMethod::FromRuntimeMethod(method);
-        std::string_view methodName = etsMethod->GetName();
-        if (methodName.find(GETTER_BEGIN) != 0) {
-            return false;
-        }
-
-        bool isInterfaceMethod = false;
-        cls->EnumerateInterfaces([&](EtsClass *iface) {
-            auto *res = iface->GetRuntimeClass()->GetVirtualInterfaceMethod(
-                reinterpret_cast<const uint8_t *>(methodName.data()), method->GetProto());
-            if (res != nullptr) {
-                isInterfaceMethod = true;
-                return true;
-            }
-            return false;
-        });
-
-        if (!isInterfaceMethod) {
-            return false;
-        }
-
-        PandaString keyStr(methodName.substr(std::string_view(GETTER_BEGIN).size()));
-        if (serializedKeys.find(keyStr) != serializedKeys.end()) {
-            return false;
-        }
-
-        if (!etsMethod->IsPublic()) {
-            return false;
-        }
-
-        if (UNLIKELY(etsMethod->GetNumArgs() != 1)) {
-            return false;
-        }
-
-        Value selfArg(value->GetCoreType());
-        auto *result = helpers::InvokeAndResolveReturnValue(etsMethod, executionCtx, &selfArg);
-        if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
-            isSuccessful = false;
-            return true;
-        }
-
-        if (result == nullptr) {
-            return false;
-        }
-
-        key_ = keyStr;
-        EtsHandle val(executionCtx, result);
-        if (!AppendJSONString(val, hasContent)) {
-            isSuccessful = false;
-            return true;
-        }
-        serializedKeys.insert(keyStr);
-        hasContent = true;
-        return false;
-    });
-
     return isSuccessful;
 }
 
@@ -227,23 +90,12 @@ bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
     }
 
     bool hasContent = false;
-    PandaUnorderedSet<PandaString> serializedKeys;
 
     buffer_ += "{";
-    if (!SerializeFields(executionCtx, value, hasContent, serializedKeys)) {
+    if (!SerializeFields(executionCtx, value, hasContent)) {
         return false;
     }
 
-    // The code below mirrors managed `writeClassValue`. Ideally we'd like a single implementation
-    // of `JSON.stringify`, but native code must exist to satisfy performance requirements
-    if (FromEtsBoolean(IsLiteralInitializedInterface(value.GetPtr())) &&
-        !SerializeGetters(executionCtx, value, hasContent, serializedKeys)) {
-        return false;
-    }
-
-    if (!SerializeInterfaceList(executionCtx, value, hasContent, serializedKeys)) {
-        return false;
-    }
     buffer_ += "}";
     PopValue(value);
     return true;
@@ -824,7 +676,7 @@ bool JSONStringifier::HandleField([[maybe_unused]] EtsExecutionContext *executio
     }
     key_ = ResolveDisplayName(etsField);
     if (keys.find(key_) != keys.end()) {
-        return true;
+        return false;
     }
     keys.insert(key_);
     auto etsType = etsField->GetEtsType();

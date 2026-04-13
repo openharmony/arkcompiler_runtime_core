@@ -56,7 +56,7 @@ function stringifyFilterLiteralTest2() {
     arktest.assertEQ(JSON.stringify(c, ['obj1']), res);
     res = '{"name":"c"}';
     arktest.assertEQ(JSON.stringify(c, ['name']), res);
-    res = '{"name":"c","obj1":{"name":"d"}}';
+    res = '{"obj1":{"name":"d"},"name":"c"}';
     arktest.assertEQ(JSON.stringify(c, ['obj1', 'name']), res);
 }
 
@@ -89,7 +89,7 @@ function stringifyFilterLiteralTest3() {
     arktest.assertEQ(JSON.stringify(b, ['obj', 'obj1']), res);
     res = '{"obj":{"obj1":{"length":44},"length":3},"obj1":{"length":4},"length":2}';
     arktest.assertEQ(JSON.stringify(b, ['obj', 'obj1', 'length']), res);
-    res = '{"obj":{"name":"c","obj1":{"name":"d2"}},"name":"b","obj1":{"name":"d1"}}';
+    res = '{"obj":{"obj1":{"name":"d2"},"name":"c"},"obj1":{"name":"d1"},"name":"b"}';
     arktest.assertEQ(JSON.stringify(b, ['obj', 'obj1', 'name']), res);
 }
 
@@ -126,11 +126,11 @@ function stringifyFilterLiteralTest4() {
     };
     let res = '{"name":"a"}';
     arktest.assertEQ(JSON.stringify(a, ['name']), res);
-    res = '{"obj":{"obj":{"name":"c"},"name":"b"},"name":"a"}';
+    res = '{"name":"a","obj":{"name":"b","obj":{"name":"c"}}}';
     arktest.assertEQ(JSON.stringify(a, ['name', 'obj']), res);
     res = '{"name":"a","obj1":{"name":"d3"}}';
     arktest.assertEQ(JSON.stringify(a, ['name', 'obj1']), res);
-    res = '{"obj":{"obj":{"name":"c","obj1":{"name":"d2"}},"name":"b","obj1":{"name":"d1"}},"name":"a","obj1":{"name":"d3"}}';
+    res = '{"name":"a","obj":{"name":"b","obj":{"name":"c","obj1":{"name":"d2"}},"obj1":{"name":"d1"}},"obj1":{"name":"d3"}}';
     arktest.assertEQ(JSON.stringify(a, ['name', 'obj', 'obj1']), res);
 
     res = '{}';

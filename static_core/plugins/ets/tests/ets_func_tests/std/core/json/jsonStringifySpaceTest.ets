@@ -102,8 +102,8 @@ function stringifySpaceTest4() {
               'obj": {\n^~!@#%&*$^~!@#%&*$"name": "a",\n^~!@#%&*$^~!@#%&*$"length": 1\n^~!@#%&*$}\n}';
     arktest.assertEQ(JSON.stringify(obj1, null, '^~!@#%&*$'), res);
 
-    res = '{\n^~!@#%&*$"obj": {\n^~!@#%&*$^~!@#%&*$"name": "new A",\n^~!@#%&*$^~!@#%&*$"num": 3,\n^' +
-          '~!@#%&*$^~!@#%&*$"length": 4\n^~!@#%&*$},\n^~!@#%&*$"name": "a",\n^~!@#%&*$"length": 1\n}';
+    res = '{\n^~!@#%&*$"name": "a",\n^~!@#%&*$"length": 1,\n^~!@#%&*$"obj": {\n^~!@#%&*$^~!@#%&*$"name": "new A",' +
+          '\n^~!@#%&*$^~!@#%&*$"num": 3,\n^~!@#%&*$^~!@#%&*$"length": 4\n^~!@#%&*$}\n}';
     arktest.assertEQ(JSON.stringify(obj2, null, '^~!@#%&*$'), res);
 }
 
@@ -118,16 +118,17 @@ function stringifySpaceTest5() {
     arktest.assertEQ(JSON.stringify(obj1, null, 10), res);
     arktest.assertEQ(JSON.stringify(obj1, null, 100), res);
 
-    res = '{\n          "obj": {\n                    "name": "new A",\n                    "num": 3,\n  ' +
-          '                  "length": 4\n          },\n          "name": "a",\n          "length": 1\n}';
+    res = '{\n          "name": "a",\n          "length": 1,\n          "obj": {\n                    "name": "new A",' +
+          '\n                    "num": 3,\n                    "length": 4\n          }\n}';
     arktest.assertEQ(JSON.stringify(obj2, null, 10), res);
     arktest.assertEQ(JSON.stringify(obj2, null, 100), res);
 
     res = '{\n     "name": "name",\n     "num": 1,\n     "length": 2,\n     "obj": {\n          "name": "a",\n          "length": 1\n     }\n}';
     arktest.assertEQ(JSON.stringify(obj1, null, 5), res);
-    res = '{\n     "obj": {\n          "name": "new A",\n          "num": 3,\n          "length": 4\n     },\n     "name": "a",\n     "length": 1\n}';
+    res = '{\n     "name": "a",\n     "length": 1,\n     "obj": {\n          "name": "new A",\n          "num": 3,\n          "length": 4\n     }\n}';
     arktest.assertEQ(JSON.stringify(obj2, null, 5), res);
 }
+
 
 function stringifySpaceTest6() {
     let obj1 = new ClassA('name', 1, 2);
@@ -140,14 +141,14 @@ function stringifySpaceTest6() {
     arktest.assertEQ(JSON.stringify(obj1, null, 'abcdefghij'), res);
     arktest.assertEQ(JSON.stringify(obj1, null, 'abcdefghijkkkkkkkk'), res);
 
-    res = '{\nabcdefghij"obj": {\nabcdefghijabcdefghij"name": "new A",\nabcdefghijabcdefghij"num": 3,\nab' +
-          'cdefghijabcdefghij"length": 4\nabcdefghij},\nabcdefghij"name": "a",\nabcdefghij"length": 1\n}';
+    res = '{\nabcdefghij"name": "a",\nabcdefghij"length": 1,\nabcdefghij"obj": {\nabcdefghijabcdefghij"name": "new A",' +
+          '\nabcdefghijabcdefghij"num": 3,\nabcdefghijabcdefghij"length": 4\nabcdefghij}\n}';
     arktest.assertEQ(JSON.stringify(obj2, null, 'abcdefghij'), res);
     arktest.assertEQ(JSON.stringify(obj2, null, 'abcdefghijkkkkkkkk'), res);
 
     res = '{\nabcde"name": "name",\nabcde"num": 1,\nabcde"length": 2,\nabcde"obj": {\nabcdeabcde"name": "a",\nabcdeabcde"length": 1\nabcde}\n}';
     arktest.assertEQ(JSON.stringify(obj1, null, 'abcde'), res);
-    res = '{\nabcde"obj": {\nabcdeabcde"name": "new A",\nabcdeabcde"num": 3,\nabcdeabcde"length": 4\nabcde},\nabcde"name": "a",\nabcde"length": 1\n}';
+    res = '{\nabcde"name": "a",\nabcde"length": 1,\nabcde"obj": {\nabcdeabcde"name": "new A",\nabcdeabcde"num": 3,\nabcdeabcde"length": 4\nabcde}\n}';
     arktest.assertEQ(JSON.stringify(obj2, null, 'abcde'), res);
 }
 
