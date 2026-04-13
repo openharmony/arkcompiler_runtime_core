@@ -231,10 +231,6 @@
 #33627
 07.expressions/22.binary_expressions/numeric_type_exp.ets
 
-
-#33379
-07.expressions/23.multiplicative_expressions/02.division/bigint_div_by_zero_n.ets
-
 #32703
 07.expressions/24.exponentiation_expression/inf_27.ets
 
