@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Test File.
-files: ['./namespace_member_added.libr.ets']
+desc: |-
+    {{c.desc}}
+files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
 ---*/
 
-import { N } from './namespace_member_added.libr.ets';
+import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
 
 function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+    arktest.assertEQ({{c.call}}, {{c.value}})
 }
+
+{% endfor %}

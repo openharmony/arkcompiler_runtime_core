@@ -13,18 +13,46 @@
 # limitations under the License.
 
 # Copy <test>.lib<N>.new.ets -> <test>.lib<N>.ets for all new lib versions.
-# Libs without a .new.ets counterpart are left untouched.
+# A backup of the old lib is saved as <test>.lib<N>.ets.orig so that the
+# matching restore loop in bin-compat-compile-new-libs.sh can put the old
+# content back after the new lib has been compiled. This makes repeat runs
+# without --force-generate work correctly.
 #
-# Usage: bin-compat-copy-new-libs.sh <gen-dir>/${test-id:parent}/${test-id:stem}
-# Example: bin-compat-copy-new-libs.sh /path/gen/23.binary_compatibility/test
+# Two naming conventions are supported:
+#
+#   1. Non-templated tests:
+#        gen/test.ets
+#        gen/test.libr.ets       gen/test.libr.new.ets
+#      BASE   = gen/test
+#      suffix = .ets
+#      glob   = ${BASE}.libr*.new.ets
+#
+#   2. Templated tests:
+#        gen/test_0.ets,                        gen/test_1.ets, ...
+#        gen/test.libr_0.ets,                   gen/test.libr_1.ets, ...
+#        gen/test.libr.new_0.ets,               gen/test.libr.new_1.ets, ...
+#      BASE   = gen/test                      BASE   = gen/test
+#      suffix = _0.ets                        suffix = _1.ets
+#      glob   = ${BASE}.libr*.new_0.ets       glob   = ${BASE}.libr*.new_1.ets
+#
+# In both cases the old lib is: ${new_lib%.new${suffix}}${suffix}
+#
+# Usage: bin-compat-copy-new-libs.sh <gen-dir>/<test-id-name>
 
-set -e
+set -euo pipefail
 
-TEST_ID_PATH="$1"
+BASE="$1"
 
-for new_lib in "${TEST_ID_PATH}".libr*.new.ets; do
+suffix=".ets"
+
+if [[ "$BASE" =~ ^(.+)_([0-9]+)$ ]]; then
+    BASE="${BASH_REMATCH[1]}"
+    suffix="_${BASH_REMATCH[2]}.ets"
+fi
+
+for new_lib in ${BASE}.libr*.new${suffix}; do
     [ -f "$new_lib" ] || continue
-    old_lib="${new_lib%.new.ets}.ets"
+    old_lib="${new_lib%.new${suffix}}${suffix}"
     cp "$old_lib" "${old_lib}.orig"
     cp "$new_lib" "$old_lib"
 done
