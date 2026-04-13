@@ -1,0 +1,9 @@
+artifacts/
+src/web/hierarchical_integrated_data.json
+configs/config.json
+__pycache__/
+*.pyc
+.venv/
+.deps/
+.DS_Store
+Thumbs.db

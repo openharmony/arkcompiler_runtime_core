@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "depsRoot": ".deps",
+  "tools": {
+    "homecheck": {
+      "repo": "https://gitcode.com/openharmony-sig/homecheck",
+      "ref": "ed9f09e",
+      "sourceDir": "sources/homecheck",
+      "runtimeDir": "runtime/homecheck"
+    },
+    "hapray": {
+      "repo": "https://gitcode.com/SMAT/ArkAnalyzer-HapRay",
+      "ref": "ee78d0c",
+      "sourceDir": "sources/ArkAnalyzer-HapRay",
+      "workspaceSubdir": "perf_testing"
+    }
+  }
+}
