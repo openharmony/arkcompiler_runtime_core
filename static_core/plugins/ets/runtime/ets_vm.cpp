@@ -17,6 +17,7 @@
 #include <atomic>
 
 #include "compiler/optimizer/ir/runtime_interface.h"
+#include "execution/job_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context_wrapper.h"
 #include "include/mem/panda_smart_pointers.h"
@@ -43,6 +44,7 @@
 #include "runtime/compiler.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread_scopes.h"
+#include "runtime/include/value-inl.h"
 #include "runtime/init_icu.h"
 #include "runtime/execution/coroutines/stackful/stackful_coroutine_manager.h"
 #include "runtime/execution/stackless/stackless_job_manager.h"
@@ -562,7 +564,7 @@ bool PandaEtsVM::CheckEntrypointSignature(Method *entrypoint)
     ASSERT(entrypoint != nullptr);
 
     if (entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::I32 &&
-        entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::VOID) {
+        entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::VOID && !entrypoint->HasAsyncAnnotation()) {
         return false;
     }
 
@@ -631,9 +633,40 @@ coretypes::String *PandaEtsVM::CreateString(Method *ctor, ObjectHeader *obj)
     return str == nullptr ? nullptr : str->GetCoreType();
 }
 
+static Expected<int, Runtime::Error> WaitForEntrypointCompletion(Value result)
+{
+    if (!result.IsReference()) {
+        return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
+    }
+
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    EtsHandle<EtsPromise> promise(executionCtx, EtsPromise::FromCoreType(result.GetAs<ObjectHeader *>()));
+    ASSERT(promise->GetClass() == PlatformTypes(executionCtx)->corePromise);
+
+    while (promise->IsPending()) {
+        ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
+        JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()->ExecuteJobs();
+    }
+
+    ASSERT(promise->IsResolved() || promise->IsRejected());
+    if (promise->IsRejected()) {
+        executionCtx->GetMT()->SetException(promise->GetValue(executionCtx)->GetCoreType());
+    } else {
+        // NOTE(panferovi): try to obtain int from promise??
+    }
+
+    return 0;
+}
+
 Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoint, const std::vector<std::string> &args)
 {
     ASSERT(Runtime::GetCurrent()->GetLanguageContext(*entrypoint).GetLanguage() == panda_file::SourceLang::ETS);
+
+    if (entrypoint->GetNumArgs() > 1) {
+        // What if entrypoint->GetNumArgs() > 1 ?
+        LOG(ERROR, RUNTIME) << "ets entrypoint has args count more than 1 : " << entrypoint->GetNumArgs();
+        return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
+    }
 
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
@@ -645,24 +678,21 @@ Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoin
     }
 
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    if (entrypoint->GetNumArgs() == 0) {
-        auto v = entrypoint->Invoke(executionCtx->GetMT(), nullptr);
-        return v.GetAs<int>();
-    }
+    Value *entrypointArgs = nullptr;
+    Value argValue;
 
     if (entrypoint->GetNumArgs() == 1) {
         EtsObjectArray *etsObjectArray = CreateArgumentsArray(args, this);
-        EtsHandle<EtsObjectArray> argsHandle(executionCtx, etsObjectArray);
-        ASSERT(argsHandle.GetPtr() != nullptr);
-        Value argVal(argsHandle.GetPtr()->AsObject()->GetCoreType());
-        auto v = entrypoint->Invoke(executionCtx->GetMT(), &argVal);
-
-        return v.GetAs<int>();
+        argValue = Value(etsObjectArray->GetCoreType());
+        entrypointArgs = &argValue;
     }
 
-    // What if entrypoint->GetNumArgs() > 1 ?
-    LOG(ERROR, RUNTIME) << "ets entrypoint has args count more than 1 : " << entrypoint->GetNumArgs();
-    return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
+    auto v = entrypoint->Invoke(executionCtx->GetMT(), entrypointArgs);
+    if (entrypoint->HasAsyncAnnotation()) {
+        return WaitForEntrypointCompletion(v);
+    }
+
+    return v.GetAs<int>();
 }
 
 ObjectHeader *PandaEtsVM::GetOOMErrorObject()

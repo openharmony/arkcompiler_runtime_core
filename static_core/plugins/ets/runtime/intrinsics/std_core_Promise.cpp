@@ -40,7 +40,7 @@ namespace ark::ets::intrinsics {
 
 void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)
 {
-    PandaVector<Value> args {Value(outsidePromise), Value(internalPromise)};
+    PandaVector<Value> args {Value(outsidePromise->GetCoreType()), Value(internalPromise->GetCoreType())};
 
     PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(ManagedThread::GetCurrent(),
                                                                                     args.data());
