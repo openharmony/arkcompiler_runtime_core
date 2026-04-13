@@ -58,11 +58,6 @@ EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
     return ToEtsBoolean(ark::ets::intrinsics::helpers::SameValueZero(EtsExecutionContext::GetCurrent(), a, b));
 }
 
-EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)
-{
-    return nullptr;
-}
-
 ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
 {
     if (UNLIKELY(!cls->IsArrayClass())) {

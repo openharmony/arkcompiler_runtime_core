@@ -7124,18 +7124,6 @@ intrinsics:
     llvm_codegen_func: EmitGetHashCodeByValue
     need_param_locations: true
 
-  - name: StdCoreRuntimeGetTypeInfo
-    space: ets
-    class_name: std.core.Runtime
-    method_name: __getTypeInfo
-    static: true
-    signature:
-      ret: std.core.Class
-      args: [ Y ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeGetTypeInfo
-    clear_flags: [ heap_inv, no_dce ]
-    peephole_func: PeepholeGetTypeInfo
-
   - name: StdCoreRuntimeAllocSameTypeArray
     space: ets
     class_name: std.core.Runtime
@@ -10525,4 +10513,3 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSameValueZero
     llvm_codegen_func: EmitSameValueZero
-
