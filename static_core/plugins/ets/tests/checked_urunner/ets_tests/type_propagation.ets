@@ -13,8 +13,6 @@
 * limitations under the License.
 */
 
-import { Runtime } from 'std/core'
-
 //! CHECKER      Check type prop
 //! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "type_propagation.ETSGLOBAL::main"
 //! METHOD       "type_propagation.ETSGLOBAL::test"
@@ -37,19 +35,11 @@ class B extends A {
     public static klass = Class.current()
 }
 
-class Stub {
-    foo(): Any {
-        return '123'
-    }
-}
-
 let boxClass = Class.of(new Box<Int>())
-let stubClass = Class.of(new Stub())
-let anyClass = stubClass.getInstanceMethod('foo')!.getReturnType()
 
 function testNewObjSimple() {
     let b = new B()
-    let klass1 = Runtime.__getTypeInfo(b)
+    let klass1 = Class.of(b)
     arktest.assertEQ(klass1, B.klass)
 }
 
@@ -60,17 +50,17 @@ function testNewObjPhi(x: boolean) {
     } else {
         a = new B()
     }
-    let klass1 = Runtime.__getTypeInfo(a)
-    arktest.assertTrue(klass1 === undefined)
+    let klass1 = Class.of(a)
+    arktest.assertEQ(klass1, x ? A.klass : B.klass)
 }
 
 function testNewObjStoreLoad() {
     let box = new Box<A>()
     box.set(new B())
-    let klass1 = Runtime.__getTypeInfo(box)
-    let klass2 = Runtime.__getTypeInfo(box.get())
+    let klass1 = Class.of(box)
+    let klass2 = Class.of(box.get())
     box.set(new A())
-    let klass3 = Runtime.__getTypeInfo(box.get())
+    let klass3 = Class.of(box.get())
 
     arktest.assertEQ(klass1, boxClass)
     arktest.assertEQ(klass2, B.klass)
@@ -88,11 +78,11 @@ function __noinline__blackBox() {
 function testInvalidateSimple() {
     let box = new Box<A>()
     box.set(new B())
-    let klass1 = Runtime.__getTypeInfo(box.get())
+    let klass1 = Class.of(box.get())
     __noinline__blackBox(box)
-    let klass2 = Runtime.__getTypeInfo(box.get())
+    let klass2 = Class.of(box.get())
     arktest.assertEQ(klass1, B.klass)
-    arktest.assertEQ(klass2, anyClass)
+    arktest.assertEQ(klass2, B.klass)
 }
 
 function testInvalidateInTriangle(x: boolean) {
@@ -101,8 +91,8 @@ function testInvalidateInTriangle(x: boolean) {
     if (x) {
         __noinline__blackBox(box)
     }
-    let klass1 = Runtime.__getTypeInfo(box.get())
-    arktest.assertEQ(klass1, anyClass)
+    let klass1 = Class.of(box.get())
+    arktest.assertEQ(klass1, B.klass)
 }
 
 function testInvalidateBeforeEdge(x: boolean) {
@@ -111,14 +101,14 @@ function testInvalidateBeforeEdge(x: boolean) {
     let box = new Box<A>()
     box.set(new B())
     if (x) {
-        klass1 = Runtime.__getTypeInfo(box.get())
+        klass1 = Class.of(box.get())
     }
     __noinline__blackBox(box)
     if (x) {
-        klass2 = Runtime.__getTypeInfo(box.get())
+        klass2 = Class.of(box.get())
     }
     arktest.assertEQ(klass1, B.klass)
-    arktest.assertEQ(klass2, anyClass)
+    arktest.assertEQ(klass2, B.klass)
 }
 
 let gObj: Object | null = null
@@ -134,11 +124,11 @@ function testEscapeToGObject(x: boolean) {
     box.set(new B())
     gObj = box
     if (x) {
-        let klass1 = Runtime.__getTypeInfo(box.get())
+        let klass1 = Class.of(box.get())
         __noinline__blackBox()
-        let klass2 = Runtime.__getTypeInfo(box.get())
+        let klass2 = Class.of(box.get())
         arktest.assertEQ(klass1, B.klass)
-        arktest.assertEQ(klass2, anyClass)
+        arktest.assertEQ(klass2, B.klass)
     }
 }
 
@@ -148,11 +138,11 @@ function testEscapeToGObjectField(x: boolean) {
     __noinline__blackBox()
     gHolder.obj = box
     if (x) {
-        let klass1 = Runtime.__getTypeInfo(box.get())
+        let klass1 = Class.of(box.get())
         __noinline__blackBox()
-        let klass2 = Runtime.__getTypeInfo(box.get())
+        let klass2 = Class.of(box.get())
         arktest.assertEQ(klass1, B.klass)
-        arktest.assertEQ(klass2, anyClass)
+        arktest.assertEQ(klass2, B.klass)
     }
 }
 
@@ -172,22 +162,19 @@ function testLongEscapeChain() {
     __noinline__blackBox() // h1 escapes
     h3.obj = h4
     h5.obj = h6
-    let klass1 = Runtime.__getTypeInfo(h4.obj) // Holder
-    let klass2 = Runtime.__getTypeInfo(h6.obj) // Holder
+    let klass1 = Class.of(h4.obj) // Holder
+    let klass2 = Class.of(h6.obj) // Holder
     __noinline__blackBox()
     h2.obj = h3
     h1.obj = h2 // h2,h3,h4 escape
-    let klass3 = Runtime.__getTypeInfo(h4.obj) // Holder
+    let klass3 = Class.of(h4.obj) // Holder
     __noinline__blackBox() // h2-h4 are invalidated
-    let klass4 = Runtime.__getTypeInfo(h4.obj) // Object
-    let klass5 = Runtime.__getTypeInfo(h6.obj) // Holder
+    let klass4 = Class.of(h4.obj) // Holder
+    let klass5 = Class.of(h6.obj) // Holder
     arktest.assertEQ(klass1, Holder.klass)
     arktest.assertEQ(klass2, Holder.klass)
     arktest.assertEQ(klass3, Holder.klass)
-    // Note(#27093): enable after union processing implementation
-    // arktest.assertEQ(klass4, anyClass)
-    // Next line should be removed after union processing implementation
-    arktest.assertEQ(klass4, undefined)
+    arktest.assertEQ(klass4, Holder.klass)
     arktest.assertEQ(klass5, Holder.klass)
 }
 
@@ -202,19 +189,15 @@ function testEscapeChainInTriangle(x: boolean) {
         h2.obj = h3
     }
     __noinline__blackBox(h2) // h3, h2, h1 escape and are invalidated
-    // Note(#27093): enable after union processing implementation
-    // arktest.assertEQ(Runtime.__getTypeInfo(h2.obj), anyClass)
-    // arktest.assertEQ(Runtime.__getTypeInfo(h2.obj), anyClass)
-    // Next two line should be removed after union processing implementation
-    arktest.assertEQ(Runtime.__getTypeInfo(h2.obj), undefined)
-    arktest.assertEQ(Runtime.__getTypeInfo(h2.obj), undefined)
+    arktest.assertEQ(Class.of(h2.obj), Holder.klass)
+    arktest.assertEQ(Class.of(h2.obj), Holder.klass)
 }
 
 function testLoopPhi() {
     let a = new A()
     __noinline__blackBox(a) // doesn't affect anything
     for (let i = 0; i < 11; i++) {
-        arktest.assertEQ(Runtime.__getTypeInfo(a), A.klass)
+        arktest.assertEQ(Class.of(a), A.klass)
         a = new A()
         __noinline__blackBox(a)
     }
@@ -224,11 +207,7 @@ function testLoopLoad() {
     let a = new A()
     gHolder.obj = a
     for (let i = 0; i < 5; i++) {
-        // NOTE: doesn't work optimally, need fix
-        // Note(#27093): enable after union processing implementation
-        // arktest.assertEQ(Runtime.__getTypeInfo(gHolder.obj), anyClass)
-        // Next line should be removed after union processing implementation
-        arktest.assertEQ(Runtime.__getTypeInfo(gHolder.obj), undefined)
+        arktest.assertEQ(Class.of(gHolder.obj), A.klass)
         gHolder.obj = new A()
     }
 }
@@ -244,11 +223,8 @@ function testDiamondEscape(x: boolean) {
     }
     // we consider `holder` escaped although it cannot escape on each beanch of `if`
     __noinline__blackBox()
-    let klass1 = Runtime.__getTypeInfo(h2.obj)
-    // Note(#27093): enable after union processing implementation
-    // arktest.assertEQ(klass1, anyClass)
-    // Next line should be removed after union processing implementation
-    arktest.assertEQ(klass1, undefined)
+    let klass1 = Class.of(h2.obj)
+    arktest.assertEQ(klass1, A.klass)
 }
 
 function main() {
