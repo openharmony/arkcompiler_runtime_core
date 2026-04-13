@@ -88,13 +88,23 @@ private:
 
     void PushToRunnableQueue(Job *job, JobPriority priority);
 
+    void AddJobInWaiters(JobEvent *blocker, Job *job) RELEASE(*blocker);
+
     void RegisterIncomingJob(Job *newJob);
 
     bool EventIsInPendingQueue(JobEvent *event);
 
     void ExecuteJob(Job *job);
 
+    void ProcessTimerEvents();
+
+    int64_t GetShortestTimerDelay();
+
+    void UpdateMinExpirationTime(JobEvent *blocker);
+
 private:
+    static constexpr uint64_t MAX_EXPIRATION_TIME = std::numeric_limits<uint64_t>::max();
+
     StacklessJobManager *jobManager_;
     std::atomic<bool> isActive_ = true;
 
@@ -107,6 +117,9 @@ private:
 
     /// the moving average number of coroutines in the runnable queue
     std::atomic<double> loadFactor_ = 0;
+
+    /// the minimal expiration time of pending timer
+    uint64_t minExpirationTime_ = MAX_EXPIRATION_TIME;
 };
 
 }  // namespace ark

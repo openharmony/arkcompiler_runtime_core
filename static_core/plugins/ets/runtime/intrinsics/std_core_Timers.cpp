@@ -93,7 +93,7 @@ private:
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static TimerTable g_timerTable = {};
 static std::atomic<TimerId> g_nextTimerId = 1;
-static std::atomic<TimerId> g_internalEventId = 0;
+static std::atomic<EventId> g_internalEventId = 0;
 
 static void InvokeCallback(mem::Reference *callback)
 {
@@ -115,69 +115,126 @@ static bool CheckCoroutineSwitchEnabled(JobExecutionContext *executionCtx)
     return true;
 }
 
+struct EntrypointParams {
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
+    EntrypointParams(JobManager *jobMan, EventId eId, mem::Reference *callback, int delay, bool isPeriodic, TimerId tId)
+        : event(jobMan, eId), timer(callback, delay, isPeriodic, tId)
+    {
+    }
+
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
+    static EntrypointParams *Create(JobManager *jobMan, EventId eId, mem::Reference *callback, int delay,
+                                    bool isPeriodic, TimerId tId)
+    {
+        auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+        return allocator->New<EntrypointParams>(jobMan, eId, callback, delay, isPeriodic, tId);
+    }
+
+    static void Destroy(EntrypointParams *params)
+    {
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(params);
+    }
+
+    TimerEvent event;  // NOLINT(misc-non-private-member-variables-in-classes)
+    TimerInfo timer;   // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+void LaunchTimerCallback(EntrypointParams *epParams, TimerEvent *timerEvent, Job *job)
+{
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *jobMan = executionCtx->GetManager();
+
+    auto deleteParams = [jobMan, job](EntrypointParams *params) {
+        g_timerTable.RemoveTimer(params->timer.GetId());
+        PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(params->timer.GetCallback());
+        EntrypointParams::Destroy(params);
+        jobMan->DestroyJob(job);
+    };
+
+    if (!g_timerTable.RegisterTimer(epParams->timer.GetId(), timerEvent)) {
+        deleteParams(epParams);
+        return;
+    }
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    auto usDelay = epParams->timer.GetDelay() * 1000U;
+    timerEvent->SetExpirationTime(jobMan->GetCurrentTime() + usDelay);
+    executionCtx->GetWorker()->PostSchedulingTask(epParams->timer.GetDelay());
+
+    auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
+    auto launchRes = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId, timerEvent});
+    if (launchRes != LaunchResult::OK) {
+        deleteParams(epParams);
+    }
+}
+
+void TimerEntrypoint(void *param)
+{
+    auto *epParams = static_cast<EntrypointParams *>(param);
+
+    auto deleteParams = [](EntrypointParams *params) {
+        g_timerTable.RemoveTimer(params->timer.GetId());
+        PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(params->timer.GetCallback());
+        EntrypointParams::Destroy(params);
+    };
+
+    if (g_timerTable.IsTimerDisarmed(epParams->timer.GetId())) {
+        deleteParams(epParams);
+        return;
+    }
+
+    InvokeCallback(epParams->timer.GetCallback());
+
+    if (!epParams->timer.IsPeriodic()) {
+        deleteParams(epParams);
+        return;
+    }
+
+    g_timerTable.RetireTimer(epParams->timer.GetId());
+
+    epParams->event.~TimerEvent();
+
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *jobMan = executionCtx->GetManager();
+    // Atomic with relaxed order reason: sync is not needed here
+    auto eventId = g_internalEventId.fetch_add(1, std::memory_order_relaxed);
+    auto *timerEvent = std::launder(new (&epParams->event) TimerEvent(jobMan, eventId));
+
+    auto *job = executionCtx->GetJob();
+    // clone job
+    auto epInfo = Job::NativeEntrypointInfo {TimerEntrypoint, epParams};
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    job = jobMan->CreateJob(job->GetName(), std::move(epInfo), job->GetPriority());
+    ASSERT(job != nullptr);
+    LaunchTimerCallback(epParams, timerEvent, job);
+}
+
 TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodic)
 {
     auto *executionCtx = JobExecutionContext::GetCurrent();
     if (!CheckCoroutineSwitchEnabled(executionCtx)) {
         return 0;
     }
+
+    // Atomic with relaxed order reason: sync is not needed here
+    auto eventId = g_internalEventId.fetch_add(1, std::memory_order_relaxed);
     // Atomic with relaxed order reason: sync is not needed here
     auto timerId = g_nextTimerId.fetch_add(1, std::memory_order_relaxed);
+    auto isPeriodic = periodic != 0U;
+    auto *jobMan = executionCtx->GetManager();
     auto *refStorage = executionCtx->GetVM()->GetGlobalObjectStorage();
     auto *callbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    auto *timerInfo =
-        Runtime::GetCurrent()->GetInternalAllocator()->New<TimerInfo>(callbackRef, delay, periodic, timerId);
-
-    auto timerEntrypoint = [](void *param) {
-        auto *timer = static_cast<TimerInfo *>(param);
-        auto *executionCtx = JobExecutionContext::GetCurrent();
-        auto *jobMan = executionCtx->GetManager();
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        auto usDelay = timer->GetDelay() * 1000U;
-
-        while (true) {
-            // Atomic with relaxed order reason: sync is not needed here
-            TimerEvent timerEvent(jobMan, g_internalEventId.fetch_add(1, std::memory_order_relaxed));
-
-            if (!g_timerTable.RegisterTimer(timer->GetId(), &timerEvent)) {
-                break;
-            }
-
-            timerEvent.Lock();
-            timerEvent.SetExpirationTime(jobMan->GetCurrentTime() + usDelay);
-            executionCtx->GetWorker()->PostSchedulingTask(timer->GetDelay());
-            jobMan->Await(&timerEvent);
-
-            if (g_timerTable.IsTimerDisarmed(timer->GetId())) {
-                break;
-            }
-
-            InvokeCallback(timer->GetCallback());
-
-            if (!timer->IsPeriodic()) {
-                break;
-            }
-
-            g_timerTable.RetireTimer(timer->GetId());
-        }
-
-        g_timerTable.RemoveTimer(timer->GetId());
-        executionCtx->GetVM()->GetGlobalObjectStorage()->Remove(timer->GetCallback());
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(timer);
-    };
+    auto *epParams = EntrypointParams::Create(jobMan, eventId, callbackRef, delay, isPeriodic, timerId);
+    ASSERT(epParams != nullptr);
 
     auto jobName = "Timer callback: " + ark::ToPandaString(timerId);
-    auto *jobMan = executionCtx->GetManager();
-    auto epInfo = Job::NativeEntrypointInfo {timerEntrypoint, timerInfo};
+    auto epInfo = Job::NativeEntrypointInfo {TimerEntrypoint, epParams};
     // NOLINTNEXTLINE(performance-move-const-arg)
     auto *job = jobMan->CreateJob(std::move(jobName), std::move(epInfo), EtsCoroutine::TIMER_CALLBACK,
                                   Job::Type::MUTATOR, true);
-    auto launchRes = jobMan->Launch(job, LaunchParams {true});
-    if (launchRes != LaunchResult::OK) {
-        refStorage->Remove(callbackRef);
-        jobMan->DestroyJob(job);
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(timerInfo);
-    }
+    ASSERT(job != nullptr);
+
+    LaunchTimerCallback(epParams, &epParams->event, job);
     return timerId;
 }
 

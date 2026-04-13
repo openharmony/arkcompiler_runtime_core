@@ -133,11 +133,6 @@ void StackfulCoroutineWorker::AddCoroutineWaitingForStart(JobEvent *startEvent, 
     {
         os::memory::LockHolder l(waitersLock_);
         startEvent->Unlock();
-        // NOTE(alimovilya, #33386) generalize working with events
-        if (startEvent->GetType() == JobEvent::Type::TIMER) {
-            auto currTimeMicro = os::time::GetClockTimeInMicro();
-            static_cast<TimerEvent *>(startEvent)->SetCurrentTime(currTimeMicro);
-        }
         RegisterIncomingActiveCoroutine(coro);
         coro->RequestSuspend(true);
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::AddCoroutineWaitingForStart: " << coro->GetName()
