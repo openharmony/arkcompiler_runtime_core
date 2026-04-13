@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ public:
      * @brief Get member raw name
      * 1. normal method: methodName
      * 2. setter&getter method: %%set-field(fieldType) -> field; %%get-()fieldType -> field
-     * 3. field: fieldName (ignore %%property-)
+     * 3. field: fieldName
      * @return member raw name
      */
     [[nodiscard]] std::string GetRawName();

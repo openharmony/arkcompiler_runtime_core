@@ -49,9 +49,12 @@ private:
     bool AppendJSONString(EtsHandle<EtsObject> &value, bool hasContent);
     void AppendJSONPrimitive(const PandaString &value, bool hasContent);
 
-    bool SerializeFields(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent);
-    bool SerializeGetters(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj, bool &hasContent);
-    bool SerializeInterfaceList(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent);
+    bool SerializeFields(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent,
+                         PandaUnorderedSet<PandaString> &serializedKeys);
+    bool SerializeGetters(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj, bool &hasContent,
+                          PandaUnorderedSet<PandaString> &serializedKeys);
+    bool SerializeInterfaceList(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent,
+                                PandaUnorderedSet<PandaString> &serializedKeys);
 
     // handling of types
     bool SerializeJSONObject(EtsHandle<EtsObject> &value);

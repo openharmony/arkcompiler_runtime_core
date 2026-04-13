@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -338,7 +338,7 @@ TEST_F(LibAbcKitModifyApiAnnotationsStaticTests, InterfaceFieldRemoveAnnotation)
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
     std::string moduleName = "annotations_static";
     std::string interfaceNames("I1");
-    std::string paramNames("%%property-i1F1");
+    std::string paramNames("i1F1");
     auto cif = GetAbckitCoreInterfaceField(file, moduleName, interfaceNames, paramNames);
     ASSERT_NE(cif, nullptr);
 
@@ -380,7 +380,7 @@ TEST_F(LibAbcKitModifyApiAnnotationsStaticTests, InterfaceFieldAddAnnotation)
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
     std::string moduleName = "annotations_static";
     std::string interfaceNames("I2");
-    std::string paramNames("%%property-i2F1");
+    std::string paramNames("i2F1");
     auto cif = GetAbckitCoreInterfaceField(file, moduleName, interfaceNames, paramNames);
     ASSERT_NE(cif, nullptr);
 
