@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,15 +15,26 @@ limitations under the License.
 
 /*---
 desc: >-
-    Predefined types array declaration.
+    A compile-time error occurs if an attempt is made
+    to override private member
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE1365480: The 'override' modifier is invalid here because the property 'f' is private in class 'Base'."
 ---*/
 
-{%- for i in default_value %}
-let x{{loop.index}}{% if i.type %}: {{i.type}}{% endif %}{% if i.value %} = {{i.value}}{% endif %};
-{%- endfor %}
+class Base<T> {
+  private f: T
+  constructor(v: T) {
+    this.f = v
+  }
+}
+
+class D<T> extends Base<T> {
+  private override f: T
+  constructor(v: T) {
+    super(v)
+    this.f = v
+  }
+}
 
 function main(): void {
-    {% for i in default_value %}
-    let y{{loop.index}}{% if i.type %}: {{i.type}}{% endif %}{% if i.value %} = {{i.value}}{% endif %}
-    {%- endfor %}
 }

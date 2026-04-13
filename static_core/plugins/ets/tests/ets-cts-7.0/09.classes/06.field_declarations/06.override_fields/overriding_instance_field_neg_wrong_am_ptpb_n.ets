@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,15 +15,19 @@ limitations under the License.
 
 /*---
 desc: >-
-    Predefined types array declaration.
+    A compile-time error occurs if: Access Modifiers of the overriding field
+    and of the overridden field are different.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE1600001: Access modifier of field 'num' in class 'D' and in the base class 'C' must be the same."
 ---*/
 
-{%- for i in default_value %}
-let x{{loop.index}}{% if i.type %}: {{i.type}}{% endif %}{% if i.value %} = {{i.value}}{% endif %};
-{%- endfor %}
+class C {
+  protected num: number = 1
+}
+
+class D extends C {
+  num: number = 2
+}
 
 function main(): void {
-    {% for i in default_value %}
-    let y{{loop.index}}{% if i.type %}: {{i.type}}{% endif %}{% if i.value %} = {{i.value}}{% endif %}
-    {%- endfor %}
 }
