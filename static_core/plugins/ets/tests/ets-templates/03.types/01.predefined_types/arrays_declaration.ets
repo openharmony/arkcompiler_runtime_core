@@ -13,35 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for i in default_value %}
-
 /*---
 desc: >-
-    Predefined type {{i.type}} array declaration.
-    type {{i}}
+    Predefined types array declaration.
 ---*/
 
-{% if "" == i.type %}
+{%- for i in default_value %}
+let x{{loop.index}}{% if i.type %}: {{i.type}}{% endif %}{% if i.value %} = {{i.value}}{% endif %};
+{%- endfor %}
 
-let x = {{i.value}};
 function main(): void {
-  let y = {{i.value}};
+    {% for i in default_value %}
+    let y{{loop.index}}{% if i.type %}: {{i.type}}{% endif %}{% if i.value %} = {{i.value}}{% endif %}
+    {%- endfor %}
 }
-
-{% elif "" != i.value %}
-
-let x: {{i.type}} = {{i.value}};
-function main(): void {
-  let y: {{i.type}} = {{i.value}};
-}
-
-{% else %}
-
-let x: {{i.type}}
-function main(): void {
-  let y: {{i.type}}
-}
-
-{% endif %}
-
-{% endfor %}

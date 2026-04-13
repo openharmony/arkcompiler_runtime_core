@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,9 +14,22 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Multi-line string literals that can include embedded expressions are called Template literals
-tags: [compile-only]
+desc: >-
+    Multi-line string literals that can include embedded expressions are called Template literals
+    MultilineString literals are of literal types corresponding to literals. If an operator is applied to a literal, then the literal
+    type is replaced for string
 ---*/
 
-let sentence = `This is an example of multi-line string,
+const sentence = `This is an example of multi-line string,
  which should be enclosed in backticks (\`)`
+
+ function main() {
+    arktest.assertTrue(sentence instanceof string)
+    arktest.assertTrue(`MultilineTest` + '' instanceof string)
+    
+    let copy = ''
+    for(let letter of sentence) {
+        copy += letter
+    }
+    arktest.assertEQ(copy, sentence)
+ }

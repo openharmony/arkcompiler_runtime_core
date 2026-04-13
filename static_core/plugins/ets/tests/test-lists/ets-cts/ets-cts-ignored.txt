@@ -1,6 +1,3 @@
-#28019
-02.lexical_elements/07.keywords/soft_12.ets
-
 #25512
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
