@@ -14,7 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: panda-bin-compat
-description: "Checks binary compatibility by running tests with old libraries, switching to rebuilt libraries, 
+description: "Checks binary compatibility by running tests with old libraries, switching to rebuilt libraries,
             and rerunning compile/verify/runtime steps."
 parameters:
     # common
@@ -35,7 +35,7 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     ark-args: [ ]
-    # adds --boot-panda-files option to verifier and ark with all dependent and the current abc files
+    # adds --boot-panda-files option to verifier and ark with all dependent abc files
     is-panda: true
     boot-panda-files: ""
     compiler-enable-jit: "true"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,18 @@
 /*---
   files: [./ext_module_final_class/ext_module.ets]
   tags: [negative]
+  negative_steps: [verifier, runtime.ark, ark-with-jit.ark, ark-after-aot.ark, hybrid-ark.ark]
+  expected_error:
+      verifier: |-
+        E/verifier: Cannot link class: Cannot find method 'foo ()D' in class 'ext_module.B'
+      runtime.ark: |-
+        E/verifier: Cannot link class: Cannot find method 'foo ()D' in class 'ext_module.B'
+      ark-with-jit.ark: |-
+        E/verifier: Cannot link class: Cannot find method 'foo ()D' in class 'ext_module.B'
+      ark-after-aot.ark: |-
+        E/verifier: Cannot link class: Cannot find method 'foo ()D' in class 'ext_module.B'
+      hybrid-ark.ark: |-
+        E/verifier: Cannot link class: Cannot find method 'foo ()D' in class 'ext_module.B'
 ---*/
 
 import { A, B } from './imported_hierarchy/ext_module.ets'

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,3 +22,23 @@ parameters:
     extension: ets
     load-runtimes: ets
     work-dir: ${WORK_DIR}/${suite-name}
+
+collections:
+    02.lexical_elements: >-
+    03.types: >-
+    04.names_declarations_and_scopes: >-
+    05.generics: >-
+    06.contexts_and_conversions: >-
+    07.expressions: >-
+    08.statements: >-
+    09.classes: >-
+    10.interfaces: >-
+    11.enumerations: >-
+    12.error_handling: >-
+    13.modules_and_namespaces: >-
+    14.ambient_declarations: >-
+    15.semantic_rules: >-
+    16.concurrency: >-
+    17.experimental_features: >-
+    18.annotations: >-
+    20.implementation_details: >-

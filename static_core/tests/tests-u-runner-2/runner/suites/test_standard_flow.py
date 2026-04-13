@@ -621,7 +621,7 @@ class TestStandardFlow(ITestFlow, Test):
             if name in arg:
                 if not self.__boot_panda_files:
                     _, value = arg.split('=')
-                    boot_panda_files = [value, *self.dependent_abc_files, self.test_abc.as_posix()]
+                    boot_panda_files = [value, *self.dependent_abc_files]
                     self.__boot_panda_files = f'{name}={":".join(boot_panda_files)}'
                 dep_files_args.append(self.__boot_panda_files)
             else:

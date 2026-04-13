@@ -20,6 +20,10 @@ desc: >-
       Abstract class case.
 tags: [compile-only, negative]
 ---*/
+<<<<<<<< HEAD:static_core/plugins/ets/tests/ets-cts-7.0/09.classes/04.class_members/class_initializer/abstract_class_initializer_with_super_n.ets
+========
+
+>>>>>>>> 4c9c00f9f0 (Description: Fix u-runner verifier files chain):static_core/plugins/ets/tests/ets-cts-7.0/23.binary_compatibility/01.classification_of_source_code_changes/class_and_interface_declaration/ambient_decl_not_loadable/interface_declarations.ets
 
 abstract class A {
   public foo(): int {
@@ -34,3 +38,25 @@ abstract class B extends A {
     x = 5 + super.foo();
   }
 }
+<<<<<<<< HEAD:static_core/plugins/ets/tests/ets-cts-7.0/09.classes/04.class_members/class_initializer/abstract_class_initializer_with_super_n.ets
+========
+
+export interface E<U, R> {
+    foo(x: U): R
+}
+
+export interface F {
+    f: number
+}
+
+export interface M extends F {
+}
+
+export interface K {
+    a: string
+    get foo(): string
+    set foo(v: string)
+}
+
+export interface J {}
+>>>>>>>> 4c9c00f9f0 (Description: Fix u-runner verifier files chain):static_core/plugins/ets/tests/ets-cts-7.0/23.binary_compatibility/01.classification_of_source_code_changes/class_and_interface_declaration/ambient_decl_not_loadable/interface_declarations.ets
