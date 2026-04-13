@@ -549,7 +549,6 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     stats_.StartInterval(JobTimeStats::CTX_SWITCH);
     // performs the fiber switch!
     from->SwitchTo(to);
-    FinalizeTerminatedCoros();
     if (IsCrossWorkerCall()) {
         ASSERT(Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR);
         // Here this != current coroutine's worker. The rest of this function will be executed CONCURRENTLY!
@@ -559,6 +558,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     stats_.FinishInterval(JobTimeStats::CTX_SWITCH);
     stats_.StartInterval(JobTimeStats::SCH_ALL);
     OnAfterContextSwitch(from);
+    FinalizeTerminatedCoros();
 }
 
 void StackfulCoroutineWorker::FinalizeTerminatedCoros()
