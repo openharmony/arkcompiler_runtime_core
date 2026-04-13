@@ -38,7 +38,7 @@ class EtsGeneratorCollectionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
     @patch('sys.argv', ["runner.sh", "config-1", "test_suite_2_col"])
     def test_gen_for_collections(self) -> None:
         """
@@ -65,7 +65,7 @@ class EtsGeneratorCollectionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
     @patch('sys.argv', ["runner.sh", "config-1", "test_suite_3_col", "--filter", "*/inner/*"])
     def test_gen_for_collections_with_filter(self) -> None:
         """
@@ -90,7 +90,7 @@ class EtsGeneratorCollectionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
     @patch('sys.argv', ["runner.sh", "config-1", "test_suite_3_col", "--filter", "**/*test*"])
     def test_gen_for_collections_with_filter_2(self) -> None:
         """
@@ -119,7 +119,7 @@ class EtsGeneratorCollectionsTest(TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
     @patch('sys.argv', ["runner.sh", "config-1", "test_suite_3_col",
                         "--test-file", "03.types/inner/simple_test_types.ets"])
     def test_gen_for_collections_with_test_file(self) -> None:
