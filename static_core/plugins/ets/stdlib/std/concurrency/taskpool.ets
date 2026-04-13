@@ -1078,11 +1078,12 @@ export namespace taskpool {
          * @returns { boolean } true if current running task is canceled, false - otherwise
          */
         static isCanceled(): boolean {
-            const item: Task | undefined = getCurrentTask();
-            if (item === undefined) {
-                throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
+            let result: boolean = false;
+            let currentTask = getCurrentTask();
+            if (currentTask !== undefined) {
+                result = InternalTask.of(currentTask!).state.load() == (State.CANCELED.valueOf());
             }
-            return InternalTask.of(item!).state.load() == (State.CANCELED.valueOf());
+            return result;
         }
 
         /**
