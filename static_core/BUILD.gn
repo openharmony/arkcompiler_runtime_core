@@ -143,7 +143,9 @@ ark_unittest_group("static_core_tests") {
     "${ark_root}/libarkbase/tests:arkbase_tests",
     "${ark_root}/runtime/tests:runtime_tests",
   ]
-  deps += plugin_unittests
+  if (!ark_use_common_runtime) {
+    deps += plugin_unittests
+  }
 }
 
 config("ark_common_config") {
