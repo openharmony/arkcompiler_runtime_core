@@ -13,35 +13,42 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Resolution for Overload Declarations - constructor overload.
+desc: Ambient Interface declarations
+tags: [compile-only, not-a-test]
 ---*/
 
-final class A {
-    public size: number = 0;
+export interface A { a: number }
 
-    constructor conI(a: int) {
-        this.size = a;
-    }
-
-    constructor conN(a: number) {
-        this.size = 100 + a;
-    }
-
-    constructor conS(a: string) {
-        this.size = a.length;
-    }
-
-    overload constructor { {{c.list}} };
+export interface B {
+    a: int
+    b: float
+    c: FixedArray<byte>
 }
 
-function main() {
-    let i: int = 1;
-    let pi: number = 3.14;
-    let a: A = new A({{c.param}});
-
-    arktest.assertEQ({{c.result}}, a.size);
+export interface C {
+    foo(x: number, y: string): string
 }
 
-{% endfor %}
+export interface D<T1> {
+    a: T1
+}
+
+export interface E<U, R> {
+    foo(x: U): R
+}
+
+export interface F {
+    f: number
+}
+
+export interface M extends F {
+}
+
+export interface K {
+    a: string
+    get foo(): string
+    set foo(v: string)
+}
+
+export interface J {}
