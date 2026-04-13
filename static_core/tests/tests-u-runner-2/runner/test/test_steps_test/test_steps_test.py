@@ -63,19 +63,10 @@ class TestStepsTest(TestCase):
 
     @staticmethod
     def get_steps(step_reports: list[StepReport]) -> list[TestStep]:
-        lines_per_step = 5
         result: list[TestStep] = []
-        reproduce = "\n".join([str(r) for r in step_reports if r.command_line])
-        lines = [line for line in reproduce.split('\n') if line]
-        for i in range(len(lines) // lines_per_step):
-            line = lines[i * lines_per_step]
-            pos = line.find(":")
-            step_name = line[0:pos]
-            type_name = step_name.split('-')[-1]
-            cli = line[pos + 1:].strip().split(' ')
-            test_name = cli[-1]
-            args = cli[1:]
-            result.append(TestStep(name=test_name, args=args, type=type_name))
+        for report in step_reports:
+            args = report.command_line.split()
+            result.append(TestStep(name=args[-1], type=report.step_kind.value, args=args[1:-1]))
         return result
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
@@ -102,8 +93,7 @@ class TestStepsTest(TestCase):
             # test
             steps = self.get_steps(result.step_reports)
             expected_main_ets = os.path.basename(result.path)
-            file_type = expected_main_ets.split('.')[-1]
-            expected_types = [file_type, RUNTIME_STEP]
+            expected_types = [COMPILER_STEP, RUNTIME_STEP]
             expected_main_ets_abc = f"{INTERMEDIATE}/{expected_main_ets}.abc"
 
             self.assertEqual(len(steps), len(expected_types))

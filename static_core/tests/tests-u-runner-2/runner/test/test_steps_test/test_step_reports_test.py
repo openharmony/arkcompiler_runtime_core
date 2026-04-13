@@ -25,6 +25,7 @@ from unittest.mock import patch
 from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
+from runner.options.options_step import StepKind
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
@@ -88,18 +89,21 @@ class TestStepReportsTest(TestCase):
         """Tests minimal configuration to create step report"""
         report = StepReport(
             name="step",
+            step_kind=StepKind.OTHER,
             command_line="cmd"
         )
         expected_str = """step: cmd
 step: Actual output: ''
 step: Actual error: ''
-step: Actual return code: 0"""
+step: Actual return code: 0
+step: Step kind: other"""
         self.assertEqual(expected_str, str(report).strip())
 
     def test_filled_step_report2(self) -> None:
         """Tests maximal configuration to create step report"""
         report = StepReport(
             name="step",
+            step_kind=StepKind.COMPILER,
             command_line="cmd",
             cmd_output="output",
             cmd_error="error",
@@ -114,6 +118,7 @@ step: Actual error: 'error'
 step: Actual return code: 3
 step: Validator messages: validators
 step: Extra: extra
+step: Step kind: compiler
 step: Step status: status"""
         self.assertEqual(expected_str, str(report).strip())
 
@@ -124,6 +129,7 @@ step: Step status: status"""
         """
         report1 = StepReport(
             name="step1",
+            step_kind=StepKind.OTHER,
             command_line="cmd",
             cmd_output="output",
             cmd_error="error",
@@ -134,6 +140,7 @@ step: Step status: status"""
         )
         report2 = StepReport(
             name="step1",
+            step_kind=StepKind.OTHER,
             command_line="cmd",
             cmd_output="output",
             cmd_error="error",
@@ -172,6 +179,7 @@ step: Step status: status"""
                 first_args = f"--output={work_dir.as_posix()}/intermediate/simple1.ets.abc simple1.ets"
                 expected_first_step_report = StepReport(
                     name="echo-compiler",
+                    step_kind=StepKind.COMPILER,
                     command_line=f"/usr/bin/echo {first_args}",
                     cmd_return_code=0,
                     cmd_output=first_args,
@@ -187,6 +195,7 @@ step: Step status: status"""
                                "simple1.ets")
                 expected_second_step_report = StepReport(
                     name="echo-runtime",
+                    step_kind=StepKind.RUNTIME,
                     command_line=f"/usr/bin/echo {second_args}",
                     cmd_return_code=0,
                     cmd_output=second_args,

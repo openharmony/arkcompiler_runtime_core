@@ -45,6 +45,7 @@ class StepKind(BaseEnum):
     DECLGEN = "declgen"
     TSC = "tsc"
     OTHER = "other"
+    NONE = ""
 
 
 @dataclass(frozen=True)
