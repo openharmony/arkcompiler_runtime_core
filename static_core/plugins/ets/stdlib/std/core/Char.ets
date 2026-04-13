@@ -61,22 +61,6 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
-     * valueOf(char) creates a Char object from a primitive char. This method is preferred over
-     * {@link <constructor(char)>} since this method can use a cached Char object, i.e. this method might
-     * be more efficient.
-     *
-     * @param { char } value a primitive char to create Char from.
-     * @returns { Char }
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static valueOf(value: char): Char {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Char(value);
-    }
-
-    /**
      * equals(Object) compares two Chars by their underlying primitive chars. Returns false if the argument
      * is not an instance of Char.
      *

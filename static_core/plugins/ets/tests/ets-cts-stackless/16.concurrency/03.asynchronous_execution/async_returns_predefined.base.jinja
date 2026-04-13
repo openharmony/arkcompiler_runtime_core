@@ -42,7 +42,7 @@ async function startTest(){
     let awaited_result = await result
     arktest.assertTrue(awaited_result instanceof {{type_name}})
     {%- if type_name in ['Byte', 'Short'] %}
-    arktest.assertEQ({{type_name}}.valueOf(awaited_result), {{c.value}})
+    arktest.assertEQ(new {{type_name}}(awaited_result), {{c.value}})
     {%- else %}
     arktest.assertEQ(awaited_result, {{c.value}})
     {%- endif %}

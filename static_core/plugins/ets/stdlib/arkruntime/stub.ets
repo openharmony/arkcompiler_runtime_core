@@ -148,4 +148,92 @@ export namespace stub {
     }
 
 
+    /**
+     * Static method that converts primitive boolean to boxed version
+     *
+     * @param { boolean } b value to be converted
+     * @returns { Boolean } The boxed Boolean object representing the input value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export function valueOf(b: boolean): Boolean {
+        if (b) {
+            return Boolean.TRUE;
+        };
+        return Boolean.FALSE;
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     *
+     * @param { byte } value value to box
+     * @returns { Byte } boxed value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export function valueOf(value: byte): Byte {
+        return new Byte(value);
+    }
+
+        /**
+     * Returns boxed representation of the primitive
+     * @param { short } value value to box
+     * @returns { short } boxed value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export function valueOf(value: short): Short {
+        return new Short(value);
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     * @param { int } value value to box
+     * @returns { int } boxed value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */    
+    export function valueOf(value: int): Int {
+        return new Int(value);
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     * @param { long } value value to box
+     * @returns { long } boxed value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */   
+    export function valueOf(value: long): Long {
+        return new Long(value);
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     * @param { float } value value to box
+     * @returns { float } boxed value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */   
+    export function valueOf(value: float): Float {
+        return new Float(value);
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     * @param { double } value value to box
+     * @returns { double } boxed value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */   
+    export function valueOf(value: double): Double {
+        return new Double(value);
+    }
 }
