@@ -836,9 +836,6 @@
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_5.ets
 
-#33911
-16.concurrency/06.api_details_and_restrictions/01.using_the_asynchronous_api/async_main_entry_point.ets
-
 #34177
 16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_other_jobs.ets
 16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_promise_callbacks.ets

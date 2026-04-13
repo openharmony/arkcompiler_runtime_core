@@ -62,6 +62,8 @@ public:
 
     void OnJobCompletion(Value result) override;
 
+    void ListUnhandledEventsOnProgramExit() override;
+
 protected:
     // we would like everyone to use the factory to create a EtsExecutionContextWrapper
     explicit EtsExecutionContextWrapper(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Job *job);

@@ -49,8 +49,7 @@ void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx)
     ASSERT(queueSize == 0 || cbQueue != nullptr);
     ASSERT(queueSize == 0 || workerDomainQueue != nullptr);
 
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
-        state_ == STATE_REJECTED && queueSize == 0) {
+    if (state_ == STATE_REJECTED && queueSize == 0) {
         executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, executionCtx);
     }
 

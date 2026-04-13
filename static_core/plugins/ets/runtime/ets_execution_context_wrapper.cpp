@@ -101,6 +101,11 @@ void EtsExecutionContextWrapper::OnJobCompletion(Value result)
     EtsJob::EtsJobFinish(completedJob, retObject);
 }
 
+void EtsExecutionContextWrapper::ListUnhandledEventsOnProgramExit()
+{
+    executionCtx_.ProcessUnhandledRejectedPromises(true);
+}
+
 static EtsObject *GetReturnValueAsObject(EtsExecutionContext *executionCtx, panda_file::Type returnType,
                                          Value returnValue)
 {

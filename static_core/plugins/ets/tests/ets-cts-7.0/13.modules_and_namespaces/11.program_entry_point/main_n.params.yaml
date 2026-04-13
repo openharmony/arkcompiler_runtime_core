@@ -114,7 +114,7 @@ cases:
           function main(): string { // wrong return type
               return res
           }
-      expected: "Semantic error ESE0088: Bad return type, main enable only void or int type."
+      expected: "Semantic error ESE0088: The return type of the main function must be either void or int."
 #11
     - use: |-
           let v: int|string = 0
