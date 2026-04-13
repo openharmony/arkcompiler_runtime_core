@@ -1800,6 +1800,8 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatible_signature_neg_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatible_signature_neg_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatible_signature_neg_5.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/semantic_rules_case_06.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/semantic_rules_case_10.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/spec_example_3.ets
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_26.ets
 15.semantic_rules/10.overloading/04.overload_equivalent_signatures/overload_equivalent_signatures_negative_26.ets

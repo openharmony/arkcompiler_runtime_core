@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 /*---
 desc: Derived class cannot have non-compatible constraints of type parameters
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0228: Type argument 'ContravariantTypeParameter' should be a subtype of 'Derived' constraint"
 ---*/
 
 class Base {}
