@@ -41,10 +41,21 @@ public:
             return event_;
         }
 
+        bool IsOwnedExternally() const
+        {
+            return ownedExternally_;
+        }
+
+        void SetOwnedExternally(bool val)
+        {
+            ownedExternally_ = val;
+        }
+
     private:
         friend class EtsWaitersList;
         Node *next_ = nullptr;
         JobEvent *event_;
+        bool ownedExternally_ = false;
     };
 
     void PushBack(Node *node)

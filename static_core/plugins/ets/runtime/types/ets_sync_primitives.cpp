@@ -350,11 +350,40 @@ void EtsEventWithDependencies::ResolveDependencies()
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         auto *node = waitersList->PopFront();
         auto *blocker = node->GetEvent();
+        bool externallyOwned = node->IsOwnedExternally();
+
         allocator->Delete(node);
         blocker->Happen();
-        // NOTE(panferovi): is there any better place to remove blocker??
-        allocator->Delete(blocker);
+
+        if (!externallyOwned) {
+            allocator->Delete(blocker);
+        }
     }
+}
+
+void EtsEventWithDependencies::WaitBlocking()
+{
+    // Atomic with relaxed order reason: acq_rel in CAS
+    auto state = state_.load(std::memory_order_relaxed);
+    // Atomic with acq_rel order reason: sync with ResolveDependencies
+    while (!state_.compare_exchange_weak(state, (state + ONE_WAITER) | DEPENDENCY_BIT, std::memory_order_acq_rel,
+                                         std::memory_order_relaxed)) {
+    }
+
+    if (IsFireState(state)) {
+        return;
+    }
+
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+
+    auto blockingEvent = BlockingEvent {executionCtx->GetManager()};
+    auto *node = Runtime::GetCurrent()->GetInternalAllocator()->New<EtsWaitersList::Node>(&blockingEvent);
+    node->SetOwnedExternally(true);
+
+    blockingEvent.Lock();
+    GetWaitersList(EtsExecutionContext::GetCurrent())->PushBack(node);
+    blockingEvent.Wait();
 }
 
 }  // namespace ark::ets

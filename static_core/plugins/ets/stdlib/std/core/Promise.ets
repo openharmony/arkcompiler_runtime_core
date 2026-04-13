@@ -669,6 +669,15 @@ export final class Promise<out T> implements PromiseLike<T> {
      */
     public native awaitResolution(): T;
 
+    /**
+     * Await promise in synchronous mode
+     *
+     * @returns { T } promise completion value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public native awaitSync(): T;
+
     private native resolveImpl<U>(value: U, wasLinked: boolean): void;
     private native rejectImpl(error: Object, wasLinked: boolean): void;
     private native submitCallback(callback: Object): void;
