@@ -472,6 +472,9 @@ public:
 
     void ResolveDependencies();
 
+    // Synchronously block the current worker thread until this event fires.
+    void WaitBlocking();
+
     static EtsEventWithDependencies *Create(EtsExecutionContext *executionCtx);
 
     static EtsEventWithDependencies *FromCoreType(ObjectHeader *eventRegistry)

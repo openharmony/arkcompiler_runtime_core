@@ -440,6 +440,22 @@ add_ets_coroutines_test(FILE await_standalone_promise.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+add_ets_coroutines_test(FILE await_sync.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE await_sync.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKLESS"
+                        OPTION_SETS_STACKLESS "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
 add_ets_coroutines_test(FILE stats.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"

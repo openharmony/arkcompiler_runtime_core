@@ -23,6 +23,8 @@ namespace ark::ets::intrinsics::helpers {
 
 EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount = -1, int32_t primCount = -1, int32_t pc = -1);
 
+EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise);
+
 }  // namespace ark::ets::intrinsics::helpers
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_AWAIT_PROMISE_IMPL_H

@@ -33,6 +33,7 @@
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/job_launch.h"
 #include "runtime/execution/job_worker_group.h"
+#include "runtime/execution/job_worker_thread.h"
 #include "runtime/execution/stackless/suspendable_job.h"
 
 namespace ark::ets::intrinsics {
@@ -172,4 +173,8 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     return helpers::EtsAwaitPromiseImpl(promise, -1, -1, -1);
 }
 
+EtsObject *EtsAwaitPromiseSync(EtsPromise *promise)
+{
+    return helpers::EtsAwaitPromiseSyncImpl(promise);
+}
 }  // namespace ark::ets::intrinsics
