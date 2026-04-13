@@ -292,7 +292,7 @@ function functionArgTypeConflictArray(): Array<Object> {
 }
 
 function functionArgTypeConflictBoolean(): Boolean {
-    return Boolean.valueOf(true);
+    return new Boolean(true);
 }
 
 function functionArgTypeConflictString(): string {

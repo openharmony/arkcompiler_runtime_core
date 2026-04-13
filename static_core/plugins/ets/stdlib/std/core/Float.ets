@@ -47,18 +47,6 @@ export final class Float extends Floating implements Comparable<Float> {
     }
 
     /**
-     * Returns boxed representation of the primitive
-     *
-     * @param value value to box
-     *
-     * @returns boxed value
-     */
-    public static valueOf(value: float): Float {
-        // TODO(ivan-tyulyandin): caching is possible
-        return new Float(value);
-    }
-
-    /**
      * Minimal value that this type can have as a float
      */
     public static readonly MIN_VALUE: float = 1.4e-45f;
@@ -431,7 +419,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the addition
      */
     public add(other: Float): Float {
-        return Float.valueOf((this.value + other.toFloat()) as float)
+        return new Float((this.value + other.toFloat()) as float)
     }
 
     /**
@@ -442,7 +430,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the subtraction
      */
     public sub(other: Float): Float {
-        return Float.valueOf((this.value - other.toFloat()) as float)
+        return new Float((this.value - other.toFloat()) as float)
     }
 
     /**
@@ -453,7 +441,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the multiplication
      */
     public mul(other: Float): Float {
-        return Float.valueOf((this.value * other.toFloat()) as float)
+        return new Float((this.value * other.toFloat()) as float)
     }
 
     /**
@@ -464,7 +452,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the division
      */
     public div(other: Float): Float {
-        return Float.valueOf((this.value / other.toFloat()) as float)
+        return new Float((this.value / other.toFloat()) as float)
     }
 
     /**

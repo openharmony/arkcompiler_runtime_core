@@ -74,43 +74,43 @@
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testByteVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Byte/, 6
+//! INST_COUNT    /LoadObject.*Byte/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Byte/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testCharVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Char/, 6
+//! INST_COUNT    /LoadObject.*Char/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Char/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testShortVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Short/, 6
+//! INST_COUNT    /LoadObject.*Short/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Short/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testIntVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Int/, 6
+//! INST_COUNT    /LoadObject.*Int/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Int/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testLongVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Long/, 6
+//! INST_COUNT    /LoadObject.*Long/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Long/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testFloatVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Float/, 6
+//! INST_COUNT    /LoadObject.*Float/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Float/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testNumberVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Double/, 6
+//! INST_COUNT    /LoadObject.*Double/, 0
 //! PASS_AFTER    "LSE"
 //! INST_COUNT    /LoadObject.*Double/, 0
 
@@ -118,7 +118,7 @@ function testByte(input: Byte): byte {
     let result: byte = (0).toByte();
 
     for (let i = 0; i < 5000; i++) {
-        result += Byte.valueOf(input);
+        result += new Byte(input);
     }
 
     return result;
@@ -128,7 +128,7 @@ function testChar(input: Char): char {
     let result: Int = c'A'.toInt();
 
     for (let i = 0; i < 5000; i++) {
-        result += Char.valueOf(input).toInt();
+        result += new Char(input).toInt();
     }
 
     return result.toChar();
@@ -138,7 +138,7 @@ function testShort(input: Short): short {
     let result: short = 0 as short;
 
     for (let i = 0; i < 5000; i++) {
-        result += Short.valueOf(input);
+        result += new Short(input);
     }
 
     return result;
@@ -148,7 +148,7 @@ function testInt(input: Int): int {
     let result: int = 0;
 
     for (let i = 0; i < 5000; i++) {
-        result += Int.valueOf(input);
+        result += new Int(input);
     }
 
     return result;
@@ -158,7 +158,7 @@ function testLong(input: Long): long {
     let result: long = 0;
 
     for (let i = 0; i < 5000; i++) {
-        result += Long.valueOf(input);
+        result += new Long(input);
     }
 
     return result;
@@ -168,7 +168,7 @@ function testFloat(input: Float): float {
     let result: float = 0 as float;
 
     for (let i = 0; i < 5000; i++) {
-        result += Float.valueOf(input);
+        result += new Float(input);
     }
 
     return result;
@@ -178,7 +178,7 @@ function testNumber(input: Number): number {
     let result: number = 0;
 
     for (let i = 0; i < 5000; i++) {
-        result += Number.valueOf(input);
+        result += new Number(input);
     }
 
     return result;
@@ -192,11 +192,11 @@ function __noinline__dummyReturn(): Int {
 }
 
 function testByteVN(a: Byte, b: Byte): byte {
-    let x: byte = (Byte.valueOf(a) + Byte.valueOf(b)).toByte();
+    let x: byte = (new Byte(a) + new Byte(b)).toByte();
     __noinline__dummy(x);
-    let y: byte = (Byte.valueOf(a) + Byte.valueOf(b)).toByte();
+    let y: byte = (new Byte(a) + new Byte(b)).toByte();
     __noinline__dummy(y);
-    let z: byte = (Byte.valueOf(b) + Byte.valueOf(a)).toByte();
+    let z: byte = (new Byte(b) + new Byte(a)).toByte();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
@@ -207,11 +207,11 @@ function testByteVN(a: Byte, b: Byte): byte {
 }
 
 function testCharVN(a: Char, b: Char): char {
-    let x: char = (Char.valueOf(a).toInt() + Char.valueOf(b).toInt()).toChar();
+    let x: char = (new Char(a).toInt() + new Char(b).toInt()).toChar();
     __noinline__dummy(x);
-    let y: char = (Char.valueOf(a).toInt() + Char.valueOf(b).toInt()).toChar();
+    let y: char = (new Char(a).toInt() + new Char(b).toInt()).toChar();
     __noinline__dummy(y);
-    let z: char = (Char.valueOf(b).toInt() + Char.valueOf(a).toInt()).toChar();
+    let z: char = (new Char(b).toInt() + new Char(a).toInt()).toChar();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
@@ -222,11 +222,11 @@ function testCharVN(a: Char, b: Char): char {
 }
 
 function testShortVN(a: Short, b: Short): short {
-    let x: short = (Short.valueOf(a) + Short.valueOf(b)).toShort();
+    let x: short = (new Short(a) + new Short(b)).toShort();
     __noinline__dummy(x);
-    let y: short = (Short.valueOf(a) + Short.valueOf(b)).toShort();
+    let y: short = (new Short(a) + new Short(b)).toShort();
     __noinline__dummy(y);
-    let z: short = (Short.valueOf(b) + Short.valueOf(a)).toShort();
+    let z: short = (new Short(b) + new Short(a)).toShort();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
@@ -237,11 +237,11 @@ function testShortVN(a: Short, b: Short): short {
 }
 
 function testIntVN(a: Int, b: Int): int {
-    let x: int = Int.valueOf(a) + Int.valueOf(b);
+    let x: int = new Int(a) + new Int(b);
     __noinline__dummy(x);
-    let y: int = Int.valueOf(a) + Int.valueOf(b);
+    let y: int = new Int(a) + new Int(b);
     __noinline__dummy(y);
-    let z: int = Int.valueOf(b) + Int.valueOf(a);
+    let z: int = new Int(b) + new Int(a);
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
@@ -252,11 +252,11 @@ function testIntVN(a: Int, b: Int): int {
 }
 
 function testLongVN(a: Long, b: Long): long {
-    let x: long = Long.valueOf(a) + Long.valueOf(b);
+    let x: long = new Long(a) + new Long(b);
     __noinline__dummy(x);
-    let y: long = Long.valueOf(a) + Long.valueOf(b);
+    let y: long = new Long(a) + new Long(b);
     __noinline__dummy(y);
-    let z: long = Long.valueOf(b) + Long.valueOf(a);
+    let z: long = new Long(b) + new Long(a);
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
@@ -267,11 +267,11 @@ function testLongVN(a: Long, b: Long): long {
 }
 
 function testFloatVN(a: Float, b: Float): float {
-    let x: float = Float.valueOf(a) + Float.valueOf(b);
+    let x: float = new Float(a) + new Float(b);
     __noinline__dummy(x);
-    let y: float = Float.valueOf(a) + Float.valueOf(b);
+    let y: float = new Float(a) + new Float(b);
     __noinline__dummy(y);
-    let z: float = Float.valueOf(b) + Float.valueOf(a);
+    let z: float = new Float(b) + new Float(a);
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
@@ -282,11 +282,11 @@ function testFloatVN(a: Float, b: Float): float {
 }
 
 function testNumberVN(a: Number, b: Number): number {
-    let x: number = Number.valueOf(a) + Number.valueOf(b);
+    let x: number = new Number(a) + new Number(b);
     __noinline__dummy(x);
-    let y: number = Number.valueOf(a) + Number.valueOf(b);
+    let y: number = new Number(a) + new Number(b);
     __noinline__dummy(y);
-    let z: number = Number.valueOf(b) + Number.valueOf(a);
+    let z: number = new Number(b) + new Number(a);
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {

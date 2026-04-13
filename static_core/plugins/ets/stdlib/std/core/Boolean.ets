@@ -257,22 +257,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     }
 
     /**
-     * Static method that converts primitive boolean to boxed version
-     *
-     * @param { boolean } b value to be converted
-     * @returns { Boolean } The boxed Boolean object representing the input value
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static valueOf(b: boolean): Boolean {
-        if (b) {
-            return Boolean.TRUE;
-        };
-        return Boolean.FALSE;
-    }
-
-    /**
      * Returns the value of this instance as primitive
      *
      * @returns { boolean } The primitive boolean value of this instance
@@ -379,7 +363,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @FaAndStageModel
      */
     public negate(): Boolean {
-        return Boolean.valueOf(!this.value)
+        return new Boolean(!this.value)
     }
 
     /**
@@ -391,7 +375,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @FaAndStageModel
      */
     public and(other: Boolean): Boolean {
-        return Boolean.valueOf(this.value && other)
+        return new Boolean(this.value && other)
     }
 
     /**
@@ -403,7 +387,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @FaAndStageModel
      */
     public or(other: Boolean): Boolean {
-        return Boolean.valueOf(this.value || other)
+        return new Boolean(this.value || other)
     }
 
     /**
@@ -415,6 +399,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @FaAndStageModel
      */
     public xor(other: Boolean): Boolean {
-        return Boolean.valueOf(this.value ^ other)
+        return new Boolean(this.value ^ other)
     }
 }
