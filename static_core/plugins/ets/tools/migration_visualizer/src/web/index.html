@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Dependency Visualization</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font-family:"Inter",sans-serif;background:#1a202c;color:#e2e8f0}
+  #wrap{flex:1;position:relative}
+
+  .top-toolbar{position:absolute;top:1rem;left:1rem;right:1rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.85rem;z-index:30;flex-wrap:wrap}
+  .toolbar-nav,.toolbar-controls{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+  .toolbar-nav{min-width:0;flex:1 1 320px}
+  .toolbar-controls{justify-content:flex-end;flex:1 1 460px}
+  .toolbar-card,.toolbar-chip{display:flex;align-items:center;gap:.45rem;background:rgba(45,55,72,.78);padding:.42rem .6rem;border-radius:.75rem;
+    backdrop-filter:blur(4px);box-shadow:0 4px 12px rgba(0,0,0,.22);font-size:12px;color:#e2e8f0}
+  .toolbar-btn{border:none;background:#374151;color:#fff;font-size:13px;font-weight:600;padding:.55rem .9rem;border-radius:.75rem;cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,.22)}
+  .toolbar-btn:hover{background:#4b5563}
+  .toolbar-btn.primary{background:#2563eb}
+  .toolbar-btn.primary:hover{background:#1d4ed8}
+  .toolbar-btn:disabled,.panel-dock:disabled{opacity:.45;cursor:not-allowed}
+  #breadcrumb{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;min-width:0}
+  #breadcrumb button{background:none;border:none;padding:0;color:#90cdf4;cursor:pointer;font:inherit}
+  #breadcrumb button:hover{text-decoration:underline}
+  #breadcrumb .sep{color:#a0aec0}
+  #breadcrumb .muted{color:#94a3b8;font-size:11px}
+  #breadcrumb .current{color:#e2e8f0;font-weight:600}
+  .toolbar-chip input[type="checkbox"]{accent-color:#2563eb}
+  .toolbar-chip select{background:#111827;color:#fff;border:1px solid #4b5563;border-radius:.55rem;padding:.28rem .45rem;font-size:12px}
+
+  .links line{stroke-width:1.4;transition:opacity .3s}
+  .links line.internal{stroke:#4a5568;stroke-opacity:.35}
+  .links line.file2har{stroke:#a0aec0;stroke-opacity:.75}
+  .links line.har{stroke:#4a5568;stroke-opacity:.35}
+
+  .links line.internal.highlighted{stroke:#63b3ed;stroke-width:2;stroke-opacity:1}
+  .links line.file2har.highlighted{stroke:#38a169;stroke-width:2;stroke-opacity:1}
+  .links line.har.highlighted{stroke:#d69e2e;stroke-width:2;stroke-opacity:.95}
+
+  .arrows path{pointer-events:none;transition:opacity .3s}
+  .arrow-internal{fill:#4a5568;opacity:.7}
+  .arrow-file2har{fill:#a0aec0;opacity:.9}
+  .arrow-har{fill:#4a5568;opacity:.7}
+  .arrows path.highlighted.arrow-internal{fill:#63b3ed;opacity:1}
+  .arrows path.highlighted.arrow-file2har{fill:#38a169;opacity:1}
+  .arrows path.highlighted.arrow-har{fill:#d69e2e;opacity:.95}
+
+  .link-label{font-size:10px;text-anchor:middle;pointer-events:none;fill:#38a169}
+  .link-label.highlighted{font-weight:bold}
+
+  .nodes circle{stroke:#e2e8f0;stroke-width:2;cursor:pointer;transition:opacity .3s}
+  .nodes circle.external-node{stroke-dasharray:4 4;stroke:#a0aec0}
+  .nodes g.highlighted circle{stroke:#63b3ed;stroke-width:3}
+  .nodes text{font-size:10px;pointer-events:none;fill:#e2e8f0;text-shadow:0 0 2px #1a202c,0 0 4px #1a202c}
+
+  .tooltip{position:absolute;background:rgba(45,55,72,.9);padding:8px 10px;font-size:12px;border-radius:6px;opacity:0;transition:opacity .2s;pointer-events:none}
+
+  #info-panel{position:absolute;top:5.2rem;right:1rem;min-width:240px;max-width:360px;background:rgba(45,55,72,.85);
+    backdrop-filter:blur(4px);border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.45;box-shadow:0 4px 12px rgba(0,0,0,.25);overflow:auto;display:none}
+  #info-panel h3{margin:0 0 6px;font-weight:600;font-size:15px;color:#e2e8f0}
+  #info-panel p{margin:4px 0;color:#cbd5e0;word-break:break-all}
+
+  #rank-panel{position:absolute;right:1rem;bottom:4.25rem;max-height:min(42vh,calc(100vh - 12rem));width:min(380px,calc(100vw - 2rem));background:rgba(45,55,72,.9);
+    backdrop-filter:blur(4px);border-radius:10px;padding:10px 12px;overflow:auto;box-shadow:0 6px 16px rgba(0,0,0,.35);display:none}
+  #rank-panel h4{margin:.25rem 0 .5rem;font-size:14px;font-weight:700}
+  #rank-panel ol{margin:0 0 .75rem 1.25rem}
+  #rank-panel li{margin:.15rem 0;color:#e2e8f0}
+  #rank-panel a{color:#90cdf4;text-decoration:none}
+  #rank-panel a:hover{text-decoration:underline}
+  #rank-panel .muted{color:#a0aec0;font-size:12px}
+  #rank-close{position:absolute;top:8px;right:10px;background:#4a5568;border:none;border-radius:6px;color:#fff;font-size:12px;padding:.2rem .45rem;cursor:pointer}
+
+  .panel-dock{position:absolute;bottom:1rem;z-index:30;display:flex;align-items:center;gap:.4rem;border:none;border-radius:.9rem;padding:.6rem .95rem;font-size:13px;
+    font-weight:700;color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35);backdrop-filter:blur(4px)}
+  .panel-dock.right{right:1rem;background:rgba(217,119,6,.92)}
+  .panel-dock.right:hover{background:rgba(180,83,9,.96)}
+  .panel-dock.active{box-shadow:0 0 0 2px rgba(255,255,255,.18),0 6px 16px rgba(0,0,0,.35)}
+  .panel-dock .state{font-size:11px;font-weight:500;opacity:.85}
+
+  @media (max-width: 1180px){
+    .top-toolbar{flex-direction:column;align-items:stretch}
+    .toolbar-controls{justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+  <div class="flex flex-col h-full">
+    <header class="p-4 bg-gray-800 shadow text-center">
+      <h1 class="text-2xl font-bold">Dependency Visualization</h1>
+    </header>
+
+    <div id="wrap">
+      <svg id="main-svg" class="w-full h-full"></svg>
+
+      <div class="top-toolbar">
+        <div class="toolbar-nav">
+          <button id="back" class="toolbar-btn" disabled>Back</button>
+          <div class="toolbar-card">
+            <div id="breadcrumb"></div>
+          </div>
+        </div>
+        <div class="toolbar-controls">
+          <label class="toolbar-chip" title="Show only nodes with non-zero timing. Edges remain only when both endpoints stay visible. cycles = CPU cycle count.">
+            <input id="toggle-nonzero" type="checkbox" />
+            Non-Zero
+          </label>
+          <label class="toolbar-chip" title="Hover highlight depth (1-8 levels)">
+            Highlight
+            <select id="depth-select" aria-label="Highlight depth">
+              <option value="1">1 level</option>
+              <option value="2">2 levels</option>
+              <option value="3" selected>3 levels</option>
+              <option value="4">4 levels</option>
+              <option value="5">5 levels</option>
+              <option value="6">6 levels</option>
+              <option value="7">7 levels</option>
+              <option value="8">8 levels</option>
+            </select>
+          </label>
+          <button id="reset" class="toolbar-btn primary" title="Fit the graph to the viewport">Fit Graph</button>
+        </div>
+      </div>
+
+      <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
+        <p class="text-gray-400 text-lg">Loading data...</p>
+      </div>
+      <div id="tooltip" class="tooltip"></div>
+      <div id="info-panel"><h3>Details</h3><p>Hover or click a node for details</p></div>
+      <button id="rank-btn" type="button" title="Toggle the ranking panel" class="panel-dock right">Ranking <span class="state">Show</span></button>
+
+      <div id="rank-panel">
+        <button id="rank-close">Close</button>
+        <div id="rank-content"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(async()=>{
+  const loadingEl = document.getElementById("loading");
+  if (!window.d3){
+    loadingEl.innerHTML = '<p class="text-red-400 text-lg">Failed to load D3.js. Please check the network or switch to a local D3 file.</p>';
+    return;
+  }
+  const last = p=>p.split(/[\\/]/).pop();
+  const isExternalHarNode = d => !!(d && (d.isExternal || d.kind === "EXTERNAL"));
+  const label= (d,isHar)=>isExternalHarNode(d)?d.name:(isHar?d.name:last(d.name));
+  const info = d3.select("#info-panel");
+  const wrapEl = document.getElementById("wrap");
+  const topToolbarEl = document.querySelector(".top-toolbar");
+  const infoPanelEl = document.getElementById("info-panel");
+
+  const svg=d3.select("#main-svg"), g=svg.append("g");
+  const linkG=g.append("g").attr("class","links");
+  const arrowG=g.append("g").attr("class","arrows");
+  const labelG=g.append("g").attr("class","labels");
+  const nodeG=g.append("g").attr("class","nodes");
+
+  let W,H; resize();
+  let currentTransform = d3.zoomIdentity;
+  const zoom=d3.zoom().scaleExtent([.1,8]).on("zoom",e=>{
+    currentTransform = e.transform;
+    g.attr("transform",e.transform);
+  });
+  svg.call(zoom);
+
+  let data;
+  try{
+    data = await d3.json("hierarchical_integrated_data.json");
+  }catch(e){
+    d3.select("#loading").html('<p class="text-red-400 text-lg">Failed to load hierarchical_integrated_data.json</p>');
+    throw e;
+  }
+  const {harGraph,fileGraphs,crossHarDependencies=[]}=data;
+  d3.select("#loading").style("display","none");
+
+  // Indexes and global view state.
+  const allFiles = Object.entries(fileGraphs).flatMap(([har,fg]) =>
+    (fg.nodes||[]).map(n => ({...n, __har: har}))
+  );
+  const harNodeById = new Map(harGraph.nodes.map(n=>[n.id,n]));
+  const fileNodeById = new Map(allFiles.map(n=>[n.id,n]));
+  const harByFileId  = new Map(allFiles.map(n=>[n.id,n.__har]));
+  const metricInfo = data.metricInfo || {};
+  const fallbackMetrics = {
+    unified: {
+      field: "timing_cycles",
+      label: "Timing",
+      description: "Displayed using the current timing metric. cycles = CPU cycle count.",
+    },
+  };
+  const declaredMetrics = (() => {
+    const sourceMetrics = metricInfo.metrics && Object.keys(metricInfo.metrics).length
+      ? metricInfo.metrics
+      : fallbackMetrics;
+    const normalizedMetrics = { ...sourceMetrics };
+    if (normalizedMetrics.unified){
+      normalizedMetrics.unified = {
+        ...normalizedMetrics.unified,
+        label: "Timing",
+        description: "Displayed using the current timing metric. cycles = CPU cycle count.",
+      };
+    }
+    return normalizedMetrics;
+  })();
+  function metricConfig(mode){
+    return declaredMetrics[mode] || fallbackMetrics.unified;
+  }
+  function metricField(mode){ return metricConfig(mode).field || "timing_cycles"; }
+  function metricLabel(mode){ return metricConfig(mode).label || mode; }
+  function metricLegendTip(mode){
+    return metricConfig(mode || metricMode).description || "cycles = CPU cycle count.";
+  }
+  function escAttr(s){
+    return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+  }
+  function metricValue(d, mode){
+    const targetMode = mode || metricMode;
+    const field = metricField(targetMode);
+    const raw = d ? d[field] : null;
+    if (raw != null && Number.isFinite(+raw)) return +raw;
+    if (targetMode === "self" && d && d.timing_cycles != null && Number.isFinite(+d.timing_cycles)) return +d.timing_cycles;
+    return 0;
+  }
+  function numericNonZero(v){
+    return v != null && Number.isFinite(+v) && +v !== 0;
+  }
+  /** Whether a node should be kept when "non-zero only" filtering is enabled. */
+  function nodePassesNonzeroHideFilter(d, isHarView, hz){
+    if (!hz) return true;
+    if (metricValue(d) !== 0) return true;
+    if (metricField(metricMode) === "timing_unified_cycles" || metricField(metricMode) === "timing_cycles") return false;
+    if (isHarView && (numericNonZero(d && d.timing_official_cycles) || numericNonZero(d && d.timing_raw_cycles)))
+      return true;
+    return false;
+  }
+  function fmtCycles(v){ return v == null ? "-" : Number(v).toLocaleString("en-US"); }
+
+  const availableMetricModes = Object.keys(declaredMetrics).filter(mode => {
+    const field = metricField(mode);
+    return harGraph.nodes.some(n => n && n[field] != null) || allFiles.some(n => n && n[field] != null);
+  });
+  const metricSwitchEl = document.getElementById("metric-switch");
+  const metricDisplayEl = document.getElementById("metric-display");
+  const metricSourceHintEl = document.getElementById("metric-source-hint");
+  const rankBtn = document.getElementById("rank-btn");
+  const backBtn = document.getElementById("back");
+  const breadcrumbEl = document.getElementById("breadcrumb");
+  let hideZero=false;
+  let metricMode=(metricInfo.defaultMetric || availableMetricModes[0] || "unified");
+  if (!availableMetricModes.includes(metricMode)) metricMode = availableMetricModes[0] || "unified";
+  function syncMetricDisplay(){
+    if (metricDisplayEl) metricDisplayEl.textContent = metricLabel(metricMode);
+    if (metricSourceHintEl) metricSourceHintEl.textContent = "cycles";
+    if (metricSwitchEl){
+      metricSwitchEl.title = metricLegendTip(metricMode);
+    }
+  }
+  syncMetricDisplay();
+  let currentView='har';  // 'har' | 'file'
+  let currentHar=null;
+  let highlightDepth = 3; // Number of visible downstream layers during hover.
+  let viewStack = [];
+
+  let currentNodes = []; // Used for locate-and-focus actions.
+  let pinnedInfoState = null; // Restores the pinned detail panel after hover-out.
+
+  function defaultInfoHtml(){
+    const tip = metricLegendTip(metricMode);
+    const tipLine = tip ? `<p class="muted" style="font-size:11px;line-height:1.35;margin-top:.15rem">${tip}</p>` : "";
+    return `<h3>Details</h3><p>Hover or click a node for details</p>${tipLine}`;
+  }
+
+  function infoIsHarNode(isHarView, node){
+    return isHarView || isExternalHarNode(node);
+  }
+
+  function setPinnedInfo(d, isHarLike){
+    if (!d || d.id == null) return;
+    pinnedInfoState = {
+      nodeId: d.id,
+      isHarLike: !!isHarLike,
+      view: currentView,
+      harName: currentHar || null,
+    };
+  }
+
+  function clearGraphHoverState(){
+    nodeG.selectAll("g").style("opacity",1).classed("highlighted",false);
+    linkG.selectAll("line").style("opacity",1).classed("highlighted",false);
+    arrowG.selectAll("path").style("opacity",1).classed("highlighted",false);
+    labelG.selectAll("text").style("opacity",1).classed("highlighted",false);
+  }
+
+  function hideInfoPanel(){
+    info.style("display","none");
+  }
+
+  function showInfoPanel(){
+    info.style("display","block");
+  }
+
+  function clearPinnedInfo(){
+    pinnedInfoState = null;
+    clearGraphHoverState();
+    info.html(defaultInfoHtml());
+    hideInfoPanel();
+  }
+
+  function resolvePinnedInfo(){
+    if (!pinnedInfoState) return null;
+    if (pinnedInfoState.view !== currentView) return null;
+    if ((pinnedInfoState.harName || null) !== (currentHar || null)) return null;
+    const node = currentNodes.find(n => n && n.id === pinnedInfoState.nodeId)
+      || fileNodeById.get(pinnedInfoState.nodeId)
+      || harNodeById.get(pinnedInfoState.nodeId);
+    if (!node) return null;
+    return { node, isHarLike: !!pinnedInfoState.isHarLike };
+  }
+
+  function restoreInfoPanel(){
+    clearGraphHoverState();
+    const pinned = resolvePinnedInfo();
+    if (pinned){
+      showInfo(pinned.node, pinned.isHarLike);
+      return;
+    }
+    pinnedInfoState = null;
+    info.html(defaultInfoHtml());
+    hideInfoPanel();
+  }
+
+  function isPanelOpen(id){
+    const panel = document.getElementById(id);
+    if(!panel) return false;
+    return window.getComputedStyle(panel).display !== "none";
+  }
+
+  renderHar(true);
+
+  function isRankPanelOpen(){
+    return isPanelOpen("rank-panel");
+  }
+
+  function updateOverlayLayout(){
+    if (!wrapEl || !topToolbarEl || !infoPanelEl) return;
+    const wrapRect = wrapEl.getBoundingClientRect();
+    const toolbarRect = topToolbarEl.getBoundingClientRect();
+    const topGap = 12;
+    const topPx = Math.max(16, Math.round(toolbarRect.bottom - wrapRect.top + topGap));
+    const maxHeight = Math.max(140, H - topPx - 16);
+    infoPanelEl.style.top = `${topPx}px`;
+    infoPanelEl.style.maxHeight = `${maxHeight}px`;
+  }
+
+  function updatePanelToggleStates(){
+    if (rankBtn){
+      const open = isRankPanelOpen();
+      rankBtn.classList.toggle("active", open);
+      rankBtn.setAttribute("aria-pressed", open ? "true" : "false");
+      const state = rankBtn.querySelector(".state");
+      if (state) state.textContent = open ? "Shown" : "Show";
+    }
+  }
+
+  function syncRankPanel(){
+    if(isRankPanelOpen()) openRankPanel();
+  }
+
+  function transformFromSnapshot(snapshot){
+    const x = Number(snapshot && snapshot.x);
+    const y = Number(snapshot && snapshot.y);
+    const k = Number(snapshot && snapshot.k);
+    return d3.zoomIdentity.translate(Number.isFinite(x) ? x : 0, Number.isFinite(y) ? y : 0).scale(Number.isFinite(k) && k > 0 ? k : 1);
+  }
+
+  function applyTransformSnapshot(snapshot){
+    svg.call(zoom.transform, transformFromSnapshot(snapshot));
+  }
+
+  function captureViewState(){
+    return {
+      view: currentView,
+      harName: currentHar,
+      transform: { x: currentTransform.x, y: currentTransform.y, k: currentTransform.k },
+      rankOpen: isRankPanelOpen(),
+    };
+  }
+
+  function updateNavigationUi(){
+    if(backBtn) backBtn.disabled = viewStack.length === 0;
+    if(!breadcrumbEl) return;
+    if(currentView === 'har' || !currentHar){
+      breadcrumbEl.innerHTML = `<span class="muted">View</span><span class="sep">/</span><span class="current">Overview</span>`;
+      updateOverlayLayout();
+      return;
+    }
+    breadcrumbEl.innerHTML = `<span class="muted">View</span><span class="sep">/</span><button type="button" data-nav="home">Overview</button><span class="sep">/</span><span class="current">${currentHar}</span>`;
+    updateOverlayLayout();
+  }
+
+  function pushCurrentViewState(){
+    viewStack.push(captureViewState());
+    updateNavigationUi();
+  }
+
+  function restoreViewState(state){
+    if(!state) return;
+    pinnedInfoState = null;
+    closeRankPanel();
+    if(state.view === 'file' && state.harName){
+      renderFile(state.harName, false, { syncPanels:false, updateNavigation:false });
+    }else{
+      renderHar(false, { syncPanels:false, updateNavigation:false });
+    }
+    applyTransformSnapshot(state.transform);
+    if(state.rankOpen) openRankPanel();
+    updateNavigationUi();
+  }
+
+  function navigateBack(){
+    if(!viewStack.length) return;
+    const prevState = viewStack.pop();
+    restoreViewState(prevState);
+  }
+
+  function navigateHome({ fitOnce=true, clearHistory=false, pushHistory=false } = {}){
+    if(pushHistory) pushCurrentViewState();
+    if(clearHistory){
+      viewStack = [];
+    }
+    pinnedInfoState = null;
+    renderHar(fitOnce);
+  }
+
+  function navigateToFile(harName, { fitOnce=true, pushHistory=false } = {}){
+    if(pushHistory) pushCurrentViewState();
+    pinnedInfoState = null;
+    renderFile(harName, fitOnce);
+  }
+
+  function renderHar(fitOnce=false, options={}){
+    const { syncPanels=true, updateNavigation=true } = options;
+    currentView='har'; currentHar=null;
+    renderGraph(harGraph.nodes, harGraph.edges, true, fitOnce);
+    restoreInfoPanel();
+    if(syncPanels) syncRankPanel();
+    if(updateNavigation) updateNavigationUi();
+  }
+
+  function renderFile(harName, fitOnce=false, options={}){
+    const { syncPanels=true, updateNavigation=true } = options;
+    const fg=fileGraphs[harName];
+    if(!fg){ alert("No file dependencies found."); return; }
+
+    const nodes=[...fg.nodes];
+    const edges=[...fg.edges];
+    const idSet=new Set(nodes.map(n=>n.id));
+
+    crossHarDependencies.forEach(dep=>{
+      if(!idSet.has(dep.sourceId)) return;
+      const tgt=harGraph.nodes.find(h=>h.name===dep.targetHarId);
+      if(!tgt) return;
+      if(!idSet.has(tgt.id)){
+        nodes.push({...tgt,isExternal:true,x:(Math.random()-0.5)*60,y:(Math.random()-0.5)*60});
+        idSet.add(tgt.id);
+      }
+      edges.push({source:dep.sourceId,target:tgt.id,count:dep.count});
+    });
+
+    currentView='file'; currentHar=harName;
+    renderGraph(nodes, edges, false, fitOnce);
+    restoreInfoPanel();
+    if(syncPanels) syncRankPanel();
+    if(updateNavigation) updateNavigationUi();
+  }
+
+  function idOf(v){ return (v && typeof v === 'object') ? v.id : v; }
+  function normalizeEdges(arr){ return arr.map(e=>({ source:idOf(e.source), target:idOf(e.target), count:(e.count??null) })); }
+
+  function renderGraph(rawNodes, rawEdges, isHar, fitOnce){
+    linkG.selectAll("*").remove(); arrowG.selectAll("*").remove();
+    labelG.selectAll("*").remove(); nodeG.selectAll("*").remove();
+
+    // When enabled, keep only non-zero nodes and only edges whose endpoints remain visible.
+    const keep = n => nodePassesNonzeroHideFilter(n, isHar, hideZero);
+    const nodes = rawNodes.filter(keep);
+    currentNodes = nodes;
+
+    const idSet = new Set(nodes.map(n=>n.id));
+    const baseEdges = normalizeEdges(rawEdges);
+
+    const edges = baseEdges.filter(e => idSet.has(e.source) && idSet.has(e.target));
+
+    // ======== Force-layout parameters: HAR view and file view are tuned separately. ========
+    let linkForce, charge, collide, radial, compX=null, compY=null;
+
+    if (isHar) {
+      // HAR view: slightly denser layout.
+      linkForce = d3.forceLink(edges).id(d=>d.id).distance(120).strength(0.95);
+      charge    = d3.forceManyBody().strength(-240).distanceMin(20).distanceMax(340);
+      collide   = d3.forceCollide().radius(26);
+      radial    = d3.forceRadial(0, W/2, H/2).strength(0.012);
+    } else {
+      // File view: looser layout with disconnected-component partitioning.
+      linkForce = d3.forceLink(edges).id(d=>d.id).distance(190).strength(0.95);
+      charge    = d3.forceManyBody().strength(-420).distanceMin(20).distanceMax(1100);
+      collide   = d3.forceCollide().radius(24);
+      radial    = d3.forceRadial(0, W/2, H/2).strength(0.004);
+
+      const compIndexOf = computeComponents(nodes, edges);
+      const centers     = gridCenters(d3.max([...compIndexOf.values()])+1, W, H);
+      compX = d3.forceX(d => centers[compIndexOf.get(d.id)].x).strength(0.22);
+      compY = d3.forceY(d => centers[compIndexOf.get(d.id)].y).strength(0.22);
+    }
+
+    const sim=d3.forceSimulation(nodes)
+      .velocityDecay(0.45)
+      .force("link",linkForce)
+      .force("charge",charge)
+      .force("collide",collide)
+      .force("radial",radial)
+      .force("center",d3.forceCenter(W/2,H/2));
+
+    if (compX && compY){ sim.force("compX", compX).force("compY", compY); }
+
+    // Links
+    const lines=linkG.selectAll("line")
+      .data(edges)
+      .join("line")
+      .attr("class", d=>{
+        if (d.count!=null) return "file2har";
+        return isHar ? "har" : "internal";
+      });
+
+    // Arrowheads: render for every edge.
+    const arrows=arrowG.selectAll("path")
+      .data(edges)
+      .join("path")
+      .attr("d","M0,-3L6,0L0,3Z")
+      .attr("class", d=>{
+        if (d.count!=null) return "arrow-file2har";
+        return isHar ? "arrow-har" : "arrow-internal";
+      });
+
+    // Count labels for File -> HAR edges.
+    const labels=labelG.selectAll("text")
+      .data(edges.filter(d=>d.count!=null))
+      .join("text").attr("class","link-label")
+      .text(d=>d.count);
+
+    // Node size and color.
+    const maxT=d3.max(nodes,d=>metricValue(d))||1;
+    const r=d3.scaleLinear().domain([0,maxT]).range(isHar?[12,28]:[6,14]);
+    const col=d3.scaleSequential(isHar?d3.interpolateInferno:d3.interpolateTurbo).domain([maxT,0]);
+
+    const ng=nodeG.selectAll("g")
+      .data(nodes, d=>d.id)
+      .join("g")
+      .call(d3.drag()
+        .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+        .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
+        .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}));
+
+    ng.append("circle")
+      .attr("r",d=>isExternalHarNode(d)?15:r(metricValue(d)))
+      .attr("fill",d=>isExternalHarNode(d)? "#4a5568":col(metricValue(d)))
+      .attr("class",d=>isExternalHarNode(d)?"external-node":null);
+
+    ng.append("text")
+      .attr("x",d=>(isExternalHarNode(d)?15:r(metricValue(d)))+4)
+      .attr("y",4)
+      .text(d=>label(d,isHar));
+
+    // Click handling.
+    ng.on("click",(e,d)=>{
+      e.stopPropagation();
+      if(isHar && !isExternalHarNode(d) && fileGraphs[d.name]){
+        navigateToFile(d.name, { fitOnce:true, pushHistory:true });
+      }else{
+        const isHarLike = infoIsHarNode(isHar, d);
+        setPinnedInfo(d, isHarLike);
+        showInfo(d, isHarLike);
+      }
+    });
+
+    // Hover handling (subtree constrained by depth).
+    ng.on("mouseover",(e,d)=>{
+      showInfo(d, infoIsHarNode(isHar, d));
+      const set=descendDepth(d,edges,highlightDepth);
+      ng.style("opacity",.08);
+      lines.style("opacity",.08);
+      arrows.style("opacity",.08);
+      labels.style("opacity",.08);
+
+      ng.filter(n=>set.nodes.has(n.id)).style("opacity",1).classed("highlighted",true);
+      lines.filter(l=>set.links.has(l)).style("opacity",1).classed("highlighted",true);
+      arrows.filter(l=>set.links.has(l)).style("opacity",1).classed("highlighted",true);
+      labels.filter(l=>set.links.has(l)).style("opacity",1).classed("highlighted",true);
+    }).on("mouseout",()=>{
+      ng.style("opacity",1).classed("highlighted",false);
+      lines.style("opacity",1).classed("highlighted",false);
+      arrows.style("opacity",1).classed("highlighted",false);
+      labels.style("opacity",1).classed("highlighted",false);
+      restoreInfoPanel();
+    });
+
+    // tick
+    sim.on("tick",()=>{
+      lines
+        .attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+        .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+
+      ng.attr("transform",d=>`translate(${d.x},${d.y})`);
+
+      arrows.attr("transform",d=>{
+        const midX=(d.source.x+d.target.x)/2;
+        const midY=(d.source.y+d.target.y)/2;
+        const angle=Math.atan2(d.target.y-d.source.y,d.target.x-d.source.x)*180/Math.PI;
+        return `translate(${midX},${midY}) rotate(${angle})`;
+      });
+
+      labels
+        .attr("x",d=>(d.source.x+d.target.x)/2)
+        .attr("y",d=>(d.source.y+d.target.y)/2-4);
+    });
+
+    // fitOnce: call fitGraph only after the first cooling cycle of the current simulation.
+    // If fitGraph runs on every "end", dragging a node would trigger another automatic zoom.
+    if (fitOnce){
+      let didFit = false;
+      sim.on("end", ()=>{
+        if (didFit) return;
+        didFit = true;
+        fitGraph(nodes);
+      });
+    }
+  }
+
+  // Directed BFS with a maximum depth n (root is depth 0).
+  function descendDepth(start,edges,maxDepth){
+    const idStart = start.id;
+    const nSet=new Set([idStart]);
+    const lSet=new Set();
+
+    // Adjacency list (directed: source -> targets).
+    const adj = new Map();
+    edges.forEach(l=>{
+      const s=idOf(l.source), t=idOf(l.target);
+      if(!adj.has(s)) adj.set(s,[]);
+      adj.get(s).push({edge:l, to:t});
+    });
+
+    const q=[{id:idStart, depth:0}];
+    while(q.length){
+      const {id,depth}=q.shift();
+      if(depth>=maxDepth) continue;
+      const list=adj.get(id); if(!list) continue;
+      for(const {edge,to} of list){
+        lSet.add(edge);
+        if(!nSet.has(to)){
+          nSet.add(to);
+          q.push({id:to, depth:depth+1});
+        }
+      }
+    }
+    return {nodes:nSet, links:lSet};
+  }
+
+  // Compute connected components from the current edge set (treated as undirected).
+  function computeComponents(nodes, edges){
+    const idSet = new Set(nodes.map(n=>n.id));
+    const adj = new Map();
+    idSet.forEach(id=>adj.set(id,new Set()));
+    edges.forEach(e=>{
+      const s = idOf(e.source), t = idOf(e.target);
+      if(!idSet.has(s) || !idSet.has(t)) return;
+      adj.get(s).add(t);
+      adj.get(t).add(s);
+    });
+
+    const compIndexOf = new Map();
+    let comp = 0;
+    for(const id of idSet){
+      if(compIndexOf.has(id)) continue;
+      const q=[id]; compIndexOf.set(id,comp);
+      while(q.length){
+        const cur=q.shift();
+        adj.get(cur).forEach(n=>{
+          if(!compIndexOf.has(n)){ compIndexOf.set(n,comp); q.push(n); }
+        });
+      }
+      comp++;
+    }
+    return compIndexOf; // id -> compIdx
+  }
+
+  // Generate grid centers and distribute components across the canvas.
+  function gridCenters(k, width, height){
+    if(k<=0) return [];
+    const cols = Math.ceil(Math.sqrt(k));
+    const rows = Math.ceil(k / cols);
+    const pad  = 60; // Outer padding.
+    const cellW = Math.max(1,(width  - pad*2) / cols);
+    const cellH = Math.max(1,(height - pad*2) / rows);
+    const centers = [];
+    for(let i=0;i<k;i++){
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      centers.push({
+        x: pad + cellW*(c + 0.5),
+        y: pad + cellH*(r + 0.5)
+      });
+    }
+    return centers;
+  }
+
+  function estimateLabelWidth(text){
+    return Array.from(String(text || "")).reduce((sum, ch) => {
+      return sum + (/[\u3400-\u9fff]/.test(ch) ? 9 : 6);
+    }, 0);
+  }
+
+  function fitGraph(nodesArr){
+    if(!nodesArr.length) return;
+
+    const isHarView = currentView === "har";
+    const maxMetric = d3.max(nodesArr, d=>metricValue(d)) || 1;
+    const radiusScale = d3.scaleLinear().domain([0, maxMetric]).range(isHarView ? [12,28] : [6,14]);
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nodesArr.forEach(d=>{
+      if (d == null || typeof d.x !== "number" || typeof d.y !== "number") return;
+      const radius = isExternalHarNode(d) ? 15 : radiusScale(metricValue(d));
+      const textWidth = estimateLabelWidth(label(d, isHarView));
+      const left = d.x - radius - 16;
+      const right = d.x + radius + 4 + textWidth + 12;
+      const top = d.y - Math.max(radius, 10) - 12;
+      const bottom = d.y + Math.max(radius, 10) + 12;
+      if (left < minX) minX = left;
+      if (right > maxX) maxX = right;
+      if (top < minY) minY = top;
+      if (bottom > maxY) maxY = bottom;
+    });
+
+    if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) return;
+
+    const graphWidth = Math.max(1, maxX - minX);
+    const graphHeight = Math.max(1, maxY - minY);
+    const outerPadX = Math.max(28, Math.min(64, W * 0.06));
+    const outerPadY = Math.max(28, Math.min(72, H * 0.08));
+    const usableWidth = Math.max(1, W - outerPadX * 2);
+    const usableHeight = Math.max(1, H - outerPadY * 2);
+    const rawScale = 0.96 * Math.min(usableWidth / graphWidth, usableHeight / graphHeight);
+
+    // A single node should stay centered with a comfortable reading ratio instead of filling the viewport.
+    const maxFitScale = nodesArr.length === 1 ? 1.35 : 2.2;
+    const scale = Math.max(0.35, Math.min(maxFitScale, rawScale));
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const tx = W / 2 - scale * centerX;
+    const ty = H / 2 - scale * centerY;
+    svg.transition().duration(600)
+      .call(zoom.transform, d3.zoomIdentity.translate(tx,ty).scale(scale));
+  }
+
+  function showInfo(d,isHar){
+    showInfoPanel();
+    const lines = [];
+    const isHarLike = isHar || isExternalHarNode(d);
+    const currentCycles = metricValue(d);
+    lines.push(`<h3>Details</h3>`);
+    lines.push(`<p><strong>Name:</strong> ${isHar? d.name : last(d.name)}</p>`);
+    if(!isHar && !isExternalHarNode(d)){
+      lines.push(`<p><strong>Path:</strong> ${d.name}</p>`);
+    }
+    lines.push(`<p><strong>Type:</strong> ${isExternalHarNode(d)?'External HAR':(isHarLike?'HAR':'File')}</p>`);
+    lines.push(`<p title="${escAttr(metricLegendTip(metricMode))}"><strong>Timing:</strong> ${fmtCycles(currentCycles)} cycles</p>`);
+    info.html(lines.join(""));
+  }
+
+  /* ====== Ranking panel with click-to-focus support ====== */
+  function openRankPanel(){
+    const panel = d3.select("#rank-panel");
+    const box = d3.select("#rank-content");
+    panel.style("display","block");
+
+    const fmt = fmtCycles;
+    let html = '';
+    html += `<p class="muted" style="margin:0 0 .55rem;font-size:11px;line-height:1.35">Node size matches the graph. Sorted by the current timing metric.</p>`;
+
+    if(currentView==='har'){
+      // HAR ranking
+      const harSorted = [...harGraph.nodes].sort((a,b)=>metricValue(b)-metricValue(a)).slice(0,50);
+      html += `<h4>Top HARs (Top 50, ${metricLabel(metricMode)})</h4><ol>`;
+      harSorted.forEach(n=>{
+        html += `<li><a href="#" data-type="har" data-id="${n.id}">${n.name}</a> <span class="muted">— ${fmt(metricValue(n))} cycles</span></li>`;
+      });
+      html += `</ol>`;
+
+      // Global file ranking
+      const fileSorted = [...allFiles].sort((a,b)=>metricValue(b)-metricValue(a)).slice(0,50);
+      html += `<h4>Top Files (Top 50, ${metricLabel(metricMode)})</h4><ol>`;
+      fileSorted.forEach(n=>{
+        const har = n.__har || harByFileId.get(n.id) || '';
+        html += `<li><a href="#" data-type="file" data-id="${n.id}" data-har="${har}">${last(n.name)}</a> <span class="muted">— ${fmt(metricValue(n))} cycles · ${har}</span></li>`;
+      });
+      html += `</ol>`;
+    }else{
+      const fg=fileGraphs[currentHar]||{nodes:[]};
+      const inner = [...fg.nodes].sort((a,b)=>metricValue(b)-metricValue(a)).slice(0,50);
+      html += `<h4>${currentHar} Top Files (Top 50, ${metricLabel(metricMode)})</h4><ol>`;
+      inner.forEach(n=>{
+        html += `<li><a href="#" data-type="file" data-id="${n.id}" data-har="${currentHar}">${last(n.name)}</a> <span class="muted">— ${fmt(metricValue(n))} cycles</span></li>`;
+      });
+      html += `</ol>`;
+
+      // Additional global file Top 30 section
+      const fileSorted = [...allFiles].sort((a,b)=>metricValue(b)-metricValue(a)).slice(0,30);
+      html += `<h4>Global Top Files (Top 30, ${metricLabel(metricMode)})</h4><ol>`;
+      fileSorted.forEach(n=>{
+        const har = n.__har || harByFileId.get(n.id) || '';
+        html += `<li><a href="#" data-type="file" data-id="${n.id}" data-har="${har}">${last(n.name)}</a> <span class="muted">— ${fmt(metricValue(n))} cycles · ${har}</span></li>`;
+      });
+      html += `</ol>`;
+    }
+    box.html(html);
+    updatePanelToggleStates();
+  }
+  function closeRankPanel(){
+    d3.select("#rank-panel").style("display","none");
+    updatePanelToggleStates();
+  }
+
+  function toggleRankPanel(){
+    if(isRankPanelOpen()) closeRankPanel();
+    else openRankPanel();
+  }
+
+  // Ranking panel click delegation: locate and navigate.
+  document.getElementById('rank-content').addEventListener('click', async (e)=>{
+    const a = e.target.closest('a[data-type]');
+    if(!a) return;
+    e.preventDefault();
+
+    const type = a.dataset.type;
+    if(type === 'har'){
+      const harId = a.dataset.id;
+      if(currentView!=='har') navigateHome({ fitOnce:true, pushHistory:true });
+      const node = harNodeById.get(harId);
+      if(node && hideZero && !nodePassesNonzeroHideFilter(node, true, hideZero)){
+        hideZero = false;
+        d3.select("#toggle-nonzero").property("checked", false);
+        renderHar(true);
+      }
+      focusWhenReady(harId);
+    }else if(type === 'file'){
+      const fileId = a.dataset.id;
+      const harName = a.dataset.har || harByFileId.get(fileId);
+      const node = fileNodeById.get(fileId);
+      if(node && hideZero && !nodePassesNonzeroHideFilter(node, false, hideZero)){
+        hideZero = false;
+        d3.select("#toggle-nonzero").property("checked", false);
+      }
+      if(currentView!=='file' || currentHar!==harName){
+        navigateToFile(harName, { fitOnce:true, pushHistory:true });
+      }
+      focusWhenReady(fileId);
+    }
+  });
+
+  async function focusWhenReady(targetId, tries=20){
+    for(let i=0;i<tries;i++){
+      const ok = focusNode(targetId);
+      if(ok) return;
+      await new Promise(r=>setTimeout(r,120));
+    }
+  }
+
+  function focusNode(targetId){
+    const sel = nodeG.selectAll("g").filter(d=>d.id===targetId);
+    if (!sel.size()) return false;
+    const d = sel.datum();
+    if (d==null || typeof d.x!=='number' || typeof d.y!=='number') return false;
+
+    const scale = 2.0;
+    const tx = W/2 - scale*d.x;
+    const ty = H/2 - scale*d.y;
+    svg.transition().duration(600)
+      .call(zoom.transform, d3.zoomIdentity.translate(tx,ty).scale(scale));
+
+    const circ = sel.select("circle");
+    circ.interrupt()
+      .transition().duration(120).attr("stroke","#f6ad55").attr("stroke-width",4)
+      .transition().duration(600).attr("stroke","#e2e8f0").attr("stroke-width",2);
+    return true;
+  }
+
+  // Events and controls.
+  if (backBtn) d3.select("#back").on("click", navigateBack);
+  d3.select("#reset").on("click",()=> fitGraph(currentNodes));
+  if (rankBtn) d3.select("#rank-btn").on("click",toggleRankPanel);
+  d3.select("#rank-close").on("click",closeRankPanel);
+    if (breadcrumbEl){
+      breadcrumbEl.addEventListener("click", (e)=>{
+        const btn = e.target.closest('button[data-nav="home"]');
+        if(!btn) return;
+        navigateHome({ fitOnce:true, clearHistory:true });
+      });
+    }
+
+  svg.on("click", (e)=>{
+    if (e.defaultPrevented) return;
+    clearPinnedInfo();
+  });
+
+  window.addEventListener("keydown", (e)=>{
+    if (e.key !== "Escape") return;
+    clearPinnedInfo();
+  });
+
+  d3.select("#toggle-nonzero").on("change", function(){
+    hideZero = this.checked;
+    if(currentView==='har') renderHar(false);
+    else renderFile(currentHar, false);
+  });
+
+  const depthSelect = document.getElementById("depth-select");
+  if (depthSelect){
+    depthSelect.value = String(highlightDepth);
+    depthSelect.addEventListener("change", ()=>{
+      highlightDepth = parseInt(depthSelect.value,10) || 1;
+    });
+  }
+
+  updatePanelToggleStates();
+
+  window.addEventListener("resize",resize);
+  function resize(){
+    W=wrapEl.clientWidth;
+    H=wrapEl.clientHeight;
+    svg.attr("width",W).attr("height",H);
+    updateOverlayLayout();
+  }
+})();
+</script>
+</body>
+</html>
