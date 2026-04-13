@@ -22,12 +22,12 @@ async function startTest(): Promise<void> {
     throw new Error("test-1: thrown from async startTest");
 }
 
-function main(): void {
+async function main(): Promise<void> {
     try {
-        waitForCompletion(startTest);
+        await startTest();
         
         // If we got here, the test failed.
-        throw new Error("waitForCompletion did not propagate rejection");
+        throw new Error("Promise did not propagate rejection");
     } catch (e) {
         let err = e as Error;
         arktest.assertEQ(err.message, "test-1: thrown from async startTest");

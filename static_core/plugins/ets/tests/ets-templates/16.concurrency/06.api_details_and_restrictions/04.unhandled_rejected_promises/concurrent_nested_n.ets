@@ -16,7 +16,7 @@
 /*---
 desc: Simultaneously run task A() (throws an exception) and task B() (successful task).
 assert: Stderr contains error A.
-tags: [negative]
+tags: [negative, no-warmup]
 expected_out:
     runtime:
         - "Task A start"
@@ -47,6 +47,6 @@ async function taskB(): Promise<void> {
     console.log('Task B done');
 }
 
-function main(): void {
-    waitForCompletion(() => Promise.all([taskA(), taskB()]))
+async function main(): Promise<void> {
+    await Promise.all([taskA(), taskB()])
 }

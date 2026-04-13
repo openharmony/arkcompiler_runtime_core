@@ -16,7 +16,7 @@
 /*---
 desc: outer() calls inner(), inner() throws; outer() is not expected.
 assert: stderr contains the error from inner and the stack from inner -> outer.
-tags: [negative]
+tags: [negative, no-warmup]
 expected_error:
     runtime:
         - "Unhandled exception: nested_inner_throw_n.ExpectedError"
@@ -35,6 +35,6 @@ async function outer(): Promise<void> {
     await inner();
 }
 
-function main(): void {
-    waitForCompletion(outer);
+async function main(): Promise<void> {
+    await outer();
 }

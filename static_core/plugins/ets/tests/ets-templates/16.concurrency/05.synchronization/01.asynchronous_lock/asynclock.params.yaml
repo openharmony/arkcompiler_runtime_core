@@ -41,7 +41,7 @@ cases:
         await p1;
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
 
   - desc: Operations execute sequentially.
     decl: |-
@@ -77,4 +77,4 @@ cases:
         arktest.assertEQ(executionOrder[2], 3);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
