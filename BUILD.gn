@@ -441,15 +441,6 @@ if (!ark_standalone_build) {
   }
 }
 
-ohos_prebuilt_etc("app_static_runtime_enable_list") {
-  relative_install_dir = "ark"
-  source = "$ark_root/static_core/ohos/app_static_runtime_enable_list.conf"
-
-  # Set the subsystem name
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
-}
-
 ohos_prebuilt_etc("static_aot_methods_black_list.json") {
   relative_install_dir = "ark"
   source = "$ark_root/static_core/compiler/tools/paoc/static_aot_methods_black_list.json"
