@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+{% for lib in libs %}
 /*---
-desc: Test File.
-files: ['./namespace_function_added.libr.ets']
+desc: |-
+    Old library - {{lib.desc}}
+tags: [compile-only, not-a-test]
 ---*/
 
-import { N } from './namespace_function_added.libr.ets';
-
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
+export namespace N {
+    {{lib.body|indent}}
 }
+
+{% endfor %}
