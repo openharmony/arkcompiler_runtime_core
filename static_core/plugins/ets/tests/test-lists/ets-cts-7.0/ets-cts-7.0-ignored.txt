@@ -685,8 +685,8 @@
 13.modules_and_namespaces/04.import_directives/05.import_path/bad/import_path_bad_n_3.ets
 
 #32456 Initializer in ambient const declaration
-14.ambient_declarations/bad_ambient_declarations_3.ets
-14.ambient_declarations/bad_ambient_declarations_4.ets
+14.ambient_declarations/bad_ambient_declarations_n_3.ets
+14.ambient_declarations/bad_ambient_declarations_n_4.ets
 14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_10.ets
 14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_11.ets
 14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_12.ets
