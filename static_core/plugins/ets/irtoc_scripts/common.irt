@@ -12,8 +12,12 @@
 # limitations under the License.
 
 module EtsConstants
-    CORO_NULL_VALUE_OFFSET = "cross_values::GetEtsCoroutineNullValueOffset(graph->GetArch())"
-    CORO_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch())"
+    MANAGED_THREAD_TYPE_OFFSET = "cross_values::GetManagedThreadTypeOffset(graph->GetArch())"
+    MANAGED_THREAD_TYPE_WORKER_THREAD = "cross_values::GetManagedThreadTypeWorkerThread(graph->GetArch())"
+    COROUTINE_EXECUTION_CONTEXT_OFFSET = "cross_values::GetEtsCoroutineExecutionContextOffset(graph->GetArch())"
+    EXECUTION_CONTEXT_WRAPPER_OFFSET = "cross_values::GetEtsExecutionContextWrapperOffset(graph->GetArch())"
+    EXECUTION_CONTEXT_NULL_VALUE_OFFSET = "cross_values::GetEtsExecutionContextNullValueOffset(graph->GetArch())"
+    EXECUTION_CONTEXT_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsExecutionContextLocalStorageOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_DATA_OFFSET = "cross_values::GetEscompatArrayBufferOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET = "cross_values::GetEscompatArrayActualLengthOffset(graph->GetArch())"
     BOX_PRIMITIVE_VALUE_OFFSET = "cross_values::GetEtsBoxPrimitiveValueOffset(graph->GetArch())"
@@ -95,12 +99,29 @@ scoped_macro(:isBigIntType) do |flags|
   AndI(flags).Imm(EtsConstants::ETS_CLASS_IS_BIG_INT_FLAG).u32
 end
 
+# NOTE: The dispatch is only needed while stackful and stackless execution hosts coexist.
+# After the runtime fully switches to stackless coroutines, %tr can map to a single execution-context host and this
+# helper can be simplified accordingly.
+scoped_macro(:getCurrentEtsExecutionContext) do
+  thread_type := LoadI(%tr).Imm(EtsConstants::MANAGED_THREAD_TYPE_OFFSET).u32
+  tr_word := Bitcast(%tr).SrcType("DataType::POINTER").word
+  If(thread_type, EtsConstants::MANAGED_THREAD_TYPE_WORKER_THREAD).EQ.Unlikely {
+    execution_ctx_word_0 := AddI(tr_word).Imm(EtsConstants::EXECUTION_CONTEXT_WRAPPER_OFFSET).word
+  } Else {
+    execution_ctx_word_1 := AddI(tr_word).Imm(EtsConstants::COROUTINE_EXECUTION_CONTEXT_OFFSET).word
+  }
+  execution_ctx_word := Phi(execution_ctx_word_0, execution_ctx_word_1).word
+  Bitcast(execution_ctx_word).SrcType(Options.arch_64_bits? ? "DataType::UINT64" : "DataType::UINT32").ptr
+end
+
 macro(:ets_nullvalue) do
-  LoadI(%tr).Imm(EtsConstants::CORO_NULL_VALUE_OFFSET).ref
+  execution_ctx := getCurrentEtsExecutionContext()
+  LoadI(execution_ctx).Imm(EtsConstants::EXECUTION_CONTEXT_NULL_VALUE_OFFSET).ref
 end
 
 scoped_macro(:getPlatformTypes) do
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  execution_ctx := getCurrentEtsExecutionContext()
+  ptypes := LoadI(execution_ctx).Imm(EtsConstants::EXECUTION_CONTEXT_LOCAL_STORAGE_OFFSET).ptr
 end
 
 scoped_macro(:getPlatformTypeClass) do |ptypes, ofs|
@@ -156,7 +177,8 @@ end
 #
 ["ref", "ref_uint"].each do |ret_type|
   macro("get_platform_type_#{ret_type}".to_sym) do |offset|
-    ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+    execution_ctx := getCurrentEtsExecutionContext()
+    ptypes := LoadI(execution_ctx).Imm(EtsConstants::EXECUTION_CONTEXT_LOCAL_STORAGE_OFFSET).ptr
     LoadI(ptypes).Imm(offset).send(ret_type)
   end # get_platform_type_#{ret_type}
 end

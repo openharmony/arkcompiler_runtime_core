@@ -90,7 +90,7 @@ scoped_macro(:fetchHashCode) do |obj, is_string|
 end
 
 scoped_macro(:calcHashCode) do |obj, type|
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  ptypes := getPlatformTypes()
 
   int_max := Cast(MapConstants::INT_MAX).f64
   int_min := Cast(MapConstants::INT_MIN).f64
@@ -292,7 +292,7 @@ Label(:Done)
 end
 
 macro(:findKeyByVal) do |buck_data, buck_len, key, type|
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  ptypes := getPlatformTypes()
   long_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_LONG_TYPE_OFFSET)
   float_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET)
   double_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_DOUBLE_TYPE_OFFSET)
