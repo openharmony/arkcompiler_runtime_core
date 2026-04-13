@@ -222,7 +222,7 @@ class TestLists:
             if is_fastverify is not None and bool(is_fastverify):
                 return BuildTypeKind.is_value('fast-verify', option_name="from gn 'is_fastverify=true'")
         cmake_build_type = cast(str, self.__search_in_build_properties('CMAKE_BUILD_TYPE'))
-        if cmake_build_type == "fastverify":
+        if cmake_build_type in ("fastverify", "fast_verify"):
             cmake_build_type = "fast-verify"
         return BuildTypeKind.is_value(cmake_build_type, option_name="from cmake CMAKE_BUILD_TYPE")
 
