@@ -136,6 +136,8 @@ cases:
       defs: |-
         let iss: String = `Hello, ${TString}!`
         let TString = 'String'
+      tags: 'compile-only, negative'
+      expected_out: "Semantic error ESE0375: Variable 'TString' is used before being assigned."
 
     - use: |-
         let a: AClass = new AClass

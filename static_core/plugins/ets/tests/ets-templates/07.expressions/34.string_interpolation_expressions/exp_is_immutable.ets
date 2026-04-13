@@ -18,6 +18,8 @@ desc: >-
     An embedded expression is an expression specified inside the dollar
     sign '$' and curly braces. The type of a string interpolation expression
     is string.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0375: Variable 'pString' is used before being assigned."
 ---*/
 
 let iss: String = `Hello ${pString}`

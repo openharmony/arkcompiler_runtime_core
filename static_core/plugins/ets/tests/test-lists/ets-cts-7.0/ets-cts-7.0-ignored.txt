@@ -33,12 +33,6 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 
-#33502
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_0.ets
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_1.ets
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_2.ets
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_3.ets
-
 #26666 (cts #47 - bad array element type)
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets

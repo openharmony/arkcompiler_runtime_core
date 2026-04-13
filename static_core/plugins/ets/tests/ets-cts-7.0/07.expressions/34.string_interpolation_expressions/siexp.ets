@@ -19,6 +19,12 @@ desc: >-
     An embedded expression is an expression specified inside the dollar
     sign '$' and curly braces. The type of a string interpolation expression
     is string.
+{% if c.tags is defined and c.tags %}
+tags: [{{c.tags}}]
+{% endif %}
+{% if c.expected_out is defined and c.expected_out %}
+expected_out: "{{c.expected_out}}"
+{% endif %}
 ---*/
 {{c.defs}}
 
