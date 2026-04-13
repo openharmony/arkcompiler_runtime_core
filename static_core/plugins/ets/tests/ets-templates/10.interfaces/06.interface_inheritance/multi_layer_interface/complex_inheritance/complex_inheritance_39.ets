@@ -18,14 +18,26 @@ desc: Simultaneously overriding a field from a superclass and implements a prope
 assertion: A property can be implemented as a field in different combinations.
 ---*/
 
-class C {
-    num: number = 1
-}
-
 interface I {
     num: number
 }
 
+class C {
+    num: number = 1
+}
+
 class D extends C implements I {
     num: number = 2
+}
+
+function main() {
+    let c: C = new C();
+    let dd: D = new D();
+    let cd: C = new D();
+    let id: I = new D();
+
+    arktest.assertEQ(c.num, 1)
+    arktest.assertEQ(dd.num, 2)
+    arktest.assertEQ(cd.num, 2)
+    arktest.assertEQ(id.num, 2)
 }

@@ -12,93 +12,93 @@
 # limitations under the License.
 
 cases:
-  # interfaces
-  - import: |-
-      A
-    decl: |-
-      class B implements A {
-        a: string = 'b'
-      }
-    use: |-
-      const b: B  = new B
-      arktest.assertTrue(b.a instanceof number) // should fail on verifier
-      arktest.assertEQ(b.a, 'b') //  should be unreachable
-  - import: |-
-      B
-    decl: |-
-      class C implements B {
-        a: int = 1
-        b: float = 1.0f
-        c: String[] = ["c"]
-      }
-    use: |-
-      const c: C  = new C
-      arktest.assertEQ(c.a, 1)
-      arktest.assertEQ(c.b, 1.0)
-      arktest.assertTrue(c.c[0] instanceof Byte) // should fail on verifier
-      arktest.assertEQ(c.c[0], "c") // should be unreachable
-  - import: |-
-      C
-    decl: |-
-      class D implements C {
-        foo(x: number, y: string, z: double[]): string {
-          return x.toString() + y + z.toString();
-        }
-      }
-    use: |-
-      const d: D  = new D
-      arktest.assertEQ(d.foo(1, '1', [1]), '111')  // should fail on verifier
-  - import: |-
-      D
-    decl: |-
-      class E implements D<string, number> {
-        a: string = 'a'
-        b: number = 1
-      }
-    use: |-
-      const e: E = new E
-      arktest.assertEQ(e.a, 'a')
-      arktest.assertTrue(e.b instanceof Number) // should fail on verifier
-      arktest.assertEQ(e.b, 1) // should be unreachable
-  - import: |-
-      E
-    decl: |-
-      class F implements E<number,number,string> {
-        foo(x: number, y: number): string {
-          return (x + y).toString()
-        }
-      }
-    use: |-
-      const f: F = new F
-      arktest.assertEQ(f.foo(1,1), '2') // should fail on verifier
-  - import: |-
-      M,F
-    decl: |-
-      class C implements M {
-        f: string = 'a'
-      }
-    use: |-
-      const c: C = new C
-      arktest.assertTrue(c.f instanceof Number) // should fail on verifier
-      arktest.assertEQ(c.f, 'a')
-  - import: |-
-      K
-    decl: |-
-      class B implements K {
-        a: int = 1
-        get foo(): int {return this.a}
-        set foo(v: int) { this.a = v}
-      }
-    use: |-
-      const b: B = new B
-      arktest.assertTrue(b.a instanceof String) // should fail on verifier
-      arktest.assertEQ(b.a, 1) // should be unreachable
-      b.a = 2
-      arktest.assertEQ(b.a, 2)
-  - import: |-
-      J
-    decl: |-
-      class I implements J {}
-    use: |-
-      const i: I = new I
-      arktest.assertEQ(i.foo(1), '1') // should fail on verifier
+    # interfaces
+    - import: |-
+          A
+      decl: |-
+          class B implements A {
+            a: string = 'b'
+          }
+          const b: A  = new B
+      use: |-
+          arktest.assertTrue(b.a instanceof number) // should fail on verifier
+          arktest.assertEQ(b.a, 'b') //  should be unreachable
+    - import: |-
+          B
+      decl: |-
+          class C implements B {
+            a: int = 1
+            b: float = 1.0f
+            c: FixedArray<string> = ["c"]
+          }
+          const c: B  = new C
+      use: |-
+          arktest.assertEQ(c.a, 1)
+          arktest.assertEQ(c.b, 1.0)
+          arktest.assertTrue(c.c[0] instanceof Byte) // should fail on verifier
+          arktest.assertEQ(c.c[0], "c") // should be unreachable
+    - import: |-
+          C
+      decl: |-
+          class D implements C {
+            foo(x: number, y: string, z: double[]): string {
+              return x.toString() + y + z.toString();
+            }
+          }
+          const d: C  = new D
+      use: |-
+          arktest.assertEQ(d.foo(1, '1', [1]), '111')  // should fail on verifier
+    - import: |-
+          D
+      decl: |-
+          class E implements D<string, number> {
+            a: string = 'a'
+            b: number = 1
+          }
+          const e: D<string, number> = new E
+      use: |-
+          arktest.assertEQ(e.a, 'a')
+          arktest.assertTrue(e.b instanceof Number) // should fail on verifier
+          arktest.assertEQ(e.b, 1) // should be unreachable
+    - import: |-
+          E
+      decl: |-
+          class F implements E<number,number,string> {
+            foo(x: number, y: number): string {
+              return (x + y).toString()
+            }
+          }
+          const f: E<number,number,string> = new F
+      use: |-
+          arktest.assertEQ(f.foo(1,1), '2') // should fail on verifier
+    - import: |-
+          M,F
+      decl: |-
+          class C implements M {
+            f: string = 'a'
+          }
+          const c: M = new C
+      use: |-
+          arktest.assertTrue(c.f instanceof Number) // should fail on verifier
+          arktest.assertEQ(c.f, 'a')
+    - import: |-
+          K
+      decl: |-
+          class B implements K {
+            a: int = 1
+            get foo(): int {return this.a}
+            set foo(v: int) { this.a = v}
+          }
+          const b: K = new B
+      use: |-
+          arktest.assertTrue(b.a instanceof String) // should fail on verifier
+          arktest.assertEQ(b.a, 1) // should be unreachable
+          b.a = 2
+          arktest.assertEQ(b.a, 2)
+    - import: |-
+          J
+      decl: |-
+          class I implements J {}
+          const i: J = new I
+      use: |-
+          arktest.assertEQ(i.foo(1), '1') // should fail on verifier

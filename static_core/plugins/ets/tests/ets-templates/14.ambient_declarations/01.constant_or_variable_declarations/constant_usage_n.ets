@@ -16,7 +16,6 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Constant declarations implementations
-files: ['./constant_declarations_n_{{loop.index0}}.ets']
 tags: [negative, compile-only]
 expected_out: {{c.expected}}
 ---*/
@@ -26,9 +25,4 @@ import { {{c.decl}} } from './constant_declarations_n_{{loop.index0}}.d'
 function usage() {
   {{c.use|indent}}
 }
-
-function main() {
-  usage()
-}
-
 {% endfor %}

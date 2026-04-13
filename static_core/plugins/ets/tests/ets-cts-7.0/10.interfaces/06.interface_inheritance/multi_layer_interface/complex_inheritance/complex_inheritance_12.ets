@@ -23,10 +23,27 @@ interface G {
 
 class A implements G {
     static readonly CONSTANT = "Constant from A";
-    readonly CONSTANT: string = "Constant from interface A";
+    readonly CONSTANT: string = "Constant from class A";
 }
 
 class B extends A {
     static readonly CONSTANT = "Constant from B";
-    readonly CONSTANT: string = "Constant from interface B";
+    readonly CONSTANT: string = "Constant from class B";
+}
+
+let gb: G = new B();
+let ga: G = new A();
+let aa: A = new A();
+let ab: A = new B();
+let b: B = new B();
+
+function main() {
+    arktest.assertEQ(gb.CONSTANT, "Constant from class B")
+    arktest.assertEQ(ga.CONSTANT, "Constant from class A")
+    arktest.assertEQ(aa.CONSTANT, "Constant from class A")
+    arktest.assertEQ(ab.CONSTANT, "Constant from class B")
+    arktest.assertEQ(b.CONSTANT, "Constant from class B")
+
+    arktest.assertEQ(A.CONSTANT, "Constant from A")
+    arktest.assertEQ(B.CONSTANT, "Constant from B")
 }

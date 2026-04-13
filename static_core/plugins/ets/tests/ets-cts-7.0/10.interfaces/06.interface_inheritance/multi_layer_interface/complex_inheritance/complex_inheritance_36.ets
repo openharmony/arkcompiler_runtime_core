@@ -22,9 +22,25 @@ interface G {
 }
 
 class A implements G {
-    readonly CONSTANT: string = "X";
+    readonly CONSTANT: string = "A";
 }
 
 class B extends A {
-    readonly CONSTANT: string = "X";
+    readonly CONSTANT: string = "B";
+}
+
+let g1: G = new A();
+let g2: G = new B();
+
+let a1: A = new A();
+let a2: A = new B();
+
+let b: B = new B();
+
+function main() {
+    arktest.assertEQ(g1.CONSTANT, "A")
+    arktest.assertEQ(g2.CONSTANT, "B")
+    arktest.assertEQ(a1.CONSTANT, "A")
+    arktest.assertEQ(a2.CONSTANT, "B")
+    arktest.assertEQ(b.CONSTANT, "B")
 }

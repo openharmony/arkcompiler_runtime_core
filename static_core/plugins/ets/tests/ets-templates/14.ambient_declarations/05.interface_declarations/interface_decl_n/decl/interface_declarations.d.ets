@@ -13,36 +13,45 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Overload Declarations - optional and rest parameters counstructor overload.
+desc: Ambient Interface declarations
+tags: [compile-only, not-a-test]
 ---*/
 
-class A {
-    foo: string = '';
+export declare interface A { a: string }
 
-    constructor foo1(a: 'a'|'b') {
-        this.foo = 'foo1';
-    }
-
-    constructor foo2(a: string) {
-        this.foo = 'foo2';
-    }
-
-    constructor foo3(a: string, b?: int) {
-        this.foo = 'foo3';
-    }
-
-    constructor foo4(a: string, ...b: number[]) {
-        this.foo = 'foo4';
-    }
-
-    overload constructor { {{c.list}} };
+export declare interface B {
+    a: int
+    b: float
+    c: FixedArray<string>
 }
 
-function main() {
-    let a: A = new A({{c.call}})
-    arktest.assertEQ('{{c.result}}', a.foo);
+export declare interface C {
+    foo(x: number, y: string, z: double[]): string
 }
 
-{% endfor %}
+export declare interface D<T1, T2> {
+    a: T1
+    b: T2
+}
+
+export declare interface E<U, V, R> {
+    foo(x: U, y: V): R
+}
+
+export declare interface F {
+    f: string
+}
+
+export declare interface M extends F {
+}
+
+export declare interface K {
+    a: int
+    get foo(): int
+    set foo(v: int)
+}
+
+export declare interface J {
+    default foo(f: number): string
+}

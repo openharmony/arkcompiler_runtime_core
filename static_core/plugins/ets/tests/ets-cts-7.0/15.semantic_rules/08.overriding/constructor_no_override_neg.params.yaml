@@ -26,57 +26,6 @@ cases:
       arktest.assertEQ(res, 1)
 
   - base: |-
-      constructor() {
-          res = 1;
-      }
-      constructor name() {
-          res = 2;
-      }
-    derived: |-
-      override constructor() {
-      }
-      override constructor name() {
-          super()
-      }
-    call: |-
-      new Derived.name()
-      arktest.assertEQ(res, 1)
-
-  - base: |-
-      constructor() {
-          res = 1;
-      }
-      constructor name() {
-          res = 2;
-      }
-    derived: |-
-      constructor() {
-      }
-      override constructor name() {
-          super()
-      }
-    call: |-
-      new Derived.name()
-      arktest.assertEQ(res, 1)
-
-  - base: |-
-      constructor() {
-          res = 1;
-      }
-      constructor name() {
-          res = 2;
-      }
-    derived: |-
-      override constructor() {
-      }
-      constructor name() {
-          super()
-      }
-    call: |-
-      new Derived.name()
-      arktest.assertEQ(res, 1)
-
-  - base: |-
       data: T
       constructor() {
           res = 1;
