@@ -630,13 +630,6 @@
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0002.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
 
-#33936 No CTE on relational operations between char type and non-numeric type
-17.experimental_features/01.type_char/02.char_operations/rel_n_0.ets
-17.experimental_features/01.type_char/02.char_operations/rel_n_1.ets
-17.experimental_features/01.type_char/02.char_operations/rel_n_3.ets
-17.experimental_features/01.type_char/02.char_operations/rel_n_4.ets
-17.experimental_features/01.type_char/02.char_operations/rel_n_6.ets
-
 #28490
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_2.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_23.ets
