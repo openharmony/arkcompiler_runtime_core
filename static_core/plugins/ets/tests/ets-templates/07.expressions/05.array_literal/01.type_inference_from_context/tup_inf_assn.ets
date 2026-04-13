@@ -13,15 +13,170 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
   The type of a tuple literal can be inferred from the assignment context
 ---*/
 
-{{c.decl}}
+class A {}
 
-function main() {
-    {{c.use|indent}}
+function sum(p: [number, number, number]): number {
+    return p[0] + p[1] + p[2]
 }
-{% endfor %}
+
+enum Color { Red, Green, Blue }
+enum Size { S, L, M, XL }
+
+type S = (p: string) => string
+type N = (p: number) => number
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("tup_inf_assn")
+
+    suite.addTest("[byte, int, long]", () => {
+        let a: [byte, int, long]|undefined
+        a = [0b11, 42, -9223372036854775807-1]
+        arktest.assertEQ(a![0], 3)
+        arktest.assertEQ(a![1], 42)
+        arktest.assertEQ(a![2], -9223372036854775807-1)
+    })
+
+    suite.addTest("[float, short, double, number]", () => {
+        let a: [float, short, double, number]|undefined
+        a = [111e11f, 33, Number.NaN, 1.7976931348623157e+308, ]
+        arktest.assertEQ(a![0], 111e11f)
+        arktest.assertEQ(a![1], 33)
+        arktest.assertTrue(Number.isNaN(a![2]))
+        arktest.assertEQ(a![3], 1.7976931348623157e+308)
+    })
+
+    suite.addTest("[Byte, Short, Int, Long]", () => {
+        let a: [Byte, Short, Int, Long]|undefined
+        a = [1, 2, 3, -9223372036854775807-1,]
+        arktest.assertEQ(a![0], 1)
+        arktest.assertEQ(a![1], 2)
+        arktest.assertEQ(a![2], 3)
+        arktest.assertEQ(a![3], -9223372036854775807-1)
+    })
+
+    suite.addTest("[Number, Float, Int]", () => {
+        let a: [Number, Float, Int]|undefined
+        a = [Number.NaN, 0.0f, -2147483647]
+        arktest.assertTrue(Number.isNaN(a![0]))
+        arktest.assertEQ(a![1], 0.0f)
+        arktest.assertEQ(a![2], -2147483647)
+    })
+
+    suite.addTest("nested tuple of strings", () => {
+        let a: [[string, string], string, string]|undefined
+        a = [['1', '2',], '', '-9223372036854775808', ]
+        arktest.assertEQ(a![0][0], '1')
+        arktest.assertEQ(a![0][1], '2')
+        arktest.assertEQ(a![1], '')
+        arktest.assertEQ(a![2], '-9223372036854775808')
+    })
+
+    suite.addTest("[A, Object, A] class objects", () => {
+        let a: [A, Object, A]|null
+        a = [{}, {}, new A]
+        arktest.assertTrue(a![0] instanceof A)
+        arktest.assertTrue(a![1] instanceof Object)
+        arktest.assertTrue(a![2] instanceof A)
+    })
+
+    suite.addTest("nested tuple of mixed types", () => {
+        let a: [[string, number], [[number], [int, boolean]]]|null
+        a = [['1', 1], [[42], [33, true]]]
+        arktest.assertEQ(a![0][0], '1')
+        arktest.assertEQ(a![0][1], 1)
+        arktest.assertEQ(a![1][0][0], 42)
+        arktest.assertEQ(a![1][1][0], 33)
+        arktest.assertEQ(a![1][1][1], true)
+    })
+
+    suite.addTest("nested [byte, number] tuples", () => {
+        let a: [[byte, number], [number, byte]]|null
+        a = [[0x03, 222e22], [333e33, 0x02]]
+        arktest.assertEQ(a![0][0], 3)
+        arktest.assertEQ(a![0][1], 222e22)
+        arktest.assertEQ(a![1][0], 333e33)
+        arktest.assertEQ(a![1][1], 2)
+    })
+
+    suite.addTest("nested [Float, Long, Short] tuples", () => {
+        let a: [[Float, Float], [Long, Long], [Short]]|undefined
+        a = [[-16777215, 16777215], [-9223372036854775807-1, 9223372036854775807], [32767]]
+        arktest.assertEQ(a![0][0], -16777215.0f)
+        arktest.assertEQ(a![0][1], 16777215.0f)
+        arktest.assertEQ(a![1][0], -9223372036854775807-1)
+        arktest.assertEQ(a![1][1], 9223372036854775807)
+        arktest.assertEQ(a![2][0], 32767)
+    })
+
+    suite.addTest("tuple passed to sum function", () => {
+        let a: [number, number, number]|null
+        a = [1, 2, 3, ]
+        arktest.assertEQ( sum(a!), 6.0 )
+        a = [1.1, 2.2, 3.3, ]
+        arktest.assertEQ( sum(a!), 6.6 )
+        a = [0, 0, -1]
+        arktest.assertEQ( sum(a!), -1.0 )
+    })
+
+    suite.addTest("[Color, Size, string] enums", () => {
+        let a: [Color, Size, string]|undefined
+        a = [Color.Green, Size.XL, 'a']
+        arktest.assertEQ(a![0], Color.Green)
+        arktest.assertEQ(a![1], Size.XL)
+        arktest.assertEQ(a![2], 'a')
+    })
+
+    suite.addTest("[S, N, boolean] function types", () => {
+        let a: [S, N, boolean]|undefined
+        a = [(p: string): string => p + p, (p: number): number => p + p, true]
+        arktest.assertEQ(a![0]('a'), 'aa')
+        arktest.assertEQ(a![1](42), 84)
+        arktest.assertEQ(a![2], true)
+    })
+
+    suite.addTest("[byte[], long[], string[]] arrays", () => {
+        let a: [byte[], long[], string[]]|undefined
+        a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']]
+        arktest.assertEQ(a![0][0], 0)
+        arktest.assertEQ(a![0][1], 15)
+        arktest.assertEQ(a![0][2], 127)
+        arktest.assertEQ(a![1][0], -9223372036854775807-1)
+        arktest.assertEQ(a![1][1], 9223372036854775807)
+        arktest.assertEQ(a![2][0], 'a')
+        arktest.assertEQ(a![2][1], 'b')
+        arktest.assertEQ(a![2][2], 'c')
+    })
+
+    suite.addTest("[Array<byte>, Array<long>, Array<string>]", () => {
+        let a: [Array<byte>, Array<long>, Array<string>]|undefined
+        a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']]
+        arktest.assertEQ(a![0][0], 0)
+        arktest.assertEQ(a![0][1], 15)
+        arktest.assertEQ(a![0][2], 127)
+        arktest.assertEQ(a![1][0], -9223372036854775807-1)
+        arktest.assertEQ(a![1][1], 9223372036854775807)
+        arktest.assertEQ(a![2][0], 'a')
+        arktest.assertEQ(a![2][1], 'b')
+        arktest.assertEQ(a![2][2], 'c')
+    })
+
+    suite.addTest("[FixedArray<byte>, FixedArray<long>, FixedArray<string>]", () => {
+        let a: [FixedArray<byte>, FixedArray<long>, FixedArray<string>]|undefined
+        a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']]
+        arktest.assertEQ(a![0][0], 0)
+        arktest.assertEQ(a![0][1], 15)
+        arktest.assertEQ(a![0][2], 127)
+        arktest.assertEQ(a![1][0], -9223372036854775807-1)
+        arktest.assertEQ(a![1][1], 9223372036854775807)
+        arktest.assertEQ(a![2][0], 'a')
+        arktest.assertEQ(a![2][1], 'b')
+        arktest.assertEQ(a![2][2], 'c')
+    })
+
+    return suite.run()
+}
