@@ -181,6 +181,11 @@ public:
         expirationTime_ = expirationTime;
     }
 
+    uint64_t GetExpirationTime() const
+    {
+        return expirationTime_;
+    }
+
     void SetCurrentTime(uint64_t currentTime)
     {
         currentTime_ = currentTime;
