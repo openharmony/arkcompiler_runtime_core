@@ -300,7 +300,6 @@ TEST_F(FillSaveStateSuspendInputsTest, MultipleSaveStateSuspendDifferentLiveSets
             INST(5U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    OptimizeSaveStateConstantInputs(GetInstById(expectedGraph, 6U)->CastToSaveStateSuspend());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
@@ -374,8 +373,8 @@ TEST_F(FillSaveStateSuspendInputsTest, GraphCheckerPassesAfterFillPass)
 #endif
 }
 
-/// Test 9: Constants added as bridge inputs should be converted to immediates.
-TEST_F(FillSaveStateSuspendInputsTest, ConstantsConvertedToImmediates)
+/// Test 9: Constants added as bridge inputs should not be converted to immediates.
+TEST_F(FillSaveStateSuspendInputsTest, ConstantsNotConvertedToImmediates)
 {
     GRAPH(GetGraph())
     {
@@ -400,7 +399,6 @@ TEST_F(FillSaveStateSuspendInputsTest, ConstantsConvertedToImmediates)
             INST(5U, Opcode::Return).s64().Inputs(0U);
         }
     }
-    OptimizeSaveStateConstantInputs(GetInstById(expectedGraph, 4U)->CastToSaveStateSuspend());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
@@ -590,7 +588,6 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopWithSaveStateSuspendInBody)
             INST(12U, Opcode::Return).s32().Inputs(6U);
         }
     }
-    OptimizeSaveStateConstantInputs(GetInstById(expectedGraph, 7U)->CastToSaveStateSuspend());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
@@ -660,7 +657,6 @@ TEST_F(FillSaveStateSuspendInputsTest, LoopTwoExitsSaveStateSuspendInHeader)
             INST(12U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    OptimizeSaveStateConstantInputs(GetInstById(expectedGraph, 7U)->CastToSaveStateSuspend());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
