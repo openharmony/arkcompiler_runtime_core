@@ -18,11 +18,11 @@ desc: >-
     Tuple type T (P1, ..., Pn) is a subtype of type S (P1, ..., Pm),
     where n >= m, i.e., a tuple type is a subtype of a tuple type with
     fewer identical constituent types.
-    Check with readonly directive
+    Check with readonly directive. If the expression type is readonly, then the target type must also be readonly.
 ---*/
 
 function main(): void {
     const a: readonly [string, boolean] = ["hello", true]
-    let b: [string] = a
+    let b: readonly [string] = a
     arktest.assertEQ(b[0], "hello")
 }

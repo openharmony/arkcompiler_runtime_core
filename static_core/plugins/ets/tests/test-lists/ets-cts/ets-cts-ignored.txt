@@ -476,9 +476,6 @@
 #33339
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_n.d.ets
 
-#33508
-15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
-
 #33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 
@@ -561,6 +558,10 @@
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_1.ets
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_2.ets
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_3.ets
+
+#34214
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_1.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_3.ets
 
 #16840
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_overriding.ets
