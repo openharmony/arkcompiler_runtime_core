@@ -49,6 +49,11 @@ public:
         return &executionCtx_;
     }
 
+    static constexpr uint32_t GetExecutionContextOffset()
+    {
+        return MEMBER_OFFSET(EtsExecutionContextWrapper, executionCtx_);
+    }
+
     void Initialize();
 
     void UpdateCachedObjects() override;
