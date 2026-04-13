@@ -35,5 +35,10 @@ function main(): int {
         arktest.assertTrue( y === undefined )
     });
 
+    suite.addTest("Standalone literal", () => {
+        undefined //standalone literal
+        arktest.assertTrue(undefined instanceof undefined)
+    });
+
     return suite.run();
 }
