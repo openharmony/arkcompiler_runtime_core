@@ -27,7 +27,6 @@ package escompat;
  * @type { number }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const NaN: number;
 
@@ -38,7 +37,6 @@ export const NaN: number;
  * @type { number }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export const Infinity: number;
 
@@ -50,7 +48,6 @@ export const Infinity: number;
  * @returns { number } - result of parsing
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function parseInt(s: String): number {
     return Double.parseInt(s);
@@ -65,7 +62,6 @@ export function parseInt(s: String): number {
  * @returns { number } - result of parsing
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function parseInt(s: String, radix: int): number {
     return Double.parseInt(s, radix);
@@ -80,7 +76,6 @@ export function parseInt(s: String, radix: int): number {
  * @returns { number } - result of parsing
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function parseInt(s: String, radix: number): number {
     return Double.parseInt(s, radix);
@@ -94,7 +89,6 @@ export function parseInt(s: String, radix: number): number {
  * @returns { number } - result of parsing
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function parseFloat(s: String): number {
     return Double.parseFloat(s);
@@ -107,7 +101,6 @@ export function parseFloat(s: String): number {
  * @returns { boolean } - unconditionally returns `false`. Integral types can not be `NaN`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isNaN(b: byte): boolean { return false; }
 
@@ -118,7 +111,6 @@ export function isNaN(b: byte): boolean { return false; }
  * @returns { boolean } - unconditionally returns `false`. Integral types can not be `NaN`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isNaN(s: short): boolean { return false; }
 
@@ -129,7 +121,6 @@ export function isNaN(s: short): boolean { return false; }
  * @returns { boolean } - unconditionally returns `false`. Integral types can not be `NaN`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isNaN(i: int): boolean { return false; }
 
@@ -140,7 +131,6 @@ export function isNaN(i: int): boolean { return false; }
  * @returns { boolean } - unconditionally returns `false`. Integral types can not be `NaN`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isNaN(l: long): boolean { return false; }
 
@@ -151,7 +141,6 @@ export function isNaN(l: long): boolean { return false; }
  * @returns { boolean } - `true` if the argument is `NaN`, `false` otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isNaN(f: float): boolean {
     return Float.isNaN(f);
@@ -164,7 +153,6 @@ export function isNaN(f: float): boolean {
  * @returns { boolean } - `true` if the argument is `NaN`, `false` otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isNaN(d: number): boolean {
     return d.isNaN();
@@ -177,7 +165,6 @@ export function isNaN(d: number): boolean {
  * @returns { boolean } - unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFinite(b: byte): boolean { return true; }
 
@@ -188,7 +175,6 @@ export function isFinite(b: byte): boolean { return true; }
  * @returns { boolean } - unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFinite(s: short): boolean { return true; }
 
@@ -199,7 +185,6 @@ export function isFinite(s: short): boolean { return true; }
  * @returns { boolean } - unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFinite(i: int): boolean { return true; }
 
@@ -210,7 +195,6 @@ export function isFinite(i: int): boolean { return true; }
  * @returns { boolean } - unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFinite(l: long): boolean { return true; }
 
@@ -221,7 +205,6 @@ export function isFinite(l: long): boolean { return true; }
  * @returns { boolean } - `true` if the argument is a floating point value, `false` otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFinite(f: float): boolean {
     return f.isFinite();
@@ -234,7 +217,6 @@ export function isFinite(f: float): boolean {
  * @returns { boolean } - `true` if the argument is a floating point value, `false` otherwise.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isFinite(d: number): boolean {
     return d.isFinite();
@@ -247,7 +229,6 @@ export function isFinite(d: number): boolean {
  * @returns { boolean } - unconditionally returns `true` as integral types are integer.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isInteger(b: byte): boolean { return true; }
 
@@ -258,7 +239,6 @@ export function isInteger(b: byte): boolean { return true; }
  * @returns { boolean } - unconditionally returns `true` as integral types are integer.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isInteger(s: short): boolean { return true; }
 
@@ -269,7 +249,6 @@ export function isInteger(s: short): boolean { return true; }
  * @returns { boolean } - unconditionally returns `true` as integral types are integer.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isInteger(i: int): boolean { return true; }
 
@@ -280,7 +259,6 @@ export function isInteger(i: int): boolean { return true; }
  * @returns { boolean } - unconditionally returns `true` as integral types are integer.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isInteger(l: long): boolean { return true; }
 
@@ -291,7 +269,6 @@ export function isInteger(l: long): boolean { return true; }
  * @returns { boolean } - true if the argument is similar to an integer value
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isInteger(v: float): boolean {
     return v.isInteger();
@@ -304,7 +281,6 @@ export function isInteger(v: float): boolean {
  * @returns { boolean } - true if the argument is similar to an integer value
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isInteger(v: number): boolean {
     return v.isInteger();
@@ -317,7 +293,6 @@ export function isInteger(v: number): boolean {
  * @returns { boolean } - true if the argument is less than Float.MAX_SAFE_INTEGER
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isSafeInteger(v: int): boolean {
     return v <= Float.MAX_SAFE_INTEGER as int;
@@ -330,7 +305,6 @@ export function isSafeInteger(v: int): boolean {
  * @returns { boolean } - true if the argument is less than Double.MAX_SAFE_INTEGER
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isSafeInteger(v: long): boolean {
     return v <= Double.MAX_SAFE_INTEGER.toLong();
@@ -343,7 +317,6 @@ export function isSafeInteger(v: long): boolean {
  * @returns { boolean } - true if the argument is integer and less than Float.MAX_SAFE_INTEGER
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isSafeInteger(v: float): boolean {
     return v.isSafeInteger();
@@ -356,7 +329,6 @@ export function isSafeInteger(v: float): boolean {
  * @returns { boolean } - true if the argument is integer and less than Double.MAX_SAFE_INTEGER
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function isSafeInteger(v: number): boolean {
     return v.isSafeInteger();
@@ -369,7 +341,6 @@ export function isSafeInteger(v: number): boolean {
  * @returns { int } - timer id
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function setTimeout(func: Function): int {
     return setTimeout(func, 0);
@@ -385,7 +356,6 @@ export function setTimeout(func: Function): int {
  * @returns { int } - timer id
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function setTimeout(func: Function, delayMs: int | null | undefined, ...args: FixedArray<Any>): int {
     if (delayMs) {
@@ -404,7 +374,6 @@ export function setTimeout(func: Function, delayMs: int | null | undefined, ...a
  * @returns { int } - timer id
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function setTimeout(msg: string, delayMs?: int | null): int {
     if (delayMs) {
@@ -425,7 +394,6 @@ export function setTimeout(msg: string, delayMs?: int | null): int {
  *     if pass empty or null or undefined will do nothing.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function clearTimeout(timerId?: int | null): void {
     if (timerId) {
@@ -443,7 +411,6 @@ export function clearTimeout(timerId?: int | null): void {
  * @returns { int } - timer id
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function setInterval(func: Function, delayMs: int | null | undefined, ...args: FixedArray<Any>): int {
     if (delayMs) {
@@ -462,7 +429,6 @@ export function setInterval(func: Function, delayMs: int | null | undefined, ...
  * @returns { int } - timer id
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function setInterval(msg: string, delayMs?: int | null): int {
     if (delayMs) {
@@ -483,7 +449,6 @@ export function setInterval(msg: string, delayMs?: int | null): int {
  *     if pass empty or null or undefined will do nothing.
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function clearInterval(timerId?: int | null): void {
     if (timerId) {

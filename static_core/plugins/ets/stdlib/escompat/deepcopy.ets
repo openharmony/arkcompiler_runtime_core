@@ -26,7 +26,6 @@ package escompat;
  * @interface Cloneable
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export interface Cloneable {
 	/**
@@ -35,7 +34,6 @@ export interface Cloneable {
 	 * @returns { Cloneable }
 	 * @syscap SystemCapability.Utils.Lang
 	 * @FaAndStageModel
-     * @since 24
 	 */
 	clone(): Cloneable;
 }
@@ -54,7 +52,6 @@ export interface Cloneable {
  * @returns { T | null | undefined }
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
- * @since 24
  */
 export function deepcopy<T>(src: T | null | undefined, depth: int = -1): T | null | undefined {
 	const maxDepth = (depth == -1) ? Int.MAX_VALUE : depth
