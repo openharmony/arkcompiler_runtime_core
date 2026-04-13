@@ -25,6 +25,7 @@ from unittest.mock import MagicMock, patch
 import yaml
 
 from runner.common_exceptions import MalformedStepConfigurationException
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options_step import RawStepData, Step
@@ -42,10 +43,11 @@ class TestStepsTest2(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TEST_STEPS_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def prepare() -> list[TestStandardFlow]:
-        args = get_args()
+        args = get_args(TestStepsTest2.env_properties)
         runner = RunnerStandardFlow(Config(args))
         return [cast(TestStandardFlow, test.do_run()) for test in runner.tests]
 
@@ -81,7 +83,7 @@ class TestStepsTest2(TestCase):
         """
         # preparation
         check_mock.return_value = True, ""
-        args = get_args()
+        args = get_args(TestStepsTest2.env_properties)
         runner = RunnerStandardFlow(Config(args))
         no_req_step = runner.steps[0]
         try:
@@ -118,7 +120,7 @@ class TestStepsTest2(TestCase):
         """
         try:
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             with self.assertRaises(MalformedStepConfigurationException):
                 RunnerStandardFlow(Config(args))
         finally:
@@ -141,7 +143,7 @@ class TestStepsTest2(TestCase):
         """
         try:
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             with self.assertRaises(MalformedStepConfigurationException):
                 RunnerStandardFlow(Config(args))
         finally:
@@ -164,7 +166,7 @@ class TestStepsTest2(TestCase):
         """
         try:
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             runner = RunnerStandardFlow(Config(args))
             no_req_step = runner.steps[0]
             self.assertEqual(len(no_req_step.pre_requirements), 0,
@@ -194,7 +196,7 @@ class TestStepsTest2(TestCase):
         """
         with patch('sys.argv', argv):
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
             try:
@@ -226,7 +228,7 @@ class TestStepsTest2(TestCase):
         """
         with patch('sys.argv', argv):
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
             try:
@@ -258,7 +260,7 @@ class TestStepsTest2(TestCase):
         """
         with patch('sys.argv', argv):
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
             expected_rep_path = result.test_env.work_dir.intermediate / "report"
@@ -294,7 +296,7 @@ class TestStepsTest2(TestCase):
         """
         try:
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             runner = RunnerStandardFlow(Config(args))
             result = cast(TestStandardFlow, next(iter(runner.tests))).do_run()
             self.assertTrue(result.passed, "Test is expected to pass")
@@ -318,7 +320,7 @@ class TestStepsTest2(TestCase):
         - test failed
         """
         # preparation
-        args = get_args()
+        args = get_args(TestStepsTest2.env_properties)
         try:
             with self.assertRaises(MalformedStepConfigurationException):
                 RunnerStandardFlow(Config(args))
@@ -342,7 +344,7 @@ class TestStepsTest2(TestCase):
         """
         try:
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest2.env_properties)
             runner = RunnerStandardFlow(Config(args))
             full_step = runner.steps[0]
             step_str = str(full_step)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,6 +24,7 @@ from unittest.mock import patch
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import IncorrectEnumValue
 from runner.enum_types.verbose_format import VerboseKind
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options import cli_options_utils as cli_utils
 from runner.options.cli_options import CliOptions, CliOptionsParser, CliParserBuilder, ConfigsLoader
 
@@ -33,12 +34,14 @@ class TestSuiteConfigTest2(unittest.TestCase):
     test_suite_name = "test_suite2"
     current_path = Path(__file__).parent
     data_folder = current_path / "data"
+    config_path: ClassVar[Path] = data_folder / ".urunner.env"
     test_environ: ClassVar[dict[str, str]] = {
         'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
         'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
         'PANDA_BUILD': Path.cwd().as_posix(),
         'WORK_DIR': Path.cwd().as_posix()
     }
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     def test_empty_args(self) -> None:
         args: list[str] = []
@@ -88,11 +91,12 @@ class TestSuiteConfigTest2(unittest.TestCase):
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest2.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *args)
+                               workflow_parser, env_parser, *args)
         cli.parse_args()
 
         actual = cli.full_options
@@ -113,11 +117,12 @@ class TestSuiteConfigTest2(unittest.TestCase):
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest2.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *args)
+                               workflow_parser, env_parser, *args)
         cli.parse_args()
 
         actual = cli.full_options
@@ -138,11 +143,12 @@ class TestSuiteConfigTest2(unittest.TestCase):
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest2.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *args)
+                               workflow_parser, env_parser, *args)
         cli.parse_args()
 
         actual = cli.full_options
@@ -164,11 +170,12 @@ class TestSuiteConfigTest2(unittest.TestCase):
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest2.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *args)
+                               workflow_parser, env_parser, *args)
         cli.parse_args()
 
         actual = cli.full_options
@@ -191,11 +198,12 @@ class TestSuiteConfigTest2(unittest.TestCase):
         parser_builder = CliParserBuilder(configs)
         test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
         workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest2.env_properties)
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
                                parser_builder.create_parser_for_default_test_suite(),
-                               workflow_parser, *args)
+                               workflow_parser, env_parser, *args)
         cli.parse_args()
 
         actual = cli.full_options

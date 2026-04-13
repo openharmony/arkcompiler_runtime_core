@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -79,7 +79,7 @@ class RunnerEnv:
             result[prop_name] = MandatoryProp(value=os.getenv(prop_name), is_path=is_path, require_exist=require_exist)
         return result
 
-    def load_environment(self, runner_help_mode: bool = False) -> None:
+    def load_environment(self, runner_help_mode: bool = False) -> list[MandatoryPropDescription]:
         self.load_home_env()
         self.load_local_env()
 
@@ -88,6 +88,8 @@ class RunnerEnv:
 
         if self.urunner_path:
             os.environ[self.urunner_path_name] = self.urunner_path.as_posix()
+
+        return self.mandatory_props
 
     def load_local_env(self) -> None:
         """
