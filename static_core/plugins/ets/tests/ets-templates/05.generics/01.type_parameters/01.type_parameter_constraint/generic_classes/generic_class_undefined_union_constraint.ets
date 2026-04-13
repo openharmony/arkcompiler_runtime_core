@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,25 @@
  */
 
 /*---
-desc: Non-mandatory return of a non-empty instance generic test, using null as the type.
+desc: Non-mandatory return of a non-empty generic instance, Using an inherited union type object | undefined.
+      Using object as generic type.
 ---*/
 
-class A<T> {
-  foo(p: T): T {
-    return p;
-  }
+class A {
+    value: string;
+    constructor(value: string) {
+        this.value = value;
+    }
+}
+
+class B<T extends A | undefined> {
+    foo(p: T): T {
+        return p;
+    }
 }
 
 function main(): void {
-  let a = new A<null>();
-  let result = a.foo(null);
-  arktest.assertEQ(result === null, true);
+    let b = new B<A>();
+    let result = b.foo(new A("test"));
+    arktest.assertEQ(result !== null, true);
 }

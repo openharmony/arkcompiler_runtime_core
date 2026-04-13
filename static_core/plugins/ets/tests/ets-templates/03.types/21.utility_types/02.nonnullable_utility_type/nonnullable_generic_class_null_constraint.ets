@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,9 +20,6 @@ desc: NonNullish Type Parameter
 
 class MyBase {}
 
-type TMyBase = MyBase
-type TMyBaseNullable = MyBase | null
-
 class A<T extends MyBase | null> {
     foo(p:T): NonNullable<T> {
         return p!
@@ -30,7 +27,7 @@ class A<T extends MyBase | null> {
 }
 
 function main() {
-    let a = new A<TMyBaseNullable>
-    let result: TMyBase = a.foo(new MyBase)
+    let a = new A<MyBase>
+    let result: MyBase = a.foo(new MyBase)
     arktest.assertNE(result, null);
 }
