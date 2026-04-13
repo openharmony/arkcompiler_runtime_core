@@ -2501,3 +2501,5 @@
 09.classes/07.method_declarations/05.overriding_methods/overriding_by_instance_methods/instance_method_overridden_by_abstract.ets
 #TSC-PROJECT_FAIL
 17.experimental_features/03.value_array_types/value_array_init.ets
+02.lexical_elements/07.keywords/soft.ets
+02.lexical_elements/07.keywords/soft_reserved_common.ets
