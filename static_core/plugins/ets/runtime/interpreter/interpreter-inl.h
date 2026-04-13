@@ -155,18 +155,13 @@ public:
     {
         ASSERT(this->GetFrame()->IsStackless());
 
-        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
-
         auto *executionCtx = this->GetExecutionContext();
         auto *frame = this->GetFrame();
-        auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
 
         // NOTE(panferovi): need to handle compiler -> interpreter call
         auto *prev = frame->GetPrevFrame();
 
         // return to the caller frame
-        frame->GetAcc().Set(asyncCtx->GetReturnValue(executionCtx));
-
         Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(executionCtx->GetMT(), frame->GetMethod());
 
         this->GetInstructionHandlerState()->UpdateInstructionHandlerState(
@@ -234,6 +229,8 @@ public:
         asyncCtx->SetRefCount(refCount);
         asyncCtx->SetPrimCount(primCount);
         asyncCtx->SetCompiledCode(0);
+
+        frame->GetAcc().Set(asyncCtx->GetReturnValue(executionCtx)->GetCoreType());
     }
 
     template <BytecodeInstruction::Format FORMAT>

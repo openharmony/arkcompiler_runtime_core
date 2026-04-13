@@ -497,7 +497,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
         return 0;
     }
-    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
+    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, jobMan);
 
     // Read values from stack and keep in args values for Launch after possible GC in EtsPromise::Create
