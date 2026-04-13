@@ -27,6 +27,29 @@
 
 namespace ark::ets {
 
+static DefaultHandlerMode FromString(const std::string &s)
+{
+    if (s == "throw") {
+        return DefaultHandlerMode::THROW;
+    }
+    if (s == "warn") {
+        return DefaultHandlerMode::WARN;
+    }
+    if (s == "none") {
+        return DefaultHandlerMode::NONE;
+    }
+    return DefaultHandlerMode::INVALID;
+}
+
+UnhandledObjectManager::UnhandledObjectManager(PandaEtsVM *vm)
+    : vm_(vm),
+      jobHandlerMode_(FromString(vm->GetOptions().GetListUnhandledOnExitJobs())),
+      promiseHandlerMode_(FromString(vm->GetOptions().GetListUnhandledOnExitPromises()))
+{
+    ASSERT(jobHandlerMode_ != DefaultHandlerMode::INVALID);
+    ASSERT(promiseHandlerMode_ != DefaultHandlerMode::INVALID);
+}
+
 static void UpdateObjectsImpl(PandaUnorderedSet<EtsObject *> &objects, const GCRootUpdater &gcRootUpdater)
 {
     PandaVector<PandaUnorderedSet<EtsObject *>::node_type> movedObjects {};
@@ -156,7 +179,7 @@ static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsExecutionC
 
 template <typename T>
 static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
-                                    EtsHandle<EtsEscompatArray> &hobjects)
+                                    EtsHandle<EtsEscompatArray> &hobjects, DefaultHandlerMode handlerMode)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
@@ -169,10 +192,12 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecution
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
+    ASSERT(handlerMode != DefaultHandlerMode::INVALID);
+    auto defaultHandlerMode = static_cast<int>(handlerMode);
     auto *jobExecCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
     auto *jobMan = jobExecCtx->GetManager();
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, jobMan);
-    PandaVector<Value> args = {Value(hobjects->GetCoreType())};
+    PandaVector<Value> args = {Value(hobjects->GetCoreType()), Value(defaultHandlerMode)};
     auto epInfo = Job::ManagedEntrypointInfo {evt, method, std::move(args)};
     auto *job =
         jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::ASYNC_CALL, Job::Type::MUTATOR, true);
@@ -188,7 +213,7 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecution
 
 template <typename T>
 static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
-                                     const PandaUnorderedSet<EtsObject *> &objects)
+                                     const PandaUnorderedSet<EtsObject *> &objects, DefaultHandlerMode handlerMode)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     ASSERT(executionCtx != nullptr);
@@ -201,7 +226,7 @@ static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsExecutio
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
-    ListObjectsFromEtsArray<T>(etsClassLinker, executionCtx, hEtsArray);
+    ListObjectsFromEtsArray<T>(etsClassLinker, executionCtx, hEtsArray, handlerMode);
 }
 
 void UnhandledObjectManager::AddFailedJob(EtsJob *job)
@@ -228,7 +253,7 @@ void UnhandledObjectManager::ListFailedJobs(EtsExecutionContext *executionCtx)
         }
         unhandledObjects.swap(failedJobs_);
     }
-    ListUnhandledObjectsImpl<EtsJob>(vm_->GetClassLinker(), executionCtx, unhandledObjects);
+    ListUnhandledObjectsImpl<EtsJob>(vm_->GetClassLinker(), executionCtx, unhandledObjects, jobHandlerMode_);
 }
 
 void UnhandledObjectManager::AddRejectedPromise(EtsPromise *promise, EtsExecutionContext *adderExecutionCtx)
@@ -279,7 +304,7 @@ void UnhandledObjectManager::ListRejectedPromises(EtsExecutionContext *execution
         }
     }
 
-    ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), executionCtx, unhandledObjects);
+    ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), executionCtx, unhandledObjects, promiseHandlerMode_);
 }
 
 bool UnhandledObjectManager::HasFailedJobObjects() const

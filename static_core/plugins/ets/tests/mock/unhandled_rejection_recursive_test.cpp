@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@ protected:
     void SetUp() override
     {
         ani::testing::AniTest::SetUp();
-        [[maybe_unused]] bool listPromises = Runtime::GetOptions().IsListUnhandledOnExitPromises(
+        [[maybe_unused]] auto listPromises = Runtime::GetOptions().GetListUnhandledOnExitPromises(
             plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
-        ASSERT(listPromises);
+        ASSERT(listPromises == "none");
         BindNativeFunctions();
         successFlag_ = false;
     }

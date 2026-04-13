@@ -43,6 +43,7 @@ class JobExecutionContext;
  * - CREATED: Initial state after construction
  * - RUNNABLE: Ready to be scheduled on a worker
  * - RUNNING: Currently executing on a worker
+ * - YIELDED: Suspended by the scheduler to execute another task
  * - BLOCKED: Waiting for an event (I/O, timer, etc.)
  * - TERMINATING: Execution completed, cleanup in progress
  *
@@ -66,13 +67,19 @@ public:
      *                     |    +----------+    |          |
      *                     |                    |          |
      *                     |    +----------+    |     +----------+
-     *                     +--> |          | ---+     |          |
-     * +-------------+          | RUNNING  |          | BLOCKED  |
-     * | TERMINATING | <------- |          | -------> |          |
-     * +-------------+          +----------+          +----------+
+     * +-------------+     +--> |          | ---+     |          |
+     * | TERMINATING | <------- | RUNNING  | -------> | BLOCKED  |
+     * +-------------+     +--- |          | ---+     |          |
+     *                     |    +----------+    |     +----------+
+     *                     |                    |
+     *                     |    +----------+    |
+     *                     +--> |          | <--+
+     *                          | YIELDED  |
+     *                          |          |
+     *                          +----------+
      *
      */
-    enum class Status { CREATED, RUNNABLE, RUNNING, BLOCKED, TERMINATING };
+    enum class Status { CREATED, RUNNABLE, RUNNING, YIELDED, BLOCKED, TERMINATING };
 
     /// the type of work that a job performs
     enum class Type { MUTATOR, SCHEDULER, FINALIZER };

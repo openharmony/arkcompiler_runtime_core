@@ -133,8 +133,6 @@ private:
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    void ProcessUnhandledRejectedPromises(bool listAllObjects);
-
     // Allocator calls our protected ctor
     friend class mem::Allocator;
 };

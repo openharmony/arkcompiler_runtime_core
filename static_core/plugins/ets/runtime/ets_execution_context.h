@@ -130,6 +130,12 @@ public:
 
     int32_t GetTaskpoolTaskId() const;
 
+    /// @brief traverse current unhandled failed jobs with custom handler
+    void ProcessUnhandledFailedJobs();
+
+    /// @brief traverse current unhandled rejected promises with custom handler
+    void ProcessUnhandledRejectedPromises(bool listAllObjects);
+
 private:
     PandaAniEnv *etsAniEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};

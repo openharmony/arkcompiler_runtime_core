@@ -98,6 +98,9 @@ public:
 
     virtual void OnJobCompletion(Value result);
 
+    /// @brief list unhandled language specific events on program exit
+    virtual void ListUnhandledEventsOnProgramExit() {}
+
 protected:
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     JobExecutionContext(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,

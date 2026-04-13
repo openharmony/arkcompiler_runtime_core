@@ -89,6 +89,7 @@ EtsObject *EtsAsyncContextAwaitResult(EtsAsyncContext *asyncCtx)
         return awaiteeP->GetValue(executionCtx);
     }
     executionCtx->GetMT()->SetException(awaiteeP->GetValue(executionCtx)->GetCoreType());
+    executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(awaiteeP, executionCtx);
     return nullptr;
 }
 

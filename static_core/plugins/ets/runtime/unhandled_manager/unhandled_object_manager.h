@@ -27,10 +27,12 @@ class EtsJob;
 class EtsPromise;
 class EtsExecutionContext;
 
+enum class DefaultHandlerMode { THROW, WARN, NONE, INVALID };
+
 /// @brief The class manages all unhandled rejected objects
 class UnhandledObjectManager final {
 public:
-    explicit UnhandledObjectManager(PandaEtsVM *vm) : vm_(vm) {}
+    explicit UnhandledObjectManager(PandaEtsVM *vm);
     NO_COPY_SEMANTIC(UnhandledObjectManager);
     NO_MOVE_SEMANTIC(UnhandledObjectManager);
     ~UnhandledObjectManager() = default;
@@ -84,6 +86,9 @@ private:
 
     mutable os::memory::Mutex mutex_;
     PandaEtsVM *vm_;
+
+    const DefaultHandlerMode jobHandlerMode_;
+    const DefaultHandlerMode promiseHandlerMode_;
 };
 }  // namespace ark::ets
 
