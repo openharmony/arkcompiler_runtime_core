@@ -119,12 +119,11 @@ TEST(BuilderTest, SpecialNames)
     ASSERT_EQ(Builder::BuildConstructorName(), "<ctor>");
     ASSERT_EQ(Builder::BuildSetterName("value"), "%%set-value");
     ASSERT_EQ(Builder::BuildGetterName("value"), "%%get-value");
-    ASSERT_EQ(Builder::BuildPropertyName("value"), "%%property-value");
+    ASSERT_EQ(Builder::BuildPropertyName("value"), "value");
     ASSERT_EQ(Builder::BuildPartialName("value"), "%%partial-value");
     ASSERT_EQ(Builder::BuildAsyncName("value"), "%%async-value");
     ASSERT_EQ(Builder::GetSetterNamePrefix(), "%%set-");
     ASSERT_EQ(Builder::GetGetterNamePrefix(), "%%get-");
-    ASSERT_EQ(Builder::GetPropertyNamePrefix(), "%%property-");
     ASSERT_EQ(Builder::GetPartialNamePrefix(), "%%partial-");
     ASSERT_EQ(Builder::GetAsyncNamePrefix(), "%%async-");
     ASSERT_EQ(Builder::GetLambdaPrefix(), "%%lambda-");

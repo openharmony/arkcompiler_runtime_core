@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceRemoveFieldTest0)
     helpers::InterfaceByNameContext interfaceCtx2 = {nullptr, "MyInterface2"};
     g_implI->moduleEnumerateInterfaces(moduleCtx.module, &interfaceCtx2, helpers::InterfaceByNameFinder);
 
-    helpers::FieldByNameContext fieldCtx = {nullptr, "%%property-key"};
+    helpers::FieldByNameContext fieldCtx = {nullptr, "key"};
     g_implI->interfaceEnumerateFields(interfaceCtx.iface, &fieldCtx, helpers::FieldByNameFinder);
     ASSERT_TRUE(fieldCtx.field != nullptr);
 
@@ -66,7 +66,7 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceRemoveFieldTest0)
     g_implI->fileEnumerateModules(file, &moduleCtx2, helpers::ModuleByNameFinder);
     helpers::InterfaceByNameContext interfaceCtx3 = {nullptr, "MyInterface"};
     g_implI->moduleEnumerateInterfaces(moduleCtx2.module, &interfaceCtx3, helpers::InterfaceByNameFinder);
-    helpers::FieldByNameContext checkFieldCtx = {nullptr, "%%property-key"};
+    helpers::FieldByNameContext checkFieldCtx = {nullptr, "key"};
     g_implI->interfaceEnumerateFields(interfaceCtx3.iface, &checkFieldCtx, helpers::FieldByNameFinder);
     ASSERT_TRUE(checkFieldCtx.field != nullptr);
 
@@ -109,7 +109,7 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceRemoveFieldTest2)
     helpers::InterfaceByNameContext interfaceCtx = {nullptr, "MyInterface"};
     g_implI->moduleEnumerateInterfaces(moduleCtx.module, &interfaceCtx, helpers::InterfaceByNameFinder);
 
-    helpers::FieldByNameContext fieldCtx = {nullptr, "%%property-key"};
+    helpers::FieldByNameContext fieldCtx = {nullptr, "key"};
     g_implI->interfaceEnumerateFields(interfaceCtx.iface, &fieldCtx, helpers::FieldByNameFinder);
     ASSERT_TRUE(fieldCtx.field != nullptr);
     bool ret = g_implArkM->interfaceRemoveField(interfaceCtx.iface->GetArkTSImpl(), fieldCtx.field->GetArkTSImpl());
@@ -126,7 +126,7 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceRemoveFieldTest2)
 
     helpers::InterfaceByNameContext interfaceCtx2 = {nullptr, "MyInterface"};
     g_implI->moduleEnumerateInterfaces(moduleCtx2.module, &interfaceCtx2, helpers::InterfaceByNameFinder);
-    helpers::FieldByNameContext checkFieldCtx = {nullptr, "%%property-key"};
+    helpers::FieldByNameContext checkFieldCtx = {nullptr, "key"};
     g_implI->interfaceEnumerateFields(interfaceCtx2.iface, &checkFieldCtx, helpers::FieldByNameFinder);
     ASSERT_TRUE(checkFieldCtx.field == nullptr);
     g_impl->closeFile(file);

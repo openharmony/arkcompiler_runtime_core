@@ -284,7 +284,6 @@ static AbckitArktsFunction *CreateFunctionImpl(AbckitFile *file, AbckitCoreModul
 
 static constexpr std::string_view GET_FUNCTION_PATTERN = "%%get-";
 static constexpr std::string_view SET_FUNCTION_PATTERN = "%%set-";
-static constexpr std::string_view PROPERTY_FUNCTION_PATTERN = "%%property-";
 // ========================================
 // Create / Update
 // ========================================
@@ -1140,16 +1139,9 @@ void AnnotationInterfaceRemoveFieldStatic(AbckitCoreAnnotationInterface *ai,
 // ========================================
 // InterfaceField
 // ========================================
-static std::string ReplacePropertyWithId(const std::string &input, const std::string &id)
+static std::string MakeInterfaceAccessorPrefix(const std::string &fieldName, std::string_view accessorPattern)
 {
-    size_t pos = input.find(PROPERTY_FUNCTION_PATTERN.data());
-    if (pos != std::string::npos) {
-        std::string result = input;
-        result.replace(pos, std::string(PROPERTY_FUNCTION_PATTERN.data()).length(), id);
-        return result;
-    }
-
-    return input;
+    return std::string(accessorPattern) + fieldName;
 }
 
 static bool InterfaceFieldSetTypeModifyFuncSig(AbckitCoreFunction *func, std::string &getMethodName,
@@ -1206,14 +1198,15 @@ static bool InterfaceFieldSetTypeDealForObjectLiteral(AbckitCoreInterfaceField *
 {
     for (auto &objectLiteral : field->owner->objectLiterals) {
         for (auto &objectLiteralField : objectLiteral->fields) {
-            if (ClassFieldGetNameStatic(objectLiteralField.get())->impl.data() == field->name->impl.data()) {
+            std::string objFieldName = ClassFieldGetNameStatic(objectLiteralField.get())->impl.data();
+            if (objFieldName == field->name->impl.data()) {
                 std::string objectLiteralFullName = std::string(objectLiteral->owningModule->moduleName->impl.data()) +
                                                     "." + ClassGetNameStatic(objectLiteral.get())->impl.data();
                 std::string objectLiteralGetMethodName =
-                    ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" +
+                    MakeInterfaceAccessorPrefix(field->name->impl.data(), GET_FUNCTION_PATTERN) + ":" +
                     objectLiteralFullName;
                 std::string objectLiteralSetMethodName =
-                    ReplacePropertyWithId(field->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" +
+                    MakeInterfaceAccessorPrefix(field->name->impl.data(), SET_FUNCTION_PATTERN) + ":" +
                     objectLiteralFullName;
                 return ClassModifyTypeAndMethodSig(objectLiteralField.get(), objectLiteralGetMethodName,
                                                    objectLiteralSetMethodName, type);
@@ -1227,9 +1220,9 @@ static bool InterfaceFieldSetTypeDealForInterface(AbckitCoreInterfaceField *fiel
 {
     std::string interfaceFullName(field->owner->GetArkTSImpl()->impl.GetStaticClass()->name);
     std::string interfaceGetMethodName =
-        ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+        MakeInterfaceAccessorPrefix(field->name->impl.data(), GET_FUNCTION_PATTERN) + ":" + interfaceFullName;
     std::string interfaceSetMethodName =
-        ReplacePropertyWithId(field->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+        MakeInterfaceAccessorPrefix(field->name->impl.data(), SET_FUNCTION_PATTERN) + ":" + interfaceFullName;
     for (auto &method : field->owner->methods) {
         if (!InterfaceFieldSetTypeModifyFuncSig(method.get(), interfaceGetMethodName, interfaceSetMethodName, type)) {
             LIBABCKIT_LOG(DEBUG) << "Modify function Signature error\n";
@@ -1243,13 +1236,14 @@ static bool InterfaceFieldSetTypeDealForClass(AbckitCoreInterfaceField *field, A
 {
     for (auto &cls : field->owner->classes) {
         for (auto &clsField : cls->fields) {
-            if (ClassFieldGetNameStatic(clsField.get())->impl.data() == field->name->impl.data()) {
+            std::string clsFieldName = ClassFieldGetNameStatic(clsField.get())->impl.data();
+            if (clsFieldName == field->name->impl.data()) {
                 std::string classFullName = std::string(clsField->owner->owningModule->moduleName->impl.data()) + "." +
                                             ClassGetNameStatic(clsField->owner)->impl.data();
                 std::string classGetMethodName =
-                    ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + classFullName;
+                    MakeInterfaceAccessorPrefix(field->name->impl.data(), GET_FUNCTION_PATTERN) + ":" + classFullName;
                 std::string classSetMethodName =
-                    ReplacePropertyWithId(field->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + classFullName;
+                    MakeInterfaceAccessorPrefix(field->name->impl.data(), SET_FUNCTION_PATTERN) + ":" + classFullName;
                 return ClassModifyTypeAndMethodSig(clsField.get(), classGetMethodName, classSetMethodName, type);
             }
         }
@@ -1291,9 +1285,9 @@ bool InterfaceFieldAddAnnotationStatic(AbckitArktsInterfaceField *field,
 
     std::string interfaceFullName(field->core->owner->GetArkTSImpl()->impl.GetStaticClass()->name);
     std::string interfaceGetMethodName =
-        ReplacePropertyWithId(field->core->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+        MakeInterfaceAccessorPrefix(field->core->name->impl.data(), GET_FUNCTION_PATTERN) + ":" + interfaceFullName;
     std::string interfaceSetMethodName =
-        ReplacePropertyWithId(field->core->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+        MakeInterfaceAccessorPrefix(field->core->name->impl.data(), SET_FUNCTION_PATTERN) + ":" + interfaceFullName;
     for (auto &method : field->core->owner->methods) {
         std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
         if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
@@ -1326,9 +1320,9 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
 
     std::string interfaceFullName(field->core->owner->GetArkTSImpl()->impl.GetStaticClass()->name);
     std::string interfaceGetMethodName =
-        ReplacePropertyWithId(field->core->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+        MakeInterfaceAccessorPrefix(field->core->name->impl.data(), GET_FUNCTION_PATTERN) + ":" + interfaceFullName;
     std::string interfaceSetMethodName =
-        ReplacePropertyWithId(field->core->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+        MakeInterfaceAccessorPrefix(field->core->name->impl.data(), SET_FUNCTION_PATTERN) + ":" + interfaceFullName;
     for (auto &method : field->core->owner->methods) {
         std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
         if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
@@ -2036,11 +2030,7 @@ bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module
 template <typename TblType>
 static void RemoveFuncInTable(TblType &table, const std::string &interfaceName, const std::string &name)
 {
-    std::string cleanFieldName = name;
-    const std::string propertyPrefix = "%%property-";
-    if (cleanFieldName.find(propertyPrefix) == 0) {
-        cleanFieldName = cleanFieldName.substr(propertyPrefix.length());
-    }
+    const std::string &cleanFieldName = name;
 
     for (auto iter = table.begin(); iter != table.end();) {
         if (iter->first.find(cleanFieldName + ":") != std::string::npos &&

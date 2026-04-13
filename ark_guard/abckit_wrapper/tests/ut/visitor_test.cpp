@@ -205,16 +205,16 @@ public:
         AddTargetObjectName("module_static.Ns1.m2");
         AddTargetObjectName("module_static.Ns1.Color2.#ordinal");
         AddTargetObjectName("module_static.Ns1.ClassB.sField2");
-        AddTargetObjectName("module_static.Ns1.ClassB.%%property-iField2");
-        AddTargetObjectName("module_static.Interface1.%%property-iField1");
+        AddTargetObjectName("module_static.Ns1.ClassB.iField2");
+        AddTargetObjectName("module_static.Interface1.iField1");
         AddTargetObjectName("module_static.Color1.#ordinal");
         AddTargetObjectName("module_static.Ns1.ClassB.field2");
         AddTargetObjectName("module_static.Ns1.Color2.#ItemsArray");
         AddTargetObjectName("module_static.Color1.#ItemsArray");
         AddTargetObjectName("module_static.m1");
         AddTargetObjectName("module_static.ClassA.field1");
-        AddTargetObjectName("module_static.ClassA.%%property-iField1");
-        AddTargetObjectName("module_static.Ns1.Interface2.%%property-iField2");
+        AddTargetObjectName("module_static.ClassA.iField1");
+        AddTargetObjectName("module_static.Ns1.Interface2.iField2");
         AddTargetObjectName("module_static.ClassA.sField1");
     }
 
@@ -516,7 +516,7 @@ public:
         // Fields
         AddTargetObjectName("module_static.ClassA.field1");
         AddTargetObjectName("module_static.ClassA.sField1");
-        AddTargetObjectName("module_static.ClassA.%%property-iField1");
+        AddTargetObjectName("module_static.ClassA.iField1");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -569,7 +569,7 @@ public:
         // Fields
         AddTargetObjectName("module_static.ClassA.field1");
         AddTargetObjectName("module_static.ClassA.sField1");
-        AddTargetObjectName("module_static.ClassA.%%property-iField1");
+        AddTargetObjectName("module_static.ClassA.iField1");
     }
 
     bool Visit(abckit_wrapper::Module *module) override

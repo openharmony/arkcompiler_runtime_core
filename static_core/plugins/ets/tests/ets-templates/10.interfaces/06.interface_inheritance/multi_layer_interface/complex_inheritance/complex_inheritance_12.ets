@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,6 @@
 
 /*---
 desc: Rewriting of constants in the test class.
-assertion: Compile-time error occurs in case, where a field simultaneously overrides 
-           a field from a superclass and implements a property from a superinterface.
-tags: [compile-only, negative]
 ---*/
 
 interface G {
@@ -25,9 +22,11 @@ interface G {
 }
 
 class A implements G {
-    readonly CONSTANT: string = "X";
+    static readonly CONSTANT = "Constant from A";
+    readonly CONSTANT: string = "Constant from interface A";
 }
 
 class B extends A {
-    readonly CONSTANT: string = "X";
+    static readonly CONSTANT = "Constant from B";
+    readonly CONSTANT: string = "Constant from interface B";
 }
