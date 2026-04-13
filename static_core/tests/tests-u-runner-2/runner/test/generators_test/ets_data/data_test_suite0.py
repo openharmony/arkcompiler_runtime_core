@@ -72,6 +72,7 @@ args = {
     'test_suite.parameters.with-js': 'with-js',
     'test_suite.parameters.test-list': None,
     'test_suite.parameters.test-file': None,
+    'test_suite.parameters.rerun-failed': False,
     'test_suite.parameters.skip-test-lists': False,
     'test_suite.parameters.update-excluded': False,
     'test_suite.parameters.update-expected': False,

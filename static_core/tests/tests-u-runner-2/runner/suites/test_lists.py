@@ -40,6 +40,7 @@ _LOGGER = Log.get_logger(__file__)
 
 _GN_BUILD_PROPERTIES_FILE_NAME = "args.gn"
 _CMAKE_BUILD_PROPERTIES_FILE_NAME = "CMakeCache.txt"
+_RERUN_FAILURES_FILE_NAME = "failures.txt"
 
 
 class TestLists:
@@ -78,7 +79,8 @@ class TestLists:
         load_dotenv()
         self.list_roots = list_roots
         self.config = test_env.config
-        self.explicit_list: Path | None = self._get_explicit_list()
+        self._work_dir = test_env.work_dir
+        self.explicit_list: Path | None = self.resolve_explicit_list()
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
         self.build_properties: list[str] = []
@@ -87,10 +89,10 @@ class TestLists:
 
         _LOGGER.default(f"Initialize TestLists: gn_build = {self.config.general.gn_build}")
         if self.config.general.gn_build:
-            self.build_properties = self.gn_build_properties()
+            self.build_properties = self._gn_build_properties()
             self.build_system = BuildSystem.GN
         else:
-            self.build_properties = self.cmake_build_properties()
+            self.build_properties = self._cmake_build_properties()
         self.sanitizer = self.search_sanitizer()
         _LOGGER.default(f"Initialize TestLists: sanitizer = {self.sanitizer}")
         self.architecture = detect_architecture(self.config.general.qemu)
@@ -225,7 +227,7 @@ class TestLists:
         return BuildTypeKind.is_value(cmake_build_type, option_name="from cmake CMAKE_BUILD_TYPE")
 
     def search_sanitizer(self) -> SanitizerKind:
-        props = self.get_sanitizers_properties_names()
+        props = self._get_sanitizers_properties_names()
 
         is_ubsan = self.__to_bool(self.__search_in_build_properties(props["ubsan"]))
         is_asan = self.__to_bool(self.__search_in_build_properties(props["asan"]))
@@ -236,24 +238,6 @@ class TestLists:
         if is_tsan:
             return SanitizerKind.TSAN
         return SanitizerKind.NONE
-
-    def get_sanitizers_properties_names(self) -> dict[str, str]:
-        sanitizer_depending_on_build_system = {
-            BuildSystem.GN.value: {
-                "ubsan": "is_ubsan",
-                "asan": "is_asan",
-                "tsan": "is_tsan",
-            },
-            BuildSystem.CMAKE.value: {
-                "ubsan": "PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER",
-                "asan": "PANDA_ENABLE_ADDRESS_SANITIZER",
-                "tsan": "PANDA_ENABLE_THREAD_SANITIZER",
-            }
-        }
-        build_sys = self.build_system.value
-        if build_sys not in sanitizer_depending_on_build_system:
-            raise InvalidConfiguration(f"Unknown build system: {build_sys}")
-        return sanitizer_depending_on_build_system[build_sys]
 
     def is_aot(self) -> Step | None:
         return next((step for step in self.config.workflow.steps if step.step_kind == StepKind.AOT), None)
@@ -313,11 +297,44 @@ class TestLists:
     def get_es2panda_args(self) -> list[str] | str:
         return args if (args := self.config.workflow.get_parameter("es2panda-args")) else []
 
-    def gn_build_properties(self) -> list[str]:
+    def resolve_explicit_list(self) -> Path | None:
+        explicit_list = self._get_explicit_list()
+        if explicit_list is not None:
+            self.explicit_list = explicit_list
+            return explicit_list
+        if self.config.test_suite.test_lists.rerun_failed:
+            if self._work_dir.rerun_failures is not None:
+                self.explicit_list = self._work_dir.rerun_failures
+                return self.explicit_list
+            failures_path = self._work_dir.report / _RERUN_FAILURES_FILE_NAME
+            raise InvalidConfiguration(
+                f"Cannot rerun failed tests: previous failures list '{failures_path}' is not found")
+        self.explicit_list = None
+        return None
+
+    def _get_sanitizers_properties_names(self) -> dict[str, str]:
+        sanitizer_depending_on_build_system = {
+            BuildSystem.GN.value: {
+                "ubsan": "is_ubsan",
+                "asan": "is_asan",
+                "tsan": "is_tsan",
+            },
+            BuildSystem.CMAKE.value: {
+                "ubsan": "PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER",
+                "asan": "PANDA_ENABLE_ADDRESS_SANITIZER",
+                "tsan": "PANDA_ENABLE_THREAD_SANITIZER",
+            }
+        }
+        build_sys = self.build_system.value
+        if build_sys not in sanitizer_depending_on_build_system:
+            raise InvalidConfiguration(f"Unknown build system: {build_sys}")
+        return sanitizer_depending_on_build_system[build_sys]
+
+    def _gn_build_properties(self) -> list[str]:
         file_name = os.getenv('GN_BUILD_PROPERTIES_FILE_NAME', _GN_BUILD_PROPERTIES_FILE_NAME)
         return self.__get_build_properties_from_file(file_name)
 
-    def cmake_build_properties(self) -> list[str]:
+    def _cmake_build_properties(self) -> list[str]:
         file_name = os.getenv('CMAKE_BUILD_PROPERTIES_FILE_NAME', _CMAKE_BUILD_PROPERTIES_FILE_NAME)
         return self.__get_build_properties_from_file(file_name)
 

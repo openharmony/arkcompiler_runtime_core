@@ -79,8 +79,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow_step_filter_ext", "test_suite", "--test-file=simple1.ets"],),
@@ -118,8 +118,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=imports_nat.ets"],),
@@ -165,8 +165,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=imports_nat_co1.ets"],),
@@ -213,8 +213,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=imports_nat_co2.ets"],),
@@ -266,8 +266,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=simple1.ets"],),
@@ -308,8 +308,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=simple_co.ets"],),
@@ -343,8 +343,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=simple_co_neg.ets"],),
@@ -379,8 +379,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=simple_nat.ets"],),
@@ -408,8 +408,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=d_file_in_meta.ets"],),
@@ -449,8 +449,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow_bad_executables", "test_suite", "--test-file", "simple1.ets"],),
@@ -473,8 +473,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch('sys.argv', ["runner.sh", "workflow_bad_executables", "test_suite", "--enable-es2panda", "false",
                         "--enable-runtime", "false", "--test-file", "simple1.ets"])
@@ -496,8 +496,8 @@ class TestStepsTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch('sys.argv', ["runner.sh", "workflow_bad_timeout", "test_suite", "--test-file", "simple1.ets"])
     def test_check_bad_timeout(self) -> None:

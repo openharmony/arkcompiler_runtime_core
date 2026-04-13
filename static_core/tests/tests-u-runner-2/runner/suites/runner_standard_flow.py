@@ -31,7 +31,6 @@ from runner.options.config import Config
 from runner.options.options_step import StepKind
 from runner.runner_file_based import RunnerFileBased
 from runner.suites.tests_flow_registry import TestFlowRegistry
-from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
 from runner.types.test_env import TestEnv
 
@@ -47,6 +46,7 @@ class RunnerStandardFlow(RunnerFileBased):
         RunnerFileBased.__init__(self, config, self.suite_name)
 
         self.__aot_check()
+        work_dir = self.work_dir
 
         self.test_env: TestEnv = TestEnv(
             config=config,
@@ -54,8 +54,8 @@ class RunnerStandardFlow(RunnerFileBased):
             cmd_env=self.cmd_env,
             timestamp=int(datetime.timestamp(datetime.now(pytz.UTC))),
             report_formats={self.config.general.report.report_format},
-            work_dir=WorkDir(config, self.default_work_dir_root),
-            coverage=CoverageManager(self.config.general.build, self.work_dir.coverage_dir, config.general.coverage),
+            work_dir=work_dir,
+            coverage=CoverageManager(self.config.general.build, work_dir.coverage_dir, config.general.coverage),
             test_flow_registry=TestFlowRegistry()
         )
 

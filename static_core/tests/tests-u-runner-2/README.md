@@ -127,6 +127,7 @@ Example:
 -   `--skip-test-lists` - do not use ignored or excluded lists, run all available tests, report all found failures
 -   `--test-list TEST_LIST` - run tests ONLY listed in TEST\_LIST file.
 -   `--test-file TEST_FILE` - run ONLY ONE specified test. **Attention** - not test suite, but the single test from the suite.
+-   `--rerun-failed` - rerun only tests from the previous run's `failures.txt` in the same work directory.
 -   `--update-excluded` - regenerates excluded test lists
 -   `--update-expected` - regenerates expected test lists (applied only for JS Parser test suite)
 -   `--report-format` - specifies in what format to generate failure reports. By default, `md`. Possible value: `html`. As well reports in the plain text format with `.log` extension are always generated.

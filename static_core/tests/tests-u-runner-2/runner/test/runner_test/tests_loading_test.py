@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,7 @@ from typing import ClassVar
 from unittest import TestCase
 from unittest.mock import patch
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -42,8 +43,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite"],),
@@ -77,8 +78,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--skip-compile-only-neg"],),
@@ -112,8 +113,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests"],),
@@ -144,8 +145,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite",
@@ -180,8 +181,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--exclude-ignored-test-lists=test_suite-*-ASAN.txt"],),
@@ -215,8 +216,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite",
@@ -255,8 +256,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite",
@@ -294,8 +295,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--skip-test-lists"],),
@@ -329,8 +330,58 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--rerun-failed"],),
+        (["runner.sh", "workflow", "test_suite", "--rerun-failed", "--gn-build"],),
+    ])
+    def test_rerun_failed(self, argv: Callable) -> None:
+        with patch('sys.argv', argv):
+            work_dir = Path(os.environ["WORK_DIR"])
+            report_dir = work_dir / "report"
+            report_dir.mkdir(parents=True, exist_ok=True)
+            (report_dir / "failures.txt").write_text(
+                "test2.ets /tmp/report/test2.log\n"
+                "test8_co_neg.ets /tmp/report/test8.log\n",
+                encoding="utf-8")
+
+            config = self.get_config()
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test2.ets",
+                "test8_co_neg.ets"
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--rerun-failed"],),
+        (["runner.sh", "workflow", "test_suite", "--rerun-failed", "--gn-build"],),
+    ])
+    def test_rerun_failed_without_previous_report(self, argv: Callable) -> None:
+        with patch('sys.argv', argv):
+            config = self.get_config()
+            with self.assertRaisesRegex(InvalidConfiguration, "Cannot rerun failed tests"):
+                RunnerStandardFlow(config)
+
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow-repeats", "test_suite"],),
@@ -362,8 +413,8 @@ class TestsLoadingTest(TestCase):
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
-    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow-repeats", "test_suite", "--exclude-ignored-tests"],),
