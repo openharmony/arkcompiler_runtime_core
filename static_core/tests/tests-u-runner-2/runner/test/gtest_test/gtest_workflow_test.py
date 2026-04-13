@@ -23,6 +23,7 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -37,9 +38,10 @@ class GTestFlowTest(TestCase):
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
     test_list: ClassVar[Callable[[str], Path]] = lambda list_name: test_utils.get_list_path(__file__,
                                                                                             "ani_tests.txt")
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     def config_test(self) -> Config:
-        args = get_args()
+        args = get_args(GTestFlowTest.env_properties)
         config = Config(args)
         return config
 

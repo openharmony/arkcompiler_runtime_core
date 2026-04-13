@@ -23,6 +23,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from runner.common_exceptions import CompileEtsTestPartException, CompileEtsTestPartTimeoutException
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler import GTestEtsCompiler
 from runner.options.cli_options import get_args
 from runner.options.config import Config
@@ -37,13 +38,14 @@ class EtsGeneratorTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
     failed_test = Path("fail.ets")
     failed_timeout_test = Path("fail_timeout.ets")
     cmake_fake = "CMake.fake"
     cmake_for_test = "CMakeLists.txt"
 
     def config_test(self) -> Config:
-        args = get_args()
+        args = get_args(EtsGeneratorTest.env_properties)
         config = Config(args)
         return config
 

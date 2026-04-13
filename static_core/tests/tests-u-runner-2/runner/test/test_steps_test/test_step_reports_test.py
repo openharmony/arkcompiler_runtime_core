@@ -22,6 +22,7 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import patch
 
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -49,10 +50,11 @@ class TestStepReportsTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TEST_STEPS_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def prepare() -> list[TestStandardFlow]:
-        args = get_args()
+        args = get_args(TestStepReportsTest.env_properties)
         runner = RunnerStandardFlow(Config(args))
         return [cast(TestStandardFlow, test.do_run()) for test in runner.tests]
 

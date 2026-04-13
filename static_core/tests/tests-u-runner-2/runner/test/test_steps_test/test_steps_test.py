@@ -24,6 +24,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from runner.common_exceptions import FileNotFoundException, InvalidConfiguration, MalformedStepConfigurationException
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options_step import StepKind
@@ -52,10 +53,11 @@ class TestStepsTest(TestCase):
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TEST_STEPS_TEST_ROOT', data_folder().as_posix())
     get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def prepare() -> list[TestStandardFlow]:
-        args = get_args()
+        args = get_args(TestStepsTest.env_properties)
         runner = RunnerStandardFlow(Config(args))
         return [cast(TestStandardFlow, test.do_run()) for test in runner.tests]
 
@@ -508,7 +510,7 @@ class TestStepsTest(TestCase):
         """
         try:
             # preparation
-            args = get_args()
+            args = get_args(TestStepsTest.env_properties)
             with self.assertRaises(MalformedStepConfigurationException):
                 RunnerStandardFlow(Config(args))
         finally:

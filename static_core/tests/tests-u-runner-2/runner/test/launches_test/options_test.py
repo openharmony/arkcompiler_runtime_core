@@ -27,6 +27,7 @@ import pytz
 
 from runner import utils
 from runner.code_coverage.coverage_manager import CoverageManager
+from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options import IOptions
@@ -47,6 +48,7 @@ class KeyValueType(NamedTuple):
 class OptionsTest(TestCase):
     current_folder: ClassVar[Path] = Path(__file__).parent
     data_folder: ClassVar[Path] = Path(__file__).parent / "data"
+    env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
     def divide_param(param: str) -> KeyValueType:
@@ -61,7 +63,7 @@ class OptionsTest(TestCase):
             yield first.endswith(second)
 
     def prepare(self) -> tuple[TestEnv, Path]:
-        args = get_args()
+        args = get_args(OptionsTest.env_properties)
         config = Config(args)
         timestamp = int(datetime.timestamp(datetime.now(pytz.UTC)))
         work_root = self.current_folder / Path(os.environ["WORK_DIR"])

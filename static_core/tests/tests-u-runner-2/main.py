@@ -28,7 +28,7 @@ from runner.enum_types.verbose_format import VerboseKind
 from runner.environment import RunnerEnv
 from runner.init_runner import InitRunner
 from runner.logger import Log
-from runner.options.cli_options import get_args
+from runner.options.cli_options import apply_cli_environment_overrides, get_args
 from runner.options.config import Config
 from runner.runner_base import Runner
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -43,7 +43,7 @@ def main() -> None:
 
     runner_help_mode = init_runner.request_runner_help(set(sys.argv))
     try:
-        RunnerEnv(
+        env_props = RunnerEnv(
             local_env=Path.cwd().with_name(".env"),
             urunner_path=Path(__file__).parent,
             global_env=init_runner.urunner_env_path).load_environment(runner_help_mode)
@@ -51,7 +51,8 @@ def main() -> None:
         logging.critical(exc)
         sys.exit(1)
 
-    args = get_args()
+    args = get_args(env_props)
+    apply_cli_environment_overrides(args, env_props)
     logger = load_config(args)
     config = Config(args)
 

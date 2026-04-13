@@ -117,5 +117,9 @@ args = {
     'runner.clean-gcda-before-run': True,
     'runner.gn-build': True,
     'runner.gcov-tool': '/usr/bin/ls',
-    'runner.retrieve-log-timeout': 111
+    'runner.retrieve-log-timeout': 111,
+    'runner.work-dir-runner': '~/tmp_dir',
+    'runner.panda-build': None,
+    'runner.arkcompiler-runtime-core-path': None,
+    'runner.arkcompiler-ets-frontend-path': None
 }
