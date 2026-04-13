@@ -573,7 +573,7 @@ export final class Console {
         let df: DataFrame | undefined = undefined
         if (dat instanceof ArrayLike) {
             dat = dat as ArrayLike<Any>
-            let d = new Array<Any>(dat.length)
+            let d = Array.create<Any>(dat.length, undefined)
             for (let i = 0; i < d.length; ++i) {
                 d[i] = dat[i]
             }
@@ -676,7 +676,7 @@ export final class Console {
             const fieldVals = DataFrame.getAllInstanceFieldValues(obj)
             const keyLength = fieldVals.length
             let keyArray = new Array<string>();
-            let valuesKeyArray:Array<string> = new Array<string>(keyLength).fill("");
+            let valuesKeyArray:Array<string> = Array.create<string>(keyLength, '');
             for (let i = 0; i < keyLength; i++) {
                 const fieldVal: [string, Any, Class] = fieldVals[i]
 
@@ -726,7 +726,7 @@ export final class Console {
             let innerKey = keys[j];
             if (!initialMap.has(innerKey)) {
                 let mapArrayLen: int = innerLength > keyLength ? innerLength : keyLength
-                let mapArray = new Array<string>(mapArrayLen).fill("");
+                let mapArray = Array.create<string>(mapArrayLen, '');
                 mapArray[i] = innerValue[j];
                 columnMap.columnValue.set(innerKey, mapArray);
                 initialMap.set(innerKey, true);
@@ -776,7 +776,7 @@ export final class Console {
             keysArray.push(key);
         }
         let keyLength = mapLen + 1;
-        let outputKeysArray:Array<string> = new Array<string>(keyLength);
+        let outputKeysArray:Array<string> = Array.create<string>(keyLength, '');
         outputKeysArray[0] = "(index)";
         for (let i = 0; i < mapLen; i++) {
             outputKeysArray[i + 1] = keysArray[i];
@@ -792,7 +792,7 @@ export final class Console {
         }
         let keyLength: int = mapLen + 1;
         let valueLength: int = keyLength * length;
-        let outputValuesArray:Array<string> = new Array<string>(valueLength);
+        let outputValuesArray:Array<string> = Array.create<string>(valueLength, '');
         let valueIndex = 0;
         for (let i = 0; i < length; i++) {
             let key = keyArray[i];
@@ -823,8 +823,8 @@ export final class Console {
 
     private static graphTable(head: Array<string>, columns: Array<string>, length: int): Array<string> {
         let columnLen = head.length;
-        let columnWidths: Array<int> = new Array<int>(columnLen);
-        let rowDivider: Array<string> = new Array<string>(columnLen);
+        let columnWidths: Array<int> = Array.create<int>(columnLen, 0);
+        let rowDivider: Array<string> = Array.create<string>(columnLen, '');
         let tableResult: Array<string> = new Array<string>();
         for (let i = 0; i < columnLen; i++) {
             let stringLen = head[i].length;
@@ -1062,7 +1062,7 @@ class DataFrame {
         const bottomBorder = this.buildBorderRow('─', '┴', '└', '┘');
         // header has 2 rows and footer - 1
 
-        const output = new Array<string>(4 + this.rowsCount);
+        const output = Array.create<string>(4 + this.rowsCount, '');
 
         // |output| = 0
         output[0] = topBorder
@@ -1399,14 +1399,14 @@ class DataFrame {
      */
     public static fromObjects(...data: Any[]): void {
         const columns = new Set<string>();
-        const preparedInfo = new Array<Map<string, string>>(data.length);
-        for (let i = 0; i < data.length; ++i){
-            preparedInfo[i] = DataFrame.getObjectInfoForTable(data[i]);
-            for (let key of preparedInfo[i].keys())
+        const preparedInfo = new Array<Map<string, string>>(data.length, (i) => {
+            let map = DataFrame.getObjectInfoForTable(data[i]);
+            for (let key of map.keys())
             {
                 columns.add(key);
             }
-        }
+            return map;
+        });
         const df = new DataFrame(Array.from(columns));
         for (let i = 0; i < data.length; ++i) {
             df.insertRow(preparedInfo[i]);

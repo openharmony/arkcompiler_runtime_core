@@ -118,7 +118,7 @@ function testGetPropertyObject(): boolean {
 }
 
 function testSetPropertyString50(): boolean {
-    let string50 = new Array<string>(50).fill('a').join('');
+    let string50 = Array.create<string>(50, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string50', string50);
@@ -129,7 +129,7 @@ function testSetPropertyString50(): boolean {
 }
 
 function testSetPropertyString100(): boolean {
-    let string100 = new Array<string>(100).fill('a').join('');
+    let string100 = Array.create<string>(100, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string100', string100);
@@ -140,7 +140,7 @@ function testSetPropertyString100(): boolean {
 }
 
 function testSetPropertyString500(): boolean {
-    let string500 = new Array<string>(500).fill('a').join('');
+    let string500 = Array.create<string>(500, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string500', string500);
@@ -151,7 +151,7 @@ function testSetPropertyString500(): boolean {
 }
 
 function testSetPropertyString1000(): boolean {
-    let string1000 = new Array<string>(1000).fill('a').join('');
+    let string1000 = Array.create<string>(1000, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string1000', string1000);
@@ -162,7 +162,7 @@ function testSetPropertyString1000(): boolean {
 }
 
 function testSetPropertyString5000(): boolean {
-    let string5000 = new Array<string>(5000).fill('a').join('');
+    let string5000 = Array.create<string>(5000, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string5000', string5000);
@@ -173,7 +173,7 @@ function testSetPropertyString5000(): boolean {
 }
 
 function testSetPropertyString10000(): boolean {
-    let string10000 = new Array<string>(10000).fill('a').join('');
+    let string10000 = Array.create<string>(10000, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string10000', string10000);
@@ -184,7 +184,7 @@ function testSetPropertyString10000(): boolean {
 }
 
 function testSetPropertyString50000(): boolean {
-    let string50000 = new Array<string>(50000).fill('a').join('');
+    let string50000 = Array.create<string>(50000, 'a').join('');
     let startTime = Chrono.nanoNow();
     for (let i = 0; i < ITERATIONS; i++) {
         fooInstance.setProperty('string50000', string50000);

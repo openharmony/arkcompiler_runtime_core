@@ -57,12 +57,12 @@ class SharedJob<T> {
 }
 
 function runConcurrently(callback: callbackT, coroutines: number) {
-    let jobs = new Array<Promise<void>>(coroutines.toInt());
+    let jobs = new Array<Promise<void>>();
     for (let i = 0; i < coroutines; ++i) {
         const id = i.toInt();
-        jobs[id] = launch() {
+        jobs.push(launch() {
             return callback(id)
-        };
+        });
     }
     return new SharedJob<Promise<void>>(jobs);
 }

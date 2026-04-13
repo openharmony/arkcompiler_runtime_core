@@ -41,7 +41,7 @@ export namespace url {
     class Helper {
         static ASCII_32: number = 32;
         static ASCII_127: int = 127;
-        static specialCharForBit: Array<number> = new Array<number>(128);
+        static specialCharForBit: Array<number> = Array.create<number>(128, 0);
         static head: Map<string, number> = new Map<string, number>();
         static doubleSegment: Array<string> = new Array<string>("..", ".%2e", ".%2E", "%2e.", "%2E.",
             "%2e%2e", "%2E%2E", "%2e%2E", "%2E%2e");
@@ -53,10 +53,9 @@ export namespace url {
 
         static specialcharacter: Array<string> = new Array<string>('\0', '\t', '\n', '\r', ' ', '#', '%', '/', ':', '?', '@', '[', '\\', ']');
 
-        static hexTable: Array<string> = new Array<string>(256);
+        static hexTable: Array<string> = Array.create<string>(256, '');
 
         static {
-            Helper.specialCharForBit.fill(0);
             let specialSymbolsTmp = ['#', '%', '/', ':', '?', '@', '[', '\\', ']', '<', '>', '^', '|'];
             for (let i = 0; i <= Helper.ASCII_32; i++) {
                 Helper.specialCharForBit[i] = 1;

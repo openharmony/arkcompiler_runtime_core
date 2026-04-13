@@ -38,7 +38,7 @@ async function asyncRWLockSharedReadTest() {
     const tasks_counter = 10;
 
     let sharedValue: int = 42;
-    let jobs = new Array<Promise<void>>(tasks_counter);
+    let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
 
     // First, acquire read lock in main task
     let acquiredInMain = false;
@@ -68,7 +68,7 @@ async function asyncRWLockSharedReadTest() {
 
     await job0;
     for (let job of jobs) {
-        await job;
+        await job!;
     }
 
     arktest.assertEQ(sharedValue, 42);
@@ -81,7 +81,7 @@ async function asyncRWLockExclusiveWriteTest() {
     const workload = 5;
 
     let count: int = 0;
-    let jobs = new Array<Promise<void>>(tasks_counter);
+    let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
 
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
@@ -100,7 +100,7 @@ async function asyncRWLockExclusiveWriteTest() {
         };
     }
     for (let job of jobs) {
-        await job;
+        await job!;
     }
 
     arktest.assertEQ(count, tasks_counter * workload);
@@ -178,7 +178,7 @@ async function asyncRWLockWriteWriteExclusionTest() {
     let flag = false;
     const tasks_counter = 5;
 
-    let jobs = new Array<Promise<void>>(tasks_counter);
+    let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
@@ -197,7 +197,7 @@ async function asyncRWLockWriteWriteExclusionTest() {
     }
 
     for (let job of jobs) {
-        await job;
+        await job!;
     }
 }
 
@@ -206,12 +206,9 @@ async function asyncRWLockMultipleReadersTest() {
     let readLock = rwLock.readLock();
 
     const readers_count = 10;
-    let activeReaders = new Array<int>(readers_count);
-    for (let i = 0; i < readers_count; ++i) {
-        activeReaders[i] = 0;
-    }
+    let activeReaders = Array.create<int>(readers_count, 0);
 
-    let jobs = new Array<Promise<void>>(readers_count);
+    let jobs = Array.create<Promise<void> | undefined>(readers_count, undefined);
     for (let i = 0; i < readers_count; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
@@ -234,7 +231,7 @@ async function asyncRWLockMultipleReadersTest() {
     }
 
     for (let job of jobs) {
-        await job;
+        await job!;
     }
 }
 
@@ -249,7 +246,7 @@ async function asyncRWLockMixedStressTest() {
     const workload = 5;
 
     let total_jobs = reader_count + writer_count;
-    let jobs = new Array<Promise<void>>(total_jobs);
+    let jobs = Array.create<Promise<void> | undefined>(total_jobs, undefined);
 
     for (let i = 0; i < reader_count; ++i) {
         const id = i.toInt();
@@ -285,7 +282,7 @@ async function asyncRWLockMixedStressTest() {
     }
 
     for (let job of jobs) {
-        await job;
+        await job!;
     }
 
     arktest.assertEQ(sharedCounter, writer_count * workload);

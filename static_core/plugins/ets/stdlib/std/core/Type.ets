@@ -2741,10 +2741,9 @@ export final class ClassType extends Type {
      * @FaAndStageModel
      */
     public make(args: FixedArray<Any>): Object {
-        const argTypes = new Array<Type>(args.length)
-        for (let i = 0; i < args.length; i++) {
-            argTypes[i] = Type.of(args[i])
-        }
+        const argTypes = new Array<Type>(args.length, (i) => {
+            return Type.of(args[i])
+        })
         // collect all applicable constructors
         const ctors = new Array<Method>()
         const ctorNum = this.getConstructorsNum()

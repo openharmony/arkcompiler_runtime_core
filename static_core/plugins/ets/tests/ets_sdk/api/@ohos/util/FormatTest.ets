@@ -254,8 +254,7 @@ function testFunctionAsObject() : int {
 function testFunctionsArrayObject() : int {
     let lambda = (arg: string):string => { return "XX" + arg}
 
-    let arr = new Array<(arg: string)=>string>(1)
-    arr[0] = lambda
+    let arr = new Array<(arg: string)=>string>(lambda)
 
     let expected = "Array of functions: [ { [Function: null]  [length]: 0,  [name] :'null',  [prototype]: null { [constructor]: [Circular] } }, [length]: 1 ]"
     let expected1 = "Array of functions: [ [Function: null] ]"

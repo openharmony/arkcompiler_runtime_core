@@ -73,7 +73,7 @@ export class RegExpResultArray extends Array<String | undefined> {
     }
 
     protected constructor() {
-        super(0)
+        super()
         this.isCorrect = false
     }
 
@@ -172,7 +172,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         }
 
         if (hasIndices) {
-            this.indices_ = new Array<Array<int>>(n)
+            this.indices_ = new Array<Array<int>>(n, () => new Array<int>())
             for (let i = 0; i < this.resultRaw_.length; i += 2) {
                 const index: int = this.resultRaw_[i]
                 const endIndex: int = this.resultRaw_[i + 1]

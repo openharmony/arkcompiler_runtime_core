@@ -15,9 +15,9 @@
 
 const elementsNum: int = 100;
 
-let testArrayInt: int[] = new Array<int>(elementsNum);
-let testArrayObj: Object[] = new Array<Object>(elementsNum);
-let testArrayStr: String[] = new Array<String>(elementsNum);
+let testArrayInt: int[] = Array.create<int>(elementsNum, 0);
+let testArrayObj: Object[] = new Array<Object>(elementsNum, () => new Object());
+let testArrayStr: String[] = Array.create<String>(elementsNum, '');
 let queueInt: containers.stackless.ArrayConcurrentQueue<int> = new containers.stackless.ArrayConcurrentQueue<int>(200);
 let queueObj: containers.stackless.ArrayConcurrentQueue<Object> =
     new containers.stackless.ArrayConcurrentQueue<Object>(200);
@@ -101,7 +101,7 @@ async function main(): Promise<int> {
         while (!queueIntPopQueue.isEmpty()) {
             await queueIntPopQueue.pop();
         }
-        let promises: Promise<void>[] = new Array<Promise<void>>(100);
+        let promises: (Promise<void> | undefined)[] = Array.create<Promise<void> | undefined>(100, undefined);
         for (let i: int = 0; i < elementsNum; ++i) {
             promises[i] = queueIntPopData();
         }
@@ -109,7 +109,7 @@ async function main(): Promise<int> {
             queueIntPopQueue.push(i);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            await promises[i]!;
         }
         arktest.assertEQ(queueIntPopQueue.size, 0);
     });
@@ -136,7 +136,7 @@ async function main(): Promise<int> {
         for (let i: int = 0; i < queueSize; ++i) {
             await queue.push(queueItem);
         }
-        let promisesPop: Promise<int>[] = new Array<Promise<int>>(queueSize / 2);
+        let promisesPop: (Promise<int> | undefined)[] = Array.create<Promise<int> | undefined>(queueSize / 2, undefined);
         for (let i: int = 0; i < queueSize / 2; ++i) {
             promisesPop[i] = queue.pop();
         }
@@ -144,7 +144,7 @@ async function main(): Promise<int> {
             arktest.assertEQ(queue.poll(), queueItem);
         }
         for (let i: int = 0; i < queueSize / 2; i++) {
-            await promisesPop[i];
+            await promisesPop[i]!;
         }
         arktest.assertEQ(queue.size, 0);
     });
@@ -183,7 +183,7 @@ async function pusherStr() {
 }
 
 async function popperInt(): Promise<int[]> {
-    let result: int[] = new Array<int>(elementsNum);
+    let result: int[] = Array.create<int>(elementsNum, 0);
     for (let i = 0; i < elementsNum; i++) {
         let queueItem = queueInt.getFirst();
         result[i] = await queueInt.pop();
@@ -193,7 +193,7 @@ async function popperInt(): Promise<int[]> {
 }
 
 async function popperObj(): Promise<Object[]> {
-    let result: Object[] = new Array<Object>(elementsNum);
+    let result: Object[] = new Array<Object>(elementsNum, () => new Object());
     for (let i = 0; i < elementsNum; i++) {
         let queueItem = queueObj.getFirst();
         result[i] = await queueObj.pop();
@@ -203,7 +203,7 @@ async function popperObj(): Promise<Object[]> {
 }
 
 async function popperStr(): Promise<String[]> {
-    let result: String[] = new Array<String>(elementsNum);
+    let result: String[] = Array.create<String>(elementsNum, '');
     for (let i = 0; i < elementsNum; i++) {
         result[i] = await queueStr.pop();
     }

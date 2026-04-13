@@ -483,10 +483,9 @@ export namespace util {
     */
     export function format(s: string, ...args: Object[]): string {
         // arrays are invariant, need to copy
-        let a = new Array<Any>(args.length)
-        for (let i = 0; i < args.length; ++i) {
-            a[i] = args[i]
-        }
+        let a = new Array<Any>(args.length, (i) => {
+            return args[i]
+        })
         return (new Formatter).format(s, a)
     }
 

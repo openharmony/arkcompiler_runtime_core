@@ -13,23 +13,6 @@
 
 ---
 cases:
-  - doc: Call parent constructor to specify the array length. Create array using 'new'.
-    decl: |-
-      class A<T> extends Array<T> {
-        constructor(length: int) {
-          super(length)
-        }
-      }
-
-      function main() {
-        let i: A<number> = new A<number>(3)
-        i[1] = 7
-
-        arktest.assertTrue(Array.isArray(i))
-        arktest.assertEQ(i.length, 3)
-        arktest.assertEQ(i[1], 7)
-      }
-
   - doc: Array of custom object type with foreach check
     decl: |-
       class A {

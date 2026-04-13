@@ -345,12 +345,12 @@ export final class Promise<out T> implements PromiseLike<T> {
         return new Promise<Array<Awaited<U>>>((resolve: (value: Array<Awaited<U>>) => void, reject: (error: Error) => void): void => {
             let resolvedCnt = new Int32Array(new ArrayBuffer(4));
             Atomics.store(resolvedCnt, 0, 0);
-            const values: Array<Awaited<U>> = new Array<Awaited<U>>(promises.length);
 
             if (promises.length === 0) {
-                resolve(values);
+                resolve(new Array<Awaited<U>>());
                 return;
             }
+            const values: Array<Awaited<U>> = Array.create<Awaited<U>>(promises.length, new Object() as Awaited<U>);
 
             for (let i = 0; i < promises.length; ++i) {
                 const idx = i;

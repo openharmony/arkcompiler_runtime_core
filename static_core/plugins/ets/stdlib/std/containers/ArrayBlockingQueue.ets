@@ -31,7 +31,7 @@ export namespace containers {
                 throw new RangeError("ArrayBlockingQueue:: Invalid capacity");
             }
             this.capacitySize = capacity;
-            this.array = new Array<T>(this.capacitySize);
+            this.array = Array.create<T | undefined>(this.capacitySize, undefined);
             this.mutex = ConcurrencyHelpers.mutexCreate();
             this.condVar = ConcurrencyHelpers.condVarCreate();
         }
@@ -47,7 +47,7 @@ export namespace containers {
                 throw new RangeError("ArrayBlockingQueue:: Invalid capacity");
             }
             this.capacitySize = capacity;
-            this.array = new Array<T>(this.capacitySize);
+            this.array = Array.create<T | undefined>(this.capacitySize, undefined);
             this.mutex = ConcurrencyHelpers.mutexCreate();
             this.condVar = ConcurrencyHelpers.condVarCreate();
             if (iterable) {
@@ -86,7 +86,7 @@ export namespace containers {
             try {
                 const val = this.array[this.curHeadIdx];
                 this.increaseHeadIdx();
-                return val;
+                return val as T;
             } finally {
                 ConcurrencyHelpers.condVarNotifyOne(this.condVar, this.mutex);
                 ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -263,7 +263,7 @@ export namespace containers {
             }
         }
 
-        private array: Array<T>;                        // Array, where all ArrayBlockingQueue elements will be located
+        private array: Array<T | undefined>;            // Array, where all ArrayBlockingQueue elements will be located
         private curHeadIdx: int = 0;                    // Index of the first element in a ArrayBlockingQueue
         private curTailIdx: int = 0;                    // Index of the last element in a ArrayBlockingQueue
         private mutex: Object;                          // push/pop Mutex

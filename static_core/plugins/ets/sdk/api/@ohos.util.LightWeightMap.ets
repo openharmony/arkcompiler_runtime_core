@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,18 +77,18 @@ export interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
 }
 
 class LightWeightMapEntry<K, V> {
-    entryHashs: Array<int>;
-    entryKeys: Array<K>;
-    entryValues: Array<V>;
+    entryHashs: Array<int | undefined>;
+    entryKeys: Array<K | undefined>;
+    entryValues: Array<V | undefined>;
     actualLength: int = 0;
 
     private static readonly MIN_BUCKETS_COUNT = 8;
     private capacity: int = LightWeightMapEntry.MIN_BUCKETS_COUNT;
 
     constructor() {
-        this.entryHashs = new Array<int>(this.capacity);
-        this.entryKeys = new Array<K>(this.capacity);
-        this.entryValues = new Array<V>(this.capacity);
+        this.entryHashs = Array.create<int | undefined>(this.capacity, undefined);
+        this.entryKeys = Array.create<K | undefined>(this.capacity, undefined);
+        this.entryValues = Array.create<V | undefined>(this.capacity, undefined);
     }
 
     set(index: int, hash: int, key: K, value: V): void {
@@ -123,20 +124,20 @@ class LightWeightMapEntry<K, V> {
     clear(): void {
         this.actualLength = 0;
         this.capacity = LightWeightMapEntry.MIN_BUCKETS_COUNT;
-        this.entryHashs = new Array<int>(this.capacity);
-        this.entryKeys = new Array<K>(this.capacity);
-        this.entryValues = new Array<V>(this.capacity);
+        this.entryHashs = Array.create<int | undefined>(this.capacity, undefined);
+        this.entryKeys = Array.create<K | undefined>(this.capacity, undefined);
+        this.entryValues = Array.create<V | undefined>(this.capacity, undefined);
     }
 
-    private insert<T>(a: Array<T>, index: int, value: T): void {
+    private insert<T>(a: Array<T | undefined>, index: int, value: T): void {
         for (let i: int = this.actualLength; i > index; i--) {
             a[i] = a[i - 1];
         }
         a[index] = value;
     }
 
-    private increaseCapacity<T>(array: Array<T>, capacity: int): Array<T> {
-        const newArray = new Array<T>(capacity);
+    private increaseCapacity<T>(array: Array<T | undefined>, capacity: int): Array<T | undefined> {
+        const newArray = Array.create<T | undefined>(capacity, undefined);
         for (let i = 0; i < this.actualLength; i++) {
             newArray[i] = array[i]
         }
@@ -232,7 +233,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @returns ValueIterator with hash map keys
      */
     keys(): IterableIterator<K> {
-        return new LightWeightMapIterator<K, V, K>(this, (index: int) => this.buckets.entryKeys[index]);
+        return new LightWeightMapIterator<K, V, K>(this, (index: int) => this.buckets.entryKeys[index] as K);
     }
 
     /**
@@ -241,7 +242,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @returns ValueIterator with hash map values
      */
     values(): IterableIterator<V> {
-        return new LightWeightMapIterator<K, V, V>(this, (index: int) => this.buckets.entryValues[index]);
+        return new LightWeightMapIterator<K, V, V>(this, (index: int) => this.buckets.entryValues[index] as V);
     }
 
     /**
@@ -251,7 +252,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      */
     entries(): IterableIterator<[K, V]> {
         return new LightWeightMapIterator<K, V, [K, V]>(this,
-            (index: int) => [this.buckets.entryKeys[index], this.buckets.entryValues[index]]);
+            (index: int) => [this.buckets.entryKeys[index] as K, this.buckets.entryValues[index] as V]);
     }
 
     /**
@@ -300,7 +301,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         this.checkEmptyContainer();
         this.checkRange(index, this.buckets.actualLength);
 
-        return this.buckets.entryKeys[index];
+        return this.buckets.entryKeys[index] as K;
     }
 
     /**
@@ -316,7 +317,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         this.checkEmptyContainer();
         this.checkRange(index, this.buckets.actualLength);
 
-        return this.buckets.entryValues[index];
+        return this.buckets.entryValues[index] as V;
     }
 
     /**
@@ -532,11 +533,11 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         }
     }
 
-    private binarySearchHashes(hashArray: Array<int>, hashCode: int, size: int): int {
+    private binarySearchHashes(hashArray: Array<int | undefined>, hashCode: int, size: int): int {
         let low: int = 0, high: int = size - 1;
         while (low <= high) {
             const mid = (low + high) >>> 1;
-            const midHash = hashArray[mid];
+            const midHash = hashArray[mid]!;
             if (midHash < hashCode) {
                 low = mid + 1;
             } else {

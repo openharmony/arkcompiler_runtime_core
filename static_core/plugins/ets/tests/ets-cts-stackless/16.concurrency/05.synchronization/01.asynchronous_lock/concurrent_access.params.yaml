@@ -36,7 +36,9 @@ cases:
           }, AsyncLockMode.EXCLUSIVE);
         };
           
-        const tasks = new Array<Promise<void>>(totalTasks).map(() => task());
+        const tasks = new Array<Promise<void>>(totalTasks, () => {
+          return task();
+        });
         await Promise.all(tasks);
         arktest.assertEQ(maxConcurrent, 1);
         arktest.assertEQ(concurrentCount, 0);
@@ -67,7 +69,9 @@ cases:
           }
         };
         
-        const tasks = new Array<Promise<void>>(concurrentTasks).map(() => incrementTask());
+        const tasks = new Array<Promise<void>>(concurrentTasks, () => {
+          return incrementTask();
+        });
         await Promise.all(tasks);
         const expected = concurrentTasks * iterations;
 
