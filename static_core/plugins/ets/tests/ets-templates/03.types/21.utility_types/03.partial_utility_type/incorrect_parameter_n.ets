@@ -16,22 +16,26 @@ limitations under the License.
 {% for t in types %}
 {% for c in cases %}
 
+{% set response = c.out | default("Semantic error ESE0065: type %%partial-C has no property named i") %}
 /*---
 desc: variables of Partial<T> are to be initialized with valid object literals.
         - {{t}}, {{c.doc}}
 tags: [compile-only, negative]
+expected_out: '{{response}}'
 ---*/
 
 {{t}} C {
-  j: int {% if t != interface %} = 0 {% endif %}
+  j: int {% if t != "interface" %} = 0; {% endif %}
 }
 
 function foo() {
   return -1
 }
 
+const hello: String = "Hello World"
+
 function main() {
-    let i: Partial<C> = {{c.argument}}
+    let tp: Partial<C> = {{c.argument}}
 }
 
 {% endfor %}

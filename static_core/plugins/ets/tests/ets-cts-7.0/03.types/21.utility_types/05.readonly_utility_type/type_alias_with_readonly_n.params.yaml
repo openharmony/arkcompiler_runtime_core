@@ -37,10 +37,9 @@ cases:
       }
 
       class AC extends A {}
-      type RA = Readonly<A>
+      type RAC = Readonly<A>
 
     check: |-
       let rac: RAC = new RAC
       rac.foo()
       arktest.assertEQ(rac.s, "s")
-  

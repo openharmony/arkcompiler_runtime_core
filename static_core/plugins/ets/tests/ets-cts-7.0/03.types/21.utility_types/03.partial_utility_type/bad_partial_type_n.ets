@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: T must be a class or an interface type
 tags: [compile-only, negative]
+expected_out: 'Semantic error ESE124644: T in Partial<T> must be a class or an interface type.'
 ---*/
 
 

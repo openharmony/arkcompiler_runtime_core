@@ -16,14 +16,17 @@ limitations under the License.
 {% for t in types %}
 {% for c in cases %}
 
+{% set response = c.out %}
+
 /*---
 desc: Calling function using Object with unacceptable parameters
         - {{t}}, {{c.doc}}
 tags: [compile-only, negative]
+expected_out: '{{ response|replace("|undefined", "") if t != "interface" else response }}'
 ---*/
 
 {{t}} C {
-  j?: int = 0;
+  j?: int {% if t != "interface" %}= 0;{% endif %}
 }
 
 function foo(i: Required<C>) {

@@ -19,6 +19,7 @@ limitations under the License.
 desc: >-
     No method (not even any getter or setter) of T is part of the Required<T> type.
 tags: [compile-only,negative]
+expected_out: "Semantic error ESE123454: Cannot call methods of type 'Required'."
 ---*/
 
 {{c.decl}}
