@@ -44,7 +44,7 @@ class InteropPlatformBase(PlatformBase, ABC):
             opts_obj["compiler-enable-jit"] = "false"
         elif OptFlags.JIT in self.flags:
             opts_obj["compiler-enable-jit"] = "true"
-        self.arkjs_interop.ets_vm_opts = json.dumps(opts_obj)
+        self.arkjs_interop.ets_vm_opts = json.dumps(opts_obj).replace('"', '\\"')
 
     @property
     def required_tools(self) -> List[str]:
