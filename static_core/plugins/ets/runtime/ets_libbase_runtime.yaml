@@ -5519,7 +5519,7 @@ intrinsics:
 
   - name: StdCoreRegisterTimer
     space: ets
-    class_name: escompat.ETSGLOBAL
+    class_name: std.core.ETSGLOBAL
     method_name: registerTimer
     static: true
     signature:
@@ -5529,7 +5529,7 @@ intrinsics:
 
   - name: StdCoreClearTimer
     space: ets
-    class_name: escompat.ETSGLOBAL
+    class_name: std.core.ETSGLOBAL
     method_name: clearTimer
     static: true
     signature:
