@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -53,7 +53,7 @@ interface I3 {
 interface I4 extends I3 { 
         foo_i4_p1(p: P1): string { return "I4" }
         foo_i4_p2(p: P2): string { return "I4" }
-        overload foo { foo, foo_i4_p1, foo_i4_p2 }
+        overload foo { foo, foo_i4_p1, foo_i4_p2, foo_i3_p1 }
     }
 interface I5 { 
         foo(): void
@@ -73,7 +73,7 @@ interface I6 {
     }
 interface I7 extends I6 { 
         foo_i7_p1(p: P1): string { return "I7" }
-        overload foo { foo, foo_i7_p1 }  
+        overload foo { foo, foo_i7_p1, foo_i6_p1, foo_i6_p2 }
     }
 interface I8 { 
         foo(): void

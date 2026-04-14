@@ -63,7 +63,7 @@ cases:
               overload foo { m1, m2 } // CTE, Not all methods included
           }
       expected_out: |-
-          Not all methods included in 'A.foo'
+          Semantic error ESE0390: Method 'm3' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload.
 
     - decl: |-
           interface I1 {
@@ -82,7 +82,7 @@ cases:
               overload foo { m1, m2, m3 } // CTE, Not all methods included
           }
       expected_out: |-
-          Not all methods included in 'A.foo'
+          Semantic error ESE0390: Method 'm4' is missed in the overridden explicit overload 'foo', but listed in the parent explicit overload.
 
     - decl: |-
           interface I1 {
