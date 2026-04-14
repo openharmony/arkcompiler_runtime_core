@@ -49,7 +49,7 @@ bool UnionStackIsEmpty(bool *isEmpty)
     if (UNLIKELY(ctx == nullptr)) {
         return false;
     }
-    *isEmpty = ctx->GetInteropHybridStackEnabled() && (ctx->GetOrCreateCallStack().GetRecords().Size() == 0);
+    *isEmpty = (!ctx->GetInteropHybridStackEnabled()) || (ctx->GetOrCreateCallStack().GetRecords().Size() == 0);
     return true;
 }
 

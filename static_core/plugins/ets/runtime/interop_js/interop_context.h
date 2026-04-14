@@ -447,11 +447,12 @@ public:
 
     bool GetInteropHybridStackEnabled()
     {
-        if (ark::default_target_options::GetInteropHybridStackEnable()) {
-            sharedEtsVmState_->isInteropStackEnabled = true;
-            return true;
-        }
-        return sharedEtsVmState_->isInteropStackEnabled;
+        std::call_once(initStackFlag_, [this]() {
+            if (!isInteropStackEnabled_) {
+                isInteropStackEnabled_ = ark::default_target_options::GetInteropHybridStackEnable();
+            }
+        });
+        return isInteropStackEnabled_;
     }
 
     // hybrid call stack support
@@ -494,7 +495,6 @@ private:
         PandaEtsVM *pandaEtsVm = nullptr;
         PandaUniquePtr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage {};
         PandaUniquePtr<arkplatform::STSVMInterface> stsVMInterface {};
-        bool isInteropStackEnabled {};
 
     private:
         explicit SharedEtsVmState(PandaEtsVM *vm);
@@ -539,6 +539,8 @@ private:
     ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
 
     StackInfoManager stackInfoManager_;
+    bool isInteropStackEnabled_ {};
+    std::once_flag initStackFlag_;
 
     PandaUniquePtr<XGCVmAdaptor> ecmaVMIterfaceAdaptor_;
     arkplatform::EcmaVMInterface *ecmaInterface_ {};
