@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,6 @@ if (!etsRT) {
     throw new Error('Failed to create ETS Runtime!');
 }
 const benchName = helper.getEnvironmentVar('VMB_BENCH_NAME');
-const launcher = etsVm.getClass('L' + benchName + '/VmbLauncher;');
+const launcher = etsVm.getClass('Lbench_' + benchName + '/VmbLauncher;');
 launcher.main();
 print('[InteropLauncher] end');

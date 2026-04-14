@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+from vmb.target import Target
 from vmb.tool import ToolBase
 from vmb.unit import BenchUnit
 
@@ -23,19 +24,31 @@ class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.panda_root = self.ensure_dir_env('PANDA_BUILD')
+
+        if Target.HOST == self.target:
+            self.panda_root = self.ensure_dir_env('PANDA_BUILD')
+            ark_js = ToolBase.ensure_file(
+                self.panda_root, 'bin', 'interop_js', 'ark_js_napi_cli')
+            self.etsstdlib = ToolBase.ensure_file(
+                self.panda_root, 'plugins', 'ets', 'etsstdlib.abc')
+            ark_lib = f'{self.panda_root}/lib/interop_js/:{self.panda_root}/lib/'
+            stub_file = ""
+        elif self.target in (Target.DEVICE, Target.OHOS):
+            ark_js = f'{self.dev_dir.as_posix()}/ark_js_napi_cli'
+            ark_lib = f'{self.dev_dir.as_posix()}/lib'
+            self.etsstdlib = f'{self.dev_dir.as_posix()}/etsstdlib.abc'
+            stub_file = f'--stub-file={self.dev_dir.as_posix()}/stub.an'
+        else:
+            raise NotImplementedError(f'Wrong target: {self.target}!')
         self.ets_vm_opts = '{}'  # no extra options by default, but still valid json
-        ark_js = ToolBase.ensure_file(
-            self.panda_root, 'bin', 'interop_js', 'ark_js_napi_cli')
-        self.etsstdlib = ToolBase.ensure_file(
-            self.panda_root, 'plugins', 'ets', 'etsstdlib.abc')
-        self.cmd = f'LD_LIBRARY_PATH={self.panda_root}/lib/interop_js/:{self.panda_root}/lib/ ' \
+        self.cmd = f'LD_LIBRARY_PATH={ark_lib} ' \
                    f'ARK_ETS_STDLIB_PATH={self.etsstdlib} ' \
-                   "ETS_VM_OPTS='{ets_vm_opts}' " \
+                   'ETS_VM_OPTS="{ets_vm_opts}" ' \
                    'ARK_ETS_INTEROP_JS_GTEST_ABC_PATH={test_zip} ' \
                    'VMB_BENCH_NAME={bench_name} ' \
                    f'{ark_js} ' \
                    '--entry-point={entry_point} ' \
+                   f'{stub_file} ' \
                    '{test_abc}'
 
     @property
@@ -51,14 +64,15 @@ class Tool(ToolBase):
 
     def run(self, bu: BenchUnit, abc: str, entry_point: str,
             bench_name: str = 'none', zip_path: str = 'none'):
-        res = self.sh.run(self.cmd.format(
+        cwd = '' if Target.HOST == self.target else self.dev_dir.as_posix()
+        res = self.x_sh.run(self.cmd.format(
             test_zip=zip_path,
             test_abc=abc,
             entry_point=entry_point,
             bench_name=bench_name,
             ets_vm_opts=self.ets_vm_opts
-        ))
+        ), cwd=cwd)
         bu.parse_run_output(res)
 
     def kill(self) -> None:
-        self.sh.run('pkill ark_js_napi_cli')
+        self.x_sh.run('pkill ark_js_napi_cli')
