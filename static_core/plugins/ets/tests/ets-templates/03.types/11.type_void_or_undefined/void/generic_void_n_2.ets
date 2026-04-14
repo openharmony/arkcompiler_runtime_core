@@ -16,8 +16,12 @@ limitations under the License.
 /*---
 desc: Void type in generic
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0227: Unexpected token 'void'."
 ---*/
 
+class A<T> {
+    constructor(p: T) {}
+}
 
 let a: A<void> = new A<void>(void)
 

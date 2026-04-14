@@ -15,7 +15,7 @@
 cases:
   - call: |-
       let s: string = "1"
-      s.bar()" 
+      s.bar()
     expected_out: "Semantic error ESE0087: Property 'bar' does not exist on type 'String'"
 
   - call: |-
