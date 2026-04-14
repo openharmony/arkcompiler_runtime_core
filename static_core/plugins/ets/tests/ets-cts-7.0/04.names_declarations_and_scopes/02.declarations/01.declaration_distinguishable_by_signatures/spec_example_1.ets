@@ -16,6 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Declaration functions distinguishable by signatures with export
+tags: [compile-only, negative]
 files: ['./module_to_export.ets']
 ---*/
 
