@@ -16,10 +16,12 @@
 /*---
 desc: Reference to an undefined class name.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0371: Cannot find type 'A'.
 ---*/
 
 function main(): void {
-  let a = new A();
+    let a = new A();
 }

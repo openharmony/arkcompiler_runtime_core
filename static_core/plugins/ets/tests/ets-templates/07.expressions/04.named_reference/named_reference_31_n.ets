@@ -16,11 +16,14 @@
 /*---
 desc: The qualified name is incorrect, the interface is referenced. A compilation error is reported.
 files:
-- ./named_reference_export6.ets
-- ./named_reference_export7.ets
+    - ./named_reference_export6.ets
+    - ./named_reference_export7.ets
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0371: Cannot find type 'ShapeInterface'.
+    Semantic error ESE0070: 'Calculable' type does not exist.
 ---*/
 
 import {ShapeInterfaces} from './named_reference_export6.ets';
