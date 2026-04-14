@@ -50,59 +50,6 @@ constexpr int MARK_PREFETCH_DISTANCE = 16; // when it is changed, remember to ch
 #error Prefetch queue size must be strictly greater than prefetch distance.
 #endif
 
-class PrefetchQueue {
-public:
-    explicit PrefetchQueue(size_t d) : elems_{ nullptr }, distance_(d), tail_(0), head_(0) {}
-    ~PrefetchQueue() {}
-    inline void Add(BaseObject* objaddr)
-    {
-        size_t t = tail_;
-        elems_[t] = objaddr;
-        tail_ = (t + 1) & (COMMON_MAX_PREFETCH_QUEUE_SIZE - 1UL);
-
-        __builtin_prefetch(reinterpret_cast<void*>(objaddr), 0, PREFETCH_LOCALITY);
-    }
-
-    inline BaseObject* Remove()
-    {
-        size_t h = head_;
-        BaseObject* objaddr = elems_[h];
-        head_ = (h + 1) & (COMMON_MAX_PREFETCH_QUEUE_SIZE - 1UL);
-
-        return objaddr;
-    }
-
-    inline size_t Length() const { return (tail_ - head_) & (COMMON_MAX_PREFETCH_QUEUE_SIZE - 1UL); }
-
-    inline bool Empty() const { return head_ == tail_; }
-
-    inline bool Full() const { return Length() == distance_; }
-
-private:
-    static constexpr int PREFETCH_LOCALITY = 3;
-    BaseObject* elems_[COMMON_MAX_PREFETCH_QUEUE_SIZE];
-    size_t distance_;
-    size_t tail_;
-    size_t head_;
-}; // End of small queue implementation
-
-// For managing gc roots
-class StaticRootTable {
-public:
-    struct StaticRootArray {
-        RefField<>* content[0];
-    };
-
-    StaticRootTable() { totalRootsCount_ = 0; }
-    ~StaticRootTable() = default;
-    void VisitRoots(const RefFieldVisitor& visitor);
-
-private:
-    std::mutex gcRootsLock_;                         // lock gcRootsBuckets
-    std::map<StaticRootArray*, uint32_t> gcRootsBuckets_; // record gc roots entry of CFile
-    size_t totalRootsCount_;
-};
-
 class ParallelMarkingMonitor : public TaskPackMonitor {
 public:
     explicit ParallelMarkingMonitor(int posted, int capacity) : TaskPackMonitor(posted, capacity) {}
@@ -117,13 +64,11 @@ public:
 class MarkingWork;
 template <bool ProcessXRef>
 class ConcurrentMarkingWork;
-using RootSet = MarkStack<BaseObject*>;
 constexpr size_t LOCAL_MARK_STACK_CAPACITY = 128;
 using GlobalMarkStack = StackList<BaseObject, LOCAL_MARK_STACK_CAPACITY>;
 using ParallelLocalMarkStack = LocalStack<BaseObject, LOCAL_MARK_STACK_CAPACITY, ParallelMarkingMonitor>;
 using SequentialLocalMarkStack = LocalStack<BaseObject, LOCAL_MARK_STACK_CAPACITY>;
 using LocalCollectStack = LocalStack<BaseObject, LOCAL_MARK_STACK_CAPACITY>;
-using WorkStackBuf = MarkStackBuffer<BaseObject*>;
 
 using WeakStack = CArrayList<std::pair<RefField<>*, size_t>>;
 
@@ -337,7 +282,6 @@ protected:
 
     // let finalizerProcessor process finalizers, and mark resurrected if in stw gc
     void ClearWeakStack(bool parallel);
-    virtual void ProcessStringTable() {}
 
     virtual void ProcessFinalizers() {}
     virtual void RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack)
@@ -360,8 +304,6 @@ private:
     void MarkRememberSetImpl(BaseObject* object, LocalCollectStack &markStack);
     void ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel);
     void MarkAwaitingJitFort();
-    void EnumMutatorRoot(ObjectPtr& obj, RootSet& rootSet) const;
-    void EnumConcurrencyModelRoots(RootSet& rootSet) const;
 };
 
 

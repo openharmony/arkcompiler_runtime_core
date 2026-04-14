@@ -16,7 +16,6 @@
 #include "common_components/heap/allocator/fix_heap.h"
 
 #include "common_components/heap/ark_collector/ark_collector.h"
-#include "common_runtime/hooks.h"
 
 namespace common_vm {
 

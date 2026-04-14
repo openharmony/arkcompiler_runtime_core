@@ -14,7 +14,6 @@
  **/
 
 #include "common_interfaces/heap/heap_visitor.h"
-#include "common_components/common_runtime/hooks.h"
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/base_runtime.h"
 

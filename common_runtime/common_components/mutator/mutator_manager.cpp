@@ -177,22 +177,6 @@ void MutatorManager::AcquireMutatorManagementWLock()
     }
 }
 
-bool MutatorManager::AcquireMutatorManagementWLockForCpuProfile()
-{
-    uint64_t start = TimeUtil::NanoSeconds();
-    bool acquired = TryAcquireMutatorManagementWLock();
-    while (!acquired) {
-        TimeUtil::SleepForNano(WAIT_LOCK_INTERVAL);
-        acquired = TryAcquireMutatorManagementWLock();
-        uint64_t now = TimeUtil::NanoSeconds();
-        if (!acquired && ((now - start) / SECOND_TO_NANO_SECOND > WAIT_LOCK_TIMEOUT)) {
-            LOG_COMMON(FATAL) << "Wait mutator list lock timeout";
-            UNREACHABLE_CC();
-        }
-    }
-    return acquired;
-}
-
 // Visit all mutators, hold mutatorListLock firstly
 void MutatorManager::VisitAllMutators(MutatorVisitor func, bool ignoreFinalizer)
 {
@@ -425,24 +409,6 @@ void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
     EnsurePhaseTransition(phase, undoneMutators);
     if (!worldStopped) {
         MutatorManagementWUnlock();
-    }
-}
-
-void MutatorManager::EnsureCpuProfileFinish(std::list<Mutator *> &undoneMutators)
-{
-    while (undoneMutators.size() > 0) {
-        for (auto it = undoneMutators.begin(); it != undoneMutators.end();) {
-            Mutator *mutator = *it;
-            if (mutator->FinishedCpuProfile()) {
-                it = undoneMutators.erase(it);
-                continue;
-            }
-            if (mutator->InSaferegion() && mutator->TransitionToCpuProfile(false)) {
-                it = undoneMutators.erase(it);
-                continue;
-            }
-            ++it;
-        }
     }
 }
 

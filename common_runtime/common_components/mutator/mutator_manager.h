@@ -110,8 +110,6 @@ public:
 
     void AcquireMutatorManagementWLock();
 
-    bool AcquireMutatorManagementWLockForCpuProfile();
-
     static void VisitMuatorHelper(void* argPtr, void* handle)
     {
         Mutator* mutator = reinterpret_cast<Mutator*>(argPtr);
@@ -165,8 +163,6 @@ public:
 
     void EnsurePhaseTransition(GCPhase phase, std::list<Mutator*> &undoneMutators);
     void TransitionAllMutatorsToGCPhase(GCPhase phase);
-
-    void EnsureCpuProfileFinish(std::list<Mutator*> &undoneMutators);
 
     template<class STWFunction>
     void FlipMutators(STWParam& param, STWFunction&& stwFunction, FlipFunction *flipFunction);

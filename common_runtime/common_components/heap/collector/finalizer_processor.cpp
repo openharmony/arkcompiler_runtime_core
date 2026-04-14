@@ -253,14 +253,6 @@ void FinalizerProcessor::LogAfterProcess()
 }
 #endif
 
-void FinalizerProcessor::RegisterFinalizer(BaseObject* obj)
-{
-    RefField<> tmpField(nullptr);
-    Heap::GetHeap().GetBarrier().WriteStaticRef(tmpField, obj);
-    std::lock_guard<std::mutex> l(listLock_);
-    finalizers_.push_back(reinterpret_cast<BaseObject*>(tmpField.GetFieldValue()));
-}
-
 void FinalizerProcessor::ReclaimHeapGarbage()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "ARK_RT_GC_RECLAIM", "");

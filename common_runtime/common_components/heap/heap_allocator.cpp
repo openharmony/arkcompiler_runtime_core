@@ -66,13 +66,6 @@ Address HeapAllocator::AllocateInHuge(size_t size, LanguageType language)
     return address;
 }
 
-Address HeapAllocator::AllocateInReadOnly(size_t size, LanguageType language)
-{
-    auto address = HeapManager::Allocate(size, AllocType::READ_ONLY_OBJECT);
-    BaseObject::Cast(address)->SetLanguageType(language);
-    return address;
-}
-
 uintptr_t HeapAllocator::AllocateLargeJitFortRegion(size_t size, LanguageType language)
 {
     RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());

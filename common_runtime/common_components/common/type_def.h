@@ -38,15 +38,13 @@ using common_vm::BaseObject;
 // basic types for managed world: modify them together
 using MIndex = uint64_t;  // index of array
 
-// at first glance, there is no need to expose this type or at least RAW_POINTER_OBJECT.
+// at first glance, there is no need to expose this type.
 // however in consideration that there are lots of differences for runtime apis to support different gc,
 // this is acceptable.
 enum class AllocType {
     MOVEABLE_OBJECT = 0,
     MOVEABLE_OLD_OBJECT,
     NONMOVABLE_OBJECT,
-    RAW_POINTER_OBJECT,
-    READ_ONLY_OBJECT,
 };
 } // namespace common_vm
 
