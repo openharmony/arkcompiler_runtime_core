@@ -147,10 +147,11 @@ HWTEST(MemberLinkerTest, member_linker_test_002, TestSize.Level1)
     ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.Interface1.field1",
                                             field1SetterOfClassA.value());
 
-    // ClassC declares field1; it is the tail of the override chain for ClassB / Interface2 field1.
-    const auto field1OfClassC = fileView.Get<abckit_wrapper::Field>("module_member_linker_field_test.ClassC.field1");
-    ASSERT_TRUE(field1OfClassC.has_value());
-    abckit_wrapper::Member *tailMember = field1OfClassC.value();
+    // ClassC does not redeclare field1; generated ABC has no ClassC.field1. Chain tail is ClassB field1 setter.
+    const auto field1SetterOfClassB = fileView.Get<abckit_wrapper::Method>(
+        "module_member_linker_field_test.ClassB.%%set-field1:module_member_linker_field_test.ClassB;i32;void;");
+    ASSERT_TRUE(field1SetterOfClassB.has_value());
+    abckit_wrapper::Member *tailMember = field1SetterOfClassB.value();
 
     // ClassB field1
     ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.ClassB.field1", tailMember);
@@ -265,11 +266,11 @@ HWTEST(MemberLinkerTest, member_linker_test_004, TestSize.Level1)
     ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.Interface1.field1",
                                               field1SetterOfClassA.value());
 
-    // ClassC declares field1; it is the tail of the override chain for ClassB / Interface2 field1.
-    const auto field1OfClassC =
-        fileView.Get<abckit_wrapper::Field>("ns_member_linker_field_test.Ns1.ClassC.field1");
-    ASSERT_TRUE(field1OfClassC.has_value());
-    abckit_wrapper::Member *tailMember = field1OfClassC.value();
+    // ClassC does not redeclare field1; generated ABC has no Ns1.ClassC.field1. Chain tail is ClassB field1 setter.
+    const auto field1SetterOfClassB = fileView.Get<abckit_wrapper::Method>(
+        "ns_member_linker_field_test.Ns1.ClassB.%%set-field1:ns_member_linker_field_test.Ns1.ClassB;i32;void;");
+    ASSERT_TRUE(field1SetterOfClassB.has_value());
+    abckit_wrapper::Member *tailMember = field1SetterOfClassB.value();
 
     // ClassB field1
     ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.ClassB.field1", tailMember);
