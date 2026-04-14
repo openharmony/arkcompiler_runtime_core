@@ -70,7 +70,7 @@ cases:
           arktest.assertFalse(a == b) // different types
 
     - warning: |-
-          Warning W0018: Values of BigInt type are never equal to numerics.
+          Warning W65001: The equality expression is always false.
       decl: |-
           let a = 1n
           let b = 1

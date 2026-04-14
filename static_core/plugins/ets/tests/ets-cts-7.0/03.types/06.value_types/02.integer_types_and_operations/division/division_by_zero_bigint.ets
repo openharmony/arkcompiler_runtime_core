@@ -15,6 +15,8 @@ limitations under the License.
 
 /*---
 desc: check division by zero for bigint operand
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY206401: BigInt: division by zero"
 ---*/
 
 function foo(): void {

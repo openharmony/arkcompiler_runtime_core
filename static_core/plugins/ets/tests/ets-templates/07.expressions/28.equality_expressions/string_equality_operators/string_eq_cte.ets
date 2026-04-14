@@ -17,7 +17,14 @@
 
 /*---
 desc: Compile-time error test for String equality
+{% if case.expect_cte is defined and not case.expect_cte %}
+tags: [compile-only]
+{% else %}
 tags: [negative, compile-only]
+{% endif %}
+{% if case.expected_out is defined %}
+expected_out: {{case.expected_out}}
+{% endif %}
 ---*/
 
 class TestClass {}
