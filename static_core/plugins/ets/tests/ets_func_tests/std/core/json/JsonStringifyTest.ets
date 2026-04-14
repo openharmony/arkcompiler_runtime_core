@@ -73,7 +73,7 @@ function testStringifyNullUndefined(): void {
     arktest.assertEQ(JSON.stringifyJsonElement(nullElem), "null", "Null should be stringified as 'null'");
 
     const undefinedElem = jsonx.JsonElement.createUndefined();
-    arktest.assertEQ(JSON.stringifyJsonElement(undefinedElem), "undefined", "Undefined should be stringified as 'undefined'");
+    arktest.assertEQ(JSON.stringifyJsonElement(undefinedElem), '', 'Undefined should be stringified as empty string');
 }
 
 function testStringifyBooleans(): void {

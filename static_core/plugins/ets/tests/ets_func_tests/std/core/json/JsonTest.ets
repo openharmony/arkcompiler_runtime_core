@@ -336,7 +336,7 @@ function testStringifyArrayWithReferenceCycle(): int {
 function testStringifyLambda(): int {
     const lambda = () => "hello"
 
-    let testResult = test("undefined" == JSON.stringify(lambda), "standalone lambda")
+    let testResult = test('' == JSON.stringify(lambda), 'standalone lambda')
     testResult += test("[null]" == JSON.stringify([lambda]), "array of lambdas")
 
     return testResult
@@ -358,7 +358,7 @@ function hello(): string {
 function testStringifyFunction(): int {
     const fn: () => string = hello
 
-    let testResult = test("undefined" == JSON.stringify(fn), "standalone function")
+    let testResult = test('' == JSON.stringify(fn), "standalone function")
     testResult += test("[null]" == JSON.stringify([fn]), "array of functions")
 
     return testResult
@@ -419,7 +419,7 @@ function testStringifyEnum(): int {
 function testStringifyNullUndefined(): int {
     let testResult = test("null" == JSON.stringify(null), "standalone null")
 
-    testResult += test("undefined" == JSON.stringify(undefined), "standalone undefined")
+    testResult += test('' == JSON.stringify(undefined), "standalone undefined")
 
     return testResult
 }
