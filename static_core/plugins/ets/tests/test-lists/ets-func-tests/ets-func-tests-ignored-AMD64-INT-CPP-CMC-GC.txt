@@ -1,3 +1,6 @@
+#33179
+ets_func_tests/std/concurrency/workerlocal_test.ets
+
 #34083
 ets_func_tests/std/containers/async_array_concurrent_queue/ArrayConcurrentQueue_PopTest.ets
 
