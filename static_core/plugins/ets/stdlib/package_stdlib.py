@@ -165,9 +165,6 @@ def main():
         "--std-dir", type=Path, help="Directory containing standard library files"
     )
     parser.add_argument(
-        "--escompat-dir", type=Path, help="Directory containing escompact files"
-    )
-    parser.add_argument(
         "--arkruntime-dir", type=Path, help="Directory containing arkruntime files"
     )
     parser.add_argument(
@@ -180,21 +177,17 @@ def main():
     args = parser.parse_args()
 
     std_lib_dir = args.std_dir
-    escompat_lib_dir = args.escompat_dir
     arkruntime_lib_dir = args.arkruntime_dir
     target_dir = args.target_dir
     json_file = args.json_file
 
-    if not std_lib_dir or not escompat_lib_dir or not arkruntime_lib_dir or not target_dir or not json_file:
-        parser.error("std-dir, escompact-dir, arkruntime-dir, target-dir, and json-files are required.")
-    template_dir = escompat_lib_dir.parent.parent / "templates" / "stdlib"
-    validate_templates(template_dir, escompat_lib_dir.parent)
+    if not std_lib_dir or not arkruntime_lib_dir or not target_dir or not json_file:
+        parser.error("std-dir, arkruntime-dir, target-dir, and json-files are required.")
+    template_dir = std_lib_dir.parent.parent / "templates" / "stdlib"
+    validate_templates(template_dir, std_lib_dir.parent)
     target_dir.mkdir(parents=True, exist_ok=True)
     hiddable_apis = read_hiddable_apis(std_lib_dir, json_file)
     copy_files_with_filter(std_lib_dir, target_dir, hiddable_apis)
-
-    escompat_target_dir = target_dir / escompat_lib_dir.name
-    shutil.copytree(escompat_lib_dir, escompat_target_dir, dirs_exist_ok=True)
 
     arkruntime_target_dir = target_dir / arkruntime_lib_dir.name
     shutil.copytree(arkruntime_lib_dir, arkruntime_target_dir, dirs_exist_ok=True)

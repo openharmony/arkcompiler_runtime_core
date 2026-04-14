@@ -270,7 +270,6 @@ function ets_std_lib() {
     echo "> Copying ets std lib into SDK..."
     mkdir -p "$PANDA_SDK_PATH"/ets/stdlib
     cp -r "$ARK_ROOT"/plugins/ets/stdlib/std "$PANDA_SDK_PATH"/ets/stdlib
-    cp -r "$ARK_ROOT"/plugins/ets/stdlib/escompat "$PANDA_SDK_PATH"/ets/stdlib
     cp -r "$ARK_ROOT"/plugins/ets/stdlib/arkruntime "$PANDA_SDK_PATH"/ets/stdlib
 }
 

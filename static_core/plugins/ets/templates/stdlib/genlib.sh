@@ -16,7 +16,6 @@ set -e -o pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 readonly GENPATH="${SCRIPT_DIR}/../../stdlib"
-readonly GEN_ESCOMPAT_PATH="${1:-${GENPATH}}/escompat"
 readonly GEN_STDCORE_PATH="${1:-${GENPATH}}/std/core"
 readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
 readonly GEN_STDINTEROP_PATH="${1:-${GENPATH}}/std/interop/js"
@@ -40,7 +39,6 @@ function format_file() {
     sed -e 's/\b \s\+\b/ /g' | sed -e 's/\s\+$//g' | sed -e 's+/\*\s*\*/\s*++g' | cat -s
 }
 
-mkdir -p "${GEN_ESCOMPAT_PATH}"
 mkdir -p "${GEN_STDCORE_PATH}"
 mkdir -p "${GEN_STDINTEROP_PATH}"
 
