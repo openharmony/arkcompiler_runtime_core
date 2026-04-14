@@ -136,17 +136,6 @@
 #32626
 07.expressions/07.spread_expression/spex_copy_values_8.ets
 
-#32639
-07.expressions/07.spread_expression/spex_readonly_array_source.ets
-07.expressions/07.spread_expression/spex_readonly_n_1.ets
-
-#33309
-07.expressions/07.spread_expression/spex_58.ets
-07.expressions/07.spread_expression/spex_59.ets
-07.expressions/07.spread_expression/spex_60.ets
-07.expressions/07.spread_expression/spex_61.ets
-07.expressions/07.spread_expression/spex_62.ets
-
 #32421
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_0.ets
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_1.ets

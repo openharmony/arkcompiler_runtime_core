@@ -26,7 +26,7 @@ cases:
           let a: readonly number[] = [1.0, 2.0, 3.0]
           let ro: readonly number[] = [...a]
           ro[0] = 25.0
-      expected: Cannot assign to read-only property
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
 
     - use: |-
           // Mutable array spread to readonly with elements - cannot modify
