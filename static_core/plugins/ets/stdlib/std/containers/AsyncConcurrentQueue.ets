@@ -53,7 +53,7 @@ export namespace containers.stackless {
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        pop(): Promise<T>;
+        pop(): Promise<Awaited<T>>;
 
         /**
          * Attempts to insert an element without waiting.
