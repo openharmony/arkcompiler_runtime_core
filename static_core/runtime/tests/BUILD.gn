@@ -51,6 +51,12 @@ ark_runtime_unittest("arkruntime_memory_management_test") {
     ]
   }
   if (ark_use_common_runtime) {
+    cflags_cc = [
+      "-Wno-variadic-macros",
+      "-Wno-gnu-anonymous-struct",
+      "-Wno-nested-anon-types",
+      "-Wno-zero-length-array",
+    ]
     sources = ["cmcgc_test.cpp"]
   }
   module_out_path = runtime_test_module_out_path

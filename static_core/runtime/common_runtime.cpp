@@ -61,8 +61,10 @@ void InitCommonRuntime()
     auto *baseRuntime = BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     auto param = BaseRuntime::GetDefaultParam();
-    param.logOptions.level = MapLogLevel(Logger::GetLevel());
-    param.logOptions.component = MapLogComponents();
+    if (Logger::IsInitialized()) {
+        param.logOptions.level = MapLogLevel(Logger::GetLevel());
+        param.logOptions.component = MapLogComponents();
+    }
     // Single pass compaction should be enabled explicitly
     param.gcParam.singlePassCompactionEnabled =
         runtimeOptions.WasSetG1SinglePassCompactionEnabled() && runtimeOptions.IsG1SinglePassCompactionEnabled();
