@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,18 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-{% for c in cases %}
+*/
 
 /*---
-desc: {{c.desc}}
+desc: Start a coroutine with a complex lambda expression.
+expected_out:
+    runtime:
+        - Test for coroutine with a complex lambda expression is passed.
 ---*/
 
-{{c.decl}}
-
-function main(): void {
-  {{c.logic}}
+async function main(): Promise<void> {
+  const complexLambda = async (n: number): Promise<int> => {
+    let sum: int = 0;
+    for (let i = 1; i <= n; i++) {
+      sum += i;
+    }
+    return Promise.resolve(sum);
+  };
+  await ( async ()=>{
+    const result: int = await complexLambda(3);
+    arktest.assertEQ(result, 6);
+    console.log("Test for coroutine with a complex lambda expression is passed."); //To ensure the async lambda has completed
+  })()
 }
-
-{% endfor %}
