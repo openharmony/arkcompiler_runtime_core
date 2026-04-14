@@ -16,15 +16,17 @@
 /*---
 desc: Reference to an undefined class member.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0087: Property 'j' does not exist on type 'A'
 ---*/
 
 class A {
-  i: number = 0;
+    i: number = 0;
 }
 
 function main(): void {
-  let a = new A();
-  let b = a.j;
+    let a = new A();
+    let b = a.j;
 }

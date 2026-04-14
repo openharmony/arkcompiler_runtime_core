@@ -16,10 +16,14 @@
 /*---
 desc: The qualified name is misspelled when the module is imported.
 files:
-- ./named_reference_export10.ets
+    - ./named_reference_export10.ets
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0356: Cannot find imported element 'UserID1'
+    Semantic error ESE0371: Cannot find type 'UserID1'.
+    Semantic error ESE0371: Cannot find type 'UserID1'.
 ---*/
 
 import {UserID1} from './named_reference_export10.ets';

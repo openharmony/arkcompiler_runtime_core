@@ -16,10 +16,12 @@
 /*---
 desc: Restricting access Interface by namespace, object that does not meet the interface definition.
 files:
-- ./named_reference_export6.ets
+    - ./named_reference_export6.ets
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0065: type Calculable has no property named Calculable
 ---*/
 
 import {ShapeInterfaces} from './named_reference_export6.ets';

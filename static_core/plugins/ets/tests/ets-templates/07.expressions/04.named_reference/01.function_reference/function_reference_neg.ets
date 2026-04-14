@@ -19,8 +19,9 @@ desc: >-
     but only if Explicit Generic Instantiations is present,
     otherwise a compile-time error occurs
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE655063: Generic function gen requires explicit type arguments when used as a value.
 ---*/
 
 function gen<T> (x: T) {}
 let b = gen ;
-
