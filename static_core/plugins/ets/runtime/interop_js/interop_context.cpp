@@ -356,9 +356,6 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
         XGC::Create(vm, etsProxyRefStorage.get(), static_cast<STSVMInterfaceImpl *>(stsVMInterface.get()));
     ASSERT(xgcCreated);
 
-    isInteropStackEnabled =
-        Runtime::GetOptions().IsInteropSupportHybridstack(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
-
     // the event loop framework is per-EtsVM. Further on, it uses local InteropCtx instances
     // to access the JSVM-specific data
     RegisterEventLoopModule(EtsExecutionContext::GetCurrent());
@@ -450,6 +447,9 @@ InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJ
 
     InitExternalInterfaces();
     InitJsValueFinalizationRegistry(executionCtx);
+
+    isInteropStackEnabled_ =
+        Runtime::GetOptions().IsInteropSupportHybridstack(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
 }
 
 InteropCtx::~InteropCtx()
