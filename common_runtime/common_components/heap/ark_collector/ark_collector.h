@@ -25,25 +25,6 @@
 
 namespace common_vm {
 
-class CopyTable {
-public:
-    explicit CopyTable(RegionalHeap& space) : theSpace(space) {}
-
-    // if object is not relocated (forwarded or compacted), return nullptr.
-    BaseObject* RouteObject(BaseObject* old, size_t size)
-    {
-        BaseObject* toAddress = theSpace.RouteObject(old, size);
-        return toAddress;
-    }
-
-    BaseObject* GetForwardingPointer(BaseObject* old)
-    {
-        return old->GetForwardingPointer();
-    }
-
-    RegionalHeap& theSpace;
-};
-
 enum class GCMode: uint8_t {
     CMC = 0,
     CONCURRENT_MARK = 1,
@@ -53,7 +34,7 @@ enum class GCMode: uint8_t {
 class ArkCollector : public MarkingCollector {
 public:
     explicit ArkCollector(Allocator& allocator, CollectorResources& resources)
-        : MarkingCollector(allocator, resources), fwdTable_(reinterpret_cast<RegionalHeap&>(allocator))
+        : MarkingCollector(allocator, resources)
     {
         collectorType_ = CollectorType::SMOOTH_COLLECTOR;
     }
@@ -106,20 +87,6 @@ public:
 
     bool IsCurrentPointer(RefField<>& ref) const override { return false; }
 
-    void AddRawPointerObject(BaseObject* obj) override
-    {
-        RegionalHeap& space = reinterpret_cast<RegionalHeap&>(theAllocator_);
-        space.AddRawPointerObject(obj);
-    }
-
-    void RemoveRawPointerObject(BaseObject* obj) override
-    {
-        RegionalHeap& space = reinterpret_cast<RegionalHeap&>(theAllocator_);
-        space.RemoveRawPointerObject(obj);
-    }
-
-    BaseObject* ForwardUpdateRawRef(ObjectRef& ref);
-
     bool IsFromObject(BaseObject* obj) const override
     {
         // filter const string object.
@@ -135,11 +102,11 @@ public:
     bool IsUnmovableFromObject(BaseObject* obj) const override;
 
     // this is called when caller assures from-object/from-region still exists.
-    BaseObject* GetForwardingPointer(BaseObject* fromObj) { return fwdTable_.GetForwardingPointer(fromObj); }
+    BaseObject* GetForwardingPointer(BaseObject* fromObj) { return fromObj->GetForwardingPointer(); }
 
     BaseObject* FindToVersion(BaseObject* obj) const override
     {
-        return const_cast<ArkCollector*>(this)->fwdTable_.GetForwardingPointer(obj);
+        return obj->GetForwardingPointer();
     }
 
     void SetGCThreadQosPriority(common_vm::PriorityMode mode);
@@ -149,18 +116,8 @@ public:
 
     BaseObject* TryForwardObject(BaseObject* fromVersion);
 
-    bool TryUntagRefField(BaseObject* obj, RefField<>& field, BaseObject*& target) const override;
     bool TryUpdateRefField(BaseObject* obj, RefField<>& field, BaseObject*& newRef) const override;
     bool TryForwardRefField(BaseObject* obj, RefField<>& field, BaseObject*& newRef) const override;
-
-    RefField<> GetAndTryTagRefField(BaseObject* target) const override
-    {
-        if (IsFromObject(target)) {
-            return RefField<>(target);
-        } else {
-            return RefField<>(target);
-        }
-    }
 
     void ProcessEvacuationStack(GlobalEvacuationStack &globalStack);
     void ProcessEvacuationStack(ParallelLocalEvacuationStack &markStack);
@@ -192,7 +149,6 @@ protected:
     void ClearAllGCInfo();
 
     void DoGarbageCollection() override;
-    void ProcessStringTable() override;
 
     void ProcessFinalizers() override;
 
@@ -273,8 +229,6 @@ private:
     void MarkRef(RefField<> &ref, Stack &stack);
 
     void ProcessReferencesAfterCopy();
-
-    CopyTable fwdTable_;
 
     GCMode gcMode_ = GCMode::CMC;
 };

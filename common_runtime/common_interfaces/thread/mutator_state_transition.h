@@ -17,12 +17,17 @@
 #define COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
 
 #include "common_interfaces/thread/mutator-inl.h"
-#include "common_interfaces/thread/thread_state.h"
 #include "common_components/mutator/mutator_manager.h"
 
 namespace common_vm {
 
-template <typename T, ThreadState newState>
+enum class MutatorState : uint16_t {
+    RUNNING = 0,
+    NATIVE = 1,
+    WAIT = 2,
+};
+
+template <typename T, MutatorState newState>
 class MutatorStateTransitionScope final {
     static_assert(std::is_base_of_v<Mutator, T>);
 
@@ -30,7 +35,7 @@ public:
     explicit MutatorStateTransitionScope(T *self) : self_(self)
     {
         DCHECK_CC(self_ != nullptr);
-        if constexpr (newState == ThreadState::RUNNING) {
+        if constexpr (newState == MutatorState::RUNNING) {
             hasSwitchState_ = self_->TransferToRunningIfInNative();
         } else {
             hasSwitchState_ = self_->TransferToNativeIfInRunning();
@@ -40,7 +45,7 @@ public:
     ~MutatorStateTransitionScope()
     {
         if (hasSwitchState_) {
-            if constexpr (newState == ThreadState::RUNNING) {
+            if constexpr (newState == MutatorState::RUNNING) {
                 self_->TransferToNative();
             } else {
                 self_->TransferToRunning();
@@ -54,20 +59,6 @@ private:
     NO_COPY_SEMANTIC_CC(MutatorStateTransitionScope);
 };
 
-class MutatorSuspensionScope final {
-public:
-    explicit MutatorSuspensionScope(Mutator *self) : scope_(self)
-    {
-        DCHECK_CC(!self->IsInRunningState());
-    }
-
-    ~MutatorSuspensionScope() = default;
-
-private:
-    MutatorStateTransitionScope<Mutator, ThreadState::IS_SUSPENDED> scope_;
-    NO_COPY_SEMANTIC_CC(MutatorSuspensionScope);
-};
-
 class MutatorNativeScope final {
 public:
     explicit MutatorNativeScope(Mutator *self) : scope_(self)
@@ -78,7 +69,7 @@ public:
     ~MutatorNativeScope() = default;
 
 private:
-    MutatorStateTransitionScope<Mutator, ThreadState::NATIVE> scope_;
+    MutatorStateTransitionScope<Mutator, MutatorState::NATIVE> scope_;
     NO_COPY_SEMANTIC_CC(MutatorNativeScope);
 };
 
@@ -92,39 +83,8 @@ public:
     ~MutatorManagedScope() = default;
 
 private:
-    MutatorStateTransitionScope<T, ThreadState::RUNNING> scope_;
+    MutatorStateTransitionScope<T, MutatorState::RUNNING> scope_;
     NO_COPY_SEMANTIC_CC(MutatorManagedScope);
-};
-
-template <typename T>
-class SuspendAllScope final {
-    static_assert(std::is_base_of_v<Mutator, T>);
-
-public:
-    explicit SuspendAllScope(T *self) : self_(self), scope_(self)
-    {
-#if defined(TODO_MACRO)
-        TRACE_GC(GCStats::Scope::ScopeId::SuspendAll, SharedHeap::GetInstance()->GetEcmaGCStats());
-        ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "SuspendAll", "");
-#endif
-        DCHECK_CC(self_ != nullptr);
-        DCHECK_CC(!self_->IsInRunningState());
-        MutatorManager::Instance().StopTheWorld(false, GCPhase::GC_PHASE_IDLE);
-    }
-
-    ~SuspendAllScope()
-    {
-#if defined(TODO_MACRO)
-        TRACE_GC(GCStats::Scope::ScopeId::ResumeAll, SharedHeap::GetInstance()->GetEcmaGCStats());
-        ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "ResumeAll", "");
-#endif
-        MutatorManager::Instance().StartTheWorld();
-    }
-
-private:
-    T *self_;
-    MutatorStateTransitionScope<T, ThreadState::IS_SUSPENDED> scope_;
-    NO_COPY_SEMANTIC_CC(SuspendAllScope);
 };
 }  // namespace common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H

@@ -43,10 +43,6 @@ public:
     // For PostFork and Prefork.
     static void StartRuntimeThreads();
     static void StopRuntimeThreads();
-
-    void SetReadOnlyToROSpace();
-    void ClearReadOnlyFromROSpace();
-    bool IsInROSpace(BaseObject *obj);
 };
 } // namespace common_vm
 #endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H

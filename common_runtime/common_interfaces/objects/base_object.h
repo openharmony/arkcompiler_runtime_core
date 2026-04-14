@@ -34,6 +34,9 @@
 #include "common_interfaces/objects/base_object_operator.h"
 #include "common_interfaces/objects/base_state_word.h"
 namespace common_vm {
+
+using MemoryOrder = std::memory_order;
+
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
@@ -142,13 +145,6 @@ public:
     void SetForwardState(BaseStateWord::ForwardState state)
     {
         state_.SetForwardState(state);
-    }
-
-    template <typename T>
-    Field<T> &GetField(uint32_t offset) const
-    {
-        auto addr = reinterpret_cast<MAddress>(this) + offset;
-        return *reinterpret_cast<Field<T> *>(addr);
     }
 
     // Locking means that this object forwardstate is forwarding.

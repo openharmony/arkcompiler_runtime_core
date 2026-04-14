@@ -77,7 +77,6 @@ public:
         SUSPENSION_FOR_GC_PHASE = 1 << 0,
         SUSPENSION_FOR_STW = 1 << 1,
         SUSPENSION_FOR_EXIT = 1 << 2,
-        SUSPENSION_FOR_CPU_PROFILE = 1 << 3,
         SUSPENSION_FOR_PENDING_CALLBACK = 1 << 4,
         SUSPENSION_FOR_RUNNING_CALLBACK = 1 << 5,
         /**
@@ -113,13 +112,6 @@ public:
         FINISH_TRANSITION,
     };
 
-    enum CpuProfileState : uint32_t {
-        NO_CPUPROFILE,
-        NEED_CPUPROFILE,
-        IN_CPUPROFILING,
-        FINISH_CPUPROFILE,
-    };
-
     virtual ~Mutator();
 
     static Mutator* NewMutator();
@@ -129,9 +121,7 @@ public:
     static Mutator* GetMutator() noexcept;
 
     void InitTid();
-    void SetEcmaVMPtr(void* ecmaVMPtr) { this->ecmavm_ = ecmaVMPtr;}
     uint32_t GetTid() const { return tid_; }
-    void* GetEcmaVMPtr() const {return ecmavm_;}
 
     static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
     {
@@ -185,16 +175,6 @@ public:
         return transitionState_ == FINISH_TRANSITION;
     }
 
-    __attribute__((always_inline)) inline bool FinishedCpuProfile() const
-    {
-        return cpuProfileState_.load(std::memory_order_acquire) == FINISH_CPUPROFILE;
-    }
-
-    __attribute__((always_inline)) inline void SetCpuProfileState(CpuProfileState state)
-    {
-        cpuProfileState_.store(state, std::memory_order_relaxed);
-    }
-
     // Spin wait phase transition finished when GC is tranverting this mutator's phase
     __attribute__((always_inline)) inline void WaitForPhaseTransition() const
     {
@@ -209,20 +189,10 @@ public:
         }
     }
 
-    __attribute__((always_inline)) inline void WaitForCpuProfiling() const
-    {
-        while (cpuProfileState_.load(std::memory_order_acquire) != FINISH_CPUPROFILE) {
-            // Give up CPU to avoid overloading
-            (void)sched_yield();
-        }
-    }
-
     __attribute__((always_inline)) inline void SetSuspensionFlag(SuspensionType flag)
     {
         if (flag == SUSPENSION_FOR_GC_PHASE) {
             transitionState_.store(NEED_TRANSITION, std::memory_order_relaxed);
-        } else if (flag == SUSPENSION_FOR_CPU_PROFILE) {
-            cpuProfileState_.store(NEED_CPUPROFILE, std::memory_order_relaxed);
         }
         suspensionFlag_.fetch_or(flag, std::memory_order_seq_cst);
     }
@@ -293,14 +263,8 @@ public:
     void GCPhasePreForward(GCPhase newPhase);
     void HandleGCPhase(GCPhase newPhase);
 
-    inline void HandleCpuProfile();
-
-    void TransitionToCpuProfileExclusive();
-
     // Ensure that mutator phase is changed only once by mutator itself or GC
     bool TransitionGCPhase(bool bySelf);
-
-    __attribute__((always_inline)) inline bool TransitionToCpuProfile(bool bySelf);
 
     virtual void VisitMutatorRoots(const RefFieldVisitor& visitor);
     virtual void UpdateReadBarrierEntrypoint(common_vm::GCPhase phase);
@@ -479,12 +443,8 @@ private:
     // Indicate the state of mutator's phase transition
     std::atomic<GCPhaseTransitionState> transitionState_ = { NO_TRANSITION };
 
-    std::atomic<CpuProfileState> cpuProfileState_ = { NO_CPUPROFILE };
-
     // thread id
     uint32_t tid_ = 0;
-    // ecmavm
-    void* ecmavm_ = nullptr;
 
     ObjectRef rawObject_{ nullptr };
     std::mutex flipFunctionMtx_;

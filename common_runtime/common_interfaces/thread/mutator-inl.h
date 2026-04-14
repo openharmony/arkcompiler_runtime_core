@@ -45,38 +45,6 @@ inline bool Mutator::LeaveSaferegion() noexcept
     return false;
 }
 
-// Ensure that mutator is changed only once by mutator itself or Profile
-bool Mutator::TransitionToCpuProfile(bool bySelf)
-{
-    // CC-OFFNXT(G.CTL.03): false positive
-    do {
-        CpuProfileState state = cpuProfileState_.load();
-        // If this mutator profile has finished, just return
-        if (state == FINISH_CPUPROFILE) {
-            return true;
-        }
-        // If this mutator is executing profile by other thread, mutator should wait but profile just return
-        if (state == IN_CPUPROFILING) {
-            if (bySelf) {
-                WaitForCpuProfiling();
-                return true;
-            } else {
-                return false;
-            }
-        }
-        if (!bySelf && state == NO_CPUPROFILE) {
-            return true;
-        }
-        // Current thread set atomic variable to ensure atomicity of phase transition
-        CHECK_CC(state == NEED_CPUPROFILE);
-        if (cpuProfileState_.compare_exchange_weak(state, IN_CPUPROFILING)) {
-            TransitionToCpuProfileExclusive();
-            cpuProfileState_.store(FINISH_CPUPROFILE, std::memory_order_release);
-            return true;
-        }
-    } while (true);
-}
-
 void Mutator::TransferToRunning()
 {
     DoLeaveSaferegion();

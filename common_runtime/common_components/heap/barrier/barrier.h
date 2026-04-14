@@ -31,28 +31,11 @@ public:
 
     virtual BaseObject* ReadRefField(BaseObject* obj, RefField<false>& field) const;
     virtual BaseObject* ReadStaticRef(RefField<false>& field) const;
-    virtual BaseObject* ReadStringTableStaticRef(RefField<false> &field) const;
 
-    virtual void ReadStruct(HeapAddress dst, BaseObject* obj, HeapAddress src, size_t size) const;
-
-    virtual void WriteRoot(BaseObject* obj) const;
-    virtual void WriteRefField(BaseObject* obj, RefField<false>& field, BaseObject* ref) const;
     virtual void WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const;
-    
-    virtual void WriteStaticRef(RefField<false>& field, BaseObject* ref) const;
-    virtual void WriteStruct(BaseObject* obj, HeapAddress dst, size_t dstLen, HeapAddress src, size_t srcLen) const;
-
-    virtual void CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MIndex dstSize,
-                              BaseObject* srcObj, HeapAddress srcField, MIndex srcSize) const;
 
     virtual BaseObject* AtomicReadRefField(BaseObject* obj, RefField<true>& field,
                                             MemoryOrder order) const;
-
-    virtual void AtomicWriteRefField(BaseObject* obj, RefField<true>& field, BaseObject* ref, MemoryOrder order) const;
-    virtual BaseObject* AtomicSwapRefField(BaseObject* obj, RefField<true>& field, BaseObject* ref,
-                                            MemoryOrder order) const;
-    virtual bool CompareAndSwapRefField(BaseObject* obj, RefField<true>& field, BaseObject* oldRef, BaseObject* newRef,
-                                         MemoryOrder succOrder, MemoryOrder failOrder) const;
 
 protected:
     class LocalRefFieldContainer {

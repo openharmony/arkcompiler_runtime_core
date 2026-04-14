@@ -60,9 +60,6 @@ public:
 
     bool IsUnmovableFromObject(BaseObject* obj) const override { return currentCollector_->IsUnmovableFromObject(obj); }
 
-    void AddRawPointerObject(BaseObject* obj) override { return currentCollector_->AddRawPointerObject(obj); }
-    void RemoveRawPointerObject(BaseObject* obj) override { return currentCollector_->RemoveRawPointerObject(obj); }
-
     BaseObject* ForwardObject(BaseObject* obj) override { return currentCollector_->ForwardObject(obj); }
 
     bool TryUpdateRefField(BaseObject* obj, RefField<>& field, BaseObject*& toVersion) const override
@@ -73,16 +70,6 @@ public:
     bool TryForwardRefField(BaseObject* obj, RefField<>& field, BaseObject*& toVersion) const override
     {
         return currentCollector_->TryForwardRefField(obj, field, toVersion);
-    }
-
-    bool TryUntagRefField(BaseObject* obj, RefField<>& field, BaseObject*& target) const override
-    {
-        return currentCollector_->TryUntagRefField(obj, field, target);
-    }
-
-    RefField<> GetAndTryTagRefField(BaseObject* obj) const override
-    {
-        return currentCollector_->GetAndTryTagRefField(obj);
     }
 
 private:

@@ -31,10 +31,7 @@
 #include "common_components/heap/space/to_space.h"
 #include "common_components/heap/space/nonmovable_space.h"
 #include "common_interfaces/thread/mutator.h"
-#include "common_components/heap/space/appspawn_space.h"
 #include "common_components/heap/space/large_space.h"
-#include "common_components/heap/space/rawpointer_space.h"
-#include "common_components/heap/space/readonly_space.h"
 #include "common_interfaces/objects/base_object.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
@@ -64,9 +61,7 @@ public:
 
     RegionalHeap() : youngSpace_(regionManager_), oldSpace_(regionManager_),
         fromSpace_(regionManager_, *this), toSpace_(regionManager_),
-        nonMovableSpace_(regionManager_), largeSpace_(regionManager_),
-        appSpawnSpace_(regionManager_), rawpointerSpace_(regionManager_),
-        readonlySpace_(regionManager_) {}
+        nonMovableSpace_(regionManager_), largeSpace_(regionManager_) {}
 
     NO_INLINE_CC virtual ~RegionalHeap()
     {
@@ -149,8 +144,7 @@ public:
     inline size_t GetUsedUnitCount() const
     {
         return fromSpace_.GetUsedUnitCount() + toSpace_.GetUsedUnitCount() + youngSpace_.GetUsedUnitCount() +
-            oldSpace_.GetUsedUnitCount() + nonMovableSpace_.GetUsedUnitCount() + largeSpace_.GetUsedUnitCount() +
-            appSpawnSpace_.GetUsedUnitCount() + readonlySpace_.GetUsedUnitCount() + rawpointerSpace_.GetUsedUnitCount();
+            oldSpace_.GetUsedUnitCount() + nonMovableSpace_.GetUsedUnitCount() + largeSpace_.GetUsedUnitCount();
     }
 
     size_t GetUsedPageSize() const override
@@ -239,8 +233,6 @@ public:
         toSpace_.CollectFixTasks(taskList);
         nonMovableSpace_.CollectFixTasks(taskList);
         largeSpace_.CollectFixTasks(taskList);
-        rawpointerSpace_.CollectFixTasks(taskList);
-        appSpawnSpace_.CollectFixTasks(taskList);
 
         return taskList;
     }
@@ -256,16 +248,6 @@ public:
     }
 
     void MarkJitFortMemInstalled(void *thread, BaseObject *obj);
-
-    void SetReadOnlyToROSpace()
-    {
-        readonlySpace_.SetReadOnlyToRORegionList();
-    }
-
-    void ClearReadOnlyFromROSpace()
-    {
-        readonlySpace_.ClearReadOnlyFromRORegionList();
-    }
 
     size_t CollectLargeGarbage() { return largeSpace_.CollectLargeGarbage(); }
 
@@ -289,17 +271,7 @@ public:
             oldSpace_.AssembleGarbageCandidates(fromSpace_);
             nonMovableSpace_.ClearRSet();
             largeSpace_.ClearRSet();
-            appSpawnSpace_.ClearRSet();
-            rawpointerSpace_.ClearRSet();
         }
-    }
-
-    void CollectAppSpawnSpaceGarbage()
-    {
-        regionManager_.CollectFromSpaceGarbage(fromSpace_.GetFromRegionList());
-        appSpawnSpace_.ReassembleAppspawnSpace(fromSpace_.GetExemptedRegionList());
-        appSpawnSpace_.ReassembleAppspawnSpace(toSpace_.GetTlToRegionList());
-        appSpawnSpace_.ReassembleAppspawnSpace(toSpace_.GetFullToRegionList());
     }
 
     void ClearAllGCInfo()
@@ -310,9 +282,6 @@ public:
         fromSpace_.ClearAllGCInfo();
         nonMovableSpace_.ClearAllGCInfo();
         largeSpace_.ClearAllGCInfo();
-        appSpawnSpace_.ClearAllGCInfo();
-        rawpointerSpace_.ClearAllGCInfo();
-        readonlySpace_.ClearAllGCInfo();
     }
 
     void AssembleGarbageCandidates()
@@ -343,7 +312,6 @@ public:
         VisitAllocBuffers(visitor);
 
         nonMovableSpace_.PrepareMarking();
-        readonlySpace_.PrepareMarking();
     }
 
     void PrepareForward()
@@ -362,7 +330,6 @@ public:
         VisitAllocBuffers(visitor);
 
         nonMovableSpace_.PrepareForward();
-        readonlySpace_.PrepareForward();
     }
     void FeedHungryBuffers() override;
 
@@ -409,43 +376,11 @@ public:
         return region->IsNewObjectSinceMarking(object);
     }
 
-    static bool IsReadOnlyObject(const BaseObject* object)
-    {
-        RegionDesc* region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(object));
-        ASSERT_LOGF(region != nullptr, "region is nullptr");
-        return region->IsReadOnlyRegion();
-    }
-
     static bool IsYoungSpaceObject(const BaseObject* object)
     {
         RegionDesc* region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(object));
         ASSERT_LOGF(region != nullptr, "region is nullptr");
         return region->IsInYoungSpace();
-    }
-
-    void AddRawPointerObject(BaseObject* obj)
-    {
-        RegionDesc* region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
-        region->IncRawPointerObjectCount();
-        if (region->IsFromRegion() && fromSpace_.TryDeleteFromRegion(region, RegionDesc::RegionType::FROM_REGION,
-                RegionDesc::RegionType::RAW_POINTER_REGION)) {
-            GCPhase phase = Heap::GetHeap().GetGCPhase();
-            CHECK_CC(phase != GCPhase::GC_PHASE_COPY && phase != GCPhase::GC_PHASE_PRECOPY);
-            rawpointerSpace_.AddRawPointerRegion(region);
-        } else {
-            CHECK_CC(region->GetRegionType() != RegionDesc::RegionType::LONE_FROM_REGION);
-        }
-    }
-
-    void RemoveRawPointerObject(BaseObject* obj)
-    {
-        RegionDesc* region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
-        region->DecRawPointerObjectCount();
-    }
-
-    void AddRawPointerRegion(RegionDesc* region)
-    {
-        rawpointerSpace_.AddRawPointerRegion(region);
     }
 
     void CopyRegion(RegionDesc* region);
@@ -481,9 +416,6 @@ private:
     ToSpace toSpace_;
     NonMovableSpace nonMovableSpace_;
     LargeSpace largeSpace_;
-    AppSpawnSpace appSpawnSpace_;
-    RawPointerSpace rawpointerSpace_;
-    ReadOnlySpace readonlySpace_;
 };
 } // namespace common_vm
 

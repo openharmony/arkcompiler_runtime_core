@@ -39,7 +39,6 @@
 #include "common_components/heap/collector/region_rset.h"
 #include "common_components/log/log.h"
 #include "common_interfaces/mem/tlab.h"
-#include "common_components/platform/map.h"
 #include "securec.h"
 #ifdef COMMON_ASAN_SUPPORT
 #include "common_components/sanitizer/sanitizer_interface.h"
@@ -118,24 +117,6 @@ public:
     {
         static RegionDesc nullRegion;
         return &nullRegion;
-    }
-
-    void SetReadOnly()
-    {
-        constexpr int pageProtRead = 1;
-        DLOG(REPORT, "try to set readonly to %p, size is %ld", GetRegionBase(), GetRegionBaseSize());
-        if (PageProtect(reinterpret_cast<void *>(GetRegionBase()), GetRegionBaseSize(), pageProtRead) != 0) {
-            DLOG(REPORT, "set read only fail");
-        }
-    }
-
-    void ClearReadOnly()
-    {
-        constexpr int pageProtReadWrite = 3;
-        DLOG(REPORT, "try to set read & write to %p, size is %ld", GetRegionBase(), GetRegionBaseSize());
-        if (PageProtect(reinterpret_cast<void *>(GetRegionBase()), GetRegionBaseSize(), pageProtReadWrite) != 0) {
-            DLOG(REPORT, "clear read only fail");
-        }
     }
 
     RegionBitmap *GetMarkBitmap()
@@ -391,18 +372,8 @@ public:
         MONOSIZE_NONMOVABLE_REGION,
         FULL_MONOSIZE_NONMOVABLE_REGION,
 
-        // region for raw-pointer objects which are exposed to runtime thus can not be moved by any gc.
-        // raw-pointer region becomes pinned region when none of its member objects are used as raw pointer.
-        RAW_POINTER_REGION,
-
-        // allocation context is able and responsible to determine whether it is safe to be collected.
-        TL_RAW_POINTER_REGION,
-
         RECENT_LARGE_REGION,
         LARGE_REGION,
-
-        READ_ONLY_REGION,
-        APPSPAWN_REGION,
 
         END_OF_REGION_TYPE,
 
@@ -776,32 +747,6 @@ public:
         return RegionDesc::IsInOldSpace(type);
     }
 
-    int32_t IncRawPointerObjectCount()
-    {
-        int32_t oldCount = __atomic_fetch_add(&metadata.rawPointerObjectCount, 1, __ATOMIC_SEQ_CST);
-        LOGF_CHECK(oldCount >= 0) << "region " << this << " has wrong raw pointer count " << oldCount;
-        LOGF_CHECK(oldCount < MAX_RAW_POINTER_COUNT) << "inc raw-pointer-count overflow";
-        return oldCount;
-    }
-
-    int32_t DecRawPointerObjectCount()
-    {
-        int32_t oldCount = __atomic_fetch_sub(&metadata.rawPointerObjectCount, 1, __ATOMIC_SEQ_CST);
-        LOGF_CHECK(oldCount > 0) << "dec raw-pointer-count underflow, please check whether releaseRawData is overused.";
-        return oldCount;
-    }
-
-    int32_t GetRawPointerObjectCount() const
-    {
-        return __atomic_load_n(&metadata.rawPointerObjectCount, __ATOMIC_SEQ_CST);
-    }
-
-    bool CompareAndSwapRawPointerObjectCount(int32_t expectVal, int32_t newVal)
-    {
-        return __atomic_compare_exchange_n(&metadata.rawPointerObjectCount, &expectVal, newVal, false, __ATOMIC_SEQ_CST,
-                                           __ATOMIC_ACQUIRE);
-    }
-
     uintptr_t Alloc(size_t size)
     {
         DCHECK_CC(size > 0);
@@ -853,11 +798,6 @@ public:
     {
         return (GetRegionType()  == RegionType::FULL_POLYSIZE_NONMOVABLE_REGION) ||
                (GetRegionType()  == RegionType::RECENT_POLYSIZE_NONMOVABLE_REGION);
-    }
-
-    bool IsReadOnlyRegion() const
-    {
-        return GetRegionType()  == RegionType::READ_ONLY_REGION;
     }
 
     RegionDesc* GetPrevRegion() const
@@ -972,12 +912,9 @@ public:
 
     bool IsFromRegion() const { return GetRegionType()  == RegionType::FROM_REGION; }
 
-    bool IsAppSpawnRegion() const { return GetRegionType()  == RegionType::APPSPAWN_REGION; }
-
     bool IsUnmovableFromRegion() const
     {
-        return GetRegionType()  == RegionType::EXEMPTED_FROM_REGION ||
-            GetRegionType()  == RegionType::RAW_POINTER_REGION;
+        return GetRegionType()  == RegionType::EXEMPTED_FROM_REGION;
     }
 
     bool IsToRegion() const { return GetRegionType()  == RegionType::TO_REGION; }
@@ -1028,7 +965,6 @@ public:
 private:
     void VisitAllObjectsBefore(const std::function<void(BaseObject*)>&& func, uintptr_t end);
 
-    static constexpr int32_t MAX_RAW_POINTER_COUNT = std::numeric_limits<int32_t>::max();
     static constexpr int32_t BITS_4 = 4;
     static constexpr int32_t BITS_5 = 5;
 
@@ -1116,7 +1052,6 @@ private:
             uint32_t prevRegionIdx; // support fast deletion for region list.
 
             uint32_t liveByteCount;
-            int32_t rawPointerObjectCount;
             TLAB* tlab;
         };
 
@@ -1396,7 +1331,6 @@ private:
         SetMarkedRegionFlag(0);
         SetEnqueuedRegionFlag(0);
         SetResurrectedRegionFlag(0);
-        __atomic_store_n(&metadata.rawPointerObjectCount, 0, __ATOMIC_SEQ_CST);
 #ifdef USE_HWASAN
         ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(metadata.regionBase),
             nUnit * RegionDesc::UNIT_SIZE);

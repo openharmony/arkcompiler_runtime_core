@@ -28,26 +28,6 @@ namespace common_vm {
 const size_t MarkingCollector::MAX_MARKING_WORK_SIZE = 16; // fork task if bigger
 const size_t MarkingCollector::MIN_MARKING_WORK_SIZE = 8;  // forbid forking task if smaller
 
-void StaticRootTable::VisitRoots(const RefFieldVisitor& visitor)
-{
-    std::lock_guard<std::mutex> lock(gcRootsLock_);
-    uint32_t gcRootsSize = 0;
-    std::unordered_set<RefField<>*> visitedSet;
-    for (auto iter = gcRootsBuckets_.begin(); iter != gcRootsBuckets_.end(); iter++) {
-        gcRootsSize = iter->second;
-        StaticRootArray* array = iter->first;
-        for (uint32_t i = 0; i < gcRootsSize; i++) {
-            RefField<>* root = array->content[i];
-            // make sure to visit each static root only once time.
-            if (visitedSet.find(root) != visitedSet.end()) {
-                continue;
-            }
-            visitedSet.insert(root);
-            visitor(*root);
-        }
-    }
-}
-
 template <bool ProcessXRef>
 class ConcurrentMarkingTask : public common_vm::Task {
 public:
@@ -197,12 +177,6 @@ void MarkingCollector::MergeWeakStack(WeakStack &weakStack)
 
         globalWeakStack_.push_back(pair);
     }
-}
-
-void MarkingCollector::EnumConcurrencyModelRoots(RootSet& rootSet) const
-{
-    LOG_COMMON(FATAL) << "Unresolved fatal";
-    UNREACHABLE_CC();
 }
 
 class MergeMutatorRootsScope {

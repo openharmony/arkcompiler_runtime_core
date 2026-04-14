@@ -29,7 +29,6 @@
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/slot_list.h"
-#include "common_components/common_runtime/hooks.h"
 
 namespace common_vm {
 class MarkingCollector;

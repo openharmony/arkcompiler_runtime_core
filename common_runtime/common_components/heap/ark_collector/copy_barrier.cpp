@@ -45,100 +45,12 @@ BaseObject* CopyBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) c
 
 BaseObject* CopyBarrier::ReadStaticRef(RefField<false>& field) const { return ReadRefField(nullptr, field); }
 
-// If the object is still alive, return its toSpace object; if not, return nullptr
-BaseObject* CopyBarrier::ReadStringTableStaticRef(RefField<false>& field) const
-{
-    // Note: CMC GC assumes all objects in string table are not in young space. Based on the assumption, CMC GC skip
-    // read barrier in young GC
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-        return reinterpret_cast<BaseObject*>(field.GetFieldValue());
-    }
-
-    auto isSurvivor = [](BaseObject* obj) {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
-        return (regionInfo->IsNewObjectSinceMarking(obj) ||
-            regionInfo->IsToRegion() || regionInfo->IsMarkedObject(obj));
-    };
-
-    RefField<> tmpField(field);
-    BaseObject* obj = tmpField.GetTargetObject();
-    if (obj != nullptr && isSurvivor(obj)) {
-        return ReadRefField(nullptr, field);
-    } else {
-        return nullptr;
-    }
-}
-
-void CopyBarrier::ReadStruct(HeapAddress dst, BaseObject* obj, HeapAddress src, size_t size) const
-{
-    CHECK_CC(!Heap::IsHeapAddress(dst));
-    if (obj != nullptr) { //LCOV_EXCL_BR_LINE
-        obj->ForEachRefInStruct(
-            [this, obj](RefField<false>& field) {
-                BaseObject* target = ReadRefField(obj, field);
-                (void)target;
-            },
-            src, src + size);
-    }
-    CHECK_CC(memcpy_s(reinterpret_cast<void*>(dst), size, reinterpret_cast<void*>(src), size) == EOK);
-}
-
 BaseObject* CopyBarrier::AtomicReadRefField(BaseObject* obj, RefField<true>& field, MemoryOrder order) const
 {
     RefField<false> tmpField(field.GetFieldValue(order));
     BaseObject* target = ReadRefField(nullptr, tmpField);
     DLOG(FBARRIER, "atomic read obj %p ref-field@%p: %#zx -> %p", obj, &field, tmpField.GetFieldValue(), target);
     return target;
-}
-
-void CopyBarrier::AtomicWriteRefField(BaseObject* obj, RefField<true>& field, BaseObject* newRef,
-                                      MemoryOrder order) const
-{
-    RefField<> newField(newRef);
-    field.SetFieldValue(newField.GetFieldValue(), order);
-    if (obj != nullptr) { //LCOV_EXCL_BR_LINE
-        DLOG(FBARRIER, "atomic write obj %p<%p>(%zu) ref@%p: %#zx", obj, obj->GetTypeInfo(), obj->GetSize(), &field,
-             newField.GetFieldValue());
-    } else { //LCOV_EXCL_BR_LINE
-        DLOG(FBARRIER, "atomic write static ref@%p: %#zx", &field, newField.GetFieldValue());
-    }
-}
-
-BaseObject* CopyBarrier::AtomicSwapRefField(BaseObject* obj, RefField<true>& field, BaseObject* newRef,
-                                            MemoryOrder order) const
-{
-    HeapAddress oldValue = field.Exchange(newRef, order);
-    RefField<> oldField(oldValue);
-    BaseObject* oldRef = ReadRefField(nullptr, oldField);
-    DLOG(BARRIER, "atomic swap obj %p<%p>(%zu) ref-field@%p: old %#zx(%p), new %#zx(%p)", obj, obj->GetTypeInfo(),
-         obj->GetSize(), &field, oldValue, oldRef, field.GetFieldValue(), newRef);
-    return oldRef;
-}
-
-bool CopyBarrier::CompareAndSwapRefField(BaseObject* obj, RefField<true>& field, BaseObject* oldRef,
-                                         BaseObject* newRef, MemoryOrder succOrder, MemoryOrder failOrder) const
-{
-    HeapAddress oldFieldValue = field.GetFieldValue(std::memory_order_seq_cst);
-    RefField<false> oldField(oldFieldValue);
-    BaseObject* oldVersion = ReadRefField(nullptr, oldField);
-    while (oldVersion == oldRef) { //LCOV_EXCL_BR_LINE
-        RefField<> newField(newRef);
-        if (field.CompareExchange(oldFieldValue, newField.GetFieldValue(), succOrder, failOrder)) { //LCOV_EXCL_BR_LINE
-            return true;
-        }
-        oldFieldValue = field.GetFieldValue(std::memory_order_seq_cst);
-        RefField<false> tmp(oldFieldValue);
-        oldVersion = ReadRefField(nullptr, tmp);
-    }
-
-    return false;
-}
-
-void CopyBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MIndex dstSize, BaseObject* srcObj,
-                                  HeapAddress srcField, MIndex srcSize) const
-{
-        LOG_COMMON(FATAL) << "Unresolved fatal";
-        UNREACHABLE_CC();
 }
 
 void YoungCopyBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const

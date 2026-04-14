@@ -34,7 +34,7 @@ enum class AllocBufferType: uint8_t {
 // thread-local data structure
 class AllocationBuffer {
 public:
-    AllocationBuffer() : tlRawPointerRegions_("thread-local raw-pointer regions") {}
+    AllocationBuffer() = default;
     ~AllocationBuffer();
     void Init();
     static AllocationBuffer* GetOrCreateAllocBuffer();
@@ -108,19 +108,6 @@ public:
     // record stack roots in allocBuffer so that mutator can concurrently enumerate roots without lock.
     void PushRoot(uint64_t* root) { taggedObjStackRoots_.emplace_back(root); }
 
-    // move the stack roots to other container so that other threads can visit them.
-    template <class Functor>
-    inline void MarkStack(Functor consumer)
-    {
-        if (taggedObjStackRoots_.empty()) {
-            return;
-        }
-        for (uint64_t* obj : taggedObjStackRoots_) {
-            consumer(reinterpret_cast<BaseObject*>(obj));
-        }
-        stackRoots_.clear();
-    }
-
     template<AllocBufferType allocType>
     HeapAddress FastAllocateInTlab(size_t size)
     {
@@ -160,7 +147,6 @@ private:
     // slow path
     HeapAddress TryAllocateOnce(size_t totalSize, AllocType allocType);
     HeapAddress AllocateImpl(size_t totalSize, AllocType allocType);
-    HeapAddress AllocateRawPointerObject(size_t totalSize);
 
     // tlRegion in AllocBuffer is a shortcut for fast allocation.
     // we should handle failure in RegionManager
@@ -172,9 +158,6 @@ private:
     TLAB tlab_ {};
 
     std::atomic<RegionDesc*> preparedRegion_ = { nullptr };
-    // allocate objects which are exposed to runtime thus can not be moved.
-    // allocation context is responsible to notify collector when these objects are safe to be collected.
-    RegionList tlRawPointerRegions_;
     // Record stack roots in concurrent enum phase, waiting for GC to merge these roots
     std::list<BaseObject*> stackRoots_;
 
