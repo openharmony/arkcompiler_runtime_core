@@ -113,7 +113,7 @@ function checkArray<T>(arr: T[], start: int, end: int, expected: T) {
 
 //! CHECKER       std.core Array from primitive array
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, entry: "escompat_array_from.ETSGLOBAL::testArrayFrom"
+//! RUN           force_jit: true, options: "--compiler-regex=.*testArrayFrom.*", entry: "escompat_array_from.ETSGLOBAL::testArrayFrom"
 //! METHOD        "escompat_array_from.ETSGLOBAL::testArrayFrom"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::from/
