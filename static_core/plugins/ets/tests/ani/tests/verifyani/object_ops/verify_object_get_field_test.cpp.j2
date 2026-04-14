@@ -268,10 +268,9 @@ TEST_F(ObjectGetField{{ Type }}Test, object_from_local_scope)
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_{{ type }}.Child", &object_);
-    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
-
     ani_field field {};
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, field, &result), ANI_ERROR);
@@ -317,9 +316,9 @@ TEST_F(ObjectGetField{{ Type }}Test, object_from_escape_local_scope)
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_get_field_{{ type }}.Child", &object);
-    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
     ani_field field {};
     ASSERT_EQ(env_->Class_FindField(class_, "{{ type }}Field", &field), ANI_OK);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, field, &result), ANI_OK);
