@@ -14,6 +14,7 @@
  */
 native function nativeGetRef(): ESValue;
 native function nativeGetWrappedPtr(esValue:ESValue): long;
+native function nativeGetWrappedPtrSafe(esValue: ESValue, lower: long, upper: long): long;
 
 export function etsCheckWrappedPtr(): boolean {
     const longValue: long = 0x12345678;
@@ -42,6 +43,16 @@ export function etsCheckUnWrappedPtrFromTS(): boolean {
     let esValue = module.getPropertySafe('unwrapobjTS')
     let nativePtr:long = nativeGetWrappedPtr(esValue);
     if( nativePtr === longValue){
+        return true;
+    }
+    return false;
+}
+
+export function etsCheckWrappedPtrSafe(lower: long, upper: long): boolean {
+    const longValue: long = 0x12345678;
+    let esValue: ESValue = nativeGetRef();
+    let nativePtr: long = nativeGetWrappedPtrSafe(esValue, lower, upper);
+    if (nativePtr === longValue) {
         return true;
     }
     return false;

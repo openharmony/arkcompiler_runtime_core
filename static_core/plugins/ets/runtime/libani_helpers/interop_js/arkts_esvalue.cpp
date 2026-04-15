@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result)
+extern "C" bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result, const napi_type_tag *tag)
 {
-    return ark::ets::interop::js::UnwrapESValue(env, esValue, result);
+    return ark::ets::interop::js::UnwrapESValue(env, esValue, result, tag);
 }

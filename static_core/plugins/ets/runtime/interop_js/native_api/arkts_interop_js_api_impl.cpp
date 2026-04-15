@@ -58,7 +58,7 @@ static bool InitializeGlobalOnce(ani_env *env)
     return isInitialized;
 }
 
-PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **result)
+PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **result, const napi_type_tag *tag)
 {
     if (env == nullptr || result == nullptr) {
         return false;
@@ -102,6 +102,12 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
     NapiScope jsHandleScope(jsenv);
 
     auto jsObj = JSConvertJSValue::WrapWithNullCheck(jsenv, jsValueObject);
+    if (tag != nullptr) {
+        bool isMatched = false;
+        if (napi_check_object_type_tag(jsenv, jsObj, tag, &isMatched) != napi_ok || !isMatched) {
+            return false;
+        }
+    }
     void *res = nullptr;
     if (napi_unwrap(jsenv, jsObj, &res) != napi_ok) {
         return false;

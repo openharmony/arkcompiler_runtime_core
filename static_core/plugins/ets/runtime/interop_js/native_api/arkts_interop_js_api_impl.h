@@ -28,7 +28,7 @@ class EtsExecutionContext;
 namespace ark::ets::interop::js {
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esValue, void **result);
+PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esValue, void **result, const napi_type_tag *tag);
 
 /// Experimental API, only for internal usage in runtime.
 PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result);

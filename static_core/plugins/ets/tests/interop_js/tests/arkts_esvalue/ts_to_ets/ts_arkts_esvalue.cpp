@@ -82,10 +82,62 @@ static napi_value NativeWrapRef(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value NativeWrapRefSafe(napi_env env, napi_callback_info info)
+{
+    size_t argc = 3U;
+    napi_value argv[3U];  // NOLINT(modernize-avoid-c-arrays)
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (status != napi_ok || argc < 3U) {
+        return nullptr;
+    }
+
+    int64_t lowerVal;
+    int64_t upperVal;
+    status = napi_get_value_int64(env, argv[1U], &lowerVal);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    status = napi_get_value_int64(env, argv[2U], &upperVal);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    auto *tag = new napi_type_tag {static_cast<uint64_t>(lowerVal), static_cast<uint64_t>(upperVal)};
+
+    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
+    void *nativePtr = reinterpret_cast<void *>(DUMMY_NATIVE_POINTER);
+    status = napi_wrap(env, argv[0U], nativePtr, NoopFinalize, nullptr, nullptr);
+    if (status != napi_ok) {
+        delete tag;
+        return nullptr;
+    }
+    status = napi_type_tag_object(env, argv[0U], tag);
+    if (status != napi_ok) {
+        delete tag;
+        return nullptr;
+    }
+
+    napi_value result;
+    napi_get_undefined(env, &result);
+    delete tag;
+    return result;
+}
+
 static ani_long NativeGetWrappedPtr([[maybe_unused]] ani_env *env, ani_object esValue)
 {
     void *nativePtr = nullptr;
     if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        return 0;
+    }
+    return reinterpret_cast<ani_long>(nativePtr);
+}
+
+static ani_long NativeGetWrappedPtrSafe([[maybe_unused]] ani_env *env, ani_object esValue, ani_long lower,
+                                        ani_long upper)
+{
+    void *nativePtr = nullptr;
+    napi_type_tag tag = {static_cast<uint64_t>(lower), static_cast<uint64_t>(upper)};
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr, &tag) || nativePtr == nullptr) {
         return 0;
     }
     return reinterpret_cast<ani_long>(nativePtr);
@@ -144,6 +196,22 @@ public:
         return napi_set_named_property(env, global, "nativeWrapRef", fn) == napi_ok;
     }
 
+    static bool RegisterNativeWrapRefSafe(napi_env env)
+    {
+        napi_value global;
+        if (napi_get_global(env, &global) != napi_ok) {
+            return false;
+        }
+
+        napi_value fn;
+        if (napi_create_function(env, "nativeWrapRefSafe", NAPI_AUTO_LENGTH, NativeWrapRefSafe, nullptr, &fn) !=
+            napi_ok) {
+            return false;
+        }
+
+        return napi_set_named_property(env, global, "nativeWrapRefSafe", fn) == napi_ok;
+    }
+
     bool RegisterETSGetter(ani_env *env)
     {
         ani_ref classRef = GetClassRefObject(env, "ts_arkts_esvalue.ETSGLOBAL");
@@ -154,6 +222,7 @@ public:
         std::array methods = {
             ani_native_function {"nativeGetRef", nullptr, reinterpret_cast<void *>(NativeGetRef)},
             ani_native_function {"nativeGetWrappedPtr", nullptr, reinterpret_cast<void *>(NativeGetWrappedPtr)},
+            ani_native_function {"nativeGetWrappedPtrSafe", nullptr, reinterpret_cast<void *>(NativeGetWrappedPtrSafe)},
         };
         return env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size()) ==
                ANI_OK;
@@ -168,6 +237,7 @@ TEST_F(NativeArktsESvalueTsToEtsTest, check_js_to_ets_arkts_value)
 
     ASSERT_TRUE(RegisterNativeSaveRef(napiEnv));
     ASSERT_TRUE(RegisterNativeWrapRef(napiEnv));
+    ASSERT_TRUE(RegisterNativeWrapRefSafe(napiEnv));
     ASSERT_TRUE(RegisterETSGetter(aniEnv));
     ASSERT_TRUE(RunJsTestSuite("ts_arkts_esvalue.ts"));
 }
