@@ -34,6 +34,9 @@ _LOGGER = logging.getLogger('runner.astchecker.util_astchecker')
 # NOTE(pronai) use runner.parser #30090
 _error_msg_pattern = re.compile(r"[\w\s]*error:.*", re.IGNORECASE)
 
+_warning_msg_pattern = re.compile(
+    r"^\s*Warning\s+W\d+\s*:\s*.+$")
+
 
 class UtilASTChecker:
     skip_options = {'SkipErrors': False, 'SkipWarnings': False}
@@ -353,7 +356,7 @@ class UtilASTChecker:
 
         for actual_error in actual_errors:
             message = actual_error[0]
-            if not self.check_skip_warning() and message.startswith("Warning:"):
+            if not self.check_skip_warning() and _warning_msg_pattern.match(message):
                 Log.all(_LOGGER, f'Unexpected warning {actual_error}')
                 failed_tests += 1
             if not self.check_skip_error() and _error_msg_pattern.match(message):

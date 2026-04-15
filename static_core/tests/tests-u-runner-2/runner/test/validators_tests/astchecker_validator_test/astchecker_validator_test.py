@@ -131,6 +131,60 @@ class AstcheckerValidatorTest(TestCase):
         self.assertFalse(actual.passed)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
+    def test_warning_check_ok(self, mock_test: MagicMock) -> None:
+        """
+        Test gets expected error message but with other coordinates
+        Expected: test failed
+        """
+        mock_test.path = self.data_folder / "test4.ets"
+        actual_output = (self.data_folder / "test4-expected-stdout.txt").read_text(encoding="utf-8")
+        actual_error = ""
+        actual_return_code = 0
+        actual = AstCheckerValidator.es2panda_result_validator(
+            test=mock_test,
+            _=AstcheckerValidatorTest.step_fields,
+            actual_stdout=actual_output,
+            _2=actual_error,
+            return_code=actual_return_code)
+        self.assertTrue(actual.passed)
+
+    @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
+    def test_warning_check_fail(self, mock_test: MagicMock) -> None:
+        """
+        Test gets expected error message but with other coordinates
+        Expected: test failed
+        """
+        mock_test.path = self.data_folder / "test4-not-all-warn.ets"
+        actual_output = (self.data_folder / "test4-expected-stdout.txt").read_text(encoding="utf-8")
+        actual_error = ""
+        actual_return_code = 0
+        actual = AstCheckerValidator.es2panda_result_validator(
+            test=mock_test,
+            _=AstcheckerValidatorTest.step_fields,
+            actual_stdout=actual_output,
+            _2=actual_error,
+            return_code=actual_return_code)
+        self.assertFalse(actual.passed)
+
+    @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
+    def test_warning_bad_format_fail(self, mock_test: MagicMock) -> None:
+        """
+        Test gets expected error message but with other coordinates
+        Expected: test failed
+        """
+        mock_test.path = self.data_folder / "test4-incorrect-warn.ets"
+        actual_output = (self.data_folder / "test4-expected-stdout.txt").read_text(encoding="utf-8")
+        actual_error = ""
+        actual_return_code = 0
+        actual = AstCheckerValidator.es2panda_result_validator(
+            test=mock_test,
+            _=AstcheckerValidatorTest.step_fields,
+            actual_stdout=actual_output,
+            _2=actual_error,
+            return_code=actual_return_code)
+        self.assertFalse(actual.passed)
+
+    @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_no_markup_return1(self, mock_test: MagicMock) -> None:
         """
         Test doesn't specify either expected message or expected node but returns 1
