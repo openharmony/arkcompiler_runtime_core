@@ -15,6 +15,8 @@
 
 package std.core;
 
+import { AbcFile } from "arkruntime"
+
 /**
  * @class ABC files based RuntimeLinker.
  */
@@ -54,7 +56,8 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const loadedFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(paths.length)
+        const loadedFiles : FixedArray<AbcFile | undefined> =
+            new FixedArray<AbcFile | undefined>(paths.length)
         let count = 0
         for (let i = 0; i < paths.length; i++) {
             const file = AbcFile.loadAbcFile(this, paths[i])
@@ -66,7 +69,8 @@ export class AbcRuntimeLinker extends RuntimeLinker {
                 console.error("Failed to load ABC file: " + paths[i])
             }
         }
-        const newFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(count)
+        const newFiles : FixedArray<AbcFile | undefined> = 
+            new FixedArray<AbcFile | undefined>(count)
         for (let i = 0; i < count; i++) {
             newFiles[i] = loadedFiles[i]
         }

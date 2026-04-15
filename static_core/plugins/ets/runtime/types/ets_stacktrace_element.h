@@ -75,7 +75,7 @@ public:
 
     inline static EtsStackTraceElement *Create(EtsExecutionContext *executionCtx)
     {
-        EtsClass *klass = PlatformTypes(executionCtx)->coreStackTraceElement;
+        EtsClass *klass = PlatformTypes(executionCtx)->arkruntimeStackTraceElement;
         EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
         return reinterpret_cast<EtsStackTraceElement *>(etsObject);
     }

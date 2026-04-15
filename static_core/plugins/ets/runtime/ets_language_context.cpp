@@ -97,7 +97,7 @@ void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) cons
     errHandle->SetMessage(executionCtx, message);
 
     auto *stackLines = EtsTypedObjectArray<EtsStackTraceElement>::Create(
-        PlatformTypes(executionCtx->GetMT())->coreStackTraceElement, 0U);
+        PlatformTypes(executionCtx->GetMT())->arkruntimeStackTraceElement, 0U);
     if (UNLIKELY(stackLines == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return;

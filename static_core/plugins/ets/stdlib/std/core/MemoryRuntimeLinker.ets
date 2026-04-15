@@ -14,7 +14,7 @@
  */
 
 package std.core;
-import { stub } from "arkruntime"
+import { stub, AbcFile } from "arkruntime"
 
 /**
  * @class RuntimeLinker backed by in-memory ABC files.
@@ -22,7 +22,7 @@ import { stub } from "arkruntime"
 export class MemoryRuntimeLinker extends AbcRuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>> | Array<ValueArray<byte>>) {
         super(parentLinker, [])
-        const abcFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(Double.toInt(rawAbcFiles.length))
+        const abcFiles : FixedArray<AbcFile | undefined> =  new FixedArray<AbcFile | undefined>(rawAbcFiles.length)
         let i = 0
         for (const rawFile of rawAbcFiles) {
             if (rawFile instanceof ValueArray<byte>) {

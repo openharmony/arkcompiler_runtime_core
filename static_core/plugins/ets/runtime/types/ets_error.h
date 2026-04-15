@@ -129,8 +129,8 @@ public:
         auto *stack = EtsString::CreateFromMUtf8(DEFAULT_OOM_STACK.data());
         oomH->SetStack(executionCtx, stack);
 
-        auto *stackLines =
-            EtsTypedObjectArray<EtsStackTraceElement>::Create(PlatformTypes(executionCtx)->coreStackTraceElement, 0U);
+        auto *stackLines = EtsTypedObjectArray<EtsStackTraceElement>::Create(
+            PlatformTypes(executionCtx)->arkruntimeStackTraceElement, 0U);
         oomH->SetStackLines(executionCtx, stackLines);
 
         return oomH.GetPtr();

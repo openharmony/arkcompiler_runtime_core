@@ -36,7 +36,7 @@ static EtsAbcFile *CreateAbcFile(EtsExecutionContext *executionCtx, ClassLinkerC
                                  std::unique_ptr<const panda_file::File> &&pf)
 {
     auto *abcFile =
-        EtsAbcFile::FromEtsObject(EtsObject::Create(executionCtx, PlatformTypes(executionCtx)->coreAbcFile));
+        EtsAbcFile::FromEtsObject(EtsObject::Create(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFile));
     abcFile->SetPandaFile(pf.get());
 
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf), ctx);
@@ -53,10 +53,53 @@ static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &ext
                            EtsExecutionContext *executionCtx, const std::string &path)
 {
     if (!extractor || !extractor->Init()) {
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreAbcFileNotFoundError,
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
                                "Open failed, file: " + path);
         return false;
     }
+    return true;
+}
+
+static bool GetHspPath(const std::string &pathStr, EtsExecutionContext *executionCtx,
+                       std::unique_ptr<const panda_file::File> &pf)
+{
+    std::string hspPath = pathStr;
+    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
+    if (!CheckExtractor(extractor, executionCtx, pathStr)) {
+        return false;
+    }
+    std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
+    auto safeData = extractor->GetSafeDataForHsp(abcPath);
+    if (safeData == nullptr) {
+        LOG(ERROR, RUNTIME) << "Failed to get safe data from HSP archive: " << abcPath;
+        return false;
+    }
+    pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
+    return true;
+}
+
+static bool GetHapPath(const std::string &pathStr, EtsExecutionContext *executionCtx,
+                       std::unique_ptr<const panda_file::File> &pf)
+{
+    size_t pos = pathStr.rfind("/ets/");
+    if (pos == std::string::npos) {
+        std::string message = std::string("Open failed, file: ") + pathStr;
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError, message);
+        return false;
+    }
+    std::string hapPath = pathStr.substr(0, pos);
+    hapPath += ".hap";
+
+    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
+    if (!CheckExtractor(extractor, executionCtx, pathStr)) {
+        return false;
+    }
+    auto safeData = extractor->GetSafeData(pathStr);
+    if (safeData == nullptr) {
+        LOG(ERROR, RUNTIME) << "Failed to get safe data from HAP archive: " << pathStr;
+        return false;
+    }
+    pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
     return true;
 }
 
@@ -80,47 +123,14 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     }
 
     auto pathStr = std::string(path.begin(), path.end());
-    if (pf == nullptr && IsHspPath(pathStr)) {
-        // get hsp path
-        std::string hspPath = pathStr;
-        std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
-        if (!CheckExtractor(extractor, executionCtx, pathStr)) {
-            return nullptr;
-        }
-        std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
-        auto safeData = extractor->GetSafeDataForHsp(abcPath);
-        if (safeData == nullptr) {
-            LOG(ERROR, RUNTIME) << "Failed to get safe data from HSP archive: " << abcPath;
-            return nullptr;
-        }
-        pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
+    if (pf == nullptr && IsHspPath(pathStr) && !GetHspPath(pathStr, executionCtx, pf)) {
+        return nullptr;
     }
-
-    if (pf == nullptr) {
-        // get hap path
-        size_t pos = pathStr.rfind("/ets/");
-        if (pos == std::string::npos) {
-            ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreAbcFileNotFoundError,
-                                   PandaString("Open failed, file: ") + path);
-            return nullptr;
-        }
-        std::string hapPath = pathStr.substr(0, pos);
-        hapPath += ".hap";
-
-        std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
-        if (!CheckExtractor(extractor, executionCtx, pathStr)) {
-            return nullptr;
-        }
-        auto safeData = extractor->GetSafeData(pathStr);
-        if (safeData == nullptr) {
-            LOG(ERROR, RUNTIME) << "Failed to get safe data from HAP archive: " << pathStr;
-            return nullptr;
-        }
-        pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
+    if (pf == nullptr && !GetHapPath(pathStr, executionCtx, pf)) {
+        return nullptr;
     }
-
     if (pf == nullptr) {
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreAbcFileNotFoundError,
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
                                PandaString("Abc file not found: ") + path);
         return nullptr;
     }

@@ -58,37 +58,14 @@ function testReflect() {
         (e: Error): boolean => e instanceof NullPointerError)
 }
 
-function getAdditionalAbcFile(): string {
-    let procManager = new StdProcess.ProcessManager()
-    const abcFile = procManager.getEnvironmentVar("ADDITIONAL_ABC_FILE")
-    arktest.assertLT(0, abcFile.length, "no additional abc file specified in env")
-    return abcFile
-}
-
 function testRuntimeLinker() {
-    const abcFilePath = getAdditionalAbcFile()
     const linker = new AbcRuntimeLinker(undefined, [])
-    const abcFile = AbcFile.loadAbcFile(linker, abcFilePath)
-    arktest.expectThrow(() => { abcFile.loadClass(unsafe.leakLinker(), "test", false) },
-        (e: Error): boolean => e instanceof NullPointerError)
-    arktest.expectThrow(() => { abcFile.loadClass(linker, unsafe.leakString(), false) },
-        (e: Error): boolean => e instanceof NullPointerError)
 
     arktest.expectThrow(() => { loadLibrary(unsafe.leakString()) },
         (e: Error): boolean => e instanceof NullPointerError)
     arktest.expectThrow(() => { loadLibraryWithPermissionCheck("test", unsafe.leakString()) },
         (e: Error): boolean => e instanceof NullPointerError)
     arktest.expectThrow(() => { loadLibraryWithPermissionCheck(unsafe.leakString(), "test") },
-        (e: Error): boolean => e instanceof NullPointerError)
-
-    arktest.expectThrow(() => { AbcFile.loadAbcFile(getBootRuntimeLinker(), unsafe.leakString()) },
-        (e: Error): boolean => e instanceof NullPointerError)
-    arktest.expectThrow(() => { AbcFile.loadAbcFile(unsafe.leakLinker(), "test") },
-        (e: Error): boolean => e instanceof NullPointerError)
-
-    arktest.expectThrow(() => { AbcFile.loadFromMemory(getBootRuntimeLinker(), unsafe.leakByteArray()) },
-        (e: Error): boolean => e instanceof NullPointerError)
-    arktest.expectThrow(() => { AbcFile.loadFromMemory(unsafe.leakLinker(), []) },
         (e: Error): boolean => e instanceof NullPointerError)
 
     arktest.expectThrow(() => { getBootRuntimeLinker().findLoadedClass(unsafe.leakString()) },

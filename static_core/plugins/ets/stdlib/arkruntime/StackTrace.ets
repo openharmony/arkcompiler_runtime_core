@@ -17,7 +17,7 @@
  * @kit ArkTS
  */
 
-package std.core;
+package arkruntime;
 
 // synchronize with mirror class in runtime
 /**
@@ -25,6 +25,7 @@ package std.core;
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
  */
+@annotation.InternalAPI
 export class StackTraceElement {
     private static readonly NATIVE_METHOD_LINE_NUMBER: int = -2;
 
@@ -56,6 +57,7 @@ export class StackTraceElement {
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
  */
+@annotation.InternalAPI
 export class StackTrace {
     /**
     * Method provides stack of methods at the place of a call
