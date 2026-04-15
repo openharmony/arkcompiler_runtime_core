@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Asynchronous functions return generics.
+tags: [no-warmup]
 ---*/
 
 async function functionReturnGeneric<T>(value: T): Promise<T> {
@@ -27,6 +28,6 @@ async function startTest() {
    arktest.assertEQ(res, "Generic!")
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

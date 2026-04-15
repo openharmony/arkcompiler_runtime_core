@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous function.
       Using promise.all in asynchronous functions to handle empty arrays.
+tags: [no-warmup]
 ---*/
 
 async function functionWithEmptyArray(): Promise<string> {
@@ -28,6 +29,6 @@ async function startTest() {
     arktest.assertEQ(result, "Empty array results: 0");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

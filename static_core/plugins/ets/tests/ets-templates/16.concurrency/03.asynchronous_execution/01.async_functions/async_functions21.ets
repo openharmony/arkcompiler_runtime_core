@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Asynchronous function returns null.
+tags: [no-warmup]
 ---*/
 
 async function functionReturnNull(): Promise<null> {
@@ -27,6 +28,6 @@ async function startTest() {
     arktest.assertEQ(result === null, true);
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

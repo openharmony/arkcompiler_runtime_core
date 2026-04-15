@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Use await promise.resolve in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function nestedPromise(): Promise<Promise<string>> {
@@ -27,6 +28,6 @@ async function startTest() {
     arktest.assertEQ(result, "Nested promise result");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

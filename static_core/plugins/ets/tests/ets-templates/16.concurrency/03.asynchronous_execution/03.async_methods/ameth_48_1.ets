@@ -15,6 +15,7 @@
 
 /*---
 desc: Throw error in chained catch await is forbidden for non-async function
+tags: [no-warmup]
 ---*/
 
 type EN = Error|null
@@ -43,6 +44,6 @@ async function startTest(): Promise<void> {
     arktest.assertTrue(false)
 }
 
-function main(): void {
-   waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

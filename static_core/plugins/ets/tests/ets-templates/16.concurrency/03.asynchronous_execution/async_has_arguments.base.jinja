@@ -81,8 +81,8 @@ async function startTest(){
     await {{ call_async(declaration_type, params) }}
 }
 
-function main(){
-    waitForCompletion(startTest)
+async function main(): Promise<void> {
+    await startTest()
 }
 
 {% endfor %}

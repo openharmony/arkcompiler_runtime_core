@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       using promise.all in asynchronous methods to handle empty arrays.
+tags: [no-warmup]
 ---*/
 
 class MethodWithEmptyArray {
@@ -31,6 +32,6 @@ async function startTest() {
     arktest.assertEQ(result, "Empty array results: 0");
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

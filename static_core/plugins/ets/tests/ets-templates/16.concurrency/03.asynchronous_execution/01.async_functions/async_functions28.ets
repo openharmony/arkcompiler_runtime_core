@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous function.
       Using async/await nesting in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function methodNestedAsync(): Promise<string> {
@@ -30,6 +31,6 @@ async function startTest() {
     arktest.assertEQ(result, "Nested async!");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

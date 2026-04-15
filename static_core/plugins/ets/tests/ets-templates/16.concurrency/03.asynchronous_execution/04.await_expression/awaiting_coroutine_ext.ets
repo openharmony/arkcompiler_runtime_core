@@ -22,7 +22,7 @@ tags: [no-warmup]
 
 {{c.decl}}
 
-function main(): void {
+async function main(): Promise<void> {
   {{c.logic}}
 }
 

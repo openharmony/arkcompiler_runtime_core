@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous function.
       Asynchronous function returns Promise.reject.
+tags: [no-warmup]
 ---*/
 
 async function functionReturnReject(): Promise<void> {
@@ -30,6 +31,6 @@ async function startTest() {
     }
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

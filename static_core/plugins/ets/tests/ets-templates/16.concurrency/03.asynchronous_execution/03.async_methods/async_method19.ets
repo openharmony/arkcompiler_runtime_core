@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Asynchronous method returns promise.reject.
+tags: [no-warmup]
 ---*/
 
 class MethodReturnReject {
@@ -33,6 +34,6 @@ async function startTest() {
     }
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }
