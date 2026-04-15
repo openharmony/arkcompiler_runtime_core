@@ -145,7 +145,9 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
 }
 
 /* static */
-FlatStringInfo FlatStringInfo::FlattenSlicedString(VMHandle<String> &slicedStr)
+// SlicedString flattening may not trigger GC as we just read SlicedString.parent field.
+// So VMHandle is not needed here.
+FlatStringInfo FlatStringInfo::FlattenSlicedString(String *slicedStr)
 {
     const common_vm::SlicedString *slicedString = slicedStr->ToSlicedString();
     auto readBarrier = [](void *obj, size_t offset) {
@@ -168,7 +170,7 @@ FlatStringInfo FlatStringInfo::FlattenAllString(VMHandle<String> &str, const Lan
     }
     // 2. SlicedString
     if (string->IsSlicedString()) {
-        return FlattenSlicedString(str);
+        return FlattenSlicedString(string);
     }
     // 3. TreeString
     if (string->IsTreeString()) {
